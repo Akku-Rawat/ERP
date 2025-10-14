@@ -1,11 +1,13 @@
 import './App.css'
 import LoginPage from '../src/views/LoginPage'
+import Sidebar from './components/SideBar'
 
 function App() {
  
   return (
     <>
-     <LoginPage/>
+     {/* <LoginPage/> */}
+     <Sidebar/>
     </>
   )
 }
