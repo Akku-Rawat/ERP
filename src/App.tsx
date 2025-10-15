@@ -1,13 +1,13 @@
 import './App.css'
 import LoginPage from '../src/views/LoginPage'
-import SalesModule from './views/Sales'
+import Sidebar from './components/SideBar'
 
 function App() {
  
   return (
     <>
      {/* <LoginPage/> */}
-     <SalesModule/>
+     <Sidebar/>
     </>
   )
 }
