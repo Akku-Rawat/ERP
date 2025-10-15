@@ -73,18 +73,21 @@ const SalesModule: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
-      <nav className="bg-white border-b shadow-sm sticky top-0 z-40">
-  <div className="max-w-7xl mx-auto px-6 py-3 flex flex-wrap items-center justify-between">
-    <h1 className="text-2xl font-bold text-teal-700">Sales Module</h1>
+     {/* Navigation Box */}
+<div className="bg-white shadow-2xl rounded-xl mx-6 mt-6 p-4 border border-gray-200">
+  <div className="flex flex-wrap items-center justify-between">
+    {/* Title */}
+    <h1 className="text-2xl font-bold text-teal-700 mb-2 sm:mb-0">Sales Module</h1>
 
-    <div className="flex items-center space-x-2">
+    {/* Tabs */}
+    <div className="flex flex-wrap items-center gap-2">
       {/* Always visible important tabs */}
       {[
         "product-master",
         "sales-order",
         "delivery-note",
         "sales-invoice",
-         "sales-quotation",
+        "sales-quotation",
         "return-note",
         "tax-charges",
       ].map((tab) => (
@@ -92,10 +95,10 @@ const SalesModule: React.FC = () => {
           key={tab}
           to={`/${tab}`}
           onClick={() => setActiveTab(tab)}
-          className={`px-3 py-2 rounded-md text-sm font-medium ${
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
             activeTab === tab
-              ? "bg-teal-600 text-white"
-              : "text-gray-700 hover:bg-teal-100"
+              ? "bg-teal-600 text-white shadow-md"
+              : "bg-gray-100 text-gray-700 hover:bg-teal-100"
           }`}
         >
           {tab
@@ -106,7 +109,7 @@ const SalesModule: React.FC = () => {
       ))}
 
       {/* Dropdown for optional components */}
-      <div className="relative">
+      <div>
         <select
           value={activeTab}
           onChange={(e) => {
@@ -114,13 +117,10 @@ const SalesModule: React.FC = () => {
             setActiveTab(tab);
             window.history.pushState({}, "", `/${tab}`);
           }}
-          className="border border-gray-300 rounded-md p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="border border-gray-300 rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
         >
           <option value="">More...</option>
-          {[
-            "inventory-linkage",
-            "sales-reports",
-          ].map((tab) => (
+          {["inventory-linkage", "sales-reports"].map((tab) => (
             <option key={tab} value={tab}>
               {tab
                 .split("-")
@@ -132,7 +132,8 @@ const SalesModule: React.FC = () => {
       </div>
     </div>
   </div>
-</nav>
+</div>
+
 
 
 
