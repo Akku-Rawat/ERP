@@ -2,6 +2,7 @@ import './App.css'
 import LoginPage from '../src/views/LoginPage'
 import Sidebar from './components/SideBar'
 import SalesModule from './views/Sales'
+import ProcurementModule from './views/Procurement'
 
 function App() {
   return (
@@ -11,9 +12,11 @@ function App() {
         <Sidebar />
       </div>
 
-      {/* Main Content (takes remaining width) */}
-      <div className="flex-1 bg-gray-50">
+       {/* <div className="flex-1 bg-gray-50">
         <SalesModule />
+      </div> */}
+       <div className="flex-1 bg-gray-50">
+        <ProcurementModule />
       </div>
     </div>
   );
