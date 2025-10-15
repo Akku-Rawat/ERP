@@ -7,6 +7,7 @@ import InventoryModule from './views/Inventory';
 import SupplierModule from './views/Supplier';
 import AccountingModule from './views/Accounting';
 import CrmModule from './views/Crm';
+import Dashboard from './views/DashBoard';
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
       </div>
       <div className="flex-1 bg-gray-50">
         <Routes>
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/sales" element={<SalesModule />} />
           <Route path="/procurement" element={<ProcurementModule />} />
           <Route path="/inventory" element={<InventoryModule />} />
