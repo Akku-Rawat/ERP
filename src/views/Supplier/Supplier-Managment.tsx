@@ -1,16 +1,23 @@
 import React, { useState } from "react";
-import SupplierModal from '../components/supplier/SupplierModal';
-import ContractModal from '../components/supplier/ContractModal';
-import PerformanceModal from '../components/supplier/PerformanceModal';
+import SupplierModal from '../../components/supplier/SupplierModal';
+import ContractModal from '../../components/supplier/ContractModal';
+import PerformanceModal from '../../components/supplier/PerformanceModal';
+
+import {
+   FaBuilding, 
+   FaFileSignature, 
+   FaChartLine ,
+   FaHandshake,
+  } from "react-icons/fa";
 
 const suppliersModule = {
-  name: "Supplier Management",
-  icon: "🏢",
+  name: "Supplier",
+  icon: <FaHandshake />,
   defaultTab: "suppliers",
   tabs: [
-    { id: "suppliers", name: "Suppliers", icon: "🏢" },
-    { id: "contracts", name: "Contracts", icon: "📝" },
-    { id: "performance", name: "Performance", icon: "📈" },
+    { id: "suppliers", name: "Suppliers", icon: <FaBuilding /> },
+    { id: "contracts", name: "Contracts", icon: <FaFileSignature /> },
+    { id: "performance", name: "Performance", icon: <FaChartLine /> },
   ],
   suppliers: [
     {
@@ -84,7 +91,7 @@ const SupplierManagement: React.FC = () => {
             }}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
-                ? "text-blue-600 border-b-2 border-blue-600"
+                ? "text-teal-600 border-b-2 border-teal-600"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -108,11 +115,11 @@ const SupplierManagement: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleAdd}
-                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
               >
                 + Add
               </button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
                 Export
               </button>
             </div>
@@ -166,7 +173,7 @@ const SupplierManagement: React.FC = () => {
             </p>
             <button
               onClick={handleAdd}
-              className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
               + Add Contract
             </button>
@@ -184,7 +191,7 @@ const SupplierManagement: React.FC = () => {
             </p>
             <button
               onClick={handleAdd}
-              className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
               + Add Performance Record
             </button>

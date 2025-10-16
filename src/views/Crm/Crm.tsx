@@ -1,16 +1,24 @@
 import React, { useState } from "react";
-import LeadModal from '../components/crm/LeadModal';
-import OpportunityModal from '../components/crm/OpportunityModal';
-import TicketModal from '../components/crm/TicketModal';
+import LeadModal from '../../components/crm/LeadModal';
+import OpportunityModal from '../../components/crm/OpportunityModal';
+import TicketModal from '../../components/crm/TicketModal';
+
+import {
+   FaUsers,
+    FaUser, 
+    FaBriefcase,
+     FaTicketAlt 
+    } from "react-icons/fa";
+
 
 const crmModule = {
   name: "CRM",
-  icon: "👥",
+  icon: <FaUsers />,
   defaultTab: "leads",
   tabs: [
-    { id: "leads", name: "Leads", icon: "👤" },
-    { id: "opportunities", name: "Opportunities", icon: "💼" },
-    { id: "tickets", name: "Support Tickets", icon: "🎫" },
+    { id: "leads", name: "Leads", icon: <FaUser /> },
+    { id: "opportunities", name: "Opportunities", icon: <FaBriefcase /> },
+    { id: "tickets", name: "Support Tickets", icon: <FaTicketAlt /> },
   ],
   leads: [
     { id: "LEAD-001", name: "Global Enterprises", contact: "Jane Wilson", status: "Qualified", value: 150000, source: "Website" },
@@ -67,7 +75,7 @@ const CRM: React.FC = () => {
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
-                ? "text-blue-600 border-b-2 border-blue-600"
+                ? "text-teal-600 border-b-2 border-teal-600"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -90,11 +98,11 @@ const CRM: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleAdd}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
             >
               + Add
             </button>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+            <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
               Export
             </button>
           </div>
