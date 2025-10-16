@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import QuotationModal from '../components/sales/QuotationModal';
 import InvoiceModal from "../components/sales/InvoiceModal";
-import PosModal from "../components/sales/PosModal";
+import PosModal from "../components/sales/POSModal";
+
 
 const sales = {
   name: "Sales",
@@ -14,9 +15,9 @@ const sales = {
     { id: "reports", name: "Reports", icon: "📊" },
   ],
   quotations: [
-    { id: "QUO-001", customer: "Acme Corp", date: "2025-10-14", amount: 25000, status: "Awaiting Response", dueDate: "2025-10-25" },
-    { id: "QUO-002", customer: "Globex Ltd", date: "2025-10-15", amount: 35000, status: "Approved", dueDate: "2025-10-28" },
-    { id: "QUO-003", customer: "Initech", date: "2025-10-16", amount: 45000, status: "Rejected", dueDate: "2025-10-30" },
+    { id: "QUO-001", customer: "Acme Corp", date: "2025-10-14", amount: 25000, opportunityStage: "Awaiting Response" },
+    { id: "QUO-002", customer: "Globex Ltd", date: "2025-10-15", amount: 35000, opportunityStage: "Approved" },
+    { id: "QUO-003", customer: "Initech", date: "2025-10-16", amount: 45000, opportunityStage: "Rejected" },
   ],
   invoices: [],
   pos: [],
@@ -112,10 +113,9 @@ const SalesModule: React.FC = () => {
                 <tr>
                   <th className="px-4 py-2 text-left">Quotation ID</th>
                   <th className="px-4 py-2 text-left">Customer</th>
-                  <th className="px-4 py-2 text-left">Date</th>
+                  <th className="px-4 py-2 text-left">Follow-Up Date</th>
                   <th className="px-4 py-2 text-left">Amount</th>
-                  <th className="px-4 py-2 text-left">Status</th>
-                  <th className="px-4 py-2 text-left">Due Date</th>
+                  <th className="px-4 py-2 text-left">Opportunity Stage</th>
                   <th className="px-4 py-2 text-center">Actions</th>
                 </tr>
               </thead>
@@ -126,8 +126,8 @@ const SalesModule: React.FC = () => {
                     <td className="px-4 py-2">{q.customer}</td>
                     <td className="px-4 py-2">{q.date}</td>
                     <td className="px-4 py-2">₹{q.amount.toLocaleString()}</td>
-                    <td className="px-4 py-2">{q.status}</td>
-                    <td className="px-4 py-2">{q.dueDate}</td>
+                    <td className="px-4 py-2">{q.opportunityStage}</td>
+          
                     <td className="px-4 py-2 text-center">
                       <button className="text-blue-600 hover:underline">View</button>
                     </td>
@@ -156,11 +156,12 @@ const SalesModule: React.FC = () => {
         onClose={() => setShowInvoiceModal(false)}
         onSave={data => console.log('Invoice data', data)}
       />
-      <PosModal
-        isOpen={showPosModal}
-        onClose={() => setShowPosModal(false)}
-        onSave={data => console.log('POS data', data)}
-      />
+     <PosModal
+    isOpen={showPosModal}
+   onClose={() => setShowPosModal(false)}
+   onSave={data => console.log('POS data', data)}
+    />
+
     </div>
   );
 };

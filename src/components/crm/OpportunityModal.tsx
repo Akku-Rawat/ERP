@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface OpportunityModalProps {
   isOpen: boolean;
@@ -17,83 +18,150 @@ const OpportunityModal: React.FC<OpportunityModalProps> = ({ isOpen, onClose, on
     notes: "",
   });
 
+  const handleFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(form);
+    handleReset();
+    onClose();
+  };
+
+  const handleReset = () => {
+    setForm({
+      name: "",
+      customer: "",
+      value: "",
+      stage: "",
+      probability: "",
+      expectedClose: "",
+      notes: "",
+    });
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-96 max-h-full overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-4">Add Opportunity</h3>
+    <div className="fixed z-50 inset-0 flex items-center justify-center bg-black/40">
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 40 }}
+          className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
+        >
+          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
+            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
+              <h3 className="text-2xl w-full font-semibold text-blue-600">
+                Add Opportunity
+              </h3>
+              <button
+                type="button"
+                className="text-gray-700 hover:bg-[#fefefe] rounded-full w-8 h-8"
+                onClick={onClose}
+              >
+                <span className="text-2xl">&times;</span>
+              </button>
+            </div>
 
-        <input
-          type="text"
-          placeholder="Opportunity Name"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="border rounded-md w-full mb-3 px-3 py-2"
-        />
+            <div className="flex-1 overflow-y-auto border-b px-4">
+              {/* OPPORTUNITY DETAILS */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-4">OPPORTUNITY DETAILS</div>
+                <div className="grid grid-cols-6 gap-4 mb-6">
+                  <input
+                    type="text"
+                    className="col-span-4 border rounded p-2"
+                    placeholder="Opportunity Name"
+                    name="name"
+                    value={form.name}
+                    onChange={handleFormChange}
+                  />
+                  <input
+                    type="text"
+                    className="col-span-2 border rounded p-2"
+                    placeholder="Customer"
+                    name="customer"
+                    value={form.customer}
+                    onChange={handleFormChange}
+                  />
+                  <input
+                    type="number"
+                    className="col-span-2 border rounded p-2"
+                    placeholder="Value"
+                    name="value"
+                    value={form.value}
+                    onChange={handleFormChange}
+                  />
+                  <input
+                    type
 
-        <input
-          type="text"
-          placeholder="Customer"
-          value={form.customer}
-          onChange={(e) => setForm({ ...form, customer: e.target.value })}
-          className="border rounded-md w-full mb-3 px-3 py-2"
-        />
+="text"
+                    className="col-span-2 border rounded p-2"
+                    placeholder="Stage (e.g., Proposal, Negotiation)"
+                    name="stage"
+                    value={form.stage}
+                    onChange={handleFormChange}
+                  />
+                  <input
+                    type="number"
+                    className="col-span-1 border rounded p-2"
+                    placeholder="Probability (%)"
+                    name="probability"
+                    value={form.probability}
+                    onChange={handleFormChange}
+                  />
+                  <input
+                    type="date"
+                    className="col-span-1 border rounded p-2"
+                    placeholder="Expected Close Date"
+                    name="expectedClose"
+                    value={form.expectedClose}
+                    onChange={handleFormChange}
+                  />
+                  <textarea
+                    className="col-span-6 border rounded p-2"
+                    placeholder="Notes"
+                    name="notes"
+                    value={form.notes}
+                    onChange={handleFormChange}
+                  />
+                </div>
+              </div>
+            </div>
 
-        <input
-          type="number"
-          placeholder="Value"
-          value={form.value}
-          onChange={(e) => setForm({ ...form, value: e.target.value })}
-          className="border rounded-md w-full mb-3 px-3 py-2"
-        />
-
-        <input
-          type="text"
-          placeholder="Stage (e.g., Proposal, Negotiation)"
-          value={form.stage}
-          onChange={(e) => setForm({ ...form, stage: e.target.value })}
-          className="border rounded-md w-full mb-3 px-3 py-2"
-        />
-
-        <input
-          type="number"
-          placeholder="Probability (%)"
-          value={form.probability}
-          onChange={(e) => setForm({ ...form, probability: e.target.value })}
-          className="border rounded-md w-full mb-3 px-3 py-2"
-        />
-
-        <input
-          type="date"
-          placeholder="Expected Close Date"
-          value={form.expectedClose}
-          onChange={(e) => setForm({ ...form, expectedClose: e.target.value })}
-          className="border rounded-md w-full mb-3 px-3 py-2"
-        />
-
-        <textarea
-          placeholder="Notes"
-          value={form.notes}
-          onChange={(e) => setForm({ ...form, notes: e.target.value })}
-          className="border rounded-md w-full mb-3 px-3 py-2"
-        />
-
-        <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 rounded-md border">
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              onSubmit(form);
-              onClose();
-            }}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-          >
-            Save Opportunity
-          </button>
-        </div>
-      </div>
+            {/* Controls */}
+            <div className="m-3 flex items-center justify-between gap-x-7 shrink-0">
+              <button
+                type="button"
+                className="w-24 rounded-3xl bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <div className="flex gap-x-2">
+                <button
+                  type="submit"
+                  className="w-24 rounded-3xl bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="w-24 rounded-3xl bg-gray-300 text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-500 hover:text-white"
+                  onClick={handleReset}
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </form>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };

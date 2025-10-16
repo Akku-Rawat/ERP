@@ -1,311 +1,340 @@
-import React, { useState, useReducer } from "react";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-// --- Sample data for products ---
-const sampleProducts = [
-  {
-    id: 1,
-    name: "Wireless Mouse",
-    image: "https://via.placeholder.com/80?text=Mouse",
-    price: 18.99,
-  },
-  {
-    id: 2,
-    name: "USB-C Cable",
-    image: "https://via.placeholder.com/80?text=Cable",
-    price: 8.5,
-  },
-  {
-    id: 3,
-    name: "Notebook",
-    image: "https://via.placeholder.com/80?text=Notebook",
-    price: 3.25,
-  },
-  {
-    id: 4,
-    name: "Water Bottle",
-    image: "https://via.placeholder.com/80?text=Bottle",
-    price: 12.0,
-  },
-];
+// Modern Section for card-style headers
+const Block: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
+  <div className="border rounded-md bg-white mb-4">
+    <div className="px-4 pt-3 pb-2 text-gray-800 font-bold text-sm border-b bg-gray-50">{title}</div>
+    <div className="p-4 grid gap-4">{children}</div>
+  </div>
+);
 
-// --- Types ---
-type Product = typeof sampleProducts[number];
-type CartItem = Product & { quantity: number };
+const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => (
+  <input
+    {...props}
+    className="border border-gray-300 rounded-md bg-white px-3 py-2 text-sm w-full"
+  />
+);
 
-interface PosModalProps {
+const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (props) => (
+  <select
+    {...props}
+    className="border border-gray-300 rounded-md bg-white px-3 py-2 text-sm w-full"
+  >
+    {props.children}
+  </select>
+);
+
+const TableHeader: React.FC<{ label: string; className?: string }> = ({
+  label,
+  className = "",
+}) => (
+  <th
+    className={`bg-gray-50 border-b border-gray-200 px-2 py-2 text-xs font-medium text-gray-700 ${className}`}
+  >
+    {label}
+  </th>
+);
+
+export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave?: (data: any) => void;
 }
 
-type CartAction =
-  | { type: "ADD"; product: Product }
-  | { type: "REMOVE"; id: number }
-  | { type: "UPDATE_QTY"; id: number; quantity: number }
-  | { type: "APPLY_DISCOUNT"; discount: number }
-  | { type: "CLEAR" };
+const demoCustomers = [
+  "Cash Customer",
+  "Acme Ventures",
+  "Sample Walkin"
+];
+const demoProducts = [
+  { product: "C001 - Choco Bar", price: 40, available: 16 },
+  { product: "C002 - Milk Shake", price: 60, available: 9 },
+  { product: "S005 - Veg Sandwich", price: 50, available: 20 }
+];
 
-interface CartState {
-  items: CartItem[];
-  discount: number;
-}
+const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
+  const [number] = useState("POS-2025-001");
+  const [date, setDate] = useState("");
+  const [cashier] = useState("Demo User");
+  const [customer, setCustomer] = useState("");
+  const [scanCode, setScanCode] = useState("");
+  const [cart, setCart] = useState<any[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [note, setNote] = useState("");
+  const [remarks, setRemarks] = useState("");
+  const [phone, setPhone] = useState("");
 
-// --- Cart Reducer ---
-function cartReducer(state: CartState, action: CartAction): CartState {
-  switch (action.type) {
-    case "ADD": {
-      const exists = state.items.find((item) => item.id === action.product.id);
-      if (exists) {
-        return {
-          ...state,
-          items: state.items.map((item) =>
-            item.id === action.product.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          ),
-        };
-      }
-      return {
-        ...state,
-        items: [...state.items, { ...action.product, quantity: 1 }],
-      };
-    }
-    case "REMOVE":
-      return {
-        ...state,
-        items: state.items.filter((item) => item.id !== action.id),
-      };
-    case "UPDATE_QTY":
-      return {
-        ...state,
-        items: state.items.map((item) =>
-          item.id === action.id
-            ? { ...item, quantity: action.quantity }
-            : item
-        ),
-      };
-    case "APPLY_DISCOUNT":
-      return {
-        ...state,
-        discount: action.discount,
-      };
-    case "CLEAR":
-      return {
-        items: [],
-        discount: 0,
-      };
-    default:
-      return state;
-  }
-}
-
-const TAX_RATE = 0.08; // 8%
-
-// --- POS Component ---
-const PosModal: React.FC<PosModalProps> = ({ isOpen, onClose, onSave }) => {
-  const [products] = useState<Product[]>(sampleProducts);
-  const [cart, dispatch] = useReducer(cartReducer, {
-    items: [],
-    discount: 0,
-  });
-  const [darkMode, setDarkMode] = useState(false);
-
-  if (!isOpen) return null;
-
-  const subtotal = cart.items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const taxes = subtotal * TAX_RATE;
-  const total = subtotal + taxes - cart.discount;
-
-  // --- Handlers ---
-  const handleAddItem = (product: Product) =>
-    dispatch({ type: "ADD", product });
-  const handleRemoveItem = (id: number) =>
-    dispatch({ type: "REMOVE", id });
-  const handleQtyChange = (id: number, quantity: number) =>
-    dispatch({ type: "UPDATE_QTY", id, quantity: Math.max(1, quantity) });
-  const handleDiscount = () => {
-    const discountValue = prompt("Enter discount amount", "0");
-    if (discountValue) {
-      dispatch({ type: "APPLY_DISCOUNT", discount: Number(discountValue) });
+  // Add demo item to cart for simplicity
+  const addToCart = () => {
+    const found = demoProducts.find(
+      prod => prod.product.startsWith(scanCode)
+    );
+    if (found) {
+      setCart([
+        ...cart,
+        { ...found, qty: 1, amount: found.price }
+      ]);
+      setScanCode("");
     }
   };
-  const handleCheckout = () => {
-    if (onSave) onSave(cart);
-    alert("Checkout complete! (Demo)");
-    dispatch({ type: "CLEAR" });
+
+  const updateItemQty = (idx: number, qty: number) => {
+    const ct = [...cart];
+    ct[idx].qty = qty;
+    ct[idx].amount = qty * ct[idx].price;
+    setCart(ct);
+  };
+
+  const removeItem = (idx: number) => {
+    setCart(cart.filter((_, i) => i !== idx));
+  };
+
+  const subtotal = cart.reduce((acc, itm) => acc + itm.amount, 0);
+  const discountVal = Number(discount);
+  const grandTotal = subtotal - discountVal;
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onSave) {
+      onSave({
+        number,
+        date,
+        cashier,
+        customer,
+        phone,
+        cart,
+        paymentMethod,
+        discount: discountVal,
+        note,
+        remarks,
+        grandTotal
+      });
+    }
+    handleReset();
     onClose();
   };
 
+  const handleReset = () => {
+    setDate("");
+    setCustomer("");
+    setScanCode("");
+    setCart([]);
+    setPaymentMethod("");
+    setDiscount(0);
+    setNote("");
+    setRemarks("");
+    setPhone("");
+  };
+
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-      <div className={darkMode ? "bg-gray-900 min-h-[90vh] rounded-lg shadow-2xl w-[90vw] max-w-6xl p-2 transition" : "bg-gray-50 min-h-[90vh] rounded-lg shadow-2xl w-[90vw] max-w-6xl p-2 transition"}>
-        <div className="max-w-6xl mx-auto py-8 px-4">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className={darkMode ? "text-white font-bold text-2xl" : "text-gray-900 font-bold text-2xl"}>
-              Point of Sale
-            </h1>
-            <div className="flex items-center gap-2">
+    <div className="fixed z-50 inset-0 flex items-center justify-center bg-black/40">
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 40 }}
+          className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
+        >
+          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave} autoComplete="off">
+            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
+              <h3 className="text-2xl w-full font-semibold text-blue-600">
+                New POS Sale
+              </h3>
               <button
-                className="rounded-full bg-gray-200 dark:bg-gray-800 p-2 focus:outline-none"
-                onClick={() => setDarkMode((d) => !d)}
-                aria-label="Toggle Dark Mode"
                 type="button"
+                className="text-gray-700 hover:bg-[#fefefe] rounded-full w-8 h-8"
+                onClick={onClose}
               >
-                {darkMode ? (
-                  <svg className="h-6 w-6 text-yellow-400" viewBox="0 0 24 24" fill="none">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3a7.5 7.5 0 1 0 9.79 9.79z" fill="currentColor" />
-                  </svg>
-                ) : (
-                  <svg className="h-6 w-6 text-gray-600" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="5" fill="currentColor" />
-                    <path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42M16.36 16.36l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M16.36 7.64l1.42-1.42" stroke="currentColor" strokeWidth="2" />
-                  </svg>
-                )}
+                <span className="text-2xl">&times;</span>
               </button>
-              <button className="rounded-full p-2 text-2xl font-bold hover:bg-gray-200 text-gray-700" onClick={onClose} title="Close" type="button">&times;</button>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Product List */}
-            <div className="md:col-span-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((product) => (
-                  <div
-                    key={product.id}
-                    className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 flex flex-col items-center"
+            <div className="flex-1 overflow-y-auto border-b px-4">
+              {/* Document Header */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-4">DOCUMENT HEADER</div>
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                  <Input value={number} readOnly placeholder="Bill No." />
+                  <Input value={cashier} readOnly placeholder="Cashier" />
+                  <Input type="date" value={date} onChange={e => setDate(e.target.value)} placeholder="Date" />
+                  <Input value={remarks} onChange={e => setRemarks(e.target.value)} placeholder="Any remarks" />
+                </div>
+              </div>
+
+              {/* Customer */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-4">CUSTOMER</div>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <Select value={customer} onChange={e => setCustomer(e.target.value)}>
+                    <option value="">Select customer</option>
+                    {demoCustomers.map(cust => (
+                      <option key={cust}>{cust}</option>
+                    ))}
+                  </Select>
+                  <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone (optional)" />
+                </div>
+              </div>
+
+              {/* Add/scan product */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-4">ADD/SCAN PRODUCT</div>
+                <div className="flex gap-3 items-center mb-6">
+                  <Input
+                    placeholder="Scan code or enter (e.g., C001)"
+                    value={scanCode}
+                    onChange={e => setScanCode(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={addToCart}
+                    className="bg-blue-600 text-white rounded px-5 py-2 font-bold"
                   >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="rounded-lg mb-2 w-20 h-20 object-contain bg-gray-100"
-                    />
-                    <div className={darkMode ? "text-white font-medium text-lg mb-1" : "text-gray-900 font-medium text-lg mb-1"}>
-                      {product.name}
-                    </div>
-                    <div className={darkMode ? "text-gray-300 text-sm mb-2" : "text-gray-500 text-sm mb-2"}>
-                      ${product.price.toFixed(2)}
-                    </div>
-                    <button
-                      className="mt-auto w-full text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-lg transition-all"
-                      onClick={() => handleAddItem(product)}
-                      type="button"
-                    >
-                      Add Item
-                    </button>
+                    Add Item
+                  </button>
+                </div>
+              </div>
+
+              {/* Product Table */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-2">CART ITEMS</div>
+                <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2 py-4 px-2">
+                  <table className="min-w-full text-xs table-fixed">
+                    <thead>
+                      <tr className="bg-gray-50 text-gray-800">
+                        <th className="w-1/12 px-2 py-1 text-left">#</th>
+                        <th className="w-5/12 px-2 py-1 text-left">Product</th>
+                        <th className="w-1/6 px-2 py-1 text-left">Qty</th>
+                        <th className="w-1/6 px-2 py-1 text-left">Price</th>
+                        <th className="w-1/6 px-2 py-1 text-left">Amount</th>
+                        <th className="w-1/10 px-2 py-1 text-center">Remove</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cart.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="text-center py-2 text-gray-400">No items added.</td>
+                        </tr>
+                      ) : (
+                        cart.map((item, idx) => (
+                          <tr key={idx} className="border-t">
+                            <td className="px-2 py-2">{idx + 1}</td>
+                            <td className="px-2 py-2">{item.product}</td>
+                            <td className="px-2 py-2">
+                              <Input
+                                type="number"
+                                min={1}
+                                max={item.available}
+                                value={item.qty}
+                                onChange={e => updateItemQty(idx, Number(e.target.value))}
+                                style={{ width: "60px" }}
+                              />
+                            </td>
+                            <td className="px-2 py-2">{item.price}</td>
+                            <td className="px-2 py-2">{item.amount}</td>
+                            <td className="px-2 py-2 text-center">
+                              <button
+                                type="button"
+                                onClick={() => removeItem(idx)}
+                                className="bg-red-100 border border-red-300 rounded px-2 py-1"
+                              >
+                                ×
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Payment & Note */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-4">PAYMENT & NOTES</div>
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-gray-600 text-xs mb-1 font-semibold">Payment Method</label>
+                    <Select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
+                      <option value="">Select method</option>
+                      <option>Cash</option>
+                      <option>Card</option>
+                      <option>UPI</option>
+                    </Select>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Cart Panel */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col">
-              <div className="font-bold text-lg mb-3 text-gray-900 dark:text-white">
-                Shopping Cart
-              </div>
-              {cart.items.length === 0 && (
-                <div className="text-gray-400 text-center py-4">Cart is empty</div>
-              )}
-              <ul className="flex-1 divide-y divide-gray-200 dark:divide-gray-700 mb-4">
-                {cart.items.map((item) => (
-                  <li key={item.id} className="py-3 flex items-center">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-10 h-10 object-contain rounded bg-gray-100 mr-2"
+                  <div>
+                    <label className="block text-gray-600 text-xs mb-1 font-semibold">Discount</label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={discount}
+                      onChange={e => setDiscount(Number(e.target.value))}
+                      placeholder="Discount (₹)"
                     />
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900 dark:text-white">{item.name}</div>
-                      <div className="text-xs text-gray-500">${item.price.toFixed(2)}</div>
-                    </div>
-                    <div className="flex items-center mr-2">
-                      <button
-                        className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-7 h-7 flex items-center justify-center mr-1 text-xl"
-                        onClick={() =>
-                          handleQtyChange(item.id, item.quantity - 1)
-                        }
-                        disabled={item.quantity <= 1}
-                        type="button"
-                      >
-                        –
-                      </button>
-                      <input
-                        type="number"
-                        min={1}
-                        value={item.quantity}
-                        onChange={(e) =>
-                          handleQtyChange(item.id, Number(e.target.value))
-                        }
-                        className="w-10 text-center border border-gray-300 dark:border-gray-700 rounded-md px-1 py-0.5 text-base"
-                      />
-                      <button
-                        className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-7 h-7 flex items-center justify-center ml-1 text-xl"
-                        onClick={() =>
-                          handleQtyChange(item.id, item.quantity + 1)
-                        }
-                        type="button"
-                      >
-                        +
-                      </button>
-                    </div>
-                    <button
-                      className="ml-2 bg-red-100 dark:bg-red-700 text-red-500 dark:text-red-200 rounded-lg px-2 py-1 text-sm hover:bg-red-200"
-                      onClick={() => handleRemoveItem(item.id)}
-                      title="Remove"
-                      type="button"
-                    >
-                      Remove
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-4 space-y-2 text-base">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">Subtotal</span>
-                  <span className="font-semibold text-gray-900 dark:text-white">${subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">Taxes</span>
-                  <span className="text-gray-900 dark:text-white">${taxes.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">Discount</span>
-                  <span className="text-gray-900 dark:text-white">
-                    -${cart.discount.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-900 dark:text-white">Total</span>
-                  <span className="text-blue-600 dark:text-blue-300">${Math.max(total, 0).toFixed(2)}</span>
+                  </div>
+                  <div>
+                    <label className="block text-gray-600 text-xs mb-1 font-semibold">Note</label>
+                    <Input
+                      value={note}
+                      onChange={e => setNote(e.target.value)}
+                      placeholder="Any note"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-4">
+              {/* Summary */}
+              <div className="flex justify-end my-6 px-4">
+                <div className="bg-gray-100 rounded px-6 py-4 text-lg font-medium text-gray-700 w-72">
+                  <div className="mb-1 flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>₹{subtotal}</span>
+                  </div>
+                  <div className="mb-1 flex justify-between">
+                    <span>Discount:</span>
+                    <span>₹{discountVal}</span>
+                  </div>
+                  <div className="flex justify-between text-blue-800 font-bold border-t pt-2 mt-2 text-xl">
+                    <span>Grand Total:</span>
+                    <span>₹{grandTotal}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="m-3 flex items-center justify-between gap-x-7 shrink-0">
+              <button
+                type="button"
+                className="w-24 rounded-3xl bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <div className="flex gap-x-2">
                 <button
-                  className="w-full py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 text-lg shadow touch-auto"
-                  onClick={handleDiscount}
-                  type="button"
+                  type="submit"
+                  className="w-24 rounded-3xl bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
                 >
-                  Apply Discount
+                  Save
                 </button>
                 <button
-                  className="w-full py-3 rounded-xl font-bold text-white bg-green-600 hover:bg-green-700 text-lg shadow touch-auto"
-                  onClick={handleCheckout}
-                  disabled={cart.items.length === 0}
                   type="button"
+                  className="w-24 rounded-3xl bg-gray-300 text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-500 hover:text-white"
+                  onClick={handleReset}
                 >
-                  Checkout
+                  Reset
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </form>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };
 
-export default PosModal;
+export default POSModal;
