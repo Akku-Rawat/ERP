@@ -73,7 +73,11 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (onSubmit) onSubmit({ ...form, items });
+    handleReset();
     onClose();
+  };
+
+  const handleReset = () => {
     setForm({
       warehouseNumber: "",
       name: "",
@@ -94,11 +98,11 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 40 }}
-          className="rounded-lg bg-white mt-10 w-[96vw] max-w-6xl shadow-lg"
+          className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
-          <form className="pb-2 bg-[#fefefe]/10" onSubmit={handleSave}>
-            <div className="flex h-12 items-center justify-between border-b px-6 py-7 rounded-t-lg bg-indigo-100/30">
-              <h3 className="text-2xl w-full font-semibold text-indigo-600">
+          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
+            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
+              <h3 className="text-2xl w-full font-semibold text-blue-600">
                 Warehouse Details
               </h3>
               <button
@@ -109,7 +113,8 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
                 <span className="text-2xl">&times;</span>
               </button>
             </div>
-            <div className="overflow-y-auto h-[82vh] border-b">
+
+            <div className="flex-1 overflow-y-auto border-b px-4">
               {/* WAREHOUSE INFO */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
                 <div className="font-semibold text-gray-600 mb-4">WAREHOUSE INFO</div>
@@ -162,34 +167,24 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
               {/* WAREHOUSE ITEMS */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
                 <div className="font-semibold text-gray-600 mb-2">INVENTORY ITEMS</div>
-                <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2">
-                  <table className="min-w-full text-xs">
+                <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2 py-4 px-2">
+                  <table className="min-w-full text-xs table-fixed">
                     <thead>
                       <tr className="bg-gray-50 text-gray-800">
-                        <th></th>
-                        <th>ITEM CODE</th>
-                        <th>ITEM NAME</th>
-                        <th>QUANTITY</th>
-                        <th>LOCATION</th>
-                        <th>UOM</th>
-                        <th>BATCH NUMBER</th>
-                        <th>EXPIRY DATE</th>
-                        <th></th>
+                        <th className="w-1/8 px-2 py-1 text-left">ITEM CODE</th>
+                        <th className="w-1/8 px-2 py-1 text-left">ITEM NAME</th>
+                        <th className="w-1/8 px-2 py-1 text-left">QUANTITY</th>
+                        <th className="w-1/8 px-2 py-1 text-left">LOCATION</th>
+                        <th className="w-1/8 px-2 py-1 text-left">UOM</th>
+                        <th className="w-1/8 px-2 py-1 text-left">BATCH NUMBER</th>
+                        <th className="w-1/8 px-2 py-1 text-left">EXPIRY DATE</th>
+                        <th className="w-1/10 px-2 py-1 text-center"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {items.map((item, idx) => (
                         <tr key={idx}>
-                          <td>
-                            <button
-                              type="button"
-                              className="bg-indigo-100 border border-indigo-300 rounded px-2 py-1"
-                              onClick={addItem}
-                            >
-                              +
-                            </button>
-                          </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="Item Code"
@@ -198,7 +193,7 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="Item Name"
@@ -207,7 +202,7 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               type="number"
                               className="border rounded p-1 w-full"
@@ -216,7 +211,7 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="Location"
@@ -225,7 +220,7 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="UOM"
@@ -234,7 +229,7 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="Batch Number"
@@ -243,7 +238,7 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               type="date"
                               className="border rounded p-1 w-full"
@@ -252,7 +247,7 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1 text-center">
                             <button
                               type="button"
                               className="bg-red-100 border border-red-300 rounded px-2 py-1"
@@ -266,11 +261,16 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
                     </tbody>
                   </table>
                 </div>
+                <div>
+                  <button type="button" className="bg-blue-100 border border-blue-300 rounded px-2 py-1" onClick={addItem}>
+                    Add
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Controls */}
-            <div className="m-3 flex items-center justify-between gap-x-7">
+            <div className="m-3 flex items-center justify-between gap-x-7 shrink-0">
               <button
                 type="button"
                 className="w-24 rounded-3xl bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
@@ -281,24 +281,14 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
               <div className="flex gap-x-2">
                 <button
                   type="submit"
-                  className="w-24 rounded-3xl bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
+                  className="w-24 rounded-3xl bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
                 >
                   Save
                 </button>
                 <button
                   type="button"
                   className="w-24 rounded-3xl bg-gray-300 text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-500 hover:text-white"
-                  onClick={() => {
-                    setForm({
-                      warehouseNumber: "",
-                      name: "",
-                      address: "",
-                      manager: "",
-                      contact: "",
-                      remarks: "",
-                    });
-                    setItems([{ ...emptyWarehouseItem }]);
-                  }}
+                  onClick={handleReset}
                 >
                   Reset
                 </button>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface QuotationModalProps {
@@ -8,73 +8,127 @@ interface QuotationModalProps {
 }
 
 interface ItemRow {
+  productName: string;
   description: string;
-  sku: string;
   quantity: number;
-  uom: string;
-  price: number;
-  amount: number;
-  gst: number;
+  listPrice: number;
+  discount: number;
+  tax: number;
 }
 
 const emptyItem: ItemRow = {
+  productName: "",
   description: "",
-  sku: "",
   quantity: 0,
-  uom: "",
-  price: 0,
-  amount: 0,
-  gst: 0,
+  listPrice: 0,
+  discount: 0,
+  tax: 0,
+};
+
+interface FormData {
+  quoteOwner: string;
+  subject: string;
+  quoteStage: string;
+  team: string;
+  carrier: string;
+  connectedTo: string;
+  dealName: string;
+  validUntil: string;
+  contactName: string;
+  accountName: string;
+  billingStreet: string;
+  billingCity: string;
+  billingState: string;
+  billingCode: string;
+  billingCountry: string;
+  shippingStreet: string;
+  shippingCity: string;
+  shippingState: string;
+  shippingCode: string;
+  shippingCountry: string;
+  totalDiscount: number;
+  totalTax: number;
+  adjustment: number;
+  termsAndConditions: string;
+  descriptionInformation: string;
+  // Computed fields (not editable directly)
+  subTotal: number;
+  grandTotal: number;
+}
+
+const emptyForm: FormData = {
+  quoteOwner: "",
+  subject: "",
+  quoteStage: "",
+  team: "",
+  carrier: "",
+  connectedTo: "",
+  dealName: "",
+  validUntil: "",
+  contactName: "",
+  accountName: "",
+  billingStreet: "",
+  billingCity: "",
+  billingState: "",
+  billingCode: "",
+  billingCountry: "",
+  shippingStreet: "",
+  shippingCity: "",
+  shippingState: "",
+  shippingCode: "",
+  shippingCountry: "",
+  totalDiscount: 0,
+  totalTax: 0,
+  adjustment: 0,
+  termsAndConditions: "",
+  descriptionInformation: "",
+  subTotal: 0,
+  grandTotal: 0,
 };
 
 const QuotationModal: React.FC<QuotationModalProps> = ({ isOpen, onClose, onSubmit }) => {
-  const [form, setForm] = useState({
-    number: "",
-    tag: "",
-    dateTime: "",
-    description: "",
-    opportunity: "",
-    opportunityStage: "",
-    forecast: "",
-    followUpDate: "",
-    customer: "",
-    key: "",
-    taxLocation: "",
-    priceTier: "",
-    paymentTerms: "",
-    shipTo: "",
-    addresses: ["", "", "", "", ""],
-  });
-
+  const [form, setForm] = useState<FormData>(emptyForm);
   const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
 
+  // Auto-calculate item amounts, subTotal, and grandTotal whenever items or totals change
+  useEffect(() => {
+    const newItems = items.map(item => ({
+      ...item,
+      // Item amount logic: (quantity * listPrice) - discount + tax
+      amount: (item.quantity * item.listPrice) - item.discount + item.tax,
+    }));
+
+    const subTotal = newItems.reduce((sum, item) => sum + (item.quantity * item.listPrice - item.discount + item.tax), 0);
+    const grandTotal = subTotal - form.totalDiscount + form.totalTax + form.adjustment;
+
+    setForm(prev => ({
+      ...prev,
+      subTotal,
+      grandTotal,
+    }));
+  }, [items, form.totalDiscount, form.totalTax, form.adjustment]);
+
   const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
-    key?: string,
-    idx?: number
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    if (key === "addresses" && typeof idx === "number") {
-      const addresses = [...form.addresses];
-      addresses[idx] = e.target.value;
-      setForm({ ...form, addresses });
-    } else {
-      setForm({ ...form, [e.target.name]: e.target.value });
-    }
+    const { name, value } = e.target;
+    const numValue = ['totalDiscount', 'totalTax', 'adjustment'].includes(name) ? Number(value) : value;
+    setForm({ ...form, [name]: numValue });
   };
 
   const handleItemChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement>,
     idx: number
   ) => {
-    const rows = [...items];
-    const name = e.target.name;
-    const value =
-      e.target.type === "number" ? Number(e.target.value) : e.target.value;
-    rows[idx] = { ...rows[idx], [name]: value };
-    setItems(rows);
+    const { name, value } = e.target;
+    const numValue = ['quantity', 'listPrice', 'discount', 'tax'].includes(name) ? Number(value) : value;
+    const newItems = [...items];
+    newItems[idx] = { ...newItems[idx], [name]: numValue };
+    setItems(newItems);
   };
 
   const addItem = () => setItems([...items, { ...emptyItem }]);
+
   const removeItem = (idx: number) => {
     if (items.length === 1) return;
     setItems(items.filter((_, i) => i !== idx));
@@ -82,41 +136,33 @@ const QuotationModal: React.FC<QuotationModalProps> = ({ isOpen, onClose, onSubm
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSubmit) onSubmit({ ...form, items });
+    // Compute final subTotal and grandTotal
+    const subTotal = items.reduce((sum, item) => sum + (item.quantity * item.listPrice - item.discount + item.tax), 0);
+    const grandTotal = subTotal - form.totalDiscount + form.totalTax + form.adjustment;
+    const finalForm = { ...form, subTotal, grandTotal };
+    if (onSubmit) onSubmit({ ...finalForm, items });
+    handleReset();
     onClose();
-    setForm({
-      number: "",
-      tag: "",
-      dateTime: "",
-      description: "",
-      opportunity: "",
-      opportunityStage: "",
-      forecast: "",
-      followUpDate: "",
-      customer: "",
-      key: "",
-      taxLocation: "",
-      priceTier: "",
-      paymentTerms: "",
-      shipTo: "",
-      addresses: ["", "", "", "", ""],
-    });
+  };
+
+  const handleReset = () => {
+    setForm(emptyForm);
     setItems([{ ...emptyItem }]);
   };
 
   if (!isOpen) return null;
 
   return (
-      <div className="fixed z-50 inset-0 flex items-center justify-center bg-black/40">
+    <div className="fixed z-50 inset-0 flex items-center justify-center bg-black/40">
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 40 }}
-          className="rounded-lg bg-white mt-10 w-[96vw] max-w-6xl shadow-lg"
+          className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
-          <form className="pb-2 bg-[#fefefe]/10" onSubmit={handleSave}>
-            <div className="flex h-12 items-center justify-between border-b px-6 py-7 rounded-t-lg bg-blue-100/30">
+          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
+            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
               <h3 className="text-2xl w-full font-semibold text-blue-600">
                 Create Quotation
               </h3>
@@ -124,98 +170,121 @@ const QuotationModal: React.FC<QuotationModalProps> = ({ isOpen, onClose, onSubm
                 <span className="text-2xl">&times;</span>
               </button>
             </div>
-            <div className="overflow-y-auto h-[82vh] border-b">
-              {/* DOCUMENT HEADER */}
+            <div className="flex-1 overflow-y-auto border-b">
+              {/* QUOTE INFORMATION */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">DOCUMENT HEADER</div>
-                <div className="grid grid-cols-8 gap-4 mb-6">
-                  <input className="col-span-1 border rounded p-2" placeholder="Number" name="number" value={form.number} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Tag" name="tag" value={form.tag} onChange={handleFormChange} />
-                  <input className="col-span-2 border rounded p-2" type="datetime-local" name="dateTime" value={form.dateTime} onChange={handleFormChange} />
-                  <input className="col-span-2 border rounded p-2" type="datetime-local" name="followUpDate" value={form.followUpDate} onChange={handleFormChange} />
-                  <input className="col-span-2 border rounded p-2" placeholder="Description" name="description" value={form.description} onChange={handleFormChange} />
-                  <input className="col-span-2 border rounded p-2" placeholder="Opportunity stage" name="opportunityStage" value={form.opportunityStage} onChange={handleFormChange} />
-                  <input className="col-span-2 border rounded p-2" placeholder="Forecast" name="forecast" value={form.forecast} onChange={handleFormChange} />
+                <div className="font-semibold text-gray-600 mb-4">QUOTE INFORMATION</div>
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                  <input className="col-span-1 border rounded p-2" placeholder="Quote Owner" name="quoteOwner" value={form.quoteOwner} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Subject" name="subject" value={form.subject} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Quote Stage" name="quoteStage" value={form.quoteStage} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Team" name="team" value={form.team} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Carrier" name="carrier" value={form.carrier} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Connected To" name="connectedTo" value={form.connectedTo} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Deal Name" name="dealName" value={form.dealName} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" type="date" placeholder="Valid Until" name="validUntil" value={form.validUntil} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Contact Name" name="contactName" value={form.contactName} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Account Name" name="accountName" value={form.accountName} onChange={handleFormChange} />
                 </div>
               </div>
-              {/* CUSTOMER SECTION */}
+              {/* ADDRESS INFORMATION */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">CUSTOMER</div>
-                <div className="grid grid-cols-6 gap-4 mb-6">
-                  <input className="col-span-1 border rounded p-2" placeholder="Type to search..." name="customer" value={form.customer} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Key" name="key" value={form.key} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Tax location" name="taxLocation" value={form.taxLocation} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Price tier" name="priceTier" value={form.priceTier} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Terms of payment" name="paymentTerms" value={form.paymentTerms} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Ship to" name="shipTo" value={form.shipTo} onChange={handleFormChange} />
-                </div>
-              </div>
-              {/* BILLING ADDRESS SECTION */}
-              <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">BILLING ADDRESS</div>
+                <div className="font-semibold text-gray-600 mb-2">ADDRESS INFORMATION</div>
                 <div className="grid grid-cols-5 gap-4 mb-6">
-                  {form.addresses.map((val, idx) => (
-                    <input key={idx} className="col-span-1 border rounded p-2" placeholder={["Address", "Address", "City", "ZIP Code", "Country"][idx]} value={val} onChange={e => handleFormChange(e, "addresses", idx)} />
-                  ))}
+                  <div className="col-span-5 font-medium text-gray-500 mb-2">Billing Address</div>
+                  <input className="col-span-1 border rounded p-2" placeholder="Billing Street" name="billingStreet" value={form.billingStreet} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Billing City" name="billingCity" value={form.billingCity} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Billing State" name="billingState" value={form.billingState} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Billing Code" name="billingCode" value={form.billingCode} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Billing Country" name="billingCountry" value={form.billingCountry} onChange={handleFormChange} />
+                  <div className="col-span-5 font-medium text-gray-500 mb-2 mt-4">Shipping Address</div>
+                  <input className="col-span-1 border rounded p-2" placeholder="Shipping Street" name="shippingStreet" value={form.shippingStreet} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Shipping City" name="shippingCity" value={form.shippingCity} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Shipping State" name="shippingState" value={form.shippingState} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Shipping Code" name="shippingCode" value={form.shippingCode} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Shipping Country" name="shippingCountry" value={form.shippingCountry} onChange={handleFormChange} />
                 </div>
               </div>
-              {/* ITEMS SECTION */}
+              {/* QUOTED ITEMS */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">ITEMS</div>
-                <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2">
+                <div className="font-semibold text-gray-600 mb-2">QUOTED ITEMS</div>
+                <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2 py-4">
                   <table className="min-w-full text-xs">
                     <thead>
                       <tr className="bg-gray-50 text-gray-800">
-                        <th></th>
+                        <th>S.NO</th>
+                        <th>PRODUCT NAME</th>
                         <th>DESCRIPTION</th>
-                        <th>SKU</th>
                         <th>QUANTITY</th>
-                        <th>UOM</th>
-                        <th>PRICE</th>
-                        <th>AMOUNT</th>
-                        <th>GST (%)</th>
+                        <th>LIST PRICE ($)</th>
+                        <th>AMOUNT ($)</th>
+                        <th>DISCOUNT ($)</th>
+                        <th>TAX ($)</th>
                         <th></th>
                       </tr>
                     </thead>
                     <tbody>
-                      {items.map((itemRow, idx) => (
-                        <tr key={idx}>
-                          <td>
-                            <button type="button" className="bg-blue-100 border border-blue-300 rounded px-2 py-1" onClick={addItem}>+</button>
-                          </td>
-                          <td>
-                            <input className="border rounded p-1 w-full" placeholder="Type to search..." name="description" value={itemRow.description} onChange={e => handleItemChange(e, idx)} />
-                          </td>
-                          <td>
-                            <input className="border rounded p-1 w-full" placeholder="SKU" name="sku" value={itemRow.sku} onChange={e => handleItemChange(e, idx)} />
-                          </td>
-                          <td>
-                            <input type="number" className="border rounded p-1 w-full" name="quantity" value={itemRow.quantity} onChange={e => handleItemChange(e, idx)} />
-                          </td>
-                          <td>
-                            <input className="border rounded p-1 w-full" placeholder="UOM" name="uom" value={itemRow.uom} onChange={e => handleItemChange(e, idx)} />
-                          </td>
-                          <td>
-                            <input type="number" className="border rounded p-1 w-full" name="price" value={itemRow.price} onChange={e => handleItemChange(e, idx)} />
-                          </td>
-                          <td>
-                            <input type="number" className="border rounded p-1 w-full" name="amount" value={itemRow.quantity * itemRow.price} disabled />
-                          </td>
-                          <td>
-                            <input type="number" className="border rounded p-1 w-full" name="gst" value={itemRow.gst} onChange={e => handleItemChange(e, idx)} />
-                          </td>
-                          <td>
-                            <button type="button" className="bg-red-100 border border-red-300 rounded px-2 py-1" onClick={() => removeItem(idx)}>-</button>
-                          </td>
-                        </tr>
-                      ))}
+                      {items.map((itemRow, idx) => {
+                        const itemAmount = (itemRow.quantity * itemRow.listPrice) - itemRow.discount + itemRow.tax;
+                        return (
+                          <tr key={idx}>
+                            <td className="text-center">{idx + 1}</td>
+                            <td>
+                              <input className="border rounded p-1 w-full" placeholder="Product Name" name="productName" value={itemRow.productName} onChange={e => handleItemChange(e, idx)} />
+                            </td>
+                            <td>
+                              <input className="border rounded p-1 w-full" placeholder="Description" name="description" value={itemRow.description} onChange={e => handleItemChange(e, idx)} />
+                            </td>
+                            <td>
+                              <input type="number" className="border rounded p-1 w-full" name="quantity" value={itemRow.quantity} onChange={e => handleItemChange(e, idx)} />
+                            </td>
+                            <td>
+                              <input type="number" className="border rounded p-1 w-full" name="listPrice" value={itemRow.listPrice} onChange={e => handleItemChange(e, idx)} />
+                            </td>
+                            <td>
+                              <input type="number" className="border rounded p-1 w-full" value={itemAmount} disabled />
+                            </td>
+                            <td>
+                              <input type="number" className="border rounded p-1 w-full" name="discount" value={itemRow.discount} onChange={e => handleItemChange(e, idx)} />
+                            </td>
+                            <td>
+                              <input type="number" className="border rounded p-1 w-full" name="tax" value={itemRow.tax} onChange={e => handleItemChange(e, idx)} />
+                            </td>
+                            <td>
+                              <button type="button" className="bg-red-100 border border-red-300 rounded px-2 py-1" onClick={() => removeItem(idx)}>-</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
+                  {/* <button type="button" className="mt-2 bg-blue-100 border border-blue-300 rounded px-2 py-1" onClick={addItem}>+ Add Item</button> */}
                 </div>
+                <div>
+                  <button type="button" className="mt-2 bg-blue-100 border border-blue-300 rounded px-2 py-1" onClick={addItem}>+ Add Item</button>
+                </div>
+              </div>
+              {/* TOTALS SECTION */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-2">TOTALS SECTION</div>
+                <div className="grid grid-cols-5 gap-4 mb-6">
+                  <input className="col-span-1 border rounded p-2" placeholder="Sub Total ($)" name="subTotal" value={form.subTotal} onChange={handleFormChange} disabled />
+                  <input className="col-span-1 border rounded p-2" type="number" placeholder="Discount ($)" name="totalDiscount" value={form.totalDiscount} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" type="number" placeholder="Tax ($)" name="totalTax" value={form.totalTax} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" type="number" placeholder="Adjustment ($)" name="adjustment" value={form.adjustment} onChange={handleFormChange} />
+                  <input className="col-span-1 border rounded p-2" placeholder="Grand Total ($)" name="grandTotal" value={form.grandTotal} onChange={handleFormChange} disabled />
+                </div>
+              </div>
+              {/* TERMS AND CONDITIONS & DESCRIPTION INFORMATION */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-2">TERMS AND CONDITIONS</div>
+                <textarea className="border rounded p-2 w-full h-24" placeholder="Enter terms and conditions..." name="termsAndConditions" value={form.termsAndConditions} onChange={handleFormChange} />
+                <div className="font-semibold text-gray-600 mb-2 mt-4">DESCRIPTION INFORMATION</div>
+                <textarea className="border rounded p-2 w-full h-24" placeholder="Enter description information..." name="descriptionInformation" value={form.descriptionInformation} onChange={handleFormChange} />
               </div>
             </div>
             {/* Controls */}
-            <div className="m-3 flex items-center justify-between gap-x-7">
+            <div className="m-3 flex items-center justify-between gap-x-7 shrink-0">
               <button type="button"
                 className="w-24 rounded-3xl bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
                 onClick={onClose}
@@ -232,27 +301,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({ isOpen, onClose, onSubm
                 <button
                   type="button"
                   className="w-24 rounded-3xl bg-gray-300 text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-500 hover:text-white"
-                  onClick={() => {
-                    setForm({
-                      ...form,
-                      number: "",
-                      tag: "",
-                      dateTime: "",
-                      description: "",
-                      opportunity: "",
-                      opportunityStage: "",
-                      forecast: "",
-                      followUpDate: "",
-                      customer: "",
-                      key: "",
-                      taxLocation: "",
-                      priceTier: "",
-                      paymentTerms: "",
-                      shipTo: "",
-                      addresses: ["", "", "", "", ""],
-                    });
-                    setItems([{ ...emptyItem }]);
-                  }}
+                  onClick={handleReset}
                 >
                   Reset
                 </button>

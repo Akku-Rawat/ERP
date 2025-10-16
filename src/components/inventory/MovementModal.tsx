@@ -76,7 +76,11 @@ const MovementModal: React.FC<MovementModalProps> = ({
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (onSubmit) onSubmit({ ...form, items });
+    handleReset();
     onClose();
+  };
+
+  const handleReset = () => {
     setForm({
       movementNumber: "",
       tag: "",
@@ -98,10 +102,10 @@ const MovementModal: React.FC<MovementModalProps> = ({
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 40 }}
-          className="rounded-lg bg-white mt-10 w-[96vw] max-w-6xl shadow-lg"
+          className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
-          <form className="pb-2 bg-[#fefefe]/10" onSubmit={handleSave}>
-            <div className="flex h-12 items-center justify-between border-b px-6 py-7 rounded-t-lg bg-blue-100/30">
+          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
+            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
               <h3 className="text-2xl w-full font-semibold text-blue-600">
                 Inventory Movement
               </h3>
@@ -113,7 +117,8 @@ const MovementModal: React.FC<MovementModalProps> = ({
                 <span className="text-2xl">&times;</span>
               </button>
             </div>
-            <div className="overflow-y-auto h-[82vh] border-b">
+
+            <div className="flex-1 overflow-y-auto border-b px-4">
               {/* MOVEMENT HEADER */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
                 <div className="font-semibold text-gray-600 mb-4">MOVEMENT DETAILS</div>
@@ -173,35 +178,25 @@ const MovementModal: React.FC<MovementModalProps> = ({
               {/* MOVEMENT ITEMS */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
                 <div className="font-semibold text-gray-600 mb-2">MOVEMENT ITEMS</div>
-                <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2">
-                  <table className="min-w-full text-xs">
+                <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2 py-4 px-2">
+                  <table className="min-w-full text-xs table-fixed">
                     <thead>
                       <tr className="bg-gray-50 text-gray-800">
-                        <th></th>
-                        <th>ITEM CODE</th>
-                        <th>ITEM NAME</th>
-                        <th>QUANTITY</th>
-                        <th>FROM LOCATION</th>
-                        <th>TO LOCATION</th>
-                        <th>UOM</th>
-                        <th>MOVEMENT DATE</th>
-                        <th>REFERENCE NO.</th>
-                        <th></th>
+                        <th className="w-1/9 px-2 py-1 text-left">ITEM CODE</th>
+                        <th className="w-1/9 px-2 py-1 text-left">ITEM NAME</th>
+                        <th className="w-1/9 px-2 py-1 text-left">QUANTITY</th>
+                        <th className="w-1/9 px-2 py-1 text-left">FROM LOCATION</th>
+                        <th className="w-1/9 px-2 py-1 text-left">TO LOCATION</th>
+                        <th className="w-1/9 px-2 py-1 text-left">UOM</th>
+                        <th className="w-1/9 px-2 py-1 text-left">MOVEMENT DATE</th>
+                        <th className="w-1/9 px-2 py-1 text-left">REFERENCE NO.</th>
+                        <th className="w-1/10 px-2 py-1 text-center"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {items.map((item, idx) => (
                         <tr key={idx}>
-                          <td>
-                            <button
-                              type="button"
-                              className="bg-blue-100 border border-blue-300 rounded px-2 py-1"
-                              onClick={addItem}
-                            >
-                              +
-                            </button>
-                          </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="Item Code"
@@ -210,7 +205,7 @@ const MovementModal: React.FC<MovementModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="Item Name"
@@ -219,7 +214,7 @@ const MovementModal: React.FC<MovementModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               type="number"
                               className="border rounded p-1 w-full"
@@ -228,7 +223,7 @@ const MovementModal: React.FC<MovementModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="From Location"
@@ -237,7 +232,7 @@ const MovementModal: React.FC<MovementModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="To Location"
@@ -246,7 +241,7 @@ const MovementModal: React.FC<MovementModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="UOM"
@@ -255,7 +250,7 @@ const MovementModal: React.FC<MovementModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               type="date"
                               className="border rounded p-1 w-full"
@@ -264,7 +259,7 @@ const MovementModal: React.FC<MovementModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="Reference Number"
@@ -273,7 +268,7 @@ const MovementModal: React.FC<MovementModalProps> = ({
                               onChange={(e) => handleItemChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1 text-center">
                             <button
                               type="button"
                               className="bg-red-100 border border-red-300 rounded px-2 py-1"
@@ -287,11 +282,16 @@ const MovementModal: React.FC<MovementModalProps> = ({
                     </tbody>
                   </table>
                 </div>
+                <div>
+                  <button type="button" className="bg-blue-100 border border-blue-300 rounded px-2 py-1" onClick={addItem}>
+                    Add
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Controls */}
-            <div className="m-3 flex items-center justify-between gap-x-7">
+            <div className="m-3 flex items-center justify-between gap-x-7 shrink-0">
               <button
                 type="button"
                 className="w-24 rounded-3xl bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
@@ -309,18 +309,7 @@ const MovementModal: React.FC<MovementModalProps> = ({
                 <button
                   type="button"
                   className="w-24 rounded-3xl bg-gray-300 text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-500 hover:text-white"
-                  onClick={() => {
-                    setForm({
-                      movementNumber: "",
-                      tag: "",
-                      dateTime: "",
-                      description: "",
-                      requestedBy: "",
-                      approvedBy: "",
-                      remarks: "",
-                    });
-                    setItems([{ ...emptyMovementItem }]);
-                  }}
+                  onClick={handleReset}
                 >
                   Reset
                 </button>

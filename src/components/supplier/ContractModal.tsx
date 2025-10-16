@@ -68,7 +68,11 @@ const ContractModal: React.FC<ContractModalProps> = ({
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (onSubmit) onSubmit({ ...form, parties });
+    handleReset();
     onClose();
+  };
+
+  const handleReset = () => {
     setForm({
       contractNumber: "",
       title: "",
@@ -85,34 +89,32 @@ const ContractModal: React.FC<ContractModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="fixed z-50 inset-0 flex items-center justify-center bg-black/40">
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 40 }}
-          className="bg-white rounded-lg mt-10 w-[96vw] max-w-5xl shadow-lg"
+          className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
-          <form className="pb-2 bg-[#fefefe]/10" onSubmit={handleSave}>
-            <div className="flex items-center justify-between h-12 border-b px-6 py-7 rounded-t-lg bg-blue-100/30">
-              <h3 className="w-full text-2xl font-semibold text-blue-600">
+          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
+            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
+              <h3 className="text-2xl w-full font-semibold text-blue-600">
                 Contract Details
               </h3>
               <button
                 type="button"
-                className="w-8 h-8 rounded-full text-gray-700 hover:bg-[#fefefe]"
+                className="text-gray-700 hover:bg-[#fefefe] rounded-full w-8 h-8"
                 onClick={onClose}
               >
                 <span className="text-2xl">&times;</span>
               </button>
             </div>
 
-            <div className="overflow-y-auto h-[75vh] border-b">
+            <div className="flex-1 overflow-y-auto border-b px-4">
               {/* CONTRACT INFO */}
-              <div className="flex flex-col gap-y-2 m-4 p-6 border">
-                <div className="mb-4 font-semibold text-gray-600">
-                  CONTRACT INFORMATION
-                </div>
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-4">CONTRACT INFORMATION</div>
                 <div className="grid grid-cols-8 gap-4 mb-6">
                   <input
                     className="col-span-2 border rounded p-2"
@@ -180,36 +182,24 @@ const ContractModal: React.FC<ContractModalProps> = ({
               </div>
 
               {/* CONTRACT PARTIES */}
-              <div className="flex flex-col gap-y-2 m-4 p-6 border">
-                <div className="mb-2 font-semibold text-gray-600">
-                  CONTRACT PARTIES
-                </div>
-                <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2">
-                  <table className="min-w-full text-xs">
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-2">CONTRACT PARTIES</div>
+                <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2 py-4 px-2">
+                  <table className="min-w-full text-xs table-fixed">
                     <thead>
                       <tr className="bg-gray-50 text-gray-800">
-                        <th></th>
-                        <th>PARTY NAME</th>
-                        <th>ROLE</th>
-                        <th>CONTACT PERSON</th>
-                        <th>CONTACT EMAIL</th>
-                        <th>CONTACT PHONE</th>
-                        <th></th>
+                        <th className="w-1/6 px-2 py-1 text-left">PARTY NAME</th>
+                        <th className="w-1/6 px-2 py-1 text-left">ROLE</th>
+                        <th className="w-1/6 px-2 py-1 text-left">CONTACT PERSON</th>
+                        <th className="w-1/6 px-2 py-1 text-left">CONTACT EMAIL</th>
+                        <th className="w-1/6 px-2 py-1 text-left">CONTACT PHONE</th>
+                        <th className="w-1/10 px-2 py-1 text-center"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {parties.map((party, idx) => (
-                        <tr key={idx}>
-                          <td>
-                            <button
-                              type="button"
-                              className="bg-blue-100 border border-blue-300 rounded px-2 py-1"
-                              onClick={addParty}
-                            >
-                              +
-                            </button>
-                          </td>
-                          <td>
+                        <tr key={idx}> 
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="Party Name"
@@ -218,7 +208,7 @@ const ContractModal: React.FC<ContractModalProps> = ({
                               onChange={(e) => handlePartyChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="Role"
@@ -227,7 +217,7 @@ const ContractModal: React.FC<ContractModalProps> = ({
                               onChange={(e) => handlePartyChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="Contact Person"
@@ -236,7 +226,7 @@ const ContractModal: React.FC<ContractModalProps> = ({
                               onChange={(e) => handlePartyChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="Contact Email"
@@ -245,7 +235,7 @@ const ContractModal: React.FC<ContractModalProps> = ({
                               onChange={(e) => handlePartyChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
                               placeholder="Contact Phone"
@@ -254,7 +244,7 @@ const ContractModal: React.FC<ContractModalProps> = ({
                               onChange={(e) => handlePartyChange(e, idx)}
                             />
                           </td>
-                          <td>
+                          <td className="px-2 py-1 text-center">
                             <button
                               type="button"
                               className="bg-red-100 border border-red-300 rounded px-2 py-1"
@@ -268,11 +258,16 @@ const ContractModal: React.FC<ContractModalProps> = ({
                     </tbody>
                   </table>
                 </div>
+                <div>
+                  <button type="button" className="bg-blue-100 border border-blue-300 rounded px-2 py-1" onClick={addParty} >
+                    Add
+                   </button>
+                </div>
               </div>
             </div>
 
             {/* Controls */}
-            <div className="flex m-3 items-center justify-between gap-x-7">
+            <div className="m-3 flex items-center justify-between gap-x-7 shrink-0">
               <button
                 type="button"
                 className="w-24 rounded-3xl bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
@@ -290,19 +285,7 @@ const ContractModal: React.FC<ContractModalProps> = ({
                 <button
                   type="button"
                   className="w-24 rounded-3xl bg-gray-300 text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-500 hover:text-white"
-                  onClick={() => {
-                    setForm({
-                      contractNumber: "",
-                      title: "",
-                      supplier: "",
-                      startDate: "",
-                      endDate: "",
-                      contractValue: "",
-                      description: "",
-                      status: "",
-                    });
-                    setParties([{ ...emptyParty }]);
-                  }}
+                  onClick={handleReset}
                 >
                   Reset
                 </button>

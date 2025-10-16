@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Modern Section for card-style headers
 const Block: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
@@ -53,17 +54,17 @@ const demoProducts = [
 ];
 
 const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
-  if (!isOpen) return null;
-
   const [number] = useState("POS-2025-001");
   const [date, setDate] = useState("");
-  const [cashier, setCashier] = useState("Demo User");
+  const [cashier] = useState("Demo User");
   const [customer, setCustomer] = useState("");
   const [scanCode, setScanCode] = useState("");
   const [cart, setCart] = useState<any[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [discount, setDiscount] = useState(0);
   const [note, setNote] = useState("");
+  const [remarks, setRemarks] = useState("");
+  const [phone, setPhone] = useState("");
 
   // Add demo item to cart for simplicity
   const addToCart = () => {
@@ -102,194 +103,236 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
         date,
         cashier,
         customer,
+        phone,
         cart,
         paymentMethod,
         discount: discountVal,
         note,
+        remarks,
         grandTotal
       });
     }
+    handleReset();
     onClose();
   };
 
+  const handleReset = () => {
+    setDate("");
+    setCustomer("");
+    setScanCode("");
+    setCart([]);
+    setPaymentMethod("");
+    setDiscount(0);
+    setNote("");
+    setRemarks("");
+    setPhone("");
+  };
+
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed z-50 inset-0 flex items-center justify-center bg-black/70">
-      <div className="w-full max-w-4xl mx-auto my-8 rounded-lg bg-white shadow-2xl border">
-        <form onSubmit={handleSave} autoComplete="off">
-          {/* Modal header */}
-          <div className="flex items-center justify-between py-4 px-6 bg-blue-50 rounded-t-lg border-b">
-            <h2 className="text-2xl font-bold text-blue-700">New POS Sale</h2>
-            <button type="button" className="text-2xl text-gray-500 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center" onClick={onClose}>&times;</button>
-          </div>
-          <div className="overflow-y-auto max-h-[80vh] p-4 md:p-6">
-            {/* Document Header */}
-            <Block title="DOCUMENT HEADER">
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <div>
+    <div className="fixed z-50 inset-0 flex items-center justify-center bg-black/40">
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 40 }}
+          className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
+        >
+          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave} autoComplete="off">
+            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
+              <h3 className="text-2xl w-full font-semibold text-blue-600">
+                New POS Sale
+              </h3>
+              <button
+                type="button"
+                className="text-gray-700 hover:bg-[#fefefe] rounded-full w-8 h-8"
+                onClick={onClose}
+              >
+                <span className="text-2xl">&times;</span>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto border-b px-4">
+              {/* Document Header */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-4">DOCUMENT HEADER</div>
+                <div className="grid grid-cols-4 gap-4 mb-6">
                   <Input value={number} readOnly placeholder="Bill No." />
-                </div>
-                <div>
                   <Input value={cashier} readOnly placeholder="Cashier" />
-                </div>
-                <div>
                   <Input type="date" value={date} onChange={e => setDate(e.target.value)} placeholder="Date" />
-                </div>
-                <div>
-                  <Input placeholder="Any remarks" />
+                  <Input value={remarks} onChange={e => setRemarks(e.target.value)} placeholder="Any remarks" />
                 </div>
               </div>
-            </Block>
-            {/* Customer */}
-            <Block title="CUSTOMER">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
+
+              {/* Customer */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-4">CUSTOMER</div>
+                <div className="grid grid-cols-2 gap-4 mb-6">
                   <Select value={customer} onChange={e => setCustomer(e.target.value)}>
                     <option value="">Select customer</option>
                     {demoCustomers.map(cust => (
                       <option key={cust}>{cust}</option>
                     ))}
                   </Select>
-                </div>
-                <div>
-                  <Input placeholder="Phone (optional)" />
+                  <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone (optional)" />
                 </div>
               </div>
-            </Block>
-            {/* Add/scan product */}
-            <Block title="ADD/SCAN PRODUCT">
-              <div className="flex gap-3 items-center">
-                <Input
-                  placeholder="Scan code or enter (e.g., C001)"
-                  value={scanCode}
-                  onChange={e => setScanCode(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={addToCart}
-                  className="bg-blue-600 text-white rounded px-5 py-2 font-bold"
-                >
-                  Add Item
-                </button>
+
+              {/* Add/scan product */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-4">ADD/SCAN PRODUCT</div>
+                <div className="flex gap-3 items-center mb-6">
+                  <Input
+                    placeholder="Scan code or enter (e.g., C001)"
+                    value={scanCode}
+                    onChange={e => setScanCode(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={addToCart}
+                    className="bg-blue-600 text-white rounded px-5 py-2 font-bold"
+                  >
+                    Add Item
+                  </button>
+                </div>
               </div>
-            </Block>
-            {/* Product Table */}
-            <Block title="CART ITEMS">
-              <div className="overflow-x-auto">
-                <table className="min-w-full border rounded text-xs">
-                  <thead>
-                    <tr>
-                      <TableHeader label="#" />
-                      <TableHeader label="Product" />
-                      <TableHeader label="Qty" />
-                      <TableHeader label="Price" />
-                      <TableHeader label="Amount" />
-                      <TableHeader label="Remove" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {cart.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="text-center py-2 text-gray-400">No items added.</td>
+
+              {/* Product Table */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-2">CART ITEMS</div>
+                <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2 py-4 px-2">
+                  <table className="min-w-full text-xs table-fixed">
+                    <thead>
+                      <tr className="bg-gray-50 text-gray-800">
+                        <th className="w-1/12 px-2 py-1 text-left">#</th>
+                        <th className="w-5/12 px-2 py-1 text-left">Product</th>
+                        <th className="w-1/6 px-2 py-1 text-left">Qty</th>
+                        <th className="w-1/6 px-2 py-1 text-left">Price</th>
+                        <th className="w-1/6 px-2 py-1 text-left">Amount</th>
+                        <th className="w-1/10 px-2 py-1 text-center">Remove</th>
                       </tr>
-                    ) : (
-                      cart.map((item, idx) => (
-                        <tr key={idx} className="bg-white border-t">
-                          <td className="px-2 py-2">{idx + 1}</td>
-                          <td className="px-2 py-2">{item.product}</td>
-                          <td className="px-2 py-2">
-                            <Input
-                              type="number"
-                              min={1}
-                              max={item.available}
-                              value={item.qty}
-                              onChange={e => updateItemQty(idx, Number(e.target.value))}
-                              style={{ width: "60px" }}
-                            />
-                          </td>
-                          <td className="px-2 py-2">{item.price}</td>
-                          <td className="px-2 py-2">{item.amount}</td>
-                          <td className="px-2 py-2">
-                            <button
-                              type="button"
-                              onClick={() => removeItem(idx)}
-                              className="bg-red-100 text-red-600 rounded-full px-3 py-1 font-bold"
-                            >&times;</button>
-                          </td>
+                    </thead>
+                    <tbody>
+                      {cart.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="text-center py-2 text-gray-400">No items added.</td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </Block>
-            {/* Payment & Note */}
-            <Block title="PAYMENT & NOTES">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-gray-600 text-xs mb-1 font-semibold">Payment Method</label>
-                  <Select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
-                    <option value="">Select method</option>
-                    <option>Cash</option>
-                    <option>Card</option>
-                    <option>UPI</option>
-                  </Select>
-                </div>
-                <div>
-                  <label className="block text-gray-600 text-xs mb-1 font-semibold">Discount</label>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={discount}
-                    onChange={e => setDiscount(Number(e.target.value))}
-                    placeholder="Discount (₹)"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-600 text-xs mb-1 font-semibold">Note</label>
-                  <Input
-                    value={note}
-                    onChange={e => setNote(e.target.value)}
-                    placeholder="Any note"
-                  />
+                      ) : (
+                        cart.map((item, idx) => (
+                          <tr key={idx} className="border-t">
+                            <td className="px-2 py-2">{idx + 1}</td>
+                            <td className="px-2 py-2">{item.product}</td>
+                            <td className="px-2 py-2">
+                              <Input
+                                type="number"
+                                min={1}
+                                max={item.available}
+                                value={item.qty}
+                                onChange={e => updateItemQty(idx, Number(e.target.value))}
+                                style={{ width: "60px" }}
+                              />
+                            </td>
+                            <td className="px-2 py-2">{item.price}</td>
+                            <td className="px-2 py-2">{item.amount}</td>
+                            <td className="px-2 py-2 text-center">
+                              <button
+                                type="button"
+                                onClick={() => removeItem(idx)}
+                                className="bg-red-100 border border-red-300 rounded px-2 py-1"
+                              >
+                                ×
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            </Block>
-            {/* Summary */}
-            <div className="flex justify-end gap-4 my-6">
-              <div className="bg-gray-100 rounded px-6 py-4 text-lg font-medium text-gray-700 w-72">
-                <div className="mb-1 flex justify-between">
-                  <span>Subtotal:</span>
-                  <span>₹{subtotal}</span>
+
+              {/* Payment & Note */}
+              <div className="border m-4 p-6 flex flex-col gap-y-2">
+                <div className="font-semibold text-gray-600 mb-4">PAYMENT & NOTES</div>
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-gray-600 text-xs mb-1 font-semibold">Payment Method</label>
+                    <Select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
+                      <option value="">Select method</option>
+                      <option>Cash</option>
+                      <option>Card</option>
+                      <option>UPI</option>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-gray-600 text-xs mb-1 font-semibold">Discount</label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={discount}
+                      onChange={e => setDiscount(Number(e.target.value))}
+                      placeholder="Discount (₹)"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-600 text-xs mb-1 font-semibold">Note</label>
+                    <Input
+                      value={note}
+                      onChange={e => setNote(e.target.value)}
+                      placeholder="Any note"
+                    />
+                  </div>
                 </div>
-                <div className="mb-1 flex justify-between">
-                  <span>Discount:</span>
-                  <span>₹{discountVal}</span>
-                </div>
-                <div className="flex justify-between text-blue-800 font-bold border-t pt-2 mt-2 text-xl">
-                  <span>Grand Total:</span>
-                  <span>₹{grandTotal}</span>
+              </div>
+
+              {/* Summary */}
+              <div className="flex justify-end my-6 px-4">
+                <div className="bg-gray-100 rounded px-6 py-4 text-lg font-medium text-gray-700 w-72">
+                  <div className="mb-1 flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>₹{subtotal}</span>
+                  </div>
+                  <div className="mb-1 flex justify-between">
+                    <span>Discount:</span>
+                    <span>₹{discountVal}</span>
+                  </div>
+                  <div className="flex justify-between text-blue-800 font-bold border-t pt-2 mt-2 text-xl">
+                    <span>Grand Total:</span>
+                    <span>₹{grandTotal}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          {/* Footer Buttons */}
-          <div className="flex justify-end items-center bg-gray-50 py-4 px-6 border-t rounded-b-lg">
-            <button
-              type="button"
-              className="w-28 rounded-3xl bg-gray-200 px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-300"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="w-28 rounded-3xl bg-blue-600 px-4 py-2 text-base font-medium text-white hover:bg-blue-700 ml-3"
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      </div>
+
+            {/* Controls */}
+            <div className="m-3 flex items-center justify-between gap-x-7 shrink-0">
+              <button
+                type="button"
+                className="w-24 rounded-3xl bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <div className="flex gap-x-2">
+                <button
+                  type="submit"
+                  className="w-24 rounded-3xl bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="w-24 rounded-3xl bg-gray-300 text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-500 hover:text-white"
+                  onClick={handleReset}
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </form>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };
