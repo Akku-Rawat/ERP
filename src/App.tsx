@@ -1,7 +1,7 @@
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from './components/SideBar';
-import SalesModule from './views/Sales';
+import SalesModule from './views/Sales/Sales';
 import ProcurementModule from './views/Procurement';
 import InventoryModule from './views/Inventory';
 import SupplierModule from './views/Supplier';
