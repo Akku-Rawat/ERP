@@ -107,7 +107,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({ isOpen, onClose, onSubm
   if (!isOpen) return null;
 
   return (
-    <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-50 shadow-3xl">
+      <div className="fixed z-50 inset-0 flex items-center justify-center bg-black/40">
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0, y: 40 }}
