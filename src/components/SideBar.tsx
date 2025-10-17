@@ -34,8 +34,7 @@ const Sidebar = () => {
       >
         <div className="flex items-center justify-between p-4 border-b shadow-sm">
           <div className="flex items-center space-x-2">
-            {/* <span className="text-yellow-500 text-xl">⚡</span> */}
-            {open && (
+             {open && (
               <h2 className="text-2xl font-semibold text-black">ERP</h2>
             )}
           </div>
