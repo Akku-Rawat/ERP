@@ -89,12 +89,6 @@ const Accounting: React.FC = () => {
               className="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <div className="flex items-center gap-2">
-              <button
-                onClick={handleAdd}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-              >
-                + Add
-              </button>
               <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
                 Export
               </button>
