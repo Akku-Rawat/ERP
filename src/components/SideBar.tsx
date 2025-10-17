@@ -38,7 +38,11 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
         } h-screen bg-gray-50 text-black fixed shadow-xl transition-all duration-300`}
       >
         <div className="flex items-center justify-between p-4 border-b shadow-sm">
-          {open && <h2 className="text-2xl font-semibold">ERP</h2>}
+          <div className="flex items-center space-x-2">
+             {open && (
+              <h2 className="text-2xl font-semibold text-black">ERP</h2>
+            )}
+          </div>
           <button
             onClick={() => setOpen(!open)}
             className="text-2xl text-gray-600 hover:text-teal-700 focus:outline-none"
