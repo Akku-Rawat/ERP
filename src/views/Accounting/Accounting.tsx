@@ -1,15 +1,22 @@
 import React, { useState } from "react";
-import AccountModal from '../components/accounting/AccountModal';
-import JournalModal from '../components/accounting/JournalModal';
+import AccountModal from '../../components/accounting/AccountModal';
+import JournalModal from '../../components/accounting/JournalModal';
+
+import { 
+  FaBriefcase,
+   FaChartPie, 
+   FaFileAlt, 
+   FaClipboardList
+   } from "react-icons/fa";
 
 const accountingModule = {
   name: "Accounting",
-  icon: "💼",
+  icon: <FaBriefcase />,
   defaultTab: "accounts",
   tabs: [
-    { id: "accounts", name: "Chart of Accounts", icon: "📊" },
-    { id: "journals", name: "Journal Entries", icon: "📝" },
-    { id: "reports", name: "Financial Reports", icon: "📋" },
+    { id: "accounts", name: "Chart of Accounts", icon: <FaChartPie /> },
+    { id: "journals", name: "Journal Entries", icon: <FaFileAlt /> },
+    { id: "reports", name: "Financial Reports", icon: <FaClipboardList /> },
   ],
   accounts: [
     { code: "1000", name: "Cash", type: "Asset", balance: 150000, parent: "Current Assets" },
@@ -58,7 +65,7 @@ const Accounting: React.FC = () => {
             }}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
-                ? "text-blue-600 border-b-2 border-blue-600"
+                ? "text-teal-600 border-b-2 border-teal-600"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -82,13 +89,7 @@ const Accounting: React.FC = () => {
               className="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <div className="flex items-center gap-2">
-              <button
-                onClick={handleAdd}
-                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
-              >
-                + Add
-              </button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
                 Export
               </button>
             </div>
@@ -134,7 +135,7 @@ const Accounting: React.FC = () => {
             <p className="text-gray-500">Journal entry management will be implemented here.</p>
             <button
               onClick={handleAdd}
-              className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
               + Add Journal Entry
             </button>

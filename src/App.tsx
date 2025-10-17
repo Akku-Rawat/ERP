@@ -1,54 +1,39 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoutes';
-import Login from './views/LoginPage';
-import Sidebar from './components/SideBar';
+import React, { useState } from "react";
+import "./App.css";
+import { Routes, Route } from "react-router-dom";
+import Sidebar from "./components/SideBar"; // keep name consistent with your file
+import SalesModule from "./views/Sales/Sales";
+import ProcurementModule from "./views/Procurement/Procurement";
+import InventoryModule from "./views/Inventory/Inventory";
+import SupplierModule from "./views/Supplier/Supplier-Managment";
+import AccountingModule from "./views/Accounting/Accounting";
+import CrmModule from "./views/Crm/Crm";
 
-import SalesModule from './views/Sales/Sales';
-import ProcurementModule from './views/Procurement';
-import InventoryModule from './views/Inventory';
-import SupplierModule from './views/Supplier';
-import AccountingModule from './views/Accounting';
-import CrmModule from './views/Crm';
+const App: React.FC = () => {
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
 
-const AppLayout: React.FC = () => (
-  <div className="flex min-h-screen">
-     <div className="w-64">
-      <Sidebar />
-    </div>
-
-    <div className="flex-1 bg-gray-50">
-      <Routes>
-        <Route path="/sales" element={<SalesModule />} />
-        <Route path="/procurement" element={<ProcurementModule />} />
-        <Route path="/inventory" element={<InventoryModule />} />
-        <Route path="/suppliers" element={<SupplierModule />} />
-        <Route path="/accounting" element={<AccountingModule />} />
-        <Route path="/crm" element={<CrmModule />} />
-
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </div>
-  </div>
-);
-
-function App() {
   return (
-    <AuthProvider>
-       <Routes>
-         <Route path="/login" element={<Login />} />
+    <div className="flex min-h-screen">
+      {/* Sidebar handles its own fixed positioning */}
+      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
 
-        {/* All other routes need auth */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/*" element={<AppLayout />} />
-        </Route>
-
-        {/* Root redirects to login if not authenticated */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </AuthProvider>
+      {/* Main content: uses md:ml-64 or md:ml-16 depending on sidebar state */}
+      <div
+        className={`flex-1 transition-all duration-300 bg-gray-50 ${
+          sidebarOpen ? "md:ml-64" : "md:ml-16"
+        }`}
+      >
+        <Routes>
+          <Route path="/sales" element={<SalesModule />} />
+          <Route path="/procurement" element={<ProcurementModule />} />
+          <Route path="/inventory" element={<InventoryModule />} />
+          <Route path="/suppliers" element={<SupplierModule />} />
+          <Route path="/accounting" element={<AccountingModule />} />
+          <Route path="/crm" element={<CrmModule />} />
+        </Routes>
+      </div>
+    </div>
   );
-}
+};
 
 export default App;

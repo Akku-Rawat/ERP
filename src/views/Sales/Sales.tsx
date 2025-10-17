@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import QuotationsTable from "./Quotations";
 import InvoiceTable from "./Invoices";
+import ReportTable from "./Reports";
 import POS from "./POS";
 import QuotationModal from '../../components/sales/QuotationModal';
 import InvoiceModal from "../../components/sales/InvoiceModal";
-import PosModal from "../../components/sales/POSModal";
+import PosModal from "../../components/sales/PosModal";
 import PricingAndTaxRules from "./PricingAndTaxRules";
 import SalesDashboard  from "./SalesDashboard";
 
@@ -78,11 +79,11 @@ const SalesModule: React.FC = () => {
           <>
             <div className="flex items-center justify-end gap-4 mb-4">
               <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
                 onClick={() => setShowModal(true)}>
                 + Add
               </button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 transition">
+              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
                 Export
               </button>
             </div>
@@ -96,11 +97,11 @@ const SalesModule: React.FC = () => {
           <>
             <div className="flex items-center justify-end gap-4 mb-4">
               <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
                 onClick={() => setShowInvoiceModal(true)}>
                 + Add
               </button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 transition">
+              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
                 Export
               </button>
             </div>
@@ -117,7 +118,7 @@ const SalesModule: React.FC = () => {
                 onClick={() => setShowPosModal(true)}>
                 + Add
               </button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
                 Export
               </button>
             </div>
@@ -125,11 +126,9 @@ const SalesModule: React.FC = () => {
           </>
         )}
 
-        {/* Reports */}
-        {activeTab === "reports" && (
-          <div className="py-8 text-center text-gray-400">
-            No data available for this section.
-          </div>
+          
+      {activeTab === "reports" && (
+      <ReportTable />
         )}
 
         {activeTab === "pricingtax" && <PricingAndTaxRules />}
@@ -144,7 +143,7 @@ const SalesModule: React.FC = () => {
       <InvoiceModal
         isOpen={showInvoiceModal}
         onClose={() => setShowInvoiceModal(false)}
-        onSave={data => console.log('Invoice data', data)}
+        onSubmit={data => console.log('Invoice data', data)}
       />
       <PosModal
         isOpen={showPosModal}

@@ -1,16 +1,25 @@
 import React, { useState } from "react";
-import ProductModal from '../components/inventory/ProductModal';
-import WarehouseModal from '../components/inventory/WarehouseModal';
-import MovementModal from '../components/inventory/MovementModal';
+import ProductModal from '../../components/inventory/ProductModal';
+import WarehouseModal from '../../components/inventory/WarehouseModal';
+import MovementModal from '../../components/inventory/MovementModal';
+
+
+import{
+  FaBoxOpen,
+   FaWarehouse,
+    FaTruckMoving, 
+    FaBoxes
+
+} from "react-icons/fa";
 
 const inventory = {
   name: "Inventory",
-  icon: "📦",
+  icon: <FaBoxes />,
   defaultTab: "products",
   tabs: [
-    { id: "products", name: "Products", icon: "🛍️" },
-    { id: "warehouses", name: "Warehouses", icon: "🏭" },
-    { id: "movements", name: "Movements", icon: "🚚" },
+    { id: "products", name: "Products", icon: <FaBoxOpen /> },
+    { id: "warehouses", name: "Warehouses", icon: <FaWarehouse /> },
+    { id: "movements", name: "Movements", icon: <FaTruckMoving /> },
   ],
   products: [
     { id: "PR-001", name: "Laptop Pro 14", category: "Electronics", stock: 120, minStock: 50, price: 1500, supplier: "TechSupply Co" },
@@ -72,7 +81,7 @@ const Inventory: React.FC = () => {
             }}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
-                ? "text-blue-600 border-b-2 border-blue-600"
+                ? "text-teal-600 border-b-2 border-teal-600"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -96,11 +105,11 @@ const Inventory: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleAdd}
-                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
               >
                 + Add
               </button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
                 Export
               </button>
             </div>
@@ -186,7 +195,7 @@ const Inventory: React.FC = () => {
             </p>
             <button
               onClick={handleAdd}
-              className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
               + Add Movement
             </button>

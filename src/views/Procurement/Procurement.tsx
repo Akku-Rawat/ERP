@@ -1,16 +1,24 @@
 import React, { useState } from "react";
-import RFQModal from '../components/procurement/RfqModal';
-import PurchaseOrderModal from '../components/procurement/PurchaseOrderModal';
-import ApprovalModal from '../components/procurement/ApprovalModal';
+import RFQModal from '../../components/procurement/RfqModal';
+import PurchaseOrderModal from '../../components/procurement/PurchaseOrderModal';
+import ApprovalModal from '../../components/procurement/ApprovalModal';
+
+import {
+  FaClipboardList,
+  FaShoppingCart,
+  FaCheckCircle,
+  FaShoppingBag
+ 
+} from "react-icons/fa";
 
 const procurement = {
   name: "Procurement",
-  icon: "🛒",
+  icon: <FaShoppingBag />,
   defaultTab: "rfqs",
   tabs: [
-    { id: "rfqs", name: "RFQs", icon: "📋" },
-    { id: "orders", name: "Purchase Orders", icon: "🛒" },
-    { id: "approvals", name: "Approvals", icon: "✅" },
+  { id: "rfqs", name: "RFQs", icon: <FaClipboardList /> },   
+  { id: "orders", name: "Purchase Orders", icon: <FaShoppingCart /> },
+  { id: "approvals", name: "Approvals", icon: <FaCheckCircle /> },     
   ],
   rfqs: [
     { id: "RFQ-001", supplier: "TechSupply Co", date: "2025-01-10", amount: 50000, status: "Awaiting Response", dueDate: "2025-01-25" },
@@ -70,7 +78,7 @@ const Procurement: React.FC = () => {
             }}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
-                ? "text-blue-600 border-b-2 border-blue-600"
+                ? "text-teal-600 border-b-2 border-teal-600"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -95,11 +103,11 @@ const Procurement: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleAdd}
-                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
               >
                 + Add
               </button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
                 Export
               </button>
             </div>
@@ -183,7 +191,7 @@ const Procurement: React.FC = () => {
             </p>
             <button
               onClick={handleAdd}
-              className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
               + Add Approval
             </button>
