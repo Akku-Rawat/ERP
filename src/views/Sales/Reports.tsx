@@ -175,7 +175,7 @@ export default function ReportTable() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto mt-8 mb-12 p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
+    <div className="max-w-auto mx-auto mt-8 mb-12 p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
       {/* Filter bar */}
       <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 justify-between items-center mb-4">
         <div className="flex flex-wrap gap-3 items-center">
