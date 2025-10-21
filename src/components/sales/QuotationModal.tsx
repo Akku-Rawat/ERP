@@ -1,7 +1,95 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Trash2 } from "lucide-react";
 
+
+const customers = [
+  { name: "Bloom Brothers Furniture", key: "0011", city: "New York" },
+  { name: "Handy Dan", key: "0014", city: "Ville Marie" },
+  { name: "Montreal Hotel and Spa", key: "0009", city: "Montreal" },
+  { name: "Superior foods ltd", key: "0010", city: "Toronto" },
+  { name: "Thompson and sons ltd", key: "0013", city: "Toronto" }
+];
+
+function CustomerDropdown({
+  value,
+  onChange,
+  className = ""
+}: {
+  value: string;
+  onChange: (s: string) => void;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  const filtered = customers.filter(
+    c =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.key.includes(search) ||
+      c.city.toLowerCase().includes(search.toLowerCase())
+  );
+  const selected = customers.find(c => c.name === value);
+
+  return (
+    <div ref={ref} className={`relative w-full flex flex-col gap-1 ${className}`}>
+      <span className="font-medium text-gray-600 text-sm">Customer Name</span>
+      <button
+        type="button"
+        className="w-full rounded border px-3 py-2 text-left focus:outline-none bg-white"
+        onClick={() => setOpen(v => !v)}
+      >
+        {selected ? selected.name : "Select customer..."}
+      </button>
+      {open && (
+        <div className="absolute left-0 w-full mt-1 bg-white border shadow-lg rounded z-10">
+          <input
+            className="w-full border-b px-2 py-1"
+            autoFocus
+            placeholder="Search..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <ul className="max-h-40 overflow-y-auto">
+            {filtered.map(c => (
+              <li
+                key={c.key}
+                className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
+                  c.name === value ? "bg-blue-200 font-bold" : ""
+                }`}
+                onClick={() => {
+                  onChange(c.name);
+                  setOpen(false);
+                  setSearch("");
+                }}
+              >
+                <div className="flex flex-col">
+                  <span>{c.name}</span>
+                  <span className="text-xs text-gray-400">Key: {c.key}, City: {c.city}</span>
+                </div>
+              </li>
+            ))}
+            {filtered.length === 0 && (
+              <li className="px-4 py-2 text-gray-500">No match</li>
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// -- QUOTATION MODAL STARTS HERE --
 interface QuotationModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -26,29 +114,24 @@ const emptyItem: ItemRow = {
 };
 
 interface FormData {
-  subject: string;
-  quoteOwner: string;
-  contactName: string;
-  accountName: string;
+  CutomerName: string;
+  quoteID: string;
   validUntil: string;
-
+  dateOfQuotation: string;
   totalDiscount: number;
   totalTax: number;
   adjustment: number;
-
   termsAndConditions: string;
   descriptionInformation: string;
-
   subTotal: number;
   grandTotal: number;
 }
 
 const emptyForm: FormData = {
-  subject: "",
-  quoteOwner: "",
-  contactName: "",
-  accountName: "",
+  CutomerName: "",
+  quoteID: "",
   validUntil: "",
+  dateOfQuotation: "",
   totalDiscount: 0,
   totalTax: 0,
   adjustment: 0,
@@ -141,15 +224,42 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
               </button>
             </header>
 
-                        <section className="flex-1 overflow-y-auto p-4 space-y-6">
+            <section className="flex-1 overflow-y-auto p-4 space-y-6">
               {/* Quote Information */}
               <Card title="Quote Information">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  <Input label="Subject" name="subject" value={form.subject} onChange={handleForm} />
-                  <Input label="Quote Owner" name="quoteOwner" value={form.quoteOwner} onChange={handleForm} />
-                  <Input label="Contact Name" name="contactName" value={form.contactName} onChange={handleForm} />
-                  <Input label="Account Name" name="accountName" value={form.accountName} onChange={handleForm} />
-                  <Input label="Valid Until" name="validUntil" type="date" value={form.validUntil} onChange={handleForm} />
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <CustomerDropdown
+                      value={form.CutomerName}
+                      onChange={name => setForm(p => ({ ...p, CutomerName: name }))}
+                      className="w-full"
+                    />
+                    <Input
+                      label="Quote ID"
+                      name="quoteID"
+                      value={form.quoteID}
+                      onChange={handleForm}
+                      className="w-full"
+                    />
+                    <Input
+                      label="Date of Quotation"
+                      name="dateOfQuotation"
+                      type="date"
+                      value={form.dateOfQuotation}
+                      onChange={handleForm}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <Input
+                      label="Valid Until"
+                      name="validUntil"
+                      type="date"
+                      value={form.validUntil}
+                      onChange={handleForm}
+                      className="w-full col-span-3"
+                    />
+                  </div>
                 </div>
               </Card>
 
@@ -159,14 +269,14 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 text-gray-700">
                       <tr>
-                        <th className="px-3 py-2 text-left">#</th>
-                        <th className="px-3 py-2 text-left">Product</th>
-                        <th className="px-3 py-2 text-left">Description</th>
-                        <th className="px-3 py-2 text-right">Qty</th>
-                        <th className="px-3 py-2 text-right">List $</th>
-                        <th className="px-3 py-2 text-right">Amount $</th>
-                        <th className="px-3 py-2 text-right">Disc $</th>
-                        <th className="px-3 py-2 text-right">Tax $</th>
+                        <th className="px-2 py-2 text-left">#</th>
+                        <th className="px-2 py-2 text-left">Product</th>
+                        <th className="px-2 py-2 text-left">Description</th>
+                        <th className="px-2 py-2 text-left">Qty</th>
+                        <th className="px-2 py-2 text-left">Unit Price</th>
+                        <th className="px-2 py-2 text-left">Amount </th>
+                        <th className="px-2 py-2 text-left">Discount</th>
+                        <th className="px-2 py-2 text-left">Tax </th>
                         <th></th>
                       </tr>
                     </thead>
@@ -199,9 +309,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                 </button>
               </Card>
 
-              {/* === NEW: Terms + Summary (2-column grid) === */}
               <div className="grid gap-6 md:grid-cols-2">
-                {/* Terms & Conditions */}
                 <Card title="Terms & Conditions">
                   <textarea
                     className="w-full rounded border p-3 text-sm h-48 resize-none"
@@ -211,8 +319,6 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     placeholder="Enter terms and conditions..."
                   />
                 </Card>
-
-                {/* Summary */}
                 <Card title="Summary">
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
@@ -262,7 +368,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
   );
 };
 
-/* Reusable UI */
+
 const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="rounded-lg border bg-white p-5 shadow-sm">
     <h3 className="mb-4 text-lg font-semibold text-gray-700">{title}</h3>
@@ -272,7 +378,7 @@ const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, c
 
 const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement> & { label: string }>(
   ({ label, className = "", ...props }, ref) => (
-    <label className="flex flex-col gap-1 text-sm">
+    <label className="flex flex-col gap-1 text-sm w-full">
       <span className="font-medium text-gray-600">{label}</span>
       <input
         ref={ref}
