@@ -3,10 +3,10 @@ import QuotationsTable from "./Quotations";
 import InvoiceTable from "./Invoices";
 import ReportTable from "./Reports";
 import POS from "./POS";
+import SalesSettings from "./Setting";
 import QuotationModal from '../../components/sales/QuotationModal';
 import InvoiceModal from "../../components/sales/InvoiceModal";
 import PosModal from "../../components/sales/PosModal";
-import PricingAndTaxRules from "./PricingAndTaxRules";
 import SalesDashboard  from "./SalesDashboard";
 
 import {
@@ -16,7 +16,7 @@ import {
   FaFileInvoiceDollar,
   FaCashRegister,
   FaChartBar,
-  FaBalanceScale
+  FaCog
 } from "react-icons/fa";
 
 
@@ -25,12 +25,12 @@ const sales = {
   icon: <FaMoneyBillWave />,
   defaultTab: "salesdashboard",
   tabs: [
-    { id: "salesdashboard", name: "Sales Dashboard", icon: <FaCalendarAlt /> },
+    { id: "salesdashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
     { id: "quotations", name: "Quotations", icon: <FaFileInvoice /> },
     { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
     { id: "pos", name: "POS", icon: <FaCashRegister /> },
-    { id: "pricingtax", name: "Pricing & Tax Rules", icon: <FaBalanceScale /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
+    {id:"settings" , name:"Settings", icon:<FaCog/>}
   ],
   quotations: [],
   invoices: [],
@@ -131,7 +131,9 @@ const SalesModule: React.FC = () => {
       <ReportTable />
         )}
 
-        {activeTab === "pricingtax" && <PricingAndTaxRules />}
+        {activeTab === "settings" &&(
+          <SalesSettings/>
+        )}
       </div>
 
       {/* Modals */}

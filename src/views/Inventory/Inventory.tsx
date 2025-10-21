@@ -3,14 +3,11 @@ import ProductModal from '../../components/inventory/ProductModal';
 import WarehouseModal from '../../components/inventory/WarehouseModal';
 import MovementModal from '../../components/inventory/MovementModal';
 
+import { FaBoxOpen, FaWarehouse, FaTruckMoving, FaBoxes } from "react-icons/fa";
 
-import{
-  FaBoxOpen,
-   FaWarehouse,
-    FaTruckMoving, 
-    FaBoxes
-
-} from "react-icons/fa";
+import Products from "./Products";
+import Warehouses from "./Warehouses";
+import Movements from "./Movements";
 
 const inventory = {
   name: "Inventory",
@@ -36,24 +33,9 @@ const inventory = {
 const Inventory: React.FC = () => {
   const [activeTab, setActiveTab] = useState(inventory.defaultTab);
   const [searchTerm, setSearchTerm] = useState("");
-
   const [showProductModal, setShowProductModal] = useState(false);
   const [showWarehouseModal, setShowWarehouseModal] = useState(false);
   const [showMovementModal, setShowMovementModal] = useState(false);
-
-  const filteredProducts = inventory.products.filter(
-    (p) =>
-      p.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.supplier.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredWarehouses = inventory.warehouses.filter(
-    (w) =>
-      w.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      w.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      w.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleAdd = () => {
     if (activeTab === "products") setShowProductModal(true);
@@ -92,121 +74,43 @@ const Inventory: React.FC = () => {
 
       {/* Content */}
       <div className="bg-white rounded-lg shadow-sm p-4">
-        {/* Search + Add + Export */}
-        {activeTab !== "movements" && (
-          <div className="flex items-center justify-between mb-4">
-            <input
-              type="search"
-              placeholder={`Search ${activeTab === "products" ? "products" : "warehouses"}...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleAdd}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-              >
-                + Add
-              </button>
-              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
-                Export
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Products Table */}
         {activeTab === "products" && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-200 rounded-lg">
-              <thead className="bg-gray-100 text-gray-700 text-sm">
-                <tr>
-                  <th className="px-4 py-2 text-left">Product ID</th>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Category</th>
-                  <th className="px-4 py-2 text-left">Stock</th>
-                  <th className="px-4 py-2 text-left">Min Stock</th>
-                  <th className="px-4 py-2 text-left">Price</th>
-                  <th className="px-4 py-2 text-left">Supplier</th>
-                  <th className="px-4 py-2 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredProducts.map((p) => (
-                  <tr key={p.id} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-2">{p.id}</td>
-                    <td className="px-4 py-2">{p.name}</td>
-                    <td className="px-4 py-2">{p.category}</td>
-                    <td className="px-4 py-2">{p.stock}</td>
-                    <td className="px-4 py-2">{p.minStock}</td>
-                    <td className="px-4 py-2">${p.price.toLocaleString()}</td>
-                    <td className="px-4 py-2">{p.supplier}</td>
-                    <td className="px-4 py-2 text-center">
-                      <button className="text-blue-600 hover:underline">View</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Products
+            products={inventory.products}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onAdd={handleAdd}
+          />
         )}
-
-        {/* Warehouses Table */}
         {activeTab === "warehouses" && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-200 rounded-lg">
-              <thead className="bg-gray-100 text-gray-700 text-sm">
-                <tr>
-                  <th className="px-4 py-2 text-left">Warehouse ID</th>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Location</th>
-                  <th className="px-4 py-2 text-left">Manager</th>
-                  <th className="px-4 py-2 text-left">Items</th>
-                  <th className="px-4 py-2 text-left">Capacity</th>
-                  <th className="px-4 py-2 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredWarehouses.map((w) => (
-                  <tr key={w.id} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-2">{w.id}</td>
-                    <td className="px-4 py-2">{w.name}</td>
-                    <td className="px-4 py-2">{w.location}</td>
-                    <td className="px-4 py-2">{w.manager}</td>
-                    <td className="px-4 py-2">{w.items}</td>
-                    <td className="px-4 py-2">{w.capacity}</td>
-                    <td className="px-4 py-2 text-center">
-                      <button className="text-blue-600 hover:underline">View</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Warehouses
+            warehouses={inventory.warehouses}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onAdd={handleAdd}
+          />
         )}
-
-        {/* Movements Section */}
         {activeTab === "movements" && (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Stock Movements</h3>
-            <p className="text-gray-500">
-              Stock movement tracking and history will be displayed here.
-            </p>
-            <button
-              onClick={handleAdd}
-              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-            >
-              + Add Movement
-            </button>
-          </div>
+          <Movements onAdd={handleAdd} />
         )}
       </div>
 
       {/* Modals */}
-      <ProductModal isOpen={showProductModal} onClose={() => setShowProductModal(false)} onSubmit={(data) => console.log("New Product:", data)} />
-      <WarehouseModal isOpen={showWarehouseModal} onClose={() => setShowWarehouseModal(false)} onSubmit={(data) => console.log("New Warehouse:", data)} />
-      <MovementModal isOpen={showMovementModal} onClose={() => setShowMovementModal(false)} onSubmit={(data) => console.log("New Movement:", data)} />
+      <ProductModal
+        isOpen={showProductModal}
+        onClose={() => setShowProductModal(false)}
+        onSubmit={(data) => console.log("New Product:", data)}
+      />
+      <WarehouseModal
+        isOpen={showWarehouseModal}
+        onClose={() => setShowWarehouseModal(false)}
+        onSubmit={(data) => console.log("New Warehouse:", data)}
+      />
+      <MovementModal
+        isOpen={showMovementModal}
+        onClose={() => setShowMovementModal(false)}
+        onSubmit={(data) => console.log("New Movement:", data)}
+      />
     </div>
   );
 };

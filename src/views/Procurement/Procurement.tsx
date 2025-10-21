@@ -1,61 +1,54 @@
 import React, { useState } from "react";
-import RFQModal from '../../components/procurement/RfqModal';
-import PurchaseOrderModal from '../../components/procurement/PurchaseOrderModal';
-import ApprovalModal from '../../components/procurement/ApprovalModal';
+import RFQsTable from "./Rfqs";
+import PurchaseOrdersTable from "./PurchaseOrders";
+import ApprovalsSection from "./Approvals";
+import InvoiceMatching from "./Invoice-matching";
+import GoodsReceipt from "./Goods-Receipt";
+import Dashboard from "./ProcurementDashboard";
+import RFQModal from "../../components/procurement/RfqModal";
+import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal";
+import ApprovalModal from "../../components/procurement/ApprovalModal";
+import GoodsReceiptModal from "../../components/procurement/GoodsReceiptModal";
+import InvoiceMatchingModal from "../../components/procurement/InvoiceMatchingModal";
 
-import {
+import { 
   FaClipboardList,
-  FaShoppingCart,
   FaCheckCircle,
-  FaShoppingBag
- 
+  FaShoppingBag,
+  FaTachometerAlt,
+  FaFileSignature,
+  FaFileInvoiceDollar,
+  FaTruckLoading
 } from "react-icons/fa";
 
 const procurement = {
   name: "Procurement",
   icon: <FaShoppingBag />,
-  defaultTab: "rfqs",
+  defaultTab: "procurementdashboard",
   tabs: [
-  { id: "rfqs", name: "RFQs", icon: <FaClipboardList /> },   
-  { id: "orders", name: "Purchase Orders", icon: <FaShoppingCart /> },
-  { id: "approvals", name: "Approvals", icon: <FaCheckCircle /> },     
-  ],
-  rfqs: [
-    { id: "RFQ-001", supplier: "TechSupply Co", date: "2025-01-10", amount: 50000, status: "Awaiting Response", dueDate: "2025-01-25" },
-    { id: "RFQ-002", supplier: "Office Solutions", date: "2025-01-12", amount: 25000, status: "Received", dueDate: "2025-01-27" },
-    { id: "RFQ-003", supplier: "Equipment Plus", date: "2025-01-14", amount: 75000, status: "In Review", dueDate: "2025-01-29" },
-  ],
-  purchaseOrders: [
-    { id: "PO-001", supplier: "TechSupply Co", date: "2025-01-15", amount: 48000, status: "Approved", deliveryDate: "2025-02-01" },
-    { id: "PO-002", supplier: "Office Solutions", date: "2025-01-16", amount: 23000, status: "Pending", deliveryDate: "2025-02-05" },
-    { id: "PO-003", supplier: "Equipment Plus", date: "2025-01-17", amount: 72000, status: "Draft", deliveryDate: "2025-02-10" },
+    {id:"procurementdashboard", name: "Dashboard", icon: <FaTachometerAlt />},
+    { id: "rfqs", name: "RFQs", icon: <FaFileSignature /> },
+    { id: "orders", name: "Purchase Orders", icon: <FaClipboardList /> },
+    { id: "approvals", name: "Approvals", icon: <FaCheckCircle /> },
+    { id: "invoicematching", name: "Invoice Matching", icon: <FaFileInvoiceDollar /> },
+    { id: "goodsreceipt", name: "Goods Receipt", icon: <FaTruckLoading /> },
   ],
 };
 
 const Procurement: React.FC = () => {
   const [activeTab, setActiveTab] = useState(procurement.defaultTab);
-  const [searchTerm, setSearchTerm] = useState("");
-
-   const [showRFQModal, setShowRFQModal] = useState(false);
+  const [showRFQModal, setShowRFQModal] = useState(false);
   const [showPOModal, setShowPOModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showGRModal, setShowGRModal] = useState(false);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
-  const filteredRFQs = procurement.rfqs.filter(
-    (rfq) =>
-      rfq.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      rfq.supplier.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredOrders = procurement.purchaseOrders.filter(
-    (po) =>
-      po.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      po.supplier.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-   const handleAdd = () => {
+  const handleAdd = () => {
     if (activeTab === "rfqs") setShowRFQModal(true);
     else if (activeTab === "orders") setShowPOModal(true);
     else if (activeTab === "approvals") setShowApprovalModal(true);
+    else if (activeTab === "goodsreceipt") setShowGRModal(true);
+    else if (activeTab === "invoicematching") setShowInvoiceModal(true);
   };
 
   return (
@@ -72,10 +65,7 @@ const Procurement: React.FC = () => {
         {procurement.tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => {
-              setActiveTab(tab.id);
-              setSearchTerm("");
-            }}
+            onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
                 ? "text-teal-600 border-b-2 border-teal-600"
@@ -89,117 +79,16 @@ const Procurement: React.FC = () => {
 
       {/* Content */}
       <div className="bg-white rounded-lg shadow-sm p-4">
-        {/* Search, Add & Export Actions */}
-        {activeTab !== "approvals" && (
-          <div className="flex items-center justify-between mb-4">
-            <input
-              type="search"
-              placeholder={`Search ${activeTab === "rfqs" ? "RFQs" : "Orders"}...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleAdd}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-              >
-                + Add
-              </button>
-              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
-                Export
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* RFQs Table */}
-        {activeTab === "rfqs" && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-200 rounded-lg">
-              <thead className="bg-gray-100 text-gray-700 text-sm">
-                <tr>
-                  <th className="px-4 py-2 text-left">RFQ ID</th>
-                  <th className="px-4 py-2 text-left">Supplier</th>
-                  <th className="px-4 py-2 text-left">Date</th>
-                  <th className="px-4 py-2 text-left">Amount</th>
-                  <th className="px-4 py-2 text-left">Status</th>
-                  <th className="px-4 py-2 text-left">Due Date</th>
-                  <th className="px-4 py-2 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRFQs.map((rfq) => (
-                  <tr key={rfq.id} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-2">{rfq.id}</td>
-                    <td className="px-4 py-2">{rfq.supplier}</td>
-                    <td className="px-4 py-2">{rfq.date}</td>
-                    <td className="px-4 py-2">${rfq.amount.toLocaleString()}</td>
-                    <td className="px-4 py-2">{rfq.status}</td>
-                    <td className="px-4 py-2">{rfq.dueDate}</td>
-                    <td className="px-4 py-2 text-center">
-                      <button className="text-blue-600 hover:underline">View</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Purchase Orders Table */}
-        {activeTab === "orders" && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-200 rounded-lg">
-              <thead className="bg-gray-100 text-gray-700 text-sm">
-                <tr>
-                  <th className="px-4 py-2 text-left">PO ID</th>
-                  <th className="px-4 py-2 text-left">Supplier</th>
-                  <th className="px-4 py-2 text-left">Date</th>
-                  <th className="px-4 py-2 text-left">Amount</th>
-                  <th className="px-4 py-2 text-left">Status</th>
-                  <th className="px-4 py-2 text-left">Delivery Date</th>
-                  <th className="px-4 py-2 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.map((po) => (
-                  <tr key={po.id} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-2">{po.id}</td>
-                    <td className="px-4 py-2">{po.supplier}</td>
-                    <td className="px-4 py-2">{po.date}</td>
-                    <td className="px-4 py-2">${po.amount.toLocaleString()}</td>
-                    <td className="px-4 py-2">{po.status}</td>
-                    <td className="px-4 py-2">{po.deliveryDate}</td>
-                    <td className="px-4 py-2 text-center">
-                      <button className="text-blue-600 hover:underline">View</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Approvals Section */}
-        {activeTab === "approvals" && (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Pending Approvals</h3>
-            <p className="text-gray-500">
-              Approval workflow interface will be implemented here.
-            </p>
-            <button
-              onClick={handleAdd}
-              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-            >
-              + Add Approval
-            </button>
-          </div>
-        )}
+        {activeTab === "rfqs" && <RFQsTable onAdd={handleAdd} />}
+        {activeTab === "orders" && <PurchaseOrdersTable onAdd={handleAdd} />}
+        {activeTab === "approvals" && <ApprovalsSection onAdd={handleAdd} />}
+        {activeTab === "invoicematching" && <InvoiceMatching onAdd={handleAdd} />}
+        {activeTab === "goodsreceipt" && <GoodsReceipt onAdd={handleAdd} />}
+        {activeTab === "procurementdashboard" && <Dashboard />}
       </div>
 
-       <RFQModal
+      {/* Modals */}
+      <RFQModal
         isOpen={showRFQModal}
         onClose={() => setShowRFQModal(false)}
         onSubmit={(data) => console.log("New RFQ:", data)}
@@ -213,6 +102,16 @@ const Procurement: React.FC = () => {
         isOpen={showApprovalModal}
         onClose={() => setShowApprovalModal(false)}
         onSubmit={(data) => console.log("New Approval:", data)}
+      />
+      <GoodsReceiptModal
+        isOpen={showGRModal}
+        onClose={() => setShowGRModal(false)}
+        onSubmit={(data) => console.log("New Goods Receipt:", data)}
+      />
+      <InvoiceMatchingModal 
+        isOpen={showInvoiceModal}
+        onClose={() => setShowInvoiceModal(false)}
+        onSubmit={(data) => console.log("New Invoice Matching:", data)}
       />
     </div>
   );

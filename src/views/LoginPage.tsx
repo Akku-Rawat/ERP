@@ -129,7 +129,7 @@ return (
 
             <button
               type="submit"
-              className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition duration-200"
+              className="w-full bg-[#006182] text-white py-2 px-4 rounded-md hover:bg-[#006182] transition duration-200"
             >
               LOGIN
             </button>
@@ -137,7 +137,7 @@ return (
 
           <p className="mt-6 text-center text-sm text-black">
             Forgot password?{' '}
-            <a href="#" className="text-purple-600 hover:underline">
+            <a href="#" className="text-[#006182] hover:underline">
               Reset it
             </a>
           </p>

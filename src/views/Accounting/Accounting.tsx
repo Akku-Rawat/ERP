@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import AccountModal from '../../components/accounting/AccountModal';
 import JournalModal from '../../components/accounting/JournalModal';
 
-import { 
-  FaBriefcase,
-   FaChartPie, 
-   FaFileAlt, 
-   FaClipboardList
-   } from "react-icons/fa";
+import { FaBriefcase, FaChartPie, FaFileAlt, FaClipboardList } from "react-icons/fa";
+
+import Coa from './COA';
+import JournalEntries from './Journal-Entries';
+import FinancialReports from './Financial-Reports';
 
 const accountingModule = {
   name: "Accounting",
@@ -32,13 +31,6 @@ const Accounting: React.FC = () => {
 
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [showJournalModal, setShowJournalModal] = useState(false);
-
-  const filteredAccounts = accountingModule.accounts.filter(
-    (account) =>
-      account.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      account.type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleAdd = () => {
     if (activeTab === "accounts") setShowAccountModal(true);
@@ -76,82 +68,25 @@ const Accounting: React.FC = () => {
 
       {/* Content */}
       <div className="bg-white rounded-lg shadow-sm p-4">
-        {/* Search, Add, Export Actions */}
-        {activeTab !== "reports" && (
-          <div className="flex items-center justify-between mb-4">
-            <input
-              type="search"
-              placeholder={`Search ${
-                activeTab === "accounts" ? "accounts" : "journal entries"
-              }...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <div className="flex items-center gap-2">
-              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
-                Export
-              </button>
-            </div>
-          </div>
+        {(activeTab === "accounts") && (
+          <Coa
+            accounts={accountingModule.accounts}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onAdd={handleAdd}
+          />
         )}
 
-        {/* Chart of Accounts Table */}
-        {activeTab === "accounts" && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-200 rounded-lg">
-              <thead className="bg-gray-100 text-gray-700 text-sm">
-                <tr>
-                  <th className="px-4 py-2 text-left">Account Code</th>
-                  <th className="px-4 py-2 text-left">Account Name</th>
-                  <th className="px-4 py-2 text-left">Type</th>
-                  <th className="px-4 py-2 text-left">Balance</th>
-                  <th className="px-4 py-2 text-left">Parent</th>
-                  <th className="px-4 py-2 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAccounts.map((acc) => (
-                  <tr key={acc.code} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-2">{acc.code}</td>
-                    <td className="px-4 py-2">{acc.name}</td>
-                    <td className="px-4 py-2">{acc.type}</td>
-                    <td className="px-4 py-2">${acc.balance.toLocaleString()}</td>
-                    <td className="px-4 py-2">{acc.parent}</td>
-                    <td className="px-4 py-2 text-center">
-                      <button className="text-blue-600 hover:underline">View</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {(activeTab === "journals") && (
+          <JournalEntries
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onAdd={handleAdd}
+          />
         )}
 
-        {/* Journals Tab */}
-        {activeTab === "journals" && (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Journal Entries</h3>
-            <p className="text-gray-500">Journal entry management will be implemented here.</p>
-            <button
-              onClick={handleAdd}
-              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-            >
-              + Add Journal Entry
-            </button>
-          </div>
-        )}
-
-        {/* Reports Tab */}
-        {activeTab === "reports" && (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              Financial Reports
-            </h3>
-            <p className="text-gray-500">
-              Financial reporting and analytics will be displayed here.
-            </p>
-          </div>
+        {(activeTab === "reports") && (
+          <FinancialReports />
         )}
       </div>
 
