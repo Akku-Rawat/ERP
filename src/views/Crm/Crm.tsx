@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import LeadModal from '../../components/crm/LeadModal';
 import TicketModal from '../../components/crm/TicketModal';
+import CustomerModal from '../../components/crm/CustomerModal';  
+import CustomerManagement from "./CustomerManagement";        
 import CRMSettings from "./Settings";
 import CRMDashboard from "./CRMDashboard";
 import CRMReports from "./Reports";
@@ -22,14 +24,12 @@ const crmModule = {
   icon: <FaUsers />,
   defaultTab: "dashboard",
   tabs: [
-    {id:"dashboard",name:"Dashboard",icon:<FaCalendarAlt/>},
-    {id:"customer-managment" , name:"CustomerManagement",icon:<FaIdBadge/>},
+    { id: "dashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
+    { id: "customer-managment", name: "Customer Management", icon: <FaIdBadge /> },
     { id: "leads", name: "Leads", icon: <FaUser /> },
     { id: "tickets", name: "Support Tickets", icon: <FaTicketAlt /> },
-    {id:"settings",name:"Settings",icon:<FaCog/>},
-    {id:"reports",name:"Reports",icon:<FaChartBar/>},
-
-
+    { id: "settings", name: "Settings", icon: <FaCog /> },
+    { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ],
   leads: [
     { id: "LEAD-001", name: "Global Enterprises", contact: "Jane Wilson", status: "Qualified", value: 150000, source: "Website" },
@@ -46,19 +46,24 @@ const crmModule = {
     { id: "TICK-002", title: "Report Generation Error", customer: "XYZ Industries", priority: "Medium", status: "In Progress", created: "2025-01-17" },
     { id: "TICK-003", title: "Feature Request - Export", customer: "Tech Solutions", priority: "Low", status: "Resolved", created: "2025-01-16" },
   ],
+  // Optional: Pre-populate customers
+  customers: [
+    { id: "CUST-001", companyName: "Global Enterprises", firstName: "Jane", lastName: "Wilson", email: "jane@global.com", phone: "+1 555-0101", status: "active" },
+    { id: "CUST-002", firstName: "Bob", lastName: "Chen", email: "bob@startup.co", phone: "+1 555-0102", status: "prospect" },
+  ],
 };
 
 const CRM: React.FC = () => {
   const [activeTab, setActiveTab] = useState(crmModule.defaultTab);
   const [searchTerm, setSearchTerm] = useState("");
   const [showLeadModal, setShowLeadModal] = useState(false);
-  const [showOpportunityModal, setShowOpportunityModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false); // <-- ADD
 
   const handleAdd = () => {
     if (activeTab === "leads") setShowLeadModal(true);
-    else if (activeTab === "opportunities") setShowOpportunityModal(true);
     else if (activeTab === "tickets") setShowTicketModal(true);
+    else if (activeTab === "customer-managment") setShowCustomerModal(true); // <-- ADD
   };
 
   return (
@@ -92,6 +97,17 @@ const CRM: React.FC = () => {
 
       {/* Content */}
       <div className="bg-white rounded-lg shadow-sm p-4">
+        {activeTab === "dashboard" && <CRMDashboard />}
+
+        {activeTab === "customer-managment" && (
+          <CustomerManagement
+            initialCustomers={crmModule.customers}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onAdd={handleAdd}
+          />
+        )}
+
         {activeTab === "leads" && (
           <Leads
             leads={crmModule.leads}
@@ -100,7 +116,7 @@ const CRM: React.FC = () => {
             onAdd={handleAdd}
           />
         )}
-    
+
         {activeTab === "tickets" && (
           <SupportTickets
             tickets={crmModule.tickets}
@@ -109,16 +125,38 @@ const CRM: React.FC = () => {
             onAdd={handleAdd}
           />
         )}
+
         {activeTab === "settings" && <CRMSettings />}
         {activeTab === "reports" && <CRMReports />}
-        {activeTab === "dashboard" && <CRMDashboard />}
-
-
       </div>
 
       {/* Modals */}
-      <LeadModal isOpen={showLeadModal} onClose={() => setShowLeadModal(false)} onSubmit={(data) => console.log("New Lead:", data)} />
-      <TicketModal isOpen={showTicketModal} onClose={() => setShowTicketModal(false)} onSubmit={(data) => console.log("New Ticket:", data)} />
+      <LeadModal
+        isOpen={showLeadModal}
+        onClose={() => setShowLeadModal(false)}
+        onSubmit={(data) => {
+          console.log("New Lead:", data);
+          setShowLeadModal(false);
+        }}
+      />
+
+      <TicketModal
+        isOpen={showTicketModal}
+        onClose={() => setShowTicketModal(false)}
+        onSubmit={(data) => {
+          console.log("New Ticket:", data);
+          setShowTicketModal(false);
+        }}
+      />
+
+      <CustomerModal
+        isOpen={showCustomerModal}
+        onClose={() => setShowCustomerModal(false)}
+        onSubmit={(data) => {
+          console.log("New/Edit Customer:", data);
+          setShowCustomerModal(false);
+        }}
+      />
     </div>
   );
 };
