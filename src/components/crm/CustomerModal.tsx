@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import url from "../../api/url";
 import {
   X,
   Mail,
@@ -10,7 +9,9 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
-const CUSTOMER_ENDPOINT = `${url}/resource/Customer`;
+const base_url = import.meta.env.BASE_URL;
+const CUSTOMER_ENDPOINT = `${base_url}/resource/Customer`;
+
 
 interface CustomerFormData {
   customer_name: string;
@@ -158,7 +159,9 @@ const CustomerModal: React.FC<{
           `${CUSTOMER_ENDPOINT}/${initialData.customer_name}`,
           {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json",
+               "Authorization" : import.meta.env.AUTHORIZATION
+             },
             body: JSON.stringify(payload),
           }
         );
