@@ -217,12 +217,13 @@ const [custLoading, setCustLoading] = useState(true);
   //   }
   // };
 
-  const loadCustomers = async () => {
+ const loadCustomers = async () => {
   try {
     setCustLoading(true);
+
     const res = await fetch(`${base_url}/resource/Customer`, {
       signal: controller.signal,
-      method: "GET",
+      method: "GET", // ✅ use GET instead of PUT
       headers: {
         "Content-Type": "application/json",
         "Authorization": import.meta.env.VITE_AUTHORIZATION,
@@ -231,8 +232,10 @@ const [custLoading, setCustLoading] = useState(true);
 
     if (!res.ok) throw new Error("Failed to load customers");
 
-    const data = await res.json();
-    setCustomers(data.map((c: any) => ({ name: c.name })));
+    const result = await res.json();
+    const customers = result.data?.map((c: any) => ({ name: c.name })) || [];
+
+    setCustomers(customers);
   } catch (err: any) {
     if (err.name !== "AbortError") {
       console.error("Error loading customers:", err);
