@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Trash2 } from "lucide-react";
 
 const base_url = import.meta.env.BASE_URL;
+console.log("base url " ,base_url);
  
 function CustomerDropdown({
   value,
