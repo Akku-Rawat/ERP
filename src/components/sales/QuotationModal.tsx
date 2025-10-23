@@ -62,7 +62,7 @@ function CustomerDropdown({
         <ul className="max-h-40 overflow-y-auto">
           {filtered.map((c) => (
             <li
-              key={c.name}  // ← use name as key if no unique ID
+              key={c.name}  
               className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
                 c.name === value ? "bg-blue-200 font-bold" : ""
               }`}
@@ -192,23 +192,55 @@ const [custLoading, setCustLoading] = useState(true);
 
   const controller = new AbortController();
 
+  // const loadCustomers = async () => {
+  //   try {
+  //     setCustLoading(true);
+  //     const res = await fetch(`${base_url}/resource/Customer`, {
+  //       signal: controller.signal,
+     
+  //           method: "PUT",
+  //           headers: { "Content-Type": "application/json",
+  //              "Authorization" : import.meta.env.VITE_AUTHORIZATION
+  //            },
+  //           body: JSON.stringify(payload),
+      
+  //     });
+  //     if (!res.ok) throw new Error("Failed to load customers");
+  //     const data = await res.json();
+  //     setCustomers(data.map((c: any) => ({ name: c.name })));
+  //     } catch (err: any) {
+  //     if (err.name !== "AbortError") {
+  //       console.error(err);
+  //     }
+  //   } finally {
+  //     setCustLoading(false);
+  //   }
+  // };
+
   const loadCustomers = async () => {
-    try {
-      setCustLoading(true);
-      const res = await fetch(`${base_url}/resource/Customer`, {
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error("Failed to load customers");
-      const data = await res.json();
-      setCustomers(data.map((c: any) => ({ name: c.name })));
-      } catch (err: any) {
-      if (err.name !== "AbortError") {
-        console.error(err);
-      }
-    } finally {
-      setCustLoading(false);
+  try {
+    setCustLoading(true);
+    const res = await fetch(`${base_url}/resource/Customer`, {
+      signal: controller.signal,
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": import.meta.env.VITE_AUTHORIZATION,
+      },
+    });
+
+    if (!res.ok) throw new Error("Failed to load customers");
+
+    const data = await res.json();
+    setCustomers(data.map((c: any) => ({ name: c.name })));
+  } catch (err: any) {
+    if (err.name !== "AbortError") {
+      console.error("Error loading customers:", err);
     }
-  };
+  } finally {
+    setCustLoading(false);
+  }
+};
 
   loadCustomers();
 
