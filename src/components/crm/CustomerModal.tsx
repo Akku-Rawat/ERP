@@ -137,21 +137,61 @@ const CustomerModal: React.FC<{
     }
   };
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!form.customer_name?.trim()) {
+  //     toast.error("Customer Name is required");
+  //     return;
+  //   }
+  //   if (
+  //     form.customer_type === "Company" &&
+  //     !form.custom_customer_tpin?.trim()
+  //   ) {
+  //     toast.error("Customer TPIN is required for companies");
+  //     return;
+  //   }
+  //   setLoading(true);
+  //   try {
+  //     const payload = { ...form };
+  //     let response;
+  //     if (isEditMode && initialData?.customer_name) {
+  //       response = await fetch(
+  //         `${CUSTOMER_ENDPOINT}/${initialData.customer_name}`,
+  //         {
+  //           method: "PUT",
+  //           headers: { "Content-Type": "application/json",
+  //              "Authorization" : import.meta.env.VITE_AUTHORIZATION
+  //            },
+  //           body: JSON.stringify(payload),
+  //         }
+  //       );
+  //     } else {
+  //       response = await fetch(CUSTOMER_ENDPOINT, {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify(payload),
+  //       });
+  //     }
+  //     if (!response.ok) {
+  //       const err = await response.json();
+  //       throw new Error(err.message || "Failed to save customer");
+  //     }
+  //     await response.json();
+  //     toast.success(isEditMode ? "Customer updated!" : "Customer created!");
+  //     onSubmit?.({ ...form });
+  //     handleClose();
+  //   } catch (err: any) {
+  //     toast.error(err.message || "Something went wrong");
+  //     console.error(err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.customer_name?.trim()) {
-      toast.error("Customer Name is required");
-      return;
-    }
-    if (
-      form.customer_type === "Company" &&
-      !form.custom_customer_tpin?.trim()
-    ) {
-      toast.error("Customer TPIN is required for companies");
-      return;
-    }
-    setLoading(true);
-    try {
+  e.preventDefault(); 
+  setLoading(true);
+  try {
       const payload = { ...form };
       let response;
       if (isEditMode && initialData?.customer_name) {
@@ -160,7 +200,7 @@ const CustomerModal: React.FC<{
           {
             method: "PUT",
             headers: { "Content-Type": "application/json",
-               "Authorization" : import.meta.env.AUTHORIZATION
+               "Authorization" : import.meta.env.VITE_AUTHORIZATION
              },
             body: JSON.stringify(payload),
           }
@@ -181,12 +221,11 @@ const CustomerModal: React.FC<{
       onSubmit?.({ ...form });
       handleClose();
     } catch (err: any) {
-      toast.error(err.message || "Something went wrong");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    toast.error(err.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleClose = () => {
     setForm(emptyForm);
