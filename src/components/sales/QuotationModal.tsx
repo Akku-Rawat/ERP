@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Trash2 } from "lucide-react";
 
 const base_url = import.meta.env.BASE_URL;
-console.log("base url " ,base_url);
+console.log("base erp url " ,base_url);
  
 function CustomerDropdown({
   value,
@@ -223,7 +223,7 @@ const [custLoading, setCustLoading] = useState(true);
 
     const res = await fetch(`${base_url}/resource/Customer`, {
       signal: controller.signal,
-      method: "GET", // ✅ use GET instead of PUT
+      method: "GET",  
       headers: {
         "Content-Type": "application/json",
         "Authorization": import.meta.env.VITE_AUTHORIZATION,
