@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
-const base_url = import.meta.env.BASE_URL;
+const base_url = import.meta.env.VITE_BASE_URL;
 const CUSTOMER_ENDPOINT = `${base_url}/resource/Customer`;
 
 
@@ -198,7 +198,7 @@ const CustomerModal: React.FC<{
         response = await fetch(
           `${CUSTOMER_ENDPOINT}/${initialData.customer_name}`,
           {
-            method: "PUT",
+            method: "POST",
             headers: { "Content-Type": "application/json",
                "Authorization" : import.meta.env.VITE_AUTHORIZATION
              },

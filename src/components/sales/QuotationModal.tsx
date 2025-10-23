@@ -4,7 +4,7 @@ import { Plus, X, Trash2 } from "lucide-react";
 
 const base_url = import.meta.env.BASE_URL;
 console.log("base url " ,base_url);
- 
+
 function CustomerDropdown({
   value,
   onChange,
@@ -181,9 +181,16 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 }) => {
   const [form, setForm] = useState<FormData>({ ...emptyForm });
   const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
+  const itemsPerPage = 7;                          
+const [page, setPage] = useState(0);             
+const paginatedItems = items.slice(
+  page * itemsPerPage,
+  (page + 1) * itemsPerPage
+);
   const [activeTab, setActiveTab] = useState<"details" | "payment" | "address">(
     "details"
   );
+  const [isShippingOpen, setIsShippingOpen] = useState(false);
  const [customers, setCustomers] = useState<{ name: string }[]>([]);
 const [custLoading, setCustLoading] = useState(true);
 
@@ -386,7 +393,7 @@ useEffect(() => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="w-[96vw] max-w-6xl max-h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
+          className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
         >
           <form onSubmit={submit} className="flex flex-col h-full overflow-hidden">
             {/* Header */}
@@ -476,8 +483,9 @@ useEffect(() => {
                      </div>
                   </Card>
 
+<div className="my-6 h-px bg-gray-300" />
                   {/* Quoted Items */}
-                  <Card title="Quoted Items">
+                  {/* <Card title="Quoted Items">
                     <div className="overflow-x-auto rounded-lg border">
                       <table className="w-full text-sm">
                         <thead className="bg-gray-50 text-gray-700">
@@ -589,8 +597,146 @@ useEffect(() => {
                         </span>
                         </div>
                       </div>
-                  </Card>
+                  </Card> */}
+ <Card title="Quoted Items">
+  {/* ---------- PAGINATION CONTROLS ---------- */}
+  <div className="flex items-center justify-between mb-3">
+    <span className="text-sm text-gray-600">
+      Showing {page * itemsPerPage + 1}–{Math.min((page + 1) * itemsPerPage, items.length)} of {items.length}
+    </span>
+    <div className="flex gap-1">
+      <button
+        type="button"
+        onClick={() => setPage(Math.max(0, page - 1))}
+        disabled={page === 0}
+        className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        ← Prev
+      </button>
+      <button
+        type="button"
+        onClick={() => setPage(page + 1)}
+        disabled={(page + 1) * itemsPerPage >= items.length}
+        className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Next →
+      </button>
+    </div>
+  </div>
 
+   <div className="overflow-x-auto rounded-lg border">
+    <table className="w-full text-sm">
+      <thead className="bg-gray-50 text-gray-700">
+        <tr>
+          <th className="px-2 py-2 text-left">#</th>
+          <th className="px-2 py-2 text-left">Product</th>
+          <th className="px-2 py-2 text-left">Description</th>
+          <th className="px-2 py-2 text-left">Qty</th>
+          <th className="px-2 py-2 text-left">Unit Price</th>
+          <th className="px-2 py-2 text-left">Discount</th>
+          <th className="px-2 py-2 text-left">Tax</th>
+          <th className="px-2 py-2 text-right">Amount</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody className="divide-y">
+        {paginatedItems.map((it, idx) => {
+          const i = page * itemsPerPage + idx;   // real index in full array
+          const amount = it.quantity * it.listPrice - it.discount + it.tax;
+          return (
+            <tr key={i} className="hover:bg-gray-50">
+              <td className="px-3 py-2 text-center">{i + 1}</td>
+              <td className="px-1 py-1">
+                <input
+                  className="w-full rounded border p-1 text-sm"
+                  name="productName"
+                  value={it.productName}
+                  onChange={(e) => handleItem(e, i)}
+                />
+              </td>
+              <td className="px-1 py-1">
+                <input
+                  className="w-full rounded border p-1 text-sm"
+                  name="description"
+                  value={it.description}
+                  onChange={(e) => handleItem(e, i)}
+                />
+              </td>
+              <td className="px-1 py-1">
+                <input
+                  type="number"
+                  className="w-full rounded border p-1 text-right text-sm"
+                  name="quantity"
+                  value={it.quantity}
+                  onChange={(e) => handleItem(e, i)}
+                />
+              </td>
+              <td className="px-1 py-1">
+                <input
+                  type="number"
+                  className="w-full rounded border p-1 text-right text-sm"
+                  name="listPrice"
+                  value={it.listPrice}
+                  onChange={(e) => handleItem(e, i)}
+                />
+              </td>
+              <td className="px-1 py-1">
+                <input
+                  type="number"
+                  className="w-full rounded border p-1 text-right text-sm"
+                  name="discount"
+                  value={it.discount}
+                  onChange={(e) => handleItem(e, i)}
+                />
+              </td>
+              <td className="px-1 py-1">
+                <input
+                  type="number"
+                  className="w-full rounded border p-1 text-right text-sm"
+                  name="tax"
+                  value={it.tax}
+                  onChange={(e) => handleItem(e, i)}
+                />
+              </td>
+              <td className="px-1 py-1 text-right font-medium">
+                {symbol}
+                {amount.toFixed(2)}
+              </td>
+              <td className="px-1 py-1 text-center">
+                <button
+                  type="button"
+                  onClick={() => removeItem(i)}
+                  className="p-1 text-red-600 hover:bg-red-50 rounded"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+
+  {/* ---------- ADD ITEM + SUBTOTAL ---------- */}
+  <div className="flex justify-between mt-3">
+    <button
+      type="button"
+      onClick={addItem}
+      className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
+    >
+      <Plus className="w-4 h-4" /> Add Item
+    </button>
+    <div className="py-2 px-2">
+      <span className="text-gray-600 px-2">Sub Total</span>
+      <span className="font-medium">
+        {symbol}
+        {form.subTotal.toFixed(2)}
+      </span>
+    </div>
+  </div>
+</Card>
+                  
                  </>
               )}
 
@@ -689,7 +835,57 @@ useEffect(() => {
         />
       </div>
     </Card>
-    <Card title="Shipping Address">
+   <div className=" my-2 h-px bg-gray-300" />
+    {/* Shipping Address */}
+<div className="border rounded-lg overflow-hidden">
+  <div className="bg-gray-50 px-4 py-3 flex items-center justify-between">
+    <button
+  type="button"
+  onClick={() => setIsShippingOpen(!isShippingOpen)}
+  className="flex items-center gap-2 text-lg font-semibold text-gray-700 hover:text-gray-900"
+>
+  <span className="font-bold">
+    {isShippingOpen ? "−" : "+"}
+  </span>
+  Shipping Address
+</button>
+
+<label className="flex items-center gap-2 cursor-pointer select-none">
+  <input
+    type="checkbox"
+    checked={form.sameAsBilling}
+    onChange={(e) => {
+      const checked = e.target.checked;
+      setForm((prev) => ({
+        ...prev,
+        sameAsBilling: checked, 
+        ...(checked
+          ? {
+              shippingAddressLine1: prev.billingAddressLine1 ?? "",
+              shippingAddressLine2: prev.billingAddressLine2 ?? "",
+              shippingPostalCode: prev.billingPostalCode ?? "",
+              shippingCity: prev.billingCity ?? "",
+              shippingState: prev.billingState ?? "",
+              shippingCountry: prev.billingCountry ?? "",
+            }
+          : {
+              shippingAddressLine1: "",
+              shippingAddressLine2: "",
+              shippingPostalCode: "",
+              shippingCity: "",
+              shippingState: "",
+              shippingCountry: "",
+            }),
+      }));
+    }}
+    className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+  />
+  <span className="text-sm text-gray-600">Same as billing address</span>
+</label>
+  </div>
+ 
+  {isShippingOpen && (
+    <div className="p-4 border-t">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <Input
           label="Line 1"
@@ -739,18 +935,11 @@ useEffect(() => {
           placeholder="Country"
           disabled={form.sameAsBilling}
         />
-        <div className="col-span-3 flex items-center gap-2 mt-2">
-          <input
-            type="checkbox"
-            name="sameAsBilling"
-            checked={form.sameAsBilling }
-            onChange={handleForm}
-            className="w-4 h-4 text-indigo-600"
-          />
-          <span className="text-gray-600">Same as billing address</span>
-        </div>
       </div>
-    </Card>
+    </div>
+  )}
+</div>
+<div className=" my-2 h-px bg-gray-300" />
     <Card title="Terms and Conditions">
       <textarea
         className="w-full rounded border p-3 text-sm h-28 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400"
@@ -801,10 +990,9 @@ const Card: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
   children,
 }) => (
-  <div className="rounded-lg border bg-white p-5 shadow-sm">
+  <div>
     <h3 className="mb-4 text-lg font-semibold text-gray-700">{title}</h3>
-    {children}
-  </div>
+    {children}</div>
 );
 
 // Reusable Input Component
