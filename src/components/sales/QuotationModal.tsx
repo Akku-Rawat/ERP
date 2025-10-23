@@ -440,13 +440,6 @@ useEffect(() => {
   custLoading={custLoading}
 />
                         <Input
-                          label="Quote ID"
-                          name="quoteID"
-                          value={form.quoteID}
-                          onChange={handleForm}
-                          className="w-full"
-                        />
-                        <Input
                           label="Date of Quotation"
                           name="dateOfQuotation"
                           type="date"
@@ -469,8 +462,7 @@ useEffect(() => {
                             <option value="USD">USD ($)</option>
                            </select>
                         </div>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="flex flex-col gap-1">
                         <Input
                           label="Valid Until"
                           name="validUntil"
@@ -480,7 +472,8 @@ useEffect(() => {
                           className="w-full col-span-3"
                         />
                       </div>
-                    </div>
+                      </div>
+                     </div>
                   </Card>
 
                   {/* Quoted Items */}
