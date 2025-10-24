@@ -187,7 +187,7 @@ const paginatedItems = items.slice(
   page * itemsPerPage,
   (page + 1) * itemsPerPage
 );
-  const [activeTab, setActiveTab] = useState<"details" | "payment" | "address">(
+  const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
     "details"
   );
   const [isShippingOpen, setIsShippingOpen] = useState(false);
@@ -311,13 +311,11 @@ useEffect(() => {
     setItems(copy);
   };
 
-  // const addItem = () => setItems((p) => [...p, { ...emptyItem }]);
   const addItem = () => {
   const newItem = { ...emptyItem };
   const newItems = [...items, newItem];
   setItems(newItems);
 
-  // Auto-switch to the page that contains the new item
   const newItemIndex = newItems.length - 1;
   const targetPage = Math.floor(newItemIndex / itemsPerPage);
   setPage(targetPage);
@@ -390,7 +388,7 @@ useEffect(() => {
 
             {/* Tabs */}
             <div className="flex border-b bg-gray-50">
-              {(["details", "payment", "address"] as const).map((tab) => (
+              {(["details", "terms", "address"] as const).map((tab) => (
                 <button
                   key={tab}
                   type="button"
@@ -403,19 +401,20 @@ useEffect(() => {
                 >
                   {tab === "details"
                     ? "Details"
-                    : tab === "payment"
-                    ? "Payment Info"
-                    : "Address & Terms"}
+                    : tab === "terms"
+                    ? "Terms & Conditions"
+                    : "Additional Details"}
                 </button>
               ))}
             </div>
 
              <section className="flex-1 overflow-y-auto p-4 space-y-6">
                {activeTab === "details" && (
-                <div className=" grid grid-cols-3">
+                // <div className=" grid grid-cols-3">
+                <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4">
                   <div className=" col-span-2">
                   {/* Quote Information */}
-                   <h3 className="mb-4 text-lg font-semibold text-gray-700">Quote Information</h3> 
+                   <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">Quote Information</h3> 
                     <div className="flex flex-col gap-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
 <CustomerDropdown
@@ -465,7 +464,7 @@ useEffect(() => {
 <div className="my-6 h-px bg-gray-600" />
                   
  {/* <Card title="Quoted Items"> */}
-  <h3 className="mb-4 text-lg font-semibold text-gray-700">Quoted Items</h3>
+  <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">Quoted Items</h3>
    <div className="flex items-center justify-between mb-3">
     <span className="text-sm text-gray-600">
       Showing {page * itemsPerPage + 1}–{Math.min((page + 1) * itemsPerPage, items.length)} of {items.length}
@@ -594,22 +593,19 @@ useEffect(() => {
       <Plus className="w-4 h-4" /> Add Item
     </button>
     <div className="py-2 px-2">
-      <span className="text-gray-600 px-2">Sub Total</span>
-      <span className="font-medium">
-        {symbol}
-        {form.subTotal.toFixed(2)}
-      </span>
+      
     </div>
   </div>
   </div>
   
 {/* ---------- Customer Details + Summary ---------- */}
-<div className="col-span-1 sticky top-4 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
+{/* <div className="col-span-1 sticky top-4 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit"> */}
+<div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
   <div className="w-full max-w-sm space-y-6">  
   {/* ---------- Customer Details ---------- */}
-  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white">
-    <h3 className="mb-3 text-lg font-semibold text-gray-700">Customer Details</h3>
-    <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
+    <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">Customer Details</h3>
+    {/* <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
       <div>
         <h4 className="font-medium text-gray-600">First Name</h4>
         <p className="text-gray-800">Rishab</p>
@@ -626,12 +622,35 @@ useEffect(() => {
         <h4 className="font-medium text-gray-600">Email Address</h4>
         <p className="text-gray-800">rn@gmail.com</p>
       </div>
+    </div> */}
+     <div className="space-y-2 text-sm">
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">First Name</span>
+        <span className="font-medium text-gray-800">Rishab</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Last Name</span>
+        <span className="font-medium text-gray-800">
+          Negi
+        </span>
+      </div>
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Phone Number</span>
+        <span className="font-medium text-gray-800"> +91 9201564389
+        </span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-base font-semibold text-gray-700">Email Address</span>
+        <span className="text-base font-bold text-blue-600">
+           rn@gmail.com
+        </span>
+      </div>
     </div>
   </div>
 
   {/* ---------- Summary ---------- */}
-  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white">
-    <h3 className="mb-3 text-lg font-semibold text-gray-700">Summary</h3>
+  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
+    <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">Summary</h3>
     <div className="space-y-2 text-sm">
       <div className="flex justify-between">
         <span className="font-medium text-gray-600">Total Items</span>
@@ -665,61 +684,57 @@ useEffect(() => {
 </div>
 </div>
   </div>
-  
-              )}
+   )}
 
               {/* === TAB: PAYMENT INFO === */}
-              {activeTab === "payment" && (
-                 <>
-                  <h3 className="mb-4 text-lg font-semibold text-gray-700">Payment Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <Input
-                      label="Payment Terms"
-                      name="paymentTerms"
-                      value={form.paymentTerms || ""}
-                      onChange={handleForm}
-                      placeholder="e.g., Net 30, Due on Receipt"
-                    />
-                    <Input
-                      label="Payment Method"
-                      name="paymentMethod"
-                      value={form.paymentMethod || ""}
-                      onChange={handleForm}
-                      placeholder="e.g., Bank Transfer, Credit Card"
-                    />
-                    <Input
-                      label="Bank Name"
-                      name="bankName"
-                      value={form.bankName || ""}
-                      onChange={handleForm}
-                    />
-                    <Input
-                      label="Account Number"
-                      name="accountNumber"
-                      value={form.accountNumber || ""}
-                      onChange={handleForm}
-                    />
-                    <Input
-                      label="Routing Number / IBAN"
-                      name="routingNumber"
-                      value={form.routingNumber || ""}
-                      onChange={handleForm}
-                    />
-                    <Input
-                      label="SWIFT / BIC"
-                      name="swiftCode"
-                      value={form.swiftCode || ""}
-                      onChange={handleForm}
-                    />
-                  </div>
-                </>
+              {activeTab === "terms" && (
+              <>
+  <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
+    Terms and Conditions
+  </h3>
+
+<textarea 
+  className="w-full h-64 p-4 border border-gray-300 rounded-md text-sm text-gray-700 font-mono bg-gray-50 resize-none" 
+>
+• Price Validity – Quotation is valid for 30 days from the date of issue.
+• Payment Terms – 50% advance, 50% before dispatch (or as mutually agreed).
+• Delivery Time – Delivery within 10–15 working days from order confirmation.
+• Taxes & Duties – Prices are exclusive of GST and other applicable taxes.
+• Warranty – 12 months from the date of delivery (against manufacturing defects).
+• Delivery Charges – Extra at actuals or included (specify one).
+• Cancellation – Orders once confirmed cannot be canceled without prior approval.
+• Jurisdiction – All disputes subject to [City Name] jurisdiction.
+• Validity of Offer – Quotation automatically expires after the validity period.
+  Acceptance – Placing an order implies acceptance of the above terms and conditions.
+</textarea>
+</>
+
+
               )}
 
               {/* === TAB: ADDRESS & TERMS === */}
               {activeTab === "address" && (
-                 <div className="flex flex-col gap-6">
-       <h3 className=" text-lg font-semibold text-gray-700">Billing Address</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className=" grid grid-cols-2 gap-10">
+                   <div className=" col-span-1 shadow px-4 rounded-lg border border-gray-300 bg-white py-6">
+        <div className=" flex justify-between">
+        <h3 className=" mb-4 text-lg font-semibold text-gray-700 underline ">Billing Address</h3>
+ <div className="flex items-center space-x-2">
+    <label htmlFor="address" className="text-gray-600 font-medium">
+      More Address:
+    </label>
+    <select
+      name="address"
+      id="address"
+      className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    >
+      <option value="address1">Address 1</option>
+      <option value="address2">Address 2</option>
+      <option value="address3">Address 3</option>
+      <option value="address4">Address 4</option>
+    </select>
+  </div>
+</div>
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
         <Input
           label="Line 1"
           name="billingAddressLine1"
@@ -763,12 +778,9 @@ useEffect(() => {
           placeholder="Country"
         />
       </div>
-    <div className=" my-2 h-px bg-gray-600" />
-
-
+ 
     {/* Shipping Address */}
-<div className="border rounded-lg overflow-hidden">
-  <div className="bg-gray-50 px-4 py-3 flex items-center justify-between">
+   {/* <div className="bg-gray-50 px-4 py-3 flex items-center justify-between">
     <button
   type="button"
   onClick={() => setIsShippingOpen(!isShippingOpen)}
@@ -815,8 +827,7 @@ useEffect(() => {
   </div>
  
   {isShippingOpen && (
-    <div className="p-4 border-t">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <Input
           label="Line 1"
           name="shippingAddressLine1"
@@ -865,20 +876,54 @@ useEffect(() => {
           placeholder="Country"
           disabled={form.sameAsBilling}
         />
-      </div>
+      </div> 
+  )}  */}
+    
     </div>
-  )}
-</div>
-<div className=" my-2 h-px bg-gray-600" />
-       <h3 className="mb-4 text-lg font-semibold text-gray-700">Terms and Conditions</h3>
-      <textarea
-        className="w-full rounded border p-3 text-sm h-28 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        name="notes"
-        value={form.notes ?? ""}
-        onChange={handleForm}
-        placeholder="Any special instructions..."
-      />
-   </div>
+  <div className=" col-span-1 px-4 shadow rounded-lg border border-gray-300 bg-white py-6">
+                   <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">Payment Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
+                    <Input
+                      label="Payment Terms"
+                      name="paymentTerms"
+                      value={form.paymentTerms || ""}
+                      onChange={handleForm}
+                      placeholder="e.g., Net 30, Due on Receipt"
+                    />
+                    <Input
+                      label="Payment Method"
+                      name="paymentMethod"
+                      value={form.paymentMethod || ""}
+                      onChange={handleForm}
+                      placeholder="e.g., Bank Transfer, Credit Card"
+                    />
+                    <Input
+                      label="Bank Name"
+                      name="bankName"
+                      value={form.bankName || ""}
+                      onChange={handleForm}
+                    />
+                    <Input
+                      label="Account Number"
+                      name="accountNumber"
+                      value={form.accountNumber || ""}
+                      onChange={handleForm}
+                    />
+                    <Input
+                      label="Routing Number / IBAN"
+                      name="routingNumber"
+                      value={form.routingNumber || ""}
+                      onChange={handleForm}
+                    />
+                    <Input
+                      label="SWIFT / BIC"
+                      name="swiftCode"
+                      value={form.swiftCode || ""}
+                      onChange={handleForm}
+                    />
+                  </div>
+                  </div>
+                 </div>
               )}
             </section>
 
