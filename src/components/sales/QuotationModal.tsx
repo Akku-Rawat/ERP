@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Trash2 } from "lucide-react";
 
-const base_url = import.meta.env.BASE_URL;
+const base_url = import.meta.env.VITE_BASE_URL;
 console.log("base url " ,base_url);
 
 function CustomerDropdown({
@@ -181,7 +181,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 }) => {
   const [form, setForm] = useState<FormData>({ ...emptyForm });
   const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
-  const itemsPerPage = 7;                          
+  const itemsPerPage = 5;                          
 const [page, setPage] = useState(0);             
 const paginatedItems = items.slice(
   page * itemsPerPage,
@@ -270,6 +270,13 @@ useEffect(() => {
   }
 }, [isOpen]);
 
+useEffect(() => {
+  if (isOpen) {
+    const today = new Date().toISOString().split("T")[0];  
+    setForm((prev) => ({ ...prev, validUntil: today }));
+  }
+}, [isOpen]);
+
   useEffect(() => {
     const subTotal = items.reduce(
       (s, i) => s + i.quantity * i.listPrice - i.discount + i.tax,
@@ -293,45 +300,6 @@ useEffect(() => {
     setForm((p) => ({ ...p, [name]: num }));
   };
    
-// const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-    
-//     try {
-//       const payload = { ...form };
-//       let response;
-//       if (isEditMode && initialData?.customer_name) {
-//         response = await fetch(
-//           `${CUSTOMER_ENDPOINT}/${initialData.customer_name}`,
-//           {
-//             method: "PUT",
-//             headers: { "Content-Type": "application/json",
-//                "Authorization" : import.meta.env.AUTHORIZATION
-//              },
-//             body: JSON.stringify(payload),
-//           }
-//         );
-//       } else {
-//         response = await fetch(CUSTOMER_ENDPOINT, {
-//           method: "POST",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify(payload),
-//         });
-//       }
-//       if (!response.ok) {
-//         const err = await response.json();
-//         throw new Error(err.message || "Failed to save customer");
-//       }
-//       await response.json();
-//       toast.success(isEditMode ? "Customer updated!" : "Customer created!");
-//       onSubmit?.({ ...form });
-//       handleClose();
-//     } catch (err: any) {
-//       toast.error(err.message || "Something went wrong");
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
 
   const handleItem = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     const { name, value } = e.target;
@@ -343,7 +311,17 @@ useEffect(() => {
     setItems(copy);
   };
 
-  const addItem = () => setItems((p) => [...p, { ...emptyItem }]);
+  // const addItem = () => setItems((p) => [...p, { ...emptyItem }]);
+  const addItem = () => {
+  const newItem = { ...emptyItem };
+  const newItems = [...items, newItem];
+  setItems(newItems);
+
+  // Auto-switch to the page that contains the new item
+  const newItemIndex = newItems.length - 1;
+  const targetPage = Math.floor(newItemIndex / itemsPerPage);
+  setPage(targetPage);
+};
   const removeItem = (idx: number) => {
     if (items.length === 1) return;
     setItems((p) => p.filter((_, i) => i !== idx));
@@ -434,11 +412,12 @@ useEffect(() => {
 
              <section className="flex-1 overflow-y-auto p-4 space-y-6">
                {activeTab === "details" && (
-                <>
+                <div className=" grid grid-cols-3">
+                  <div className=" col-span-2">
                   {/* Quote Information */}
-                  <Card title="Quote Information">
+                   <h3 className="mb-4 text-lg font-semibold text-gray-700">Quote Information</h3> 
                     <div className="flex flex-col gap-4">
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
 <CustomerDropdown
   value={form.CutomerName}
   onChange={(name) => setForm((p) => ({ ...p, CutomerName: name }))}
@@ -481,126 +460,13 @@ useEffect(() => {
                       </div>
                       </div>
                      </div>
-                  </Card>
+                   
 
-<div className="my-6 h-px bg-gray-300" />
-                  {/* Quoted Items */}
-                  {/* <Card title="Quoted Items">
-                    <div className="overflow-x-auto rounded-lg border">
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-50 text-gray-700">
-                          <tr>
-                            <th className="px-2 py-2 text-left">#</th>
-                            <th className="px-2 py-2 text-left">Product</th>
-                            <th className="px-2 py-2 text-left">Description</th>
-                            <th className="px-2 py-2 text-left">Qty</th>
-                            <th className="px-2 py-2 text-left">Unit Price</th>
-                            <th className="px-2 py-2 text-left">Discount</th>
-                            <th className="px-2 py-2 text-left">Tax</th>
-                            <th className="px-2 py-2 text-right">Amount</th>
-                            <th></th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                          {items.map((it, i) => {
-                            const amount =
-                              it.quantity * it.listPrice - it.discount + it.tax;
-                            return (
-                              <tr key={i} className="hover:bg-gray-50">
-                                <td className="px-3 py-2 text-center">
-                                  {i + 1}
-                                </td>
-                                <td className="px-1 py-1">
-                                  <input
-                                    className="w-full rounded border p-1 text-sm"
-                                    name="productName"
-                                    value={it.productName}
-                                    onChange={(e) => handleItem(e, i)}
-                                  />
-                                </td>
-                                <td className="px-1 py-1">
-                                  <input
-                                    className="w-full rounded border p-1 text-sm"
-                                    name="description"
-                                    value={it.description}
-                                    onChange={(e) => handleItem(e, i)}
-                                  />
-                                </td>
-                                <td className="px-1 py-1">
-                                  <input
-                                    type="number"
-                                    className="w-full rounded border p-1 text-right text-sm"
-                                    name="quantity"
-                                    value={it.quantity}
-                                    onChange={(e) => handleItem(e, i)}
-                                  />
-                                </td>
-                                <td className="px-1 py-1">
-                                  <input
-                                    type="number"
-                                    className="w-full rounded border p-1 text-right text-sm"
-                                    name="listPrice"
-                                    value={it.listPrice}
-                                    onChange={(e) => handleItem(e, i)}
-                                  />
-                                </td>
-                                <td className="px-1 py-1">
-                                  <input
-                                    type="number"
-                                    className="w-full rounded border p-1 text-right text-sm"
-                                    name="discount"
-                                    value={it.discount}
-                                    onChange={(e) => handleItem(e, i)}
-                                  />
-                                </td>
-                                <td className="px-1 py-1">
-                                  <input
-                                    type="number"
-                                    className="w-full rounded border p-1 text-right text-sm"
-                                    name="tax"
-                                    value={it.tax}
-                                    onChange={(e) => handleItem(e, i)}
-                                  />
-                                </td>
-                                <td className="px-1 py-1 text-right font-medium">
-                                  {symbol}
-                                  {amount.toFixed(2)}
-                                </td>
-                                <td className="px-1 py-1 text-center">
-                                  <button
-                                    type="button"
-                                    onClick={() => removeItem(i)}
-                                    className="p-1 text-red-600 hover:bg-red-50 rounded"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div className="flex justify-between">
-                    <button
-                      type="button"
-                      onClick={addItem}
-                      className="mt-3 flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
-                    >
-                      <Plus className="w-4 h-4" /> Add Item
-                    </button>
-                    <div className=" py-2 px-2">
-                        <span className="text-gray-600 px-2">Sub Total</span>
-                        <span className=" font-medium">
-                          {symbol}
-                          {form.subTotal.toFixed(2)}
-                        </span>
-                        </div>
-                      </div>
-                  </Card> */}
- <Card title="Quoted Items">
-  {/* ---------- PAGINATION CONTROLS ---------- */}
-  <div className="flex items-center justify-between mb-3">
+<div className="my-6 h-px bg-gray-600" />
+                  
+ {/* <Card title="Quoted Items"> */}
+  <h3 className="mb-4 text-lg font-semibold text-gray-700">Quoted Items</h3>
+   <div className="flex items-center justify-between mb-3">
     <span className="text-sm text-gray-600">
       Showing {page * itemsPerPage + 1}–{Math.min((page + 1) * itemsPerPage, items.length)} of {items.length}
     </span>
@@ -735,14 +601,77 @@ useEffect(() => {
       </span>
     </div>
   </div>
-</Card>
-                  
-                 </>
+  </div>
+  
+{/* ---------- Customer Details + Summary ---------- */}
+<div className="col-span-1 sticky top-4 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
+  <div className="w-full max-w-sm space-y-6">  
+  {/* ---------- Customer Details ---------- */}
+  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white">
+    <h3 className="mb-3 text-lg font-semibold text-gray-700">Customer Details</h3>
+    <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+      <div>
+        <h4 className="font-medium text-gray-600">First Name</h4>
+        <p className="text-gray-800">Rishab</p>
+      </div>
+      <div>
+        <h4 className="font-medium text-gray-600">Phone Number</h4>
+        <p className="text-gray-800">+91 9201564389</p>
+      </div>
+      <div>
+        <h4 className="font-medium text-gray-600">Last Name</h4>
+        <p className="text-gray-800">Negi</p>
+      </div>
+      <div>
+        <h4 className="font-medium text-gray-600">Email Address</h4>
+        <p className="text-gray-800">rn@gmail.com</p>
+      </div>
+    </div>
+  </div>
+
+  {/* ---------- Summary ---------- */}
+  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white">
+    <h3 className="mb-3 text-lg font-semibold text-gray-700">Summary</h3>
+    <div className="space-y-2 text-sm">
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Total Items</span>
+        <span className="font-medium text-gray-800">{items.length}</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Sub Total</span>
+        <span className="font-medium text-gray-800">
+          {symbol}{form.subTotal.toFixed(2)}
+        </span>
+      </div>
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Total Tax</span>
+        <span className="font-medium text-gray-800">
+          {symbol}{items.reduce((sum, it) => sum + it.tax, 0).toFixed(2)}
+        </span>
+      </div>
+      <div className="flex justify-between border-t pt-2 mt-2">
+        <span className="text-base font-semibold text-gray-700">Total Amount</span>
+        <span className="text-base font-bold text-blue-600">
+          {symbol}
+          {(
+            form.subTotal +
+            items.reduce((sum, it) => sum + it.tax, 0) -
+            items.reduce((sum, it) => sum + it.discount, 0)
+          ).toFixed(2)}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+  </div>
+  
               )}
 
               {/* === TAB: PAYMENT INFO === */}
               {activeTab === "payment" && (
-                <Card title="Payment Information">
+                 <>
+                  <h3 className="mb-4 text-lg font-semibold text-gray-700">Payment Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <Input
                       label="Payment Terms"
@@ -783,13 +712,13 @@ useEffect(() => {
                       onChange={handleForm}
                     />
                   </div>
-                </Card>
+                </>
               )}
 
               {/* === TAB: ADDRESS & TERMS === */}
               {activeTab === "address" && (
                  <div className="flex flex-col gap-6">
-    <Card title="Billing Address">
+       <h3 className=" text-lg font-semibold text-gray-700">Billing Address</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <Input
           label="Line 1"
@@ -834,8 +763,9 @@ useEffect(() => {
           placeholder="Country"
         />
       </div>
-    </Card>
-   <div className=" my-2 h-px bg-gray-300" />
+    <div className=" my-2 h-px bg-gray-600" />
+
+
     {/* Shipping Address */}
 <div className="border rounded-lg overflow-hidden">
   <div className="bg-gray-50 px-4 py-3 flex items-center justify-between">
@@ -939,8 +869,8 @@ useEffect(() => {
     </div>
   )}
 </div>
-<div className=" my-2 h-px bg-gray-300" />
-    <Card title="Terms and Conditions">
+<div className=" my-2 h-px bg-gray-600" />
+       <h3 className="mb-4 text-lg font-semibold text-gray-700">Terms and Conditions</h3>
       <textarea
         className="w-full rounded border p-3 text-sm h-28 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400"
         name="notes"
@@ -948,8 +878,7 @@ useEffect(() => {
         onChange={handleForm}
         placeholder="Any special instructions..."
       />
-    </Card>
-  </div>
+   </div>
               )}
             </section>
 
@@ -985,15 +914,6 @@ useEffect(() => {
   );
 };
 
-// Reusable Card Component
-const Card: React.FC<{ title: string; children: React.ReactNode }> = ({
-  title,
-  children,
-}) => (
-  <div>
-    <h3 className="mb-4 text-lg font-semibold text-gray-700">{title}</h3>
-    {children}</div>
-);
 
 // Reusable Input Component
 const Input = React.forwardRef<
