@@ -198,7 +198,7 @@ const CustomerModal: React.FC<{
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="w-[1200px] h-[700px] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
+            className=" w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
           >
             <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
               {/* Header */}
