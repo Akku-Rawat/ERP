@@ -4,7 +4,7 @@ import { Plus, X, Trash2 } from "lucide-react";
 
 const base_url = import.meta.env.VITE_BASE_URL;
 console.log("base url " ,base_url);
- 
+
 function CustomerDropdown({
   value,
   onChange,
@@ -84,6 +84,7 @@ function CustomerDropdown({
   </div>
 );
 }
+ 
 
 interface ItemRow {
   productName: string;
@@ -181,9 +182,18 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 }) => {
   const [form, setForm] = useState<FormData>({ ...emptyForm });
   const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
-  const [activeTab, setActiveTab] = useState<"details" | "payment" | "address">(
+  const [selectedTemplate, setSelectedTemplate] = useState("General Service Terms");
+
+const itemsPerPage = 5;                          
+const [page, setPage] = useState(0);             
+const paginatedItems = items.slice(
+  page * itemsPerPage,
+  (page + 1) * itemsPerPage
+);
+  const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
     "details"
   );
+  const [isShippingOpen, setIsShippingOpen] = useState(false);
  const [customers, setCustomers] = useState<{ name: string }[]>([]);
 const [custLoading, setCustLoading] = useState(true);
 
@@ -263,6 +273,13 @@ useEffect(() => {
   }
 }, [isOpen]);
 
+useEffect(() => {
+  if (isOpen) {
+    const today = new Date().toISOString().split("T")[0];  
+    setForm((prev) => ({ ...prev, validUntil: today }));
+  }
+}, [isOpen]);
+
   useEffect(() => {
     const subTotal = items.reduce(
       (s, i) => s + i.quantity * i.listPrice - i.discount + i.tax,
@@ -286,45 +303,6 @@ useEffect(() => {
     setForm((p) => ({ ...p, [name]: num }));
   };
    
-// const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-    
-//     try {
-//       const payload = { ...form };
-//       let response;
-//       if (isEditMode && initialData?.customer_name) {
-//         response = await fetch(
-//           `${CUSTOMER_ENDPOINT}/${initialData.customer_name}`,
-//           {
-//             method: "PUT",
-//             headers: { "Content-Type": "application/json",
-//                "Authorization" : import.meta.env.AUTHORIZATION
-//              },
-//             body: JSON.stringify(payload),
-//           }
-//         );
-//       } else {
-//         response = await fetch(CUSTOMER_ENDPOINT, {
-//           method: "POST",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify(payload),
-//         });
-//       }
-//       if (!response.ok) {
-//         const err = await response.json();
-//         throw new Error(err.message || "Failed to save customer");
-//       }
-//       await response.json();
-//       toast.success(isEditMode ? "Customer updated!" : "Customer created!");
-//       onSubmit?.({ ...form });
-//       handleClose();
-//     } catch (err: any) {
-//       toast.error(err.message || "Something went wrong");
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
 
   const handleItem = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     const { name, value } = e.target;
@@ -336,7 +314,15 @@ useEffect(() => {
     setItems(copy);
   };
 
-  const addItem = () => setItems((p) => [...p, { ...emptyItem }]);
+  const addItem = () => {
+  const newItem = { ...emptyItem };
+  const newItems = [...items, newItem];
+  setItems(newItems);
+
+  const newItemIndex = newItems.length - 1;
+  const targetPage = Math.floor(newItemIndex / itemsPerPage);
+  setPage(targetPage);
+};
   const removeItem = (idx: number) => {
     if (items.length === 1) return;
     setItems((p) => p.filter((_, i) => i !== idx));
@@ -386,7 +372,7 @@ useEffect(() => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="w-[96vw] max-w-6xl max-h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
+          className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
         >
           <form onSubmit={submit} className="flex flex-col h-full overflow-hidden">
             {/* Header */}
@@ -405,7 +391,7 @@ useEffect(() => {
 
             {/* Tabs */}
             <div className="flex border-b bg-gray-50">
-              {(["details", "payment", "address"] as const).map((tab) => (
+              {(["details", "terms", "address"] as const).map((tab) => (
                 <button
                   key={tab}
                   type="button"
@@ -418,20 +404,22 @@ useEffect(() => {
                 >
                   {tab === "details"
                     ? "Details"
-                    : tab === "payment"
-                    ? "Payment Info"
-                    : "Address & Terms"}
+                    : tab === "terms"
+                    ? "Terms & Conditions"
+                    : "Additional Details"}
                 </button>
               ))}
             </div>
 
              <section className="flex-1 overflow-y-auto p-4 space-y-6">
                {activeTab === "details" && (
-                <>
+                // <div className=" grid grid-cols-3">
+                <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4">
+                  <div className=" col-span-2">
                   {/* Quote Information */}
-                  <Card title="Quote Information">
+                   <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">Quote Information</h3> 
                     <div className="flex flex-col gap-4">
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
 <CustomerDropdown
   value={form.CutomerName}
   onChange={(name) => setForm((p) => ({ ...p, CutomerName: name }))}
@@ -447,7 +435,17 @@ useEffect(() => {
                           onChange={handleForm}
                           className="w-full"
                         />
-                        <div className="flex flex-col gap-1">
+                         <div className="flex flex-col gap-1">
+                        <Input
+                          label="Valid Until"
+                          name="validUntil"
+                          type="date"
+                          value={form.validUntil}
+                          onChange={handleForm}
+                          className="w-full col-span-3"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
                           <label className="font-medium text-gray-600 text-sm">
                             Currency
                           </label>
@@ -462,189 +460,349 @@ useEffect(() => {
                             <option value="USD">USD ($)</option>
                            </select>
                         </div>
-                        <div className="flex flex-col gap-1">
-                        <Input
-                          label="Valid Until"
-                          name="validUntil"
-                          type="date"
-                          value={form.validUntil}
-                          onChange={handleForm}
-                          className="w-full col-span-3"
-                        />
-                      </div>
                       </div>
                      </div>
-                  </Card>
+                   
 
-                  {/* Quoted Items */}
-                  <Card title="Quoted Items">
-                    <div className="overflow-x-auto rounded-lg border">
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-50 text-gray-700">
-                          <tr>
-                            <th className="px-2 py-2 text-left">#</th>
-                            <th className="px-2 py-2 text-left">Product</th>
-                            <th className="px-2 py-2 text-left">Description</th>
-                            <th className="px-2 py-2 text-left">Qty</th>
-                            <th className="px-2 py-2 text-left">Unit Price</th>
-                            <th className="px-2 py-2 text-left">Discount</th>
-                            <th className="px-2 py-2 text-left">Tax</th>
-                            <th className="px-2 py-2 text-right">Amount</th>
-                            <th></th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                          {items.map((it, i) => {
-                            const amount =
-                              it.quantity * it.listPrice - it.discount + it.tax;
-                            return (
-                              <tr key={i} className="hover:bg-gray-50">
-                                <td className="px-3 py-2 text-center">
-                                  {i + 1}
-                                </td>
-                                <td className="px-1 py-1">
-                                  <input
-                                    className="w-full rounded border p-1 text-sm"
-                                    name="productName"
-                                    value={it.productName}
-                                    onChange={(e) => handleItem(e, i)}
-                                  />
-                                </td>
-                                <td className="px-1 py-1">
-                                  <input
-                                    className="w-full rounded border p-1 text-sm"
-                                    name="description"
-                                    value={it.description}
-                                    onChange={(e) => handleItem(e, i)}
-                                  />
-                                </td>
-                                <td className="px-1 py-1">
-                                  <input
-                                    type="number"
-                                    className="w-full rounded border p-1 text-right text-sm"
-                                    name="quantity"
-                                    value={it.quantity}
-                                    onChange={(e) => handleItem(e, i)}
-                                  />
-                                </td>
-                                <td className="px-1 py-1">
-                                  <input
-                                    type="number"
-                                    className="w-full rounded border p-1 text-right text-sm"
-                                    name="listPrice"
-                                    value={it.listPrice}
-                                    onChange={(e) => handleItem(e, i)}
-                                  />
-                                </td>
-                                <td className="px-1 py-1">
-                                  <input
-                                    type="number"
-                                    className="w-full rounded border p-1 text-right text-sm"
-                                    name="discount"
-                                    value={it.discount}
-                                    onChange={(e) => handleItem(e, i)}
-                                  />
-                                </td>
-                                <td className="px-1 py-1">
-                                  <input
-                                    type="number"
-                                    className="w-full rounded border p-1 text-right text-sm"
-                                    name="tax"
-                                    value={it.tax}
-                                    onChange={(e) => handleItem(e, i)}
-                                  />
-                                </td>
-                                <td className="px-1 py-1 text-right font-medium">
-                                  {symbol}
-                                  {amount.toFixed(2)}
-                                </td>
-                                <td className="px-1 py-1 text-center">
-                                  <button
-                                    type="button"
-                                    onClick={() => removeItem(i)}
-                                    className="p-1 text-red-600 hover:bg-red-50 rounded"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div className="flex justify-between">
-                    <button
-                      type="button"
-                      onClick={addItem}
-                      className="mt-3 flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
-                    >
-                      <Plus className="w-4 h-4" /> Add Item
-                    </button>
-                    <div className=" py-2 px-2">
-                        <span className="text-gray-600 px-2">Sub Total</span>
-                        <span className=" font-medium">
-                          {symbol}
-                          {form.subTotal.toFixed(2)}
-                        </span>
-                        </div>
-                      </div>
-                  </Card>
+<div className="my-6 h-px bg-gray-600" />
+                  
+ {/* <Card title="Quoted Items"> */}
+  <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">Quoted Items</h3>
+   <div className="flex items-center justify-between mb-3">
+    <span className="text-sm text-gray-600">
+      Showing {page * itemsPerPage + 1}–{Math.min((page + 1) * itemsPerPage, items.length)} of {items.length}
+    </span>
+    <div className="flex gap-1">
+      <button
+        type="button"
+        onClick={() => setPage(Math.max(0, page - 1))}
+        disabled={page === 0}
+        className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        ← Prev
+      </button>
+      <button
+        type="button"
+        onClick={() => setPage(page + 1)}
+        disabled={(page + 1) * itemsPerPage >= items.length}
+        className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Next →
+      </button>
+    </div>
+  </div>
 
-                 </>
-              )}
+   <div className="overflow-x-auto rounded-lg border">
+    <table className="w-full text-sm">
+      <thead className="bg-gray-50 text-gray-700">
+        <tr>
+          <th className="px-2 py-2 text-left">#</th>
+          <th className="px-2 py-2 text-left">Product</th>
+          <th className="px-2 py-2 text-left">Description</th>
+          <th className="px-2 py-2 text-left">Qty</th>
+          <th className="px-2 py-2 text-left">Unit Price</th>
+          <th className="px-2 py-2 text-left">Discount</th>
+          <th className="px-2 py-2 text-left">Tax</th>
+          <th className="px-2 py-2 text-right">Amount</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody className="divide-y">
+        {paginatedItems.map((it, idx) => {
+          const i = page * itemsPerPage + idx;   // real index in full array
+          const amount = it.quantity * it.listPrice - it.discount + it.tax;
+          return (
+            <tr key={i} className="hover:bg-gray-50">
+              <td className="px-3 py-2 text-center">{i + 1}</td>
+              <td className="px-1 py-1">
+                <input
+                  className="w-full rounded border p-1 text-sm"
+                  name="productName"
+                  value={it.productName}
+                  onChange={(e) => handleItem(e, i)}
+                />
+              </td>
+              <td className="px-1 py-1">
+                <input
+                  className="w-full rounded border p-1 text-sm"
+                  name="description"
+                  value={it.description}
+                  onChange={(e) => handleItem(e, i)}
+                />
+              </td>
+              <td className="px-1 py-1">
+                <input
+                  type="number"
+                  className="w-full rounded border p-1 text-right text-sm"
+                  name="quantity"
+                  value={it.quantity}
+                  onChange={(e) => handleItem(e, i)}
+                />
+              </td>
+              <td className="px-1 py-1">
+                <input
+                  type="number"
+                  className="w-full rounded border p-1 text-right text-sm"
+                  name="listPrice"
+                  value={it.listPrice}
+                  onChange={(e) => handleItem(e, i)}
+                />
+              </td>
+              <td className="px-1 py-1">
+                <input
+                  type="number"
+                  className="w-full rounded border p-1 text-right text-sm"
+                  name="discount"
+                  value={it.discount}
+                  onChange={(e) => handleItem(e, i)}
+                />
+              </td>
+              <td className="px-1 py-1">
+                <input
+                  type="number"
+                  className="w-full rounded border p-1 text-right text-sm"
+                  name="tax"
+                  value={it.tax}
+                  onChange={(e) => handleItem(e, i)}
+                />
+              </td>
+              <td className="px-1 py-1 text-right font-medium">
+                {symbol}
+                {amount.toFixed(2)}
+              </td>
+              <td className="px-1 py-1 text-center">
+                <button
+                  type="button"
+                  onClick={() => removeItem(i)}
+                  className="p-1 text-red-600 hover:bg-red-50 rounded"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
 
-              {/* === TAB: PAYMENT INFO === */}
-              {activeTab === "payment" && (
-                <Card title="Payment Information">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <Input
-                      label="Payment Terms"
-                      name="paymentTerms"
-                      value={form.paymentTerms || ""}
-                      onChange={handleForm}
-                      placeholder="e.g., Net 30, Due on Receipt"
-                    />
-                    <Input
-                      label="Payment Method"
-                      name="paymentMethod"
-                      value={form.paymentMethod || ""}
-                      onChange={handleForm}
-                      placeholder="e.g., Bank Transfer, Credit Card"
-                    />
-                    <Input
-                      label="Bank Name"
-                      name="bankName"
-                      value={form.bankName || ""}
-                      onChange={handleForm}
-                    />
-                    <Input
-                      label="Account Number"
-                      name="accountNumber"
-                      value={form.accountNumber || ""}
-                      onChange={handleForm}
-                    />
-                    <Input
-                      label="Routing Number / IBAN"
-                      name="routingNumber"
-                      value={form.routingNumber || ""}
-                      onChange={handleForm}
-                    />
-                    <Input
-                      label="SWIFT / BIC"
-                      name="swiftCode"
-                      value={form.swiftCode || ""}
-                      onChange={handleForm}
-                    />
-                  </div>
-                </Card>
-              )}
+  {/* ---------- ADD ITEM + SUBTOTAL ---------- */}
+  <div className="flex justify-between mt-3">
+    <button
+      type="button"
+      onClick={addItem}
+      className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
+    >
+      <Plus className="w-4 h-4" /> Add Item
+    </button>
+    <div className="py-2 px-2">
+      
+    </div>
+  </div>
+  </div>
+  
+{/* ---------- Customer Details + Summary ---------- */}
+{/* <div className="col-span-1 sticky top-4 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit"> */}
+<div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
+  <div className="w-full max-w-sm space-y-6">  
+  {/* ---------- Customer Details ---------- */}
+  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
+    <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">Customer Details</h3>
+    {/* <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+      <div>
+        <h4 className="font-medium text-gray-600">First Name</h4>
+        <p className="text-gray-800">Rishab</p>
+      </div>
+      <div>
+        <h4 className="font-medium text-gray-600">Phone Number</h4>
+        <p className="text-gray-800">+91 9201564389</p>
+      </div>
+      <div>
+        <h4 className="font-medium text-gray-600">Last Name</h4>
+        <p className="text-gray-800">Negi</p>
+      </div>
+      <div>
+        <h4 className="font-medium text-gray-600">Email Address</h4>
+        <p className="text-gray-800">rn@gmail.com</p>
+      </div>
+    </div> */}
+     <div className="space-y-2 text-sm">
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">First Name</span>
+        <span className="font-medium text-gray-800">Rishab</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Last Name</span>
+        <span className="font-medium text-gray-800">
+          Negi
+        </span>
+      </div>
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Phone Number</span>
+        <span className="font-medium text-gray-800"> +91 9201564389
+        </span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-base font-semibold text-gray-700">Email Address</span>
+        <span className="text-base font-bold text-blue-600">
+           rn@gmail.com
+        </span>
+      </div>
+    </div>
+  </div>
+
+  {/* ---------- Summary ---------- */}
+  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
+    <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">Summary</h3>
+    <div className="space-y-2 text-sm">
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Total Items</span>
+        <span className="font-medium text-gray-800">{items.length}</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Sub Total</span>
+        <span className="font-medium text-gray-800">
+          {symbol}{form.subTotal.toFixed(2)}
+        </span>
+      </div>
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Total Tax</span>
+        <span className="font-medium text-gray-800">
+          {symbol}{items.reduce((sum, it) => sum + it.tax, 0).toFixed(2)}
+        </span>
+      </div>
+      <div className="flex justify-between border-t pt-2 mt-2">
+        <span className="text-base font-semibold text-gray-700">Total Amount</span>
+        <span className="text-base font-bold text-blue-600">
+          {symbol}
+          {(
+            form.subTotal +
+            items.reduce((sum, it) => sum + it.tax, 0) -
+            items.reduce((sum, it) => sum + it.discount, 0)
+          ).toFixed(2)}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+  </div>
+   )}
+
+              {/* === TAB: Terms & Conditions === */}
+              {activeTab === "terms" && (
+              <>
+              <div className=" items-center mb-4">
+  <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
+    Terms and Conditions
+  </h3>
+ 
+        <div className="flex items-center space-x-2">
+          <label className="text-sm text-gray-600">Select a template</label>
+          <select
+            className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={selectedTemplate}
+            onChange={(e) => setSelectedTemplate(e.target.value)}
+          >
+            <option>General Service Terms</option>
+            <option>Payment Terms</option>
+            <option>Service Delivery Terms</option>
+            <option>Cancellation / Refund Policy</option>
+            <option>Confidentiality & Data Protection</option>
+            <option>Liability</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Toolbar */}
+      <div className="flex space-x-1 mb-3 p-1 bg-gray-100 rounded-md">
+        <button className="p-2 hover:bg-gray-200 rounded" title="Bold">
+          <strong>B</strong>
+        </button>
+        <button className="p-2 hover:bg-gray-200 rounded" title="Italic">
+          <em>I</em>
+        </button>
+        <button className="p-2 hover:bg-gray-200 rounded" title="Underline">
+          <u>U</u>
+        </button>
+        <div className="w-px bg-gray-300 mx-1"></div>
+        <button className="p-2 hover:bg-gray-200 rounded" title="Unordered List">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <button className="p-2 hover:bg-gray-200 rounded" title="Ordered List">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+<textarea
+  className="w-full h-64 p-4 border border-gray-300 rounded-md text-sm text-gray-700 font-mono bg-white resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+  value={
+    selectedTemplate === "General Service Terms"
+      ? `1.This Quotation is subject to the following terms and conditions. By accepting this quotation, {{CustomerName}} agrees to be bound by these terms. This quotation, identified by number {{QuotationNumber}}, was issued on {{QuotationDate}} and is valid until {{ValidUntil}}.\n\n 2.The services to be provided are: {{ServiceName}}. The total amount payable for these services is {{TotalAmount}}.\n\n 3.Payment is due upon receipt of the invoice. Any disputes must be raised within 14 days of the invoice date.`
+      : selectedTemplate === "Payment Terms"
+      ? `1.Payment Stages\t20% Advance, 30% after Phase 1, 50% on completion\nDue Dates\tPayment due within 30 days from invoice\nLate Payment Charges\t12% p.a. on overdue payments\nTaxes / Additional Charges\tTax applicable @ 18%\nSpecial Notes / Conditions\tAdvance payment is non-refundable`
+      : selectedTemplate === "Service Delivery Terms"
+      ? `1.Estimated Delivery Timelines\tPhase 1: 2 weeks; Phase 2: 3 weeks; Final Delivery: 5 weeks total\nClient Responsibilities\tClient must provide content, approvals, and access to systems on time`
+      : selectedTemplate === "Cancellation / Refund Policy"
+      ? `1.Cancellation Conditions\tClient may cancel anytime with written notice\nRefund Rules\tAdvance payment is non-refundable; milestone payments refundable only for uninitiated work`
+      : selectedTemplate === "Confidentiality & Data Protection"
+      ? `1.All client data shared for the service will remain confidential.`
+      : selectedTemplate === "Liability"
+      ? `1.Company not liable for delays caused by client.\n• Client responsible for providing accurate info/resources.`
+      : ""
+  }
+/>
+
+{/* Action Buttons */}
+<div className="mt-4 flex justify-end space-x-3">
+  <button
+    onClick={() => {
+       alert("Terms saved!");
+    }}
+    className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+  >
+    Save
+  </button>
+
+  <button
+    onClick={() => {
+       alert("Preview opened!");
+    }}
+    className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+  >
+    Preview
+  </button>
+</div>
+</>
+
+)}
 
               {/* === TAB: ADDRESS & TERMS === */}
               {activeTab === "address" && (
-                 <div className="flex flex-col gap-6">
-    <Card title="Billing Address">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className=" grid grid-cols-2 gap-10">
+                   <div className=" col-span-1 shadow px-4 rounded-lg border border-gray-300 bg-white py-6">
+        <div className=" flex justify-between">
+        <h3 className=" mb-4 text-lg font-semibold text-gray-700 underline ">Billing Address</h3>
+ <div className="flex items-center space-x-2">
+    <label htmlFor="address" className="text-gray-600 font-medium">
+      More Address:
+    </label>
+    <select
+      name="address"
+      id="address"
+      className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    >
+      <option value="address1">Address 1</option>
+      <option value="address2">Address 2</option>
+      <option value="address3">Address 3</option>
+      <option value="address4">Address 4</option>
+    </select>
+  </div>
+</div>
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
         <Input
           label="Line 1"
           name="billingAddressLine1"
@@ -688,79 +846,52 @@ useEffect(() => {
           placeholder="Country"
         />
       </div>
-    </Card>
-    <Card title="Shipping Address">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <Input
-          label="Line 1"
-          name="shippingAddressLine1"
-          value={form.shippingAddressLine1 ?? ""}
-          onChange={handleForm}
-          placeholder="Street, Apartment"
-          disabled={form.sameAsBilling}
-        />
-        <Input
-          label="Line 2"
-          name="shippingAddressLine2"
-          value={form.shippingAddressLine2 ?? ""}
-          onChange={handleForm}
-          placeholder="Landmark, City"
-          disabled={form.sameAsBilling}
-        />
-        <Input
-          label="Postal Code"
-          name="shippingPostalCode"
-          value={form.shippingPostalCode ?? ""}
-          onChange={handleForm}
-          placeholder="Postal Code"
-          disabled={form.sameAsBilling}
-        />
-        <Input
-          label="City"
-          name="shippingCity"
-          value={form.shippingCity ?? ""}
-          onChange={handleForm}
-          placeholder="City"
-          disabled={form.sameAsBilling}
-        />
-        <Input
-          label="State"
-          name="shippingState"
-          value={form.shippingState ?? ""}
-          onChange={handleForm}
-          placeholder="State"
-          disabled={form.sameAsBilling}
-        />
-        <Input
-          label="Country"
-          name="shippingCountry"
-          value={form.shippingCountry ?? ""}
-          onChange={handleForm}
-          placeholder="Country"
-          disabled={form.sameAsBilling}
-        />
-        <div className="col-span-3 flex items-center gap-2 mt-2">
-          <input
-            type="checkbox"
-            name="sameAsBilling"
-            checked={form.sameAsBilling }
-            onChange={handleForm}
-            className="w-4 h-4 text-indigo-600"
-          />
-          <span className="text-gray-600">Same as billing address</span>
-        </div>
-      </div>
-    </Card>
-    <Card title="Terms and Conditions">
-      <textarea
-        className="w-full rounded border p-3 text-sm h-28 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        name="notes"
-        value={form.notes ?? ""}
-        onChange={handleForm}
-        placeholder="Any special instructions..."
-      />
-    </Card>
-  </div>
+    
+    </div>
+  <div className=" col-span-1 px-4 shadow rounded-lg border border-gray-300 bg-white py-6">
+                   <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">Payment Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
+                    <Input
+                      label="Payment Terms"
+                      name="paymentTerms"
+                      value={form.paymentTerms || ""}
+                      onChange={handleForm}
+                      placeholder="e.g., Net 30, Due on Receipt"
+                    />
+                    <Input
+                      label="Payment Method"
+                      name="paymentMethod"
+                      value={form.paymentMethod || ""}
+                      onChange={handleForm}
+                      placeholder="e.g., Bank Transfer, Credit Card"
+                    />
+                    <Input
+                      label="Bank Name"
+                      name="bankName"
+                      value={form.bankName || ""}
+                      onChange={handleForm}
+                    />
+                    <Input
+                      label="Account Number"
+                      name="accountNumber"
+                      value={form.accountNumber || ""}
+                      onChange={handleForm}
+                    />
+                    <Input
+                      label="Routing Number / IBAN"
+                      name="routingNumber"
+                      value={form.routingNumber || ""}
+                      onChange={handleForm}
+                    />
+                    <Input
+                      label="SWIFT / BIC"
+                      name="swiftCode"
+                      value={form.swiftCode || ""}
+                      onChange={handleForm}
+                    />
+                  </div>
+                  </div>
+                 </div>
               )}
             </section>
 
@@ -796,16 +927,6 @@ useEffect(() => {
   );
 };
 
-// Reusable Card Component
-const Card: React.FC<{ title: string; children: React.ReactNode }> = ({
-  title,
-  children,
-}) => (
-  <div className="rounded-lg border bg-white p-5 shadow-sm">
-    <h3 className="mb-4 text-lg font-semibold text-gray-700">{title}</h3>
-    {children}
-  </div>
-);
 
 // Reusable Input Component
 const Input = React.forwardRef<
