@@ -11,6 +11,7 @@ import SupplierModule from "../views/Supplier/SupplierManagment";
 import AccountingModule from "../views/Accounting/Accounting";
 import CrmModule from "../views/Crm/Crm";
 
+
 const AppRoutes: React.FC = () => {
   return (
     <Routes>

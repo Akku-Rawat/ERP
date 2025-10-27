@@ -3,7 +3,6 @@ import QuotationsTable from "./Quotations";
 import InvoiceTable from "./Invoices";
 import ReportTable from "./Reports";
 import POS from "./POS";
-import SalesSettings from "./Setting";
 import QuotationModal from '../../components/sales/QuotationModal';
 import InvoiceModal from "../../components/sales/InvoiceModal";
 import PosModal from "../../components/sales/PosModal";
@@ -30,7 +29,6 @@ const sales = {
     { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
     { id: "pos", name: "POS", icon: <FaCashRegister /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
-    {id:"settings" , name:"Settings", icon:<FaCog/>}
   ],
   quotations: [],
   invoices: [],
@@ -131,9 +129,7 @@ const SalesModule: React.FC = () => {
       <ReportTable />
         )}
 
-        {activeTab === "settings" &&(
-          <SalesSettings/>
-        )}
+      
       </div>
 
       {/* Modals */}
