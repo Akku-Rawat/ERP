@@ -3,7 +3,6 @@ import AccountModal from '../../components/accounting/AccountModal';
 import JournalModal from '../../components/accounting/JournalModal';
 
 import { FaBriefcase, FaChartPie, FaFileAlt, FaClipboardList } from "react-icons/fa";
-
 import Coa from './COA';
 import JournalEntries from './Journal-Entries';
 import FinancialReports from './Financial-Reports';

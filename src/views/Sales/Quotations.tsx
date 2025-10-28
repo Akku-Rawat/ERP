@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import QuotationTemplate from "../../components/sales/QuotationTemplate";
 
 interface Quotation {
   id: string;
@@ -8,10 +9,11 @@ interface Quotation {
   opportunityStage: string;
 }
 
+
 const QuotationsTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
 
-  // ✅ Local quotation data (moved from Sales file)
   const quotations: Quotation[] = [
     { id: "QUO-001", customer: "Acme Corp", date: "2025-10-14", amount: 25000, opportunityStage: "Awaiting Response" },
     { id: "QUO-002", customer: "Globex Ltd", date: "2025-10-15", amount: 35000, opportunityStage: "Approved" },
@@ -25,7 +27,7 @@ const QuotationsTable: React.FC = () => {
   );
 
   return (
-    <div>
+    <div className="p-4">
       {/* Search Bar */}
       <div className="flex items-center justify-between mb-4">
         <input
@@ -39,7 +41,7 @@ const QuotationsTable: React.FC = () => {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200 rounded-lg">
+        <table className="min-w-full border border-gray-200 rounded-lg bg-white">
           <thead className="bg-gray-100 text-gray-700 text-sm">
             <tr>
               <th className="px-4 py-2 text-left">Quotation ID</th>
@@ -57,9 +59,26 @@ const QuotationsTable: React.FC = () => {
                 <td className="px-4 py-2">{q.customer}</td>
                 <td className="px-4 py-2">{q.date}</td>
                 <td className="px-4 py-2">₹{q.amount.toLocaleString()}</td>
-                <td className="px-4 py-2">{q.opportunityStage}</td>
+                <td className="px-4 py-2">
+                  <span
+                    className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
+                      q.opportunityStage === "Approved"
+                        ? "bg-green-100 text-green-800"
+                        : q.opportunityStage === "Rejected"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
+                    {q.opportunityStage}
+                  </span>
+                </td>
                 <td className="px-4 py-2 text-center">
-                  <button className="text-blue-600 hover:underline">View</button>
+                  <button
+                    onClick={() => setSelectedQuotation(q)}
+                    className="text-blue-600 hover:underline font-medium"
+                  >
+                    View
+                  </button>
                 </td>
               </tr>
             ))}
@@ -74,6 +93,16 @@ const QuotationsTable: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+       {selectedQuotation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
+          <QuotationTemplate
+            open={true}
+            quotationData={selectedQuotation}
+            onClose={() => setSelectedQuotation(null)}
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -3,7 +3,6 @@ import LeadModal from '../../components/crm/LeadModal';
 import TicketModal from '../../components/crm/TicketModal';
 import CustomerModal from '../../components/crm/CustomerModal';  
 import CustomerManagement from "./CustomerManagement";        
-import CRMSettings from "./Settings";
 import CRMDashboard from "./CRMDashboard";
 import CRMReports from "./Reports";
 import Leads from "./Leads";
@@ -28,7 +27,6 @@ const crmModule = {
     { id: "customer-managment", name: "Customer Management", icon: <FaIdBadge /> },
     { id: "leads", name: "Leads", icon: <FaUser /> },
     { id: "tickets", name: "Support Tickets", icon: <FaTicketAlt /> },
-    { id: "settings", name: "Settings", icon: <FaCog /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ],
   leads: [
@@ -46,44 +44,50 @@ const crmModule = {
     { id: "TICK-002", title: "Report Generation Error", customer: "XYZ Industries", priority: "Medium", status: "In Progress", created: "2025-01-17" },
     { id: "TICK-003", title: "Feature Request - Export", customer: "Tech Solutions", priority: "Low", status: "Resolved", created: "2025-01-16" },
   ],
-  // Optional: Pre-populate customers
   customers: [
-    { id: "CUST-001", companyName: "Global Enterprises", firstName: "Jane", lastName: "Wilson", email: "jane@global.com", phone: "+1 555-0101", status: "active" },
-    { id: "CUST-002", firstName: "Bob", lastName: "Chen", email: "bob@startup.co", phone: "+1 555-0102", status: "prospect" },
+    { 
+      id: "CUST-001", 
+      customer_name: "Global Enterprises",
+      customer_type: "Company" as const,
+      custom_customer_tpin: "1234567890",
+      status: "active" as const 
+    },
+    { 
+      id: "CUST-002", 
+      customer_name: "Bob Chen",
+      customer_type: "Individual" as const,
+      status: "prospect" as const 
+    },
   ],
 };
 
 const CRM: React.FC = () => {
   const [activeTab, setActiveTab] = useState(crmModule.defaultTab);
-  const [searchTerm, setSearchTerm] = useState("");
   const [showLeadModal, setShowLeadModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
-  const [showCustomerModal, setShowCustomerModal] = useState(false); // <-- ADD
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
 
   const handleAdd = () => {
     if (activeTab === "leads") setShowLeadModal(true);
     else if (activeTab === "tickets") setShowTicketModal(true);
-    else if (activeTab === "customer-managment") setShowCustomerModal(true); // <-- ADD
+    else if (activeTab === "customer-managment") setShowCustomerModal(true);
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="bg-gray-50 h-screen overflow-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between p-6 pb-0">
         <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
           <span>{crmModule.icon}</span> {crmModule.name}
         </h2>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-4">
+      <div className="flex border-b border-gray-200 px-6 mt-6">
         {crmModule.tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => {
-              setActiveTab(tab.id);
-              setSearchTerm(""); // reset search on tab change
-            }}
+            onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
                 ? "text-teal-600 border-b-2 border-teal-600"
@@ -95,39 +99,33 @@ const CRM: React.FC = () => {
         ))}
       </div>
 
-      {/* Content */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        {activeTab === "dashboard" && <CRMDashboard />}
+       <div className={activeTab === "customer-managment" ? "" : "p-6"}>
+        <div className={activeTab === "customer-managment" ? "" : "bg-white rounded-lg shadow-sm p-4"}>
+          {activeTab === "dashboard" && <CRMDashboard />}
 
-        {activeTab === "customer-managment" && (
-          <CustomerManagement
-            initialCustomers={crmModule.customers}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onAdd={handleAdd}
-          />
-        )}
+          {activeTab === "customer-managment" && (
+            <CustomerManagement
+              initialCustomers={crmModule.customers}
+              onAdd={handleAdd}
+            />
+          )}
 
-        {activeTab === "leads" && (
-          <Leads
-            leads={crmModule.leads}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onAdd={handleAdd}
-          />
-        )}
+          {activeTab === "leads" && (
+            <Leads
+              leads={crmModule.leads}
+              onAdd={handleAdd}
+            />
+          )}
 
-        {activeTab === "tickets" && (
-          <SupportTickets
-            tickets={crmModule.tickets}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onAdd={handleAdd}
-          />
-        )}
+          {activeTab === "tickets" && (
+            <SupportTickets
+              tickets={crmModule.tickets}
+              onAdd={handleAdd}
+            />
+          )}
 
-        {activeTab === "settings" && <CRMSettings />}
-        {activeTab === "reports" && <CRMReports />}
+          {activeTab === "reports" && <CRMReports />}
+        </div>
       </div>
 
       {/* Modals */}

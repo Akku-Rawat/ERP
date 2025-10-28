@@ -10,6 +10,7 @@ import {
   FaUsers,
   FaHandshake,
   FaSignOutAlt,
+  FaCog
 } from "react-icons/fa";
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ const menuItems = [
   { name: "Inventory Management", to: "/inventory", icon: <FaBoxes /> },
   { name: "Supplier Management", to: "/suppliers", icon: <FaHandshake /> },
   { name: "Accounting", to: "/accounting", icon: <FaBriefcase /> },
+  { name: "Settings", to: "/settings", icon: <FaCog /> }
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
@@ -33,7 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
 
   const handleLogout = () => {
     // Example logout logic (replace with your own)
-    localStorage.clear();
+    localStorage.clear()
     console.log("User logged out");
     navigate("/login"); // redirect to login
   };

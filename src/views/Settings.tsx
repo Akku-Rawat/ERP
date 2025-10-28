@@ -1,14 +1,27 @@
 import React, { useState } from "react";
+import { FaCogs } from "react-icons/fa";
 
-const SalesSettings = () => {
+
+const settingsModule = {
+  name: "Settings",
+  icon: <FaCogs />,
+  defaultTab: "settings",
+//   tabs: [
+//     { id: "accounts", name: "Tax", icon: <FaWrench /> },
+//     { id: "journals", name: "Journal Entries", icon: <FaFileAlt /> },
+//     { id: "reports", name: "Financial Reports", icon: <FaClipboardList /> },
+//   ],
+  
+};
+
+const Settings = () => {
   const [taxRate, setTaxRate] = useState(10);
   const [currency, setCurrency] = useState("USD");
   const [invoicePrefix, setInvoicePrefix] = useState("INV");
   const [defaultPaymentMethod, setDefaultPaymentMethod] = useState("Cash");
 
   const handleSaveSettings = () => {
-    // Save settings logic here
-    console.log({
+     console.log({
       taxRate,
       currency,
       invoicePrefix,
@@ -18,9 +31,14 @@ const SalesSettings = () => {
   };
 
   return (
-    <div>
-      <h3 className="text-xl font-semibold mb-4">Sales Settings</h3>
-      <div className="space-y-4 max-w-md">
+    <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
+          <span>{settingsModule.icon}</span> {settingsModule.name}
+        </h2>
+      </div>
+       <div className="space-y-4 max-w-md border-t">
         <div>
           <label className="block mb-1 font-medium">Tax Rate (%)</label>
           <input
@@ -70,7 +88,7 @@ const SalesSettings = () => {
         </button>
       </div>
     </div>
-  );
+   );
 };
 
-export default SalesSettings;
+export default Settings;
