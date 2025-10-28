@@ -12,7 +12,7 @@ export interface Customer {
 
 interface Props {
   initialCustomers?: Customer[];
-  onAdd: () => void; // Prop from parent to open modal
+  onAdd: () => void;  
 }
 
 const CustomerManagement: React.FC<Props> = ({ initialCustomers = [], onAdd }) => {
@@ -162,6 +162,7 @@ const CustomerManagement: React.FC<Props> = ({ initialCustomers = [], onAdd }) =
           customers={customers}
           onBack={handleBack}
           onCustomerSelect={handleRowClick}
+          onAdd={onAdd}
         />
       )}
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Trash2 } from "lucide-react";
+import TermsAndCondition from "../TermsAndCondition";
 
 const base_url = import.meta.env.VITE_BASE_URL;
 console.log("base url " ,base_url);
@@ -670,97 +671,14 @@ useEffect(() => {
   </div>
    )}
   
-
- {/* === TAB: Terms & Conditions === */}
-              {activeTab === "terms" && (
-              <>
-              <div className=" items-center mb-4">
-  <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-    Terms and Conditions
-  </h3>
  
-        <div className="flex items-center space-x-2">
-          <label className="text-sm text-gray-600">Select a template</label>
-          <select
-            className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={selectedTemplate}
-            onChange={(e) => setSelectedTemplate(e.target.value)}
-          >
-            <option>General Service Terms</option>
-            <option>Payment Terms</option>
-            <option>Service Delivery Terms</option>
-            <option>Cancellation / Refund Policy</option>
-            <option>Confidentiality & Data Protection</option>
-            <option>Liability</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Toolbar */}
-      <div className="flex space-x-1 mb-3 p-1 bg-gray-100 rounded-md">
-        <button className="p-2 hover:bg-gray-200 rounded" title="Bold">
-          <strong>B</strong>
-        </button>
-        <button className="p-2 hover:bg-gray-200 rounded" title="Italic">
-          <em>I</em>
-        </button>
-        <button className="p-2 hover:bg-gray-200 rounded" title="Underline">
-          <u>U</u>
-        </button>
-        <div className="w-px bg-gray-300 mx-1"></div>
-        <button className="p-2 hover:bg-gray-200 rounded" title="Unordered List">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-        <button className="p-2 hover:bg-gray-200 rounded" title="Ordered List">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
-<textarea
-  className="w-full h-64 p-4 border border-gray-300 rounded-md text-sm text-gray-700 font-mono bg-white resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-  value={
-    selectedTemplate === "General Service Terms"
-      ? `1.This Quotation is subject to the following terms and conditions. By accepting this quotation, {{CustomerName}} agrees to be bound by these terms. This quotation, identified by number {{QuotationNumber}}, was issued on {{QuotationDate}} and is valid until {{ValidUntil}}.\n\n 2.The services to be provided are: {{ServiceName}}. The total amount payable for these services is {{TotalAmount}}.\n\n 3.Payment is due upon receipt of the invoice. Any disputes must be raised within 14 days of the invoice date.`
-      : selectedTemplate === "Payment Terms"
-      ? `1.Payment Stages\t20% Advance, 30% after Phase 1, 50% on completion\nDue Dates\tPayment due within 30 days from invoice\nLate Payment Charges\t12% p.a. on overdue payments\nTaxes / Additional Charges\tTax applicable @ 18%\nSpecial Notes / Conditions\tAdvance payment is non-refundable`
-      : selectedTemplate === "Service Delivery Terms"
-      ? `1.Estimated Delivery Timelines\tPhase 1: 2 weeks; Phase 2: 3 weeks; Final Delivery: 5 weeks total\nClient Responsibilities\tClient must provide content, approvals, and access to systems on time`
-      : selectedTemplate === "Cancellation / Refund Policy"
-      ? `1.Cancellation Conditions\tClient may cancel anytime with written notice\nRefund Rules\tAdvance payment is non-refundable; milestone payments refundable only for uninitiated work`
-      : selectedTemplate === "Confidentiality & Data Protection"
-      ? `1.All client data shared for the service will remain confidential.`
-      : selectedTemplate === "Liability"
-      ? `1.Company not liable for delays caused by client.\n• Client responsible for providing accurate info/resources.`
-      : ""
-  }
-/>
-
-{/* Action Buttons */}
-<div className="mt-4 flex justify-end space-x-3">
-  <button
-    onClick={() => {
-       alert("Terms saved!");
-    }}
-    className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-  >
-    Save
-  </button>
-
-  <button
-    onClick={() => {
-       alert("Preview opened!");
-    }}
-    className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-  >
-    Preview
-  </button>
-</div>
-</>
-
-)}
+  {/* === TAB: Terms & Conditions === */}
+              {activeTab === "terms" && (
+              <div className=" h-full w-full">
+              <TermsAndCondition/>
+              </div>
+              )}
+ 
 
               {/* === TAB: ADDRESS & TERMS === */}
               {activeTab === "address" && (

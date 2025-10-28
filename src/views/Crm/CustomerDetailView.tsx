@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { X, Search, Edit, FileText, Receipt } from "lucide-react";
+import { X, Search, Edit, FileText, Receipt, Plus } from "lucide-react";
+import CustomerModal from "../../components/crm/CustomerModal";
+import QuotationModal from "../../components/sales/QuotationModal";
+import InvoiceModal from "../../components/sales/InvoiceModal";
 
 interface Customer {
   id: string;
@@ -14,6 +17,7 @@ interface Props {
   customers: Customer[];
   onBack: () => void;
   onCustomerSelect: (customer: Customer) => void;
+  onAdd: () => void;
 }
 
 const CustomerDetailView: React.FC<Props> = ({
@@ -21,9 +25,13 @@ const CustomerDetailView: React.FC<Props> = ({
   customers,
   onBack,
   onCustomerSelect,
+  onAdd,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"overview" | "quotations" | "invoices">("overview");
+  const [showCustomerModal, setShowCustomerModal] = useState(false); 
+  const [showQuotationModal, setShowQuotationModal] = useState(false); 
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false); 
 
   const filteredCustomers = customers.filter(
     (c) =>
@@ -45,15 +53,17 @@ const CustomerDetailView: React.FC<Props> = ({
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="">
       
-      {/* Enhanced Top Header */}
-      <div className="bg-gray-100 shadow-sm px-6 py-3 flex items-center justify-between flex-shrink-0">
+      <div className="bg-gray-100 shadow px-6 py-3 flex items-center justify-between flex-shrink-0">
         <h1 className="text-xl font-bold text-gray-800">Customer Details</h1>
         <div className="flex items-center gap-3">
-          <button className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:shadow-sm transition-all duration-200">
-            Add Customer
-          </button>
+          <button
+              onClick={() => setShowCustomerModal(true)}
+              className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
+            >
+              <Plus className="w-5 h-5" /> Add Customer
+            </button>
           <button
             onClick={onBack}
             className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
@@ -62,14 +72,20 @@ const CustomerDetailView: React.FC<Props> = ({
             <X className="w-5 h-5 text-gray-600" />
           </button>
         </div>
+        <CustomerModal
+        isOpen={showCustomerModal}
+        onClose={() => setShowCustomerModal(false)}
+        onSubmit={(data) => {
+          setShowCustomerModal(false);
+        }}
+      />
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-1 overflow-auto">
+      <div className=" grid grid-cols-5">
         
-        
-        <div className="w-80 bg-white  shadow-sm flex flex-col flex-shrink-0 overflow-auto">
-          
+   <div className=" col-span-1 bg-white shadow h-[70vh]">
+  
           {/* Search */}
           <div className="p-4 flex-shrink-0">
             <div className="relative">
@@ -84,7 +100,6 @@ const CustomerDetailView: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Customer List - Will scroll properly now */}
           <div className="flex-1 overflow-y-auto">
             {filteredCustomers.map((c) => (
               <div
@@ -115,13 +130,14 @@ const CustomerDetailView: React.FC<Props> = ({
               </div>
             ))}
           </div>
+          
         </div>
 
         {/* Right Content */}
-        <div className="flex-1 flex flex-col ">
+        <div className=" col-span-4">
           
           {/* Enhanced Tabs */}
-          <div className="bg-white shadow-sm flex items-center px-8 flex-shrink-0">
+          <div className="bg-white shadow flex items-center px-8 flex-shrink-0">
             <button
               onClick={() => setActiveTab("overview")}
               className={`px-5 py-3.5 text-sm font-medium border-b-3 transition-all duration-200 ${
@@ -160,10 +176,10 @@ const CustomerDetailView: React.FC<Props> = ({
           <div className="flex-1 p-8 overflow-auto">
             
             {activeTab === "overview" && (
-              <div className="max-w-6xl mx-auto">
+              <div className=" w-full h-full overflow-hidden">
                 
                 {/* Enhanced Card */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-300 p-8">
+                <div className="bg-white rounded-xl border border-gray-200 shadow hover:shadow-lg transition-shadow duration-300 p-8">
                   
                   {/* Header */}
                   <div className="flex items-center justify-between mb-8 pb-4 border-b">
@@ -174,9 +190,9 @@ const CustomerDetailView: React.FC<Props> = ({
                   </div>
 
                   {/* Customer Info Grid */}
-                  <div className="grid grid-cols-3 gap-10 mb-8">
+                  <div className="grid grid-cols-3">
                     {/* Column 1 */}
-                    <div className="space-y-5">
+                    <div className="space-y-4">
                       <div>
                         <label className="text-xs font-bold text-gray-500 uppercase mb-2 block tracking-wide">Customer Name</label>
                         <p className="text-sm font-semibold text-gray-900">{customer.customer_name}</p>
@@ -192,7 +208,7 @@ const CustomerDetailView: React.FC<Props> = ({
                     </div>
 
                     {/* Column 2 */}
-                    <div className="space-y-5">
+                    <div className="space-y-4">
                       <div>
                         <label className="text-xs font-bold text-gray-500 uppercase mb-2 block tracking-wide">TPIN</label>
                         <p className="text-sm font-semibold text-gray-900">{customer.custom_customer_tpin || "-"}</p>
@@ -208,7 +224,7 @@ const CustomerDetailView: React.FC<Props> = ({
                     </div>
 
                     {/* Column 3 */}
-                    <div className="space-y-5">
+                    <div className="space-y-4">
                       <div>
                         <label className="text-xs font-bold text-gray-500 uppercase mb-2 block tracking-wide">Currency</label>
                         <p className="text-sm font-semibold text-gray-900">USD</p>
@@ -229,7 +245,7 @@ const CustomerDetailView: React.FC<Props> = ({
                   </div>
 
                   {/* Divider */}
-                  <div className="border-t-2 border-gray-100 my-8"></div>
+                  <div className="border-t-2 border-gray-100 my-2"></div>
 
                   {/* Address Section */}
                   <h3 className="text-lg font-bold text-gray-900 mb-6">Address Information</h3>
@@ -274,36 +290,57 @@ const CustomerDetailView: React.FC<Props> = ({
             )}
 
             {activeTab === "quotations" && (
-              <div className="max-w-4xl mx-auto">
+              <div className="w-full h-full">
                 <div className="bg-white rounded-xl border border-gray-200 shadow-md p-16 text-center">
-                  <FileText className="w-20 h-20 mx-auto text-gray-300 mb-5" />
                   <p className="text-gray-700 font-bold text-lg mb-2">No Quotations Yet</p>
                   <p className="text-sm text-gray-500 mb-8">Quotations will appear here once created</p>
-                  <button className="px-8 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200">
+                  <button 
+                  onClick={() => setShowQuotationModal(true)}
+                  className="px-8 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200">
                     Create Quotation
                   </button>
                 </div>
+
+                <QuotationModal
+        isOpen={showQuotationModal}
+        onClose={() => setShowQuotationModal(false)}
+        onSubmit={(data) => {
+          setShowQuotationModal(false);
+            }}
+                />
               </div>
+              
             )}
 
             {activeTab === "invoices" && (
-              <div className="max-w-4xl mx-auto">
+              <div className="w-full h-full">
                 <div className="bg-white rounded-xl border border-gray-200 shadow-md p-16 text-center">
                   <Receipt className="w-20 h-20 mx-auto text-gray-300 mb-5" />
                   <p className="text-gray-700 font-bold text-lg mb-2">No Invoices Yet</p>
                   <p className="text-sm text-gray-500 mb-8">Invoices will appear here once created</p>
-                  <button className="px-8 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200">
+                  <button 
+                  onClick={()=> setShowInvoiceModal(true)}
+                  className="px-8 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200">
                     Create Invoice
                   </button>
                 </div>
+                <InvoiceModal
+        isOpen={showInvoiceModal}
+        onClose={() => setShowInvoiceModal(false)}
+        onSubmit={(data) => {
+          setShowInvoiceModal(false);
+            }}
+                />
               </div>
             )}
 
           </div>
         </div>
+
       </div>
     </div>
   );
+  
 };
 
 export default CustomerDetailView;

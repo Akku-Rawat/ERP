@@ -74,8 +74,7 @@ const CRM: React.FC = () => {
   };
 
   return (
-    // ✅ Changed: Removed padding from parent container
-     <div className="bg-gray-50 h-screen overflow-auto">
+      <div className="bg-gray-50 h-screen overflow-auto">
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
         <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
@@ -100,8 +99,7 @@ const CRM: React.FC = () => {
         ))}
       </div>
 
-      {/* ✅ Content - Removed padding for customer management */}
-      <div className={activeTab === "customer-managment" ? "" : "p-6"}>
+       <div className={activeTab === "customer-managment" ? "" : "p-6"}>
         <div className={activeTab === "customer-managment" ? "" : "bg-white rounded-lg shadow-sm p-4"}>
           {activeTab === "dashboard" && <CRMDashboard />}
 
