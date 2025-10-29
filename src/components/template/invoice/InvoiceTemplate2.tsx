@@ -1,160 +1,171 @@
-import React, { forwardRef } from "react";
+import React, { useRef, useState, forwardRef } from "react";
+import { UploadCloud } from "lucide-react";
 
-interface InvoiceItem {
+// --- Types ---
+export interface InvoiceItem {
   productName: string;
   description: string;
-  hsCode?: string;
   quantity: number;
   listPrice: number;
   discount: number;
   tax: number;
 }
 
-interface InvoiceData {
+export interface InvoiceData {
   invoiceId?: string;
-  invoiceNumber?: string;
   CutomerName: string;
   dateOfInvoice: string;
-  dueDate?: string;
-  orderId?: string;
-  trackingNumber?: string;
-  forwardingAgent?: string;
-  paidBy?: string;
+  dueDate: string;
   currency: string;
-  
-  billingCompanyName?: string;
   billingAddressLine1?: string;
   billingCity?: string;
   billingState?: string;
   billingPostalCode?: string;
-  billingCountry?: string;
-  billingPhone?: string;
-  billingEmail?: string;
-  
   items: InvoiceItem[];
   subTotal: number;
   totalDiscount: number;
   totalTax: number;
-  shippingCharges?: number;
-  insurance?: number;
   adjustment: number;
   grandTotal: number;
-  
-  reasonForExport?: string;
-  incoterms?: string;
+  paymentTerms?: string;
   notes?: string;
 }
 
-interface InvoiceTemplate2Props {
+export interface InvoiceTemplate2Props {
   data: InvoiceData;
   companyLogoUrl?: string;
 }
 
+// --- Component ---
 const InvoiceTemplate2 = forwardRef<HTMLDivElement, InvoiceTemplate2Props>(
   ({ data, companyLogoUrl }, ref) => {
+    const [logo, setLogo] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [signature, setSignature] = useState<string | null>(null);
+    const signatureInputRef = useRef<HTMLInputElement>(null);
+    const [signatureText, setSignatureText] = useState<string>("");
+    const [signatureMode, setSignatureMode] = useState<"upload" | "type">("upload");
+
     const getCurrencySymbol = () => {
       switch (data.currency) {
         case "ZMW": return "ZK";
         case "INR": return "₹";
         case "USD": return "$";
-        case "EUR": return "€";
-        case "GBP": return "£";
-        default: return "$";
+        default: return "₹";
       }
     };
 
     const symbol = getCurrencySymbol();
 
+    const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (ev) => setLogo(ev.target?.result as string);
+        reader.readAsDataURL(e.target.files[0]);
+      }
+    };
+
+    const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (ev) => setSignature(ev.target?.result as string);
+        reader.readAsDataURL(e.target.files[0]);
+      }
+    };
+
     return (
       <div
         ref={ref}
-        className="w-full max-w-[210mm] mx-auto bg-white p-8"
+        className="max-w-[260mm] mx-auto bg-white p-12"
         style={{ minHeight: "297mm" }}
       >
-        {/* Header with Decorative Arc */}
-        <div className="relative mb-8">
-          <div className="absolute top-0 right-0 w-64 h-32 border-4 border-gray-300 rounded-bl-full"></div>
-          
-          <div className="flex justify-between items-start relative z-10">
+        {/* Modern Header */}
+        <div className="text-white p-8 rounded-lg mb-8" style={{ background: 'linear-gradient(to right, #2F3C7E, #2F3C7E)' }}>
+          <div className="flex justify-between items-start">
             <div className="flex items-center gap-4">
-              {companyLogoUrl ? (
-                <img src={companyLogoUrl} alt="Logo" className="w-16 h-16 object-contain" />
-              ) : (
-                <div className="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <div className="w-8 h-8 border-2 border-gray-600 rounded-full"></div>
-                </div>
-              )}
+              {/* Logo Upload */}
+              <div
+                className="w-16 h-16 bg-white rounded-lg flex items-center justify-center cursor-pointer transition"
+                style={{ backgroundColor: '#FBEAEB' }}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {logo || companyLogoUrl ? (
+                  <img src={logo || companyLogoUrl} alt="Logo" className="w-14 h-14 object-contain rounded-lg" />
+                ) : (
+                  <>
+                    <UploadCloud className="w-6 h-6" style={{ color: '#2F3C7E' }} />
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handleLogoChange}
+                />
+              </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-800">Rolaface Software Ltd</h1>
-                <p className="text-sm text-gray-500 mt-1">Innovation & Excellence</p>
+                <h1 className="text-2xl font-bold">Rolaface Software Pvt Limited</h1>
+                <p className="text-sm" style={{ color: '#FBEAEB' }}>Software & Technology Solutions</p>
               </div>
             </div>
-
             <div className="text-right">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">COMMERCIAL<br/>INVOICE</h2>
-              <p className="text-xs text-gray-500">Professional Services</p>
+              <h2 className="text-3xl font-bold">INVOICE</h2>
+              <p className="text-sm mt-1" style={{ color: '#FBEAEB' }}>#{data.invoiceId || "INV-001"}</p>
             </div>
           </div>
         </div>
 
-        {/* Invoice Info Grid */}
-        <div className="grid grid-cols-3 gap-4 mb-8 text-sm">
-          <div className="space-y-3">
-            <div>
-              <p className="text-gray-500 font-semibold text-xs uppercase">Date</p>
-              <p className="text-gray-800">{data.dateOfInvoice}</p>
+        {/* Info Section */}
+        <div className="grid grid-cols-2 gap-8 mb-8">
+          <div>
+            <h3 className="text-xs font-bold uppercase mb-2" style={{ color: '#1C1C1C' }}>Bill To</h3>
+            <div className="p-4 rounded-lg" style={{ backgroundColor: '#F2F2F2' }}>
+              <p className="font-bold mb-2" style={{ color: '#1C1C1C' }}>{data.CutomerName}</p>
+              <p className="text-sm" style={{ color: '#1C1C1C' }}>{data.billingAddressLine1}</p>
+              <p className="text-sm" style={{ color: '#1C1C1C' }}>{data.billingCity}, {data.billingState}</p>
+              <p className="text-sm" style={{ color: '#1C1C1C' }}>{data.billingPostalCode}</p>
             </div>
           </div>
-          <div className="space-y-3">
-            <div>
-              <p className="text-gray-500 font-semibold text-xs uppercase">Invoice Number</p>
-              <p className="text-gray-800 bg-pink-100 px-2 py-1 inline-block rounded">
-                {data.invoiceNumber || data.invoiceId || "INV-001"}
-              </p>
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between">
+              <span className="font-semibold" style={{ color: '#1C1C1C' }}>Invoice Date:</span>
+              <span style={{ color: '#1C1C1C' }}>{data.dateOfInvoice}</span>
             </div>
-          </div>
-          <div className="space-y-3">
-            <div>
-              <p className="text-gray-500 font-semibold text-xs uppercase">Order ID</p>
-              <p className="text-gray-800">{data.orderId || "—"}</p>
+            <div className="flex justify-between">
+              <span className="font-semibold" style={{ color: '#1C1C1C' }}>Due Date:</span>
+              <span style={{ color: '#1C1C1C' }}>{data.dueDate}</span>
             </div>
-          </div>
-        </div>
-
-        {/* Bill To */}
-        <div className="mb-8">
-          <h3 className="text-sm font-bold text-gray-700 mb-3 uppercase">Bill To</h3>
-          <div className="space-y-1 text-sm">
-            <p className="font-bold text-gray-800">{data.billingCompanyName || data.CutomerName}</p>
-            <p className="text-gray-600">{data.billingAddressLine1}</p>
-            <p className="text-gray-600">{data.billingCity}, {data.billingState} {data.billingPostalCode}</p>
-            <p className="text-gray-600">{data.billingCountry}</p>
+            <div className="flex justify-between">
+              <span className="font-semibold" style={{ color: '#1C1C1C' }}>Payment Terms:</span>
+              <span style={{ color: '#1C1C1C' }}>{data.paymentTerms || "Net 30"}</span>
+            </div>
           </div>
         </div>
 
         {/* Items Table */}
-        <div className="mb-6">
-          <table className="w-full border-collapse text-sm">
+        <div className="mb-8">
+          <table className="w-full">
             <thead>
-              <tr className="bg-[#D4B5A0] text-white">
-                <th className="px-3 py-3 text-left text-xs font-bold uppercase">Product</th>
-                <th className="px-3 py-3 text-center text-xs font-bold uppercase">Units</th>
-                <th className="px-3 py-3 text-right text-xs font-bold uppercase">Unit Price</th>
-                <th className="px-3 py-3 text-right text-xs font-bold uppercase">Total</th>
+              <tr className="text-white" style={{ backgroundColor: '#2F3C7E' }}>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Description</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold">Qty</th>
+                <th className="px-4 py-3 text-right text-sm font-semibold">Rate</th>
+                <th className="px-4 py-3 text-right text-sm font-semibold">Amount</th>
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody>
               {data.items.map((item, index) => {
                 const lineTotal = item.quantity * item.listPrice - item.discount;
                 return (
-                  <tr key={index} className="border-b border-gray-200">
-                    <td className="px-3 py-3">
-                      <p className="font-semibold text-gray-800">{item.productName}</p>
-                      {item.description && <p className="text-xs text-gray-500 mt-1">{item.description}</p>}
+                  <tr key={index} className="border-b" style={{ borderColor: '#F2F2F2' }}>
+                    <td className="px-4 py-4">
+                      <p className="font-semibold" style={{ color: '#1C1C1C' }}>{item.productName}</p>
+                      <p className="text-sm" style={{ color: '#1C1C1C' }}>{item.description}</p>
                     </td>
-                    <td className="px-3 py-3 text-center text-gray-800 font-semibold">{item.quantity}</td>
-                    <td className="px-3 py-3 text-right text-gray-800">{symbol}{item.listPrice.toFixed(2)}</td>
-                    <td className="px-3 py-3 text-right text-gray-800 font-semibold">{symbol}{lineTotal.toFixed(2)}</td>
+                    <td className="px-4 py-4 text-center" style={{ color: '#1C1C1C' }}>{item.quantity}</td>
+                    <td className="px-4 py-4 text-right" style={{ color: '#1C1C1C' }}>{symbol}{item.listPrice.toFixed(2)}</td>
+                    <td className="px-4 py-4 text-right font-semibold" style={{ color: '#1C1C1C' }}>{symbol}{lineTotal.toFixed(2)}</td>
                   </tr>
                 );
               })}
@@ -162,26 +173,137 @@ const InvoiceTemplate2 = forwardRef<HTMLDivElement, InvoiceTemplate2Props>(
           </table>
         </div>
 
-        {/* Totals */}
-        <div className="flex justify-end">
-          <div className="w-1/3 space-y-2 text-sm">
-            <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">Sub Total:</span>
-              <span className="font-semibold">{symbol}{data.subTotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between py-2 border-b">
-              <span className="text-gray-600">Sales Tax (VAT):</span>
-              <span className="font-semibold">{symbol}{data.totalTax.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between py-3 border-t-2 border-gray-800 mt-2">
-              <span className="font-bold text-base">Total:</span>
-              <span className="font-bold text-base">{symbol}{data.grandTotal.toFixed(2)}</span>
+        {/* Totals Section */}
+        <div className="flex justify-end mb-8">
+          <div className="w-80">
+            <div className="p-6 rounded-lg space-y-3" style={{ backgroundColor: '#F2F2F2' }}>
+              <div className="flex justify-between text-sm">
+                <span style={{ color: '#1C1C1C' }}>Subtotal</span>
+                <span className="font-semibold" style={{ color: '#1C1C1C' }}>{symbol}{data.subTotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span style={{ color: '#1C1C1C' }}>Tax</span>
+                <span className="font-semibold" style={{ color: '#1C1C1C' }}>{symbol}{data.totalTax.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span style={{ color: '#1C1C1C' }}>Discount</span>
+                <span className="font-semibold" style={{ color: '#1C1C1C' }}>-{symbol}{data.totalDiscount.toFixed(2)}</span>
+              </div>
+              <div className="pt-3 flex justify-between" style={{ borderTop: '2px solid #2F3C7E' }}>
+                <span className="text-lg font-bold" style={{ color: '#1C1C1C' }}>Total</span>
+                <span className="text-lg font-bold" style={{ color: '#2F3C7E' }}>{symbol}{data.grandTotal.toFixed(2)}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Footer Decorative */}
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#A67C66] rounded-tr-full opacity-30"></div>
+        {/* Signature Section */}
+        <div className="mb-8">
+          <h3 className="text-sm font-bold mb-4" style={{ color: '#1C1C1C' }}>Authorized Signature</h3>
+          
+          {/* Toggle Buttons */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setSignatureMode("upload")}
+              className={`px-4 py-2 rounded text-sm font-medium transition`}
+              style={{
+                backgroundColor: signatureMode === "upload" ? '#2F3C7E' : '#F2F2F2',
+                color: signatureMode === "upload" ? 'white' : '#1C1C1C'
+              }}
+            >
+              Upload Signature
+            </button>
+            <button
+              onClick={() => setSignatureMode("type")}
+              className={`px-4 py-2 rounded text-sm font-medium transition`}
+              style={{
+                backgroundColor: signatureMode === "type" ? '#2F3C7E' : '#F2F2F2',
+                color: signatureMode === "type" ? 'white' : '#1C1C1C'
+              }}
+            >
+              Type Signature
+            </button>
+          </div>
+
+          {/* Upload Mode */}
+          {signatureMode === "upload" && (
+            <div className="flex justify-start">
+              <div
+                className="w-64 h-32 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer transition"
+                style={{ 
+                  borderColor: '#F2F2F2',
+                  backgroundColor: '#FBEAEB'
+                }}
+                onClick={() => signatureInputRef.current?.click()}
+              >
+                {signature ? (
+                  <img
+                    src={signature}
+                    alt="Signature"
+                    className="h-28 object-contain max-w-full"
+                  />
+                ) : (
+                  <div className="text-center">
+                    <UploadCloud className="w-8 h-8 mx-auto mb-2" style={{ color: '#2F3C7E' }} />
+                    <span className="text-sm font-medium" style={{ color: '#1C1C1C' }}>Click to upload signature</span>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={signatureInputRef}
+                  onChange={handleSignatureChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Type Mode */}
+          {signatureMode === "type" && (
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                value={signatureText}
+                onChange={(e) => setSignatureText(e.target.value)}
+                placeholder="Type your signature here..."
+                className="w-64 px-4 py-3 border-2 rounded-lg focus:outline-none text-sm"
+                style={{ 
+                  borderColor: '#F2F2F2',
+                  color: '#1C1C1C'
+                }}
+              />
+              {signatureText && (
+                <div className="w-64 h-32 border-2 rounded-lg bg-white flex items-center justify-center" style={{ borderColor: '#F2F2F2' }}>
+                  <p 
+                    className="text-4xl"
+                    style={{ 
+                      fontFamily: 'Brush Script MT, cursive',
+                      color: '#1C1C1C'
+                    }}
+                  >
+                    {signatureText}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <p className="text-xs mt-3" style={{ color: '#1C1C1C' }}>Date: {data.dateOfInvoice}</p>
+        </div>
+
+        {/* Notes */}
+        {data.notes && (
+          <div className="p-4 rounded-lg mb-8" style={{ backgroundColor: '#FBEAEB' }}>
+            <h4 className="text-sm font-bold mb-2" style={{ color: '#1C1C1C' }}>Notes</h4>
+            <p className="text-sm" style={{ color: '#1C1C1C' }}>{data.notes}</p>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="mt-12 pt-6 border-t-2 text-center text-sm" style={{ borderColor: '#F2F2F2', color: '#1C1C1C' }}>
+          <p>Thank you for your business!</p>
+        </div>
       </div>
     );
   }
