@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Upload } from 'lucide-react';
 
+
+interface QuotationData {
+  id: string;
+  customer: string;
+  date: string;
+  amount: number;
+  opportunityStage: string;
+}
+interface TemplateProps {
+  quotationData: QuotationData;
+}
 interface LineItem {
   id: string;
   qty: string;
@@ -9,7 +20,8 @@ interface LineItem {
   lineTotal: number;
 }
 
-const QuotationTemplate = () => {
+
+const QuotationTemplate: React.FC<TemplateProps> = ({ quotationData }) => {
   const [logo, setLogo] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState('');
   const [companySlogan, setCompanySlogan] = useState('');
@@ -17,27 +29,22 @@ const QuotationTemplate = () => {
   const [companyPhone, setCompanyPhone] = useState('');
   const [companyFax, setCompanyFax] = useState('');
   const [companyEmail, setCompanyEmail] = useState('');
-  
-  const [invoiceNo, setInvoiceNo] = useState('');
-  const [invoiceDate, setInvoiceDate] = useState('');
+  const [invoiceNo, setInvoiceNo] = useState(quotationData?.id || '');
+  const [invoiceDate, setInvoiceDate] = useState(quotationData?.date || '');
   const [expirationDate, setExpirationDate] = useState('');
-  
   const [contactName, setContactName] = useState('');
-  const [clientCompany, setClientCompany] = useState('');
+  const [clientCompany, setClientCompany] = useState(quotationData?.customer || '');
   const [clientAddress, setClientAddress] = useState('');
   const [clientCity, setClientCity] = useState('');
   const [clientPhone, setClientPhone] = useState('');
   const [customerId, setCustomerId] = useState('');
-  
   const [salesperson, setSalesperson] = useState('');
   const [job, setJob] = useState('');
   const [paymentTerms, setPaymentTerms] = useState('Due on receipt');
   const [dueDate, setDueDate] = useState('');
-  
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { id: '1', qty: '', description: '', unitPrice: '', lineTotal: 0 }
   ]);
-  
   const [salesTaxRate, setSalesTaxRate] = useState('0');
   const [preparedBy, setPreparedBy] = useState('');
   const [conditions, setConditions] = useState('');
@@ -90,12 +97,10 @@ const QuotationTemplate = () => {
   const total = subtotal + salesTax;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto bg-white shadow-lg">
-        {/* Header Section */}
+    <div className="min-h-screen p-8">
+      <div className="max-w-4xl mx-auto bg-white ">
         <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-8">
           <div className="flex justify-between items-start mb-6">
-            {/* Logo Upload */}
             <div className="w-32 h-32 bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center relative overflow-hidden">
               {logo ? (
                 <img src={logo} alt="Company Logo" className="w-full h-full object-contain" />
@@ -107,13 +112,11 @@ const QuotationTemplate = () => {
                 </label>
               )}
             </div>
-            
             <div className="text-right">
               <h1 className="text-4xl font-bold text-gray-800">QUOTE</h1>
             </div>
           </div>
 
-          {/* Company Info */}
           <div className="space-y-2">
             <input
               type="text"
@@ -160,8 +163,6 @@ const QuotationTemplate = () => {
               className="text-sm border-b border-gray-300 bg-transparent w-full focus:outline-none focus:border-blue-500"
             />
           </div>
-
-          {/* Invoice Details */}
           <div className="mt-6 text-right space-y-2">
             <div className="flex justify-end gap-2">
               <span className="font-semibold">INVOICE #</span>
@@ -193,8 +194,6 @@ const QuotationTemplate = () => {
             </div>
           </div>
         </div>
-
-        {/* Client Info Section */}
         <div className="p-8">
           <div className="mb-6">
             <div className="font-bold mb-2">TO</div>
@@ -243,8 +242,6 @@ const QuotationTemplate = () => {
               />
             </div>
           </div>
-
-          {/* Payment Info Table */}
           <div className="grid grid-cols-4 gap-4 mb-6 border-t border-b border-gray-300 py-3">
             <div>
               <label className="font-semibold block mb-1">SALESPERSON</label>
@@ -283,8 +280,6 @@ const QuotationTemplate = () => {
               />
             </div>
           </div>
-
-          {/* Line Items Table */}
           <div className="border border-gray-300 mb-6">
             <div className="grid grid-cols-12 bg-blue-100 font-semibold border-b border-gray-300">
               <div className="col-span-1 p-2 border-r border-gray-300">QTY</div>
@@ -293,7 +288,6 @@ const QuotationTemplate = () => {
               <div className="col-span-2 p-2 border-r border-gray-300">LINE TOTAL</div>
               <div className="col-span-1 p-2"></div>
             </div>
-            
             {lineItems.map((item) => (
               <div key={item.id} className="grid grid-cols-12 border-b border-gray-300">
                 <div className="col-span-1 p-2 border-r border-gray-300">
@@ -339,7 +333,6 @@ const QuotationTemplate = () => {
               </div>
             ))}
           </div>
-
           <button
             onClick={addLineItem}
             className="mb-6 flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold"
@@ -347,8 +340,6 @@ const QuotationTemplate = () => {
             <Plus className="w-4 h-4" />
             Add Line Item
           </button>
-
-          {/* Totals */}
           <div className="flex justify-end mb-8">
             <div className="w-64 space-y-2">
               <div className="flex justify-between border-b border-gray-300 pb-2">
@@ -375,8 +366,6 @@ const QuotationTemplate = () => {
               </div>
             </div>
           </div>
-
-          {/* Footer Section */}
           <div className="space-y-4 border-t border-gray-300 pt-6">
             <div>
               <label className="block mb-1">Quotation prepared by:</label>
@@ -387,7 +376,6 @@ const QuotationTemplate = () => {
                 className="w-full border-b border-gray-300 focus:outline-none focus:border-blue-500"
               />
             </div>
-            
             <div>
               <label className="block mb-1 text-sm">
                 This is a quotation on the goods named, subject to the conditions noted below:
@@ -400,7 +388,6 @@ const QuotationTemplate = () => {
                 rows={3}
               />
             </div>
-            
             <div>
               <label className="block mb-1">To accept this quotation, sign here and return:</label>
               <input
@@ -411,8 +398,6 @@ const QuotationTemplate = () => {
               />
             </div>
           </div>
-
-          {/* Thank You Message */}
           <div className="mt-8 text-center bg-gradient-to-r from-blue-100 to-blue-200 p-4 rounded">
             <p className="font-bold text-lg">THANK YOU FOR YOUR BUSINESS!</p>
           </div>

@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Download } from 'lucide-react';
 
+interface QuotationData {
+  id: string;
+  customer: string;
+  date: string;
+  amount: number;
+  opportunityStage: string;
+}
+
+interface TemplateProps {
+  quotationData: QuotationData;
+}
+
 interface LineItem {
   id: string;
   itemName: string;
@@ -12,30 +24,30 @@ interface LineItem {
   amount: number;
 }
 
-const QuotationTemplate = () => {
+const QuotationTemplate: React.FC<TemplateProps> = ({ quotationData }) => {
   // Company Info
   const [companyName, setCompanyName] = useState('Rolaface Software Ltd');
   const [companyAddress, setCompanyAddress] = useState('1309, Opal tower, Lala lajpatray, Kentucky, 626004');
   const [companyPhone, setCompanyPhone] = useState('93574-8810');
   const [companyGSTIN, setCompanyGSTIN] = useState('29VGCED1234KZE5');
   const [companyPAN, setCompanyPAN] = useState('VGCED1234K');
-  
+
   // Invoice Details
-  const [invoiceNo, setInvoiceNo] = useState('RPT2020-01007');
-  const [invoiceDate, setInvoiceDate] = useState('February 10, 2021');
+  const [invoiceNo, setInvoiceNo] = useState(quotationData?.id || 'RPT2020-01007');
+  const [invoiceDate, setInvoiceDate] = useState(quotationData?.date || 'February 10, 2021');
   const [dueDate, setDueDate] = useState('February 10, 2021');
   const [dueAmount, setDueAmount] = useState('');
-  
+
   // Bill To
   const [billToName, setBillToName] = useState('Studio Den');
   const [billToAddress, setBillToAddress] = useState('406, 8/4 Inder Ghan wall, Bangalore, Karnataka, India - 560009');
   const [billToGSTIN, setBillToGSTIN] = useState('19VGCED1234KZ1D');
   const [billToPAN, setBillToPAN] = useState('VGCED1234K');
-  
+
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { id: '1', itemName: 'Web Development', description: 'Create and send unlimited professional invoices for free. Use our simple Request to collect payments faster.', hsn: '0056', qty: 10, gstRate: 9, cost: 100, amount: 1000 }
   ]);
-  
+
   // Bank Details
   const [bankName, setBankName] = useState('HDFC Bank');
   const [accountName, setAccountName] = useState('Foolad Labs');
@@ -43,20 +55,20 @@ const QuotationTemplate = () => {
   const [ifsc, setIfsc] = useState('HDFC0001698');
   const [accountType, setAccountType] = useState('Savings');
   const [upi, setUpi] = useState('fooladlabs@okhdfc');
-  
+
   const [termsConditions, setTermsConditions] = useState('Please pay within 15 days from the date of invoice, overdue interest @ 14% will be charged on delayed payments.\n\nPlease quote invoice number when remitting funds.');
   const [additionalNotes, setAdditionalNotes] = useState('It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using "Content here, content here.');
 
   const addLineItem = () => {
-    setLineItems([...lineItems, { 
-      id: Date.now().toString(), 
-      itemName: '', 
-      description: '', 
-      hsn: '0056', 
-      qty: 1, 
-      gstRate: 9, 
-      cost: 0, 
-      amount: 0 
+    setLineItems([...lineItems, {
+      id: Date.now().toString(),
+      itemName: '',
+      description: '',
+      hsn: '0056',
+      qty: 1,
+      gstRate: 9,
+      cost: 0,
+      amount: 0
     }]);
   };
 
@@ -86,9 +98,8 @@ const QuotationTemplate = () => {
   const totalAmount = subtotal + gstAmount;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen  p-4">
       <div className="max-w-6xl mx-auto bg-white shadow-2xl">
-        
         {/* Header Section */}
         <div className="bg-blue-600 p-6 grid grid-cols-2 gap-6">
           {/* Company Info */}

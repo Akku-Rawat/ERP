@@ -1,36 +1,47 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Download } from 'lucide-react';
 
+interface QuotationData {
+  id: string;
+  customer: string;
+  date: string;
+  amount: number;
+  opportunityStage: string;
+}
+
+interface TemplateProps {
+  quotationData: QuotationData;
+}
+
 interface LineItem {
   id: string;
   description: string;
   amount: number;
 }
 
-const QuotationTemplate = () => {
+const QuotationTemplate: React.FC<TemplateProps> = ({ quotationData }) => {
   const [companyName, setCompanyName] = useState('Rolaface Software Ltd');
   const [slogan, setSlogan] = useState('Innovative Solutions for Your Business');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(quotationData?.date || new Date().toISOString().split('T')[0]);
   const [validUntil, setValidUntil] = useState('[Date]');
-  const [quoteNumber, setQuoteNumber] = useState('[100]');
+  const [quoteNumber, setQuoteNumber] = useState(quotationData?.id || '[100]');
   const [customerId, setCustomerId] = useState('[ABC12345]');
-  
-  const [customerName, setCustomerName] = useState('[Name]');
+
+  const [customerName, setCustomerName] = useState(quotationData?.customer || '[Name]');
   const [customerCompany, setCustomerCompany] = useState('[Company Name]');
   const [customerAddress, setCustomerAddress] = useState('[Street Address]');
   const [customerCity, setCustomerCity] = useState('[City, ST ZIP Code]');
   const [customerPhone, setCustomerPhone] = useState('[Phone]');
-  
+
   const [projectDescription, setProjectDescription] = useState('');
   const [specialNotes, setSpecialNotes] = useState('Once signed, please Fax, mail or e-mail it to the provided address.');
-  
+
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { id: '1', description: '', amount: 0 }
   ]);
-  
   const [discount, setDiscount] = useState(0);
   const [taxRate, setTaxRate] = useState(10);
-  
+
   const [footerAddress, setFooterAddress] = useState('[Street Address], [City, ST ZIP Code]');
   const [footerContact, setFooterContact] = useState('[Phone]  [Fax]  [E-mail]');
 
@@ -45,7 +56,7 @@ const QuotationTemplate = () => {
   };
 
   const updateLineItem = (id: string, field: 'description' | 'amount', value: string | number) => {
-    setLineItems(lineItems.map(item => 
+    setLineItems(lineItems.map(item =>
       item.id === id ? { ...item, [field]: value } : item
     ));
   };
@@ -56,7 +67,7 @@ const QuotationTemplate = () => {
   const total = subtotal - discountAmount + taxAmount;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen  p-8">
       <div className="max-w-4xl mx-auto bg-white shadow-lg">
         {/* Header */}
         <div className="bg-indigo-900 text-white p-6 flex items-center gap-4">
