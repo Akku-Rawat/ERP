@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { X, Download, Printer } from "lucide-react";
+import { X, Printer } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useReactToPrint } from "react-to-print";
 import InvoiceTemplate1 from "../../components/template/invoice/InvoiceTemplate1";
@@ -264,7 +264,7 @@ const InvoicesTable: React.FC = () => {
       {/* Template Selector Modal */}
       {showTemplateSelector && selectedInvoice && !selectedTemplate && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 flex justify-center items-center p-4">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-[1600px] w-full relative">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-[1200px] w-full relative">
             {/* Close Button */}
             <button
               onClick={handleCloseAll}
@@ -281,7 +281,7 @@ const InvoicesTable: React.FC = () => {
                   key={template.id}
                   onClick={() => handleTemplateSelect(template.id)}
                   className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-transparent hover:border-blue-400 flex flex-col items-center"
-                  style={{ width: 450, height: 510 }}
+                  style={{ width: 380, height: 510 }}
                 >
                   <div className="w-[900px] flex justify-center items-start p-2 overflow-hidden" style={{ height: 450 }}>
                     <div style={{
@@ -314,7 +314,7 @@ const InvoicesTable: React.FC = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+              className="w-[70vw] h-[95vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Header with Buttons */}
               <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
@@ -339,16 +339,9 @@ const InvoicesTable: React.FC = () => {
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                   >
                     <Printer className="w-4 h-4" />
-                    Print
+                    Print/Download
                   </button>
-                  {/* Download Button (calls print, user can 'Save as PDF') */}
-                  <button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download
-                  </button>
+                 
                   {/* Close button */}
                   <button
                     onClick={handleCloseAll}
@@ -360,7 +353,7 @@ const InvoicesTable: React.FC = () => {
               </div>
 
               {/* Invoice Content */}
-              <div className="flex-1 overflow-auto bg-gray-100 p-8">
+              <div className="flex-1 overflow-auto bg-gray-100 p-4">
                 <div className="flex justify-center">
                   <div className="bg-gray-100 p-8 rounded-lg" ref={componentRef}>
                     {renderTemplate(selectedTemplate, false)}

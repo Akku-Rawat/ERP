@@ -101,7 +101,7 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
     return (
       <div
         ref={ref}
-        className="max-w-[800mm] bg-white p-8 shadow-lg"
+        className="max-w-[260mm] bg-white p-8 "
         style={{ minHeight: "297mm" }}
       >
         {/* Header  */}

@@ -76,7 +76,7 @@ const InvoiceTemplate2 = forwardRef<HTMLDivElement, InvoiceTemplate2Props>(
     return (
       <div
         ref={ref}
-        className="max-w-[260mm] mx-auto bg-white p-12"
+        className="max-w-[260mm] mx-auto bg-white p-8 "
         style={{ minHeight: "297mm" }}
       >
         {/* Modern Header */}
@@ -106,11 +106,10 @@ const InvoiceTemplate2 = forwardRef<HTMLDivElement, InvoiceTemplate2Props>(
               </div>
               <div>
                 <h1 className="text-2xl font-bold">Rolaface Software Pvt Limited</h1>
-                <p className="text-sm" style={{ color: '#FBEAEB' }}>Software & Technology Solutions</p>
               </div>
             </div>
             <div className="text-right">
-              <h2 className="text-3xl font-bold">INVOICE</h2>
+              <h2 className="text-3xl font-bold mt-12">INVOICE</h2>
               <p className="text-sm mt-1" style={{ color: '#FBEAEB' }}>#{data.invoiceId || "INV-001"}</p>
             </div>
           </div>
@@ -198,7 +197,8 @@ const InvoiceTemplate2 = forwardRef<HTMLDivElement, InvoiceTemplate2Props>(
         </div>
 
         {/* Signature Section */}
-        <div className="mb-8">
+        <div className="flex justify-end">
+        <div className="mb-8 ">
           <h3 className="text-sm font-bold mb-4" style={{ color: '#1C1C1C' }}>Authorized Signature</h3>
           
           {/* Toggle Buttons */}
@@ -287,9 +287,12 @@ const InvoiceTemplate2 = forwardRef<HTMLDivElement, InvoiceTemplate2Props>(
                 </div>
               )}
             </div>
+
           )}
 
+
           <p className="text-xs mt-3" style={{ color: '#1C1C1C' }}>Date: {data.dateOfInvoice}</p>
+        </div>
         </div>
 
         {/* Notes */}

@@ -93,7 +93,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
     return (
       <div
         ref={ref}
-        className="w-full max-w-[300mm] mx-auto bg-white"
+        className="w-full max-w-[260mm] mx-auto p-8 bg-white"
         style={{ minHeight: "297mm" }}
       >
         {/* Orange Header */}
@@ -278,7 +278,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
               {/* Upload Mode */}
               {signatureMode === "upload" && (
                 <div
-                  className="w-full h-24 border-2 border-dashed border-gray-300 rounded bg-gray-50 flex items-center justify-center cursor-pointer transition hover:border-orange-400"
+                  className="w-full h-24 border-2 border-dashed border-gray-300 rounded bg-gray-50 flex items-center justify-center cursor-pointer transition hover:border-[#D4AF37]"
                   onClick={() => signatureInputRef.current?.click()}
                 >
                   {signature ? (
@@ -311,7 +311,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
                     value={signatureText}
                     onChange={(e) => setSignatureText(e.target.value)}
                     placeholder="Type your signature..."
-                    className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-orange-500 focus:outline-none text-sm"
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-[#D4AF37] focus:outline-none text-sm"
                   />
                   {signatureText && (
                     <div className="w-full h-24 border-2 border-gray-300 rounded bg-white flex items-center justify-center">
