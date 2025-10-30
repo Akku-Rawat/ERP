@@ -261,109 +261,112 @@ const InvoicesTable: React.FC = () => {
         </table>
       </div>
 
-      {/* Template Selector Modal */}
-      {showTemplateSelector && selectedInvoice && !selectedTemplate && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 flex justify-center items-center p-4">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-[1200px] w-full relative">
-            {/* Close Button */}
+
+{showTemplateSelector && selectedInvoice && !selectedTemplate && (
+  <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 flex justify-center items-center p-4">
+    <div className="bg-white rounded-lg shadow-xl p-6 max-w-[62.5vw] w-full relative"> {/* 1200px ≈ 62.5vw */}
+      {/* Close Button */}
+      <button
+        onClick={handleCloseAll}
+        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
+      >
+        ×
+      </button>
+
+      {/* Modal Content */}
+      <h2 className="text-2xl font-bold mb-2">Choose Invoice Template</h2>
+      <p className="text-sm text-gray-600 mb-6">
+        Invoice for {selectedInvoice.CutomerName}
+      </p>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 justify-items-center">
+        {templates.map((template) => (
+          <div
+            key={template.id}
+            onClick={() => handleTemplateSelect(template.id)}
+            className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-transparent hover:border-blue-400 flex flex-col items-center w-[20vw] min-w-[280px] h-[65vh] max-h-[510px]"
+          >
+            {/* Preview Frame */}
+            <div className="w-[45vw] max-w-[900px] flex justify-center items-start p-2 overflow-hidden h-[60vh] max-h-[450px]">
+              <div className="w-[41vw] h-[105vh] flex justify-center items-start scale-[0.45] origin-top">
+                {renderTemplate(template.id, true)}
+              </div>
+            </div>
+
+            {/* Template Name */}
+            <div
+              className={`text-white text-center w-full py-2 font-semibold text-sm ${template.color}`}
+            >
+              {template.name}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Full Screen Invoice Preview */}
+{selectedInvoice && selectedTemplate && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="w-[70vw] h-[95vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+      >
+        {/* Header with Buttons */}
+        <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">Invoice Preview</h2>
+            <p className="text-sm text-gray-600 mt-1">Preview and download your invoice</p>
+          </div>
+          <div className="flex items-center gap-3">
+            {/* Back Button */}
+            <button
+              onClick={() => {
+                setSelectedTemplate(null);
+                setShowTemplateSelector(true);
+              }}
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
+            >
+              ← Back to Templates
+            </button>
+
+            {/* Print Button */}
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              <Printer className="w-4 h-4" />
+              Print/Download
+            </button>
+
+            {/* Close button */}
             <button
               onClick={handleCloseAll}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
+              className="p-2 rounded-full hover:bg-gray-200 transition"
             >
-              ×
+              <X className="w-5 h-5 text-gray-600" />
             </button>
-            {/* Modal Content */}
-            <h2 className="text-2xl font-bold mb-2">Choose Invoice Template</h2>
-            <p className="text-sm text-gray-600 mb-6">Invoice for {selectedInvoice.CutomerName}</p>
-            <div className="grid grid-cols-3 gap-6 justify-items-center">
-              {templates.map((template) => (
-                <div
-                  key={template.id}
-                  onClick={() => handleTemplateSelect(template.id)}
-                  className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-transparent hover:border-blue-400 flex flex-col items-center"
-                  style={{ width: 380, height: 510 }}
-                >
-                  <div className="w-[900px] flex justify-center items-start p-2 overflow-hidden" style={{ height: 450 }}>
-                    <div style={{
-                      width: "210mm",
-                      height: "297mm",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "flex-start",
-                      transform: "scale(0.45)",
-                      transformOrigin: "top center"
-                    }}>
-                      {renderTemplate(template.id, true)}
-                    </div>
-                  </div>
-                  <div className={`text-white text-center w-full py-2 font-semibold text-sm ${template.color}`}>
-                    {template.name}
-                  </div>
-                </div>
-              ))}
+          </div>
+        </div>
+
+        {/* Invoice Content */}
+        <div className="flex-1 overflow-auto bg-gray-100 p-4">
+          <div className="flex justify-center">
+            <div className="bg-gray-100 p-8 rounded-lg" ref={componentRef}>
+              {renderTemplate(selectedTemplate, false)}
             </div>
           </div>
         </div>
-      )}
+      </motion.div>
+    </AnimatePresence>
+  </div>
+)}
 
-      {/* Full Screen Invoice Preview */}
-      {selectedInvoice && selectedTemplate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <AnimatePresence>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="w-[70vw] h-[95vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-            >
-              {/* Header with Buttons */}
-              <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-800">Invoice Preview</h2>
-                  <p className="text-sm text-gray-600 mt-1">Preview and download your invoice</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  {/* Back Button */}
-                  <button
-                    onClick={() => {
-                      setSelectedTemplate(null);
-                      setShowTemplateSelector(true);
-                    }}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
-                  >
-                    ← Back to Templates
-                  </button>
-                  {/* Print Button */}
-                  <button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                  >
-                    <Printer className="w-4 h-4" />
-                    Print/Download
-                  </button>
-                 
-                  {/* Close button */}
-                  <button
-                    onClick={handleCloseAll}
-                    className="p-2 rounded-full hover:bg-gray-200 transition"
-                  >
-                    <X className="w-5 h-5 text-gray-600" />
-                  </button>
-                </div>
-              </div>
 
-              {/* Invoice Content */}
-              <div className="flex-1 overflow-auto bg-gray-100 p-4">
-                <div className="flex justify-center">
-                  <div className="bg-gray-100 p-8 rounded-lg" ref={componentRef}>
-                    {renderTemplate(selectedTemplate, false)}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      )}
     </div>
   );
 };
