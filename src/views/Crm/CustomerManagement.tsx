@@ -1,9 +1,11 @@
 import React, { useState, useEffect} from "react";
 import { Search, Plus, Edit2, Trash2 } from "lucide-react";
 import CustomerDetailView from "./CustomerDetailView";
+import axios from "axios"; 
 
 const base_url = import.meta.env.VITE_BASE_URL;
 const GET_CUSTOMER_ENDPOINT = `${base_url}.customer.customer.get_all_customers_api`;
+const DELETE_CUSTOMER_ENDPOINT = `${base_url}.customer.customer.delete_customer_by_tpin`;
 console.log("CUSTOMER_ENDPOINT", GET_CUSTOMER_ENDPOINT);
 
 interface Props {
@@ -33,6 +35,38 @@ const CustomerManagement: React.FC<Props> = ({onAdd}) => {
     }
   };
 
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+  e.stopPropagation();
+
+  const customerToDelete = customers.find((c) => c.custom_id === id);
+  if (!customerToDelete) return;
+
+  const tpin = customerToDelete.custom_customer_tpin;
+  if (!tpin) {
+    alert("Cannot delete — TPIN not found for this customer.");
+    return;
+  }
+
+  if (!window.confirm(`Are you sure you want to delete customer with TPIN ${tpin}?`)) return;
+
+  try {
+    setCustLoading(true);
+
+    await axios.delete(`${DELETE_CUSTOMER_ENDPOINT}?tpin=${tpin}`, {
+      headers: { Authorization: import.meta.env.VITE_AUTHORIZATION },
+    });
+
+    setCustomers((prev) => prev.filter((c) => c.custom_id !== id));
+    alert("Customer deleted successfully.");
+  } catch (err: any) {
+    console.error("Error deleting customer:", err);
+    const errorMsg = err.response?.data?.message || "Failed to delete customer.";
+    alert(errorMsg);
+  } finally {
+    setCustLoading(false);
+  }
+};
+
   useEffect(() => {
     fetchCustomers();
   }, []);
@@ -52,13 +86,6 @@ const CustomerManagement: React.FC<Props> = ({onAdd}) => {
   const handleBack = () => {
     setViewMode("table");
     setSelectedCustomer(null);
-  };
-
-  const handleDelete = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (window.confirm("Delete this customer?")) {
-      setCustomers((prev) => prev.filter((c) => c.custom_id !== id));
-    }
   };
 
   return (
