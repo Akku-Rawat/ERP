@@ -1,38 +1,50 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect} from "react";
 import { Search, Plus, Edit2, Trash2 } from "lucide-react";
 import CustomerDetailView from "./CustomerDetailView";
 
-export interface Customer {
-  id: string;
-  customer_name: string;
-  customer_type: "Individual" | "Company";
-  custom_customer_tpin?: string;
-  status: "active" | "inactive" | "prospect";
-}
+const base_url = import.meta.env.VITE_BASE_URL;
+const GET_CUSTOMER_ENDPOINT = `${base_url}.customer.customer.get_all_customers_api`;
+console.log("CUSTOMER_ENDPOINT", GET_CUSTOMER_ENDPOINT);
 
 interface Props {
-  initialCustomers?: Customer[];
   onAdd: () => void;  
 }
 
-const CustomerManagement: React.FC<Props> = ({ initialCustomers = [], onAdd }) => {
-  const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
+const CustomerManagement: React.FC<Props> = ({onAdd}) => {
+  const [customers, setCustomers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "detail">("table");
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
+  const [custLoading, setCustLoading] = useState(true);
 
-  const filtered = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    return customers.filter(
-      (c) =>
-        c.id.toLowerCase().includes(term) ||
-        c.customer_name.toLowerCase().includes(term) ||
-        (c.custom_customer_tpin ?? "").toLowerCase().includes(term) ||
-        c.status.includes(term)
-    );
-  }, [customers, searchTerm]);
+  const fetchCustomers = async () => {
+    try {
+      setCustLoading(true);
+      const response = await fetch(GET_CUSTOMER_ENDPOINT, {
+        headers: { Authorization: import.meta.env.VITE_AUTHORIZATION },
+      });
+      if (!response.ok) throw new Error("Failed to load customers");
+      const result = await response.json();
+      setCustomers(result.data || []);
+    } catch (err) {
+      console.error("Error loading customers:", err);
+    } finally {
+      setCustLoading(false);
+    }
+  };
 
-  const handleRowClick = (customer: Customer) => {
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const filtered = customers.filter((c: any) =>
+    [c.custom_id, c.customer_name, c.default_currency, c.custom_onboard_balance, c.custom_customer_tpin]
+      .join(" ")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
+  const handleRowClick = (customer: any) => {
     setSelectedCustomer(customer);
     setViewMode("detail");
   };
@@ -45,7 +57,7 @@ const CustomerManagement: React.FC<Props> = ({ initialCustomers = [], onAdd }) =
   const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (window.confirm("Delete this customer?")) {
-      setCustomers((prev) => prev.filter((c) => c.id !== id));
+      setCustomers((prev) => prev.filter((c) => c.custom_id !== id));
     }
   };
 
@@ -73,88 +85,93 @@ const CustomerManagement: React.FC<Props> = ({ initialCustomers = [], onAdd }) =
             </button>
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
-            <table className="min-w-full">
-              <thead className="bg-gray-100 text-gray-700 text-sm">
-                <tr>
-                  <th className="px-4 py-3 text-left">ID</th>
-                  <th className="px-4 py-3 text-left">Customer Name</th>
-                  <th className="px-4 py-3 text-left">Type</th>
-                  <th className="px-4 py-3 text-left">TPIN</th>
-                  <th className="px-4 py-3 text-left">Status</th>
-                  <th className="px-4 py-3 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {filtered.map((c) => (
-                  <tr
-                    key={c.id}
-                    onClick={() => handleRowClick(c)}
-                    className="hover:bg-gray-50 cursor-pointer transition"
-                  >
-                    <td className="px-4 py-2 font-medium">{c.id}</td>
-                    <td className="px-4 py-2 font-semibold">{c.customer_name}</td>
-                    <td className="px-4 py-2">
-                      <span
-                        className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                          c.customer_type === "Company"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-purple-100 text-purple-800"
-                        }`}
+           {custLoading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+              <p className="mt-2 text-gray-600">Loading customers…</p>
+            </div>
+          ) : (
+            <>
+              {/* Table */}
+              <div className="overflow-x-auto rounded-lg border border-gray-200">
+                <table className="min-w-full">
+                  <thead className="bg-gray-100 text-gray-700 text-sm">
+                    <tr>
+                      <th className="px-4 py-3 text-left">Cust Id</th>
+                      <th className="px-4 py-3 text-left">Customer Name</th>
+                      <th className="px-4 py-3 text-left">Type</th>
+                      <th className="px-4 py-3 text-left">Currency</th>
+                      <th className="px-4 py-3 text-left">Onboard Balance</th>
+                      <th className="px-4 py-3 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {filtered.map((c) => (
+                      <tr
+                        key={c.custom_id}
+                        onClick={() => handleRowClick(c)}
+                        className="hover:bg-gray-50 cursor-pointer transition"
                       >
-                        {c.customer_type}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2">
-                      {c.custom_customer_tpin ? (
-                        <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                          {c.custom_customer_tpin}
-                        </code>
-                      ) : (
-                        <span className="text-gray-400 text-xs">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2">
-                      <span
-                        className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                          c.status === "active"
-                            ? "bg-green-100 text-green-800"
-                            : c.status === "inactive"
-                            ? "bg-gray-100 text-gray-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {c.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2 text-center">
-                      <button
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-indigo-600 hover:text-indigo-800"
-                        title="Edit"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={(e) => handleDelete(c.id, e)}
-                        className="ml-2 text-red-600 hover:text-red-800"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        <td className="px-4 py-2 font-medium">{c.custom_id}</td>
+                        <td className="px-4 py-2 font-semibold">{c.customer_name}</td>
+                        <td className="px-4 py-2">
+                          <span
+                            className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
+                              c.customer_type === "Company"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-purple-100 text-purple-800"
+                            }`}
+                          >
+                            {c.customer_type}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2">
+                          {c.default_currency ? (
+                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                              {c.default_currency}
+                            </code>
+                          ) : (
+                            <span className="text-gray-400 text-xs">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2">
+                          {c.custom_onboard_balance ? (
+                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                              {c.custom_onboard_balance}
+                            </code>
+                          ) : (
+                            <span className="text-gray-400 text-xs">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-indigo-600 hover:text-indigo-800"
+                            title="Edit"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={(e) => handleDelete(c.custom_id, e)}
+                            className="ml-2 text-red-600 hover:text-red-800"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
 
-            {filtered.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                {searchTerm ? "No matches." : "No customers yet."}
+                {filtered.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    {searchTerm ? "No matches." : "No customers yet."}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </>
       ) : (
         <CustomerDetailView

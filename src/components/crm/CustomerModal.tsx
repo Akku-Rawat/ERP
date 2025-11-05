@@ -13,7 +13,8 @@ import {
 import toast from "react-hot-toast";
 
 const base_url = import.meta.env.VITE_BASE_URL;
-const CUSTOMER_ENDPOINT = `${base_url}/resource/Customer`;
+const CUSTOMER_ENDPOINT = `${base_url}.customer.customer.create_customer_api`;
+console.log("CUSTOMER_ENDPOINT" + CUSTOMER_ENDPOINT);
 
 interface CustomerFormData {
   customer_name: string;
@@ -22,7 +23,7 @@ interface CustomerFormData {
   ssn?: string;
   bankAccount?: string;
   email?: string;
-  phone?: string;
+  mobile_no?: string;
   paymentTerms?: string;
   website?: string;
   billingAddressLine1?: string;
@@ -52,6 +53,7 @@ const emptyForm: CustomerFormData = {
   currency: "",
   validUntil: "",
   onboardBalance: "",
+  mobile_no: "",
   ssn: "",
   bankAccount: "",
   paymentTerms: "",
@@ -90,7 +92,7 @@ const CustomerModal: React.FC<{
     const [form, setForm] = useState<CustomerFormData>(emptyForm);
     const [loading, setLoading] = useState(false);
     const [showAdditionalBilling, setShowAdditionalBilling] = useState(false);
-    const [selectedTemplate, setSelectedTemplate] = useState("General Service Terms");
+    // const [selectedTemplate, setSelectedTemplate] = useState("General Service Terms");
 
     const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">("details");
 
@@ -275,10 +277,10 @@ const CustomerModal: React.FC<{
                           icon={<Mail className="w-4 h-4 text-gray-400" />}
                         />
                         <Input
-                          label="Phone"
-                          name="phone"
+                          label="Mobile No"
+                          name="mobile_no"
                           type="tel"
-                          value={form.phone ?? ""}
+                          value={form.mobile_no ?? ""}
                           onChange={handleChange}
                           icon={<Phone className="w-4 h-4 text-gray-400" />}
                         />
@@ -595,11 +597,11 @@ const CustomerModal: React.FC<{
                     disabled={loading}
                     className="flex items-center gap-2 rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600 disabled:opacity-50"
                   >
-                    {loading ? (
+                    {/* {loading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       <Save className="w-4 h-4" />
-                    )}
+                    )} */}
                     {isEditMode ? "Update" : "Save"} Customer
                   </button>
                 </div>
