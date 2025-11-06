@@ -5,6 +5,7 @@ import EmployeeDirectory from './EmployeeDirectory';
 import Attendance from './Attendance';
 import LeaveManagement from './LeaveManagement';
 import Payroll from './Payroll';
+import Recruitment from './Recruitment';
 
 const navTabs = [
   { key: 'dashboard', label: 'HR Dashboard', icon: <FaChartLine /> },
@@ -12,7 +13,7 @@ const navTabs = [
   { key: 'attendance', label: 'Attendance', icon: <FaClipboardList /> },
   { key: 'leave', label: 'Leave Management', icon: <FaCalendarDay /> },
   { key: 'payroll', label: 'Payroll', icon: <FaMoneyCheckAlt /> },
-  {key :'recruitment' ,label:'Recruitment',icon:<FaUserPlus/>}
+   { key: 'recruitment', label: 'Recruitment', icon: <FaUserPlus /> },
 ];
 
 const HrPayrollModule: React.FC = () => {
@@ -49,6 +50,7 @@ const HrPayrollModule: React.FC = () => {
         {tab === 'attendance' && <Attendance />}
         {tab === 'leave' && <LeaveManagement />}
         {tab === 'payroll' && <Payroll />}
+        {tab === 'recruitment' && <Recruitment />}
       </div>
     </div>
   );
