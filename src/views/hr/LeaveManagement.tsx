@@ -95,7 +95,7 @@ const LeaveManagement: React.FC = () => {
 
       {/* ===== ACTION BUTTON ===== */}
       <button className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-3 rounded-lg font-semibold transition flex items-center gap-2">
-        <FaPlay />Request new leave
+        Request new leave
       </button>
 
       {/* ===== MAIN CONTENT - Table and Charts ===== */}

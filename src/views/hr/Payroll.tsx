@@ -122,13 +122,7 @@ const Payroll: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header with User Profile */}
-      <div className="flex justify-end">
-        <div className="flex items-center gap-2 text-gray-700">
-          <FaUserCircle className="text-2xl text-gray-400" />
-          <span className="font-semibold">John Doe</span>
-        </div>
-      </div>
+  
 
       {/* KPI Cards */}
       <div className="grid grid-cols-4 gap-6">
