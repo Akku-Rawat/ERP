@@ -10,10 +10,11 @@ import Recruitment from './Recruitment';
 const navTabs = [
   { key: 'dashboard', label: 'HR Dashboard', icon: <FaChartLine /> },
   { key: 'directory', label: 'Employee Directory', icon: <FaUsers /> },
+  { key: 'recruitment', label: 'Recruitment', icon: <FaUserPlus /> },
   { key: 'attendance', label: 'Attendance', icon: <FaClipboardList /> },
   { key: 'leave', label: 'Leave Management', icon: <FaCalendarDay /> },
   { key: 'payroll', label: 'Payroll', icon: <FaMoneyCheckAlt /> },
-   { key: 'recruitment', label: 'Recruitment', icon: <FaUserPlus /> },
+   
 ];
 
 const HrPayrollModule: React.FC = () => {
@@ -23,7 +24,7 @@ const HrPayrollModule: React.FC = () => {
     <div className="bg-gray-50 min-h-screen p-8 pb-20">
       {/* Header */}
       <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
-        <FaUsers /> HR & Payroll
+        <FaUsers /> Human Resources
       </h1>
 
       {/* Navbar */}

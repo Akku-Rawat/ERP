@@ -107,7 +107,7 @@ const Attendance: React.FC = () => {
                 <FaCalendarAlt />
               </button>
               <button className="text-gray-400 hover:text-gray-600">
-                Akramoud
+                calendar
               </button>
               <button className="text-teal-600 hover:text-teal-800">
                 <FaArrowRight />
