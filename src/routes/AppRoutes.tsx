@@ -11,6 +11,7 @@ import SupplierModule from "../views/Supplier/SupplierManagment";
 import AccountingModule from "../views/Accounting/Accounting";
 import CrmModule from "../views/Crm/Crm";
 import Settings from "../views/Settings";
+import HrPayrollModule from "../views/hr/HrPayrollModule";
 
 
 const AppRoutes: React.FC = () => {
@@ -30,7 +31,9 @@ const AppRoutes: React.FC = () => {
           <Route path="/accounting" element={<AccountingModule />} />
           <Route path="/crm" element={<CrmModule />} />
           <Route path="settings" element={<Settings/>}/>
+          <Route path="/hr" element={<HrPayrollModule />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
         </Route>
       </Route>
 

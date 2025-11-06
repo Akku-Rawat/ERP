@@ -26,7 +26,8 @@ const menuItems = [
   { name: "Inventory Management", to: "/inventory", icon: <FaBoxes /> },
   { name: "Supplier Management", to: "/suppliers", icon: <FaHandshake /> },
   { name: "Accounting", to: "/accounting", icon: <FaBriefcase /> },
-  { name: "Settings", to: "/settings", icon: <FaCog /> }
+  { name: "Settings", to: "/settings", icon: <FaCog /> },
+  {name : "Hr", to:"/hr",icon : <FaShoppingBag/>},
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
