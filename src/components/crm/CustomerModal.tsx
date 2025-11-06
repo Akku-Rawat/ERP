@@ -39,7 +39,7 @@ interface CustomerFormData {
   taxId?: string;
   notes?: string;
   customer_currency: string;
-  custom_onboard_balance: string;
+  customer_onboarding_balance: string;
   sameAsBilling?: boolean;
 }
 
@@ -48,7 +48,7 @@ const emptyForm: CustomerFormData = {
   customer_type: "Individual",
   custom_customer_tpin: "",
   customer_currency: "",
-  custom_onboard_balance: "",
+  customer_onboarding_balance: "",
   mobile_no: "",
   ssn: "",
   customer_email: "",
@@ -309,9 +309,9 @@ const CustomerModal: React.FC<{
                         />
                         <Input
                               label="Onboard Balance"
-                              name="custom_onboard_balance"
-                              type="custom_onboard_balance"
-                              value={form.custom_onboard_balance}
+                              name="customer_onboarding_balance"
+                              type="customer_onboarding_balance"
+                              value={form.customer_onboarding_balance}
                               onChange={handleChange}
                               placeholder="e.g. 1000"
                             />
