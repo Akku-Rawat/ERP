@@ -61,15 +61,7 @@ const EmployeeDirectory: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Employee Directory</h1>
-        <button className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg font-semibold flex items-center gap-2 transition">
-          <FaPlus /> Add New Employee
-        </button>
-      </div>
-
-      {/* All filters and search on one line - compact */}
+      {/* Filters/Search/Add New Employee */}
       <div className="bg-white rounded-lg shadow px-5 py-4">
         <div className="flex flex-wrap gap-3 items-center">
           {/* Search */}
@@ -126,6 +118,10 @@ const EmployeeDirectory: React.FC = () => {
             </select>
             <FaChevronDown className="absolute right-3 top-2.5 text-gray-400 pointer-events-none text-xs" />
           </div>
+          {/* Add New Employee Button */}
+          <button className="ml-auto bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg font-semibold flex items-center gap-2 transition">
+            <FaPlus /> Add New Employee
+          </button>
         </div>
       </div>
 
@@ -171,7 +167,7 @@ const EmployeeDirectory: React.FC = () => {
                 </td>
               </tr>
             ))}
-            {/* "See More" row INSIDE the table */}
+            {/* "See More" row */}
             {displayedEmployees.length < filteredEmployees.length && (
               <tr>
                 <td colSpan={6}>

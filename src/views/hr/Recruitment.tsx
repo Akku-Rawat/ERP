@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaUsers, FaPlus, FaFilter, FaChevronDown, FaUserTie, FaDoorOpen, FaUserCircle } from 'react-icons/fa';
+import { FaUsers, FaPlus, FaFilter, FaChevronDown, FaUserTie, FaDoorOpen } from 'react-icons/fa';
 
 // ===== DATA TYPES =====
 type JobOpening = {

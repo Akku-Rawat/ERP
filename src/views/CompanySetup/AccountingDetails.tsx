@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { DollarSign, TrendingDown, RefreshCw, Target, CheckCircle } from 'lucide-react';
+import {
+  FaDollarSign,
+  FaChartArea,
+  FaSyncAlt,
+  FaBullseye,
+  FaCheckCircle
+} from "react-icons/fa";
+
 
 const AccountingDetails: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -32,7 +39,7 @@ const AccountingDetails: React.FC = () => {
         {/* Success Message */}
         {showSuccess && (
           <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <FaCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
             <p className="text-green-800 font-medium text-sm">Configuration saved successfully!</p>
           </div>
         )}
@@ -46,7 +53,7 @@ const AccountingDetails: React.FC = () => {
             {/* General Accounts Section */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-200">
-                <DollarSign className="w-4 h-4 text-slate-600" />
+                <FaDollarSign className="w-4 h-4 text-slate-600" />
                 <h2 className="text-base font-semibold text-slate-900">General Accounts</h2>
               </div>
               
@@ -84,7 +91,7 @@ const AccountingDetails: React.FC = () => {
             {/* Exchange Rate Section */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-200">
-                <RefreshCw className="w-4 h-4 text-slate-600" />
+                <FaSyncAlt className="w-4 h-4 text-slate-600" />
                 <h2 className="text-base font-semibold text-slate-900">Exchange Rate</h2>
               </div>
               
@@ -128,7 +135,7 @@ const AccountingDetails: React.FC = () => {
             {/* Rounding Section */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-200">
-                <Target className="w-4 h-4 text-slate-600" />
+                <FaBullseye className="w-4 h-4 text-slate-600" />
                 <h2 className="text-base font-semibold text-slate-900">Rounding Configuration</h2>
               </div>
               
@@ -166,7 +173,7 @@ const AccountingDetails: React.FC = () => {
             {/* Asset Accounts Section */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-200">
-                <TrendingDown className="w-4 h-4 text-slate-600" />
+                <FaChartArea className="w-4 h-4 text-slate-600" />
                 <h2 className="text-base font-semibold text-slate-900">Asset Valuation</h2>
               </div>
               
@@ -204,11 +211,9 @@ const AccountingDetails: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <p className="text-xs text-slate-500">
-            <span className="text-red-500">*</span> Required fields
-          </p>
-          <div className="flex gap-3">
+       
+          
+          <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => setFormData({
@@ -235,7 +240,7 @@ const AccountingDetails: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+   
   );
 };
 

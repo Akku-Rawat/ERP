@@ -1,5 +1,18 @@
 import React, { useMemo, useState } from 'react';
-import { Users, TrendingUp, TrendingDown, Calendar, DollarSign, Download, FileText, Send, CheckCircle, XCircle, Filter, Search, Eye, Printer } from 'lucide-react';
+import { 
+  FaUsers, 
+  FaArrowUp, 
+  FaArrowDown, 
+  FaCalendarAlt, 
+  FaDollarSign, 
+  FaDownload, 
+  FaFileAlt, 
+  FaPaperPlane, 
+  FaCheckCircle, 
+  FaTimesCircle, 
+  FaSearch, 
+  FaEye,  
+} from 'react-icons/fa';
 
 type PayrollRecord = {
   id: string;
@@ -318,8 +331,8 @@ Generated on: ${new Date().toLocaleString()}
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'Paid': return <CheckCircle className="w-4 h-4" />;
-      case 'Failed': return <XCircle className="w-4 h-4" />;
+      case 'Paid': return <FaCheckCircle className="w-4 h-4" />;
+      case 'Failed': return <FaTimesCircle className="w-4 h-4" />;
       default: return null;
     }
   };
@@ -327,41 +340,13 @@ Generated on: ${new Date().toLocaleString()}
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">Payroll Management</h1>
-            <p className="text-slate-600 mt-1">Process salaries, manage payslips, and track payments</p>
-          </div>
-          <div className="flex gap-3">
-            <button 
-              onClick={exportToCSV}
-              className="bg-white border border-slate-300 text-slate-700 px-5 py-2.5 rounded-lg font-medium hover:bg-slate-50 transition-all flex items-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              Export
-            </button>
-            <button 
-              onClick={handleProcessPayroll}
-              disabled={pendingCount === 0}
-              className={`px-6 py-2.5 rounded-lg font-semibold shadow-lg transition-all flex items-center gap-2 ${
-                pendingCount === 0 
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white shadow-teal-500/30'
-              }`}
-            >
-              <DollarSign className="w-5 h-5" />
-              Process Payroll ({pendingCount})
-            </button>
-          </div>
-        </div>
-
+    
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="bg-blue-100 p-3 rounded-lg">
-                <Users className="text-blue-600 w-6 h-6" />
+                <FaUsers className="text-blue-600 w-6 h-6" />
               </div>
             </div>
             <p className="text-slate-600 text-sm font-medium mb-1">Total Employees</p>
@@ -372,9 +357,9 @@ Generated on: ${new Date().toLocaleString()}
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="bg-emerald-100 p-3 rounded-lg">
-                <CheckCircle className="text-emerald-600 w-6 h-6" />
+                <FaCheckCircle className="text-emerald-600 w-6 h-6" />
               </div>
-              <TrendingUp className="text-emerald-500 w-5 h-5" />
+              <FaArrowUp className="text-emerald-500 w-5 h-5" />
             </div>
             <p className="text-slate-600 text-sm font-medium mb-1">Processed This Month</p>
             <p className="text-3xl font-bold text-slate-800">{paidCount}</p>
@@ -384,7 +369,7 @@ Generated on: ${new Date().toLocaleString()}
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="bg-amber-100 p-3 rounded-lg">
-                <Calendar className="text-amber-600 w-6 h-6" />
+                <FaCalendarAlt className="text-amber-600 w-6 h-6" />
               </div>
             </div>
             <p className="text-slate-600 text-sm font-medium mb-1">Pending Payments</p>
@@ -395,7 +380,7 @@ Generated on: ${new Date().toLocaleString()}
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="bg-purple-100 p-3 rounded-lg">
-                <DollarSign className="text-purple-600 w-6 h-6" />
+                <FaDollarSign className="text-purple-600 w-6 h-6" />
               </div>
             </div>
             <p className="text-slate-600 text-sm font-medium mb-1">Total Payroll</p>
@@ -404,45 +389,77 @@ Generated on: ${new Date().toLocaleString()}
           </div>
         </div>
 
-        {/* Filters and Search */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <div className="flex flex-wrap gap-4 items-center">
-            <div className="flex-1 min-w-64">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search by name or employee ID..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
-              </div>
-            </div>
-
-            <select
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              className="px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-            >
-              {departments.map(dept => (
-                <option key={dept} value={dept}>{dept}</option>
-              ))}
-            </select>
-
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
-              className="px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-            >
-              <option value="All">All Status</option>
-              <option value="Paid">Paid</option>
-              <option value="Pending">Pending</option>
-              <option value="Processing">Processing</option>
-              <option value="Failed">Failed</option>
-            </select>
-          </div>
+      {/* Filters, Search, and Actions */}
+<div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+  <div className="flex flex-wrap items-center justify-between gap-4">
+    
+    {/* Left: Search + Filters */}
+    <div className="flex flex-wrap items-center gap-3">
+      {/* Narrower search to fit buttons */}
+      <div className="w-48 sm:w-56 md:w-64">
+        <div className="relative">
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search by name or employee ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
         </div>
+      </div>
+
+      <select
+        value={selectedDept}
+        onChange={(e) => setSelectedDept(e.target.value)}
+        className="px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+      >
+        {departments.map((dept) => (
+          <option key={dept} value={dept}>{dept}</option>
+        ))}
+      </select>
+
+      <select
+        value={filterStatus}
+        onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+          setFilterStatus(e.target.value as 'All' | 'Paid' | 'Pending' | 'Processing' | 'Failed')
+        }
+        className="px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+      >
+        <option value="All">All Status</option>
+        <option value="Paid">Paid</option>
+        <option value="Pending">Pending</option>
+        <option value="Processing">Processing</option>
+        <option value="Failed">Failed</option>
+      </select>
+    </div>
+
+    {/* Right: Actions */}
+    <div className="flex gap-3">
+      <button
+        onClick={exportToCSV}
+        className="bg-white border border-slate-300 text-slate-700 px-5 py-2.5 rounded-lg font-medium hover:bg-slate-50 transition-all flex items-center gap-2"
+      >
+        <FaDownload className="w-4 h-4" />
+        Export
+      </button>
+
+      <button
+        onClick={handleProcessPayroll}
+        disabled={pendingCount === 0}
+        className={`px-6 py-2.5 rounded-lg font-semibold shadow-lg transition-all flex items-center gap-2 ${
+          pendingCount === 0
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            : 'bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white shadow-teal-500/30'
+        }`}
+      >
+        <FaDollarSign className="w-5 h-5" />
+        Process Payroll ({pendingCount})
+      </button>
+    </div>
+  </div>
+</div>
+
 
         {/* Payroll Table */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -489,7 +506,7 @@ Generated on: ${new Date().toLocaleString()}
                           className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
                           title="View Payslip"
                         >
-                          <Eye className="w-4 h-4" />
+                          <FaEye className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -533,7 +550,7 @@ Generated on: ${new Date().toLocaleString()}
                     onClick={() => setShowPayslip(false)}
                     className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
                   >
-                    <XCircle className="w-6 h-6" />
+                    <FaTimesCircle className="w-6 h-6" />
                   </button>
                 </div>
               </div>
@@ -581,7 +598,7 @@ Generated on: ${new Date().toLocaleString()}
                   {/* Earnings */}
                   <div className="bg-emerald-50 rounded-xl p-6">
                     <h3 className="font-bold text-emerald-800 mb-4 flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5" />
+                      <FaArrowUp className="w-5 h-5" />
                       Earnings
                     </h3>
                     <div className="space-y-3">
@@ -607,7 +624,7 @@ Generated on: ${new Date().toLocaleString()}
                   {/* Deductions */}
                   <div className="bg-red-50 rounded-xl p-6">
                     <h3 className="font-bold text-red-800 mb-4 flex items-center gap-2">
-                      <TrendingDown className="w-5 h-5" />
+                      <FaArrowDown className="w-5 h-5" />
                       Deductions
                     </h3>
                     <div className="space-y-3">
@@ -674,14 +691,14 @@ Generated on: ${new Date().toLocaleString()}
                   onClick={handleDownloadPayslip}
                   className="flex-1 bg-white border border-slate-300 text-slate-700 px-6 py-3 rounded-lg font-semibold hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
                 >
-                  <Download className="w-5 h-5" />
+                  <FaDownload className="w-5 h-5" />
                   Download Payslip
                 </button>
                 <button
                   onClick={handleEmailPayslip}
                   className="flex-1 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center gap-2"
                 >
-                  <Send className="w-5 h-5" />
+                  <FaPaperPlane className="w-5 h-5" />
                   Email Payslip
                 </button>
               </div>
@@ -703,7 +720,7 @@ Generated on: ${new Date().toLocaleString()}
               <div className="p-8 space-y-6">
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
                   <div className="text-amber-600 mt-0.5">
-                    <FileText className="w-5 h-5" />
+                    <FaFileAlt className="w-5 h-5" />
                   </div>
                   <div>
                     <p className="font-semibold text-amber-900 mb-1">Processing {pendingCount} pending payments</p>
@@ -743,7 +760,7 @@ Generated on: ${new Date().toLocaleString()}
                       <div key={emp.id} className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
-                            <Users className="w-4 h-4 text-teal-600" />
+                            <FaUsers className="w-4 h-4 text-teal-600" />
                           </div>
                           <div>
                             <p className="text-sm font-medium text-slate-800">{emp.employeeName}</p>
@@ -774,7 +791,7 @@ Generated on: ${new Date().toLocaleString()}
                   onClick={confirmProcessPayroll}
                   className="flex-1 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center gap-2"
                 >
-                  <CheckCircle className="w-5 h-5" />
+                  <FaCheckCircle className="w-5 h-5" />
                   Confirm & Process
                 </button>
               </div>

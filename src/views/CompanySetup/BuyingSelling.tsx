@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { ShoppingCart, TrendingUp, CheckCircle } from 'lucide-react';
+import {
+  FaShoppingCart,
+  FaChartLine,
+  FaCheckCircle
+} from "react-icons/fa";
+
 
 const BuyingSelling: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -26,7 +31,7 @@ const BuyingSelling: React.FC = () => {
         {/* Success Message */}
         {showSuccess && (
           <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <FaCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
             <p className="text-green-800 font-medium text-sm">Terms saved successfully!</p>
           </div>
         )}
@@ -38,7 +43,7 @@ const BuyingSelling: React.FC = () => {
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200">
               <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <ShoppingCart className="w-4 h-4 text-blue-600" />
+                <FaShoppingCart className="w-4 h-4 text-blue-600" />
               </div>
               <div>
                 <h2 className="text-base font-semibold text-slate-900">Default Buying Terms</h2>
@@ -66,7 +71,7 @@ const BuyingSelling: React.FC = () => {
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200">
               <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="w-4 h-4 text-emerald-600" />
+                <FaChartLine className="w-4 h-4 text-emerald-600" />
               </div>
               <div>
                 <h2 className="text-base font-semibold text-slate-900">Default Selling Terms</h2>
@@ -92,11 +97,7 @@ const BuyingSelling: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <p className="text-xs text-slate-500">
-            <span className="text-red-500">*</span> Required fields
-          </p>
-          <div className="flex gap-3">
+          <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => setFormData({
@@ -117,7 +118,6 @@ const BuyingSelling: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

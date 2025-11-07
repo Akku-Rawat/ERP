@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaCalendarAlt, FaClock, FaUserClock, FaChartPie, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaUserClock, FaChartPie, FaArrowRight } from 'react-icons/fa';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 type AttendanceRecord = {
@@ -27,7 +27,7 @@ const attendanceSummaryData = [
 ];
 
 const Attendance: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState('November 2025');
+  const [selectedDate] = useState('November 2025');
   const [viewMode, setViewMode] = useState<'Today' | 'Monthly'>('Today');
 
   return (
@@ -43,13 +43,7 @@ const Attendance: React.FC = () => {
             className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
         </div>
-        <div className="flex gap-2">
-          <button className="text-teal-600 hover:text-teal-800">View Profile</button>
-          <button className="text-gray-400 hover:text-gray-600">
-            <FaChartPie />
-          </button>
-          <button className="text-gray-400 hover:text-gray-600">⋮</button>
-        </div>
+       
       </div>
 
       {/* KPI Cards */}

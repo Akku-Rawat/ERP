@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { FaBuilding,FaIdCard,FaMoneyCheckAlt ,FaExchangeAlt } from 'react-icons/fa';
+import { FaBuilding,FaIdCard,FaMoneyCheckAlt ,FaExchangeAlt,FaEnvelope } from 'react-icons/fa';
 import BasicDetails from './BasicDetails';
 import AccountingDetails from './AccountingDetails';
 import BuyingSelling from './BuyingSelling';
+import SubscribedModules from './subscribedmodule';
+
 
 const navTabs = [
   { key: 'basic', label: 'Basic Details', icon: <FaIdCard/> },
   { key: 'accounting', label: 'Accounting Details', icon: <FaMoneyCheckAlt /> },
   { key: 'buyingSelling', label: 'Buying & Selling', icon: <FaExchangeAlt /> },
+  { key:'subscribed',label:'Subscribed',icon:<FaEnvelope/>}
 ];
 
 const CompanySetup: React.FC = () => {
@@ -39,6 +42,7 @@ const CompanySetup: React.FC = () => {
         {tab === 'basic' && <BasicDetails />}
         {tab === 'accounting' && <AccountingDetails />}
         {tab === 'buyingSelling' && <BuyingSelling />}
+        {tab === 'subscribed' && <SubscribedModules/>}
       </div>
     </div>
   );

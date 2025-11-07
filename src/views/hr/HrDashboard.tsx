@@ -425,7 +425,17 @@ const HrDashboard: React.FC<HrDashboardProps> = ({ onNavigate }) => {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value, name, props: any) => [`${props.payload.count} requests (${value}%)`, name]} />
+             <Tooltip
+             formatter={(
+               value: number,
+               name: string,
+               props?: { payload?: { count?: number } }
+              ) => [
+              `${props?.payload?.count ?? ''} requests (${value}%)`,
+              name,
+              ]}
+              />
+
             </PieChart>
           </ResponsiveContainer>
           <div className="mt-4 space-y-2">
