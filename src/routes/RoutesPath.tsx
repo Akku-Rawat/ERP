@@ -7,5 +7,6 @@
   SUPPLIERS: "/suppliers",
   ACCOUNTING: "/accounting",
   CRM: "/crm",
-  Hr:"/hr"
+  Hr:"/hr",
+  CompanySetup: "/companySetup"
 };

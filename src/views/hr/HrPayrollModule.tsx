@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaUsers, FaClipboardList, FaCalendarDay, FaMoneyCheckAlt, FaChartLine, FaUserPlus } from 'react-icons/fa';
+import { FaUserTie, FaUsers , FaClipboardList, FaCalendarDay, FaMoneyCheckAlt, FaChartLine, FaUserPlus } from 'react-icons/fa';
 import HrDashboard from './HrDashboard';
 import EmployeeDirectory from './EmployeeDirectory';
 import Attendance from './Attendance';
@@ -24,7 +24,7 @@ const HrPayrollModule: React.FC = () => {
     <div className="bg-gray-50 min-h-screen p-8 pb-20">
       {/* Header */}
       <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
-        <FaUsers /> Human Resources
+        <FaUserTie /> Human Resources
       </h1>
 
       {/* Navbar */}
