@@ -4,7 +4,7 @@ import {
   FaChartPie,
   FaCalendar,
   FaChartBar,
-  FaDollarSign
+  FaDollarSign,
 } from "react-icons/fa";
 
 import GeneralLedger from "./GeneralLedger";
@@ -50,83 +50,9 @@ type BalanceSheetData = {
   activeAccounts: Account[];
 };
 
-const accounts: Account[] = [/* your accounts data here */];
-const journalEntries: any[] = [/* your journal entries data here */];
+// Sample Data
 
-// Example placeholder data for type safety in default arrays/objects
-const filteredAccounts: Account[] = [];
-const trialBalance: TrialBalanceAccount[] = [];
-const profitLoss: ProfitLossData = {
-  revenue: 0,
-  expenses: 0,
-  grossProfit: 0,
-  operatingExpenses: 0,
-  netIncome: 0,
-  activeAccounts: [],
-};
-const balanceSheet: BalanceSheetData = {
-  assets: 0,
-  liabilities: 0,
-  equity: 0,
-  currentAssets: 0,
-  fixedAssets: 0,
-  currentLiabilities: 0,
-  longTermLiabilities: 0,
-  activeAccounts: [],
-};
-
-const monthNames: { [key: string]: string } = {
-  "01": "January",
-  "02": "February",
-  "03": "March",
-  "04": "April",
-  "05": "May",
-  "06": "June",
-  "07": "July",
-  "08": "August",
-  "09": "September",
-  "10": "October",
-  "11": "November",
-  "12": "December",
-};
-
-const AccountingModule: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>("gl");
-  const [glSubTab, setGlSubTab] = useState<string>("chart");
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedFilter, setSelectedFilter] = useState<string>("all");
-  const [showFilterDropdown, setShowFilterDropdown] = useState<boolean>(false);
-  const [reportPeriod, setReportPeriod] = useState<string>("monthly");
-  const [reportYear, setReportYear] = useState<string>("2024");
-  const [reportMonth, setReportMonth] = useState<string>("11");
-
-  // Utility functions for GeneralLedger
-  const getFilterLabel = (): string => {
-    const labels: { [key: string]: string } = {
-      all: "All Accounts",
-      active: "Active Accounts",
-      inactive: "Inactive Accounts",
-      asset: "Asset Accounts",
-      liability: "Liability Accounts",
-      equity: "Equity Accounts",
-      income: "Income Accounts",
-      expense: "Expense Accounts",
-    };
-    return labels[selectedFilter] || "All Accounts";
-  };
-
-  const getFilterCount = (filter: string): number => {
-    if (filter === "all") return accounts.length;
-    if (filter === "active") return accounts.filter((a) => a.status === "active").length;
-    if (filter === "inactive") return accounts.filter((a) => a.status === "inactive").length;
-    if (filter === "asset") return accounts.filter((a) => a.category === "asset").length;
-    if (filter === "liability") return accounts.filter((a) => a.category === "liability").length;
-    if (filter === "equity") return accounts.filter((a) => a.category === "equity").length;
-    if (filter === "income") return accounts.filter((a) => a.category === "income").length;
-    if (filter === "expense") return accounts.filter((a) => a.category === "expense").length;
-    return 0;
-  };
- const accounts = [
+const accounts: Account[] = [
   {
     code: "1000",
     name: "Cash",
@@ -200,7 +126,8 @@ const AccountingModule: React.FC = () => {
     category: "equity",
   },
 ];
-const trialBalance = [
+
+const trialBalance: TrialBalanceAccount[] = [
   { code: "1000", name: "Cash", debit: 150000, credit: 0 },
   { code: "1100", name: "Petty Cash", debit: 5000, credit: 0 },
   { code: "1200", name: "Accounts Receivable", debit: 85000, credit: 0 },
@@ -210,16 +137,11 @@ const trialBalance = [
   { code: "4000", name: "Sales Revenue", debit: 0, credit: 500000 },
   { code: "5000", name: "Cost of Goods Sold", debit: 200000, credit: 0 },
 ];
+
 const totalDebit = trialBalance.reduce((sum, acc) => sum + acc.debit, 0);
 const totalCredit = trialBalance.reduce((sum, acc) => sum + acc.credit, 0);
 
-
-
-  const handleFilterSelect = (filter: string): void => {
-    setSelectedFilter(filter);
-    setShowFilterDropdown(false); // Close the dropdown after selection
-  };
-  const journalEntries = [
+const journalEntries = [
   {
     id: "JE-001",
     date: "2025-11-01",
@@ -271,19 +193,45 @@ const totalCredit = trialBalance.reduce((sum, acc) => sum + acc.credit, 0);
     ],
   },
 ];
-const profitLoss = {
+
+const profitLoss: ProfitLossData = {
   revenue: 500000,
   expenses: 200000,
   grossProfit: 300000,
   operatingExpenses: 100000,
   netIncome: 200000,
   activeAccounts: [
-    { code: "4000", name: "Sales Revenue", type: "Revenue", balance: 500000, parent: "Income", status: "active", category: "income" },
-    { code: "5000", name: "Cost of Goods Sold", type: "Expense", balance: 200000, parent: "Cost of Sales", status: "active", category: "expense" },
-    { code: "6000", name: "Operating Expenses", type: "Expense", balance: 100000, parent: "Operating Expenses", status: "active", category: "expense" }
-  ]
+    {
+      code: "4000",
+      name: "Sales Revenue",
+      type: "Revenue",
+      balance: 500000,
+      parent: "Income",
+      status: "active",
+      category: "income",
+    },
+    {
+      code: "5000",
+      name: "Cost of Goods Sold",
+      type: "Expense",
+      balance: 200000,
+      parent: "Cost of Sales",
+      status: "active",
+      category: "expense",
+    },
+    {
+      code: "6000",
+      name: "Operating Expenses",
+      type: "Expense",
+      balance: 100000,
+      parent: "Operating Expenses",
+      status: "active",
+      category: "expense",
+    },
+  ],
 };
-const balanceSheet = {
+
+const balanceSheet: BalanceSheetData = {
   assets: 500000,
   liabilities: 300000,
   equity: 200000,
@@ -292,105 +240,209 @@ const balanceSheet = {
   currentLiabilities: 100000,
   longTermLiabilities: 200000,
   activeAccounts: [
-    { code: "1000", name: "Cash", type: "Asset", balance: 150000, parent: "Current Assets", status: "active", category: "asset" },
-    { code: "1100", name: "Petty Cash", type: "Asset", balance: 5000, parent: "Current Assets", status: "active", category: "asset" },
-    { code: "1200", name: "Accounts Receivable", type: "Asset", balance: 45000, parent: "Current Assets", status: "active", category: "asset" },
-    { code: "1300", name: "Equipment", type: "Asset", balance: 300000, parent: "Fixed Assets", status: "active", category: "asset" },
-    { code: "2000", name: "Accounts Payable", type: "Liability", balance: 100000, parent: "Current Liabilities", status: "active", category: "liability" },
-    { code: "2500", name: "Long-term Debt", type: "Liability", balance: 200000, parent: "Long-term Liabilities", status: "active", category: "liability" },
-    { code: "3000", name: "Owner's Equity", type: "Equity", balance: 200000, parent: "Capital", status: "active", category: "equity" }
+    {
+      code: "1000",
+      name: "Cash",
+      type: "Asset",
+      balance: 150000,
+      parent: "Current Assets",
+      status: "active",
+      category: "asset",
+    },
+    {
+      code: "1100",
+      name: "Petty Cash",
+      type: "Asset",
+      balance: 5000,
+      parent: "Current Assets",
+      status: "active",
+      category: "asset",
+    },
+    {
+      code: "1200",
+      name: "Accounts Receivable",
+      type: "Asset",
+      balance: 45000,
+      parent: "Current Assets",
+      status: "active",
+      category: "asset",
+    },
+    {
+      code: "1300",
+      name: "Equipment",
+      type: "Asset",
+      balance: 300000,
+      parent: "Fixed Assets",
+      status: "active",
+      category: "asset",
+    },
+    {
+      code: "2000",
+      name: "Accounts Payable",
+      type: "Liability",
+      balance: 100000,
+      parent: "Current Liabilities",
+      status: "active",
+      category: "liability",
+    },
+    {
+      code: "2500",
+      name: "Long-term Debt",
+      type: "Liability",
+      balance: 200000,
+      parent: "Long-term Liabilities",
+      status: "active",
+      category: "liability",
+    },
+    {
+      code: "3000",
+      name: "Owner's Equity",
+      type: "Equity",
+      balance: 200000,
+      parent: "Capital",
+      status: "active",
+      category: "equity",
+    },
   ],
 };
 
+const monthNames: { [key: string]: string } = {
+  "01": "January",
+  "02": "February",
+  "03": "March",
+  "04": "April",
+  "05": "May",
+  "06": "June",
+  "07": "July",
+  "08": "August",
+  "09": "September",
+  "10": "October",
+  "11": "November",
+  "12": "December",
+};
+
+// Accounting Module Meta for tabs and icon
+const accountingModule = {
+  name: "Accounting",
+  icon: <FaBriefcase />,
+  defaultTab: "gl",
+  tabs: [
+    { id: "gl", name: "General Ledger", icon: <FaChartPie /> },
+    { id: "trial", name: "Trial Balance", icon: <FaChartBar /> },
+    { id: "pl", name: "Profit & Loss", icon: <FaCalendar /> },
+    { id: "balance", name: "Balance Sheet", icon: <FaDollarSign /> },
+  ],
+};
+
+// Main component
+const AccountingModule: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<string>(accountingModule.defaultTab);
+  const [glSubTab, setGlSubTab] = useState<string>("chart");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedFilter, setSelectedFilter] = useState<string>("all");
+  const [showFilterDropdown, setShowFilterDropdown] = useState<boolean>(false);
+  const [reportPeriod, setReportPeriod] = useState<string>("monthly");
+  const [reportYear, setReportYear] = useState<string>("2024");
+  const [reportMonth, setReportMonth] = useState<string>("11");
+
+  // Filter label for GeneralLedger
+  const getFilterLabel = (): string => {
+    const labels: { [key: string]: string } = {
+      all: "All Accounts",
+      active: "Active Accounts",
+      inactive: "Inactive Accounts",
+      asset: "Asset Accounts",
+      liability: "Liability Accounts",
+      equity: "Equity Accounts",
+      income: "Income Accounts",
+      expense: "Expense Accounts",
+    };
+    return labels[selectedFilter] || "All Accounts";
+  };
+
+  // Filter count for GeneralLedger
+  const getFilterCount = (filter: string): number => {
+    if (filter === "all") return accounts.length;
+    if (filter === "active")
+      return accounts.filter((a) => a.status === "active").length;
+    if (filter === "inactive")
+      return accounts.filter((a) => a.status === "inactive").length;
+    if (filter === "asset")
+      return accounts.filter((a) => a.category === "asset").length;
+    if (filter === "liability")
+      return accounts.filter((a) => a.category === "liability").length;
+    if (filter === "equity")
+      return accounts.filter((a) => a.category === "equity").length;
+    if (filter === "income")
+      return accounts.filter((a) => a.category === "income").length;
+    if (filter === "expense")
+      return accounts.filter((a) => a.category === "expense").length;
+    return 0;
+  };
+
+  // Filter select handler
+  const handleFilterSelect = (filter: string): void => {
+    setSelectedFilter(filter);
+    setShowFilterDropdown(false);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm mb-4">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3">
-          <FaBriefcase className="w-8 h-8 text-gray-700" />
-          <h1 className="text-2xl font-bold text-gray-800">Accounting</h1>
-        </div>
-      </header>
-      <nav className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 flex gap-8">
-          <button
-            className={`flex items-center gap-2 py-4 border-b-2 ${
-              activeTab === "gl"
-                ? "border-teal-500 text-teal-600"
-                : "border-transparent text-gray-600 hover:text-gray-800"
-            }`}
-            onClick={() => setActiveTab("gl")}
-          >
-            <FaChartPie className="w-5 h-5" />
-            <span className="font-medium">General Ledger</span>
-          </button>
-          <button
-            className={`flex items-center gap-2 py-4 border-b-2 ${
-              activeTab === "trial"
-                ? "border-teal-500 text-teal-600"
-                : "border-transparent text-gray-600 hover:text-gray-800"
-            }`}
-            onClick={() => setActiveTab("trial")}
-          >
-            <FaChartBar className="w-5 h-5" />
-            <span className="font-medium">Trial Balance</span>
-          </button>
-          <button
-            className={`flex items-center gap-2 py-4 border-b-2 ${
-              activeTab === "pl"
-                ? "border-teal-500 text-teal-600"
-                : "border-transparent text-gray-600 hover:text-gray-800"
-            }`}
-            onClick={() => setActiveTab("pl")}
-          >
-            <FaCalendar className="w-5 h-5" />
-            <span className="font-medium">Profit & Loss</span>
-          </button>
-          <button
-            className={`flex items-center gap-2 py-4 border-b-2 ${
-              activeTab === "balance"
-                ? "border-teal-500 text-teal-600"
-                : "border-transparent text-gray-600 hover:text-gray-800"
-            }`}
-            onClick={() => setActiveTab("balance")}
-          >
-            <FaDollarSign className="w-5 h-5" />
-            <span className="font-medium">Balance Sheet</span>
-          </button>
-        </div>
-      </nav>
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        {activeTab === "gl" && (
-          
-<GeneralLedger
-  glSubTab={glSubTab}
-  setGlSubTab={setGlSubTab}
-  accounts={accounts}
-  searchTerm={searchTerm}
-  setSearchTerm={setSearchTerm}
-  selectedFilter={selectedFilter}
-  setSelectedFilter={setSelectedFilter}
-  showFilterDropdown={showFilterDropdown}
-  setShowFilterDropdown={setShowFilterDropdown}
-  handleFilterSelect={handleFilterSelect}
-  getFilterLabel={getFilterLabel}
-  getFilterCount={getFilterCount}
-  journalEntries={journalEntries}  
-/>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
+          <span>{accountingModule.icon}</span> {accountingModule.name}
+        </h2>
+        {/* Optionally add summary counts here */}
+      </div>
 
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 mb-4">
+        {accountingModule.tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
+              activeTab === tab.id
+                ? "text-teal-600 border-b-2 border-teal-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <span>{tab.icon}</span> {tab.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="bg-white rounded-lg shadow-sm p-4 min-h-[400px]">
+        {activeTab === "gl" && (
+          <GeneralLedger
+            glSubTab={glSubTab}
+            setGlSubTab={setGlSubTab}
+            accounts={accounts}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedFilter={selectedFilter}
+            setSelectedFilter={setSelectedFilter}
+            showFilterDropdown={showFilterDropdown}
+            setShowFilterDropdown={setShowFilterDropdown}
+            handleFilterSelect={handleFilterSelect}
+            getFilterLabel={getFilterLabel}
+            getFilterCount={getFilterCount}
+            journalEntries={journalEntries}
+          />
         )}
         {activeTab === "trial" && (
           <TrialBalance
-  trialBalance={trialBalance}
-  totalDebit={totalDebit}
-  totalCredit={totalCredit}
-  reportMonth={reportMonth}
-  reportYear={reportYear}
-  setReportMonth={setReportMonth}
-  setReportYear={setReportYear}
-  monthNames={monthNames}
-/>
-
+            trialBalance={trialBalance}
+            totalDebit={totalDebit}
+            totalCredit={totalCredit}
+            reportMonth={reportMonth}
+            reportYear={reportYear}
+            setReportMonth={setReportMonth}
+            setReportYear={setReportYear}
+            monthNames={monthNames}
+          />
         )}
         {activeTab === "pl" && (
           <ProfitLoss
@@ -402,7 +454,6 @@ const balanceSheet = {
             reportMonth={reportMonth}
             setReportMonth={setReportMonth}
             monthNames={monthNames}
-            
           />
         )}
         {activeTab === "balance" && (
@@ -414,10 +465,10 @@ const balanceSheet = {
             profitLoss={profitLoss}
           />
         )}
-      </main>
+      </div>
     </div>
   );
 };
 
-
 export default AccountingModule;
+
