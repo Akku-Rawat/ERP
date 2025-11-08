@@ -1,107 +1,423 @@
 import React, { useState } from "react";
-import AccountModal from '../../components/accounting/AccountModal';
-import JournalModal from '../../components/accounting/JournalModal';
+import {
+  FaBriefcase,
+  FaChartPie,
+  FaCalendar,
+  FaChartBar,
+  FaDollarSign
+} from "react-icons/fa";
 
-import { FaBriefcase, FaChartPie, FaFileAlt, FaClipboardList } from "react-icons/fa";
-import Coa from './COA';
-import JournalEntries from './Journal-Entries';
-import FinancialReports from './Financial-Reports';
+import GeneralLedger from "./GeneralLedger";
+import TrialBalance from "./TrialBalance";
+import ProfitLoss from "./ProfitLoss";
+import BalanceSheet from "./BalanceSheet";
 
-const accountingModule = {
-  name: "Accounting",
-  icon: <FaBriefcase />,
-  defaultTab: "accounts",
-  tabs: [
-    { id: "accounts", name: "Chart of Accounts", icon: <FaChartPie /> },
-    { id: "journals", name: "Journal Entries", icon: <FaFileAlt /> },
-    { id: "reports", name: "Financial Reports", icon: <FaClipboardList /> },
-  ],
-  accounts: [
-    { code: "1000", name: "Cash", type: "Asset", balance: 150000, parent: "Current Assets" },
-    { code: "1200", name: "Accounts Receivable", type: "Asset", balance: 85000, parent: "Current Assets" },
-    { code: "2000", name: "Accounts Payable", type: "Liability", balance: 45000, parent: "Current Liabilities" },
-    { code: "3000", name: "Owner's Equity", type: "Equity", balance: 250000, parent: "Capital" },
+// TYPE DEFINITIONS
+type Account = {
+  code: string;
+  name: string;
+  type: string;
+  balance: number;
+  parent: string;
+  status: string;
+  category?: string;
+};
+
+type TrialBalanceAccount = {
+  code: string;
+  name: string;
+  debit: number;
+  credit: number;
+};
+
+type ProfitLossData = {
+  revenue: number;
+  expenses: number;
+  grossProfit: number;
+  operatingExpenses: number;
+  netIncome: number;
+  activeAccounts: Account[];
+};
+
+type BalanceSheetData = {
+  assets: number;
+  liabilities: number;
+  equity: number;
+  currentAssets: number;
+  fixedAssets: number;
+  currentLiabilities: number;
+  longTermLiabilities: number;
+  activeAccounts: Account[];
+};
+
+const accounts: Account[] = [/* your accounts data here */];
+const journalEntries: any[] = [/* your journal entries data here */];
+
+// Example placeholder data for type safety in default arrays/objects
+const filteredAccounts: Account[] = [];
+const trialBalance: TrialBalanceAccount[] = [];
+const profitLoss: ProfitLossData = {
+  revenue: 0,
+  expenses: 0,
+  grossProfit: 0,
+  operatingExpenses: 0,
+  netIncome: 0,
+  activeAccounts: [],
+};
+const balanceSheet: BalanceSheetData = {
+  assets: 0,
+  liabilities: 0,
+  equity: 0,
+  currentAssets: 0,
+  fixedAssets: 0,
+  currentLiabilities: 0,
+  longTermLiabilities: 0,
+  activeAccounts: [],
+};
+
+const monthNames: { [key: string]: string } = {
+  "01": "January",
+  "02": "February",
+  "03": "March",
+  "04": "April",
+  "05": "May",
+  "06": "June",
+  "07": "July",
+  "08": "August",
+  "09": "September",
+  "10": "October",
+  "11": "November",
+  "12": "December",
+};
+
+const AccountingModule: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<string>("gl");
+  const [glSubTab, setGlSubTab] = useState<string>("chart");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedFilter, setSelectedFilter] = useState<string>("all");
+  const [showFilterDropdown, setShowFilterDropdown] = useState<boolean>(false);
+  const [reportPeriod, setReportPeriod] = useState<string>("monthly");
+  const [reportYear, setReportYear] = useState<string>("2024");
+  const [reportMonth, setReportMonth] = useState<string>("11");
+
+  // Utility functions for GeneralLedger
+  const getFilterLabel = (): string => {
+    const labels: { [key: string]: string } = {
+      all: "All Accounts",
+      active: "Active Accounts",
+      inactive: "Inactive Accounts",
+      asset: "Asset Accounts",
+      liability: "Liability Accounts",
+      equity: "Equity Accounts",
+      income: "Income Accounts",
+      expense: "Expense Accounts",
+    };
+    return labels[selectedFilter] || "All Accounts";
+  };
+
+  const getFilterCount = (filter: string): number => {
+    if (filter === "all") return accounts.length;
+    if (filter === "active") return accounts.filter((a) => a.status === "active").length;
+    if (filter === "inactive") return accounts.filter((a) => a.status === "inactive").length;
+    if (filter === "asset") return accounts.filter((a) => a.category === "asset").length;
+    if (filter === "liability") return accounts.filter((a) => a.category === "liability").length;
+    if (filter === "equity") return accounts.filter((a) => a.category === "equity").length;
+    if (filter === "income") return accounts.filter((a) => a.category === "income").length;
+    if (filter === "expense") return accounts.filter((a) => a.category === "expense").length;
+    return 0;
+  };
+ const accounts = [
+  {
+    code: "1000",
+    name: "Cash",
+    type: "Asset",
+    balance: 150000,
+    parent: "Current Assets",
+    status: "active",
+    category: "asset",
+  },
+  {
+    code: "1100",
+    name: "Petty Cash",
+    type: "Asset",
+    balance: 5000,
+    parent: "Current Assets",
+    status: "active",
+    category: "asset",
+  },
+  {
+    code: "1200",
+    name: "Accounts Receivable",
+    type: "Asset",
+    balance: 85000,
+    parent: "Current Assets",
+    status: "active",
+    category: "asset",
+  },
+  {
+    code: "1300",
+    name: "Prepaid Expenses",
+    type: "Asset",
+    balance: 10000,
+    parent: "Current Assets",
+    status: "inactive",
+    category: "asset",
+  },
+  {
+    code: "2000",
+    name: "Accounts Payable",
+    type: "Liability",
+    balance: 45000,
+    parent: "Current Liabilities",
+    status: "inactive",
+    category: "liability",
+  },
+  {
+    code: "2500",
+    name: "Long-term Debt",
+    type: "Liability",
+    balance: 180000,
+    parent: "Long-term Liabilities",
+    status: "active",
+    category: "liability",
+  },
+  {
+    code: "3000",
+    name: "Owner's Equity",
+    type: "Equity",
+    balance: 250000,
+    parent: "Capital",
+    status: "active",
+    category: "equity",
+  },
+  {
+    code: "3100",
+    name: "Retained Earnings",
+    type: "Equity",
+    balance: 75000,
+    parent: "Capital",
+    status: "inactive",
+    category: "equity",
+  },
+];
+const trialBalance = [
+  { code: "1000", name: "Cash", debit: 150000, credit: 0 },
+  { code: "1100", name: "Petty Cash", debit: 5000, credit: 0 },
+  { code: "1200", name: "Accounts Receivable", debit: 85000, credit: 0 },
+  { code: "2000", name: "Accounts Payable", debit: 0, credit: 45000 },
+  { code: "2500", name: "Long-term Debt", debit: 0, credit: 180000 },
+  { code: "3000", name: "Owner's Equity", debit: 0, credit: 250000 },
+  { code: "4000", name: "Sales Revenue", debit: 0, credit: 500000 },
+  { code: "5000", name: "Cost of Goods Sold", debit: 200000, credit: 0 },
+];
+const totalDebit = trialBalance.reduce((sum, acc) => sum + acc.debit, 0);
+const totalCredit = trialBalance.reduce((sum, acc) => sum + acc.credit, 0);
+
+
+
+  const handleFilterSelect = (filter: string): void => {
+    setSelectedFilter(filter);
+    setShowFilterDropdown(false); // Close the dropdown after selection
+  };
+  const journalEntries = [
+  {
+    id: "JE-001",
+    date: "2025-11-01",
+    description: "Sales Invoice #1001",
+    status: "Posted",
+    entries: [
+      { account: "4000 - Sales Revenue", debit: 0, credit: 50000 },
+      { account: "1000 - Cash", debit: 50000, credit: 0 },
+    ],
+  },
+  {
+    id: "JE-002",
+    date: "2025-11-03",
+    description: "Purchase Office Supplies",
+    status: "Posted",
+    entries: [
+      { account: "6000 - Office Supplies Expense", debit: 2000, credit: 0 },
+      { account: "2000 - Accounts Payable", debit: 0, credit: 2000 },
+    ],
+  },
+  {
+    id: "JE-003",
+    date: "2025-11-05",
+    description: "Payroll - October",
+    status: "Draft",
+    entries: [
+      { account: "6100 - Salaries Expense", debit: 15000, credit: 0 },
+      { account: "1000 - Cash", debit: 0, credit: 15000 },
+    ],
+  },
+  {
+    id: "JE-004",
+    date: "2025-11-07",
+    description: "Bank Loan Received",
+    status: "Posted",
+    entries: [
+      { account: "1000 - Cash", debit: 300000, credit: 0 },
+      { account: "2500 - Bank Loan", debit: 0, credit: 300000 },
+    ],
+  },
+  {
+    id: "JE-005",
+    date: "2025-11-08",
+    description: "Utility Bills Payment",
+    status: "Posted",
+    entries: [
+      { account: "6200 - Utilities Expense", debit: 1200, credit: 0 },
+      { account: "1000 - Cash", debit: 0, credit: 1200 },
+    ],
+  },
+];
+const profitLoss = {
+  revenue: 500000,
+  expenses: 200000,
+  grossProfit: 300000,
+  operatingExpenses: 100000,
+  netIncome: 200000,
+  activeAccounts: [
+    { code: "4000", name: "Sales Revenue", type: "Revenue", balance: 500000, parent: "Income", status: "active", category: "income" },
+    { code: "5000", name: "Cost of Goods Sold", type: "Expense", balance: 200000, parent: "Cost of Sales", status: "active", category: "expense" },
+    { code: "6000", name: "Operating Expenses", type: "Expense", balance: 100000, parent: "Operating Expenses", status: "active", category: "expense" }
+  ]
+};
+const balanceSheet = {
+  assets: 500000,
+  liabilities: 300000,
+  equity: 200000,
+  currentAssets: 200000,
+  fixedAssets: 300000,
+  currentLiabilities: 100000,
+  longTermLiabilities: 200000,
+  activeAccounts: [
+    { code: "1000", name: "Cash", type: "Asset", balance: 150000, parent: "Current Assets", status: "active", category: "asset" },
+    { code: "1100", name: "Petty Cash", type: "Asset", balance: 5000, parent: "Current Assets", status: "active", category: "asset" },
+    { code: "1200", name: "Accounts Receivable", type: "Asset", balance: 45000, parent: "Current Assets", status: "active", category: "asset" },
+    { code: "1300", name: "Equipment", type: "Asset", balance: 300000, parent: "Fixed Assets", status: "active", category: "asset" },
+    { code: "2000", name: "Accounts Payable", type: "Liability", balance: 100000, parent: "Current Liabilities", status: "active", category: "liability" },
+    { code: "2500", name: "Long-term Debt", type: "Liability", balance: 200000, parent: "Long-term Liabilities", status: "active", category: "liability" },
+    { code: "3000", name: "Owner's Equity", type: "Equity", balance: 200000, parent: "Capital", status: "active", category: "equity" }
   ],
 };
 
-const Accounting: React.FC = () => {
-  const [activeTab, setActiveTab] = useState(accountingModule.defaultTab);
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const [showAccountModal, setShowAccountModal] = useState(false);
-  const [showJournalModal, setShowJournalModal] = useState(false);
-
-  const handleAdd = () => {
-    if (activeTab === "accounts") setShowAccountModal(true);
-    else if (activeTab === "journals") setShowJournalModal(true);
-  };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
-          <span>{accountingModule.icon}</span> {accountingModule.name}
-        </h2>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-4">
-        {accountingModule.tabs.map((tab) => (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm mb-4">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3">
+          <FaBriefcase className="w-8 h-8 text-gray-700" />
+          <h1 className="text-2xl font-bold text-gray-800">Accounting</h1>
+        </div>
+      </header>
+      <nav className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 flex gap-8">
           <button
-            key={tab.id}
-            onClick={() => {
-              setActiveTab(tab.id);
-              setSearchTerm("");
-            }}
-            className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
-              activeTab === tab.id
-                ? "text-teal-600 border-b-2 border-teal-600"
-                : "text-gray-500 hover:text-gray-700"
+            className={`flex items-center gap-2 py-4 border-b-2 ${
+              activeTab === "gl"
+                ? "border-teal-500 text-teal-600"
+                : "border-transparent text-gray-600 hover:text-gray-800"
             }`}
+            onClick={() => setActiveTab("gl")}
           >
-            <span>{tab.icon}</span> {tab.name}
+            <FaChartPie className="w-5 h-5" />
+            <span className="font-medium">General Ledger</span>
           </button>
-        ))}
-      </div>
+          <button
+            className={`flex items-center gap-2 py-4 border-b-2 ${
+              activeTab === "trial"
+                ? "border-teal-500 text-teal-600"
+                : "border-transparent text-gray-600 hover:text-gray-800"
+            }`}
+            onClick={() => setActiveTab("trial")}
+          >
+            <FaChartBar className="w-5 h-5" />
+            <span className="font-medium">Trial Balance</span>
+          </button>
+          <button
+            className={`flex items-center gap-2 py-4 border-b-2 ${
+              activeTab === "pl"
+                ? "border-teal-500 text-teal-600"
+                : "border-transparent text-gray-600 hover:text-gray-800"
+            }`}
+            onClick={() => setActiveTab("pl")}
+          >
+            <FaCalendar className="w-5 h-5" />
+            <span className="font-medium">Profit & Loss</span>
+          </button>
+          <button
+            className={`flex items-center gap-2 py-4 border-b-2 ${
+              activeTab === "balance"
+                ? "border-teal-500 text-teal-600"
+                : "border-transparent text-gray-600 hover:text-gray-800"
+            }`}
+            onClick={() => setActiveTab("balance")}
+          >
+            <FaDollarSign className="w-5 h-5" />
+            <span className="font-medium">Balance Sheet</span>
+          </button>
+        </div>
+      </nav>
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        {activeTab === "gl" && (
+          
+<GeneralLedger
+  glSubTab={glSubTab}
+  setGlSubTab={setGlSubTab}
+  accounts={accounts}
+  searchTerm={searchTerm}
+  setSearchTerm={setSearchTerm}
+  selectedFilter={selectedFilter}
+  setSelectedFilter={setSelectedFilter}
+  showFilterDropdown={showFilterDropdown}
+  setShowFilterDropdown={setShowFilterDropdown}
+  handleFilterSelect={handleFilterSelect}
+  getFilterLabel={getFilterLabel}
+  getFilterCount={getFilterCount}
+  journalEntries={journalEntries}  
+/>
 
-      {/* Content */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        {(activeTab === "accounts") && (
-          <Coa
-            accounts={accountingModule.accounts}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onAdd={handleAdd}
+        )}
+        {activeTab === "trial" && (
+          <TrialBalance
+  trialBalance={trialBalance}
+  totalDebit={totalDebit}
+  totalCredit={totalCredit}
+  reportMonth={reportMonth}
+  reportYear={reportYear}
+  setReportMonth={setReportMonth}
+  setReportYear={setReportYear}
+  monthNames={monthNames}
+/>
+
+        )}
+        {activeTab === "pl" && (
+          <ProfitLoss
+            profitLoss={profitLoss}
+            reportPeriod={reportPeriod}
+            setReportPeriod={setReportPeriod}
+            reportYear={reportYear}
+            setReportYear={setReportYear}
+            reportMonth={reportMonth}
+            setReportMonth={setReportMonth}
+            monthNames={monthNames}
+            
           />
         )}
-
-        {(activeTab === "journals") && (
-          <JournalEntries
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onAdd={handleAdd}
+        {activeTab === "balance" && (
+          <BalanceSheet
+            balanceSheet={balanceSheet}
+            reportYear={reportYear}
+            setReportYear={setReportYear}
+            monthNames={monthNames}
+            profitLoss={profitLoss}
           />
         )}
-
-        {(activeTab === "reports") && (
-          <FinancialReports />
-        )}
-      </div>
-
-      {/* Modals */}
-      <AccountModal
-        isOpen={showAccountModal}
-        onClose={() => setShowAccountModal(false)}
-        onSubmit={(data) => console.log("New Account:", data)}
-      />
-      <JournalModal
-        isOpen={showJournalModal}
-        onClose={() => setShowJournalModal(false)}
-        onSubmit={(data) => console.log("New Journal Entry:", data)}
-      />
+      </main>
     </div>
   );
 };
 
-export default Accounting;
+
+export default AccountingModule;
