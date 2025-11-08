@@ -8,5 +8,6 @@
   ACCOUNTING: "/accounting",
   CRM: "/crm",
   Hr:"/hr",
-  CompanySetup: "/companySetup"
+  CompanySetup: "/companySetup",
+  UserManagement:"/userManagement",
 };

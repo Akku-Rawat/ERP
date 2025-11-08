@@ -29,6 +29,7 @@ const menuItems = [
   { name: "Supplier Management", to: "/suppliers", icon: <FaHandshake /> },
   { name: "Accounting", to: "/accounting", icon: <FaBriefcase /> },
   {name : "Hr", to:"/hr",icon : <FaUserTie/>},
+  {name:"User Management", to:"/userManagement",icon:<FaUsers/>},
   {name:"CompanySetup", to:"/companySetup",icon:<FaBuilding/>},
   { name: "Settings", to: "/settings", icon: <FaCog /> }
   
