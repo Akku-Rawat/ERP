@@ -14,58 +14,30 @@ const base_url = import.meta.env.VITE_BASE_URL;
 const CUSTOMER_ENDPOINT = `${base_url}.customer.customer.create_customer_api`;
 console.log("CUSTOMER_ENDPOINT" + CUSTOMER_ENDPOINT);
 
-interface CustomerFormData {
-  customer_name: string;
-  customer_type: "Individual" | "Company";
-  custom_customer_tpin: string;
-  ssn?: string;
-  custom_account_number: string;
-  customer_email: string;
-  mobile_no: string;
-  paymentTerms?: string;
-  website?: string;
-  customer_billing_address_line1?: string;
-  customer_billing_address_line2?: string;
-  customer_billing_postal_code?: string;
-  customer_billing_city?: string;
-  customer_billing_state?: string;
-  customer_billing_country?: string;
-  customer_shipping_address_line1?: string;
-  customer_shipping_address_line2?: string;
-  customer_shipping_postal_code?: string;
-  customer_shipping_city?: string;
-  customer_shipping_state?: string;
-  customer_shipping_country?: string;
-  taxId?: string;
-  notes?: string;
-  customer_currency: string;
-  customer_onboarding_balance: string;
-  sameAsBilling?: boolean;
-}
-
-const emptyForm: CustomerFormData = {
+const emptyForm: Record<string, any> = {
   customer_name: "",
   customer_type: "Individual",
   custom_customer_tpin: "",
   customer_currency: "",
-  customer_onboarding_balance: "",
+  customer_onboarding_balance: 0,
   mobile_no: "",
   ssn: "",
+  custom_contact_person: "",
+  custom_display_name: "",
   customer_email: "",
-  custom_account_number: "",
-  paymentTerms: "",
-  customer_billing_address_line1: "",
-  customer_billing_address_line2: "",
-  customer_billing_postal_code: "",
-  customer_billing_city: "",
-  customer_billing_state: "",
-  customer_billing_country: "",
-  customer_shipping_address_line1: "",
-  customer_shipping_address_line2: "",
-  customer_shipping_postal_code: "",
-  customer_shipping_city: "",
-  customer_shipping_state: "",
-  customer_shipping_country: "",
+  customer_account_no: "",
+  custom_billing_address_line_1: "",
+  custom_billing_address_line_2: "",
+  custom_billing_postal_code: "",
+  custom_billing_city: "",
+  custom_billing_state: "",
+  custom_billing_country: "",
+  custom_shipping_address_line_1: "",
+  custom_shipping_address_line_2: "",
+  custom_shipping_postal_code: "",
+  custom_shipping_city: "",
+  custom_shipping_state: "",
+  custom_shipping_country: "",
   sameAsBilling: true,
 };
 
@@ -76,8 +48,8 @@ const currencyOptions = [
 const CustomerModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (data: CustomerFormData) => void;
-  initialData?: CustomerFormData | null;
+  onSubmit?: (data: Record<string, any>) => void;
+  initialData?: Record<string, any> | null;
   isEditMode?: boolean;
 }> = ({
   isOpen,
@@ -86,7 +58,7 @@ const CustomerModal: React.FC<{
   initialData,
   isEditMode = false,
 }) => {
-    const [form, setForm] = useState<CustomerFormData>(emptyForm);
+    const [form, setForm] = useState<Record<string, any>>(emptyForm);
     const [loading, setLoading] = useState(false);
     const [showAdditionalBilling, setShowAdditionalBilling] = useState(false);
     const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">("details");
@@ -104,22 +76,22 @@ const CustomerModal: React.FC<{
       if (form.sameAsBilling) {
         setForm((prev) => ({
           ...prev,
-          customer_shipping_address_line1: prev.customer_billing_address_line1 ?? "",
-          customer_shipping_address_line2: prev.customer_billing_address_line2 ?? "",
-          customer_shipping_postal_code: prev.customer_billing_postal_code ?? "",
-          customer_shipping_city: prev.customer_billing_city ?? "",
-          customer_shipping_state: prev.customer_billing_state ?? "",
-          customer_shipping_country: prev.customer_billing_country ?? "",
+          custom_shipping_address_line_1: prev.custom_billing_address_line_1 ?? "",
+          custom_shipping_address_line_2: prev.custom_billing_address_line_2 ?? "",
+          custom_shipping_postal_code: prev.custom_billing_postal_code ?? "",
+          custom_shipping_city: prev.custom_billing_city ?? "",
+          custom_shipping_state: prev.custom_billing_state ?? "",
+          custom_shipping_country: prev.custom_billing_country ?? "",
         }));
       }
     }, [
       form.sameAsBilling,
-      form.customer_billing_address_line1,
-      form.customer_billing_address_line2,
-      form.customer_billing_postal_code,
-      form.customer_billing_city,
-      form.customer_billing_state,
-      form.customer_billing_country
+      form.custom_billing_address_line_1,
+      form.custom_billing_address_line_2,
+      form.custom_billing_postal_code,
+      form.custom_billing_city,
+      form.custom_billing_state,
+      form.custom_billing_country
     ]);
 
     const handleChange = (
@@ -279,13 +251,6 @@ const CustomerModal: React.FC<{
                           onChange={handleChange}
                           icon={<Phone className="w-4 h-4 text-gray-400" />}
                         />
-                        <Input
-                          label="Payment Terms"
-                          name="paymentTerms"
-                          type="number"
-                          value={form.paymentTerms}
-                          onChange={handleChange}
-                        />
                         <label className="flex flex-col gap-1 text-sm">
                           <span className="font-medium text-gray-600">Currency</span>
                           <select
@@ -302,8 +267,8 @@ const CustomerModal: React.FC<{
                         </label>
                         <Input
                           label="Bank Account"
-                          name="custom_account_number"
-                          value={form.custom_account_number}
+                          name="customer_account_no"
+                          value={form.customer_account_no}
                           onChange={handleChange}
                           placeholder="Bank Account"
                         />
@@ -314,7 +279,44 @@ const CustomerModal: React.FC<{
                               value={form.customer_onboarding_balance}
                               onChange={handleChange}
                               placeholder="e.g. 1000"
-                            />
+                        />
+                        <Input
+                              label="Contact Person"
+                              name="custom_contact_person"
+                              type="custom_contact_person"
+                              value={form.custom_contact_person}
+                              onChange={handleChange}
+                              placeholder="e.g. Timothy"
+                        />
+                        <label className="flex flex-col gap-1 text-sm">
+  <span className="font-medium text-gray-600">Display Name *</span>
+  <select
+    name="custom_display_name"
+    value={form.custom_display_name || ""}
+    onChange={handleChange}
+    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+    required
+  >
+    <option value="" disabled>
+      Select Name
+    </option>
+    {form.customer_name && (
+      <option value={form.customer_name}>
+        {form.customer_name} 
+      </option>
+    )}
+    {form.custom_contact_person && (
+      <option value={form.custom_contact_person}>
+        {form.custom_contact_person} 
+      </option>
+    )}
+    {!form.customer_name && !form.custom_contact_person && (
+      <option value="" disabled>
+         
+      </option>
+    )}
+  </select>
+</label>
                         {form.customer_type === "Company" && (
                           <>
                             <Input
@@ -370,43 +372,43 @@ const CustomerModal: React.FC<{
                         <div className="grid grid-cols-2 gap-4">
                           <Input
                             label="Line 1"
-                            name="customer_billing_address_line1"
-                            value={form.customer_billing_address_line1 ?? ""}
+                            name="custom_billing_address_line_1"
+                            value={form.custom_billing_address_line_1 ?? ""}
                             onChange={handleChange}
                             placeholder="Street, Apartment"
                           />
                           <Input
                             label="Line 2"
-                            name="customer_billing_address_line2"
-                            value={form.customer_billing_address_line2 ?? ""}
+                            name="custom_billing_address_line_2"
+                            value={form.custom_billing_address_line_2 ?? ""}
                             onChange={handleChange}
                             placeholder="Landmark, City"
                           />
                           <Input
                             label="Postal Code"
-                            name="customer_billing_postal_code"
-                            value={form.customer_billing_postal_code ?? ""}
+                            name="custom_billing_postal_code"
+                            value={form.custom_billing_postal_code ?? ""}
                             onChange={handleChange}
                             placeholder="Postal Code"
                           />
                           <Input
                             label="City"
-                            name="customer_billing_city"
-                            value={form.customer_billing_city ?? ""}
+                            name="custom_billing_city"
+                            value={form.custom_billing_city ?? ""}
                             onChange={handleChange}
                             placeholder="City"
                           />
                           <Input
                             label="State"
-                            name="customer_billing_state"
-                            value={form.customer_billing_state ?? ""}
+                            name="custom_billing_state"
+                            value={form.custom_billing_state ?? ""}
                             onChange={handleChange}
                             placeholder="State"
                           />
                           <Input
                             label="Country"
-                            name="customer_billing_country"
-                            value={form.customer_billing_country ?? ""}
+                            name="custom_billing_country"
+                            value={form.custom_billing_country ?? ""}
                             onChange={handleChange}
                             placeholder="Country"
                           />
@@ -438,32 +440,32 @@ const CustomerModal: React.FC<{
                             <div className="grid grid-cols-2 gap-4">
                               <Input
                                 label="Line 1"
-                                name="customer_billing_address_line1_2"
+                                name="custom_billing_address_line_1_2"
                                 placeholder="Street, Apartment"
                               />
                               <Input
                                 label="Line 2"
-                                name="customer_billing_address_line2_2"
+                                name="custom_billing_address_line_2_2"
                                 placeholder="Landmark, City"
                               />
                               <Input
                                 label="Postal Code"
-                                name="customer_billing_postal_code_2"
+                                name="custom_billing_postal_code_2"
                                 placeholder="Postal Code"
                               />
                               <Input
                                 label="City"
-                                name="customer_billing_city_2"
+                                name="custom_billing_city_2"
                                 placeholder="City"
                               />
                               <Input
                                 label="State"
-                                name="customer_billing_state_2"
+                                name="custom_billing_state_2"
                                 placeholder="State"
                               />
                               <Input
                                 label="Country"
-                                name="customer_billing_country_2"
+                                name="custom_billing_country_2"
                                 placeholder="Country"
                               />
                             </div>
@@ -498,48 +500,48 @@ const CustomerModal: React.FC<{
                         <div className="grid grid-cols-2 gap-4">
                           <Input
                             label="Line 1"
-                            name="customer_shipping_address_line1"
-                            value={form.customer_shipping_address_line1 ?? ""}
+                            name="custom_shipping_address_line_1"
+                            value={form.custom_shipping_address_line_1 ?? ""}
                             onChange={handleChange}
                             placeholder="Street, Apartment"
                             disabled={form.sameAsBilling}
                           />
                           <Input
                             label="Line 2"
-                            name="customer_shipping_address_line2"
-                            value={form.customer_shipping_address_line2 ?? ""}
+                            name="custom_shipping_address_line_2"
+                            value={form.custom_shipping_address_line_2 ?? ""}
                             onChange={handleChange}
                             placeholder="Landmark, City"
                             disabled={form.sameAsBilling}
                           />
                           <Input
                             label="Postal Code"
-                            name="customer_shipping_postal_code"
-                            value={form.customer_shipping_postal_code ?? ""}
+                            name="custom_shipping_postal_code"
+                            value={form.custom_shipping_postal_code ?? ""}
                             onChange={handleChange}
                             placeholder="Postal Code"
                             disabled={form.sameAsBilling}
                           />
                           <Input
                             label="City"
-                            name="customer_shipping_city"
-                            value={form.customer_shipping_city ?? ""}
+                            name="custom_shipping_city"
+                            value={form.custom_shipping_city ?? ""}
                             onChange={handleChange}
                             placeholder="City"
                             disabled={form.sameAsBilling}
                           />
                           <Input
                             label="State"
-                            name="customer_shipping_state"
-                            value={form.customer_shipping_state ?? ""}
+                            name="custom_shipping_state"
+                            value={form.custom_shipping_state ?? ""}
                             onChange={handleChange}
                             placeholder="State"
                             disabled={form.sameAsBilling}
                           />
                           <Input
                             label="Country"
-                            name="customer_shipping_country"
-                            value={form.customer_shipping_country ?? ""}
+                            name="custom_shipping_country"
+                            value={form.custom_shipping_country ?? ""}
                             onChange={handleChange}
                             placeholder="Country"
                             disabled={form.sameAsBilling}
@@ -615,6 +617,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${icon ? "pl-10" : ""
             } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
           {...props}
+          value={props.value ?? ""}
         />
       </div>
     </label>

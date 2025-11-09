@@ -44,33 +44,16 @@ const crmModule = {
     { id: "TICK-002", title: "Report Generation Error", customer: "XYZ Industries", priority: "Medium", status: "In Progress", created: "2025-01-17" },
     { id: "TICK-003", title: "Feature Request - Export", customer: "Tech Solutions", priority: "Low", status: "Resolved", created: "2025-01-16" },
   ],
-  customers: [
-    { 
-      id: "CUST-001", 
-      customer_name: "Global Enterprises",
-      customer_type: "Company" as const,
-      custom_customer_tpin: "1234567890",
-      status: "active" as const 
-    },
-    { 
-      id: "CUST-002", 
-      customer_name: "Bob Chen",
-      customer_type: "Individual" as const,
-      status: "prospect" as const 
-    },
-  ],
+
 };
 
 const CRM: React.FC = () => {
   const [activeTab, setActiveTab] = useState(crmModule.defaultTab);
   const [showLeadModal, setShowLeadModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
-  const [showCustomerModal, setShowCustomerModal] = useState(false);
-
   const handleAdd = () => {
     if (activeTab === "leads") setShowLeadModal(true);
     else if (activeTab === "tickets") setShowTicketModal(true);
-    else if (activeTab === "customer-managment") setShowCustomerModal(true);
   };
 
   return (
@@ -105,7 +88,7 @@ const CRM: React.FC = () => {
 
           {activeTab === "customer-managment" && (
             <CustomerManagement
-              initialCustomers={crmModule.customers}
+              // initialCustomers={crmModule.customers}
               onAdd={handleAdd}
             />
           )}
@@ -144,15 +127,6 @@ const CRM: React.FC = () => {
         onSubmit={(data) => {
           console.log("New Ticket:", data);
           setShowTicketModal(false);
-        }}
-      />
-
-      <CustomerModal
-        isOpen={showCustomerModal}
-        onClose={() => setShowCustomerModal(false)}
-        onSubmit={(data) => {
-          console.log("New/Edit Customer:", data);
-          setShowCustomerModal(false);
         }}
       />
     </div>
