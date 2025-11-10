@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { FaBuilding,FaIdCard,FaMoneyCheckAlt ,FaExchangeAlt,FaEnvelope,FaUniversity,FaRegFile} from 'react-icons/fa';
+import { FaBuilding,FaIdCard,FaMoneyCheckAlt ,FaExchangeAlt,FaEnvelope,FaUniversity,FaRegFile,FaFileUpload} from 'react-icons/fa';
 import BasicDetails from './BasicDetails';
 import AccountingDetails from './AccountingDetails';
 import BuyingSelling from './BuyingSelling';
 import SubscribedModules from './subscribedmodule';
 import BankDetails from "./BankDetails"; 
 import Templates from "./Templates";
+import AddBankAccountModal from "../../components/CompanySetup/AddBankAccountModal";
+import Upload from './upload';
 
 const navTabs = [
   { key: 'basic', label: 'Basic Details', icon: <FaIdCard/> },
@@ -13,11 +15,30 @@ const navTabs = [
   { key: 'accounting', label: 'Accounting Details', icon: <FaMoneyCheckAlt /> },
   { key: 'buyingSelling', label: 'Buying & Selling', icon: <FaExchangeAlt /> },
   { key:'subscribed',label:'Subscription',icon:<FaEnvelope/>},
-  {key:'Templates', label:'Templates', icon:<FaRegFile/>}
+  {key:'Templates', label:'Templates', icon:<FaRegFile/>},
+  { key: 'logo', label: 'Logo & Signature', icon: <FaFileUpload /> },
 ];
+
+
+interface BankAccount {
+  bankName: string;
+  accountNumber: string;
+  ifscCode: string;
+  currency: string;
+  swiftCode: string;
+}
+
 
 const CompanySetup: React.FC = () => {
   const [tab, setTab] = useState(navTabs[0].key);
+ const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+ const [showBankModal, setShowBankModal] = useState(false);
+
+const handleAddBankAccount = (newAccount: BankAccount) => {
+  setBankAccounts(prev => [...prev, newAccount]);
+  setShowBankModal(false);
+};
+
 
   return (
     <div className="bg-gray-50 min-h-screen p-8 pb-20">
@@ -43,12 +64,26 @@ const CompanySetup: React.FC = () => {
       </div>
       <div>
         {tab === 'basic' && <BasicDetails />}
-          {tab === "bank" && <BankDetails />}
+            {tab === 'bank' && (
+          <BankDetails
+            bankAccounts={bankAccounts}
+            onAddAccount={() => setShowBankModal(true)}
+          />
+        )}
         {tab === 'accounting' && <AccountingDetails />}
         {tab === 'buyingSelling' && <BuyingSelling />}
         {tab === 'subscribed' && <SubscribedModules/>}
         {tab === 'Templates' && <Templates/>}
+        {tab === 'logo' && <Upload />}
       </div>
+
+       {/* Add Bank Account Modal */}
+      {showBankModal && (
+        <AddBankAccountModal
+          onClose={() => setShowBankModal(false)}
+          onSubmit={handleAddBankAccount}
+        />
+      )}
     </div>
   );
 };
