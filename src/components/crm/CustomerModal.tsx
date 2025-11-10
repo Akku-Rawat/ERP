@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 
 const base_url = import.meta.env.VITE_BASE_URL;
 const CUSTOMER_ENDPOINT = `${base_url}.customer.customer.create_customer_api`;
+const UPDATE_CUSTOMER_ENDPOINT = `${base_url}.customer.customer.update_customer_by_id`;
 console.log("CUSTOMER_ENDPOINT" + CUSTOMER_ENDPOINT);
 
 const emptyForm: Record<string, any> = {
@@ -107,48 +108,59 @@ const CustomerModal: React.FC<{
     };
 
 
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setLoading(true);
-      try {
-        const payload = { ...form };
-        let response;
-        if (isEditMode && initialData?.customer_name) {
-          response = await fetch(
-            `${CUSTOMER_ENDPOINT}/${initialData.customer_name}`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": import.meta.env.VITE_AUTHORIZATION
-              },
-              body: JSON.stringify(payload),
-            }
-          );
-        } else {
-          response = await fetch(CUSTOMER_ENDPOINT, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": import.meta.env.VITE_AUTHORIZATION
-            },
-            body: JSON.stringify(payload),
-          });
-        }
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.message || "Failed to save customer");
-        }
-        await response.json();
-        toast.success(isEditMode ? "Customer updated!" : "Customer created!");
-        onSubmit?.({ ...form });
-        handleClose();
-      } catch (err: any) {
-        toast.error(err.message || "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const payload = { ...form };
+    let response;
+
+    if (isEditMode && initialData?.custom_id) {
+      payload.id = initialData.custom_id;
+      console.log("payload.id " + initialData.custom_id);
+      
+      const updateUrl = `${UPDATE_CUSTOMER_ENDPOINT}?id=${initialData.custom_id}`;
+
+      response = await fetch(updateUrl, {
+        method: "PUT", 
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: import.meta.env.VITE_AUTHORIZATION,
+        },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      response = await fetch(CUSTOMER_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: import.meta.env.VITE_AUTHORIZATION,
+        },
+        body: JSON.stringify(payload),
+      });
+    }
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || "Failed to save customer");
+    }
+
+    const data = await response.json();
+
+    console.log(isEditMode ? "Customer updated successfully!" : "Customer created successfully!");
+    
+    // onSubmit?.(isEditMode ? { ...initialData, ...payload } : data.data || payload);
+    onSubmit?.({} as any);
+    
+    handleClose();
+  } catch (err: any) {
+    console.error("Save customer error:", err);
+    console.log(err.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
     const handleClose = () => {
       setForm(emptyForm);

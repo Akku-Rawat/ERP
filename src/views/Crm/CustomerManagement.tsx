@@ -3,6 +3,7 @@ import { Search, Plus, Edit2, Trash2 } from "lucide-react";
 import CustomerDetailView from "./CustomerDetailView";
 import axios from "axios"; 
 import CustomerModal from "../../components/crm/CustomerModal";
+import toast from "react-hot-toast";
 
 const base_url = import.meta.env.VITE_BASE_URL;
 const GET_CUSTOMER_ENDPOINT = `${base_url}.customer.customer.get_all_customers_api`;
@@ -87,62 +88,21 @@ const CustomerManagement: React.FC<Props> = ({onAdd}) => {
     setShowModal(true);
   };
 
-  const handleCustomerSaved = (savedCustomer: any) => {
-    if (editCustomer) {
-      setCustomers((prev) =>
-        prev.map((c) =>
-          c.custom_id === savedCustomer.custom_id ? savedCustomer : c
-        )
-      );
-      console.log("Customer updated!");
-    } else {
-      setCustomers((prev) => [...prev, savedCustomer]);
-      console.log("Customer created!");
-    }
+const handleCustomerSaved = async () => {
+  setShowModal(false);
+  setEditCustomer(null);
 
-    setShowModal(false);
-    setEditCustomer(null);
-  };
-
-// const handleSaveCustomer = async (data: any) => {
-//     console.log("data " + data);
-//   try {
-//     setCustLoading(true);
-//     console.log("data " + data);
-//     if (editCustomer) {
-//       const custid = editCustomer.custom_id;
-//       if (!custid) {
-//         alert("Cannot update — TPIN not found for this customer.");
-//         return;
-//       }
-//       const response = await axios.put(
-//         `${UPDATE_CUSTOMER_ENDPOINT}?id=${custid}`,
-//         data,
-//         {
-//           headers: {
-//             Authorization: import.meta.env.VITE_AUTHORIZATION,
-//           },
-//         }
-//       );
-//       const updatedCustomer = response.data?.data || { ...editCustomer, ...data };
-//       setCustomers((prev) =>
-//         prev.map((c) =>
-//           c.custom_id === editCustomer.custom_id ? updatedCustomer : c
-//         )
-//       );
-//       console.log("updatedCustomer " + updatedCustomer);
-//       alert("Customer updated successfully!");
-//     }
-//   } catch (err: any) {
-//     console.error("Error saving customer:", err);
-//     const errorMsg = err.response?.data?.message || "Failed to save customer.";
-//     alert(errorMsg);
-//   } finally {
-//     setCustLoading(false);
-//     setShowModal(false);
-//     setEditCustomer(null);
-//   }
-// };
+  try {
+    await fetchCustomers();
+    toast.success(
+      editCustomer 
+        ? "Customer updated successfully!" 
+        : "Customer created successfully!"
+    );
+  } catch (err) {
+    toast.error("Failed to refresh customer list");
+  }
+};
 
   const filtered = customers.filter((c: any) =>
     [c.custom_id, c.customer_name, c.customer_currency, c.customer_onboarding_balance, c.custom_customer_tpin,
@@ -278,12 +238,13 @@ const CustomerManagement: React.FC<Props> = ({onAdd}) => {
         </>
       ) : (
         <CustomerDetailView
-          customer={selectedCustomer!}
-          customers={customers}
-          onBack={handleBack}
-          onCustomerSelect={handleRowClick}
-          onAdd={onAdd}
-        />
+  customer={selectedCustomer!}
+  customers={customers}
+  onBack={handleBack}
+  onCustomerSelect={handleRowClick}
+  onAdd={onAdd}
+  onEdit={handleEditCustomer}  
+/>
       )}
 
       <CustomerModal
