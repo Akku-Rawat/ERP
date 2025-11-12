@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import SupplierModal from "../../components/supplier/SupplierModal";
+import SupplierModal from '../../components/supplier/SupplierModal';
 
 const suppliersData = [
   {
@@ -31,8 +31,8 @@ const suppliersData = [
   },
 ];
 
-const SupplierManagement: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+const SupplierLedger: React.FC = () => {
+ const [searchTerm, setSearchTerm] = useState("");
   const [showSupplierModal, setShowSupplierModal] = useState(false);
 
   const filteredSuppliers = suppliersData.filter(
@@ -58,7 +58,7 @@ const SupplierManagement: React.FC = () => {
         <div className="flex gap-3">
           <button
             onClick={() => setShowSupplierModal(true)}
-            className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-teal-700 transition font-medium"
+            className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
           >
             + Add Supplier
           </button>
@@ -143,4 +143,4 @@ const SupplierManagement: React.FC = () => {
   );
 };
 
-export default SupplierManagement;
+export default SupplierLedger;

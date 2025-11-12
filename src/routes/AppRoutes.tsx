@@ -7,7 +7,7 @@ import Dashboard from "../views/DashbBoard";
 import SalesModule from "../views/Sales/Sales";
 import ProcurementModule from "../views/Procurement/Procurement";
 import InventoryModule from "../views/Inventory/Inventory";
-import SupplierModule from "../views/Supplier/SupplierManagment";
+import SupplierModule from "../views/Supplier/Suppliers";
 import AccountingModule from "../views/Accounting/Accounting";
 import CrmModule from "../views/Crm/Crm";
 import Settings from "../views/Settings";

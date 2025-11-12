@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import SupplierModal from "../../components/supplier/SupplierModal";
+import SupplierPaymentsModal from "../../components/supplier/SupplierPaymentsModal";
 
 const suppliersData = [
   {
@@ -31,7 +31,7 @@ const suppliersData = [
   },
 ];
 
-const SupplierManagement: React.FC = () => {
+const Contracts: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSupplierModal, setShowSupplierModal] = useState(false);
 
@@ -131,7 +131,7 @@ const SupplierManagement: React.FC = () => {
       </div>
 
       {/* Modal */}
-      <SupplierModal
+      <SupplierPaymentsModal
         isOpen={showSupplierModal}
         onClose={() => setShowSupplierModal(false)}
         onSubmit={(data) => {
@@ -143,4 +143,4 @@ const SupplierManagement: React.FC = () => {
   );
 };
 
-export default SupplierManagement;
+export default Contracts;
