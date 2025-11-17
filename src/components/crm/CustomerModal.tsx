@@ -248,22 +248,66 @@ const handleSubmit = async (e: React.FormEvent) => {
                           required
                         />
                         <Input
-                          label="Email"
-                          name="customer_email"
-                          type="customer_email"
-                          value={form.customer_email}
-                          onChange={handleChange}
-                          icon={<Mail className="w-4 h-4 text-gray-400" />}
-                        />
-                        <Input
-                          label="Mobile No"
-                          name="mobile_no"
-                          type="tel"
-                          value={form.mobile_no}
-                          onChange={handleChange}
-                          icon={<Phone className="w-4 h-4 text-gray-400" />}
+                              label="Contact Person"
+                              name="custom_contact_person"
+                              type="custom_contact_person"
+                              value={form.custom_contact_person}
+                              onChange={handleChange}
+                              placeholder="e.g. Timothy"
                         />
                         <label className="flex flex-col gap-1 text-sm">
+                        <span className="font-medium text-gray-600">Display Name *</span>
+                        <select
+                          name="custom_display_name"
+                          value={form.custom_display_name || ""}
+                          onChange={handleChange}
+                          className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                          required
+                        >
+                          <option value="" disabled>
+                            Select Name
+                          </option>
+                          {form.customer_name && (
+                            <option value={form.customer_name}>
+                              {form.customer_name} 
+                            </option>
+                          )}
+                          {form.custom_contact_person && (
+                            <option value={form.custom_contact_person}>
+                              {form.custom_contact_person} 
+                            </option>
+                          )}
+                          {!form.customer_name && !form.custom_contact_person && (
+                            <option value="" disabled>
+         
+                            </option>
+                         )}
+                        </select>
+                      </label>
+                        {form.customer_type === "Company" && (
+                          <>
+                            <Input
+                              label="Customer TPIN"
+                              name="custom_customer_tpin"
+                              value={form.custom_customer_tpin}
+                              onChange={handleChange}
+                              placeholder="TP12345678"
+                              required
+                            />
+                          </>
+                        )}
+                        {form.customer_type === "Individual" && (
+                          <>
+                            <Input
+                              label="SSN"
+                              name="ssn"
+                              value={form.ssn ?? ""}
+                              onChange={handleChange}
+                              placeholder="Social Security Number"
+                            />
+                          </>
+                        )}
+                         <label className="flex flex-col gap-1 text-sm">
                           <span className="font-medium text-gray-600">Currency</span>
                           <select
                             name="customer_currency"
@@ -293,66 +337,21 @@ const handleSubmit = async (e: React.FormEvent) => {
                               placeholder="e.g. 1000"
                         />
                         <Input
-                              label="Contact Person"
-                              name="custom_contact_person"
-                              type="custom_contact_person"
-                              value={form.custom_contact_person}
-                              onChange={handleChange}
-                              placeholder="e.g. Timothy"
+                          label="Email"
+                          name="customer_email"
+                          type="customer_email"
+                          value={form.customer_email}
+                          onChange={handleChange}
+                          icon={<Mail className="w-4 h-4 text-gray-400" />}
                         />
-                        <label className="flex flex-col gap-1 text-sm">
-  <span className="font-medium text-gray-600">Display Name *</span>
-  <select
-    name="custom_display_name"
-    value={form.custom_display_name || ""}
-    onChange={handleChange}
-    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-    required
-  >
-    <option value="" disabled>
-      Select Name
-    </option>
-    {form.customer_name && (
-      <option value={form.customer_name}>
-        {form.customer_name} 
-      </option>
-    )}
-    {form.custom_contact_person && (
-      <option value={form.custom_contact_person}>
-        {form.custom_contact_person} 
-      </option>
-    )}
-    {!form.customer_name && !form.custom_contact_person && (
-      <option value="" disabled>
-         
-      </option>
-    )}
-  </select>
-</label>
-                        {form.customer_type === "Company" && (
-                          <>
-                            <Input
-                              label="Customer TPIN"
-                              name="custom_customer_tpin"
-                              value={form.custom_customer_tpin}
-                              onChange={handleChange}
-                              placeholder="TP12345678"
-                              required
-                            />
-                            <div></div>
-                          </>
-                        )}
-                        {form.customer_type === "Individual" && (
-                          <>
-                            <Input
-                              label="SSN"
-                              name="ssn"
-                              value={form.ssn ?? ""}
-                              onChange={handleChange}
-                              placeholder="Social Security Number"
-                            />
-                          </>
-                        )}
+                        <Input
+                          label="Mobile No"
+                          name="mobile_no"
+                          type="tel"
+                          value={form.mobile_no}
+                          onChange={handleChange}
+                          icon={<Phone className="w-4 h-4 text-gray-400" />}
+                        />
                       </div>
                     </div>
 
