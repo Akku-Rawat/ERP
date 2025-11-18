@@ -181,7 +181,7 @@ const VendorModal: React.FC<{
               >
                 Supplier Details
               </button>
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setActiveTab("contact")}
                 className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
@@ -191,7 +191,7 @@ const VendorModal: React.FC<{
                 }`}
               >
                 Contact Details
-              </button>
+              </button> */}
               <button
                 type="button"
                 onClick={() => setActiveTab("payment")}
@@ -203,7 +203,7 @@ const VendorModal: React.FC<{
               >
                 Payment & Bank
               </button>
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setActiveTab("address")}
                 className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
@@ -213,13 +213,14 @@ const VendorModal: React.FC<{
                 }`}
               >
                 Address
-              </button>
+              </button> */}
             </div>
 
             {/* Tab Content */}
             <section className="flex-1 overflow-y-auto p-6 space-y-8">
               {/* Supplier Details Tab */}
               {activeTab === "supplier" && (
+                <>
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-gray-700 underline">
                     Supplier Details
@@ -230,10 +231,6 @@ const VendorModal: React.FC<{
                     <Input label="Supplier Code" name="supplierCode" value={form.supplierCode || ""} onChange={handleChange} />
                   </div>
                 </div>
-              )}
-
-              {/* Contact Details Tab */}
-              {activeTab === "contact" && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-gray-700 underline">
                     Contact Details
@@ -245,6 +242,21 @@ const VendorModal: React.FC<{
                     <Input label="Email Id" name="emailId" value={form.emailId || ""} onChange={handleChange} icon={<Mail className="w-4 h-4 text-gray-400" />} />
                   </div>
                 </div>
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-700 underline">
+                    Address Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <Input label="Address Line 1" name="billingAddressLine1" value={form.billingAddressLine1 || ""} onChange={handleChange} />
+                    <Input label="Address Line 2" name="billingAddressLine2" value={form.billingAddressLine2 || ""} onChange={handleChange} />
+                    <Input label="City" name="billingCity" value={form.billingCity || ""} onChange={handleChange} />
+                    <Input label="District" name="district" value={form.district || ""} onChange={handleChange} />
+                    <Input label="Province" name="province" value={form.province || ""} onChange={handleChange} />
+                    <Input label="Country" name="billingCountry" value={form.billingCountry || ""} onChange={handleChange} />
+                    <Input label="Postal Code" name="billingPostalCode" value={form.billingPostalCode || ""} onChange={handleChange} />
+                  </div>
+                </div>
+                </>
               )}
 
               {/* Payment & Bank Details Tab */}
@@ -286,28 +298,6 @@ const VendorModal: React.FC<{
                       <Input label="SWIFT Code" name="swiftCode" value={form.swiftCode || ""} onChange={handleChange} />
                       <Input label="Branch Address" name="branchAddress" value={form.branchAddress || ""} onChange={handleChange} />
                     </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Address Tab */}
-              {activeTab === "address" && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-6"
-                >
-                  <h3 className="text-lg font-semibold text-gray-700 underline">
-                    Address Details
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                    <Input label="Address Line 1" name="billingAddressLine1" value={form.billingAddressLine1 || ""} onChange={handleChange} />
-                    <Input label="Address Line 2" name="billingAddressLine2" value={form.billingAddressLine2 || ""} onChange={handleChange} />
-                    <Input label="City" name="billingCity" value={form.billingCity || ""} onChange={handleChange} />
-                    <Input label="District" name="district" value={form.district || ""} onChange={handleChange} />
-                    <Input label="Province" name="province" value={form.province || ""} onChange={handleChange} />
-                    <Input label="Country" name="billingCountry" value={form.billingCountry || ""} onChange={handleChange} />
-                    <Input label="Postal Code" name="billingPostalCode" value={form.billingPostalCode || ""} onChange={handleChange} />
                   </div>
                 </motion.div>
               )}
