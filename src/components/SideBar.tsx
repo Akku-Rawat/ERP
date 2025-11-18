@@ -20,11 +20,11 @@ interface SidebarProps {
 
 const menuItems = [
   { name: "Dashboard", to: "/dashboard", icon: <FaChartBar /> },
-  { name: "Sales Management", to: "/sales", icon: <FaMoneyBillWave /> },
+  { name: "Sales", to: "/sales", icon: <FaMoneyBillWave /> },
   { name: "CRM", to: "/crm", icon: <FaUsers /> },
   { name: "Procurement", to: "/procurement", icon: <FaShoppingBag /> },
-  { name: "Inventory Management", to: "/inventory", icon: <FaBoxes /> },
-  { name: "Supplier Management", to: "/suppliers", icon: <FaHandshake /> },
+  { name: "Inventory", to: "/inventory", icon: <FaBoxes /> },
+  // { name: "Supplier Management", to: "/suppliers", icon: <FaHandshake /> },
   { name: "Accounting", to: "/accounting", icon: <FaBriefcase /> },
   { name: "Settings", to: "/settings", icon: <FaCog /> }
 ];
