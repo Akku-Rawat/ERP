@@ -80,7 +80,7 @@ const CustomerDetailView: React.FC<Props> = ({
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="flex flex-col bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm px-6 py-4 flex items-center justify-between border-b">
         <h1 className="text-2xl font-bold text-gray-800">Customer Details</h1>

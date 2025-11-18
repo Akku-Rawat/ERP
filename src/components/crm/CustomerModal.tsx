@@ -22,7 +22,6 @@ const emptyForm: Record<string, any> = {
   customer_currency: "",
   customer_onboarding_balance: 0,
   mobile_no: "",
-  ssn: "",
   custom_contact_person: "",
   custom_display_name: "",
   customer_email: "",
@@ -284,8 +283,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                          )}
                         </select>
                       </label>
-                        {form.customer_type === "Company" && (
-                          <>
+                       
                             <Input
                               label="Customer TPIN"
                               name="custom_customer_tpin"
@@ -294,19 +292,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                               placeholder="TP12345678"
                               required
                             />
-                          </>
-                        )}
-                        {form.customer_type === "Individual" && (
-                          <>
-                            <Input
-                              label="SSN"
-                              name="ssn"
-                              value={form.ssn ?? ""}
+                            {/* <Input
+                              label="ID"
+                              name="id"
+                              value={form.id}
                               onChange={handleChange}
-                              placeholder="Social Security Number"
-                            />
-                          </>
-                        )}
+                              placeholder="Identification Number"
+                            /> */}
                          <label className="flex flex-col gap-1 text-sm">
                           <span className="font-medium text-gray-600">Currency</span>
                           <select
