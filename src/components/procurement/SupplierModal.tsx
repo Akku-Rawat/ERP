@@ -50,7 +50,7 @@ const emptyForm: Record<string, any> = {
 
 const currencyOptions = ["ZMW", "USD", "INR"];
 
-const VendorModal: React.FC<{
+const SupplierModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (data: Record<string, any>) => void;
@@ -157,7 +157,7 @@ const VendorModal: React.FC<{
             {/* Header */}
             <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
               <h2 className="text-2xl font-semibold text-indigo-700">
-                {isEditMode ? "Edit Vendor" : "Add New Vendor"}
+                {isEditMode ? "Edit Supplier" : "Add New Supplier"}
               </h2>
               <button
                 type="button"
@@ -373,4 +373,4 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 );
 Input.displayName = "Input";
 
-export default VendorModal;
+export default SupplierModal;

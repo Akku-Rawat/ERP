@@ -16,8 +16,8 @@ import {
   FaTruckLoading,
   FaLandmark
 } from "react-icons/fa";
-import VendorModal from "../../components/procurement/VendorModal";
-import VendorManagement from "./VendorManagement";
+import SupplierManagement from "./SupplierManagement";
+import SupplierModal from "../../components/procurement/SupplierModal";
 
 const procurement = {
   name: "Procurement",
@@ -25,7 +25,7 @@ const procurement = {
   defaultTab: "procurementdashboard",
   tabs: [
     {id:"procurementdashboard", name: "Dashboard", icon: <FaTachometerAlt />},
-    {id: "vendor", name: "Vendor Management", icon: <FaLandmark/> },
+    {id: "supplier", name: "Supplier Management", icon: <FaLandmark/> },
     { id: "rfqs", name: "RFQs", icon: <FaFileSignature /> },
     { id: "orders", name: "Purchase Orders", icon: <FaClipboardList /> },
     { id: "approvals", name: "Approvals", icon: <FaCheckCircle /> },
@@ -36,7 +36,7 @@ const procurement = {
 
 const Procurement: React.FC = () => {
   const [activeTab, setActiveTab] = useState(procurement.defaultTab);
-  const [showVendorModal, setShowVendorModal] = useState(false);
+  const [showSupplierModal, setShowSupplierModal] = useState(false);
   const [showRFQModal, setShowRFQModal] = useState(false);
   const [showPOModal, setShowPOModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
@@ -44,7 +44,7 @@ const Procurement: React.FC = () => {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
   const handleAdd = () => {
-    if (activeTab === "vendor") setShowVendorModal(true);
+    if (activeTab === "supplier") setShowSupplierModal(true);
     else if (activeTab === "rfqs") setShowPOModal(true);
     else if (activeTab === "orders") setShowPOModal(true);
     else if (activeTab === "approvals") setShowApprovalModal(true);
@@ -80,7 +80,7 @@ const Procurement: React.FC = () => {
 
       {/* Content */}
       <div className="bg-white rounded-lg shadow-sm p-4">
-        {activeTab === "vendor" && <VendorManagement onAdd={handleAdd} />}
+        {activeTab === "supplier" && <SupplierManagement onAdd={handleAdd} />}
         {activeTab === "rfqs" && <RFQsTable onAdd={handleAdd} />}
         {activeTab === "orders" && <PurchaseOrdersTable onAdd={handleAdd} />}
         {activeTab === "approvals" && <ApprovalsSection onAdd={handleAdd} />}
@@ -88,9 +88,9 @@ const Procurement: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <VendorModal
-        isOpen={showVendorModal}
-        onClose={() => setShowVendorModal(false)}
+      <SupplierModal
+        isOpen={showSupplierModal}
+        onClose={() => setShowSupplierModal(false)}
         onSubmit={(data) => console.log("New RFQ:", data)}
       />
       <RFQModal
