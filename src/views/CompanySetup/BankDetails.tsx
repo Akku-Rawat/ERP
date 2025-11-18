@@ -38,11 +38,11 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
 
   return (
     
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="bg-white">
+      <div className=" mx-auto">
         <div className="grid grid-cols-5 gap-6">
           <div className="col-span-2 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-5 py-4">
+            <div className="bg-teal-700 px-5 py-4">
               <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                 <FaUniversity className="w-5 h-5" />
                 Bank Accounts
@@ -106,7 +106,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
 
           {/* Account Details */}
           <div className="col-span-3 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-5 py-4 flex justify-between items-center">
+            <div className=" bg-teal-700 px-5 py-4 flex justify-between items-center">
               <h2 className="text-lg font-semibold text-white">Account Details</h2>
               {selectedAccount !== null && (
                 <div className="flex gap-2">

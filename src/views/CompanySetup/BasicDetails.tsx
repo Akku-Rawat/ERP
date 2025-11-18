@@ -1,22 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  FaBuilding,
-  FaUser,
-  FaEnvelope,
-  FaPhone,
-  FaGlobe,
   FaCalendarAlt,
-  FaMapMarkerAlt,
-  FaFileAlt,
-  FaMoneyBillWave,
   FaCheckCircle
 } from 'react-icons/fa';
 
-const STORAGE_KEY = 'company_setup_basicdetails_v2_uncontrolled';
+const STORAGE_KEY = 'company_setup_basicdetails_v2_uncontrolled'; 
 
 const defaultData = {
   companyName: '',
+  district:'',
+  city:'',
+  postalCode:'',
+  province:'',
+  companyEmail:'',
+  companyPhoneNo:'',
+  alternateNo:'',
+  companyStatus:'',
   contactPerson: '',
+  companyType:'',
   legalName: '',
   parentCompany: '',
   timeZone: '',
@@ -26,8 +27,8 @@ const defaultData = {
   website: '',
   status: 'Active',
   crnCin: '',
-  tan: '',
-  pan: '',
+  tax: '',
+  registerNo: '',
   tpin: '',
   swiftCode: '',
   dateOfIncorporation: '',
@@ -185,37 +186,23 @@ const BasicDetails: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {showSuccess && (
-          <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-3">
-            <FaCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-800 font-medium text-sm">Details saved successfully!</p>
-          </div>
-        )}
-
-        <div className="space-y-4">
-
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-blue-500 px-4 py-3">
-              <h2 className="text-sm font-semibold text-white">Registration</h2>
+    <div className="p-6 bg-white">
+      <div className="">
+        <div className="space-y-2">
+          <div className="bg-white overflow-hidden">
+            <div className="  px-4">
+              <h2 className=" text-base font-semibold text-gray-700 underline">Registration Details</h2>
             </div>
-
             <div className="p-4">
               <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <InputField label="CRN / CIN" name="crnCin" icon={FaFileAlt} placeholder="Enter CRN/CIN" />
-                  <InputField label="TAN" name="tan" icon={FaFileAlt} placeholder="Enter TAN" />
-                  <InputField label="PAN" name="pan" icon={FaFileAlt} placeholder="Enter PAN" />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <InputField label="TPIN" name="tpin" icon={FaFileAlt} placeholder="Enter TPIN" />
-                  <InputField label="Date of Incorporation" name="dateOfIncorporation" type="date" icon={FaCalendarAlt} />
-                  <InputField label="Place of Registration" name="placeOfRegistration" icon={FaMapMarkerAlt} placeholder="Enter place" />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-4 gap-4">
+                  <InputField label="Registration No" name="registerNo" placeholder="Enter Registration No" />
+                  <InputField label="Tax Id/ TPIN" name="tax" placeholder="Enter Tax Id" />
+                  <InputField label="Company Name" name="companyName" placeholder="Enter Company Name" />
+                  <InputField label="Date of Incorporation" name="dateOfIncorporation" type="date"/>
+                  <InputField label="Company Type" name="companyType" placeholder="Enter Company Type" />
+                  <InputField label="Company Status" name="companyStatus" placeholder="Enter Company Status" />
+                  <InputField label="Industry Type" name="industryType" placeholder="Enter Industry Type" />
                   <SelectField
                     label="Financial Year Begins"
                     name="financialYearBegins"
@@ -233,56 +220,48 @@ const BasicDetails: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-blue-500 px-4 py-3">
-              <h2 className="text-sm font-semibold text-white">Company Information</h2>
+          <div className="bg-white overflow-hidden">
+            <div className="px-4 ">
+              <h2 className=" text-base font-semibold text-gray-700 underline">Contact Information</h2>
             </div>
             <div className="p-4">
               <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <InputField label="Company Name" name="companyName" icon={FaBuilding} required placeholder="Enter company name" />
-                  <InputField label="Legal Name" name="legalName" icon={FaFileAlt} placeholder="Enter legal name" />
-                  <InputField label="Contact Person" name="contactPerson" icon={FaUser} required placeholder="Enter contact person" />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <InputField label="Parent Company" name="parentCompany" icon={FaBuilding} placeholder="Enter parent company" />
-                  <InputField label="Industry Type" name="industryType" icon={FaBuilding} placeholder="Enter industry type" />
-                  <SelectField label="Status" name="status" icon={null} options={[{ value: 'Active', label: 'Active' }, { value: 'Inactive', label: 'Inactive' }]} />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <InputField label="Home Branch" name="homeBranch" icon={FaMapMarkerAlt} placeholder="Enter home branch" />
-                  <InputField label="Branch Office" name="branchOffice" icon={FaMapMarkerAlt} placeholder="Enter branch office" />
-                  <InputField label="Onboarding Balance" name="onboardingBalance" type="number" icon={FaMoneyBillWave} placeholder="Enter balance" />
+                <div className="grid grid-cols-4 gap-4">
+                  <InputField label="Company Email Id" name="companyEmail" required placeholder="Enter Company Email Id" />
+                  <InputField label="Company Phone No" name="companyPhoneNo"  placeholder="Enter Company Phone No" />
+                  <InputField label="Alternate No" name="contactPerson" required placeholder="Alternate No" />
+                  <InputField label="Website" name="parentCompany" placeholder="Enter Website" />
+                  <InputField label="Contact Person" name="industryType" placeholder="Enter Contact Person" />
+                  <InputField label="E-mail" name="email" placeholder="Enter E-mail"/>
+                  <InputField label="Phone No" name="phoneNumber" placeholder="Enter Phone No" />
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-blue-500 px-4 py-3">
-              <h2 className="text-sm font-semibold text-white">Contact Information</h2>
+           <div className="bg-white overflow-hidden">
+            <div className=" px-4">
+              <h2 className=" text-base font-semibold text-gray-700 underline">Company Address</h2>
             </div>
             <div className="p-4">
               <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <InputField label="Email" name="email" type="email" icon={FaEnvelope} placeholder="company@example.com" />
-                  <InputField label="Contact Email" name="contactEmail" type="email" icon={FaEnvelope} placeholder="contact@example.com" />
-                  <InputField label="Phone Number" name="phoneNumber" type="tel" icon={FaPhone} placeholder="+1 234 567 8900" />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <InputField label="Website" name="website" type="url" icon={FaGlobe} placeholder="https://example.com" />
-                  <InputField label="Time Zone" name="timeZone" icon={FaGlobe} placeholder="Enter time zone" />
+                <div className="grid grid-cols-4 gap-4">
+                  <InputField label="Address Line 1" name="addressLine1"  placeholder="Enter Address Line 1" />
+                  <InputField label="Address Line 2" name="addressLine2" placeholder="Enter Address Line 2" />
+                  <InputField label="City" name="city" placeholder="Enter City" />
+                  <InputField label="District" name="district" placeholder="Enter District" />
+                  <InputField label="Province" name="province" placeholder="Enter Province" />
+                  <InputField label="Country" name="country" placeholder="Enter Country" />
+                  <InputField label="Postal Code" name="postalCode" placeholder="Enter District" />
+                  <InputField label="Time Zone" name="timeZone" placeholder="Enter time zone" />
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+          {/* <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
             <div className="bg-blue-500 px-4 py-3">
-              <h2 className="text-sm font-semibold text-white">Company Address</h2>
+              <h2 className="text-sm font-semibold text-white"></h2>
             </div>
             <div className="p-4">
               <div className="space-y-4">
@@ -343,7 +322,7 @@ const BasicDetails: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <div className="flex justify-end gap-3">
             <button
