@@ -313,7 +313,7 @@ const Templates: React.FC = () => {
             </div>
             <div className="text-white text-center w-full py-3 font-semibold text-sm bg-[#748B75]">
               {selectedInvoiceTemplate === "default"
-                ? "Default Invoice"
+                ? "Current Invoice"
                 : `Invoice Template ${selectedInvoiceTemplate.replace(
                     "template",
                     ""
@@ -347,7 +347,7 @@ const Templates: React.FC = () => {
             </div>
             <div className="text-white text-center w-full py-3 font-semibold text-sm bg-[#D4B5A0]">
               {selectedQuotationTemplate === "default"
-                ? "Default Quotation"
+                ? "Current Quotation"
                 : `Quotation Template ${selectedQuotationTemplate.replace(
                     "quotation",
                     ""
@@ -379,7 +379,7 @@ const Templates: React.FC = () => {
             </div>
             <div className="text-white text-center w-full py-3 font-semibold text-sm bg-[#B2B1CF]">
               {selectedRFQTemplate === "default"
-                ? "Default RFQ"
+                ? "Current RFQ"
                 : `RFQ Template ${selectedRFQTemplate.replace("rfq", "")}`}
             </div>
           </div>

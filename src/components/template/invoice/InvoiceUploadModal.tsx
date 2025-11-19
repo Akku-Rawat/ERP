@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { InvoiceData } from "../invoice/InvoiceTemplate1";
 
 const templates = [
-  { id: "default", name: "Default Invoice", color: "bg-gray-600" },
+  { id: "default", name: "Current Invoice", color: "bg-gray-600" },
   { id: "template1", name: "Invoice Template 1", color: "bg-[#748B75]" },
   { id: "template2", name: "Invoice Template 2", color: "bg-[#D4B5A0]" },
   { id: "template3", name: "Invoice Template 3", color: "bg-[#B2B1CF]" },

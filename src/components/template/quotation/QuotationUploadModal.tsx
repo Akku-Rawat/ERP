@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { QuotationData } from "../quotation/QuotationTemplate1";
 
 const templates = [
-  { id: "default", name: "Default Quotation", color: "bg-gray-600" },
+  { id: "default", name: "Current Quotation", color: "bg-gray-600" },
   { id: "quotation1", name: "Quotation Template 1", color: "bg-[#748B75]" },
   { id: "quotation2", name: "Quotation Template 2", color: "bg-[#D4B5A0]" },
   { id: "quotation3", name: "Quotation Template 3", color: "bg-[#B2B1CF]" },

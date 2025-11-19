@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { RFQData } from "../rfq/RFQDefaultTemplate";
 
 const templates = [
-  { id: "default", name: "Default RFQ", color: "bg-gray-600" },
+  { id: "default", name: "Current RFQ", color: "bg-gray-600" },
   { id: "rfq1", name: "RFQ Template 1", color: "bg-[#748B75]" },
   { id: "rfq2", name: "RFQ Template 2", color: "bg-[#D4B5A0]" },
   { id: "rfq3", name: "RFQ Template 3", color: "bg-[#B2B1CF]" },
