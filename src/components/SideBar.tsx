@@ -10,7 +10,9 @@ import {
   FaUsers,
   FaHandshake,
   FaSignOutAlt,
-  FaCog
+  FaCog,
+  FaUserTie,
+  FaBuilding
 } from "react-icons/fa";
 
 interface SidebarProps {
@@ -26,7 +28,11 @@ const menuItems = [
   { name: "Inventory", to: "/inventory", icon: <FaBoxes /> },
   // { name: "Supplier Management", to: "/suppliers", icon: <FaHandshake /> },
   { name: "Accounting", to: "/accounting", icon: <FaBriefcase /> },
+  {name : "Hr", to:"/hr",icon : <FaUserTie/>},
+  {name:"User Management", to:"/userManagement",icon:<FaUsers/>},
+  {name:"CompanySetup", to:"/companySetup",icon:<FaBuilding/>},
   { name: "Settings", to: "/settings", icon: <FaCog /> }
+  
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
