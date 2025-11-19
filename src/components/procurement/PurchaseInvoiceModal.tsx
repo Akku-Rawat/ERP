@@ -10,7 +10,7 @@ type TaxRow = {
   amount: number;
 };
 
-interface PurchaseOrderModalProps {
+interface PurchaseInvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (data: any) => void;
@@ -172,7 +172,7 @@ const emptyForm: FormData = {
   roundedTotal: 0,
 };
 
-const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({ isOpen, onClose, onSubmit }) => {
+const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onClose, onSubmit }) => {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
   const [activeTab, setActiveTab] = useState<"details" | "email" | "tax" | "address" | "terms">("details");
@@ -390,7 +390,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({ isOpen, onClose
           <form onSubmit={submit} className="flex flex-col h-full overflow-hidden">
             {/* Header */}
             <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-blue-700">Create Purchase Order</h2>
+              <h2 className="text-2xl font-semibold text-blue-700">Create Purchase Order Invoice</h2>
               <button type="button" onClick={onClose} className="p-1 rounded-full hover:bg-gray-200">
                 <X className="w-5 h-5 text-gray-600" />
               </button>
@@ -902,4 +902,4 @@ const TextArea: React.FC<{ label: string; name: string; value: string; onChange:
   </label>
 );
 
-export default PurchaseOrderModal;
+export default PurchaseInvoiceModal;

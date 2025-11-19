@@ -1,24 +1,24 @@
 import React, { useState } from "react";
-import RfqTabsModal from "../../components/procurement/RfqModal";
+import PurchaseInvoiceModal from "../../components/procurement/PurchaseInvoiceModal"
 
-interface RFQsTableProps {
+interface PurchaseInvoiceTableProps {
   onAdd?: () => void;
 }
 
-const initialRFQs = [
-  { id: "RFQ-001", supplier: "TechSupply Co", date: "2025-01-10", amount: 50000, status: "Awaiting Response", dueDate: "2025-01-25" },
-  { id: "RFQ-002", supplier: "Office Solutions", date: "2025-01-12", amount: 25000, status: "Received", dueDate: "2025-01-27" },
-  { id: "RFQ-003", supplier: "Equipment Plus", date: "2025-01-14", amount: 75000, status: "In Review", dueDate: "2025-01-29" },
+const initialOrders = [
+  { id: "PO-001", supplier: "TechSupply Co", date: "2025-01-15", amount: 48000, status: "Approved", deliveryDate: "2025-02-01" },
+  { id: "PO-002", supplier: "Office Solutions", date: "2025-01-16", amount: 23000, status: "Pending", deliveryDate: "2025-02-05" },
+  { id: "PO-003", supplier: "Equipment Plus", date: "2025-01-17", amount: 72000, status: "Draft", deliveryDate: "2025-02-10" },
 ];
 
-const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
+const PurchaseInvoiceTable: React.FC<PurchaseInvoiceTableProps> = ({ onAdd }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
 
-  const filteredRFQs = initialRFQs.filter(
-    (rfq) =>
-      rfq.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      rfq.supplier.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOrders = initialOrders.filter(
+    (po) =>
+      po.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      po.supplier.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddClick = () => {
@@ -33,16 +33,13 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
       <div className="flex items-center justify-between mb-4">
         <input
           type="search"
-          placeholder="Search RFQs..."
+          placeholder="Search Orders..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleAddClick}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-          >
+          <button onClick={handleAddClick} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
             + Add
           </button>
           <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
@@ -54,24 +51,24 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
         <table className="min-w-full border border-gray-200 rounded-lg">
           <thead className="bg-gray-100 text-gray-700 text-sm">
             <tr>
-              <th className="px-4 py-2 text-left">RFQ ID</th>
+              <th className="px-4 py-2 text-left">PO ID</th>
               <th className="px-4 py-2 text-left">Supplier</th>
               <th className="px-4 py-2 text-left">Date</th>
               <th className="px-4 py-2 text-left">Amount</th>
               <th className="px-4 py-2 text-left">Status</th>
-              <th className="px-4 py-2 text-left">Due Date</th>
+              <th className="px-4 py-2 text-left">Delivery Date</th>
               <th className="px-4 py-2 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredRFQs.map((rfq) => (
-              <tr key={rfq.id} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-2">{rfq.id}</td>
-                <td className="px-4 py-2">{rfq.supplier}</td>
-                <td className="px-4 py-2">{rfq.date}</td>
-                <td className="px-4 py-2">${rfq.amount.toLocaleString()}</td>
-                <td className="px-4 py-2">{rfq.status}</td>
-                <td className="px-4 py-2">{rfq.dueDate}</td>
+            {filteredOrders.map((po) => (
+              <tr key={po.id} className="border-t hover:bg-gray-50">
+                <td className="px-4 py-2">{po.id}</td>
+                <td className="px-4 py-2">{po.supplier}</td>
+                <td className="px-4 py-2">{po.date}</td>
+                <td className="px-4 py-2">${po.amount.toLocaleString()}</td>
+                <td className="px-4 py-2">{po.status}</td>
+                <td className="px-4 py-2">{po.deliveryDate}</td>
                 <td className="px-4 py-2 text-center">
                   <button className="text-blue-600 hover:underline">View</button>
                 </td>
@@ -81,10 +78,10 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
         </table>
       </div>
 
-      {/* Render RFQ Modal */}
-      <RfqTabsModal isOpen={modalOpen} onClose={handleCloseModal} />
+      {/* Render Purchase Order Modal */}
+      <PurchaseInvoiceModal isOpen={modalOpen} onClose={handleCloseModal} />
     </>
   );
 };
 
-export default RFQsTable;
+export default PurchaseInvoiceTable;
