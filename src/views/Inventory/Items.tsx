@@ -1,4 +1,3 @@
-// Products.tsx
 import React from "react";
 
 interface Product {
@@ -18,7 +17,7 @@ interface ProductsProps {
   onAdd: () => void;
 }
 
-const Products: React.FC<ProductsProps> = ({ products, searchTerm, setSearchTerm, onAdd }) => {
+const Items: React.FC<ProductsProps> = ({ products, searchTerm, setSearchTerm, onAdd }) => {
   const filteredProducts = products.filter(
     (p) =>
       p.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -41,7 +40,7 @@ const Products: React.FC<ProductsProps> = ({ products, searchTerm, setSearchTerm
           onClick={onAdd}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
-          + Add Product
+          + Add Items
         </button>
       </div>
       <div className="overflow-x-auto">
@@ -80,4 +79,4 @@ const Products: React.FC<ProductsProps> = ({ products, searchTerm, setSearchTerm
   );
 };
 
-export default Products;
+export default Items;
