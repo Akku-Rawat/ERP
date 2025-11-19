@@ -228,6 +228,7 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <Input label="Selling Price" name="sellingPrice" value={form.sellingPrice || ""} onChange={handleForm} className="w-full col-span-3" />
                         <Input label="Sales Account" name="salesAccount" value={form.salesAccount || ""} onChange={handleForm} className="w-full col-span-3" />
+                         <Input label="Buying Price" name="buyingPrice" value={form.buyingPrice || ""} onChange={handleForm} className="w-full" />
                         <Input label="Purchase Account" name="purchaseAccount" value={form.purchaseAccount || ""} onChange={handleForm} className="w-full" />
                         <Input label="Tax" name="tax" value={form.tax || ""} onChange={handleForm} className="w-full col-span-3" />
                         <Input label="Preferred Vendor" name="prefferedVendor" value={form.prefferedVendor || ""} onChange={handleForm} className="w-full col-span-3" />
