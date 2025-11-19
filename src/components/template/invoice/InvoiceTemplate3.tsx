@@ -12,7 +12,7 @@ export interface InvoiceItem {
 
 export interface InvoiceData {
   invoiceId?: string;
-  CutomerName: string;
+  customerName: string;
   dateOfInvoice: string;
   dueDate: string;
   poNumber?: string;
@@ -163,7 +163,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
             <div>
               <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">BILL TO</h3>
               <div className="text-sm space-y-1">
-                <p className="font-semibold text-gray-800">{data.CutomerName}</p>
+                <p className="font-semibold text-gray-800">{data.customerName}</p>
                 <p className="text-gray-600">{data.billingAddressLine1}</p>
                 <p className="text-gray-600">{data.billingCity}, {data.billingState} {data.billingPostalCode}</p>
               </div>
@@ -173,7 +173,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
             <div>
               <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">SHIP TO</h3>
               <div className="text-sm space-y-1">
-                <p className="font-semibold text-gray-800">{data.CutomerName}</p>
+                <p className="font-semibold text-gray-800">{data.customerName}</p>
                 <p className="text-gray-600">{data.shippingAddressLine1}</p>
                 <p className="text-gray-600">{data.shippingCity}, {data.shippingState} {data.shippingPostalCode}</p>
               </div>

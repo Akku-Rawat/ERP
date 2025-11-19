@@ -13,7 +13,7 @@ export interface InvoiceItem {
 
 export interface InvoiceData {
   invoiceId?: string;
-  CutomerName: string;
+  customerName: string;
   dateOfInvoice: string;
   dueDate: string;
   currency: string;
@@ -120,7 +120,7 @@ const InvoiceTemplate2 = forwardRef<HTMLDivElement, InvoiceTemplate2Props>(
           <div>
             <h3 className="text-xs font-bold uppercase mb-2" style={{ color: '#1C1C1C' }}>Bill To</h3>
             <div className="p-4 rounded-lg" style={{ backgroundColor: '#F2F2F2' }}>
-              <p className="font-bold mb-2" style={{ color: '#1C1C1C' }}>{data.CutomerName}</p>
+              <p className="font-bold mb-2" style={{ color: '#1C1C1C' }}>{data.customerName}</p>
               <p className="text-sm" style={{ color: '#1C1C1C' }}>{data.billingAddressLine1}</p>
               <p className="text-sm" style={{ color: '#1C1C1C' }}>{data.billingCity}, {data.billingState}</p>
               <p className="text-sm" style={{ color: '#1C1C1C' }}>{data.billingPostalCode}</p>
