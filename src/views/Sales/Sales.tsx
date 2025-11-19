@@ -15,10 +15,8 @@ import {
   FaFileInvoiceDollar,
   FaCashRegister,
   FaChartBar,
-  FaLayerGroup
+  FaCog
 } from "react-icons/fa";
-import ItemsTable from "./Items";
-import ItemModal from "../../components/sales/ItemModal";
 
 
 const sales = {
@@ -27,13 +25,11 @@ const sales = {
   defaultTab: "salesdashboard",
   tabs: [
     { id: "salesdashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
-    { id: "items", name: "Items", icon:<FaLayerGroup/>},
     { id: "quotations", name: "Quotations", icon: <FaFileInvoice /> },
     { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
     { id: "pos", name: "POS", icon: <FaCashRegister /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ],
-  items: [],
   quotations: [],
   invoices: [],
   pos: [],
@@ -44,7 +40,6 @@ const SalesModule: React.FC = () => {
   const [activeTab, setActiveTab] = useState(sales.defaultTab);
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [showItemModal, setshowItemModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [showPosModal, setShowPosModal] = useState(false);
 
@@ -77,24 +72,6 @@ const SalesModule: React.FC = () => {
 
       <div className="bg-white rounded-lg shadow-sm p-4">
         {activeTab === "salesdashboard" && <SalesDashboard />}
-
-        {activeTab === "items" && (
-          <>
-            <div className="flex items-center justify-end gap-4 mb-4">
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                onClick={() => setshowItemModal(true)}>
-                + Add
-              </button>
-              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
-                Export
-              </button>
-            </div>
-            <ItemsTable />
-
-              </>
-        )}
-        {/* Quotations */}
         {activeTab === "quotations" && (
           <>
             <div className="flex items-center justify-end gap-4 mb-4">
@@ -151,15 +128,9 @@ const SalesModule: React.FC = () => {
       <ReportTable />
         )}
 
-      
       </div>
 
       {/* Modals */}
-      <ItemModal
-        isOpen={showItemModal}
-        onClose={() => setshowItemModal(false)}
-        onSubmit={data => console.log('Final form', data)}
-      />
       <QuotationModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}

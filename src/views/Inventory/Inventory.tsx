@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import ProductModal from '../../components/inventory/ProductModal';
 import WarehouseModal from '../../components/inventory/WarehouseModal';
 import MovementModal from '../../components/inventory/MovementModal';
 
@@ -8,6 +7,7 @@ import { FaBoxOpen, FaWarehouse, FaTruckMoving, FaBoxes } from "react-icons/fa";
 import Products from "./Products";
 import Warehouses from "./Warehouses";
 import Movements from "./Movements";
+import ItemModal from "../../components/inventory/ItemModal";
 
 const inventory = {
   name: "Inventory",
@@ -96,7 +96,7 @@ const Inventory: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <ProductModal
+      <ItemModal
         isOpen={showProductModal}
         onClose={() => setShowProductModal(false)}
         onSubmit={(data) => console.log("New Product:", data)}
