@@ -1,343 +1,559 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useRef } from "react";
+import { X, Plus, Trash2 } from "lucide-react";
 
-interface RfqModalProps {
+interface RfqTabsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (data: any) => void;
+}
+
+interface SupplierRow {
+  supplier: string;
+  contact: string;
+  email: string;
+  sendEmail: boolean;
 }
 
 interface ItemRow {
-  productName: string;
-  description: string;
+  itemCode: string;
+  requiredDate: string;
   quantity: number;
-  listPrice: number;
-  discount: number;
-  tax: number;
+  uom: string;
+  warehouse: string;
 }
+
+const emptySupplier: SupplierRow = {
+  supplier: "",
+  contact: "",
+  email: "",
+  sendEmail: true,
+};
 
 const emptyItem: ItemRow = {
-  productName: "",
-  description: "",
+  itemCode: "",
+  requiredDate: new Date().toISOString().split("T")[0],
   quantity: 0,
-  listPrice: 0,
-  discount: 0,
-  tax: 0,
+  uom: "",
+  warehouse: "",
 };
 
-interface FormData {
-  rfqOwner: string;
-  subject: string;
-  requisitionNumber: string;
-  contactName: string;
+const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
+  const [activeTab, setActiveTab] = useState<
+    "details" | "emailTemplates" | "terms"
+  >("details");
+
+  // RFQ states
+  const [rfqNumber, setRfqNumber] = useState("PUR-RFQ-");
+  const [requestDate, setRequestDate] = useState(new Date().toISOString().split("T")[0]);
+  const [quoteDeadline, setQuoteDeadline] = useState("");
+  const [status, setStatus] = useState("Draft");
+  const [suppliers, setSuppliers] = useState<SupplierRow[]>([{ ...emptySupplier }]);
+  const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
+  const [terms, setTerms] = useState("");
+
+  // Email template states
+  const [templateName, setTemplateName] = useState("");
+  const [templateType, setTemplateType] = useState("Quote Email");
+  const [subject, setSubject] = useState("");
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const [sendAttachedFiles, setSendAttachedFiles] = useState(true);
+  const [sendPrint, setSendPrint] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const paymentItemsPerPage = 5;
+const [paymentPage, setPaymentPage] = useState(0);
+
+interface PaymentRow {
+  paymentTerm: string;
+  description: string;
   dueDate: string;
-  exciseDuty: number;
-  status: string;
-  rfqNumber: string;
-  vendorName: string;
-  trackingNumber: string;
-  rfqDate: string;
-  carrier: string;
-  salesCommission: number;
-  billingStreet: string;
-  billingCity: string;
-  billingState: string;
-  billingCode: string;
-  billingCountry: string;
-  shippingStreet: string;
-  shippingCity: string;
-  shippingState: string;
-  shippingCode: string;
-  shippingCountry: string;
-  totalDiscount: number;
-  totalTax: number;
-  adjustment: number;
-  termsAndConditions: string;
-  descriptionInformation: string;
-  // Computed
-  subTotal: number;
-  grandTotal: number;
+  invoicePortion: number;
+  paymentAmount: number;
 }
 
-const emptyForm: FormData = {
-  rfqOwner: "",
-  subject: "",
-  requisitionNumber: "",
-  contactName: "",
-  dueDate: "",
-  exciseDuty: 0,
-  status: "",
-  rfqNumber: "",
-  vendorName: "",
-  trackingNumber: "",
-  rfqDate: "",
-  carrier: "",
-  salesCommission: 0,
-  billingStreet: "",
-  billingCity: "",
-  billingState: "",
-  billingCode: "",
-  billingCountry: "",
-  shippingStreet: "",
-  shippingCity: "",
-  shippingState: "",
-  shippingCode: "",
-  shippingCountry: "",
-  totalDiscount: 0,
-  totalTax: 0,
-  adjustment: 0,
-  termsAndConditions: "",
-  descriptionInformation: "",
-  subTotal: 0,
-  grandTotal: 0,
+const emptyPaymentRow: PaymentRow = {
+  paymentTerm: "",
+  description: "",
+  dueDate: new Date().toISOString().split("T")[0],
+  invoicePortion: 0,
+  paymentAmount: 0,
 };
 
-const RfqModal: React.FC<RfqModalProps> = ({ isOpen, onClose, onSubmit }) => {
-  const [form, setForm] = useState<FormData>(emptyForm);
-  const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
+const [paymentRows, setPaymentRows] = useState<PaymentRow[]>([{ ...emptyPaymentRow }]);
+const paginatedPaymentRows = paymentRows.slice(
+  paymentPage * paymentItemsPerPage,
+  (paymentPage + 1) * paymentItemsPerPage
+);
 
-  useEffect(() => {
-    const itemTotals = items.map(item => {
-      const lineAmount = item.quantity * item.listPrice;
-      const afterDiscount = lineAmount - item.discount;
-      const afterTax = afterDiscount + item.tax;
-      return afterTax;
-    });
-    const subTotal = itemTotals.reduce((sum, total) => sum + total, 0);
-    const grandTotal = subTotal - form.totalDiscount + form.totalTax + form.adjustment;
+const handlePaymentRowChange = (idx: number, field: keyof PaymentRow, value: string | number) => {
+  const updated = [...paymentRows];
+  updated[idx] = { ...updated[idx], [field]: value };
+  setPaymentRows(updated);
+};
 
-    setForm(prev => ({
-      ...prev,
-      subTotal,
-      grandTotal,
-    }));
-  }, [items, form.totalDiscount, form.totalTax, form.adjustment]);
+const addPaymentRow = () => {
+  setPaymentRows([...paymentRows, { ...emptyPaymentRow }]);
+  setPaymentPage(Math.floor(paymentRows.length / paymentItemsPerPage));
+};
 
-  const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    const numValue = ['exciseDuty', 'salesCommission', 'totalDiscount', 'totalTax', 'adjustment'].includes(name) ? Number(value) : value;
-    setForm({ ...form, [name]: numValue });
+const removePaymentRow = (idx: number) => {
+  if (paymentRows.length === 1) return;
+  setPaymentRows(paymentRows.filter((_, i) => i !== idx));
+};
+
+const handlePaymentPrev = () => setPaymentPage(Math.max(0, paymentPage - 1));
+const handlePaymentNext = () =>
+  setPaymentPage(paymentPage + 1 < Math.ceil(paymentRows.length / paymentItemsPerPage) ? paymentPage + 1 : paymentPage);
+
+  if (!isOpen) return null;
+
+  // Helper styles for tab buttons (matches invoice modal)
+  const tabClass = (active: boolean) =>
+    `px-6 py-3 font-medium text-sm capitalize transition-colors ${
+      active
+        ? "text-blue-600 border-b-2 border-blue-600 bg-white"
+        : "text-gray-600 hover:text-gray-900"
+    }`;
+
+  // Suppliers/items handlers
+  const handleSupplier = (e: React.ChangeEvent<HTMLInputElement>, idx: number, field: keyof SupplierRow) => {
+    const copy = [...suppliers];
+    if (field === "sendEmail") {
+      copy[idx] = { ...copy[idx], [field]: (e.target as HTMLInputElement).checked };
+    } else {
+      copy[idx] = { ...copy[idx], [field]: e.target.value };
+    }
+    setSuppliers(copy);
   };
 
-  const handleItemChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    idx: number
-  ) => {
-    const { name, value } = e.target;
-    const numValue = ['quantity', 'listPrice', 'discount', 'tax'].includes(name) ? Number(value) : value;
-    const newItems = [...items];
-    newItems[idx] = { ...newItems[idx], [name]: numValue };
-    setItems(newItems);
+  const handleItem = (e: React.ChangeEvent<HTMLInputElement>, idx: number, field: keyof ItemRow) => {
+    const copy = [...items];
+    const isNum = field === "quantity";
+    copy[idx] = { ...copy[idx], [field]: isNum ? Number(e.target.value) : e.target.value };
+    setItems(copy);
+  };
+
+  const addSupplier = () => setSuppliers([...suppliers, { ...emptySupplier }]);
+  const removeSupplier = (idx: number) => {
+    if (suppliers.length === 1) return;
+    setSuppliers(suppliers.filter((_, i) => i !== idx));
   };
 
   const addItem = () => setItems([...items, { ...emptyItem }]);
-
   const removeItem = (idx: number) => {
     if (items.length === 1) return;
     setItems(items.filter((_, i) => i !== idx));
   };
 
-  const copyAddress = () => {
-    setForm(prev => ({
-      ...prev,
-      shippingStreet: prev.billingStreet,
-      shippingCity: prev.billingCity,
-      shippingState: prev.billingState,
-      shippingCode: prev.billingCode,
-      shippingCountry: prev.billingCountry,
-    }));
+  // Editor toolbar actions
+  const exec = (command: string, value?: string) => {
+    document.execCommand(command, false, value);
+    editorRef.current?.focus();
   };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    const subTotal = items.reduce((sum, item) => {
-      const lineAmount = item.quantity * item.listPrice;
-      return sum + (lineAmount - item.discount + item.tax);
-    }, 0);
-    const grandTotal = subTotal - form.totalDiscount + form.totalTax + form.adjustment;
-    const finalForm = { ...form, subTotal, grandTotal };
-    if (onSubmit) onSubmit({ ...finalForm, items });
-    handleReset();
-    onClose();
+  const insertToken = (token: string) => {
+    exec("insertHTML", token);
   };
 
-  const handleReset = () => {
-    setForm(emptyForm);
-    setItems([{ ...emptyItem }]);
+  const getEditorHtml = () => editorRef.current?.innerHTML || "";
+
+  const handleSaveTemplate = () => {
+    console.log({
+      name: templateName,
+      type: templateType,
+      subject,
+      messageHtml: getEditorHtml(),
+      sendAttachedFiles,
+      sendPrint,
+    });
+    setPreviewOpen(false);
+    alert("Template saved (console).");
   };
 
-  if (!isOpen) return null;
+  const resetTemplate = () => {
+    setTemplateName("");
+    setTemplateType("Quote Email");
+    setSubject("");
+    if (editorRef.current) editorRef.current.innerHTML = "";
+    setSendAttachedFiles(true);
+    setSendPrint(false);
+  };
 
   return (
-    <div className="fixed z-50 inset-0 flex items-center justify-center bg-black/40">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 40 }}
-          className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
-        >
-          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
-            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
-              <h3 className="text-2xl w-full font-semibold text-blue-600">
-                Create RFQ
-              </h3>
-              <button type="button" className="text-gray-700 hover:bg-[#fefefe] rounded-full w-8 h-8" onClick={onClose}>
-                <span className="text-2xl">&times;</span>
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto border-b">
-              {/* RFQ INFORMATION */}
-              <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">RFQ INFORMATION</div>
-                <div className="grid grid-cols-4 gap-4 mb-6">
-                  <input className="col-span-1 border rounded p-2" placeholder="RFQ Owner" name="rfqOwner" value={form.rfqOwner} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Subject" name="subject" value={form.subject} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Requisition Number" name="requisitionNumber" value={form.requisitionNumber} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Contact Name" name="contactName" value={form.contactName} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" type="date" placeholder="Due Date" name="dueDate" value={form.dueDate} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" type="number" placeholder="Excise Duty" name="exciseDuty" value={form.exciseDuty} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Status" name="status" value={form.status} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="RFQ Number" name="rfqNumber" value={form.rfqNumber} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Vendor Name" name="vendorName" value={form.vendorName} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Tracking Number" name="trackingNumber" value={form.trackingNumber} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" type="date" placeholder="RFQ Date" name="rfqDate" value={form.rfqDate} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Carrier" name="carrier" value={form.carrier} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" type="number" placeholder="Sales Commission" name="salesCommission" value={form.salesCommission} onChange={handleFormChange} />
-                </div>
-              </div>
-              {/* ADDRESS INFORMATION */}
-              <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">ADDRESS INFORMATION</div>
-                <div className="grid grid-cols-5 gap-4 mb-6">
-                  <div className="col-span-5 font-medium text-gray-500 mb-2">Billing Address</div>
-                  <input className="col-span-1 border rounded p-2" placeholder="Billing Street" name="billingStreet" value={form.billingStreet} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Billing City" name="billingCity" value={form.billingCity} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Billing State" name="billingState" value={form.billingState} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Billing Code" name="billingCode" value={form.billingCode} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Billing Country" name="billingCountry" value={form.billingCountry} onChange={handleFormChange} />
-                  <div className="col-span-5 font-medium text-gray-500 mb-2 mt-4">Shipping Address</div>
-                  <input className="col-span-1 border rounded p-2" placeholder="Shipping Street" name="shippingStreet" value={form.shippingStreet} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Shipping City" name="shippingCity" value={form.shippingCity} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Shipping State" name="shippingState" value={form.shippingState} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Shipping Code" name="shippingCode" value={form.shippingCode} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Shipping Country" name="shippingCountry" value={form.shippingCountry} onChange={handleFormChange} />
-                  <div className="col-span-5 mt-2">
-                    <button type="button" className="bg-blue-100 text-blue-700 px-4 py-2 rounded" onClick={copyAddress}>Copy Address</button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+      <div className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col">
+        {/* Header */}
+        <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
+          <h2 className="text-2xl font-semibold text-blue-700">
+            New Request For Quotation
+          </h2>
+          <button type="button" onClick={onClose} className="p-1 rounded-full hover:bg-gray-200">
+            <X className="w-5 h-5 text-gray-600" />
+          </button>
+        </header>
+
+        {/* Tabs */}
+        <div className="flex border-b bg-gray-50">
+          <button type="button" onClick={() => setActiveTab("details")} className={tabClass(activeTab === "details")}>Details</button>
+          <button type="button" onClick={() => setActiveTab("emailTemplates")} className={tabClass(activeTab === "emailTemplates")}>Email Templates</button>
+          <button type="button" onClick={() => setActiveTab("terms")} className={tabClass(activeTab === "terms")}>Terms & Conditions</button>
+        </div>
+
+        {/* Tab Content */}
+        <section className="flex-1 overflow-y-auto p-4 space-y-6">
+          {activeTab === "details" && (
+            <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4">
+              {/* Main form (left, col-span-2) */}
+              <div className="col-span-2">
+                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">RFQ Information</h3>
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <label className="flex flex-col gap-1 text-sm w-full">
+                      <span className="font-medium text-gray-600">RFQ Number</span>
+                      <input type="text" value={rfqNumber} onChange={e => setRfqNumber(e.target.value)} className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                    </label>
+                    <label className="flex flex-col gap-1 text-sm w-full">
+                      <span className="font-medium text-gray-600">Request Date</span>
+                      <input type="date" value={requestDate} onChange={e => setRequestDate(e.target.value)} className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                    </label>
+                    <label className="flex flex-col gap-1 text-sm w-full">
+                      <span className="font-medium text-gray-600">Quote Deadline</span>
+                      <input type="date" value={quoteDeadline} onChange={e => setQuoteDeadline(e.target.value)} className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                    </label>
+                    <label className="flex flex-col gap-1 text-sm w-full">
+                      <span className="font-medium text-gray-600">Status</span>
+                      <select value={status} onChange={e => setStatus(e.target.value)} className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        <option>Draft</option>
+                        <option>Sent</option>
+                        <option>Received</option>
+                      </select>
+                    </label>
                   </div>
+                  
                 </div>
-              </div>
-              {/* RFQ ITEMS */}
-              <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">RFQ ITEMS</div>
-                <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2">
-                  <table className="min-w-full text-xs">
-                    <thead>
-                      <tr className="bg-gray-50 text-gray-800">
-                        <th>S.NO</th>
-                        <th>PRODUCT NAME</th>
-                        <th>DESCRIPTION</th>
-                        <th>QUANTITY</th>
-                        <th>LIST PRICE ($)</th>
-                        <th>AMOUNT ($)</th>
-                        <th>DISCOUNT ($)</th>
-                        <th>TAX ($)</th>
-                        <th>TOTAL ($)</th>
+
+                <div className="my-6 h-px bg-gray-600" />
+
+                {/* Suppliers */}
+                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">Suppliers</h3>
+                <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow mb-4">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 text-gray-700">
+                      <tr>
+                        <th className="py-2 px-2 w-12"></th>
+                        <th className="py-2 px-2">No.</th>
+                        <th className="py-2 px-2">Supplier</th>
+                        <th className="py-2 px-2">Contact</th>
+                        <th className="py-2 px-2">Email Id</th>
+                        <th className="py-2 px-2">Send Email</th>
                         <th></th>
                       </tr>
                     </thead>
-                    <tbody>
-                      {items.map((itemRow, idx) => {
-                        const amount = itemRow.quantity * itemRow.listPrice;
-                        const total = amount - itemRow.discount + itemRow.tax;
-                        return (
-                          <tr key={idx}>
-                            <td className="text-center">{idx + 1}</td>
-                            <td>
-                              <input className="border rounded p-1 w-full" placeholder="Product Name" name="productName" value={itemRow.productName} onChange={e => handleItemChange(e, idx)} />
-                            </td>
-                            <td>
-                              <input className="border rounded p-1 w-full" placeholder="Description" name="description" value={itemRow.description} onChange={e => handleItemChange(e, idx)} />
-                            </td>
-                            <td>
-                              <input type="number" className="border rounded p-1 w-full" name="quantity" value={itemRow.quantity} onChange={e => handleItemChange(e, idx)} />
-                            </td>
-                            <td>
-                              <input type="number" className="border rounded p-1 w-full" name="listPrice" value={itemRow.listPrice} onChange={e => handleItemChange(e, idx)} />
-                            </td>
-                            <td>
-                              <input type="number" className="border rounded p-1 w-full" value={amount} disabled />
-                            </td>
-                            <td>
-                              <input type="number" className="border rounded p-1 w-full" name="discount" value={itemRow.discount} onChange={e => handleItemChange(e, idx)} />
-                            </td>
-                            <td>
-                              <input type="number" className="border rounded p-1 w-full" name="tax" value={itemRow.tax} onChange={e => handleItemChange(e, idx)} />
-                            </td>
-                            <td>
-                              <input type="number" className="border rounded p-1 w-full" value={total} disabled />
-                            </td>
-                            <td>
-                              <button type="button" className="bg-red-100 border border-red-300 rounded px-2 py-1" onClick={() => removeItem(idx)}>-</button>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                    <tbody className="divide-y">
+                      {suppliers.map((sup, idx) => (
+                        <tr key={idx} className="hover:bg-gray-50">
+                          <td className="py-2 px-2"></td>
+                          <td className="py-2 px-2">{idx + 1}</td>
+                          <td className="py-1 px-1">
+                            <input type="text" value={sup.supplier} onChange={e => handleSupplier(e, idx, "supplier")} className="w-full rounded border p-1 text-sm" />
+                          </td>
+                          <td className="py-1 px-1">
+                            <input type="text" value={sup.contact} onChange={e => handleSupplier(e, idx, "contact")} className="w-full rounded border p-1 text-sm" />
+                          </td>
+                          <td className="py-1 px-1">
+                            <input type="text" value={sup.email} onChange={e => handleSupplier(e, idx, "email")} className="w-full rounded border p-1 text-sm" />
+                          </td>
+                          <td className="py-2 px-2 text-center">
+                            <input type="checkbox" checked={sup.sendEmail} onChange={e => handleSupplier(e, idx, "sendEmail")} />
+                          </td>
+                          <td className="py-2 px-2 text-center">
+                            <button type="button" onClick={() => removeSupplier(idx)} className="p-1 text-red-600 hover:bg-red-50 rounded">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
-                  <button type="button" className="mt-2 bg-blue-100 border border-blue-300 rounded px-2 py-1" onClick={addItem}>+ Add Row</button>
+                  <div className="p-3 bg-gray-50">
+                    <button type="button" onClick={addSupplier} className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200">
+                      <Plus className="w-4 h-4" /> Add Supplier
+                    </button>
+                  </div>
+                </div>
+
+                {/* Items */}
+                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">Items</h3>
+                <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 text-gray-700">
+                      <tr>
+                        <th className="py-2 px-2 w-12"></th>
+                        <th className="py-2 px-2">No.</th>
+                        <th className="py-2 px-2">Item Code</th>
+                        <th className="py-2 px-2">Required Date</th>
+                        <th className="py-2 px-2">Quantity</th>
+                        <th className="py-2 px-2">UOM</th>
+                        <th className="py-2 px-2">Warehouse</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {items.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-gray-50">
+                          <td className="py-2 px-2"></td>
+                          <td className="py-2 px-2">{idx + 1}</td>
+                          <td className="py-1 px-1">
+                            <input type="text" value={item.itemCode} onChange={e => handleItem(e, idx, "itemCode")} className="w-full rounded border p-1 text-sm" />
+                          </td>
+                          <td className="py-1 px-1">
+                            <input type="date" value={item.requiredDate} onChange={e => handleItem(e, idx, "requiredDate")} className="w-full rounded border p-1 text-sm" />
+                          </td>
+                          <td className="py-1 px-1">
+                            <input type="number" value={item.quantity} onChange={e => handleItem(e, idx, "quantity")} className="w-full rounded border p-1 text-right text-sm" />
+                          </td>
+                          <td className="py-1 px-1">
+                            <input type="text" value={item.uom} onChange={e => handleItem(e, idx, "uom")} className="w-full rounded border p-1 text-sm" />
+                          </td>
+                          <td className="py-1 px-1">
+                            <input type="text" value={item.warehouse} onChange={e => handleItem(e, idx, "warehouse")} className="w-full rounded border p-1 text-sm" />
+                          </td>
+                          <td className="py-2 px-2 text-center">
+                            <button type="button" onClick={() => removeItem(idx)} className="p-1 text-red-600 hover:bg-red-50 rounded">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="p-3 bg-gray-50">
+                    <button type="button" onClick={addItem} className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200">
+                      <Plus className="w-4 h-4" /> Add Item
+                    </button>
+                  </div>
                 </div>
               </div>
-              {/* TOTALS SECTION */}
-              <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">TOTALS SECTION</div>
-                <div className="grid grid-cols-5 gap-4 mb-6">
-                  <input className="col-span-1 border rounded p-2" placeholder="Sub Total ($)" name="subTotal" value={form.subTotal} onChange={handleFormChange} disabled />
-                  <input className="col-span-1 border rounded p-2" type="number" placeholder="Discount ($)" name="totalDiscount" value={form.totalDiscount} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" type="number" placeholder="Tax ($)" name="totalTax" value={form.totalTax} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" type="number" placeholder="Adjustment ($)" name="adjustment" value={form.adjustment} onChange={handleFormChange} />
-                  <input className="col-span-1 border rounded p-2" placeholder="Grand Total ($)" name="grandTotal" value={form.grandTotal} onChange={handleFormChange} disabled />
+
+              {/* Sidebar summary (col-span-1) */}
+              <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
+                <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
+                  <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">Supplier Details</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between"><span className="font-medium text-gray-600">Total Suppliers</span><span className="font-medium text-gray-800">{suppliers.length}</span></div>
+                    <div className="flex justify-between"><span className="font-medium text-gray-600">Emails to Send</span><span className="font-medium text-gray-800">{suppliers.filter(s => s.sendEmail).length}</span></div>
+                    <div className="flex justify-between border-t pt-2 mt-2"><span className="text-base font-semibold text-gray-700">Status</span><span className="text-base font-bold text-blue-600">{status}</span></div>
+                  </div>
+                </div>
+                <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
+                  <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">Items Summary</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between"><span className="font-medium text-gray-600">Total Items</span><span className="font-medium text-gray-800">{items.length}</span></div>
+                    <div className="flex justify-between"><span className="font-medium text-gray-600">Total Quantity</span><span className="font-medium text-gray-800">{items.reduce((s, it) => s + it.quantity, 0)}</span></div>
+                    <div className="flex justify-between border-t pt-2 mt-2"><span className="text-base font-semibold text-gray-700">Quote Deadline</span><span className="text-base font-bold text-blue-600">{quoteDeadline || "Not set"}</span></div>
+                  </div>
                 </div>
               </div>
-              {/* TERMS AND CONDITIONS & DESCRIPTION INFORMATION */}
-              <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">TERMS AND CONDITIONS</div>
-                <textarea className="border rounded p-2 w-full h-24" placeholder="Enter terms and conditions..." name="termsAndConditions" value={form.termsAndConditions} onChange={handleFormChange} />
-                <div className="font-semibold text-gray-600 mb-2 mt-4">DESCRIPTION INFORMATION</div>
-                <textarea className="border rounded p-2 w-full h-24" placeholder="Enter description..." name="descriptionInformation" value={form.descriptionInformation} onChange={handleFormChange} />
-              </div>
             </div>
-            {/* Controls */}
-            <div className="m-3 flex items-center justify-between gap-x-7 shrink-0">
-              <button type="button"
-                className="w-24 rounded-3xl bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
-                onClick={onClose}
-              >
-                Cancel
-              </button>
-              <div className="flex gap-x-2">
-                <button
-                  type="submit"
-                  className="w-24 rounded-3xl bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="w-24 rounded-3xl bg-gray-300 text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-500 hover:text-white"
-                  onClick={handleReset}
-                >
-                  Reset
-                </button>
+          )}
+          {/* Email Templates Tab */}
+          {activeTab === "emailTemplates" && (
+            <div className=" mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">Email Template</h3>
+                <div className="text-sm text-gray-500">Create professional email templates for supplier communication.</div>
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="font-medium text-gray-600">Name</span>
+                  <input value={templateName} onChange={e => setTemplateName(e.target.value)} placeholder="Template name" className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="font-medium text-gray-600">Type</span>
+                  <select value={templateType} onChange={e => setTemplateType(e.target.value)} className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <option>Quote Email</option>
+                    <option>Order Confirmation</option>
+                    <option>Reminder</option>
+                  </select>
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="font-medium text-gray-600">Subject</span>
+                  <input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Subject line" className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                </label>
+              </div>
+              {/* Toolbar */}
+              <div className="border border-gray-200 rounded-t-md bg-gray-50 p-2 flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <button type="button" onClick={() => exec("bold")} title="Bold" className="px-2 py-1 rounded hover:bg-gray-100 border border-transparent">B</button>
+                  <button type="button" onClick={() => exec("italic")} title="Italic" className="px-2 py-1 rounded hover:bg-gray-100 border border-transparent">I</button>
+                  <button type="button" onClick={() => exec("underline")} title="Underline" className="px-2 py-1 rounded hover:bg-gray-100 border border-transparent">U</button>
+                </div>
+                <div className="w-px h-6 bg-gray-200 mx-2" />
+                {/* Token insert */}
+                <div className="flex items-center gap-2">
+                  <label className="text-xs text-gray-600">Insert token</label>
+                  <select onChange={e => { if (!e.target.value) return; insertToken(`{{${e.target.value}}}`); e.target.selectedIndex = 0; }} defaultValue="" className="px-2 py-1 border border-gray-200 rounded bg-white text-sm">
+                    <option value="">-- select token --</option>
+                    <option value="contact.first_name">contact.first_name</option>
+                    <option value="supplier_name">supplier_name</option>
+                    <option value="rfq_number">rfq_number</option>
+                    <option value="portal_link">portal_link</option>
+                  </select>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <select onChange={e => { if (!e.target.value) return; insertToken(`<br/>${e.target.value}<br/>`); e.target.selectedIndex = 0; }} defaultValue="" className="px-2 py-1 border border-gray-200 rounded bg-white text-sm">
+                    <option value="">Insert signature</option>
+                    <option value="Regards,<br/>[Company Name]">Standard</option>
+                    <option value="Best regards,<br/>[Procurement Team]">Procurement</option>
+                    <option value="Sincerely,<br/>[Your Name]">Sincerely</option>
+                  </select>
+                  <button type="button" onClick={() => setPreviewOpen(true)} className="px-3 py-1 text-sm rounded border border-gray-200 hover:bg-gray-100">Preview</button>
+                </div>
+              </div>
+              <div className="border border-t-0 border-gray-200 rounded-b-md bg-white">
+                <div ref={editorRef} contentEditable suppressContentEditableWarning className="min-h-[240px] p-4 prose max-w-none text-sm text-gray-800 outline-none" style={{ whiteSpace: "pre-wrap" }}>
+                  <p style={{ color: "#6b7280" }}>Start typing your message here. Use tokens to personalize (e.g., {'{{contact.first_name}}'}).</p>
+                </div>
+              </div>
+              <div className="mt-4 flex items-start gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={sendAttachedFiles} onChange={e => setSendAttachedFiles(e.target.checked)} />
+                  <span>Attach files</span>
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={sendPrint} onChange={e => setSendPrint(e.target.checked)} />
+                  <span>Attach PDF print</span>
+                </label>
+                <div className="ml-auto flex gap-2">
+                  <button onClick={resetTemplate} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 text-sm">Reset</button>
+                  <button onClick={handleSaveTemplate} className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-sm">Save Template</button>
+                </div>
+              </div>
+              {/* Preview modal */}
+              {previewOpen && (
+                <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 p-4">
+                  <div className="w-full max-w-3xl bg-white rounded shadow-lg overflow-auto">
+                    <div className="flex items-center justify-between p-4 border-b">
+                      <h4 className="font-semibold text-gray-800">Email Preview</h4>
+                      <button onClick={() => setPreviewOpen(false)} className="px-2 py-1 rounded hover:bg-gray-100">Close</button>
+                    </div>
+                    <div className="p-6">
+                      <div className="text-sm text-gray-600 mb-3">{subject || <span className="text-gray-400">[No subject]</span>}</div>
+                      <div className="prose max-w-none text-sm text-gray-800" dangerouslySetInnerHTML={{ __html: getEditorHtml() }} />
+                      <div className="mt-6 text-xs text-gray-500">Tokens shown as inserted values will be replaced when sending.</div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </form>
-        </motion.div>
-      </AnimatePresence>
+          )}
+          {activeTab === "terms" && (
+  <div className="space-y-8 mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
+    <div>
+      <h3 className="mb-2 text-lg font-semibold text-gray-800">Payment Terms</h3>
+      <span className="font-medium text-gray-700">Payment Schedule</span>
+      <div className="flex items-center justify-between mb-3 mt-2">
+        <span className="text-sm text-gray-600">
+          Showing {paymentPage * paymentItemsPerPage + 1}–
+          {Math.min((paymentPage + 1) * paymentItemsPerPage, paymentRows.length)} of {paymentRows.length}
+        </span>
+        <div className="flex gap-1">
+          <button
+            type="button"
+            onClick={handlePaymentPrev}
+            disabled={paymentPage === 0}
+            className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ← Prev
+          </button>
+          <button
+            type="button"
+            onClick={handlePaymentNext}
+            disabled={(paymentPage + 1) * paymentItemsPerPage >= paymentRows.length}
+            className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
+      <div className="overflow-x-auto rounded-lg border mt-2">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50 text-gray-700">
+            <tr>
+              <th className="px-2 py-2">No.</th>
+              <th className="px-2 py-2">Payment Term</th>
+              <th className="px-2 py-2">Description</th>
+              <th className="px-2 py-2">Due Date *</th>
+              <th className="px-2 py-2">Invoice Portion</th>
+              <th className="px-2 py-2">Payment Amount *</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {paginatedPaymentRows.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="text-center p-6 text-gray-400">No Data</td>
+              </tr>
+            ) : (
+              paginatedPaymentRows.map((row, idx) => {
+                const i = paymentPage * paymentItemsPerPage + idx;
+                return (
+                  <tr key={i} className="hover:bg-gray-50">
+                    <td className="px-3 py-2 text-center">{i + 1}</td>
+                    <td className="px-1 py-1">
+                      <input className="w-full rounded border p-1 text-sm" name="paymentTerm" value={row.paymentTerm} onChange={(e) => handlePaymentRowChange(i, "paymentTerm", e.target.value)} />
+                    </td>
+                    <td className="px-1 py-1">
+                      <input className="w-full rounded border p-1 text-sm" name="description" value={row.description} onChange={(e) => handlePaymentRowChange(i, "description", e.target.value)} />
+                    </td>
+                    <td className="px-1 py-1">
+                      <input type="date" className="w-full rounded border p-1 text-sm" name="dueDate" value={row.dueDate} onChange={(e) => handlePaymentRowChange(i, "dueDate", e.target.value)} />
+                    </td>
+                    <td className="px-1 py-1">
+                      <input type="number" className="w-full rounded border p-1 text-sm" name="invoicePortion" value={row.invoicePortion} onChange={(e) => handlePaymentRowChange(i, "invoicePortion", Number(e.target.value))} />
+                    </td>
+                    <td className="px-1 py-1">
+                      <input type="number" className="w-full rounded border p-1 text-sm" name="paymentAmount" value={row.paymentAmount} onChange={(e) => handlePaymentRowChange(i, "paymentAmount", Number(e.target.value))} />
+                    </td>
+                    <td className="px-1 py-1 text-center">
+                      <button type="button" onClick={() => removePaymentRow(i)} className="p-1 text-red-600 hover:bg-red-50 rounded" disabled={paymentRows.length === 1}>
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex justify-between mt-3">
+        <button
+          type="button"
+          onClick={addPaymentRow}
+          className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
+        >
+          <Plus className="w-4 h-4" /> Add Row
+        </button>
+      </div>
+    </div>
+    <div>
+      <h3 className="mb-4 text-lg font-semibold text-gray-800">Extra Terms & Conditions</h3>
+      <textarea rows={6} className="w-full px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50" value={terms} onChange={e => setTerms(e.target.value)} placeholder="Add standard terms and conditions for RFQs here..." />
+    </div>
+  </div>
+)}
+        </section>
+        {/* Footer */}
+        <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
+          <button type="button" onClick={onClose} className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300">Cancel</button>
+          <div className="flex gap-2">
+            <button type="button" className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400">Reset</button>
+            <button type="button" className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600">Save RFQ</button>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 };
 
-export default RfqModal;
+export default RfqTabsModal;
