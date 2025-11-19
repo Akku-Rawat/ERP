@@ -17,6 +17,8 @@ import {
   FaChartBar,
   FaCog
 } from "react-icons/fa";
+import ProformaInvoicesTable from "./ProformaInvoice";
+import ProformaInvoiceModal from "../../components/sales/ProformaInvoiceModal";
 
 
 const sales = {
@@ -27,6 +29,7 @@ const sales = {
     { id: "salesdashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
     { id: "quotations", name: "Quotations", icon: <FaFileInvoice /> },
     { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
+    { id: "proformaInvoice", name: "Profroma Invoice", icon: <FaFileInvoiceDollar /> },
     { id: "pos", name: "POS", icon: <FaCashRegister /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ],
@@ -41,6 +44,7 @@ const SalesModule: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [showProformaInvoiceModal, setShowProformaInvoiceModal] = useState(false);
   const [showPosModal, setShowPosModal] = useState(false);
 
   return (
@@ -105,6 +109,21 @@ const SalesModule: React.FC = () => {
             <InvoiceTable />
           </>
         )}
+        {activeTab === "proformaInvoice" && (
+          <>
+            <div className="flex items-center justify-end gap-4 mb-4">
+              <button
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                onClick={() => setShowProformaInvoiceModal(true)}>
+                + Add
+              </button>
+              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
+                Export
+              </button>
+            </div>
+            <ProformaInvoicesTable/>
+          </>
+        )}
 
         {/* POS */}
         {activeTab === "pos" && (
@@ -139,6 +158,11 @@ const SalesModule: React.FC = () => {
       <InvoiceModal
         isOpen={showInvoiceModal}
         onClose={() => setShowInvoiceModal(false)}
+        onSubmit={data => console.log('Invoice data', data)}
+      />
+      <ProformaInvoiceModal
+        isOpen={showProformaInvoiceModal}
+        onClose={() => setShowProformaInvoiceModal(false)}
         onSubmit={data => console.log('Invoice data', data)}
       />
       <PosModal
