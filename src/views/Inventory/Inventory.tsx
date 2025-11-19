@@ -4,17 +4,20 @@ import MovementModal from '../../components/inventory/MovementModal';
 
 import { FaBoxOpen, FaWarehouse, FaTruckMoving, FaBoxes } from "react-icons/fa";
 
-import Products from "./Products";
+import Items from "./Items";
 import Warehouses from "./Warehouses";
 import Movements from "./Movements";
 import ItemModal from "../../components/inventory/ItemModal";
+import ItemsCategory from "./ItemsCategory";
+import ItemsCategoryModal from "../../components/inventory/ItemsCategoryModal";
 
 const inventory = {
   name: "Inventory",
   icon: <FaBoxes />,
-  defaultTab: "products",
+  defaultTab: "items",
   tabs: [
-    { id: "products", name: "Products", icon: <FaBoxOpen /> },
+    { id: "items", name: "Items", icon: <FaBoxOpen /> },
+    { id: "itemsCategory", name: "Items Category", icon: <FaBoxOpen /> },
     { id: "warehouses", name: "Warehouses", icon: <FaWarehouse /> },
     { id: "movements", name: "Movements", icon: <FaTruckMoving /> },
   ],
@@ -33,12 +36,14 @@ const inventory = {
 const Inventory: React.FC = () => {
   const [activeTab, setActiveTab] = useState(inventory.defaultTab);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showProductModal, setShowProductModal] = useState(false);
+  const [showItemsModal, setShowItemsModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showWarehouseModal, setShowWarehouseModal] = useState(false);
   const [showMovementModal, setShowMovementModal] = useState(false);
 
   const handleAdd = () => {
-    if (activeTab === "products") setShowProductModal(true);
+    if (activeTab === "items") setShowItemsModal(true);
+    else if (activeTab === "itemsCategory") setShowCategoryModal(true);
     else if (activeTab === "warehouses") setShowWarehouseModal(true);
     else if (activeTab === "movements") setShowMovementModal(true);
   };
@@ -74,8 +79,16 @@ const Inventory: React.FC = () => {
 
       {/* Content */}
       <div className="bg-white rounded-lg shadow-sm p-4">
-        {activeTab === "products" && (
-          <Products
+        {activeTab === "items" && (
+          <Items
+            products={inventory.products}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onAdd={handleAdd}
+          />
+        )}
+        {activeTab === "itemsCategory" && (
+          <ItemsCategory
             products={inventory.products}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -97,9 +110,14 @@ const Inventory: React.FC = () => {
 
       {/* Modals */}
       <ItemModal
-        isOpen={showProductModal}
-        onClose={() => setShowProductModal(false)}
-        onSubmit={(data) => console.log("New Product:", data)}
+        isOpen={showItemsModal}
+        onClose={() => setShowItemsModal(false)}
+        onSubmit={(data) => console.log("New Items:", data)}
+      />
+      <ItemsCategoryModal
+        isOpen={showCategoryModal}
+        onClose={() => setShowCategoryModal(false)}
+        onSubmit={(data) => console.log("New Items Category:", data)}
       />
       <WarehouseModal
         isOpen={showWarehouseModal}
