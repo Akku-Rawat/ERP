@@ -357,7 +357,7 @@ const handlePaymentNext = () =>
           )}
           {/* Email Templates Tab */}
           {activeTab === "emailTemplates" && (
-            <div className="max-w-6xl mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
+            <div className=" mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-800">Email Template</h3>
                 <div className="text-sm text-gray-500">Create professional email templates for supplier communication.</div>
@@ -447,7 +447,7 @@ const handlePaymentNext = () =>
             </div>
           )}
           {activeTab === "terms" && (
-  <div className="space-y-8 max-w-6xl mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
+  <div className="space-y-8 mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
     <div>
       <h3 className="mb-2 text-lg font-semibold text-gray-800">Payment Terms</h3>
       <span className="font-medium text-gray-700">Payment Schedule</span>
