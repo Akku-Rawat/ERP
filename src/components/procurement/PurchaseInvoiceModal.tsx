@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface PurchaseOrderModalProps {
+interface PurchaseInvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (data: any) => void;
 }
 
-// Adjust tab width as needed
+// Compact tab, left aligned
 const tabClass = (active: boolean) =>
   `px-6 py-3 text-sm font-medium transition-colors min-w-[160px]
     ${active ? "text-indigo-600 border-b-2 border-indigo-600 bg-white" : "text-gray-600 hover:text-gray-900"}`;
 
-const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
+const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
@@ -35,7 +35,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
           {/* Header */}
           <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
             <h2 className="text-2xl font-semibold text-indigo-700">
-              Create Purchase Order
+              Create Purchase Invoice
             </h2>
             <button
               type="button"
@@ -89,27 +89,27 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
           <section className="flex-1 overflow-y-auto p-6">
             {activeTab === "details" && (
               <div>
-                {/* Details tab content goes here */}
+                {/* Purchase Invoice details tab content here */}
               </div>
             )}
             {activeTab === "emailTemplates" && (
               <div>
-                {/* Email Templates tab content goes here */}
+                {/* Email Templates tab content here */}
               </div>
             )}
             {activeTab === "address" && (
               <div>
-                {/* Address tab content goes here */}
+                {/* Address tab content here */}
               </div>
             )}
             {activeTab === "tax" && (
               <div>
-                {/* Tax tab content goes here */}
+                {/* Tax tab content here */}
               </div>
             )}
             {activeTab === "terms" && (
               <div>
-                {/* Terms and Conditions tab content goes here */}
+                {/* Terms and Conditions tab content here */}
               </div>
             )}
           </section>
@@ -119,4 +119,4 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
   );
 };
 
-export default PurchaseOrderModal;
+export default PurchaseInvoiceModal;

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal"
 
 interface PurchaseOrdersTableProps {
-  onAdd: () => void;
+  onAdd?: () => void;
 }
 
 const initialOrders = [
@@ -12,11 +13,20 @@ const initialOrders = [
 
 const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+
   const filteredOrders = initialOrders.filter(
     (po) =>
       po.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       po.supplier.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleAddClick = () => {
+    setModalOpen(true);
+    if (onAdd) onAdd();
+  };
+
+  const handleCloseModal = () => setModalOpen(false);
 
   return (
     <>
@@ -29,7 +39,7 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
           className="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <div className="flex items-center gap-2">
-          <button onClick={onAdd} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+          <button onClick={handleAddClick} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
             + Add
           </button>
           <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
@@ -67,6 +77,9 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
           </tbody>
         </table>
       </div>
+
+      {/* Render Purchase Order Modal */}
+      <PurchaseOrderModal isOpen={modalOpen} onClose={handleCloseModal} />
     </>
   );
 };

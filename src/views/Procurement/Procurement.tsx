@@ -3,8 +3,6 @@ import RFQsTable from "./Rfqs";
 import PurchaseOrdersTable from "./PurchaseOrders";
 import ApprovalsSection from "./Approvals";
 import Dashboard from "./ProcurementDashboard";
-import RFQModal from "../../components/procurement/RfqModal";
-import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal";
 import ApprovalModal from "../../components/procurement/ApprovalModal";
 import { 
   FaClipboardList,
@@ -18,6 +16,7 @@ import {
 } from "react-icons/fa";
 import SupplierManagement from "./SupplierManagement";
 import SupplierModal from "../../components/procurement/SupplierModal";
+import PurchaseInvoiceTable from "./PurchaseInvoice";
 
 const procurement = {
   name: "Procurement",
@@ -30,23 +29,19 @@ const procurement = {
     { id: "orders", name: "Purchase Orders", icon: <FaClipboardList /> },
     { id: "approvals", name: "Approvals", icon: <FaCheckCircle /> },
     { id: "invoicematching", name: "Invoice Matching", icon: <FaFileInvoiceDollar /> },
-    { id: "goodsreceipt", name: "Goods Receipt", icon: <FaTruckLoading /> },
+    { id: "purchase", name: "Purchase Invoice", icon: <FaTruckLoading /> },
   ],
 };
 
 const Procurement: React.FC = () => {
   const [activeTab, setActiveTab] = useState(procurement.defaultTab);
   const [showSupplierModal, setShowSupplierModal] = useState(false);
-  const [showRFQModal, setShowRFQModal] = useState(false);
-  const [showPOModal, setShowPOModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showGRModal, setShowGRModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
   const handleAdd = () => {
     if (activeTab === "supplier") setShowSupplierModal(true);
-    else if (activeTab === "rfqs") setShowPOModal(true);
-    else if (activeTab === "orders") setShowPOModal(true);
     else if (activeTab === "approvals") setShowApprovalModal(true);
     else if (activeTab === "goodsreceipt") setShowGRModal(true);
     else if (activeTab === "invoicematching") setShowInvoiceModal(true);
@@ -84,6 +79,7 @@ const Procurement: React.FC = () => {
         {activeTab === "rfqs" && <RFQsTable onAdd={handleAdd} />}
         {activeTab === "orders" && <PurchaseOrdersTable onAdd={handleAdd} />}
         {activeTab === "approvals" && <ApprovalsSection onAdd={handleAdd} />}
+        {activeTab === "purchase" && <PurchaseInvoiceTable onAdd={handleAdd} />}
         {activeTab === "procurementdashboard" && <Dashboard />}
       </div>
 
@@ -92,16 +88,6 @@ const Procurement: React.FC = () => {
         isOpen={showSupplierModal}
         onClose={() => setShowSupplierModal(false)}
         onSubmit={(data) => console.log("New RFQ:", data)}
-      />
-      <RFQModal
-        isOpen={showRFQModal}
-        onClose={() => setShowRFQModal(false)}
-        onSubmit={(data) => console.log("New RFQ:", data)}
-      />
-      <PurchaseOrderModal
-        isOpen={showPOModal}
-        onClose={() => setShowPOModal(false)}
-        onSubmit={(data) => console.log("New PO:", data)}
       />
       <ApprovalModal
         isOpen={showApprovalModal}
