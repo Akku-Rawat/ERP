@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaUsers, FaPlus, FaFilter, FaChevronDown, FaUserTie, FaDoorOpen } from 'react-icons/fa';
+import { Users, Plus, Filter, ChevronDown, UserCheck, DoorOpen, Edit2, Trash2 } from 'lucide-react';
 
 // ===== DATA TYPES =====
 type JobOpening = {
@@ -106,464 +106,673 @@ const Recruitment: React.FC = () => {
   const [onboardingSubTab, setOnboardingSubTab] = useState<'hires' | 'tasks'>('hires');
   const [offboardingSubTab, setOffboardingSubTab] = useState<'exits' | 'tasks'>('exits');
 
+  const handleJobDelete = (id: string, title: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm(`Delete job opening "${title}"?`)) {
+      alert("Delete functionality ready — connect to API later");
+    }
+  };
+
+  const handleCandidateDelete = (id: string, name: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm(`Delete candidate "${name}"?`)) {
+      alert("Delete functionality ready — connect to API later");
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {/* ===== MAIN TABS: Recruitment (Active by default) vs Onboarding vs Offboarding ===== */}
-      <div className="flex gap-8 border-b border-gray-300 pb-4 overflow-x-auto">
-        <button
-          onClick={() => setMainTab('recruitment')}
-          className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
-            mainTab === 'recruitment'
-              ? 'text-teal-600 border-teal-500'
-              : 'text-gray-500 border-transparent hover:text-teal-600'
-          }`}
-        >
-          <FaUsers /> Recruitment
-        </button>
-        <button
-          onClick={() => setMainTab('onboarding')}
-          className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
-            mainTab === 'onboarding'
-              ? 'text-teal-600 border-teal-500'
-              : 'text-gray-500 border-transparent hover:text-teal-600'
-          }`}
-        >
-          <FaUserTie /> Onboarding
-        </button>
-        <button
-          onClick={() => setMainTab('offboarding')}
-          className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
-            mainTab === 'offboarding'
-              ? 'text-teal-600 border-teal-500'
-              : 'text-gray-500 border-transparent hover:text-teal-600'
-          }`}
-        >
-          <FaDoorOpen /> Offboarding
-        </button>
-      </div>
-
-      {/* ===== RECRUITMENT MODULE (LOADS FIRST) ===== */}
-      {mainTab === 'recruitment' && (
-        <div className="space-y-6">
-          {/* Sub-tabs: Job Openings vs Candidates */}
-          <div className="flex gap-6 border-b border-gray-200 pb-3">
-            <button
-              onClick={() => setRecruitmentSubTab('openings')}
-              className={`font-semibold transition pb-2 border-b-2 ${
-                recruitmentSubTab === 'openings'
-                  ? 'text-teal-600 border-teal-500'
-                  : 'text-gray-500 border-transparent hover:text-teal-600'
-              }`}
-            >
-              Job Openings
-            </button>
-            <button
-              onClick={() => setRecruitmentSubTab('candidates')}
-              className={`font-semibold transition pb-2 border-b-2 ${
-                recruitmentSubTab === 'candidates'
-                  ? 'text-teal-600 border-teal-500'
-                  : 'text-gray-500 border-transparent hover:text-teal-600'
-              }`}
-            >
-              Candidates Pipeline
-            </button>
-          </div>
-
-          {/* JOB OPENINGS SUB-TAB */}
-          {recruitmentSubTab === 'openings' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Job Openings</h2>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold flex items-center gap-2 transition">
-                  <FaPlus /> New Job
-                </button>
-              </div>
-
-              <div className="grid grid-cols-3 gap-6">
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-teal-500">
-                  <p className="text-gray-600 text-sm">Total Openings</p>
-                  <p className="text-4xl font-bold text-teal-600">{demoJobOpenings.filter(j => j.status === 'Open').length}</p>
-                </div>
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
-                  <p className="text-gray-600 text-sm">Total Applications</p>
-                  <p className="text-4xl font-bold text-blue-600">58</p>
-                </div>
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-                  <p className="text-gray-600 text-sm">Offers Extended</p>
-                  <p className="text-4xl font-bold text-green-600">5</p>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex gap-4 mb-6">
-                  <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
-                    <FaFilter /> Filter
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
-                    Department <FaChevronDown />
-                  </button>
-                </div>
-
-                <table className="w-full text-left text-sm">
-                  <thead className="border-b-2 border-gray-200">
-                    <tr className="text-gray-700 font-semibold">
-                      <th className="py-3 px-4">Job Title</th>
-                      <th className="py-3 px-4">Department</th>
-                      <th className="py-3 px-4">Type</th>
-                      <th className="py-3 px-4">Posting Date</th>
-                      <th className="py-3 px-4">Candidates</th>
-                      <th className="py-3 px-4">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {demoJobOpenings.map(job => (
-                      <tr key={job.id} className="border-b border-gray-200 hover:bg-gray-50">
-                        <td className="py-3 px-4 font-medium">{job.jobTitle}</td>
-                        <td className="py-3 px-4">{job.department}</td>
-                        <td className="py-3 px-4">{job.type}</td>
-                        <td className="py-3 px-4">{job.postingDate}</td>
-                        <td className="py-3 px-4 font-semibold">{job.candidates}</td>
-                        <td className="py-3 px-4">
-                          <span className={`px-4 py-1 rounded-full text-xs font-semibold ${job.status === 'Open' ? 'bg-teal-100 text-teal-700' : 'bg-gray-200 text-gray-700'}`}>
-                            {job.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* CANDIDATES PIPELINE SUB-TAB */}
-          {recruitmentSubTab === 'candidates' && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">Candidates Pipeline</h2>
-
-              <div className="grid grid-cols-5 gap-4">
-                {['Applied', 'Shortlisted', 'Interview', 'Offer', 'Hired'].map(stage => {
-                  const count = demoCandidates.filter(c => c.stage === stage).length;
-                  return (
-                    <div key={stage} className="bg-white rounded-lg shadow p-4 text-center border-t-4 border-teal-500">
-                      <p className="text-gray-600 text-sm font-semibold">{stage}</p>
-                      <p className="text-3xl font-bold text-teal-600 mt-2">{count}</p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <table className="w-full text-left text-sm">
-                  <thead className="border-b-2 border-gray-200">
-                    <tr className="text-gray-700 font-semibold">
-                      <th className="py-3 px-4">Name</th>
-                      <th className="py-3 px-4">Position</th>
-                      <th className="py-3 px-4">Applied Date</th>
-                      <th className="py-3 px-4">Email</th>
-                      <th className="py-3 px-4">Stage</th>
-                      <th className="py-3 px-4">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {demoCandidates.map(candidate => (
-                      <tr key={candidate.id} className="border-b border-gray-200 hover:bg-gray-50">
-                        <td className="py-3 px-4 font-medium">{candidate.name}</td>
-                        <td className="py-3 px-4">{candidate.position}</td>
-                        <td className="py-3 px-4">{candidate.appliedDate}</td>
-                        <td className="py-3 px-4 text-blue-600">{candidate.email}</td>
-                        <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            candidate.stage === 'Applied' ? 'bg-blue-100 text-blue-700' :
-                            candidate.stage === 'Shortlisted' ? 'bg-yellow-100 text-yellow-700' :
-                            candidate.stage === 'Interview' ? 'bg-purple-100 text-purple-700' :
-                            candidate.stage === 'Offer' ? 'bg-orange-100 text-orange-700' :
-                            'bg-green-100 text-green-700'
-                          }`}>
-                            {candidate.stage}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <button className="text-teal-600 hover:text-teal-800 font-semibold">View</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="space-y-6">
+        {/* ===== MAIN TABS: Recruitment (Active by default) vs Onboarding vs Offboarding ===== */}
+        <div className="flex gap-8 border-b border-gray-300 pb-4 overflow-x-auto">
+          <button
+            onClick={() => setMainTab('recruitment')}
+            className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
+              mainTab === 'recruitment'
+                ? 'text-indigo-600 border-indigo-500'
+                : 'text-gray-500 border-transparent hover:text-indigo-600'
+            }`}
+          >
+            <Users /> Recruitment
+          </button>
+          <button
+            onClick={() => setMainTab('onboarding')}
+            className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
+              mainTab === 'onboarding'
+                ? 'text-indigo-600 border-indigo-500'
+                : 'text-gray-500 border-transparent hover:text-indigo-600'
+            }`}
+          >
+            <UserCheck /> Onboarding
+          </button>
+          <button
+            onClick={() => setMainTab('offboarding')}
+            className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
+              mainTab === 'offboarding'
+                ? 'text-indigo-600 border-indigo-500'
+                : 'text-gray-500 border-transparent hover:text-indigo-600'
+            }`}
+          >
+            <DoorOpen /> Offboarding
+          </button>
         </div>
-      )}
 
-      {/* ===== ONBOARDING MODULE ===== */}
-      {mainTab === 'onboarding' && (
-        <div className="space-y-6">
-          <div className="flex gap-6 border-b border-gray-200 pb-3">
-            <button
-              onClick={() => setOnboardingSubTab('hires')}
-              className={`font-semibold transition pb-2 border-b-2 ${
-                onboardingSubTab === 'hires'
-                  ? 'text-teal-600 border-teal-500'
-                  : 'text-gray-500 border-transparent hover:text-teal-600'
-              }`}
-            >
-              New Hires
-            </button>
-            <button
-              onClick={() => setOnboardingSubTab('tasks')}
-              className={`font-semibold transition pb-2 border-b-2 ${
-                onboardingSubTab === 'tasks'
-                  ? 'text-teal-600 border-teal-500'
-                  : 'text-gray-500 border-transparent hover:text-teal-600'
-              }`}
-            >
-              Onboarding Tasks
-            </button>
-          </div>
-
-          {onboardingSubTab === 'hires' && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">New Hires Onboarding</h2>
-
-              <div className="grid grid-cols-3 gap-6">
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
-                  <p className="text-gray-600 text-sm">Pending</p>
-                  <p className="text-4xl font-bold text-blue-600">{demoNewHires.filter(h => h.status === 'Pending').length}</p>
-                </div>
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
-                  <p className="text-gray-600 text-sm">In Progress</p>
-                  <p className="text-4xl font-bold text-yellow-600">{demoNewHires.filter(h => h.status === 'In Progress').length}</p>
-                </div>
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-                  <p className="text-gray-600 text-sm">Completed</p>
-                  <p className="text-4xl font-bold text-green-600">{demoNewHires.filter(h => h.status === 'Completed').length}</p>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <table className="w-full text-left text-sm">
-                  <thead className="border-b-2 border-gray-200">
-                    <tr className="text-gray-700 font-semibold">
-                      <th className="py-3 px-4">Name</th>
-                      <th className="py-3 px-4">Position</th>
-                      <th className="py-3 px-4">Department</th>
-                      <th className="py-3 px-4">Start Date</th>
-                      <th className="py-3 px-4">Progress</th>
-                      <th className="py-3 px-4">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {demoNewHires.map(hire => (
-                      <tr key={hire.id} className="border-b border-gray-200 hover:bg-gray-50">
-                        <td className="py-3 px-4 font-medium">{hire.name}</td>
-                        <td className="py-3 px-4">{hire.position}</td>
-                        <td className="py-3 px-4">{hire.department}</td>
-                        <td className="py-3 px-4">{hire.startDate}</td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-32 bg-gray-200 rounded-full h-2">
-                              <div
-                                className="bg-teal-500 h-2 rounded-full"
-                                style={{ width: `${(hire.tasksCompleted / hire.totalTasks) * 100}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-xs font-semibold">{hire.tasksCompleted}/{hire.totalTasks}</span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            hire.status === 'Pending' ? 'bg-blue-100 text-blue-700' :
-                            hire.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-green-100 text-green-700'
-                          }`}>
-                            {hire.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+        {/* ===== RECRUITMENT MODULE (LOADS FIRST) ===== */}
+        {mainTab === 'recruitment' && (
+          <div className="space-y-6">
+            {/* Sub-tabs: Job Openings vs Candidates */}
+            <div className="flex gap-6 border-b border-gray-200 pb-3">
+              <button
+                onClick={() => setRecruitmentSubTab('openings')}
+                className={`font-semibold transition pb-2 border-b-2 ${
+                  recruitmentSubTab === 'openings'
+                    ? 'text-indigo-600 border-indigo-500'
+                    : 'text-gray-500 border-transparent hover:text-indigo-600'
+                }`}
+              >
+                Job Openings
+              </button>
+              <button
+                onClick={() => setRecruitmentSubTab('candidates')}
+                className={`font-semibold transition pb-2 border-b-2 ${
+                  recruitmentSubTab === 'candidates'
+                    ? 'text-indigo-600 border-indigo-500'
+                    : 'text-gray-500 border-transparent hover:text-indigo-600'
+                }`}
+              >
+                Candidates Pipeline
+              </button>
             </div>
-          )}
 
-          {onboardingSubTab === 'tasks' && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">Onboarding Tasks & Checklist</h2>
+            {/* JOB OPENINGS SUB-TAB */}
+            {recruitmentSubTab === 'openings' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-gray-800">Job Openings</h2>
+                  <button className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm">
+                    <Plus className="w-5 h-5" /> New Job
+                  </button>
+                </div>
 
-              {demoNewHires.map(hire => (
-                <div key={hire.id} className="bg-white rounded-lg shadow p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold">{hire.name}</h3>
-                      <p className="text-sm text-gray-600">{hire.position} - {hire.department}</p>
-                    </div>
-                    <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                      hire.status === 'Pending' ? 'bg-blue-100 text-blue-700' :
-                      hire.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-green-100 text-green-700'
-                    }`}>
-                      {hire.status}
-                    </span>
+                <div className="grid grid-cols-3 gap-6">
+                  <div className="bg-white rounded-lg shadow p-6 border-l-4 border-indigo-500">
+                    <p className="text-gray-600 text-sm">Total Openings</p>
+                    <p className="text-4xl font-bold text-indigo-600">{demoJobOpenings.filter(j => j.status === 'Open').length}</p>
                   </div>
+                  <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+                    <p className="text-gray-600 text-sm">Total Applications</p>
+                    <p className="text-4xl font-bold text-blue-600">58</p>
+                  </div>
+                  <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+                    <p className="text-gray-600 text-sm">Offers Extended</p>
+                    <p className="text-4xl font-bold text-green-600">5</p>
+                  </div>
+                </div>
 
-                  <div className="space-y-2">
-                    {onboardingTasks.map((task, idx) => (
-                      <div key={idx} className="flex items-center gap-3 p-2 border border-gray-200 rounded hover:bg-gray-50">
-                        <input type="checkbox" defaultChecked={idx < hire.tasksCompleted} className="w-4 h-4" />
-                        <span className={idx < hire.tasksCompleted ? 'line-through text-gray-400' : 'text-gray-700'}>{task}</span>
+                <div className="flex items-center gap-3 mb-4">
+                  <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+                    <Filter className="w-4 h-4" /> Filter
+                  </button>
+                  <div className="relative">
+                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+                      Department <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <table className="min-w-full">
+                    <thead className="bg-gray-50 text-gray-700 text-sm font-medium">
+                      <tr>
+                        <th className="px-6 py-4 text-left">Job ID</th>
+                        <th className="px-6 py-4 text-left">Job Title</th>
+                        <th className="px-6 py-4 text-left">Department</th>
+                        <th className="px-6 py-4 text-left">Type</th>
+                        <th className="px-6 py-4 text-left">Posting Date</th>
+                        <th className="px-6 py-4 text-left">Candidates</th>
+                        <th className="px-6 py-4 text-left">Status</th>
+                        <th className="px-6 py-4 text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {demoJobOpenings.map(job => (
+                        <tr
+                          key={job.id}
+                          className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
+                        >
+                          <td className="px-6 py-4 font-mono text-sm text-indigo-600">
+                            {job.id}
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            {job.jobTitle}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
+                              {job.department}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-gray-700">{job.type}</td>
+                          <td className="px-6 py-4 text-gray-600">{job.postingDate}</td>
+                          <td className="px-6 py-4 font-semibold text-gray-900">{job.candidates}</td>
+                          <td className="px-6 py-4">
+                            <span
+                              className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
+                                job.status === 'Open'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}
+                            >
+                              {job.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex items-center justify-center gap-3">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Edit functionality
+                                }}
+                                className="text-indigo-600 hover:text-indigo-800 transition"
+                                title="Edit"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => handleJobDelete(job.id, job.jobTitle, e)}
+                                className="text-red-600 hover:text-red-800 transition"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {demoJobOpenings.length === 0 && (
+                    <div className="text-center py-16 text-gray-500">
+                      No job openings found.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* CANDIDATES PIPELINE SUB-TAB */}
+            {recruitmentSubTab === 'candidates' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800">Candidates Pipeline</h2>
+
+                <div className="grid grid-cols-5 gap-4">
+                  {['Applied', 'Shortlisted', 'Interview', 'Offer', 'Hired'].map(stage => {
+                    const count = demoCandidates.filter(c => c.stage === stage).length;
+                    return (
+                      <div key={stage} className="bg-white rounded-lg shadow p-4 text-center border-t-4 border-indigo-500">
+                        <p className="text-gray-600 text-sm font-semibold">{stage}</p>
+                        <p className="text-3xl font-bold text-indigo-600 mt-2">{count}</p>
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
 
-      {/* ===== OFFBOARDING MODULE ===== */}
-      {mainTab === 'offboarding' && (
-        <div className="space-y-6">
-          <div className="flex gap-6 border-b border-gray-200 pb-3">
-            <button
-              onClick={() => setOffboardingSubTab('exits')}
-              className={`font-semibold transition pb-2 border-b-2 ${
-                offboardingSubTab === 'exits'
-                  ? 'text-teal-600 border-teal-500'
-                  : 'text-gray-500 border-transparent hover:text-teal-600'
-              }`}
-            >
-              Exit Employees
-            </button>
-            <button
-              onClick={() => setOffboardingSubTab('tasks')}
-              className={`font-semibold transition pb-2 border-b-2 ${
-                offboardingSubTab === 'tasks'
-                  ? 'text-teal-600 border-teal-500'
-                  : 'text-gray-500 border-transparent hover:text-teal-600'
-              }`}
-            >
-              Exit Tasks & Clearance
-            </button>
-          </div>
-
-          {offboardingSubTab === 'exits' && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">Exit Employees</h2>
-
-              <div className="grid grid-cols-3 gap-6">
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
-                  <p className="text-gray-600 text-sm">Pending</p>
-                  <p className="text-4xl font-bold text-red-600">{demoExitEmployees.filter(e => e.status === 'Pending').length}</p>
-                </div>
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
-                  <p className="text-gray-600 text-sm">In Progress</p>
-                  <p className="text-4xl font-bold text-orange-600">{demoExitEmployees.filter(e => e.status === 'In Progress').length}</p>
-                </div>
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-                  <p className="text-gray-600 text-sm">Completed</p>
-                  <p className="text-4xl font-bold text-green-600">{demoExitEmployees.filter(e => e.status === 'Completed').length}</p>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <table className="w-full text-left text-sm">
-                  <thead className="border-b-2 border-gray-200">
-                    <tr className="text-gray-700 font-semibold">
-                      <th className="py-3 px-4">Name</th>
-                      <th className="py-3 px-4">Position</th>
-                      <th className="py-3 px-4">Department</th>
-                      <th className="py-3 px-4">Exit Date</th>
-                      <th className="py-3 px-4">Reason</th>
-                      <th className="py-3 px-4">Clearance</th>
-                      <th className="py-3 px-4">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {demoExitEmployees.map(emp => (
-                      <tr key={emp.id} className="border-b border-gray-200 hover:bg-gray-50">
-                        <td className="py-3 px-4 font-medium">{emp.name}</td>
-                        <td className="py-3 px-4">{emp.position}</td>
-                        <td className="py-3 px-4">{emp.department}</td>
-                        <td className="py-3 px-4">{emp.exitDate}</td>
-                        <td className="py-3 px-4">{emp.reason}</td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-20 bg-gray-200 rounded-full h-2">
-                              <div
-                                className="bg-orange-500 h-2 rounded-full"
-                                style={{ width: `${(emp.tasksCompleted / emp.totalTasks) * 100}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-xs">{emp.tasksCompleted}/{emp.totalTasks}</span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            emp.status === 'Pending' ? 'bg-red-100 text-red-700' :
-                            emp.status === 'In Progress' ? 'bg-orange-100 text-orange-700' :
-                            'bg-green-100 text-green-700'
-                          }`}>
-                            {emp.status}
-                          </span>
-                        </td>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <table className="min-w-full">
+                    <thead className="bg-gray-50 text-gray-700 text-sm font-medium">
+                      <tr>
+                        <th className="px-6 py-4 text-left">Candidate ID</th>
+                        <th className="px-6 py-4 text-left">Name</th>
+                        <th className="px-6 py-4 text-left">Position</th>
+                        <th className="px-6 py-4 text-left">Applied Date</th>
+                        <th className="px-6 py-4 text-left">Email</th>
+                        <th className="px-6 py-4 text-left">Stage</th>
+                        <th className="px-6 py-4 text-center">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {demoCandidates.map(candidate => (
+                        <tr
+                          key={candidate.id}
+                          className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
+                        >
+                          <td className="px-6 py-4 font-mono text-sm text-indigo-600">
+                            {candidate.id}
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            {candidate.name}
+                          </td>
+                          <td className="px-6 py-4 text-gray-700">{candidate.position}</td>
+                          <td className="px-6 py-4 text-gray-600">{candidate.appliedDate}</td>
+                          <td className="px-6 py-4 text-blue-600">{candidate.email}</td>
+                          <td className="px-6 py-4">
+                            <span
+                              className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
+                                candidate.stage === 'Applied'
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : candidate.stage === 'Shortlisted'
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : candidate.stage === 'Interview'
+                                  ? 'bg-purple-100 text-purple-700'
+                                  : candidate.stage === 'Offer'
+                                  ? 'bg-orange-100 text-orange-700'
+                                  : 'bg-green-100 text-green-700'
+                              }`}
+                            >
+                              {candidate.stage}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex items-center justify-center gap-3">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // View functionality
+                                }}
+                                className="text-indigo-600 hover:text-indigo-800 transition"
+                                title="Edit"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => handleCandidateDelete(candidate.id, candidate.name, e)}
+                                className="text-red-600 hover:text-red-800 transition"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {demoCandidates.length === 0 && (
+                    <div className="text-center py-16 text-gray-500">
+                      No candidates found.
+                    </div>
+                  )}
+                </div>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* ===== ONBOARDING MODULE ===== */}
+        {mainTab === 'onboarding' && (
+          <div className="space-y-6">
+            <div className="flex gap-6 border-b border-gray-200 pb-3">
+              <button
+                onClick={() => setOnboardingSubTab('hires')}
+                className={`font-semibold transition pb-2 border-b-2 ${
+                  onboardingSubTab === 'hires'
+                    ? 'text-indigo-600 border-indigo-500'
+                    : 'text-gray-500 border-transparent hover:text-indigo-600'
+                }`}
+              >
+                New Hires
+              </button>
+              <button
+                onClick={() => setOnboardingSubTab('tasks')}
+                className={`font-semibold transition pb-2 border-b-2 ${
+                  onboardingSubTab === 'tasks'
+                    ? 'text-indigo-600 border-indigo-500'
+                    : 'text-gray-500 border-transparent hover:text-indigo-600'
+                }`}
+              >
+                Onboarding Tasks
+              </button>
             </div>
-          )}
 
-          {offboardingSubTab === 'tasks' && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">Exit Tasks & Clearance Checklist</h2>
+            {onboardingSubTab === 'hires' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800">New Hires Onboarding</h2>
 
-              {demoExitEmployees.map(emp => (
-                <div key={emp.id} className="bg-white rounded-lg shadow p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold">{emp.name}</h3>
-                      <p className="text-sm text-gray-600">{emp.position} - {emp.department} | Exit Date: {emp.exitDate}</p>
-                    </div>
-                    <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                      emp.status === 'Pending' ? 'bg-red-100 text-red-700' :
-                      emp.status === 'In Progress' ? 'bg-orange-100 text-orange-700' :
-                      'bg-green-100 text-green-700'
-                    }`}>
-                      {emp.status}
-                    </span>
+                <div className="grid grid-cols-3 gap-6">
+                  <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+                    <p className="text-gray-600 text-sm">Pending</p>
+                    <p className="text-4xl font-bold text-blue-600">{demoNewHires.filter(h => h.status === 'Pending').length}</p>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-gray-700 mb-3">Equipment & Access</h4>
-                      {offboardingTasks.slice(0, 5).map((task, idx) => (
-                        <div key={idx} className="flex items-center gap-3 p-2 border border-gray-200 rounded hover:bg-gray-50">
-                          <input type="checkbox" defaultChecked={idx < emp.tasksCompleted} className="w-4 h-4" />
-                          <span className={idx < emp.tasksCompleted ? 'line-through text-gray-400' : 'text-gray-700'}>{task}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-gray-700 mb-3">Documentation & Settlement</h4>
-                      {offboardingTasks.slice(5).map((task, idx) => (
-                        <div key={idx} className="flex items-center gap-3 p-2 border border-gray-200 rounded hover:bg-gray-50">
-                          <input type="checkbox" defaultChecked={(idx + 5) < emp.tasksCompleted} className="w-4 h-4" />
-                          <span className={(idx + 5) < emp.tasksCompleted ? 'line-through text-gray-400' : 'text-gray-700'}>{task}</span>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
+                    <p className="text-gray-600 text-sm">In Progress</p>
+                    <p className="text-4xl font-bold text-yellow-600">{demoNewHires.filter(h => h.status === 'In Progress').length}</p>
+                  </div>
+                  <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+                    <p className="text-gray-600 text-sm">Completed</p>
+                    <p className="text-4xl font-bold text-green-600">{demoNewHires.filter(h => h.status === 'Completed').length}</p>
                   </div>
                 </div>
-              ))}
+
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <table className="min-w-full">
+                    <thead className="bg-gray-50 text-gray-700 text-sm font-medium">
+                      <tr>
+                        <th className="px-6 py-4 text-left">Hire ID</th>
+                        <th className="px-6 py-4 text-left">Name</th>
+                        <th className="px-6 py-4 text-left">Position</th>
+                        <th className="px-6 py-4 text-left">Department</th>
+                        <th className="px-6 py-4 text-left">Start Date</th>
+                        <th className="px-6 py-4 text-left">Progress</th>
+                        <th className="px-6 py-4 text-left">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {demoNewHires.map(hire => (
+                        <tr
+                          key={hire.id}
+                          className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
+                        >
+                          <td className="px-6 py-4 font-mono text-sm text-indigo-600">
+                            {hire.id}
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            {hire.name}
+                          </td>
+                          <td className="px-6 py-4 text-gray-700">{hire.position}</td>
+                          <td className="px-6 py-4">
+                            <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
+                              {hire.department}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-gray-600">{hire.startDate}</td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-32 bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-indigo-500 h-2 rounded-full"
+                                  style={{ width: `${(hire.tasksCompleted / hire.totalTasks) * 100}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-xs font-semibold text-gray-600">
+                                {hire.tasksCompleted}/{hire.totalTasks}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span
+                              className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
+                                hire.status === 'Pending'
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : hire.status === 'In Progress'
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-green-100 text-green-700'
+                              }`}
+                            >
+                              {hire.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {demoNewHires.length === 0 && (
+                    <div className="text-center py-16 text-gray-500">
+                      No new hires found.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {onboardingSubTab === 'tasks' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800">Onboarding Tasks & Checklist</h2>
+
+                {demoNewHires.map(hire => (
+                  <div key={hire.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{hire.name}</h3>
+                        <p className="text-sm text-gray-600">{hire.position} - {hire.department}</p>
+                      </div>
+                      <span
+                        className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                          hire.status === 'Pending'
+                            ? 'bg-blue-100 text-blue-700'
+                            : hire.status === 'In Progress'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-green-100 text-green-700'
+                        }`}
+                      >
+                        {hire.status}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {onboardingTasks.map((task, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-3 p-2 border border-gray-200 rounded hover:bg-gray-50"
+                        >
+                          <input
+                            type="checkbox"
+                            defaultChecked={idx < hire.tasksCompleted}
+                            className="w-4 h-4"
+                          />
+                          <span
+                            className={
+                              idx < hire.tasksCompleted
+                                ? 'line-through text-gray-400'
+                                : 'text-gray-700'
+                            }
+                          >
+                            {task}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ===== OFFBOARDING MODULE ===== */}
+        {mainTab === 'offboarding' && (
+          <div className="space-y-6">
+            <div className="flex gap-6 border-b border-gray-200 pb-3">
+              <button
+                onClick={() => setOffboardingSubTab('exits')}
+                className={`font-semibold transition pb-2 border-b-2 ${
+                  offboardingSubTab === 'exits'
+                    ? 'text-indigo-600 border-indigo-500'
+                    : 'text-gray-500 border-transparent hover:text-indigo-600'
+                }`}
+              >
+                Exit Employees
+              </button>
+              <button
+                onClick={() => setOffboardingSubTab('tasks')}
+                className={`font-semibold transition pb-2 border-b-2 ${
+                  offboardingSubTab === 'tasks'
+                    ? 'text-indigo-600 border-indigo-500'
+                    : 'text-gray-500 border-transparent hover:text-indigo-600'
+                }`}
+              >
+                Exit Tasks & Clearance
+              </button>
             </div>
-          )}
-        </div>
-      )}
+
+            {offboardingSubTab === 'exits' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800">Exit Employees</h2>
+
+                <div className="grid grid-cols-3 gap-6">
+                  <div className="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+                    <p className="text-gray-600 text-sm">Pending</p>
+                    <p className="text-4xl font-bold text-red-600">{demoExitEmployees.filter(e => e.status === 'Pending').length}</p>
+                  </div>
+                  <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
+                    <p className="text-gray-600 text-sm">In Progress</p>
+                    <p className="text-4xl font-bold text-orange-600">{demoExitEmployees.filter(e => e.status === 'In Progress').length}</p>
+                  </div>
+                  <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+                    <p className="text-gray-600 text-sm">Completed</p>
+                    <p className="text-4xl font-bold text-green-600">{demoExitEmployees.filter(e => e.status === 'Completed').length}</p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <table className="min-w-full">
+                    <thead className="bg-gray-50 text-gray-700 text-sm font-medium">
+                      <tr>
+                        <th className="px-6 py-4 text-left">Exit ID</th>
+                        <th className="px-6 py-4 text-left">Name</th>
+                        <th className="px-6 py-4 text-left">Position</th>
+                        <th className="px-6 py-4 text-left">Department</th>
+                        <th className="px-6 py-4 text-left">Exit Date</th>
+                        <th className="px-6 py-4 text-left">Reason</th>
+                        <th className="px-6 py-4 text-left">Clearance</th>
+                        <th className="px-6 py-4 text-left">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {demoExitEmployees.map(emp => (
+                        <tr
+                          key={emp.id}
+                          className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
+                        >
+                          <td className="px-6 py-4 font-mono text-sm text-indigo-600">
+                            {emp.id}
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            {emp.name}
+                          </td>
+                          <td className="px-6 py-4 text-gray-700">{emp.position}</td>
+                          <td className="px-6 py-4">
+                            <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
+                              {emp.department}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-gray-600">{emp.exitDate}</td>
+                          <td className="px-6 py-4 text-gray-700">{emp.reason}</td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-20 bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-orange-500 h-2 rounded-full"
+                                  style={{ width: `${(emp.tasksCompleted / emp.totalTasks) * 100}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-xs text-gray-600">
+                                {emp.tasksCompleted}/{emp.totalTasks}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span
+                              className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
+                                emp.status === 'Pending'
+                                  ? 'bg-red-100 text-red-700'
+                                  : emp.status === 'In Progress'
+                                  ? 'bg-orange-100 text-orange-700'
+                                  : 'bg-green-100 text-green-700'
+                              }`}
+                            >
+                              {emp.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {demoExitEmployees.length === 0 && (
+                    <div className="text-center py-16 text-gray-500">
+                      No exit employees found.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {offboardingSubTab === 'tasks' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800">Exit Tasks & Clearance Checklist</h2>
+
+                {demoExitEmployees.map(emp => (
+                  <div key={emp.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{emp.name}</h3>
+                        <p className="text-sm text-gray-600">
+                          {emp.position} - {emp.department} | Exit Date: {emp.exitDate}
+                        </p>
+                      </div>
+                      <span
+                        className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                          emp.status === 'Pending'
+                            ? 'bg-red-100 text-red-700'
+                            : emp.status === 'In Progress'
+                            ? 'bg-orange-100 text-orange-700'
+                            : 'bg-green-100 text-green-700'
+                        }`}
+                      >
+                        {emp.status}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-gray-700 mb-3">Equipment & Access</h4>
+                        {offboardingTasks.slice(0, 5).map((task, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-3 p-2 border border-gray-200 rounded hover:bg-gray-50"
+                          >
+                            <input
+                              type="checkbox"
+                              defaultChecked={idx < emp.tasksCompleted}
+                              className="w-4 h-4"
+                            />
+                            <span
+                              className={
+                                idx < emp.tasksCompleted
+                                  ? 'line-through text-gray-400'
+                                  : 'text-gray-700'
+                              }
+                            >
+                              {task}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-gray-700 mb-3">Documentation & Settlement</h4>
+                        {offboardingTasks.slice(5).map((task, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-3 p-2 border border-gray-200 rounded hover:bg-gray-50"
+                          >
+                            <input
+                              type="checkbox"
+                              defaultChecked={(idx + 5) < emp.tasksCompleted}
+                              className="w-4 h-4"
+                            />
+                            <span
+                              className={
+                                (idx + 5) < emp.tasksCompleted
+                                  ? 'line-through text-gray-400'
+                                  : 'text-gray-700'
+                              }
+                            >
+                              {task}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

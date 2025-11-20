@@ -112,7 +112,7 @@ export default function ProfitLossImproved({
         </div>
 
         <div className="flex gap-2 items-center">
-          <button className="px-3 py-2 rounded-lg border border-transparent bg-white shadow-sm text-sm hover:bg-gray-50">
+          <button className="px-3 py-2 rounded-lg border border-transparent bg-green-600 shadow-sm text-sm hover:bg-green-700 text-white">
             Export CSV
           </button>
           <button className="px-3 py-2 rounded-lg bg-teal-600 text-white text-sm shadow-sm hover:bg-teal-700">
