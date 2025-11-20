@@ -1,29 +1,43 @@
-import React from "react";
+import React, { useState, useEffect} from "react";
+import ItemModal from "../../components/inventory/ItemModal";
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  stock: number;
-  minStock: number;
-  price: number;
-  supplier: string;
+
+const base_url = import.meta.env.VITE_BASE_URL;
+const GET_ITEMS_ENDPOINT = `${base_url}.item.item.get_all_items_api`;
+
+interface ItemsProps {
+  onAdd: () => void;  
 }
 
-interface ProductsProps {
-  products: Product[];
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  onAdd: () => void;
-}
+const Items: React.FC<ItemsProps> = ({onAdd}) => {
 
-const Items: React.FC<ProductsProps> = ({ products, searchTerm, setSearchTerm, onAdd }) => {
-  const filteredProducts = products.filter(
-    (p) =>
-      p.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const [item, setItem] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [itemLoading, setItemLoading] = useState(true);
+  const [showItemsModal, setShowItemsModal] = useState(false);
+
+    const fetchItems = async () => {
+    try {
+      setItemLoading(true);
+      const response = await fetch(GET_ITEMS_ENDPOINT, {
+        headers: { Authorization: import.meta.env.VITE_AUTHORIZATION },
+      });
+      if (!response.ok) throw new Error("Failed to load customers");
+      const result = await response.json();
+      setItem(result.data || []);
+    } catch (err) {
+      console.error("Error loading customers:", err);
+    } finally {
+      setItemLoading(false);
+    }
+  };
+
+  const filtered = item.filter((i: any) =>
+    [i.item_code, i.item_name, i.item_group, i.custom_min_stock_level, i.custom_max_stock_level, 
+      i.custom_vendor, i.custom_selling_price]
+      .join(" ")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -47,26 +61,26 @@ const Items: React.FC<ProductsProps> = ({ products, searchTerm, setSearchTerm, o
         <table className="min-w-full border border-gray-200 rounded-lg">
           <thead className="bg-gray-100 text-gray-700 text-sm">
             <tr>
-              <th className="px-4 py-2 text-left">Product ID</th>
+              <th className="px-4 py-2 text-left">Item Code</th>
               <th className="px-4 py-2 text-left">Name</th>
               <th className="px-4 py-2 text-left">Category</th>
-              <th className="px-4 py-2 text-left">Stock</th>
               <th className="px-4 py-2 text-left">Min Stock</th>
-              <th className="px-4 py-2 text-left">Price</th>
+              <th className="px-4 py-2 text-left">Max Stock</th>
               <th className="px-4 py-2 text-left">Supplier</th>
+              <th className="px-4 py-2 text-left">Price</th>
               <th className="px-4 py-2 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((p) => (
-              <tr key={p.id} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-2">{p.id}</td>
-                <td className="px-4 py-2">{p.name}</td>
-                <td className="px-4 py-2">{p.category}</td>
-                <td className="px-4 py-2">{p.stock}</td>
-                <td className="px-4 py-2">{p.minStock}</td>
-                <td className="px-4 py-2">${p.price.toLocaleString()}</td>
-                <td className="px-4 py-2">{p.supplier}</td>
+            {filtered.map((i) => (
+              <tr key={i.id} className="border-t hover:bg-gray-50">
+                <td className="px-4 py-2">{i.item_code}</td>
+                <td className="px-4 py-2">{i.item_name}</td>
+                <td className="px-4 py-2">{i.item_group}</td>
+                <td className="px-4 py-2">{i.custom_min_stock_level}</td>
+                <td className="px-4 py-2">{i.custom_max_stock_level}</td>
+                <td className="px-4 py-2">${i.custom_vendor}</td>
+                <td className="px-4 py-2">{i.custom_selling_price}</td>
                 <td className="px-4 py-2 text-center">
                   <button className="text-blue-600 hover:underline">View</button>
                 </td>
@@ -75,6 +89,11 @@ const Items: React.FC<ProductsProps> = ({ products, searchTerm, setSearchTerm, o
           </tbody>
         </table>
       </div>
+      <ItemModal
+        isOpen={showItemsModal}
+        onClose={() => setShowItemsModal(false)}
+        onSubmit={(data) => console.log("New Items:", data)}
+      />
     </div>
   );
 };
