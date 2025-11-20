@@ -830,7 +830,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
 
               {/* EMAIL TAB (BLANK) */}
               {activeTab === "email" && (
-                <div className="max-w-6xl mx-auto bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="mx-auto bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-800">
                       Email Template

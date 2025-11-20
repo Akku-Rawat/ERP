@@ -483,7 +483,7 @@ const removeItem = (idx: number) => {
           )}
           {/* Email Templates Tab */}
           {activeTab === "emailTemplates" && (
-            <div className="max-w-6xl mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
+            <div className=" mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-800">Email Template</h3>
                 <div className="text-sm text-gray-500">Create professional email templates for supplier communication.</div>
@@ -572,31 +572,49 @@ const removeItem = (idx: number) => {
               )}
             </div>
           )}
-           {/* TERMS TAB */}
-                        {activeTab === "terms" && (
-                          <div className="space-y-8">
-                            <div>
-                              <h3 className="mb-2 text-lg font-semibold text-gray-800">
-                                Payment Terms
-                              </h3>
-                              <div className="mt-4">
-                                <span className="font-medium text-gray-700">
-                                  Payment Schedule
-                                </span>
-                                <div className="overflow-x-auto rounded-lg border mt-2">
-                                  <table className="w-full text-sm">
-                                    <thead className="bg-gray-50 text-gray-700">
-                                      <tr>
-                                        <th className="px-2 py-2">No.</th>
-                                        <th className="px-2 py-2">Payment Term</th>
-                                        <th className="px-2 py-2">Description</th>
-                                        <th className="px-2 py-2">Due Date *</th>
-                                        <th className="px-2 py-2">Invoice Portion</th>
-                                        <th className="px-2 py-2">Payment Amount *</th>
-                                        <th></th>
-                                      </tr>
-                                    </thead>
-                                   <tbody className="divide-y">
+          {activeTab === "terms" && (
+  <div className="space-y-8 max-w-6xl mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
+    <div>
+      <h3 className="mb-2 text-lg font-semibold text-gray-800">Payment Terms</h3>
+      <span className="font-medium text-gray-700">Payment Schedule</span>
+      <div className="flex items-center justify-between mb-3 mt-2">
+        <span className="text-sm text-gray-600">
+          Showing {paymentPage * paymentItemsPerPage + 1}–
+          {Math.min((paymentPage + 1) * paymentItemsPerPage, paymentRows.length)} of {paymentRows.length}
+        </span>
+        <div className="flex gap-1">
+          <button
+            type="button"
+            onClick={handlePaymentPrev}
+            disabled={paymentPage === 0}
+            className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ← Prev
+          </button>
+          <button
+            type="button"
+            onClick={handlePaymentNext}
+            disabled={(paymentPage + 1) * paymentItemsPerPage >= paymentRows.length}
+            className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
+      <div className="overflow-x-auto rounded-lg border mt-2">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50 text-gray-700">
+            <tr>
+              <th className="px-2 py-2">No.</th>
+              <th className="px-2 py-2">Payment Term</th>
+              <th className="px-2 py-2">Description</th>
+              <th className="px-2 py-2">Due Date *</th>
+              <th className="px-2 py-2">Invoice Portion</th>
+              <th className="px-2 py-2">Payment Amount *</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
             {paginatedPaymentRows.length === 0 ? (
               <tr>
                 <td colSpan={7} className="text-center p-6 text-gray-400">
