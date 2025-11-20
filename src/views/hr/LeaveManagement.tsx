@@ -109,7 +109,7 @@ const LeaveManagement: React.FC = () => {
           <div className="lg:w-2/3 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-1">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
               <h2 className="text-xl font-bold text-slate-800">Leave Requests</h2>
-              <button className="flex items-center gap-2 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-6 py-2 rounded-lg shadow transition-all">
+<button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow transition">
                 <FaCalendarAlt className="w-4 h-4" />
                 Request New Leave
               </button>

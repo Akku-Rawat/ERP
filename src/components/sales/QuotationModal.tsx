@@ -64,8 +64,8 @@ function CustomerDropdown({
           {filtered.map((c) => (
             <li
               key={c.name}  
-              className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
-                c.name === value ? "bg-blue-200 font-bold" : ""
+              className={`px-4 py-2 cursor-pointer hover:bg-indigo-100 ${
+                c.name === value ? "bg-indigo-200 font-bold" : ""
               }`}
               onClick={() => {
                 onChange(c.name);
@@ -185,7 +185,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 }) => {
   const [form, setForm] = useState<FormData>({ ...emptyForm });
   const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
-  const [selectedTemplate, setSelectedTemplate] = useState("General Service Terms");
+
 
 const itemsPerPage = 5;                          
 const [page, setPage] = useState(0);             
@@ -196,7 +196,7 @@ const paginatedItems = items.slice(
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
     "details"
   );
-  const [isShippingOpen, setIsShippingOpen] = useState(false);
+
  const [customers, setCustomers] = useState<{ name: string }[]>([]);
 const [custLoading, setCustLoading] = useState(true);
 
@@ -379,8 +379,8 @@ useEffect(() => {
         >
           <form onSubmit={submit} className="flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-blue-700">
+            <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
+              <h2 className="text-2xl font-semibold text-indigo-700">
                 Create Quotation
               </h2>
               <button
@@ -401,7 +401,7 @@ useEffect(() => {
                   onClick={() => setActiveTab(tab)}
                   className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${
                     activeTab === tab
-                      ? "text-blue-600 border-b-2 border-blue-600 bg-white"
+                      ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
                       : "text-gray-600 hover:text-gray-900"
                   }`}
                 >
@@ -456,7 +456,7 @@ useEffect(() => {
                             name="currency"
                             value={form.currency}
                             onChange={handleForm}
-                            className="rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                           >
                             <option value="ZMW">ZMW (ZK)</option>
                             <option value="INR">INR (₹)</option>
@@ -471,7 +471,7 @@ useEffect(() => {
                             name="industry"
                             value={form.industry}
                             onChange={handleForm}
-                            className="rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                           >
                             <option value="product">Product</option>
                             <option value="service">Service</option>
@@ -608,7 +608,7 @@ useEffect(() => {
     <button
       type="button"
       onClick={addItem}
-      className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
+      className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200"
     >
       <Plus className="w-4 h-4" /> Add Item
     </button>
@@ -661,7 +661,7 @@ useEffect(() => {
       </div>
       <div className="flex justify-between">
         <span className="text-base font-semibold text-gray-700">Email Address</span>
-        <span className="text-base font-bold text-blue-600">
+        <span className="text-base font-bold text-indigo-600">
            rn@gmail.com
         </span>
       </div>
@@ -690,7 +690,7 @@ useEffect(() => {
       </div>
       <div className="flex justify-between border-t pt-2 mt-2">
         <span className="text-base font-semibold text-gray-700">Total Amount</span>
-        <span className="text-base font-bold text-blue-600">
+        <span className="text-base font-bold text-indigo-600">
           {symbol}
           {(
             form.subTotal +
@@ -726,7 +726,7 @@ useEffect(() => {
     <select
       name="address"
       id="address"
-      className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
     >
       <option value="address1">Address 1</option>
       <option value="address2">Address 2</option>
@@ -847,7 +847,7 @@ useEffect(() => {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
+                  className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600"
                 >
                   Save Quote
                 </button>
@@ -870,7 +870,7 @@ const Input = React.forwardRef<
     <span className="font-medium text-gray-600">{label}</span>
     <input
       ref={ref}
-      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${className} ${
+      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${className} ${
         props.disabled ? "bg-gray-50" : ""
       }`}
       {...props}

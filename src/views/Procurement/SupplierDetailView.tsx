@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { X, Search, Edit, FileText, Receipt, Plus, Building2, Phone, Mail, MapPin, DollarSign } from "lucide-react";
-import SupplierModal from "../../components/procurement/SupplierModal";
+import { X, Search, Edit, FileText, Receipt, Plus, Building2 } from "lucide-react";
+
 
 interface Supplier {
   supplierName: string;

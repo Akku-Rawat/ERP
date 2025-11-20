@@ -438,21 +438,23 @@ Generated on: ${new Date().toLocaleString()}
     <div className="flex gap-3">
       <button
         onClick={exportToCSV}
-        className="bg-white border border-slate-300 text-slate-700 px-5 py-2.5 rounded-lg font-medium hover:bg-slate-50 transition-all flex items-center gap-2"
+        className="bg-green-600 border border-slate-300 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-slate-50 transition-all flex items-center gap-2"
       >
         <FaDownload className="w-4 h-4" />
         Export
       </button>
 
-      <button
-        onClick={handleProcessPayroll}
-        disabled={pendingCount === 0}
-        className={`px-6 py-2.5 rounded-lg font-semibold shadow-lg transition-all flex items-center gap-2 ${
-          pendingCount === 0
-            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white shadow-teal-500/30'
-        }`}
-      >
+<button
+  onClick={handleProcessPayroll}
+  disabled={pendingCount === 0}
+  className={`px-6 py-2.5 rounded-lg font-semibold shadow-lg transition-all flex items-center gap-2 ${
+    pendingCount === 0
+      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+      : "bg-indigo-600 hover:bg-indigo-700 text-white"
+  }`}
+>
+
+
         <FaDollarSign className="w-5 h-5" />
         Process Payroll ({pendingCount})
       </button>

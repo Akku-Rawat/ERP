@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaSearch, FaPlus, FaUser, FaEllipsisV, FaChevronDown } from 'react-icons/fa';
+import { Search, Plus, User, Edit2, Trash2, ChevronDown } from 'lucide-react';
 
 type Employee = {
   id: string;
@@ -50,142 +50,187 @@ const EmployeeDirectory: React.FC = () => {
 
   const displayedEmployees = filteredEmployees.slice(0, itemsToShow);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Active': return 'bg-green-100 text-green-700';
-      case 'On Leave': return 'bg-yellow-100 text-yellow-700';
-      case 'Inactive': return 'bg-gray-100 text-gray-700';
-      default: return 'bg-teal-100 text-teal-700';
+  const handleDelete = (id: string, name: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm(`Delete employee "${name}"?`)) {
+      alert("Delete functionality ready — connect to API later");
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Filters/Search/Add New Employee */}
-      <div className="bg-white rounded-lg shadow px-5 py-4">
-        <div className="flex flex-wrap gap-3 items-center">
-          {/* Search */}
-          <div className="relative w-52">
-            <FaSearch className="absolute left-3 top-2.5 text-gray-400 text-xs" />
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search name/job title"
-              className="pl-8 pr-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 w-full"
-              style={{ minWidth: 100 }}
-            />
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="space-y-6">
+        {/* Header with Filters */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            {/* Search */}
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="search"
+                placeholder="Search name/job title..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+              />
+            </div>
+
+            {/* Department Filter */}
+            <div className="relative">
+              <select
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                className="px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700 appearance-none cursor-pointer"
+              >
+                <option value="">All Departments</option>
+                {uniqueDepartments.map(d => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+
+            {/* Location Filter */}
+            <div className="relative">
+              <select
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700 appearance-none cursor-pointer"
+              >
+                <option value="">All Locations</option>
+                {uniqueLocations.map(l => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+
+            {/* Status Filter */}
+            <div className="relative">
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-700 appearance-none cursor-pointer"
+              >
+                <option value="">All Status</option>
+                {statusOptions.map(stat => (
+                  <option key={stat} value={stat}>{stat}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
           </div>
-          {/* Department */}
-          <div className="relative w-40">
-            <select
-              value={department}
-              onChange={e => setDepartment(e.target.value)}
-              className="block w-full px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-600 text-sm focus:ring-2 focus:ring-teal-500 appearance-none"
-            >
-              <option value="">Department</option>
-              {uniqueDepartments.map(d => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
-            <FaChevronDown className="absolute right-3 top-2.5 text-gray-400 pointer-events-none text-xs" />
-          </div>
-          {/* Location */}
-          <div className="relative w-36">
-            <select
-              value={location}
-              onChange={e => setLocation(e.target.value)}
-              className="block w-full px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-600 text-sm focus:ring-2 focus:ring-teal-500 appearance-none"
-            >
-              <option value="">Location</option>
-              {uniqueLocations.map(l => (
-                <option key={l} value={l}>{l}</option>
-              ))}
-            </select>
-            <FaChevronDown className="absolute right-3 top-2.5 text-gray-400 pointer-events-none text-xs" />
-          </div>
-          {/* Status */}
-          <div className="relative w-28">
-            <select
-              value={status}
-              onChange={e => setStatus(e.target.value)}
-              className="block w-full px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-600 text-sm focus:ring-2 focus:ring-teal-500 appearance-none"
-            >
-              <option value="">Status</option>
-              {statusOptions.map(stat => (
-                <option key={stat} value={stat}>{stat}</option>
-              ))}
-            </select>
-            <FaChevronDown className="absolute right-3 top-2.5 text-gray-400 pointer-events-none text-xs" />
-          </div>
-          {/* Add New Employee Button */}
-          <button className="ml-auto bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg font-semibold flex items-center gap-2 transition">
-            <FaPlus /> Add New Employee
+
+          {/* Add Button */}
+          <button className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm">
+            <Plus className="w-5 h-5" /> Add New Employee
           </button>
         </div>
-      </div>
 
-      {/* Employee Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-gray-100 border-b-2 border-gray-200">
-            <tr className="text-gray-700 font-semibold">
-              <th className="py-3 px-6">Name</th>
-              <th className="py-3 px-6">Job Title</th>
-              <th className="py-3 px-6">Department</th>
-              <th className="py-3 px-6">Location</th>
-              <th className="py-3 px-6">Status</th>
-              <th className="py-3 px-6">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {displayedEmployees.map((emp) => (
-              <tr key={emp.id} className="border-b border-gray-200 hover:bg-gray-50">
-                <td className="py-3 px-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full flex items-center justify-center">
-                      <FaUser className="text-white text-base" />
-                    </div>
-                    <span className="font-medium text-gray-800">{emp.name}</span>
-                  </div>
-                </td>
-                <td className="py-3 px-6 text-gray-700">{emp.jobTitle}</td>
-                <td className="py-3 px-6 text-gray-700">{emp.department}</td>
-                <td className="py-3 px-6 text-gray-700">{emp.location}</td>
-                <td className="py-3 px-6">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(emp.status)}`}>
-                      {emp.status}
-                  </span>
-                </td>
-                <td className="py-3 px-6">
-                  <div className="flex items-center gap-2">
-                    <button className="text-teal-600 hover:text-teal-800 font-medium text-xs">
-                      View Profile
-                    </button>
-                    <FaEllipsisV className="text-gray-400 cursor-pointer hover:text-gray-600" />
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {/* "See More" row */}
-            {displayedEmployees.length < filteredEmployees.length && (
+        {/* Table */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <table className="min-w-full">
+            <thead className="bg-gray-50 text-gray-700 text-sm font-medium">
               <tr>
-                <td colSpan={6}>
-                  <button
-                    onClick={() => setItemsToShow(itemsToShow + 5)}
-                    className="w-full py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 text-sm font-semibold rounded-b"
-                  >
-                    See More ({filteredEmployees.length - displayedEmployees.length} remaining)
-                  </button>
-                </td>
+                <th className="px-6 py-4 text-left">Employee ID</th>
+                <th className="px-6 py-4 text-left">Name</th>
+                <th className="px-6 py-4 text-left">Job Title</th>
+                <th className="px-6 py-4 text-left">Department</th>
+                <th className="px-6 py-4 text-left">Location</th>
+                <th className="px-6 py-4 text-left">Status</th>
+                <th className="px-6 py-4 text-center">Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      {/* Results Info */}
-      <div className="text-center text-xs text-gray-500 mt-1">
-        Showing {displayedEmployees.length} of {filteredEmployees.length} employees
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {displayedEmployees.map((emp) => (
+                <tr
+                  key={emp.id}
+                  className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
+                >
+                  <td className="px-6 py-4 font-mono text-sm text-indigo-600">
+                    {emp.id}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="text-white w-5 h-5" />
+                      </div>
+                      <span className="font-medium text-gray-900">{emp.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-gray-700">{emp.jobTitle}</td>
+                  <td className="px-6 py-4">
+                    <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
+                      {emp.department}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-gray-600">{emp.location}</td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
+                        emp.status === 'Active'
+                          ? 'bg-green-100 text-green-800'
+                          : emp.status === 'On Leave'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {emp.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Edit functionality
+                        }}
+                        className="text-indigo-600 hover:text-indigo-800 transition"
+                        title="Edit"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => handleDelete(emp.id, emp.name, e)}
+                        className="text-red-600 hover:text-red-800 transition"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* See More Button */}
+          {displayedEmployees.length < filteredEmployees.length && (
+            <div className="border-t border-gray-200">
+              <button
+                onClick={() => setItemsToShow(itemsToShow + 5)}
+                className="w-full py-3 bg-gray-50 hover:bg-indigo-50 text-indigo-600 text-sm font-medium transition-colors"
+              >
+                See More ({filteredEmployees.length - displayedEmployees.length} remaining)
+              </button>
+            </div>
+          )}
+
+          {displayedEmployees.length === 0 && (
+            <div className="text-center py-16 text-gray-500">
+              {search || department || location || status
+                ? "No employees match your filters."
+                : "No employees added yet."}
+            </div>
+          )}
+        </div>
+
+        {/* Results Info */}
+        {displayedEmployees.length > 0 && (
+          <div className="text-center text-sm text-gray-500">
+            Showing {displayedEmployees.length} of {filteredEmployees.length} employees
+          </div>
+        )}
       </div>
     </div>
   );

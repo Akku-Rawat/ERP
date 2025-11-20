@@ -6,7 +6,7 @@ interface ItemModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (data: any) => void;
-  initialData?: any; // Optional initial data (edit mode)
+  initialData?: any; 
 }
 
 // Use a flexible type instead of strict FormData since backend defines full schema
@@ -14,12 +14,12 @@ type FormState = Record<string, any>;
 
 const emptyForm: Record<string, any> = {
   // === Basic Info ===
-  item_type: "Goods",                     // Important default
+  item_type: "Goods",                     
   items_name: "",
   description: "",
   item_group: "",
   hsn_sac_unspc: "",
-  unit_of_measurement: "Nos",             // Common default
+  unit_of_measurement: "Nos",           
   sku: "",
 
   // === Sales & Purchase ===
@@ -140,8 +140,8 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
           {/* <form onSubmit={submit} className="flex flex-col h-full overflow-hidden"> */}
           <form className="flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-blue-700">Add Items</h2>
+            <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
+              <h2 className="text-2xl font-semibold text-indigo-600">Add Items</h2>
               <button
                 type="button"
                 onClick={onClose}
@@ -1196,16 +1196,11 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
                 >
                   Reset
                 </button>
-                {/* <button
-                  type="submit"
-                  className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
-                >
-                  Save Item
-                </button> */}
+              
                 <button
   type="button"
   onClick={submit}
-  className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
+  className="rounded-full bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700"
 >
   Save Item
 </button>
@@ -1227,7 +1222,7 @@ const Input = React.forwardRef<
     <span className="font-medium text-gray-600">{label}</span>
     <input
       ref={ref}
-      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
         props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
       } ${className}`}
       {...props}

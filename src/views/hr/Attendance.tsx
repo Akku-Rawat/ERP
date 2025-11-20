@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaCalendarAlt, FaClock, FaUserClock, FaChartPie, FaArrowRight } from 'react-icons/fa';
+import { Calendar, Clock, UserLock, ArrowRight, Edit2, Trash2 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 type AttendanceRecord = {
@@ -30,164 +30,239 @@ const Attendance: React.FC = () => {
   const [selectedDate] = useState('November 2025');
   const [viewMode, setViewMode] = useState<'Today' | 'Monthly'>('Today');
 
+  const handleDelete = (id: string, name: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm(`Delete attendance record for "${name}"?`)) {
+      alert("Delete functionality ready — connect to API later");
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Header with Date Picker */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <FaCalendarAlt className="text-gray-500" />
-          <input
-            type="text"
-            value={selectedDate}
-            readOnly
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-          />
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="space-y-6">
+        {/* Header with Date Picker */}
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Calendar className="text-gray-500" />
+            <input
+              type="text"
+              value={selectedDate}
+              readOnly
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
         </div>
-       
-      </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-3 gap-6">
-        {/* Total Work Hours */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Total Work Hours</p>
-              <p className="text-3xl font-bold text-teal-600">1,850</p>
+        {/* KPI Cards */}
+        <div className="grid grid-cols-3 gap-6">
+          {/* Total Work Hours */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm">Total Work Hours</p>
+                <p className="text-3xl font-bold text-indigo-600">1,850</p>
+              </div>
+              <Clock className="text-indigo-500 w-8 h-8" />
             </div>
-            <FaClock className="text-teal-500 text-3xl" />
-          </div>
-          <div className="flex gap-2 mt-4">
-            <button className={`px-4 py-1 rounded text-sm font-medium ${viewMode === 'Today' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`} onClick={() => setViewMode('Today')}>
-              Today
-            </button>
-            <button className={`px-4 py-1 rounded text-sm font-medium ${viewMode === 'Monthly' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`} onClick={() => setViewMode('Monthly')}>
-              Monthly
-            </button>
-          </div>
-        </div>
-
-        {/* Average Daily Presence */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Average Daily Presence</p>
-              <p className="text-3xl font-bold text-gray-800">7.5 hrs</p>
-            </div>
-            <FaUserClock className="text-blue-500 text-3xl" />
-          </div>
-        </div>
-
-        {/* Absent Today */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Absent Today</p>
-              <p className="text-3xl font-bold text-red-600">3</p>
-            </div>
-            <FaCalendarAlt className="text-red-500 text-3xl" />
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content - Table and Summary */}
-      <div className="grid grid-cols-3 gap-6">
-        {/* Attendance Table */}
-        <div className="col-span-2 bg-white rounded-lg shadow p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">Employee Attendance Record</h3>
-            <div className="flex gap-2">
-              <button className="text-gray-400 hover:text-gray-600">
-                <FaCalendarAlt />
+            <div className="flex gap-2 mt-4">
+              <button
+                className={`px-4 py-1 rounded text-sm font-medium ${
+                  viewMode === 'Today'
+                    ? 'bg-indigo-100 text-indigo-700'
+                    : 'bg-gray-100 text-gray-600'
+                }`}
+                onClick={() => setViewMode('Today')}
+              >
+                Today
               </button>
-              <button className="text-gray-400 hover:text-gray-600">
-                calendar
-              </button>
-              <button className="text-teal-600 hover:text-teal-800">
-                <FaArrowRight />
+              <button
+                className={`px-4 py-1 rounded text-sm font-medium ${
+                  viewMode === 'Monthly'
+                    ? 'bg-indigo-100 text-indigo-700'
+                    : 'bg-gray-100 text-gray-600'
+                }`}
+                onClick={() => setViewMode('Monthly')}
+              >
+                Monthly
               </button>
             </div>
           </div>
 
-          <table className="w-full text-left text-sm">
-            <thead className="border-b-2 border-gray-200">
-              <tr className="text-gray-600">
-                <th className="py-3 px-2">Employee Name</th>
-                <th className="py-3 px-2">Date</th>
-                <th className="py-3 px-2">Check-In</th>
-                <th className="py-3 px-2">Break Min</th>
-                <th className="py-3 px-2">Total Hours Ratio</th>
-                <th className="py-3 px-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {demoAttendanceRecords.map(record => (
-                <tr key={record.id} className="border-b border-gray-200 hover:bg-gray-50">
-                  <td className="py-3 px-2 font-medium">{record.employeeName}</td>
-                  <td className="py-3 px-2 text-gray-600">{record.date}</td>
-                  <td className="py-3 px-2 text-gray-600">{record.checkIn}</td>
-                  <td className="py-3 px-2 text-gray-600">{record.breakMin}</td>
-                  <td className="py-3 px-2 font-medium">{record.totalHoursRatio}</td>
-                  <td className="py-3 px-2">
-                    <span className="bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-xs font-semibold">
-                      {record.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Attendance Summary Card */}
-        <div className="bg-white rounded-lg shadow p-6 flex flex-col">
-          <h3 className="text-lg font-semibold mb-6">Attendance Summary</h3>
-
-          {/* Donut Chart */}
-          <div className="flex justify-center mb-4">
-            <ResponsiveContainer width={200} height={200}>
-              <PieChart>
-                <Pie
-                  data={attendanceSummaryData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  <Cell fill="#14b8a6" />
-                  <Cell fill="#ef4444" />
-                </Pie>
-                <Tooltip formatter={(value) => `${value}%`} />
-              </PieChart>
-            </ResponsiveContainer>
+          {/* Average Daily Presence */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm">Average Daily Presence</p>
+                <p className="text-3xl font-bold text-gray-800">7.5 hrs</p>
+              </div>
+              <UserLock className="text-blue-500 w-8 h-8" />
+            </div>
           </div>
 
-          {/* Summary Stats */}
-          <div className="space-y-3">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">On-Time vs Late</p>
-              <p className="text-2xl font-bold text-teal-600">12%</p>
+          {/* Absent Today */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm">Absent Today</p>
+                <p className="text-3xl font-bold text-red-600">3</p>
+              </div>
+              <Calendar className="text-red-500 w-8 h-8" />
             </div>
+          </div>
+        </div>
 
-            <div className="bg-gray-50 rounded p-3 space-y-2">
-              <p className="text-xs font-semibold text-gray-700">88% On-Time vs Late</p>
-              <div className="space-y-1 text-xs text-gray-600">
-                <p>Late Arrivals: 15 <span className="float-right">A0</span></p>
-                <p>Early Departures: 8 <span className="float-right">B</span></p>
+        {/* Main Content - Table and Summary */}
+        <div className="grid grid-cols-3 gap-6">
+          {/* Attendance Table */}
+          <div className="col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Employee Attendance Record</h3>
+              <div className="flex gap-2 items-center">
+                <button className="text-gray-400 hover:text-gray-600">
+                  <Calendar className="w-5 h-5" />
+                </button>
+                <span className="text-gray-400 text-sm">calendar</span>
+                <button className="text-indigo-600 hover:text-indigo-800">
+                  <ArrowRight className="w-5 h-5" />
+                </button>
               </div>
             </div>
+
+            <div className="overflow-hidden rounded-lg border border-gray-200">
+              <table className="min-w-full">
+                <thead className="bg-gray-50 text-gray-700 text-sm font-medium">
+                  <tr>
+                    <th className="px-6 py-4 text-left">Attendance ID</th>
+                    <th className="px-6 py-4 text-left">Employee Name</th>
+                    <th className="px-6 py-4 text-left">Date</th>
+                    <th className="px-6 py-4 text-left">Check-In</th>
+                    <th className="px-6 py-4 text-left">Break Min</th>
+                    <th className="px-6 py-4 text-left">Total Hours</th>
+                    <th className="px-6 py-4 text-left">Status</th>
+                    <th className="px-6 py-4 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {demoAttendanceRecords.map(record => (
+                    <tr
+                      key={record.id}
+                      className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
+                    >
+                      <td className="px-6 py-4 font-mono text-sm text-indigo-600">
+                        {record.id}
+                      </td>
+                      <td className="px-6 py-4 font-medium text-gray-900">
+                        {record.employeeName}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">{record.date}</td>
+                      <td className="px-6 py-4 text-gray-700">{record.checkIn}</td>
+                      <td className="px-6 py-4 text-gray-600">{record.breakMin}</td>
+                      <td className="px-6 py-4 font-medium text-gray-900">
+                        {record.totalHoursRatio}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
+                            record.status === 'Present'
+                              ? 'bg-green-100 text-green-800'
+                              : record.status === 'Late'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : record.status === 'Early Departure'
+                              ? 'bg-orange-100 text-orange-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {record.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center gap-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Edit functionality
+                            }}
+                            className="text-indigo-600 hover:text-indigo-800 transition"
+                            title="Edit"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={(e) => handleDelete(record.id, record.employeeName, e)}
+                            className="text-red-600 hover:text-red-800 transition"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {demoAttendanceRecords.length === 0 && (
+                <div className="text-center py-16 text-gray-500">
+                  No attendance records found.
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2 mt-6">
-            <button className="flex-1 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg font-semibold transition">
-              View Reports
-            </button>
-            <button className="flex-1 border border-teal-500 text-teal-600 hover:bg-teal-50 px-4 py-2 rounded-lg font-semibold transition">
-              Download
-            </button>
+          {/* Attendance Summary Card */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Attendance Summary</h3>
+
+            {/* Donut Chart */}
+            <div className="flex justify-center mb-4">
+              <ResponsiveContainer width={200} height={200}>
+                <PieChart>
+                  <Pie
+                    data={attendanceSummaryData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    <Cell fill="#14b8a6" />
+                    <Cell fill="#ef4444" />
+                  </Pie>
+                  <Tooltip formatter={(value) => `${value}%`} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Summary Stats */}
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">On-Time vs Late</p>
+                <p className="text-2xl font-bold text-indigo-600">12%</p>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                <p className="text-xs font-semibold text-gray-700">88% On-Time vs Late</p>
+                <div className="space-y-1 text-xs text-gray-600">
+                  <p>
+                    Late Arrivals: 15 <span className="float-right">A0</span>
+                  </p>
+                  <p>
+                    Early Departures: 8 <span className="float-right">B</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 mt-6">
+              <button className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition">
+                View Reports
+              </button>
+              <button className="flex-1 border border-indigo-300 text-indigo-600 hover:bg-indigo-50 px-4 py-2 rounded-lg font-semibold transition">
+                Download
+              </button>
+            </div>
           </div>
         </div>
       </div>

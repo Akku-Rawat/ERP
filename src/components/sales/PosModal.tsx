@@ -140,8 +140,8 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
           className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
           <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave} autoComplete="off">
-            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
-              <h3 className="text-2xl w-full font-semibold text-blue-600">
+            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-indigo-100/30 shrink-0">
+              <h3 className="text-2xl w-full font-semibold text-indigo-600">
                 New POS Sale
               </h3>
               <button
@@ -191,7 +191,7 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
                   <button
                     type="button"
                     onClick={addToCart}
-                    className="bg-blue-600 text-white rounded px-5 py-2 font-bold"
+                    className="bg-indigo-600 text-white rounded px-5 py-2 font-bold"
                   >
                     Add Item
                   </button>
@@ -297,7 +297,7 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
                     <span>Discount:</span>
                     <span>₹{discountVal}</span>
                   </div>
-                  <div className="flex justify-between text-blue-800 font-bold border-t pt-2 mt-2 text-xl">
+                  <div className="flex justify-between text-indigo-800 font-bold border-t pt-2 mt-2 text-xl">
                     <span>Grand Total:</span>
                     <span>₹{grandTotal}</span>
                   </div>
@@ -317,7 +317,7 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
               <div className="flex gap-x-2">
                 <button
                   type="submit"
-                  className="w-24 rounded-3xl bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+                  className="w-24 rounded-3xl bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
                 >
                   Save
                 </button>

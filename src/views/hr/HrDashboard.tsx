@@ -161,7 +161,7 @@ const HrDashboard: React.FC<HrDashboardProps> = ({ onNavigate }) => {
           <button className="p-2 hover:bg-gray-100 rounded-lg transition">
             <FaSync className="text-gray-600 text-sm" />
           </button>
-          <button className="px-3 lg:px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold flex items-center gap-2 transition text-xs lg:text-sm">
+          <button className="px-3 lg:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold flex items-center gap-2 transition text-xs lg:text-sm">
             <FaDownload /> Export
           </button>
         </div>

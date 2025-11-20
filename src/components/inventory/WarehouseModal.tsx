@@ -101,8 +101,8 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
           className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
           <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
-            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
-              <h3 className="text-2xl w-full font-semibold text-blue-600">
+            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-indigo-100/30 shrink-0">
+              <h3 className="text-2xl w-full font-semibold text-indigo-600">
                 Warehouse Details
               </h3>
               <button
@@ -262,7 +262,7 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
                   </table>
                 </div>
                 <div>
-                  <button type="button" className="bg-blue-100 border border-blue-300 rounded px-2 py-1" onClick={addItem}>
+                  <button type="button" className="bg-indigo-100 border border-indigo-300 rounded px-2 py-1" onClick={addItem}>
                     Add
                   </button>
                 </div>
@@ -281,7 +281,7 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
               <div className="flex gap-x-2">
                 <button
                   type="submit"
-                  className="w-24 rounded-3xl bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+                  className="w-24 rounded-3xl bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
                 >
                   Save
                 </button>
