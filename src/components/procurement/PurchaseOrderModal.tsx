@@ -1343,7 +1343,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
 
               {/* TERMS TAB */}
               {activeTab === "terms" && (
-                <div className="space-y-8">
+               <div className="space-y-8 mx-auto bg-white rounded-lg p-6  ">
                   <div>
                     <h3 className="mb-2 text-lg font-semibold text-gray-800">
                       Payment Terms

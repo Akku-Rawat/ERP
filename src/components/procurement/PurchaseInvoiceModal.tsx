@@ -186,13 +186,20 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
   // --- TAX ROW STATE + HANDLERS ---
   const [taxRows, setTaxRows] = useState<TaxRow[]>([{ type: "", accountHead: "", taxRate: 0, amount: 0 }]);
 
-  const taxItemsPerPage = 5;
+  const taxItemsPerPage = 4;
   const [taxPage, setTaxPage] = useState(0);
   const paginatedTaxRows = taxRows.slice(taxPage * taxItemsPerPage, (taxPage + 1) * taxItemsPerPage);
 
-  const addTaxRow = () =>
-    setTaxRows((rows) => [...rows, { type: "", accountHead: "", taxRate: 0, amount: 0 }]);
-
+   const addTaxRow = () => {
+    setTaxRows((prev) => {
+      const newRows = [
+        ...prev,
+        { type: "", accountHead: "", taxRate: 0, amount: 0 },
+      ];
+      setTaxPage(Math.floor((newRows.length - 1) / taxItemsPerPage));
+      return newRows;
+    });
+  };
   const removeTaxRow = (idx: number) => setTaxRows((rows) => rows.filter((_, i) => i !== idx));
 
   const handleTaxRowChange = (idx: number, key: keyof TaxRow, value: any) => {
@@ -216,12 +223,27 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
   const [paymentRows, setPaymentRows] = useState<PaymentRow[]>([
     { paymentTerm: "", description: "", dueDate: "", invoicePortion: 0, paymentAmount: 0 },
   ]);
-  const paymentItemsPerPage = 3;
+  const paymentItemsPerPage = 4;
   const [paymentPage, setPaymentPage] = useState(0);
   const paginatedPaymentRows = paymentRows.slice(paymentPage * paymentItemsPerPage, (paymentPage + 1) * paymentItemsPerPage);
 
-  const addPaymentRow = () =>
-    setPaymentRows((rows) => [...rows, { paymentTerm: "", description: "", dueDate: "", invoicePortion: 0, paymentAmount: 0 }]);
+    const addPaymentRow = () => {
+    setPaymentRows((prev) => {
+      const newRows = [
+        ...prev,
+        {
+          paymentTerm: "",
+          description: "",
+          dueDate: "",
+          invoicePortion: 0,
+          paymentAmount: 0,
+        },
+      ];
+      setPaymentPage(Math.floor((newRows.length - 1) / paymentItemsPerPage));
+      return newRows;
+    });
+  };
+
 
   const removePaymentRow = (idx: number) =>
     setPaymentRows((rows) => (rows.length === 1 ? rows : rows.filter((_, i) => i !== idx)));
@@ -774,89 +796,362 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
                 </div>
               )}
 
-              {/* TERMS TAB */}
-              {activeTab === "terms" && (
-                <div className="space-y-8">
-                  <div>
-                    <h3 className="mb-2 text-lg font-semibold text-gray-800">Payment Terms</h3>
-                    <div className="mt-4">
-                      <span className="font-medium text-gray-700">Payment Schedule</span>
-                      <div className="overflow-x-auto rounded-lg border mt-2">
-                        <table className="w-full text-sm">
-                          <thead className="bg-gray-50 text-gray-700">
-                            <tr>
-                              <th className="px-2 py-2">No.</th>
-                              <th className="px-2 py-2">Payment Term</th>
-                              <th className="px-2 py-2">Description</th>
-                              <th className="px-2 py-2">Due Date *</th>
-                              <th className="px-2 py-2">Invoice Portion</th>
-                              <th className="px-2 py-2">Payment Amount *</th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y">
-                            {paginatedPaymentRows.length === 0 ? (
-                              <tr>
-                                <td colSpan={7} className="text-center p-6 text-gray-400">No Data</td>
-                              </tr>
-                            ) : (
-                              paginatedPaymentRows.map((row, idx) => {
-                                const i = paymentPage * paymentItemsPerPage + idx;
-                                return (
-                                  <tr key={i} className="hover:bg-gray-50">
-                                    <td className="px-3 py-2 text-center">{i + 1}</td>
-                                    <td className="px-1 py-1">
-                                      <input className="w-full rounded border p-1 text-sm" name="paymentTerm" value={row.paymentTerm} onChange={(e) => handlePaymentRowChange(i, "paymentTerm", e.target.value)} />
-                                    </td>
-                                    <td className="px-1 py-1">
-                                      <input className="w-full rounded border p-1 text-sm" name="description" value={row.description} onChange={(e) => handlePaymentRowChange(i, "description", e.target.value)} />
-                                    </td>
-                                    <td className="px-1 py-1">
-                                      <input type="date" className="w-full rounded border p-1 text-sm" name="dueDate" value={row.dueDate} onChange={(e) => handlePaymentRowChange(i, "dueDate", e.target.value)} />
-                                    </td>
-                                    <td className="px-1 py-1">
-                                      <input type="number" className="w-full rounded border p-1 text-sm" name="invoicePortion" value={row.invoicePortion} onChange={(e) => handlePaymentRowChange(i, "invoicePortion", Number(e.target.value))} />
-                                    </td>
-                                    <td className="px-1 py-1">
-                                      <input type="number" className="w-full rounded border p-1 text-sm" name="paymentAmount" value={row.paymentAmount} onChange={(e) => handlePaymentRowChange(i, "paymentAmount", Number(e.target.value))} />
-                                    </td>
-                                    <td className="px-1 py-1 text-center">
-                                      <button type="button" onClick={() => removePaymentRow(i)} className="p-1 text-red-600 hover:bg-red-50 rounded" disabled={paymentRows.length === 1}>
-                                        <Trash2 className="w-4 h-4" />
-                                      </button>
-                                    </td>
-                                  </tr>
-                                );
-                              })
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-
-                      <div className="flex items-center justify-between mt-3">
-                        <span className="text-sm text-gray-600">
-                          Showing {paymentRows.length === 0 ? 0 : paymentPage * paymentItemsPerPage + 1}–{Math.min((paymentPage + 1) * paymentItemsPerPage, paymentRows.length)} of {paymentRows.length}
-                        </span>
-                        <div className="flex gap-1">
-                          <button type="button" onClick={() => setPaymentPage(Math.max(0, paymentPage - 1))} disabled={paymentPage === 0} className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">← Prev</button>
-                          <button type="button" onClick={() => setPaymentPage(paymentPage + 1)} disabled={(paymentPage + 1) * paymentItemsPerPage >= paymentRows.length} className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">Next →</button>
-                        </div>
-                      </div>
-
-                      <button type="button" onClick={addPaymentRow} className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200 mt-2">
-                        <Plus className="w-4 h-4" /> Add Row
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="mt-3">
-                      <label className="font-medium text-gray-700 mb-1 block">Terms and Conditions</label>
-                      <textarea name="termsAndConditions" value={form.termsAndConditions} onChange={handleForm} rows={8} className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 mt-1" placeholder="Enter detailed terms and conditions…" />
-                    </div>
-                  </div>
-                </div>
-              )}
+             {/* TERMS TAB */}
+                           {activeTab === "terms" && (
+                            <div className="space-y-8 mx-auto bg-white rounded-lg p-6  ">
+                               <div>
+                                 <h3 className="mb-2 text-lg font-semibold text-gray-800">
+                                   Payment Terms
+                                 </h3>
+                                 <div className="mt-4">
+                                   <span className="font-medium text-gray-700">
+                                     Payment Schedule
+                                   </span>
+                                   <div className="overflow-x-auto rounded-lg border mt-2">
+                                     <table className="w-full text-sm">
+                                       <thead className="bg-gray-50 text-gray-700">
+                                         <tr>
+                                           <th className="px-2 py-2">No.</th>
+                                           <th className="px-2 py-2">Payment Term</th>
+                                           <th className="px-2 py-2">Description</th>
+                                           <th className="px-2 py-2">Due Date *</th>
+                                           <th className="px-2 py-2">Invoice Portion</th>
+                                           <th className="px-2 py-2">Payment Amount *</th>
+                                           <th></th>
+                                         </tr>
+                                       </thead>
+                                       <tbody className="divide-y">
+                                         {paginatedPaymentRows.length === 0 ? (
+                                           <tr>
+                                             <td
+                                               colSpan={7}
+                                               className="text-center p-6 text-gray-400"
+                                             >
+                                               No Data
+                                             </td>
+                                           </tr>
+                                         ) : (
+                                           paginatedPaymentRows.map((row, idx) => {
+                                             const i =
+                                               paymentPage * paymentItemsPerPage + idx;
+                                             return (
+                                               <tr key={i} className="hover:bg-gray-50">
+                                                 <td className="px-3 py-2 text-center">
+                                                   {i + 1}
+                                                 </td>
+                                                 <td className="px-1 py-1">
+                                                   <input
+                                                     className="w-full rounded border p-1 text-sm"
+                                                     name="paymentTerm"
+                                                     value={row.paymentTerm}
+                                                     onChange={(e) =>
+                                                       handlePaymentRowChange(
+                                                         i,
+                                                         "paymentTerm",
+                                                         e.target.value
+                                                       )
+                                                     }
+                                                   />
+                                                 </td>
+                                                 <td className="px-1 py-1">
+                                                   <input
+                                                     className="w-full rounded border p-1 text-sm"
+                                                     name="description"
+                                                     value={row.description}
+                                                     onChange={(e) =>
+                                                       handlePaymentRowChange(
+                                                         i,
+                                                         "description",
+                                                         e.target.value
+                                                       )
+                                                     }
+                                                   />
+                                                 </td>
+                                                 <td className="px-1 py-1">
+                                                   <input
+                                                     type="date"
+                                                     className="w-full rounded border p-1 text-sm"
+                                                     name="dueDate"
+                                                     value={row.dueDate}
+                                                     onChange={(e) =>
+                                                       handlePaymentRowChange(
+                                                         i,
+                                                         "dueDate",
+                                                         e.target.value
+                                                       )
+                                                     }
+                                                   />
+                                                 </td>
+                                                 <td className="px-1 py-1">
+                                                   <input
+                                                     type="number"
+                                                     className="w-full rounded border p-1 text-sm"
+                                                     name="invoicePortion"
+                                                     value={row.invoicePortion}
+                                                     onChange={(e) =>
+                                                       handlePaymentRowChange(
+                                                         i,
+                                                         "invoicePortion",
+                                                         Number(e.target.value)
+                                                       )
+                                                     }
+                                                   />
+                                                 </td>
+                                                 <td className="px-1 py-1">
+                                                   <input
+                                                     type="number"
+                                                     className="w-full rounded border p-1 text-sm"
+                                                     name="paymentAmount"
+                                                     value={row.paymentAmount}
+                                                     onChange={(e) =>
+                                                       handlePaymentRowChange(
+                                                         i,
+                                                         "paymentAmount",
+                                                         Number(e.target.value)
+                                                       )
+                                                     }
+                                                   />
+                                                 </td>
+                                                 <td className="px-1 py-1 text-center">
+                                                   <button
+                                                     type="button"
+                                                     onClick={() => removePaymentRow(i)}
+                                                     className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                                     disabled={paymentRows.length === 1}
+                                                   >
+                                                     <Trash2 className="w-4 h-4" />
+                                                   </button>
+                                                 </td>
+                                               </tr>
+                                             );
+                                           })
+                                         )}
+                                       </tbody>
+                                     </table>
+                                   </div>
+             
+                                   <div className="flex items-center justify-between mt-3">
+                                     <span className="text-sm text-gray-600">
+                                       Showing{" "}
+                                       {paymentRows.length === 0
+                                         ? 0
+                                         : paymentPage * paymentItemsPerPage + 1}
+                                       –
+                                       {Math.min(
+                                         (paymentPage + 1) * paymentItemsPerPage,
+                                         paymentRows.length
+                                       )}{" "}
+                                       of {paymentRows.length}
+                                     </span>
+                                     <div className="flex gap-1">
+                                       <button
+                                         type="button"
+                                         onClick={() =>
+                                           setPaymentPage(Math.max(0, paymentPage - 1))
+                                         }
+                                         disabled={paymentPage === 0}
+                                         className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                       >
+                                         ← Prev
+                                       </button>
+                                       <button
+                                         type="button"
+                                         onClick={() => setPaymentPage(paymentPage + 1)}
+                                         disabled={
+                                           (paymentPage + 1) * paymentItemsPerPage >=
+                                           paymentRows.length
+                                         }
+                                         className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                       >
+                                         Next →
+                                       </button>
+                                     </div>
+                                   </div>
+             
+                                   <button
+                                     type="button"
+                                     onClick={addPaymentRow}
+                                     className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200 mt-2"
+                                   >
+                                     <Plus className="w-4 h-4" /> Add Row
+                                   </button>
+                                 </div>
+                               </div>
+             
+                               {/* Terms and Conditions */}
+                               <div className="bg-white rounded-lg border border-gray-200">
+                                 <div className="p-4 border-b border-gray-200">
+                                   <h3 className="font-semibold text-gray-900">
+                                     Terms and Conditions
+                                   </h3>
+                                 </div>
+                                 <div className="p-6">
+                                   {/* Rich Text Editor Toolbar */}
+                                   <div className="border border-gray-300 rounded-t-lg bg-gray-50 p-2 flex items-center gap-1 flex-wrap">
+                                     <select className="px-2 py-1 text-sm border border-gray-300 rounded bg-white">
+                                       <option>Normal</option>
+                                       <option>Heading 1</option>
+                                       <option>Heading 2</option>
+                                     </select>
+             
+                                     <div className="w-px h-6 bg-gray-300 mx-1"></div>
+             
+                                     <select className="px-2 py-1 text-sm border border-gray-300 rounded bg-white">
+                                       <option>---</option>
+                                       <option>Arial</option>
+                                       <option>Times New Roman</option>
+                                     </select>
+             
+                                     <div className="w-px h-6 bg-gray-300 mx-1"></div>
+             
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded"
+                                       title="Bold"
+                                     >
+                                       <strong className="text-sm">B</strong>
+                                     </button>
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded"
+                                       title="Italic"
+                                     >
+                                       <em className="text-sm">I</em>
+                                     </button>
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded"
+                                       title="Underline"
+                                     >
+                                       <u className="text-sm">U</u>
+                                     </button>
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded"
+                                       title="Strikethrough"
+                                     >
+                                       <s className="text-sm">S</s>
+                                     </button>
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Subscript"
+                                     >
+                                       T<sub>x</sub>
+                                     </button>
+             
+                                     <div className="w-px h-6 bg-gray-300 mx-1"></div>
+             
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Font Color"
+                                     >
+                                       A
+                                     </button>
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Background Color"
+                                     >
+                                       A̲
+                                     </button>
+             
+                                     <div className="w-px h-6 bg-gray-300 mx-1"></div>
+             
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Quote"
+                                     >
+                                       "
+                                     </button>
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Code"
+                                     >
+                                       {"</>"}
+                                     </button>
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Bullet Point"
+                                     >
+                                       •¶
+                                     </button>
+             
+                                     <div className="w-px h-6 bg-gray-300 mx-1"></div>
+             
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Link"
+                                     >
+                                       🔗
+                                     </button>
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Image"
+                                     >
+                                       🖼
+                                     </button>
+             
+                                     <div className="w-px h-6 bg-gray-300 mx-1"></div>
+             
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Bullet List"
+                                     >
+                                       ≡
+                                     </button>
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Numbered List"
+                                     >
+                                       ☰
+                                     </button>
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Checklist"
+                                     >
+                                       ☑
+                                     </button>
+             
+                                     <div className="w-px h-6 bg-gray-300 mx-1"></div>
+             
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Align Left"
+                                     >
+                                       ≡
+                                     </button>
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Align Center"
+                                     >
+                                       ≡
+                                     </button>
+                                     <button
+                                       className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                                       title="Align Right"
+                                     >
+                                       ≡
+                                     </button>
+             
+                                     <div className="w-px h-6 bg-gray-300 mx-1"></div>
+             
+                                     <select className="px-2 py-1 text-sm border border-gray-300 rounded bg-white">
+                                       <option>Table</option>
+                                     </select>
+                                   </div>
+             
+                                   {/* Text Area */}
+                                   <textarea
+                                     value={form.termsAndConditions}
+                                     onChange={(e) =>
+                                       setForm((p) => ({
+                                         ...p,
+                                         termsAndConditions: e.target.value,
+                                       }))
+                                     }
+                                     className="w-full px-3 py-2 border border-gray-300 border-t-0 rounded-b-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                     rows={12}
+                                     placeholder="Enter terms and conditions..."
+                                   />
+                                 </div>
+                               </div>
+                             </div>
+                           )}
             </section>
 
             {/* Footer */}
