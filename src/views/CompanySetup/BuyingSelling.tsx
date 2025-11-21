@@ -1,65 +1,122 @@
 import React, { useState } from 'react';
-import { ShoppingCart, TrendingUp, Check, RotateCcw, Save, FileText, CreditCard, Truck, XCircle, Shield, AlertTriangle, ChevronDown } from 'lucide-react';
+import {
+  ShoppingCart,
+  TrendingUp,
+  Check,
+  RotateCcw,
+  Save,
+  FileText,
+  CreditCard,
+  Truck,
+  XCircle,
+  Shield,
+  AlertTriangle,
+  ChevronDown
+} from 'lucide-react';
 
-const BuyingSelling = () => {
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [buyingSection, setBuyingSection] = useState('general');
-  const [sellingSection, setSellingSection] = useState('general');
-  
-  const defaultTerms = {
-    general: `1. This Quotation is subject to the following terms and conditions. By accepting this quotation, {{CustomerName}} agrees to be bound by these terms. This quotation, identified by number {{QuotationNumber}}, was issued on {{QuotationDate}} and is valid until {{ValidUntil}}.
+// Section type IDs
+type SectionId =
+  | 'general'
+  | 'payment'
+  | 'delivery'
+  | 'cancellation'
+  | 'warranty'
+  | 'liability';
+
+type Tab = 'buying' | 'selling';
+
+interface SectionTerm {
+  general: string;
+  payment: string;
+  delivery: string;
+  cancellation: string;
+  warranty: string;
+  liability: string;
+}
+
+interface PaymentPhase {
+  phase: string;
+  percentage: string;
+  when: string;
+}
+
+// PaymentData for each tab
+interface PaymentDataType {
+  phases: PaymentPhase[];
+  dueDates: string;
+  lateCharges: string;
+  taxes: string;
+  specialNotes: string;
+}
+
+interface AllPaymentData {
+  buying: PaymentDataType;
+  selling: PaymentDataType;
+}
+
+interface AllFormData {
+  buying: SectionTerm;
+  selling: SectionTerm;
+}
+
+// Section object for dropdowns
+interface SectionOption {
+  id: SectionId;
+  label: string;
+  icon: React.ComponentType<any>;
+}
+
+const defaultTerms: SectionTerm = {
+  general: `1. This Quotation is subject to the following terms and conditions. By accepting this quotation, {{CustomerName}} agrees to be bound by these terms. This quotation, identified by number {{QuotationNumber}}, was issued on {{QuotationDate}} and is valid until {{ValidUntil}}.
 2. The services to be provided are: {{ServiceName}}. The total amount payable for these services is {{TotalAmount}}.
 3. Payment is due upon receipt of the invoice. Any disputes must be raised within 14 days of the invoice date.`,
-    payment: 'PAYMENT_TABLE',
-    delivery: `1. Estimated delivery timelines are as follows: Phase 1 – 2 weeks, Phase 2 – 3 weeks, with a total project duration of 5 weeks.`,
-    cancellation: `1. Cancellation Conditions: Client may cancel anytime with written notice.
+  payment: 'PAYMENT_TABLE',
+  delivery: `1. Estimated delivery timelines are as follows: Phase 1 – 2 weeks, Phase 2 – 3 weeks, with a total project duration of 5 weeks.`,
+  cancellation: `1. Cancellation Conditions: Client may cancel anytime with written notice.
 2. Refund Rules: Advance payment is non-refundable, milestone payments refundable only for uninitiated work.`,
-    warranty: `1. The Company warrants that the service will be performed professionally and function as intended for 30 days after completion.`,
-    liability: `1. The Company is not liable for delays caused by the client.
+  warranty: `1. The Company warrants that the service will be performed professionally and function as intended for 30 days after completion.`,
+  liability: `1. The Company is not liable for delays caused by the client.
 2. The client is responsible for providing accurate information and resources.
 3. In no event shall the Company's total liability, whether in contract or otherwise, exceed the total amount paid by the client for the service.`,
-  };
+};
 
-  const [formData, setFormData] = useState({
+const defaultPayment: PaymentDataType = {
+  phases: [
+    { phase: 'Advance', percentage: 'Advance Payment 20%', when: 'Upon quotation acceptance.' },
+    { phase: 'Phase 1', percentage: 'Phase 1 Completion 30%', when: 'After Phase 1 delivery' },
+    { phase: 'Final', percentage: 'Final Completion 50%', when: 'On project sign-off' },
+  ],
+  dueDates: 'Payment due within 30 days from invoice.',
+  lateCharges: '12% p.a. on overdue payments.',
+  taxes: 'Tax applicable @ 18%.',
+  specialNotes: 'Advance payment is non-refundable.',
+};
+
+const sections: SectionOption[] = [
+  { id: 'general', label: 'General Service Terms', icon: FileText },
+  { id: 'payment', label: 'Payment Terms', icon: CreditCard },
+  { id: 'delivery', label: 'Service Delivery Terms', icon: Truck },
+  { id: 'cancellation', label: 'Cancellation / Refund Policy', icon: XCircle },
+  { id: 'warranty', label: 'Warranty', icon: Shield },
+  { id: 'liability', label: 'Limitations and Liability', icon: AlertTriangle },
+];
+
+const BuyingSelling: React.FC = () => {
+  const [showSuccess, setShowSuccess] = useState<boolean>(false);
+  const [buyingSection, setBuyingSection] = useState<SectionId>('general');
+  const [sellingSection, setSellingSection] = useState<SectionId>('general');
+
+  const [formData, setFormData] = useState<AllFormData>({
     buying: { ...defaultTerms },
     selling: { ...defaultTerms },
   });
 
-  const [paymentData, setPaymentData] = useState({
-    buying: {
-      phases: [
-        { phase: 'Advance', percentage: 'Advance Payment 20%', when: 'Upon quotation acceptance.' },
-        { phase: 'Phase 1', percentage: 'Phase 1 Completion 30%', when: 'After Phase 1 delivery' },
-        { phase: 'Final', percentage: 'Final Completion 50%', when: 'On project sign-off' },
-      ],
-      dueDates: 'Payment due within 30 days from invoice.',
-      lateCharges: '12% p.a. on overdue payments.',
-      taxes: 'Tax applicable @ 18%.',
-      specialNotes: 'Advance payment is non-refundable.',
-    },
-    selling: {
-      phases: [
-        { phase: 'Advance', percentage: 'Advance Payment 20%', when: 'Upon quotation acceptance.' },
-        { phase: 'Phase 1', percentage: 'Phase 1 Completion 30%', when: 'After Phase 1 delivery' },
-        { phase: 'Final', percentage: 'Final Completion 50%', when: 'On project sign-off' },
-      ],
-      dueDates: 'Payment due within 30 days from invoice.',
-      lateCharges: '12% p.a. on overdue payments.',
-      taxes: 'Tax applicable @ 18%.',
-      specialNotes: 'Advance payment is non-refundable.',
-    },
+  const [paymentData, setPaymentData] = useState<AllPaymentData>({
+    buying: { ...defaultPayment },
+    selling: { ...defaultPayment },
   });
 
-  const sections = [
-    { id: 'general', label: 'General Service Terms', icon: FileText },
-    { id: 'payment', label: 'Payment Terms', icon: CreditCard },
-    { id: 'delivery', label: 'Service Delivery Terms', icon: Truck },
-    { id: 'cancellation', label: 'Cancellation / Refund Policy', icon: XCircle },
-    { id: 'warranty', label: 'Warranty', icon: Shield },
-    { id: 'liability', label: 'Limitations and Liability', icon: AlertTriangle },
-  ];
-
-  const handleChange = (tab, value) => {
+  const handleChange = (tab: Tab, value: string) => {
     const section = tab === 'buying' ? buyingSection : sellingSection;
     setFormData(prev => ({
       ...prev,
@@ -70,9 +127,14 @@ const BuyingSelling = () => {
     }));
   };
 
-  const handlePaymentChange = (tab, field, value, index = null) => {
+  const handlePaymentChange = (
+    tab: Tab,
+    field: keyof PaymentDataType | keyof PaymentPhase,
+    value: string,
+    index: number | null = null
+  ) => {
     setPaymentData(prev => {
-      if (index !== null) {
+      if (index !== null && field !== 'dueDates' && field !== 'lateCharges' && field !== 'taxes' && field !== 'specialNotes') {
         const newPhases = [...prev[tab].phases];
         newPhases[index] = { ...newPhases[index], [field]: value };
         return { ...prev, [tab]: { ...prev[tab], phases: newPhases } };
@@ -90,14 +152,14 @@ const BuyingSelling = () => {
     setFormData({ buying: { ...defaultTerms }, selling: { ...defaultTerms } });
   };
 
-  const getFilledCount = (tab) => {
+  const getFilledCount = (tab: Tab) => {
     return Object.values(formData[tab]).filter(v => v.trim() !== '').length;
   };
 
   const buyingSectionData = sections.find(s => s.id === buyingSection);
   const sellingSectionData = sections.find(s => s.id === sellingSection);
 
-  const PaymentTermsUI = ({ tab }) => {
+  const PaymentTermsUI: React.FC<{ tab: Tab }> = ({ tab }) => {
     const data = paymentData[tab];
     return (
       <div className="space-y-4">
@@ -187,14 +249,14 @@ const BuyingSelling = () => {
     );
   };
 
-  const renderContent = (tab) => {
+  const renderContent = (tab: Tab) => {
     const section = tab === 'buying' ? buyingSection : sellingSection;
     const sectionData = tab === 'buying' ? buyingSectionData : sellingSectionData;
-    
+
     if (section === 'payment') {
       return <PaymentTermsUI tab={tab} />;
     }
-    
+
     return (
       <textarea
         value={formData[tab][section]}
@@ -222,11 +284,10 @@ const BuyingSelling = () => {
       {/* Main Content */}
       <div className="p-4 lg:p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-          
           {/* Buying Terms Card */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="h-1 bg-blue-500" />
-            
+
             <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
               <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center">
                 <ShoppingCart className="w-4 h-4 text-white" />
@@ -244,7 +305,7 @@ const BuyingSelling = () => {
               <div className="relative">
                 <select
                   value={buyingSection}
-                  onChange={(e) => setBuyingSection(e.target.value)}
+                  onChange={(e) => setBuyingSection(e.target.value as SectionId)}
                   className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 pr-10 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                 >
                   {sections.map((section) => (
@@ -263,7 +324,7 @@ const BuyingSelling = () => {
           {/* Selling Terms Card */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="h-1 bg-emerald-500" />
-            
+
             <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
               <div className="w-9 h-9 bg-emerald-500 rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-4 h-4 text-white" />
@@ -281,7 +342,7 @@ const BuyingSelling = () => {
               <div className="relative">
                 <select
                   value={sellingSection}
-                  onChange={(e) => setSellingSection(e.target.value)}
+                  onChange={(e) => setSellingSection(e.target.value as SectionId)}
                   className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 pr-10 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent cursor-pointer"
                 >
                   {sections.map((section) => (
@@ -296,7 +357,6 @@ const BuyingSelling = () => {
               {renderContent('selling')}
             </div>
           </div>
-
         </div>
 
         {/* Action Buttons */}
