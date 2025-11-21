@@ -82,8 +82,8 @@ function SupplierDropdown({
             {filtered.map((s) => (
               <li
                 key={s.name}
-                className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
-                  s.name === value ? "bg-blue-200 font-bold" : ""
+                className={`px-4 py-2 cursor-pointer hover:bg-indigo-100 ${
+                  s.name === value ? "bg-indigo-200 font-bold" : ""
                 }`}
                 onClick={() => {
                   onChange(s.name);
@@ -176,7 +176,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
   const [form, setForm] = useState<FormData>(emptyForm);
   const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
   const [activeTab, setActiveTab] = useState<"details" | "email" | "tax" | "address" | "terms">("details");
-  const itemsPerPage = 3;
+  const itemsPerPage = 4;
   const [page, setPage] = useState(0);
   const paginatedItems = items.slice(page * itemsPerPage, (page + 1) * itemsPerPage);
 
@@ -411,8 +411,8 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col">
           <form onSubmit={submit} className="flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-blue-700">Create Purchase Invoice</h2>
+            <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
+              <h2 className="text-2xl font-semibold text-indigo-700">Create Purchase Invoice</h2>
               <button type="button" onClick={onClose} className="p-1 rounded-full hover:bg-gray-200">
                 <X className="w-5 h-5 text-gray-600" />
               </button>
@@ -421,7 +421,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
             {/* Tabs */}
             <div className="flex border-b bg-gray-50">
               {(["details", "email", "tax", "address", "terms"] as const).map((tab) => (
-                <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${activeTab === tab ? "text-blue-600 border-b-2 border-blue-600 bg-white" : "text-gray-600 hover:text-gray-900"}`}>
+                <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${activeTab === tab ? "text-indigo-600 border-b-2 border-indigo-600 bg-white" : "text-gray-600 hover:text-gray-900"}`}>
                   {tab === "details" ? "Details" : tab === "email" ? "Email" : tab === "tax" ? "Tax" : tab === "address" ? "Address" : "Terms and Conditions"}
                 </button>
               ))}
@@ -441,7 +441,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
                         <Input label="Required By" name="requiredBy" type="date" value={form.requiredBy} onChange={handleForm} className="w-full" />
                         <div className="flex flex-col gap-1">
                           <label className="font-medium text-gray-600 text-sm">Currency</label>
-                          <select name="currency" value={form.currency} onChange={handleForm} className="rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                          <select name="currency" value={form.currency} onChange={handleForm} className="rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
                             <option value="INR">INR (₹)</option>
                             <option value="USD">USD ($)</option>
                             <option value="EUR">EUR (€)</option>
@@ -518,7 +518,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
                       </table>
                     </div>
                     <div className="flex justify-between mt-3">
-                      <button type="button" onClick={addItem} className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200">
+                      <button type="button" onClick={addItem} className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200">
                         <Plus className="w-4 h-4" /> Add Item
                       </button>
                     </div>
@@ -541,7 +541,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
                           </div>
                           <div className="flex justify-between">
                             <span className="text-base font-semibold text-gray-700">Email Address</span>
-                            <span className="text-base font-bold text-blue-600">supplier@example.com</span>
+                            <span className="text-base font-bold text-indigo-600">supplier@example.com</span>
                           </div>
                         </div>
                       </div>
@@ -568,7 +568,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
                           </div>
                           <div className="flex justify-between border-t pt-2 mt-2">
                             <span className="text-base font-semibold text-gray-700">Rounded Total</span>
-                            <span className="text-base font-bold text-blue-600">{symbol}{form.roundedTotal.toFixed(2)}</span>
+                            <span className="text-base font-bold text-indigo-600">{symbol}{form.roundedTotal.toFixed(2)}</span>
                           </div>
                         </div>
                       </div>
@@ -588,12 +588,12 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="flex flex-col gap-1">
                       <label className="text-sm font-medium text-gray-600">Name</label>
-                      <input value={templateName} onChange={(e) => setTemplateName(e.target.value)} placeholder="Template name (e.g., RFQ Invitation)" className="px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                      <input value={templateName} onChange={(e) => setTemplateName(e.target.value)} placeholder="Template name (e.g., RFQ Invitation)" className="px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                     </div>
 
                     <div className="flex flex-col gap-1">
                       <label className="text-sm font-medium text-gray-600">Type</label>
-                      <select value={templateType} onChange={(e) => setTemplateType(e.target.value)} className="px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+                      <select value={templateType} onChange={(e) => setTemplateType(e.target.value)} className="px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400">
                         <option>Quote Email</option>
                         <option>Order Confirmation</option>
                         <option>Reminder</option>
@@ -602,7 +602,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
 
                     <div className="flex flex-col gap-1">
                       <label className="text-sm font-medium text-gray-600">Subject</label>
-                      <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Email subject line" className="px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                      <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Email subject line" className="px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                     </div>
                   </div>
 
@@ -659,7 +659,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
 
                     <div className="ml-auto flex gap-2">
                       <button onClick={resetTemplate} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm">Reset</button>
-                      <button onClick={handleSaveTemplate} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">Save Template</button>
+                      <button onClick={handleSaveTemplate} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm">Save Template</button>
                     </div>
                   </div>
 
@@ -760,7 +760,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
                       </div>
                     </div>
 
-                    <button type="button" onClick={addTaxRow} className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200 mt-2">
+                    <button type="button" onClick={addTaxRow} className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200 mt-2">
                       <Plus className="w-4 h-4" /> Add Row
                     </button>
                   </div>
@@ -971,7 +971,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
                                    <button
                                      type="button"
                                      onClick={addPaymentRow}
-                                     className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200 mt-2"
+                                     className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200 mt-2"
                                    >
                                      <Plus className="w-4 h-4" /> Add Row
                                    </button>
@@ -1144,7 +1144,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
                                          termsAndConditions: e.target.value,
                                        }))
                                      }
-                                     className="w-full px-3 py-2 border border-gray-300 border-t-0 rounded-b-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                     className="w-full px-3 py-2 border border-gray-300 border-t-0 rounded-b-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                      rows={12}
                                      placeholder="Enter terms and conditions..."
                                    />
@@ -1159,7 +1159,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
               <button type="button" onClick={onClose} className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300">Cancel</button>
               <div className="flex gap-2">
                 <button type="button" onClick={reset} className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400">Reset</button>
-                <button type="submit" className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600">Save Purchase Order</button>
+                <button type="submit" className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600">Save Purchase Order</button>
               </div>
             </footer>
           </form>
@@ -1172,7 +1172,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({ isOpen, onC
 const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement> & { label: string }>(({ label, className = "", ...props }, ref) => (
   <label className="flex flex-col gap-1 text-sm w-full">
     <span className="font-medium text-gray-600">{label}</span>
-    <input ref={ref} className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""} ${className}`} {...props} />
+    <input ref={ref} className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""} ${className}`} {...props} />
   </label>
 ));
 Input.displayName = "Input";
@@ -1180,7 +1180,7 @@ Input.displayName = "Input";
 const Select: React.FC<{ label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void; options: { value: string; label: string }[]; }> = ({ label, name, value, onChange, options }) => (
   <label className="flex flex-col gap-1 text-sm">
     <span className="font-medium text-gray-600">{label}</span>
-    <select name={name} value={value} onChange={onChange} className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+    <select name={name} value={value} onChange={onChange} className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400">
       {options.map((o) => (
         <option key={o.value} value={o.value}>
           {o.label}
@@ -1193,7 +1193,7 @@ const Select: React.FC<{ label: string; name: string; value: string; onChange: (
 const TextArea: React.FC<{ label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void; rows?: number; }> = ({ label, name, value, onChange, rows = 3 }) => (
   <label className="flex flex-col gap-1 text-sm w-full">
     <span className="font-medium text-gray-600">{label}</span>
-    <textarea name={name} value={value} onChange={onChange} rows={rows} className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none" />
+    <textarea name={name} value={value} onChange={onChange} rows={rows} className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none" />
   </label>
 );
 

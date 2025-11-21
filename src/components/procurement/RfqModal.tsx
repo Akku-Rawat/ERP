@@ -142,7 +142,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
   const tabClass = (active: boolean) =>
     `px-6 py-3 font-medium text-sm capitalize transition-colors ${
       active
-        ? "text-blue-600 border-b-2 border-blue-600 bg-white"
+        ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
         : "text-gray-600 hover:text-gray-900"
     }`;
 
@@ -235,8 +235,8 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
       <div className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col">
         {/* Header */}
-        <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
-          <h2 className="text-2xl font-semibold text-blue-700">
+        <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
+          <h2 className="text-2xl font-semibold text-indigo-700">
             New Request For Quotation
           </h2>
           <button
@@ -289,7 +289,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                         type="text"
                         value={rfqNumber}
                         onChange={(e) => setRfqNumber(e.target.value)}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       />
                     </label>
                     <label className="flex flex-col gap-1 text-sm w-full">
@@ -300,7 +300,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                         type="date"
                         value={requestDate}
                         onChange={(e) => setRequestDate(e.target.value)}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       />
                     </label>
                     <label className="flex flex-col gap-1 text-sm w-full">
@@ -311,7 +311,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                         type="date"
                         value={quoteDeadline}
                         onChange={(e) => setQuoteDeadline(e.target.value)}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       />
                     </label>
                     <label className="flex flex-col gap-1 text-sm w-full">
@@ -319,7 +319,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                       <select
                         value={status}
                         onChange={(e) => setStatus(e.target.value)}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       >
                         <option>Draft</option>
                         <option>Sent</option>
@@ -447,7 +447,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                   <button
                     type="button"
                     onClick={addSupplier}
-                    className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
+                    className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200"
                   >
                     <Plus className="w-4 h-4" /> Add Supplier
                   </button>
@@ -562,7 +562,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                   <button
                     type="button"
                     onClick={addItem}
-                    className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
+                    className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200"
                   >
                     <Plus className="w-4 h-4" /> Add Item
                   </button>
@@ -596,7 +596,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                       <span className="text-base font-semibold text-gray-700">
                         Status
                       </span>
-                      <span className="text-base font-bold text-blue-600">
+                      <span className="text-base font-bold text-indigo-600">
                         {status}
                       </span>
                     </div>
@@ -627,7 +627,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                       <span className="text-base font-semibold text-gray-700">
                         Quote Deadline
                       </span>
-                      <span className="text-base font-bold text-blue-600">
+                      <span className="text-base font-bold text-indigo-600">
                         {quoteDeadline || "Not set"}
                       </span>
                     </div>
@@ -655,7 +655,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                     value={templateName}
                     onChange={(e) => setTemplateName(e.target.value)}
                     placeholder="Template name"
-                    className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   />
                 </label>
                 <label className="flex flex-col gap-1 text-sm">
@@ -663,7 +663,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                   <select
                     value={templateType}
                     onChange={(e) => setTemplateType(e.target.value)}
-                    className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   >
                     <option>Quote Email</option>
                     <option>Order Confirmation</option>
@@ -676,7 +676,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder="Subject line"
-                    className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   />
                 </label>
               </div>
@@ -800,7 +800,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                   </button>
                   <button
                     onClick={handleSaveTemplate}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-sm"
+                    className="px-4 py-2 bg-indigo-500 text-white rounded-full hover:bg-indigo-600 text-sm"
                   >
                     Save Template
                   </button>
@@ -1015,7 +1015,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                   <button
                     type="button"
                     onClick={addPaymentRow}
-                    className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200 mt-2"
+                    className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200 mt-2"
                   >
                     <Plus className="w-4 h-4" /> Add Row
                   </button>
@@ -1183,7 +1183,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                   <textarea
                     value={termsAndConditions}
                     onChange={(e) => setTermsAndConditions(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 border-t-0 rounded-b-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 border-t-0 rounded-b-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     rows={12}
                     placeholder="Enter terms and conditions..."
                   />
@@ -1210,7 +1210,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
             </button>
             <button
               type="button"
-              className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
+              className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600"
             >
               Save RFQ
             </button>
