@@ -191,7 +191,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
   const [activeTab, setActiveTab] = useState<
     "details" | "email" | "tax" | "address" | "terms"
   >("details");
-  const itemsPerPage = 3;
+  const itemsPerPage = 4;
   const [page, setPage] = useState(0);
   const paginatedItems = items.slice(
     page * itemsPerPage,

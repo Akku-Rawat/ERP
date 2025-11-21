@@ -203,18 +203,7 @@ const BasicDetails: React.FC = () => {
                   <InputField label="Company Type" name="companyType" placeholder="Enter Company Type" />
                   <InputField label="Company Status" name="companyStatus" placeholder="Enter Company Status" />
                   <InputField label="Industry Type" name="industryType" placeholder="Enter Industry Type" />
-                  <SelectField
-                    label="Financial Year Begins"
-                    name="financialYearBegins"
-                    icon={FaCalendarAlt}
-                    options={[
-                      { value: "", label: "Choose Month", disabled: true },
-                      { value: "Jan", label: "January" }, { value: "Feb", label: "February" }, { value: "Mar", label: "March" },
-                      { value: "Apr", label: "April" }, { value: "May", label: "May" }, { value: "Jun", label: "June" },
-                      { value: "Jul", label: "July" }, { value: "Aug", label: "August" }, { value: "Sep", label: "September" },
-                      { value: "Oct", label: "October" }, { value: "Nov", label: "November" }, { value: "Dec", label: "December" }
-                    ]}
-                  />
+                  
                 </div>
               </div>
             </div>
