@@ -106,14 +106,7 @@ const Inventory: React.FC = () => {
         {activeTab === "movements" && (
           <Movements onAdd={handleAdd} />
         )}
-      </div>
-
-      {/* Modals */}
-      <ItemModal
-        isOpen={showItemsModal}
-        onClose={() => setShowItemsModal(false)}
-        onSubmit={(data) => console.log("New Items:", data)}
-      />
+      </div>      
       <ItemsCategoryModal
         isOpen={showCategoryModal}
         onClose={() => setShowCategoryModal(false)}

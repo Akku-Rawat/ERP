@@ -2,111 +2,277 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
-interface ItemModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit?: (data: any) => void;
-  initialData?: any; // Optional initial data (edit mode)
-}
+const base_url = import.meta.env.VITE_BASE_URL;
+const CREATE_ITEMS_ENDPOINT = `${base_url}.item.item.create_item_api`;
+console.log("CREATE_ITEMS_ENDPOINT" + CREATE_ITEMS_ENDPOINT);
 
-// Use a flexible type instead of strict FormData since backend defines full schema
 type FormState = Record<string, any>;
 
 const emptyForm: Record<string, any> = {
-  // === Basic Info ===
-  item_type: "Goods",                     // Important default
-  items_name: "",
-  description: "",
+  item_type: "Goods",
+  item_name: "",
+  item_code: "",
   item_group: "",
-  hsn_sac_unspc: "",
-  unit_of_measurement: "Nos",             // Common default
-  sku: "",
+  custom_itemclscd: "",
+  custom_itemtycd: 0,
+  custom_orgnnatcd: "",
+  custom_pkgunitcd: "",
+  custom_svcchargeyn: "Y",
+  custom_isrcaplcbyn: "Y",
+  custom_selling_price: 0,
+  custom_purchase_amount: "",
+  custom_buying_price: 0,
+  custom_suk: "",
+  custom_vendor: "",
+  custom_non_export_tax: "",
+  custom_non_export_code: "",
+  custom_non_export_name: "",
+  custom_non_export_description: "",
+  custom_non_export_tax_perct: "",
+  custom_export_tax: "",
+  custom_export_code: "",
+  custom_export_name: "",
+  custom_export_description: "",
+  custom_export_tax_perct: "",
 
-  // === Sales & Purchase ===
-  selling_price: 0,
-  sales_account: "",
-  purchase_price: 0,
-  purchase_account: "",
-  tax_preference: "Taxable",              // Important default
+  custom_local_purchase_order_tax: "",
+  custom_local_purchase_order_code: "",
+  custom_local_purchase_order_name: "",
+  custom_local_purchase_order_description: "",
+  custom_local_purchase_order_perct: "",
+
+  custom_dimension: "",
+  custom_weight: "",
+  custom_valuation: "",
+  custom_is_track_inventory: true,
+  custom_tracking_method: "None",
+  custom_reorder_level: 0,
+  custom_min_stock_level: 0,
+  custom_max_stock_level: 0,
+  custom_sales_account: "",
+  custom_purchase_account: "",
+  unitOfMeasureCd: "Nos",
+  hsn_sac_unspc: "",
+  description: "",
+  sku: "",
+  tax_preference: "Taxable",
   tax_rate: 0,
   preferred_vendor: "",
-
-  // === Inventory ===
-  track_inventory: true,                  // Most items are tracked
   opening_stock: 0,
   opening_stock_value: 0,
-  min_stock_level: 0,
-  max_stock_level: 0,
-  reorder_level: 0,
-  valuation_method: "FIFO",               // Common default
-  tracking_method: "None",                // None, Batch, Serial, IMEI
-
-  // === Physical ===
+  valuation_method: "FIFO",
+  tracking_method: "None",
   weight: 0,
   weight_unit: "kg",
   dimensions: "",
   brand: "",
-
-  // === Status & Flags ===
   is_active: true,
   allow_alternative_unit: false,
   has_batch_or_serial: false,
+  length: "",
+  width: "",
+  height: "",
+  weightUnit: "",
 };
 
-const ItemModal: React.FC<ItemModalProps> = ({
+
+const ItemModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit?: (data: Record<string, any>) => void;
+  initialData?: Record<string, any> | null;
+  isEditMode?: boolean;
+}> = ({
   isOpen,
   onClose,
   onSubmit,
   initialData,
+  isEditMode = false,
 }) => {
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [loading, setLoading] = useState(false);
+  const [fetchingItem, setFetchingItem] = useState(false);
 
-  // Fixed tab typo & duplicate value
-  const [activeTab, setActiveTab] = useState<"details" | "taxDetails" | "inventoryDetails">("details");
+   const [activeTab, setActiveTab] = useState<"details" | "taxDetails" | "inventoryDetails">("details");
 
-  // Reset form when modal opens or initialData changes
-  useEffect(() => {
+   useEffect(() => {
     if (isOpen) {
       setForm(initialData || emptyForm);
       setActiveTab("details");
     }
   }, [isOpen, initialData]);
 
-  const emptyRow = { tax: "", code: "", name: "", description: "", rate: "" };
 
+// const handleSubmit = async (e: React.FormEvent) => {
+//   e.preventDefault();
+//   setLoading(true);
 
-  const [nonExportRows, setNonExportRows] = useState<TaxRow[]>([emptyRow]);
-const [exportRows, setExportRows] = useState<TaxRow[]>([emptyRow]);
-const [localRows, setLocalRows] = useState<TaxRow[]>([emptyRow]);
+//   try {
+//     const payload = { ...form };
+//     let response;
 
-const handleExportChange = (index: number, field: keyof TaxRow, value: string) => {
-  setExportRows(rows => rows.map((row, i) => i === index ? { ...row, [field]: value } : row));
+//     if (isEditMode && initialData?.item_code) {
+//       payload.id = initialData.item_code;
+//       console.log("payload.id " + initialData.item_code);
+//       const UPDATE_ITEMS_ENDPOINT = `${base_url}.item.item.update_item_api?item_code`;
+
+//       const updateUrl = `${UPDATE_ITEMS_ENDPOINT}?item_code=${initialData.item_code}`;
+
+//       response = await fetch(updateUrl, {
+//         method: "PUT", 
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: import.meta.env.VITE_AUTHORIZATION,
+//         },
+//         body: JSON.stringify(payload),
+//       });
+//     } else {
+//       response = await fetch(CREATE_ITEMS_ENDPOINT, {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: import.meta.env.VITE_AUTHORIZATION,
+//         },
+//         body: JSON.stringify(payload),
+//       });
+//     }
+
+//     if (!response.ok) {
+//       const err = await response.json();
+//       throw new Error(err.message || "Failed to save Items");
+//     }
+
+//     const data = await response.json();
+
+//     console.log(isEditMode ? "Items updated successfully!" : "Items created successfully!");
+//     onSubmit?.({} as any);
+    
+//     handleClose();
+//   } catch (err: any) {
+//     console.error("Save customer error:", err);
+//     console.log(err.message || "Something went wrong");
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+// const handleSubmit = async (e: React.FormEvent) => {
+//   e.preventDefault();
+//   setLoading(true);
+
+//   try {
+//     const payload = { ...form };
+
+//     let response;
+
+//     if (isEditMode && initialData?.item_code) {
+//       const itemCode = initialData.item_code;
+
+//       const UPDATE_ITEMS_ENDPOINT = `${base_url}item.item.update_item_api?item_code=${itemCode}`;
+
+//       response = await fetch(UPDATE_ITEMS_ENDPOINT, {
+//         method: "PUT",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: import.meta.env.VITE_AUTHORIZATION,
+//         },
+//         body: JSON.stringify(payload),
+//       });
+//     } else {
+//       response = await fetch(CREATE_ITEMS_ENDPOINT, {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: import.meta.env.VITE_AUTHORIZATION,
+//         },
+//         body: JSON.stringify(payload),
+//       });
+//     }
+//     if (!response.ok) {
+//       let errorMessage = "Failed to save item";
+//       try {
+//         const errData = await response.json();
+//         errorMessage = errData.message || errorMessage;
+//       } catch {
+//         // ignore if no JSON
+//       }
+//       throw new Error(errorMessage);
+//     }
+
+//     const data = await response.json();
+
+//     alert(isEditMode ? "Item updated successfully!" : "Item created successfully!");
+//     onSubmit?.(data);
+//     handleClose();
+//   } catch (err: any) {
+//     console.error("Save item error:", err);
+//     alert(err.message || "Something went wrong while saving the item.");
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+ 
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const payload = { ...form };
+
+    let response;
+
+    if (isEditMode && initialData?.item_code) {
+      // CORRECT UPDATE ENDPOINT
+      const updateUrl = `${base_url}.item.item.update_item_api?item_code=${initialData.item_code}`;
+
+      response = await fetch(updateUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: import.meta.env.VITE_AUTHORIZATION,
+        },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      response = await fetch(CREATE_ITEMS_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: import.meta.env.VITE_AUTHORIZATION,
+        },
+        body: JSON.stringify(payload),
+      });
+    }
+
+    if (!response.ok) {
+      let errorMessage = "Failed to save item";
+      try {
+        const errData = await response.json();
+        errorMessage = errData.message || errorMessage;
+      } catch {}
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+
+    alert(isEditMode ? "Item updated successfully!" : "Item created successfully!");
+    
+    // This triggers refresh in parent
+    onSubmit?.(data);
+    handleClose();
+  } catch (err: any) {
+    console.error("Save item error:", err);
+    alert(err.message || "Something went wrong while saving the item.");
+  } finally {
+    setLoading(false);
+  }
 };
 
-const handleLocalChange = (index: number, field: keyof TaxRow, value: string) => {
-  setLocalRows(rows => rows.map((row, i) => i === index ? { ...row, [field]: value } : row));
-};
+const handleClose = () => {
+      setForm(emptyForm);
+      onClose();
+    };
 
-type TaxRow = {
-  tax: string;
-  code: string;
-  name: string;
-  description: string;
-  rate: string;
-};
-
-// Handlers
-const addNonExportRow = () => setNonExportRows([...nonExportRows, { tax: "", code: "", name: "", description: "", rate: "" }]);
-const addExportRow = () => setExportRows([...exportRows, { tax: "", code: "", name: "", description: "", rate: "" }]);
-const addLocalRow = () => setLocalRows([...localRows, { tax: "", code: "", name: "", description: "", rate: "" }]);
-
-const deleteNonExportRow = (i: number) => setNonExportRows(nonExportRows.filter((_, idx) => idx !== i));
-const deleteExportRow = (i: number) => setExportRows(exportRows.filter((_, idx) => idx !== i));
-const deleteLocalRow = (i: number) => setLocalRows(localRows.filter((_, idx) => idx !== i));
-
-const handleNonExportChange = (index: number, field: keyof TaxRow, value: string) => {
-  setNonExportRows(rows => rows.map((row, i) => i === index ? { ...row, [field]: value } : row));
-};
 
   const handleForm = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -117,13 +283,6 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
 
   const reset = () => {
     setForm(emptyForm);
-  };
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit?.(form);
-    reset();
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -137,8 +296,7 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
           exit={{ opacity: 0, scale: 0.95 }}
           className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
         >
-          {/* <form onSubmit={submit} className="flex flex-col h-full overflow-hidden"> */}
-          <form className="flex flex-col h-full overflow-hidden">
+          <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
             {/* Header */}
             <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
               <h2 className="text-2xl font-semibold text-blue-700">Add Items</h2>
@@ -212,11 +370,41 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
                           </select>
                         </label>
 
-                        <Input label="Items Name" name="itemsName" value={form.itemsName || ""} onChange={handleForm} className="w-full col-span-3" />
+                        <Input label="Items Name" name="item_name" value={form.item_name || ""} onChange={handleForm} className="w-full col-span-3" required/>
                         <Input label="Description" name="description" value={form.description || ""} onChange={handleForm} className="w-full col-span-3" />
-                        <Input label="Item Group" name="itemsGroup" value={form.itemsGroup || ""} onChange={handleForm} className="w-full" />
+                        <Input label="Item Group" name="item_group" value={form.item_group || ""} onChange={handleForm} className="w-full" required/>
+                        <Input label="Item Class Code" name="custom_itemclscd" value={form.custom_itemclscd || ""} onChange={handleForm} className="w-full col-span-3" />
+                        <Input label="Item Packaging Code " name="custom_pkgunitcd" value={form.custom_pkgunitcd || ""} onChange={handleForm} className="w-full col-span-3" />
+                        <Input label="Item Type Code" name="custom_itemtycd" value={form.custom_itemtycd || ""} onChange={handleForm} className="w-full col-span-3" />
+                        <Input label="Country Code" name="custom_orgnnatcd" value={form.custom_orgnnatcd || ""} onChange={handleForm} className="w-full col-span-3" />
                         <Input label="HSN/SAC/UNSPC" name="unspc" value={form.unspc || ""} onChange={handleForm} className="w-full col-span-3" />
-                        <Input label="Unit of Measurement" name="unitOfMeasurement" value={form.unitOfMeasurement || ""} onChange={handleForm} className="w-full col-span-3" />
+                        <Input label="Unit of Measurement" name="unitOfMeasureCd" value={form.unitOfMeasureCd || ""} onChange={handleForm} className="w-full col-span-3" />
+                        <label className="flex flex-col gap-1 text-sm">
+                          <span className="font-medium text-gray-600">SVC Charge</span>
+                          <select
+                            name="svcChargeYn"
+                            value={form.svcChargeYn || ""}
+                            onChange={handleForm}
+                            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            required
+                          >
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+                          </select>
+                        </label>
+                        <label className="flex flex-col gap-1 text-sm">
+                          <span className="font-medium text-gray-600">INS</span>
+                          <select
+                            name="isrcAplcbYn"
+                            value={form.isrcAplcbYn || ""}
+                            onChange={handleForm}
+                            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            required
+                          >
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+                          </select>
+                        </label>
                         <Input label="SKU" name="sku" value={form.sku || ""} onChange={handleForm} className="w-full col-span-3" />
                       </div>
                     </div>
@@ -226,9 +414,9 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
                     </h3>
                     <div className="flex flex-col gap-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <Input label="Selling Price" name="sellingPrice" value={form.sellingPrice || ""} onChange={handleForm} className="w-full col-span-3" />
+                        <Input label="Selling Price" name="custom_selling_price" value={form.custom_selling_price || ""} onChange={handleForm} className="w-full col-span-3" />
                         <Input label="Sales Account" name="salesAccount" value={form.salesAccount || ""} onChange={handleForm} className="w-full col-span-3" />
-                         <Input label="Buying Price" name="buyingPrice" value={form.buyingPrice || ""} onChange={handleForm} className="w-full" />
+                         <Input label="Buying Price" name="custom_buying_price" value={form.custom_buying_price || ""} onChange={handleForm} className="w-full" />
                         <Input label="Purchase Account" name="purchaseAccount" value={form.purchaseAccount || ""} onChange={handleForm} className="w-full" />
                         <Input label="Tax" name="tax" value={form.tax || ""} onChange={handleForm} className="w-full col-span-3" />
                         <Input label="Preferred Vendor" name="prefferedVendor" value={form.prefferedVendor || ""} onChange={handleForm} className="w-full col-span-3" />
@@ -237,446 +425,10 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
                   </>
                 )}
 
-                {/* {activeTab === "taxDetails" && (
-                  <>
-                  <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                    Tax Details
-                  </h3>
-                 <div className="flex flex-col justify-center gap-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
-                        <div className=" grid col-span-1 gap-4">
-                          <h4 className=" flex justify-center text-base font-semibold text-black">Export</h4>
-                          <div className=" flex justify-between">
-                          <div>Tax Category</div>
-                          <div>Tax %</div>
-                          </div>
-                        </div>
-                        <div className=" grid col-span-1 gap-4">
-                          <h4 className=" flex justify-center text-base font-semibold text-black">Non-Export</h4>
-                          <div>Tax Category</div>
-                          <div>Tax %</div>
-                        </div>
-                        <div className=" grid col-span-1 gap-4">
-                          <h4 className=" flex justify-center text-base font-semibold text-black">Local Purchase Order</h4>
-                          <div>Tax Category</div>
-                          <div>Tax %</div>
-                        </div>
-                      </div>
-                  </div>
-                  </>
-                )} */}
-                {/* {activeTab === "taxDetails" && (
-  <>
-    <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-      Tax Details
-    </h3>
-
-    <div className="overflow-x-auto">
-      <table className="min-w-full border border-gray-300 text-sm">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border px-4 py-2 text-center">Export</th>
-            <th className="border px-4 py-2 text-center">Non-Export</th>
-            <th className="border px-4 py-2 text-center">Local Purchase Order</th>
-          </tr>
-        </thead>
-
-        <tbody>
-           <tr className="bg-gray-50">
-            <td className="border px-4 py-2">
-              <div className="flex justify-between font-semibold">
-                <span>Tax Category</span>
-                <span>Tax %</span>
-              </div>
-            </td>
-
-            <td className="border px-4 py-2">
-              <div className="flex justify-between font-semibold">
-                <span>Tax Category</span>
-                <span>Tax %</span>
-              </div>
-            </td>
-
-            <td className="border px-4 py-2">
-              <div className="flex justify-between font-semibold">
-                <span>Tax Category</span>
-                <span>Tax %</span>
-              </div>
-            </td>
-          </tr>
-
-           <tr>
-            <td className="border px-4 py-2">
-              <div className="flex justify-between">
-                <span>Zero Rated</span>
-                <span>0%</span>
-              </div>
-            </td>
-
-            <td className="border px-4 py-2">
-              <div className="flex justify-between">
-                <span>Standard VAT</span>
-                <span>12%</span>
-              </div>
-            </td>
-
-            <td className="border px-4 py-2">
-              <div className="flex justify-between">
-                <span>Local VAT</span>
-                <span>5%</span>
-              </div>
-            </td>
-          </tr>
-
-           <tr>
-            <td className="border px-4 py-2">
-              <div className="flex justify-between">
-                <span>Special Export Duty</span>
-                <span>2%</span>
-              </div>
-            </td>
-
-            <td className="border px-4 py-2">
-              <div className="flex justify-between">
-                <span>Reduced VAT</span>
-                <span>8%</span>
-              </div>
-            </td>
-
-            <td className="border px-4 py-2">
-              <div className="flex justify-between">
-                <span>Local Service Tax</span>
-                <span>3%</span>
-              </div>
-            </td>
-          </tr>
-
-           <tr>
-            <td className="border px-4 py-2">
-              <div className="flex justify-between">
-                <span>Export Handling Fee</span>
-                <span>1%</span>
-              </div>
-            </td>
-
-            <td className="border px-4 py-2">
-              <div className="flex justify-between">
-                <span>Luxury Goods Tax</span>
-                <span>15%</span>
-              </div>
-            </td>
-
-            <td className="border px-4 py-2">
-              <div className="flex justify-between">
-                <span>Local Surcharge</span>
-                <span>4%</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </>
-)} */}
-
+               
 {/* {activeTab === "taxDetails" && (
   <>
-    <div className="mb-6">
-      <h4 className="mb-4 text-lg font-semibold text-gray-700 underline">
-        Non-Export
-      </h4>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 text-sm">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border px-4 py-2 text-center">Tax</th>
-              <th className="border px-4 py-2 text-center">Code</th>
-              <th className="border px-4 py-2 text-center">Name</th>
-              <th className="border px-6 py-2 text-center">Description</th>
-              <th className="border px-4 py-2 text-center">Tax %</th>
-              <th className="border px-2 py-2 w-10"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {nonExportRows.map((row, index) => (
-              <tr key={index}>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.tax}
-                    onChange={(e) => handleNonExportChange(index, "tax", e.target.value)}
-                    className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="e.g. VAT"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.code}
-                    onChange={(e) => handleNonExportChange(index, "code", e.target.value)}
-                    className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="e.g. V001"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.name}
-                    onChange={(e) => handleNonExportChange(index, "name", e.target.value)}
-                    className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="Standard VAT"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.description}
-                    onChange={(e) => handleNonExportChange(index, "description", e.target.value)}
-                    className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="12% VAT on non-export"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.rate}
-                    onChange={(e) => handleNonExportChange(index, "rate", e.target.value)}
-                    className="w-20 px-2 py-1 border rounded text-xs text-right focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="12"
-                  />
-                </td>
-                <td className="border text-center">
-                  <button
-                    type="button"
-                    onClick={() => deleteNonExportRow(index)}
-                    className="text-red-600 hover:text-red-800 text-xl leading-none"
-                    title="Delete"
-                  >
-                    ×
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {nonExportRows.length === 0 && (
-              <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-500 text-sm">
-                  No Non-Export tax rows added yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        <button
-          type="button"
-          onClick={addNonExportRow}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm font-medium transition"
-        >
-          + Add Row
-        </button>
-      </div>
-    </div>
-
-     <div className="mb-6">
-      <h4 className="mb-4 text-lg font-semibold text-gray-700 underline">
-        Export
-      </h4>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 text-sm">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border px-4 py-2 text-center">Tax</th>
-              <th className="border px-4 py-2 text-center">Code</th>
-              <th className="border px-4 py-2 text-center">Name</th>
-              <th className="border px-6 py-2 text-center">Description</th>
-              <th className="border px-4 py-2 text-center">Tax %</th>
-              <th className="border px-2 py-2 w-10"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {exportRows.map((row, index) => (
-              <tr key={index}>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.tax}
-                    onChange={(e) => handleExportChange(index, "tax", e.target.value)}
-                    className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="e.g. Zero Rated"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.code}
-                    onChange={(e) => handleExportChange(index, "code", e.target.value)}
-                    className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="ZR01"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.name}
-                    onChange={(e) => handleExportChange(index, "name", e.target.value)}
-                    className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="Zero Rated Export"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.description}
-                    onChange={(e) => handleExportChange(index, "description", e.target.value)}
-                    className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="0% on exports"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.rate}
-                    onChange={(e) => handleExportChange(index, "rate", e.target.value)}
-                    className="w-20 px-2 py-1 border rounded text-xs text-right focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="0"
-                  />
-                </td>
-                <td className="border text-center">
-                  <button
-                    type="button"
-                    onClick={() => deleteExportRow(index)}
-                    className="text-red-600 hover:text-red-800 text-xl leading-none"
-                    title="Delete"
-                  >
-                    ×
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {exportRows.length === 0 && (
-              <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-500 text-sm">
-                  No Export tax rows added yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        <button
-          type="button"
-          onClick={addExportRow}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm font-medium transition"
-        >
-          + Add Row
-        </button>
-      </div>
-    </div>
-
-     <div className="mb-2">
-      <h4 className="mb-4 text-lg font-semibold text-gray-700 underline">
-        Local Purchase Order
-      </h4>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 text-sm">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border px-4 py-2 text-center">Tax</th>
-              <th className="border px-4 py-2 text-center">Code</th>
-              <th className="border px-4 py-2 text-center">Name</th>
-              <th className="border px-6 py-2 text-center">Description</th>
-              <th className="border px-4 py-2 text-center">Tax %</th>
-              <th className="border px-2 py-2 w-10"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {localRows.map((row, index) => (
-              <tr key={index}>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.tax}
-                    onChange={(e) => handleLocalChange(index, "tax", e.target.value)}
-                    className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="e.g. Local VAT"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.code}
-                    onChange={(e) => handleLocalChange(index, "code", e.target.value)}
-                    className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="LV05"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.name}
-                    onChange={(e) => handleLocalChange(index, "name", e.target.value)}
-                    className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="Local Purchase VAT"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.description}
-                    onChange={(e) => handleLocalChange(index, "description", e.target.value)}
-                    className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="5% on local purchases"
-                  />
-                </td>
-                <td className="border px-2 py-1">
-                  <input
-                    type="text"
-                    value={row.rate}
-                    onChange={(e) => handleLocalChange(index, "rate", e.target.value)}
-                    className="w-20 px-2 py-1 border rounded text-xs text-right focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="5"
-                  />
-                </td>
-                <td className="border text-center">
-                  <button
-                    type="button"
-                    onClick={() => deleteLocalRow(index)}
-                    className="text-red-600 hover:text-red-800 text-xl leading-none"
-                    title="Delete"
-                  >
-                    ×
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {localRows.length === 0 && (
-              <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-500 text-sm">
-                  No Local Purchase Order tax rows added yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        <button
-          type="button"
-          onClick={addLocalRow}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm font-medium transition"
-        >
-          + Add Row
-        </button>
-      </div>
-    </div>
-  </>
-)} */}
-{activeTab === "taxDetails" && (
-  <>
-    {/* NON-EXPORT TABLE */}
-    <div className="mb-10">
+     <div className="mb-10">
       <h4 className="mb-4 text-lg font-semibold text-gray-700 underline">Non-Export</h4>
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 text-sm">
@@ -692,26 +444,25 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
             </tr>
           </thead>
           <tbody>
-            {nonExportRows.map((row, index) => (
+            {nonExportRows.map((form, index) => (
               <tr key={index}>
                 <td className="border px-2 py-1">
-                  <input type="text" value={row.tax || ""} onChange={(e) => handleNonExportChange(index, "tax", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="e.g. VAT" />
+                  <input type="text" value={} onChange={(e) => handleNonExportChange(index, "tax", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="e.g. VAT" />
                 </td>
                 <td className="border px-2 py-1">
-                  <input type="text" value={row.code || ""} onChange={(e) => handleNonExportChange(index, "code", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="V001" />
+                  <input type="text" value={form.code || ""} onChange={(e) => handleNonExportChange(index, "code", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="V001" />
                 </td>
                 <td className="border px-2 py-1">
-                  <input type="text" value={row.name || ""} onChange={(e) => handleNonExportChange(index, "name", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="Standard VAT" />
+                  <input type="text" value={form.name || ""} onChange={(e) => handleNonExportChange(index, "name", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="Standard VAT" />
                 </td>
                 <td className="border px-2 py-1">
-                  <input type="text" value={row.description || ""} onChange={(e) => handleNonExportChange(index, "description", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="12% VAT on non-export" />
+                  <input type="text" value={form.description || ""} onChange={(e) => handleNonExportChange(index, "description", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="12% VAT on non-export" />
                 </td>
                 <td className="border px-2 py-1">
-                  <input type="text" value={row.rate || ""} onChange={(e) => handleNonExportChange(index, "rate", e.target.value)} className="w-20 px-2 py-1.5 border rounded text-xs text-right" placeholder="12" />
+                  <input type="text" value={form.rate || ""} onChange={(e) => handleNonExportChange(index, "rate", e.target.value)} className="w-20 px-2 py-1.5 border rounded text-xs text-right" placeholder="12" />
                 </td>
 
-                {/* + Add Button - Always on last row */}
-                <td className="border text-center align-middle">
+                 <td className="border text-center align-middle">
                   {index === nonExportRows.length - 1 && (
                     <button
                       type="button"
@@ -723,8 +474,7 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
                   )}
                 </td>
 
-                {/* Delete Button - Hide if only one row */}
-                <td className="border text-center align-middle">
+                 <td className="border text-center align-middle">
                   {nonExportRows.length > 1 && (
                     <button
                       type="button"
@@ -742,8 +492,7 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
       </div>
     </div>
 
-    {/* EXPORT TABLE - Fixed condition */}
-    <div className="mb-10">
+     <div className="mb-10">
       <h4 className="mb-4 text-lg font-semibold text-gray-700 underline">Export</h4>
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 text-sm">
@@ -759,13 +508,13 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
             </tr>
           </thead>
           <tbody>
-            {exportRows.map((row, index) => (
+            {exportRows.map((form, index) => (
               <tr key={index}>
-                <td className="border px-2 py-1"><input type="text" value={row.tax || ""} onChange={(e) => handleExportChange(index, "tax", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="Zero Rated" /></td>
-                <td className="border px-2 py-1"><input type="text" value={row.code || ""} onChange={(e) => handleExportChange(index, "code", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="ZR01" /></td>
-                <td className="border px-2 py-1"><input type="text" value={row.name || ""} onChange={(e) => handleExportChange(index, "name", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="Zero Rated Export" /></td>
-                <td className="border px-2 py-1"><input type="text" value={row.description || ""} onChange={(e) => handleExportChange(index, "description", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="0% on exports" /></td>
-                <td className="border px-2 py-1"><input type="text" value={row.rate || ""} onChange={(e) => handleExportChange(index, "rate", e.target.value)} className="w-20 px-2 py-1.5 border rounded text-xs text-right" placeholder="0" /></td>
+                <td className="border px-2 py-1"><input type="text" value={form.tax || ""} onChange={(e) => handleExportChange(index, "tax", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="Zero Rated" /></td>
+                <td className="border px-2 py-1"><input type="text" value={form.code || ""} onChange={(e) => handleExportChange(index, "code", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="ZR01" /></td>
+                <td className="border px-2 py-1"><input type="text" value={form.name || ""} onChange={(e) => handleExportChange(index, "name", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="Zero Rated Export" /></td>
+                <td className="border px-2 py-1"><input type="text" value={form.description || ""} onChange={(e) => handleExportChange(index, "description", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="0% on exports" /></td>
+                <td className="border px-2 py-1"><input type="text" value={form.rate || ""} onChange={(e) => handleExportChange(index, "rate", e.target.value)} className="w-20 px-2 py-1.5 border rounded text-xs text-right" placeholder="0" /></td>
 
                 <td className="border text-center align-middle">
                   {index === exportRows.length - 1 && (
@@ -791,8 +540,7 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
       </div>
     </div>
 
-    {/* LOCAL PURCHASE ORDER TABLE - Fixed condition */}
-    <div className="mb-6">
+     <div className="mb-6">
       <h4 className="mb-4 text-lg font-semibold text-gray-700 underline">Local Purchase Order</h4>
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300 text-sm">
@@ -808,13 +556,13 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
             </tr>
           </thead>
           <tbody>
-            {localRows.map((row, index) => (
+            {localRows.map((form, index) => (
               <tr key={index}>
-                <td className="border px-2 py-1"><input type="text" value={row.tax || ""} onChange={(e) => handleLocalChange(index, "tax", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="Local VAT" /></td>
-                <td className="border px-2 py-1"><input type="text" value={row.code || ""} onChange={(e) => handleLocalChange(index, "code", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="LV05" /></td>
-                <td className="border px-2 py-1"><input type="text" value={row.name || ""} onChange={(e) => handleLocalChange(index, "name", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="Local Purchase VAT" /></td>
-                <td className="border px-2 py-1"><input type="text" value={row.description || ""} onChange={(e) => handleLocalChange(index, "description", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="5% on local purchases" /></td>
-                <td className="border px-2 py-1"><input type="text" value={row.rate || ""} onChange={(e) => handleLocalChange(index, "rate", e.target.value)} className="w-20 px-2 py-1.5 border rounded text-xs text-right" placeholder="5" /></td>
+                <td className="border px-2 py-1"><input type="text" value={form.tax || ""} onChange={(e) => handleLocalChange(index, "tax", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="Local VAT" /></td>
+                <td className="border px-2 py-1"><input type="text" value={form.code || ""} onChange={(e) => handleLocalChange(index, "code", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="LV05" /></td>
+                <td className="border px-2 py-1"><input type="text" value={form.name || ""} onChange={(e) => handleLocalChange(index, "name", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="Local Purchase VAT" /></td>
+                <td className="border px-2 py-1"><input type="text" value={form.description || ""} onChange={(e) => handleLocalChange(index, "description", e.target.value)} className="w-full px-2 py-1.5 border rounded text-xs" placeholder="5% on local purchases" /></td>
+                <td className="border px-2 py-1"><input type="text" value={form.rate || ""} onChange={(e) => handleLocalChange(index, "rate", e.target.value)} className="w-20 px-2 py-1.5 border rounded text-xs text-right" placeholder="5" /></td>
 
                 <td className="border text-center align-middle">
                   {index === localRows.length - 1 && (
@@ -840,164 +588,235 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
       </div>
     </div>
   </>
+)} */}
+
+{activeTab === "taxDetails" && (
+  <>
+    {/* Non-Export Table */}
+    <div className="mb-10">
+      <h4 className="mb-4 text-lg font-semibold text-gray-700 underline">Non-Export</h4>
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 text-sm">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border px-4 py-2 text-center">Tax</th>
+              <th className="border px-4 py-2 text-center">Code</th>
+              <th className="border px-4 py-2 text-center">Name</th>
+              <th className="border px-6 py-2 text-center">Description</th>
+              <th className="border px-4 py-2 text-center">Tax %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_non_export_tax"
+                  value={form.custom_non_export_tax || ""}
+                  onChange={handleForm}
+                  className="w-full px-2 py-1.5 border rounded text-xs"
+                  placeholder="e.g. VAT"
+                />
+              </td>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_non_export_code"
+                  value={form.custom_non_export_code || ""}
+                  onChange={handleForm}
+                  className="w-full px-2 py-1.5 border rounded text-xs"
+                  placeholder="V001"
+                />
+              </td>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_non_export_name"
+                  value={form.custom_non_export_name || ""}
+                  onChange={handleForm}
+                  className="w-full px-2 py-1.5 border rounded text-xs"
+                  placeholder="Standard VAT"
+                />
+              </td>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_non_export_description"
+                  value={form.custom_non_export_description || ""}
+                  onChange={handleForm}
+                  className="w-full px-2 py-1.5 border rounded text-xs"
+                  placeholder="12% VAT on non-export"
+                />
+              </td>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_non_export_tax_perct"
+                  value={form.custom_non_export_tax_perct || ""}
+                  onChange={handleForm}
+                  className="w-20 px-2 py-1.5 border rounded text-xs text-right"
+                  placeholder="12"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {/* Export Table */}
+    <div className="mb-10">
+      <h4 className="mb-4 text-lg font-semibold text-gray-700 underline">Export</h4>
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 text-sm">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border px-4 py-2 text-center">Tax</th>
+              <th className="border px-4 py-2 text-center">Code</th>
+              <th className="border px-4 py-2 text-center">Name</th>
+              <th className="border px-6 py-2 text-center">Description</th>
+              <th className="border px-4 py-2 text-center">Tax %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_export_tax"
+                  value={form.custom_export_tax || ""}
+                  onChange={handleForm}
+                  className="w-full px-2 py-1.5 border rounded text-xs"
+                  placeholder="Zero Rated"
+                />
+              </td>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_export_code"
+                  value={form.custom_export_code || ""}
+                  onChange={handleForm}
+                  className="w-full px-2 py-1.5 border rounded text-xs"
+                  placeholder="ZR01"
+                />
+              </td>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_export_name"
+                  value={form.custom_export_name || ""}
+                  onChange={handleForm}
+                  className="w-full px-2 py-1.5 border rounded text-xs"
+                  placeholder="Zero Rated Export"
+                />
+              </td>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_export_description"
+                  value={form.custom_export_description || ""}
+                  onChange={handleForm}
+                  className="w-full px-2 py-1.5 border rounded text-xs"
+                  placeholder="0% on exports"
+                />
+              </td>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_export_tax_perct"
+                  value={form.custom_export_tax_perct || ""}
+                  onChange={handleForm}
+                  className="w-20 px-2 py-1.5 border rounded text-xs text-right"
+                  placeholder="0"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {/* Local Purchase Order Table */}
+    <div className="mb-6">
+      <h4 className="mb-4 text-lg font-semibold text-gray-700 underline">Local Purchase Order</h4>
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-300 text-sm">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border px-4 py-2 text-center">Tax</th>
+              <th className="border px-4 py-2 text-center">Code</th>
+              <th className="border px-4 py-2 text-center">Name</th>
+              <th className="border px-6 py-2 text-center">Description</th>
+              <th className="border px-4 py-2 text-center">Tax %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_local_purchase_order_tax"
+                  value={form.custom_local_purchase_order_tax || ""}
+                  onChange={handleForm}
+                  className="w-full px-2 py-1.5 border rounded text-xs"
+                  placeholder="Local VAT"
+                />
+              </td>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_local_purchase_order_code"
+                  value={form.custom_local_purchase_order_code || ""}
+                  onChange={handleForm}
+                  className="w-full px-2 py-1.5 border rounded text-xs"
+                  placeholder="LV05"
+                />
+              </td>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_local_purchase_order_name"
+                  value={form.custom_local_purchase_order_name || ""}
+                  onChange={handleForm}
+                  className="w-full px-2 py-1.5 border rounded text-xs"
+                  placeholder="Local Purchase VAT"
+                />
+              </td>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_local_purchase_order_description"
+                  value={form.custom_local_purchase_order_description || ""}
+                  onChange={handleForm}
+                  className="w-full px-2 py-1.5 border rounded text-xs"
+                  placeholder="5% on local purchases"
+                />
+              </td>
+              <td className="border px-2 py-1">
+                <input
+                  type="text"
+                  name="custom_local_purchase_order_perct"
+                  value={form.custom_local_purchase_order_perct || ""}
+                  onChange={handleForm}
+                  className="w-20 px-2 py-1.5 border rounded text-xs text-right"
+                  placeholder="5"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </>
 )}
+
 
                 {activeTab === "inventoryDetails" && (
                   <>
                     <h3 className=" mb-2 text-lg font-semibold text-gray-700 underline">Inventory Details</h3>
-                   {/* <div className="flex flex-col gap-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <Input
-                          label="Brand"
-                          name="brand"
-                          value={form.brand}
-                          onChange={handleForm}
-                          className="w-full"
-                        /> 
-                        <Input
-                          label="Dimensions"
-                          name="dimensions"
-                          placeholder="L x W x D"
-                          value={form.dimensions}
-                          onChange={handleForm}
-                          className="w-full col-span-3"
-                        />
-                        <label className="flex flex-col gap-1 text-sm">
-                          <span className="font-medium text-gray-600">DimensionType</span>
-                          <select
-                            name="dimensionType"
-                            value={form.dimensionType || ""}
-                            onChange={handleForm}
-                            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                            required
-                          >
-                            <option value="cm">cm</option>
-                            <option value="inch">in</option>
-                          </select>
-                        </label>
-                        <Input
-                          label="Weight (Grams/Kg/Lbs/Oz)"
-                          name="weight"
-                          placeholder="Grams/Kg/Lbs/Oz"
-                          value={form.weight}
-                          onChange={handleForm}
-                          className="w-full col-span-3"
-                        />
-                         <label className="flex flex-col gap-1 text-sm">
-                          <span className="font-medium text-gray-600">WeightUnit</span>
-                          <select
-                            name="weightUnit"
-                            value={form.weightUnit || ""}
-                            onChange={handleForm}
-                            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                            required
-                          >
-                             <option value="g">Grams</option>
-                             <option value="kg">Kg</option>
-                           <option value="lbs">Lbs</option>
-                            <option value="oz">Oz</option>
-                          </select>
-                        </label>
-                        
-                        <label className="flex flex-col gap-1 text-sm">
-                          <span className="font-medium text-gray-600">Valuation Method</span>
-                          <select
-                            name="valutaionMethod"
-                            value={form.valutaionMethod || ""}
-                            onChange={handleForm}
-                            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                            required
-                          >
-                            <option value="Goods">FIFO</option>
-                            <option value="Service">WAC</option>
-                          </select>
-                        </label>
-                        
-                      </div>
-                     </div> */}
-
-                     {/* <div className="flex flex-col gap-4">
-  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-
-     <Input
-      label="Brand"
-      name="brand"
-      value={form.brand}
-      onChange={handleForm}
-      className="w-full"
-    />
-
-     <div className="flex flex-col gap-1">
-      <span className="font-medium text-gray-600 text-sm">Dimensions</span>
-      <div className="flex gap-2">
-        <Input
-          label=""
-          name="dimensions"
-          placeholder="L x W x D"
-          value={form.dimensions}
-          onChange={handleForm}
-          className="flex-1"
-        />
-        <select
-          name="dimensionType"
-          value={form.dimensionType || ""}
-          onChange={handleForm}
-          className="w-24 rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          required
-        >
-          <option value="cm">cm</option>
-          <option value="in">in</option>
-        </select>
-      </div>
-    </div>
-
-     <div className="flex flex-col gap-1">
-      <span className="font-medium text-gray-600 text-sm">Weight</span>
-      <div className="flex gap-2">
-        <Input
-        label=""
-          name="weight"
-          placeholder="0"
-          value={form.weight}
-          onChange={handleForm}
-          className="flex-1"
-        />
-        <select
-          name="weightUnit"
-          value={form.weightUnit || ""}
-          onChange={handleForm}
-          className="w-28 rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          required
-        >
-          <option value="g">g</option>
-          <option value="kg">kg</option>
-          <option value="lbs">lbs</option>
-          <option value="oz">oz</option>
-        </select>
-      </div>
-    </div>
-
-     <div className="flex flex-col gap-1 text-sm">
-      <span className="font-medium text-gray-600">Valuation Method</span>
-      <select
-        name="valutaionMethod"
-        value={form.valutaionMethod || ""}
-        onChange={handleForm}
-        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full"
-        required
-      >
-        <option value="FIFO">FIFO</option>
-        <option value="WAC">WAC</option>
-      </select>
-    </div>
-
-  </div>
-</div>
-    */}
     <div className="flex flex-col gap-4">
   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
-    {/* Row 1 - Brand */}
     <Input
       label="Brand"
       name="brand"
@@ -1006,11 +825,9 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
       className="w-full"
     />
 
-  {/* Enhanced Dimensions: L x W x H + Unit - Compact & Balanced */}
 <div className="flex flex-col gap-1">
   <span className="font-medium text-gray-600 text-sm">Dimensions (L × W × H)</span>
   <div className="flex items-center gap-1">
-    {/* Length */}
     <Input
       label=""
       name="length"
@@ -1018,12 +835,10 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
       value={form.length || ""}
       onChange={handleForm}
       className="w-full text-center text-xs"
-      // inputClassName="py-1.5"
     />
 
     <span className="text-gray-500 font-medium">×</span>
 
-    {/* Width */}
     <Input
       label=""
       name="width"
@@ -1031,12 +846,10 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
       value={form.width || ""}
       onChange={handleForm}
       className="w-full text-center text-xs"
-      // inputClassName="py-1.5"
     />
 
     <span className="text-gray-500 font-medium">×</span>
 
-    {/* Height */}
     <Input
       label=""
       name="height"
@@ -1046,7 +859,6 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
       className="w-full text-center text-xs"
     />
 
-    {/* Unit - Compact */}
     <select
       name="dimensionType"
       value={form.dimensionType || "cm"}
@@ -1059,15 +871,14 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
   </div>
 </div>
 
-    {/* Weight + Unit */}
     <div className="flex flex-col gap-1">
       <span className="font-medium text-gray-600 text-sm">Weight</span>
       <div className="flex gap-2">
         <Input
           label=""
-          name="weight"
+          name="custom_weight"
           placeholder="0"
-          value={form.weight}
+          value={form.custom_weight}
           onChange={handleForm}
           className="flex-1"
         />
@@ -1075,7 +886,8 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
           name="weightUnit"
           value={form.weightUnit || "kg"}
           onChange={handleForm}
-          className="w-28 rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          // className="w-28 rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-16 px-1 py-1.5 text-xs border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
         >
           <option value="gm">gm</option>
           <option value="kg">kg</option>
@@ -1093,7 +905,6 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
         value={form.valutaionMethod || ""}
         onChange={handleForm}
         className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full"
-        required
       >
         <option value="">Select...</option>
         <option value="FIFO">FIFO</option>
@@ -1105,7 +916,6 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
 
  <div className=" mt-6 col-span-full lg:col-span-4 xl:col-span-3 space-y-4">
 
-  {/* Checkbox Row */}
   <div className="flex items-center gap-3">
     <input
       type="checkbox"
@@ -1153,22 +963,22 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <Input
                           label="Min Stock Level"
-                          name="minStockLevel"
-                          value={form.minStockLevel}
+                          name="custom_min_stock_level"
+                          value={form.custom_min_stock_level}
                           onChange={handleForm}
                           className="w-full col-span-3"
                         />
                         <Input
                           label="Max Stock Level"
-                          name="maxStockLevel"
-                          value={form.maxStockLevel}
+                          name="custom_max_stock_level"
+                          value={form.custom_max_stock_level}
                           onChange={handleForm}
                           className="w-full col-span-3"
                         />
                         <Input
                           label="Re-order Level"
-                          name="reOrderLevel"
-                          value={form.reOrderLevel}
+                          name="custom_reorder_level"
+                          value={form.custom_reorder_level}
                           onChange={handleForm}
                           className="w-full"
                         />
@@ -1196,15 +1006,9 @@ const handleNonExportChange = (index: number, field: keyof TaxRow, value: string
                 >
                   Reset
                 </button>
-                {/* <button
-                  type="submit"
-                  className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
-                >
-                  Save Item
-                </button> */}
                 <button
-  type="button"
-  onClick={submit}
+  type="submit"
+  // onClick={submit}
   className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
 >
   Save Item
