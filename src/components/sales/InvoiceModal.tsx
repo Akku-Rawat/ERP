@@ -4,13 +4,31 @@ import { Plus, X, Trash2 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 
 const base_url = import.meta.env.VITE_BASE_URL;
-console.log("base url " ,base_url);
-
+const GET_CUST_ENDPOINT = `${base_url}.customer.customer.get_all_customers_api`;
+ 
 interface InvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (data: any) => void;
 }
+// ---------------- ItemRow Type & Default Empty Item ----------------
+interface ItemRow {
+  productName: string;
+  description: string;
+  quantity: number;
+  listPrice: number;
+  discount: number;
+  tax: number;
+}
+
+const emptyItem: ItemRow = {
+  productName: "",
+  description: "",
+  quantity: 1,
+  listPrice: 0,
+  discount: 0,
+  tax: 0,
+};
 
 function CustomerDropdown({
   value,
@@ -91,69 +109,9 @@ function CustomerDropdown({
   </div>
 );
 }
-
-interface ItemRow {
-  productName: string;
-  description: string;
-  quantity: number;
-  listPrice: number;
-  discount: number;
-  tax: number;
-}
-
-const emptyItem: ItemRow = {
-  productName: "",
-  description: "",
-  quantity: 0,
-  listPrice: 0,
-  discount: 0,
-  tax: 0,
-};
-
-interface FormData {
-  CutomerName: string;
-  subject: string;
-  dateOfInvoice: string;
-  dueDate: string;
-  salesCommission: number;
-  accountName: string;
-  contactName: string;
-  dealName: string;
-  salesOrder: string;
-  purchaseOrder: string;
-  exciseDuty: number;
-  status: string;
-  totalDiscount: number;
-  totalTax: number;
-  adjustment: number;
-  termsAndConditions: string;
-  subTotal: number;
-  grandTotal: number;
-   currency: string;
-  paymentTerms?: string;
-  paymentMethod?: string;
-  bankName?: string;
-  accountNumber?: string;
-  routingNumber?: string;
-  swiftCode?: string;
-  notes?: string;
- billingAddressLine1?: string;
-  billingAddressLine2?: string;
-  billingPostalCode?: string;
-  billingCity?: string;
-  billingState?: string;
-  billingCountry?: string;
-  shippingAddressLine1?: string;
-  shippingAddressLine2?: string;
-  shippingPostalCode?: string;
-  shippingCity?: string;
-  shippingState?: string;
-  shippingCountry?: string;
-  sameAsBilling: boolean;
-}
-
-const emptyForm: FormData = {
-  CutomerName: "",
+ type FormState = Record<string, any>;
+const emptyForm: Record<string, any> = {
+  cutomerName: "",
   subject: "",
   dateOfInvoice: "",  
   dueDate: "",
@@ -189,7 +147,7 @@ const emptyForm: FormData = {
 };
 
 const InvoiceModal: React.FC<InvoiceModalProps> = ({ isOpen, onClose, onSubmit }) => {
-  const [form, setForm] = useState<FormData>(emptyForm);
+  const [form, setForm] = useState<FormState>(emptyForm);
   const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
   const [selectedTemplate, setSelectedTemplate] = useState("General Service Terms");
   const itemsPerPage = 5;                          
@@ -210,44 +168,90 @@ const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
     const [isShippingOpen, setIsShippingOpen] = useState(false);
    const [customers, setCustomers] = useState<{ name: string }[]>([]);
   const [custLoading, setCustLoading] = useState(true);
+  const [custError, setCustError] = useState(false);
 
+// useEffect(() => {
+//   if (!isOpen) return;
+
+//   const controller = new AbortController();
+
+//  const loadCustomers = async () => {
+//   try {
+//     setCustLoading(true);
+
+//     const res = await fetch(`${GET_CUST_ENDPOINT}`, {
+//       signal: controller.signal,
+//       method: "GET",  
+//       headers: {
+//         "Content-Type": "application/json",
+//         "Authorization": import.meta.env.VITE_AUTHORIZATION,
+//       },
+//     });
+
+//     if (!res.ok) throw new Error("Failed to load customers");
+
+//     const result = await res.json();
+//     const customers = result.data?.map((c: any) => ({ name: c.name })) || [];
+
+//     setCustomers(customers);
+//   } catch (err: any) {
+//     if (err.name !== "AbortError") {
+//       console.error("Error loading customers:", err);
+//     }
+//   } finally {
+//     setCustLoading(false);
+//   }
+// };
+
+//   loadCustomers();
+
+//   return () => controller.abort();  
+// }, [isOpen]);
 useEffect(() => {
-  if (!isOpen) return;
+  if (!isOpen) {
+    setForm(emptyForm);
+    setItems([{ ...emptyItem }]);
+    return;
+  }
 
   const controller = new AbortController();
 
- const loadCustomers = async () => {
-  try {
-    setCustLoading(true);
+  const loadCustomers = async () => {
+    try {
+      setCustLoading(true);
+      setCustError(false);
 
-    const res = await fetch(`${base_url}/resource/Customer`, {
-      signal: controller.signal,
-      method: "GET",  
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": import.meta.env.VITE_AUTHORIZATION,
-      },
-    });
+      const res = await fetch(GET_CUST_ENDPOINT, {
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: import.meta.env.VITE_AUTHORIZATION,
+        },
+      });
 
-    if (!res.ok) throw new Error("Failed to load customers");
+      if (!res.ok) throw new Error("Failed to load customers");
+      const result = await res.json();
 
-    const result = await res.json();
-    const customers = result.data?.map((c: any) => ({ name: c.name })) || [];
+      const customers = (result.data || []).map((c: any) => ({
+        id: c.id || c.customer_id || c.name,
+        name: c.name,
+      }));
 
-    setCustomers(customers);
-  } catch (err: any) {
-    if (err.name !== "AbortError") {
-      console.error("Error loading customers:", err);
+      setCustomers(customers);
+    } catch (err: any) {
+      if (err.name !== "AbortError") {
+        console.error(err);
+        setCustError(true);
+      }
+    } finally {
+      setCustLoading(false);
     }
-  } finally {
-    setCustLoading(false);
-  }
-};
+  };
 
   loadCustomers();
 
-  return () => controller.abort();  
-}, [isOpen]);
+  return () => controller.abort();
+}, [isOpen]); 
 
 useEffect(() => {
   if (isOpen) {

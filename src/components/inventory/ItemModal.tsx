@@ -73,6 +73,7 @@ const emptyForm: Record<string, any> = {
   width: "",
   height: "",
   weightUnit: "",
+  dimensionType: "",
 };
 
 
@@ -95,12 +96,30 @@ const ItemModal: React.FC<{
 
    const [activeTab, setActiveTab] = useState<"details" | "taxDetails" | "inventoryDetails">("details");
 
-   useEffect(() => {
-    if (isOpen) {
-      setForm(initialData || emptyForm);
-      setActiveTab("details");
+  //  useEffect(() => {
+  //   if (isOpen) {
+  //     setForm(initialData || emptyForm);
+  //     setActiveTab("details");
+  //   }
+  // }, [isOpen, initialData]);
+useEffect(() => {
+  if (isOpen) {
+
+    if (initialData) {
+      const parsed = parseDimensions(initialData.custom_dimension);
+
+      setForm({
+        ...emptyForm,
+        ...initialData,
+        ...parsed,   
+      });
+    } else {
+      setForm(emptyForm);
     }
-  }, [isOpen, initialData]);
+
+    setActiveTab("details");
+  }
+}, [isOpen, initialData]);
 
 
 // const handleSubmit = async (e: React.FormEvent) => {
@@ -211,13 +230,31 @@ const ItemModal: React.FC<{
 //     setLoading(false);
 //   }
 // };
+
  
+function parseDimensions(dim: String) {
+  if (!dim) return {};
+
+  const clean = dim.replace(/\s+/g, " ").trim();  
+  const parts = clean.split(" ");
+
+  return {
+    length: parts[0] || "",
+    width: parts[2] || "",
+    height: parts[4] || "",
+    dimensionType: parts[5] || "cm",
+  };
+}
+
+
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   setLoading(true);
+    const dimensions = `${form.length} × ${form.width} × ${form.height} ${form.dimensionType}`;
+
 
   try {
-    const payload = { ...form };
+    const payload = { ...form, custom_dimension: dimensions, };
 
     let response;
 
