@@ -1,8 +1,9 @@
 import React,{useEffect, useState} from "react";
 import ItemsCategoryModal from "../../components/inventory/ItemsCategoryModal";
 
-const base_url = import.meta.env.VITE_BASE_URL;
-const GET_ITEMS_CAT_ENDPOINT = `${base_url}.item.item.get_all_item_groups_api`;
+import {
+  getAllItemGroups
+} from "../../api/itemCategoryApi";
 
 interface Product {
   id: string;
@@ -31,12 +32,8 @@ const ItemsCategory: React.FC<ProductsProps> = ({ products, searchTerm, setSearc
 const fetchItemsCategory = async () => {
     try {
       setItemCatLoading(true);
-      const response = await fetch(GET_ITEMS_CAT_ENDPOINT, {
-        headers: { Authorization: import.meta.env.VITE_AUTHORIZATION },
-      });
-      if (!response.ok) throw new Error("Failed to load items");
-      const result = await response.json();
-      setItemsCat(result.data || []);
+      const response = await getAllItemGroups();
+      setItemsCat(response);
     } catch (err) {
       console.error("Error loading item:", err);
     } finally {
