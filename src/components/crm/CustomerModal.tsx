@@ -10,10 +10,11 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
-const base_url = import.meta.env.VITE_BASE_URL;
-const CUSTOMER_ENDPOINT = `${base_url}.customer.customer.create_customer_api`;
-const UPDATE_CUSTOMER_ENDPOINT = `${base_url}.customer.customer.update_customer_by_id`;
-console.log("CUSTOMER_ENDPOINT" + CUSTOMER_ENDPOINT);
+
+import {
+  createCustomer,
+  updateCustomerByCustomerCode
+} from "../../api/customerApi";
 
 const emptyForm: Record<string, any> = {
   customer_name: "",
@@ -107,59 +108,44 @@ const CustomerModal: React.FC<{
     };
 
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoading(true);
 
-  try {
-    const payload = { ...form };
-    let response;
+      try {
+        const payload = { ...form };
+        let response;
 
-    if (isEditMode && initialData?.custom_id) {
-      payload.id = initialData.custom_id;
-      console.log("payload.id " + initialData.custom_id);
-      
-      const updateUrl = `${UPDATE_CUSTOMER_ENDPOINT}?id=${initialData.custom_id}`;
+        if (isEditMode && initialData?.custom_id) {
+          payload.id = initialData.custom_id;
+          response = await updateCustomerByCustomerCode(initialData.custome_id, payload);
+        } else {
+          response = await createCustomer(payload);
+        }
 
-      response = await fetch(updateUrl, {
-        method: "PUT", 
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: import.meta.env.VITE_AUTHORIZATION,
-        },
-        body: JSON.stringify(payload),
-      });
-    } else {
-      response = await fetch(CUSTOMER_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: import.meta.env.VITE_AUTHORIZATION,
-        },
-        body: JSON.stringify(payload),
-      });
-    }
+        if (response.message.status_code !== 200) {
+          let errorMessage = "Failed to save customer";
+          try {
+            const errData = await response.message;
+            errorMessage = errData.message || errorMessage;
+          } catch { }
+          throw new Error(errorMessage);
+        }
 
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.message || "Failed to save customer");
-    }
+        alert(isEditMode ? "Customer updated successfully!" : "Customer created successfully!");
 
-    const data = await response.json();
 
-    console.log(isEditMode ? "Customer updated successfully!" : "Customer created successfully!");
-    
-    // onSubmit?.(isEditMode ? { ...initialData, ...payload } : data.data || payload);
-    onSubmit?.({} as any);
-    
-    handleClose();
-  } catch (err: any) {
-    console.error("Save customer error:", err);
-    console.log(err.message || "Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
+        // onSubmit?.(isEditMode ? { ...initialData, ...payload } : data.data || payload);
+        onSubmit?.({} as any);
+
+        handleClose();
+      } catch (err: any) {
+        console.error("Save customer error:", err);
+        console.log(err.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     const handleClose = () => {
       setForm(emptyForm);
@@ -247,59 +233,59 @@ const handleSubmit = async (e: React.FormEvent) => {
                           required
                         />
                         <Input
-                              label="Contact Person"
-                              name="custom_contact_person"
-                              type="custom_contact_person"
-                              value={form.custom_contact_person}
-                              onChange={handleChange}
-                              placeholder="e.g. Timothy"
+                          label="Contact Person"
+                          name="custom_contact_person"
+                          type="custom_contact_person"
+                          value={form.custom_contact_person}
+                          onChange={handleChange}
+                          placeholder="e.g. Timothy"
                         />
                         <label className="flex flex-col gap-1 text-sm">
-                        <span className="font-medium text-gray-600">Display Name *</span>
-                        <select
-                          name="custom_display_name"
-                          value={form.custom_display_name || ""}
-                          onChange={handleChange}
-                          className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                          required
-                        >
-                          <option value="" disabled>
-                            Select Name
-                          </option>
-                          {form.customer_name && (
-                            <option value={form.customer_name}>
-                              {form.customer_name} 
-                            </option>
-                          )}
-                          {form.custom_contact_person && (
-                            <option value={form.custom_contact_person}>
-                              {form.custom_contact_person} 
-                            </option>
-                          )}
-                          {!form.customer_name && !form.custom_contact_person && (
+                          <span className="font-medium text-gray-600">Display Name *</span>
+                          <select
+                            name="custom_display_name"
+                            value={form.custom_display_name || ""}
+                            onChange={handleChange}
+                            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            required
+                          >
                             <option value="" disabled>
-         
+                              Select Name
                             </option>
-                         )}
-                        </select>
-                      </label>
-                       
-                            <Input
-                              label="Customer TPIN"
-                              name="custom_customer_tpin"
-                              value={form.custom_customer_tpin}
-                              onChange={handleChange}
-                              placeholder="TP12345678"
-                              required
-                            />
-                            {/* <Input
+                            {form.customer_name && (
+                              <option value={form.customer_name}>
+                                {form.customer_name}
+                              </option>
+                            )}
+                            {form.custom_contact_person && (
+                              <option value={form.custom_contact_person}>
+                                {form.custom_contact_person}
+                              </option>
+                            )}
+                            {!form.customer_name && !form.custom_contact_person && (
+                              <option value="" disabled>
+
+                              </option>
+                            )}
+                          </select>
+                        </label>
+
+                        <Input
+                          label="Customer TPIN"
+                          name="custom_customer_tpin"
+                          value={form.custom_customer_tpin}
+                          onChange={handleChange}
+                          placeholder="TP12345678"
+                          required
+                        />
+                        {/* <Input
                               label="ID"
                               name="id"
                               value={form.id}
                               onChange={handleChange}
                               placeholder="Identification Number"
                             /> */}
-                         <label className="flex flex-col gap-1 text-sm">
+                        <label className="flex flex-col gap-1 text-sm">
                           <span className="font-medium text-gray-600">Currency</span>
                           <select
                             name="customer_currency"
@@ -321,12 +307,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                           placeholder="Bank Account"
                         />
                         <Input
-                              label="Onboard Balance"
-                              name="customer_onboarding_balance"
-                              type="customer_onboarding_balance"
-                              value={form.customer_onboarding_balance}
-                              onChange={handleChange}
-                              placeholder="e.g. 1000"
+                          label="Onboard Balance"
+                          name="customer_onboarding_balance"
+                          type="customer_onboarding_balance"
+                          value={form.customer_onboarding_balance}
+                          onChange={handleChange}
+                          placeholder="e.g. 1000"
                         />
                         <Input
                           label="Email"
@@ -352,15 +338,15 @@ const handleSubmit = async (e: React.FormEvent) => {
                 )}
 
                 {/* === TAB: Terms & Conditions === */}
-              {activeTab === "terms" && (
-              <div className=" h-full w-full">
-              <TermsAndCondition/>
-              </div>
-              )}
+                {activeTab === "terms" && (
+                  <div className=" h-full w-full">
+                    <TermsAndCondition />
+                  </div>
+                )}
 
                 {activeTab === "address" && (
                   <div className="space-y-6">
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
 
                       {/* ========== BILLING ADDRESS ========== */}
                       <div className="rounded-lg border border-gray-300 bg-white shadow p-6">

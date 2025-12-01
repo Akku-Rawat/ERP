@@ -1,20 +1,19 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import ItemModal from "../../components/inventory/ItemModal";
 import axios from "axios";
 import { Search, Plus, Edit2, Trash2 } from "lucide-react";
 
-
-
-const base_url = import.meta.env.VITE_BASE_URL;
-const GET_ITEMS_ENDPOINT = `${base_url}.item.item.get_all_items_api`;
-// const DELETE_ITEMS_ENDPOINT = `${base_url}.item.item.delete_item_by_code_api?item_code=${item_code}`
-console.log(GET_ITEMS_ENDPOINT)
+import {
+  getAllItems,
+  getItemByItemCode,
+  deleteItemByItemCode,
+} from "../../api/itemApi";
 
 interface ItemsProps {
-  onAdd: () => void;  
+  onAdd: () => void;
 }
 
-const Items: React.FC<ItemsProps> = ({onAdd}) => {
+const Items: React.FC<ItemsProps> = ({ onAdd }) => {
 
   const [item, setItem] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,93 +21,67 @@ const Items: React.FC<ItemsProps> = ({onAdd}) => {
   const [showItemsModal, setShowItemsModal] = useState(false);
   const [editItems, setEditItems] = useState<any | null>(null);
 
-    const fetchItems = async () => {
+  const fetchItems = async () => {
     try {
       setItemLoading(true);
-      const response = await fetch(GET_ITEMS_ENDPOINT, {
-        headers: { Authorization: import.meta.env.VITE_AUTHORIZATION },
-      });
-      if (!response.ok) throw new Error("Failed to load items");
-      const result = await response.json();
-      setItem(result.data || []);
+      const data = await getAllItems();
+      setItem(data);
     } catch (err) {
-      console.error("Error loading item:", err);
+      console.error("Error loading items:", err);
     } finally {
       setItemLoading(false);
     }
   };
 
   const handleDelete = async (itemCode: string, e: React.MouseEvent) => {
-  e.stopPropagation();
+    e.stopPropagation();
 
-  const itemToDelete = item.find((i) => i.item_code === itemCode);
-  if (!itemToDelete) return;
+    const itemToDelete = item.find((i) => i.item_code === itemCode);
+    if (!itemToDelete) return;
 
-  const code = itemToDelete.item_code;
-  console.log("item code " + itemCode);
-  if (!itemCode) {
-    alert("Cannot delete — itemCode not found for this item.");
-    return;
-  }
+    const code = itemToDelete.item_code;
+    console.log("item code " + itemCode);
 
-  if (!window.confirm(`Are you sure you want to delete item with itemCode ${code}?`)) return;
+    if (!window.confirm(`Are you sure you want to delete item with itemCode ${itemCode}?`)) return;
 
-  try {
-    setItemLoading(true);
-    const DELETE_ITEMS_ENDPOINT = `${base_url}.item.item.delete_item_by_code_api?item_code=${code}`
+    try {
+      setItemLoading(true);
+      await deleteItemByItemCode(code);
+      setItem((prev) => prev.filter((c) => c.item_code !== code));
+      alert("Item deleted successfully.");
+    } catch (err: any) {
+      console.error("Error deleting item:", err);
+      const errorMsg = err.response?.data?.message || "Failed to delete item.";
+      alert(errorMsg);
+    } finally {
+      setItemLoading(false);
+    }
+  };
 
-    await axios.delete(`${DELETE_ITEMS_ENDPOINT}`, {
-      headers: { Authorization: import.meta.env.VITE_AUTHORIZATION },
-    });
-
-    setItem((prev) => prev.filter((c) => c.item_code !== code));
-    alert("Item deleted successfully.");
-  } catch (err: any) {
-    console.error("Error deleting item:", err);
-    const errorMsg = err.response?.data?.message || "Failed to delete item.";
-    alert(errorMsg);
-  } finally {
-    setItemLoading(false);
-  }
-};
-
- const handleAddItem = () => {
+  const handleAddItem = () => {
     setEditItems(null);
     setShowItemsModal(true);
   };
 
-  // const handleEditItem = (item: any, e: React.MouseEvent) => {
-  //     e.stopPropagation();
-  //     setEditItems(item);
-  //     setShowItemsModal(true);
-  //   };
-const handleEdit = async (item_code: string, e: React.MouseEvent) => {
-  e.stopPropagation();
-  try {
-    const res = await fetch(
-      `${base_url}.item.item.get_item_by_id_api?item_code=${item_code}`,
-      {
-        headers: { Authorization: import.meta.env.VITE_AUTHORIZATION },
-      }
-    );
+  const handleEditItem = async (item_code: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const item = await getItemByItemCode(item_code);
+      setEditItems(item.data ?? item);
+      setShowItemsModal(true);
+    } catch (err) {
+      console.error("Failed to fetch item:", err);
+      alert("Unable to fetch full item details.");
+    }
+  };
 
-    const fullItem = await res.json();
-
-    setEditItems(fullItem.data ?? fullItem);
-    setShowItemsModal(true);
-  } catch (err) {
-    console.error("Failed to fetch item:", err);
-    alert("Unable to fetch full item details.");
-  }
-};
-
-    useEffect(() => {
-      fetchItems();
-    }, []);
+  useEffect(() => {
+    fetchItems();
+  }, []);
 
   const filtered = item.filter((i: any) =>
-    [i.item_code, i.item_name, i.item_group, i.custom_min_stock_level, i.custom_max_stock_level, 
-      i.custom_vendor, i.custom_selling_price]
+    [i.item_code, i.item_name, i.item_group, i.custom_min_stock_level, i.custom_max_stock_level,
+    i.custom_vendor, i.custom_selling_price]
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
@@ -160,23 +133,22 @@ const handleEdit = async (item_code: string, e: React.MouseEvent) => {
                   <button className="text-blue-600 hover:underline">View</button>
                 </td> */}
                 <td className="px-4 py-2 text-center">
-                    <button
-                      // onClick={(e) => handleEditItem(i, e)}
-                      onClick={(e) => handleEdit(i.item_code, e)}
+                  <button
+                    onClick={(e) => handleEditItem(i.item_code, e)}
 
-                      className="text-indigo-600 hover:text-indigo-800"
-                      title="Edit"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={(e) => handleDelete(i.item_code, e)}
-                      className="ml-2 text-red-600 hover:text-red-800"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
+                    className="text-indigo-600 hover:text-indigo-800"
+                    title="Edit"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => handleDelete(i.item_code, e)}
+                    className="ml-2 text-red-600 hover:text-red-800"
+                    title="Delete"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -188,11 +160,11 @@ const handleEdit = async (item_code: string, e: React.MouseEvent) => {
           setShowItemsModal(false);
           setEditItems(null);
         }}
-        onSubmit={handleAddItem}  
+        onSubmit={handleAddItem}
         initialData={editItems}
         isEditMode={!!editItems}
       />
-  
+
     </div>
   );
 };
