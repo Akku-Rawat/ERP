@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import SupplierModal from '../../components/supplier/SupplierModal';
-import ContractModal from '../../components/supplier/ContractModal';
-import PerformanceModal from '../../components/supplier/PerformanceModal';
+import SupplierModal from "../../components/supplier/SupplierModal";
+import ContractModal from "../../components/supplier/ContractModal";
+import PerformanceModal from "../../components/supplier/PerformanceModal";
 
 import {
-   FaBuilding, 
-   FaFileSignature, 
-   FaChartLine ,
-   FaHandshake,
-  } from "react-icons/fa";
+  FaBuilding,
+  FaFileSignature,
+  FaChartLine,
+  FaHandshake,
+} from "react-icons/fa";
 
 const suppliersModule = {
   name: "Supplier",
@@ -62,7 +62,7 @@ const SupplierManagement: React.FC = () => {
     (supplier) =>
       supplier.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      supplier.contact.toLowerCase().includes(searchTerm.toLowerCase())
+      supplier.contact.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleAdd = () => {
@@ -153,7 +153,9 @@ const SupplierManagement: React.FC = () => {
                     <td className="px-4 py-2">{supplier.rating}</td>
                     <td className="px-4 py-2">{supplier.orders}</td>
                     <td className="px-4 py-2 text-center">
-                      <button className="text-blue-600 hover:underline">View</button>
+                      <button className="text-blue-600 hover:underline">
+                        View
+                      </button>
                     </td>
                   </tr>
                 ))}

@@ -1,9 +1,15 @@
 import React, { useRef, useState, forwardRef } from "react";
 import { UploadCloud } from "lucide-react";
-import type { QuotationItem , QuotationTemplate1Props  } from "../quotation/QuotationTemplate1";
+import type {
+  QuotationItem,
+  QuotationTemplate1Props,
+} from "../quotation/QuotationTemplate1";
 // --- Same Types as Before ---
 
-const QuotationDefaultTemplate = forwardRef< HTMLDivElement,QuotationTemplate1Props>(({ data, companyLogoUrl }, ref) => {
+const QuotationDefaultTemplate = forwardRef<
+  HTMLDivElement,
+  QuotationTemplate1Props
+>(({ data, companyLogoUrl }, ref) => {
   const [logo, setLogo] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -12,7 +18,7 @@ const QuotationDefaultTemplate = forwardRef< HTMLDivElement,QuotationTemplate1Pr
   const signatureInputRef = useRef<HTMLInputElement>(null);
   const [signatureText, setSignatureText] = useState<string>("");
   const [signatureMode, setSignatureMode] = useState<"upload" | "type">(
-    "upload"
+    "upload",
   );
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,10 +41,10 @@ const QuotationDefaultTemplate = forwardRef< HTMLDivElement,QuotationTemplate1Pr
     data.currency === "INR"
       ? "₹"
       : data.currency === "USD"
-      ? "$"
-      : data.currency === "ZMW"
-      ? "ZK"
-      : "";
+        ? "$"
+        : data.currency === "ZMW"
+          ? "ZK"
+          : "";
 
   return (
     <div

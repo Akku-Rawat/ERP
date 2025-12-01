@@ -63,7 +63,7 @@ const GeneralLedger: React.FC<Props> = ({
     .filter(
       (a) =>
         a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        a.code.includes(searchTerm)
+        a.code.includes(searchTerm),
     );
 
   const filteredJournalEntries = journalEntries.filter((entry) => {
@@ -133,7 +133,8 @@ const GeneralLedger: React.FC<Props> = ({
                     >
                       <span className="flex items-center gap-2">
                         <FaStar className="w-4 h-4" />
-                        {filter.charAt(0).toUpperCase() + filter.slice(1)} Accounts
+                        {filter.charAt(0).toUpperCase() + filter.slice(1)}{" "}
+                        Accounts
                       </span>
                       <span className="text-xs text-gray-500">
                         {getFilterCount(filter)}
@@ -184,7 +185,10 @@ const GeneralLedger: React.FC<Props> = ({
             <tbody>
               {filteredAccounts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                  <td
+                    colSpan={6}
+                    className="px-6 py-8 text-center text-gray-500"
+                  >
                     No accounts found
                   </td>
                 </tr>
@@ -194,15 +198,21 @@ const GeneralLedger: React.FC<Props> = ({
                     key={idx}
                     className="hover:bg-gray-50 border-b border-gray-100"
                   >
-                    <td className="px-6 py-4 text-sm text-gray-900">{account.code}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {account.code}
+                    </td>
                     <td className="px-6 py-4 text-sm text-blue-600 hover:underline cursor-pointer font-medium">
                       {account.name}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{account.type}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {account.type}
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">
                       {account.balance.toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{account.parent}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {account.parent}
+                    </td>
                     <td className="px-6 py-4 text-sm text-right">
                       <button className="text-gray-400 hover:text-gray-600">
                         <FaCog className="w-4 h-4" />
@@ -271,20 +281,30 @@ const GeneralLedger: React.FC<Props> = ({
             <tbody>
               {filteredJournalEntries.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                  <td
+                    colSpan={5}
+                    className="px-6 py-8 text-center text-gray-500"
+                  >
                     No journal entries found
                   </td>
                 </tr>
               ) : (
                 filteredJournalEntries.map((entry, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50 border-b border-gray-100">
+                  <tr
+                    key={idx}
+                    className="hover:bg-gray-50 border-b border-gray-100"
+                  >
                     <td className="px-6 py-4 text-sm">{entry.id}</td>
                     <td className="px-6 py-4 text-sm">{entry.date}</td>
                     <td className="px-6 py-4 text-sm">{entry.description}</td>
-                    <td className="px-6 py-4 text-sm capitalize">{entry.status}</td>
+                    <td className="px-6 py-4 text-sm capitalize">
+                      {entry.status}
+                    </td>
                     <td className="px-6 py-4 text-sm text-center">
                       {entry.status.toLowerCase() === "draft" && (
-                        <button className="text-blue-600 hover:underline">Edit</button>
+                        <button className="text-blue-600 hover:underline">
+                          Edit
+                        </button>
                       )}
                     </td>
                   </tr>

@@ -25,7 +25,7 @@ const SupportTickets: React.FC<TicketsProps> = ({ tickets, onAdd }) => {
       t.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.priority.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.created.toLowerCase().includes(searchTerm.toLowerCase())
+      t.created.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -74,8 +74,8 @@ const SupportTickets: React.FC<TicketsProps> = ({ tickets, onAdd }) => {
                       t.priority === "High"
                         ? "bg-red-100 text-red-800"
                         : t.priority === "Medium"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-green-100 text-green-800"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-green-100 text-green-800"
                     }`}
                   >
                     {t.priority}
@@ -87,8 +87,8 @@ const SupportTickets: React.FC<TicketsProps> = ({ tickets, onAdd }) => {
                       t.status === "Open"
                         ? "bg-blue-100 text-blue-800"
                         : t.status === "In Progress"
-                        ? "bg-purple-100 text-purple-800"
-                        : "bg-green-100 text-green-800"
+                          ? "bg-purple-100 text-purple-800"
+                          : "bg-green-100 text-green-800"
                     }`}
                   >
                     {t.status}

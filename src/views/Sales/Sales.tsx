@@ -3,23 +3,22 @@ import QuotationsTable from "./Quotations";
 import InvoiceTable from "./Invoices";
 import ReportTable from "./Reports";
 import POS from "./POS";
-import QuotationModal from '../../components/sales/QuotationModal';
+import QuotationModal from "../../components/sales/QuotationModal";
 import InvoiceModal from "../../components/sales/InvoiceModal";
 import PosModal from "../../components/sales/PosModal";
-import SalesDashboard  from "./SalesDashboard";
+import SalesDashboard from "./SalesDashboard";
 
 import {
-  FaMoneyBillWave ,
-  FaCalendarAlt,   
-  FaFileInvoice,   
+  FaMoneyBillWave,
+  FaCalendarAlt,
+  FaFileInvoice,
   FaFileInvoiceDollar,
   FaCashRegister,
   FaChartBar,
-  FaCog
+  FaCog,
 } from "react-icons/fa";
 import ProformaInvoicesTable from "./ProformaInvoice";
 import ProformaInvoiceModal from "../../components/sales/ProformaInvoiceModal";
-
 
 const sales = {
   name: "Sales",
@@ -29,7 +28,11 @@ const sales = {
     { id: "salesdashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
     { id: "quotations", name: "Quotations", icon: <FaFileInvoice /> },
     { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
-    { id: "proformaInvoice", name: "Profroma Invoice", icon: <FaFileInvoiceDollar /> },
+    {
+      id: "proformaInvoice",
+      name: "Profroma Invoice",
+      icon: <FaFileInvoiceDollar />,
+    },
     { id: "pos", name: "POS", icon: <FaCashRegister /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ],
@@ -44,7 +47,8 @@ const SalesModule: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  const [showProformaInvoiceModal, setShowProformaInvoiceModal] = useState(false);
+  const [showProformaInvoiceModal, setShowProformaInvoiceModal] =
+    useState(false);
   const [showPosModal, setShowPosModal] = useState(false);
 
   return (
@@ -81,7 +85,8 @@ const SalesModule: React.FC = () => {
             <div className="flex items-center justify-end gap-4 mb-4">
               <button
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                onClick={() => setShowModal(true)}>
+                onClick={() => setShowModal(true)}
+              >
                 + Add
               </button>
               <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
@@ -89,8 +94,7 @@ const SalesModule: React.FC = () => {
               </button>
             </div>
             <QuotationsTable />
-
-              </>
+          </>
         )}
 
         {/* Invoices */}
@@ -99,7 +103,8 @@ const SalesModule: React.FC = () => {
             <div className="flex items-center justify-end gap-4 mb-4">
               <button
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                onClick={() => setShowInvoiceModal(true)}>
+                onClick={() => setShowInvoiceModal(true)}
+              >
                 + Add
               </button>
               <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
@@ -114,14 +119,15 @@ const SalesModule: React.FC = () => {
             <div className="flex items-center justify-end gap-4 mb-4">
               <button
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                onClick={() => setShowProformaInvoiceModal(true)}>
+                onClick={() => setShowProformaInvoiceModal(true)}
+              >
                 + Add
               </button>
               <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
                 Export
               </button>
             </div>
-            <ProformaInvoicesTable/>
+            <ProformaInvoicesTable />
           </>
         )}
 
@@ -131,7 +137,8 @@ const SalesModule: React.FC = () => {
             <div className="flex items-center justify-end gap-4 mb-4">
               <button
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                onClick={() => setShowPosModal(true)}>
+                onClick={() => setShowPosModal(true)}
+              >
                 + Add
               </button>
               <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
@@ -142,33 +149,29 @@ const SalesModule: React.FC = () => {
           </>
         )}
 
-          
-      {activeTab === "reports" && (
-      <ReportTable />
-        )}
-
+        {activeTab === "reports" && <ReportTable />}
       </div>
 
       {/* Modals */}
       <QuotationModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        onSubmit={data => console.log('Final form', data)}
+        onSubmit={(data) => console.log("Final form", data)}
       />
       <InvoiceModal
         isOpen={showInvoiceModal}
         onClose={() => setShowInvoiceModal(false)}
-        onSubmit={data => console.log('Invoice data', data)}
+        onSubmit={(data) => console.log("Invoice data", data)}
       />
       <ProformaInvoiceModal
         isOpen={showProformaInvoiceModal}
         onClose={() => setShowProformaInvoiceModal(false)}
-        onSubmit={data => console.log('Invoice data', data)}
+        onSubmit={(data) => console.log("Invoice data", data)}
       />
       <PosModal
         isOpen={showPosModal}
         onClose={() => setShowPosModal(false)}
-        onSave={data => console.log('POS data', data)}
+        onSave={(data) => console.log("POS data", data)}
       />
     </div>
   );
