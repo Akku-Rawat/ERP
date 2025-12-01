@@ -12,15 +12,10 @@ const ENDPOINTS = {
   updateCustomer: `${base_url}.customer.customer.update_customer_by_id`,
 };
 
-export interface Customer {
-  id: string | number;
-  customer_name: string;
-  [key: string]: any;
-}
 
-export async function getAllCustomers(): Promise<Customer[]> {
+export async function getAllCustomers(): Promise<any> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getAllCustomers);
-  return resp.data?.data || [];
+  return resp.data;
 }
 
 export async function deleteCustomerById(id: string): Promise<any> {
@@ -36,10 +31,10 @@ export async function createCustomer(payload: any): Promise<any> {
 
 export async function getCustomerByCustomerCode(
   custom_id: string,
-): Promise<Customer> {
+): Promise<any> {
   const url = `${ENDPOINTS.getCustomerById}?custom_id=${custom_id}`;
   const resp: AxiosResponse = await api.get(url);
-  return resp.data?.data || null;
+  return resp.data || null;
 }
 
 export async function updateCustomerByCustomerCode(

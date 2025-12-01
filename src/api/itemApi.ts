@@ -12,18 +12,12 @@ const ENDPOINTS = {
   createItem: `${base_url}.item.item.create_item_api`,
 };
 
-export interface Item {
-  item_code: string;
-  item_name: string;
-  [key: string]: any;
-}
-
-export async function getAllItems(): Promise<Item[]> {
+export async function getAllItems(): Promise<any> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getAllItems);
   return resp.data?.data || [];
 }
 
-export async function getItemByItemCode(item_code: string): Promise<Item> {
+export async function getItemByItemCode(item_code: string): Promise<any> {
   const url = `${ENDPOINTS.getItemByCode}?item_code=${item_code}`;
   const resp: AxiosResponse = await api.get(url);
   return resp.data?.data || null;

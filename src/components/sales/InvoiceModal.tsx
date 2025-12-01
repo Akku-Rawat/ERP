@@ -3,14 +3,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Trash2 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 
-const base_url = import.meta.env.VITE_BASE_URL;
-console.log("base url ", base_url);
-
 interface InvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (data: any) => void;
 }
+
+import {
+  getAllCustomers,
+  getCustomerByCustomerCode,
+} from "../../api/customerApi";
 
 function CustomerDropdown({
   value,
@@ -20,9 +22,9 @@ function CustomerDropdown({
   custLoading,
 }: {
   value: string;
-  onChange: (s: string) => void;
+  onChange: (data: { name: string; custom_id: string }) => void;
   className?: string;
-  customers: { name: string }[];
+  customers: { name: string; custom_id: string }[];
   custLoading: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -32,33 +34,29 @@ function CustomerDropdown({
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const filtered = customers.filter((c: { name: string }) =>
-    c.name.toLowerCase().includes(search.toLowerCase()),
+  const filtered = customers.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
   );
+
   const selected = customers.find((c) => c.name === value);
 
   return (
-    <div
-      ref={ref}
-      className={`relative w-full flex flex-col gap-1 ${className}`}
-    >
+    <div ref={ref} className={`relative w-full flex flex-col gap-1 ${className}`}>
       <span className="font-medium text-gray-600 text-sm">Customer Name</span>
+
       <button
         type="button"
         disabled={custLoading}
         className="w-full rounded border px-3 py-2 text-left bg-white disabled:opacity-60"
         onClick={() => !custLoading && setOpen((v) => !v)}
       >
-        {custLoading
-          ? "Loading customers..."
-          : selected?.name || "Select customer..."}
+        {custLoading ? "Loading customers..." : selected?.name || "Select customer..."}
       </button>
 
       {open && !custLoading && (
@@ -70,15 +68,15 @@ function CustomerDropdown({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+
           <ul className="max-h-40 overflow-y-auto">
             {filtered.map((c) => (
               <li
-                key={c.name}
-                className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
-                  c.name === value ? "bg-blue-200 font-bold" : ""
-                }`}
+                key={c.custom_id}
+                className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${c.name === value ? "bg-blue-200 font-bold" : ""
+                  }`}
                 onClick={() => {
-                  onChange(c.name);
+                  onChange({ name: c.name, custom_id: c.custom_id });
                   setOpen(false);
                   setSearch("");
                 }}
@@ -86,6 +84,7 @@ function CustomerDropdown({
                 <span>{c.name}</span>
               </li>
             ))}
+
             {filtered.length === 0 && (
               <li className="px-4 py-2 text-gray-500">No match</li>
             )}
@@ -95,6 +94,7 @@ function CustomerDropdown({
     </div>
   );
 }
+
 
 interface ItemRow {
   productName: string;
@@ -199,6 +199,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 }) => {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
+  const [customerDetails, setCustomerDetails] = useState<any>(null);
   const [selectedTemplate, setSelectedTemplate] = useState(
     "General Service Terms",
   );
@@ -218,7 +219,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   }, []);
 
   const [isShippingOpen, setIsShippingOpen] = useState(false);
-  const [customers, setCustomers] = useState<{ name: string }[]>([]);
+  const [customers, setCustomers] = useState<{ name: string; custom_id: string }[]>([]);
   const [custLoading, setCustLoading] = useState(true);
 
   useEffect(() => {
@@ -230,20 +231,15 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
       try {
         setCustLoading(true);
 
-        const res = await fetch(`${base_url}/resource/Customer`, {
-          signal: controller.signal,
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: import.meta.env.VITE_AUTHORIZATION,
-          },
-        });
+        const response = await getAllCustomers();
 
-        if (!res.ok) throw new Error("Failed to load customers");
-
-        const result = await res.json();
+        if (response.status_code !== 200) throw new Error("Failed to load customers");
         const customers =
-          result.data?.map((c: any) => ({ name: c.name })) || [];
+          response.data?.map((c: any) => ({
+            name: c.name,
+            custom_id: c.custom_id,
+          })) || [];
+
 
         setCustomers(customers);
       } catch (err: any) {
@@ -259,6 +255,19 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
     return () => controller.abort();
   }, [isOpen]);
+
+  const loadCustomerDetailsById = async (custom_id: string) => {
+    try {
+      const response = await getCustomerByCustomerCode(custom_id);
+      if (!response || response.status_code !== 200) return;
+      setCustomerDetails(response.data);
+    } catch (err) {
+      console.error("Error loading customer details:", err);
+    }
+  };
+
+
+
 
   useEffect(() => {
     if (isOpen) {
@@ -402,11 +411,10 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${
-                    activeTab === tab
-                      ? "text-blue-600 border-b-2 border-blue-600 bg-white"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
+                  className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${activeTab === tab
+                    ? "text-blue-600 border-b-2 border-blue-600 bg-white"
+                    : "text-gray-600 hover:text-gray-900"
+                    }`}
                 >
                   {tab === "details"
                     ? "Details"
@@ -431,13 +439,15 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <CustomerDropdown
                           value={form.CutomerName}
-                          onChange={(name) =>
-                            setForm((p) => ({ ...p, CutomerName: name }))
-                          }
+                          onChange={async ({ name, custom_id }) => {
+                            setForm((p) => ({ ...p, CutomerName: name }));
+                            await loadCustomerDetailsById(custom_id);
+                          }}
                           className="w-full"
                           customers={customers}
                           custLoading={custLoading}
                         />
+
                         <Input
                           label="Date of Invoice"
                           name="dateOfInvoice"
@@ -525,7 +535,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                         <thead className="bg-gray-50 text-gray-700">
                           <tr>
                             <th className="px-2 py-2 text-left">#</th>
-                            <th className="px-2 py-2 text-left">Product</th>
+                            <th className="px-2 py-2 text-left">Item</th>
                             <th className="px-2 py-2 text-left">Description</th>
                             <th className="px-2 py-2 text-left">Qty</th>
                             <th className="px-2 py-2 text-left">Unit Price</th>
@@ -642,18 +652,10 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="font-medium text-gray-600">
-                              First Name
+                              Customer Name
                             </span>
                             <span className="font-medium text-gray-800">
-                              Rishab
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="font-medium text-gray-600">
-                              Last Name
-                            </span>
-                            <span className="font-medium text-gray-800">
-                              Negi
+                              {customerDetails?.customer_name ?? "Customer Name"}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -662,7 +664,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                             </span>
                             <span className="font-medium text-gray-800">
                               {" "}
-                              +91 9201564389
+                              {customerDetails?.mobile_no ?? "+123 4567890"}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -670,7 +672,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                               Email Address
                             </span>
                             <span className="text-base font-bold text-blue-600">
-                              rn@gmail.com
+                              {customerDetails?.customer_email ?? "customer@gmail.com"}
                             </span>
                           </div>
                         </div>
@@ -834,24 +836,24 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                               sameAsBilling: checked,
                               ...(checked
                                 ? {
-                                    shippingAddressLine1:
-                                      prev.billingAddressLine1 ?? "",
-                                    shippingAddressLine2:
-                                      prev.billingAddressLine2 ?? "",
-                                    shippingPostalCode:
-                                      prev.billingPostalCode ?? "",
-                                    shippingCity: prev.billingCity ?? "",
-                                    shippingState: prev.billingState ?? "",
-                                    shippingCountry: prev.billingCountry ?? "",
-                                  }
+                                  shippingAddressLine1:
+                                    prev.billingAddressLine1 ?? "",
+                                  shippingAddressLine2:
+                                    prev.billingAddressLine2 ?? "",
+                                  shippingPostalCode:
+                                    prev.billingPostalCode ?? "",
+                                  shippingCity: prev.billingCity ?? "",
+                                  shippingState: prev.billingState ?? "",
+                                  shippingCountry: prev.billingCountry ?? "",
+                                }
                                 : {
-                                    shippingAddressLine1: "",
-                                    shippingAddressLine2: "",
-                                    shippingPostalCode: "",
-                                    shippingCity: "",
-                                    shippingState: "",
-                                    shippingCountry: "",
-                                  }),
+                                  shippingAddressLine1: "",
+                                  shippingAddressLine2: "",
+                                  shippingPostalCode: "",
+                                  shippingCity: "",
+                                  shippingState: "",
+                                  shippingCountry: "",
+                                }),
                             }));
                           }}
                           className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
@@ -1005,9 +1007,8 @@ const Input = React.forwardRef<
     <span className="font-medium text-gray-600">{label}</span>
     <input
       ref={ref}
-      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-        props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
-      } ${className}`}
+      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
+        } ${className}`}
       {...props}
     />
   </label>

@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Trash2 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 
-const base_url = import.meta.env.VITE_BASE_URL;
-console.log("base url ", base_url);
+import {
+  getAllCustomers,
+  getCustomerByCustomerCode,
+} from "../../api/customerApi";
 
 function CustomerDropdown({
   value,
@@ -14,9 +16,9 @@ function CustomerDropdown({
   custLoading,
 }: {
   value: string;
-  onChange: (s: string) => void;
+  onChange: (data: { name: string; custom_id: string }) => void;
   className?: string;
-  customers: { name: string }[];
+  customers: { name: string; custom_id: string }[];
   custLoading: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -26,33 +28,29 @@ function CustomerDropdown({
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const filtered = customers.filter((c: { name: string }) =>
-    c.name.toLowerCase().includes(search.toLowerCase()),
+  const filtered = customers.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
   );
+
   const selected = customers.find((c) => c.name === value);
 
   return (
-    <div
-      ref={ref}
-      className={`relative w-full flex flex-col gap-1 ${className}`}
-    >
+    <div ref={ref} className={`relative w-full flex flex-col gap-1 ${className}`}>
       <span className="font-medium text-gray-600 text-sm">Customer Name</span>
+
       <button
         type="button"
         disabled={custLoading}
         className="w-full rounded border px-3 py-2 text-left bg-white disabled:opacity-60"
         onClick={() => !custLoading && setOpen((v) => !v)}
       >
-        {custLoading
-          ? "Loading customers..."
-          : selected?.name || "Select customer..."}
+        {custLoading ? "Loading customers..." : selected?.name || "Select customer..."}
       </button>
 
       {open && !custLoading && (
@@ -64,15 +62,15 @@ function CustomerDropdown({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+
           <ul className="max-h-40 overflow-y-auto">
             {filtered.map((c) => (
               <li
-                key={c.name}
-                className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
-                  c.name === value ? "bg-blue-200 font-bold" : ""
-                }`}
+                key={c.custom_id}
+                className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${c.name === value ? "bg-blue-200 font-bold" : ""
+                  }`}
                 onClick={() => {
-                  onChange(c.name);
+                  onChange({ name: c.name, custom_id: c.custom_id });
                   setOpen(false);
                   setSearch("");
                 }}
@@ -80,6 +78,7 @@ function CustomerDropdown({
                 <span>{c.name}</span>
               </li>
             ))}
+
             {filtered.length === 0 && (
               <li className="px-4 py-2 text-gray-500">No match</li>
             )}
@@ -89,7 +88,6 @@ function CustomerDropdown({
     </div>
   );
 }
-
 interface ItemRow {
   productName: string;
   description: string;
@@ -202,57 +200,29 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     "details",
   );
   const [isShippingOpen, setIsShippingOpen] = useState(false);
-  const [customers, setCustomers] = useState<{ name: string }[]>([]);
+ const [customers, setCustomers] = useState<{ name: string; custom_id: string }[]>([]);
   const [custLoading, setCustLoading] = useState(true);
+  const [customerDetails, setCustomerDetails] = useState<any>(null);
+
 
   useEffect(() => {
     if (!isOpen) return;
 
     const controller = new AbortController();
 
-    // const loadCustomers = async () => {
-    //   try {
-    //     setCustLoading(true);
-    //     const res = await fetch(`${base_url}/resource/Customer`, {
-    //       signal: controller.signal,
-
-    //           method: "PUT",
-    //           headers: { "Content-Type": "application/json",
-    //              "Authorization" : import.meta.env.VITE_AUTHORIZATION
-    //            },
-    //           body: JSON.stringify(payload),
-
-    //     });
-    //     if (!res.ok) throw new Error("Failed to load customers");
-    //     const data = await res.json();
-    //     setCustomers(data.map((c: any) => ({ name: c.name })));
-    //     } catch (err: any) {
-    //     if (err.name !== "AbortError") {
-    //       console.error(err);
-    //     }
-    //   } finally {
-    //     setCustLoading(false);
-    //   }
-    // };
-
     const loadCustomers = async () => {
       try {
         setCustLoading(true);
 
-        const res = await fetch(`${base_url}/resource/Customer`, {
-          signal: controller.signal,
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: import.meta.env.VITE_AUTHORIZATION,
-          },
-        });
+        const response = await getAllCustomers();
 
-        if (!res.ok) throw new Error("Failed to load customers");
-
-        const result = await res.json();
+        if (response.status_code !== 200) throw new Error("Failed to load customers");
         const customers =
-          result.data?.map((c: any) => ({ name: c.name })) || [];
+          response.data?.map((c: any) => ({
+            name: c.name,
+            custom_id: c.custom_id,
+          })) || [];
+
 
         setCustomers(customers);
       } catch (err: any) {
@@ -268,6 +238,16 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 
     return () => controller.abort();
   }, [isOpen]);
+
+  const loadCustomerDetailsById = async (custom_id: string) => {
+    try {
+      const response = await getCustomerByCustomerCode(custom_id);
+      if (!response || response.status_code !== 200) return;
+      setCustomerDetails(response.data);
+    } catch (err) {
+      console.error("Error loading customer details:", err);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -406,11 +386,10 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${
-                    activeTab === tab
-                      ? "text-blue-600 border-b-2 border-blue-600 bg-white"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
+                  className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${activeTab === tab
+                    ? "text-blue-600 border-b-2 border-blue-600 bg-white"
+                    : "text-gray-600 hover:text-gray-900"
+                    }`}
                 >
                   {tab === "details"
                     ? "Details"
@@ -434,9 +413,10 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <CustomerDropdown
                           value={form.CutomerName}
-                          onChange={(name) =>
-                            setForm((p) => ({ ...p, CutomerName: name }))
-                          }
+                          onChange={async ({ name, custom_id }) => {
+                            setForm((p) => ({ ...p, CutomerName: name }));
+                            await loadCustomerDetailsById(custom_id);
+                          }}
                           className="w-full"
                           customers={customers}
                           custLoading={custLoading}
@@ -642,39 +622,13 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                         <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
                           Customer Details
                         </h3>
-                        {/* <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-      <div>
-        <h4 className="font-medium text-gray-600">First Name</h4>
-        <p className="text-gray-800">Rishab</p>
-      </div>
-      <div>
-        <h4 className="font-medium text-gray-600">Phone Number</h4>
-        <p className="text-gray-800">+91 9201564389</p>
-      </div>
-      <div>
-        <h4 className="font-medium text-gray-600">Last Name</h4>
-        <p className="text-gray-800">Negi</p>
-      </div>
-      <div>
-        <h4 className="font-medium text-gray-600">Email Address</h4>
-        <p className="text-gray-800">rn@gmail.com</p>
-      </div>
-    </div> */}
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="font-medium text-gray-600">
-                              First Name
+                              Customer Name
                             </span>
                             <span className="font-medium text-gray-800">
-                              Rishab
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="font-medium text-gray-600">
-                              Last Name
-                            </span>
-                            <span className="font-medium text-gray-800">
-                              Negi
+                              {customerDetails?.customer_name ?? "Customer Name"}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -683,7 +637,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                             </span>
                             <span className="font-medium text-gray-800">
                               {" "}
-                              +91 9201564389
+                              {customerDetails?.mobile_no ?? "+123 4567890"}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -691,7 +645,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                               Email Address
                             </span>
                             <span className="text-base font-bold text-blue-600">
-                              rn@gmail.com
+                              {customerDetails?.customer_email ?? "customer@gmail.com"}
                             </span>
                           </div>
                         </div>
@@ -920,9 +874,8 @@ const Input = React.forwardRef<
     <span className="font-medium text-gray-600">{label}</span>
     <input
       ref={ref}
-      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${className} ${
-        props.disabled ? "bg-gray-50" : ""
-      }`}
+      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${className} ${props.disabled ? "bg-gray-50" : ""
+        }`}
       {...props}
     />
   </label>
