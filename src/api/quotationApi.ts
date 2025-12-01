@@ -1,5 +1,5 @@
 import type { AxiosResponse } from "axios";
-import {createAxiosInstance} from "./axiosInstance";
+import { createAxiosInstance } from "./axiosInstance";
 
 const base_url = import.meta.env.VITE_BASE_URL as string;
 const api = createAxiosInstance(base_url);
@@ -26,7 +26,10 @@ export async function getQuotationById(id: string): Promise<any> {
 }
 
 export async function createQuotation(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(ENDPOINTS.createQuotation, payload);
+  const resp: AxiosResponse = await api.post(
+    ENDPOINTS.createQuotation,
+    payload,
+  );
   return resp.data;
 }
 
@@ -38,12 +41,18 @@ export async function deleteQuotationById(id: string): Promise<any> {
 }
 
 export async function updateQuotationTermsById(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.put(ENDPOINTS.updateQuotationTerms, payload);
+  const resp: AxiosResponse = await api.put(
+    ENDPOINTS.updateQuotationTerms,
+    payload,
+  );
   return resp.data;
 }
 
 export async function updateQuotationAddressById(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.put(ENDPOINTS.updateQuotationAddress, payload);
+  const resp: AxiosResponse = await api.put(
+    ENDPOINTS.updateQuotationAddress,
+    payload,
+  );
   return resp.data;
 }
 

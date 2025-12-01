@@ -44,19 +44,21 @@ const MovementModal: React.FC<MovementModalProps> = ({
     remarks: "",
   });
 
-  const [items, setItems] = useState<MovementItem[]>([{ ...emptyMovementItem }]);
+  const [items, setItems] = useState<MovementItem[]>([
+    { ...emptyMovementItem },
+  ]);
 
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleItemChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    idx: number
+    idx: number,
   ) => {
     const rows = [...items];
     const name = e.target.name;
@@ -104,7 +106,10 @@ const MovementModal: React.FC<MovementModalProps> = ({
           exit={{ opacity: 0, y: 40 }}
           className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
-          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
+          <form
+            className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden"
+            onSubmit={handleSave}
+          >
             <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
               <h3 className="text-2xl w-full font-semibold text-blue-600">
                 Inventory Movement
@@ -121,7 +126,9 @@ const MovementModal: React.FC<MovementModalProps> = ({
             <div className="flex-1 overflow-y-auto border-b px-4">
               {/* MOVEMENT HEADER */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">MOVEMENT DETAILS</div>
+                <div className="font-semibold text-gray-600 mb-4">
+                  MOVEMENT DETAILS
+                </div>
                 <div className="grid grid-cols-6 gap-4 mb-6">
                   <input
                     className="col-span-1 border rounded p-2"
@@ -177,7 +184,9 @@ const MovementModal: React.FC<MovementModalProps> = ({
 
               {/* MOVEMENT ITEMS */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">MOVEMENT ITEMS</div>
+                <div className="font-semibold text-gray-600 mb-2">
+                  MOVEMENT ITEMS
+                </div>
                 <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2 py-4 px-2">
                   <table className="min-w-full text-xs table-fixed">
                     <thead>
@@ -185,11 +194,19 @@ const MovementModal: React.FC<MovementModalProps> = ({
                         <th className="w-1/9 px-2 py-1 text-left">ITEM CODE</th>
                         <th className="w-1/9 px-2 py-1 text-left">ITEM NAME</th>
                         <th className="w-1/9 px-2 py-1 text-left">QUANTITY</th>
-                        <th className="w-1/9 px-2 py-1 text-left">FROM LOCATION</th>
-                        <th className="w-1/9 px-2 py-1 text-left">TO LOCATION</th>
+                        <th className="w-1/9 px-2 py-1 text-left">
+                          FROM LOCATION
+                        </th>
+                        <th className="w-1/9 px-2 py-1 text-left">
+                          TO LOCATION
+                        </th>
                         <th className="w-1/9 px-2 py-1 text-left">UOM</th>
-                        <th className="w-1/9 px-2 py-1 text-left">MOVEMENT DATE</th>
-                        <th className="w-1/9 px-2 py-1 text-left">REFERENCE NO.</th>
+                        <th className="w-1/9 px-2 py-1 text-left">
+                          MOVEMENT DATE
+                        </th>
+                        <th className="w-1/9 px-2 py-1 text-left">
+                          REFERENCE NO.
+                        </th>
                         <th className="w-1/10 px-2 py-1 text-center"></th>
                       </tr>
                     </thead>
@@ -283,7 +300,11 @@ const MovementModal: React.FC<MovementModalProps> = ({
                   </table>
                 </div>
                 <div>
-                  <button type="button" className="bg-blue-100 border border-blue-300 rounded px-2 py-1" onClick={addItem}>
+                  <button
+                    type="button"
+                    className="bg-blue-100 border border-blue-300 rounded px-2 py-1"
+                    onClick={addItem}
+                  >
                     Add
                   </button>
                 </div>

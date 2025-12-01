@@ -14,7 +14,6 @@ interface ItemsProps {
 }
 
 const Items: React.FC<ItemsProps> = ({ onAdd }) => {
-
   const [item, setItem] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [itemLoading, setItemLoading] = useState(true);
@@ -42,7 +41,12 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
     const code = itemToDelete.item_code;
     console.log("item code " + itemCode);
 
-    if (!window.confirm(`Are you sure you want to delete item with itemCode ${itemCode}?`)) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete item with itemCode ${itemCode}?`,
+      )
+    )
+      return;
 
     try {
       setItemLoading(true);
@@ -80,11 +84,18 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
   }, []);
 
   const filtered = item.filter((i: any) =>
-    [i.item_code, i.item_name, i.item_group, i.custom_min_stock_level, i.custom_max_stock_level,
-    i.custom_vendor, i.custom_selling_price]
+    [
+      i.item_code,
+      i.item_name,
+      i.item_group,
+      i.custom_min_stock_level,
+      i.custom_max_stock_level,
+      i.custom_vendor,
+      i.custom_selling_price,
+    ]
       .join(" ")
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+      .includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -135,7 +146,6 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
                 <td className="px-4 py-2 text-center">
                   <button
                     onClick={(e) => handleEditItem(i.item_code, e)}
-
                     className="text-indigo-600 hover:text-indigo-800"
                     title="Edit"
                   >
@@ -164,7 +174,6 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
         initialData={editItems}
         isEditMode={!!editItems}
       />
-
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import type { AxiosResponse } from "axios";
-import {createAxiosInstance} from "./axiosInstance";
+import { createAxiosInstance } from "./axiosInstance";
 
 const base_url = import.meta.env.VITE_BASE_URL as string;
 const api = createAxiosInstance(base_url);
@@ -21,23 +21,31 @@ export interface ItemGroup {
   [key: string]: any;
 }
 
-
 export async function getAllItemGroups(): Promise<ItemGroup[]> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getAllItemGroups);
   return resp.data?.data || [];
 }
 
-export async function createItemGroup(payload: Partial<ItemGroup>): Promise<any> {
-  const resp: AxiosResponse = await api.post(ENDPOINTS.createItemGroup, payload);
+export async function createItemGroup(
+  payload: Partial<ItemGroup>,
+): Promise<any> {
+  const resp: AxiosResponse = await api.post(
+    ENDPOINTS.createItemGroup,
+    payload,
+  );
   return resp.data;
 }
 
-export async function updateItemGroupById(payload: Partial<ItemGroup>): Promise<any> {
+export async function updateItemGroupById(
+  payload: Partial<ItemGroup>,
+): Promise<any> {
   const resp: AxiosResponse = await api.put(ENDPOINTS.updateItemGroup, payload);
   return resp.data;
 }
 
-export async function deleteItemGroupByName(payload: { item_group_name: string }): Promise<any> {
+export async function deleteItemGroupByName(payload: {
+  item_group_name: string;
+}): Promise<any> {
   const resp: AxiosResponse = await api.delete(ENDPOINTS.deleteItemGroup, {
     data: payload,
   });

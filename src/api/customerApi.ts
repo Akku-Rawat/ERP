@@ -34,7 +34,9 @@ export async function createCustomer(payload: any): Promise<any> {
   return resp.data;
 }
 
-export async function getCustomerByCustomerCode(custom_id: string): Promise<Customer> {
+export async function getCustomerByCustomerCode(
+  custom_id: string,
+): Promise<Customer> {
   const url = `${ENDPOINTS.getCustomerById}?custom_id=${custom_id}`;
   const resp: AxiosResponse = await api.get(url);
   return resp.data?.data || null;
@@ -42,7 +44,7 @@ export async function getCustomerByCustomerCode(custom_id: string): Promise<Cust
 
 export async function updateCustomerByCustomerCode(
   custom_id: string,
-  payload: any
+  payload: any,
 ): Promise<any> {
   const url = `${ENDPOINTS.updateCustomer}?id=${custom_id}`;
   const resp: AxiosResponse = await api.put(url, payload);

@@ -12,7 +12,7 @@ interface Role {
   id: number;
   roleName: string;
   description: string;
-  status: "Active" | "Inactive";   // match your status radio values!
+  status: "Active" | "Inactive"; // match your status radio values!
 }
 
 interface UserFormData {
@@ -30,28 +30,27 @@ interface UserFormData {
   status: "Active" | "Inactive";
 }
 
-const CreateUserModal: React.FC<CreateUserModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onSubmit, 
+const CreateUserModal: React.FC<CreateUserModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
   initialData,
-  availableRoles = []
+  availableRoles = [],
 }) => {
-const [formData, setFormData] = useState<UserFormData>({
-  firstName: "",
-  middleName: "",
-  lastName: "",
-  gender: "",
-  phone: "",
-  dob: "",
-  email: "",
-  username: "",
-  language: "English",
-  timezone: "Asia/Kolkata",
-  role: "",
-  status: "Active"
-});
-
+  const [formData, setFormData] = useState<UserFormData>({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    gender: "",
+    phone: "",
+    dob: "",
+    email: "",
+    username: "",
+    language: "English",
+    timezone: "Asia/Kolkata",
+    role: "",
+    status: "Active",
+  });
 
   useEffect(() => {
     if (initialData) {
@@ -69,7 +68,7 @@ const [formData, setFormData] = useState<UserFormData>({
         language: "English",
         timezone: "Asia/Kolkata",
         role: "",
-        status: "Active"
+        status: "Active",
       });
     }
   }, [initialData, isOpen]);
@@ -125,8 +124,7 @@ const [formData, setFormData] = useState<UserFormData>({
   };
 
   // Get active roles only
-const activeRoles = availableRoles.filter((role) => role.status === "Active");
-
+  const activeRoles = availableRoles.filter((role) => role.status === "Active");
 
   return (
     <div className="fixed inset-0  bg-black/40 bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -136,14 +134,14 @@ const activeRoles = availableRoles.filter((role) => role.status === "Active");
           <h3 className="text-xl font-bold text-indigo-700 flex items-center gap-2">
             {initialData ? "Edit User" : "Add New User"}
           </h3>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl leading-none w-8 h-8 flex items-center justify-center hover:bg-white rounded-full transition-colors"
           >
             ✕
           </button>
         </div>
-        
+
         {/* Form Content */}
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -314,14 +312,26 @@ const activeRoles = availableRoles.filter((role) => role.status === "Active");
                 onChange={(e) => handleChange("timezone", e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all bg-white"
               >
-                <option value="Asia/Kolkata">🇮🇳 Asia/Kolkata (IST +5:30)</option>
-                <option value="America/New_York">🇺🇸 America/New_York (EST -5:00)</option>
-                <option value="Europe/London">🇬🇧 Europe/London (GMT +0:00)</option>
+                <option value="Asia/Kolkata">
+                  🇮🇳 Asia/Kolkata (IST +5:30)
+                </option>
+                <option value="America/New_York">
+                  🇺🇸 America/New_York (EST -5:00)
+                </option>
+                <option value="Europe/London">
+                  🇬🇧 Europe/London (GMT +0:00)
+                </option>
                 <option value="Asia/Dubai">🇦🇪 Asia/Dubai (GST +4:00)</option>
                 <option value="Asia/Tokyo">🇯🇵 Asia/Tokyo (JST +9:00)</option>
-                <option value="Australia/Sydney">🇦🇺 Australia/Sydney (AEDT +11:00)</option>
-                <option value="Asia/Shanghai">🇨🇳 Asia/Shanghai (CST +8:00)</option>
-                <option value="Europe/Paris">🇫🇷 Europe/Paris (CET +1:00)</option>
+                <option value="Australia/Sydney">
+                  🇦🇺 Australia/Sydney (AEDT +11:00)
+                </option>
+                <option value="Asia/Shanghai">
+                  🇨🇳 Asia/Shanghai (CST +8:00)
+                </option>
+                <option value="Europe/Paris">
+                  🇫🇷 Europe/Paris (CET +1:00)
+                </option>
               </select>
             </div>
 
@@ -366,9 +376,12 @@ const activeRoles = availableRoles.filter((role) => role.status === "Active");
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">ℹ️</span>
                   <div>
-                    <h4 className="font-semibold text-indigo-900 mb-1">Selected Role: {formData.role}</h4>
+                    <h4 className="font-semibold text-indigo-900 mb-1">
+                      Selected Role: {formData.role}
+                    </h4>
                     <p className="text-sm text-indigo-700">
-                      {availableRoles.find(r => r.roleName === formData.role)?.description || "Role permissions will be applied"}
+                      {availableRoles.find((r) => r.roleName === formData.role)
+                        ?.description || "Role permissions will be applied"}
                     </p>
                   </div>
                 </div>

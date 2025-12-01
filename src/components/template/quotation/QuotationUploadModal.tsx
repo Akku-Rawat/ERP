@@ -13,12 +13,13 @@ const templates = [
   { id: "quotation3", name: "Quotation Template 3", color: "bg-[#B2B1CF]" },
 ];
 
-const templateComponents: { [key: string]: React.FC<{ data: QuotationData }> } = {
-  default: QuotationDefaultTemplate,
-  quotation1: QuotationTemplate1,
-  quotation2: QuotationTemplate2,
-  quotation3: QuotationTemplate3,
-};
+const templateComponents: { [key: string]: React.FC<{ data: QuotationData }> } =
+  {
+    default: QuotationDefaultTemplate,
+    quotation1: QuotationTemplate1,
+    quotation2: QuotationTemplate2,
+    quotation3: QuotationTemplate3,
+  };
 
 interface QuotationUploadModalProps {
   isOpen: boolean;
@@ -47,7 +48,10 @@ const QuotationUploadModal: React.FC<QuotationUploadModalProps> = ({
     if (dir === "left") {
       scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
     } else {
-      scrollRef.current.scrollTo({ left: scrollRef.current.scrollWidth, behavior: "smooth" });
+      scrollRef.current.scrollTo({
+        left: scrollRef.current.scrollWidth,
+        behavior: "smooth",
+      });
     }
   };
 
@@ -83,7 +87,10 @@ const QuotationUploadModal: React.FC<QuotationUploadModalProps> = ({
 
   // Selection Mode: Show template gallery
   return (
-    <div className="fixed inset-0 z-50 flex justify-center items-center p-4" style={{ background: "rgba(255,255,255,0.85)" }}>
+    <div
+      className="fixed inset-0 z-50 flex justify-center items-center p-4"
+      style={{ background: "rgba(255,255,255,0.85)" }}
+    >
       <div className="bg-white rounded-2xl shadow-2xl max-w-[95vw] w-full max-h-[92vh] flex flex-col overflow-hidden relative">
         {/* Header */}
         <div className="flex items-center justify-between px-8 py-4 border-b bg-gradient-to-r from-gray-50 to-blue-50">
@@ -125,14 +132,14 @@ const QuotationUploadModal: React.FC<QuotationUploadModalProps> = ({
                       setSelectedTemplateId(template.id);
                       onClose();
                     }}
-                    className={
-                      `bg-white rounded-lg shadow-xl overflow-hidden flex flex-col items-center w-[370px] max-w-[370px] min-w-[340px] border-2 cursor-pointer transition
-                      ${selectedTemplateId === template.id
-                        ? "border-blue-700 ring-2 ring-blue-400"
-                        : "border-gray-300"}
+                    className={`bg-white rounded-lg shadow-xl overflow-hidden flex flex-col items-center w-[370px] max-w-[370px] min-w-[340px] border-2 cursor-pointer transition
+                      ${
+                        selectedTemplateId === template.id
+                          ? "border-blue-700 ring-2 ring-blue-400"
+                          : "border-gray-300"
+                      }
                       hover:shadow-2xl hover:scale-[1.02]"
-                      ${idx < templates.length - 1 ? "mr-8" : ""}`
-                    }
+                      ${idx < templates.length - 1 ? "mr-8" : ""}`}
                     tabIndex={0}
                     role="button"
                     aria-pressed={selectedTemplateId === template.id}
@@ -142,7 +149,9 @@ const QuotationUploadModal: React.FC<QuotationUploadModalProps> = ({
                         {Comp && <Comp data={data} />}
                       </div>
                     </div>
-                    <div className={`text-white text-center w-full py-2 font-semibold text-base ${template.color}`}>
+                    <div
+                      className={`text-white text-center w-full py-2 font-semibold text-base ${template.color}`}
+                    >
                       {template.name}
                     </div>
                   </div>

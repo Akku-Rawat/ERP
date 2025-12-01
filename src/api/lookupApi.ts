@@ -1,7 +1,8 @@
 import type { AxiosResponse } from "axios";
-import {createAxiosInstance} from "./axiosInstance";
+import { createAxiosInstance } from "./axiosInstance";
 
-const base_url = import.meta.env.VITE_LOOKUP_BASE_URL || import.meta.env.VITE_BASE_URL;
+const base_url =
+  import.meta.env.VITE_LOOKUP_BASE_URL || import.meta.env.VITE_BASE_URL;
 const api = createAxiosInstance(base_url);
 
 const ENDPOINTS = {

@@ -4,7 +4,7 @@ import { Plus, X, Trash2 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 
 const base_url = import.meta.env.VITE_BASE_URL;
-console.log("base url " ,base_url);
+console.log("base url ", base_url);
 
 interface InvoiceModalProps {
   isOpen: boolean;
@@ -32,64 +32,68 @@ function CustomerDropdown({
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-    const filtered = customers.filter((c: { name: string }) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
+  const filtered = customers.filter((c: { name: string }) =>
+    c.name.toLowerCase().includes(search.toLowerCase()),
   );
   const selected = customers.find((c) => c.name === value);
 
- return (
-  <div ref={ref} className={`relative w-full flex flex-col gap-1 ${className}`}>
-    <span className="font-medium text-gray-600 text-sm">Customer Name</span>
-    <button
-      type="button"
-      disabled={custLoading}
-      className="w-full rounded border px-3 py-2 text-left bg-white disabled:opacity-60"
-      onClick={() => !custLoading && setOpen((v) => !v)}
+  return (
+    <div
+      ref={ref}
+      className={`relative w-full flex flex-col gap-1 ${className}`}
     >
-      {custLoading
-        ? "Loading customers..."
-        : selected?.name || "Select customer..."}
-    </button>
+      <span className="font-medium text-gray-600 text-sm">Customer Name</span>
+      <button
+        type="button"
+        disabled={custLoading}
+        className="w-full rounded border px-3 py-2 text-left bg-white disabled:opacity-60"
+        onClick={() => !custLoading && setOpen((v) => !v)}
+      >
+        {custLoading
+          ? "Loading customers..."
+          : selected?.name || "Select customer..."}
+      </button>
 
-    {open && !custLoading && (
-      <div className="absolute left-0 w-full mt-1 bg-white border shadow-lg rounded z-10">
-        <input
-          className="w-full border-b px-2 py-1"
-          autoFocus
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <ul className="max-h-40 overflow-y-auto">
-          {filtered.map((c) => (
-            <li
-              key={c.name}  
-              className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
-                c.name === value ? "bg-blue-200 font-bold" : ""
-              }`}
-              onClick={() => {
-                onChange(c.name);
-                setOpen(false);
-                setSearch("");
-              }}
-            >
-              <span>{c.name}</span>
-            </li>
-          ))}
-          {filtered.length === 0 && (
-            <li className="px-4 py-2 text-gray-500">No match</li>
-          )}
-        </ul>
-      </div>
-    )}
-  </div>
-);
+      {open && !custLoading && (
+        <div className="absolute left-0 w-full mt-1 bg-white border shadow-lg rounded z-10">
+          <input
+            className="w-full border-b px-2 py-1"
+            autoFocus
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <ul className="max-h-40 overflow-y-auto">
+            {filtered.map((c) => (
+              <li
+                key={c.name}
+                className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
+                  c.name === value ? "bg-blue-200 font-bold" : ""
+                }`}
+                onClick={() => {
+                  onChange(c.name);
+                  setOpen(false);
+                  setSearch("");
+                }}
+              >
+                <span>{c.name}</span>
+              </li>
+            ))}
+            {filtered.length === 0 && (
+              <li className="px-4 py-2 text-gray-500">No match</li>
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 }
 
 interface ItemRow {
@@ -129,7 +133,7 @@ interface FormData {
   termsAndConditions: string;
   subTotal: number;
   grandTotal: number;
-   currency: string;
+  currency: string;
   paymentTerms?: string;
   paymentMethod?: string;
   bankName?: string;
@@ -137,7 +141,7 @@ interface FormData {
   routingNumber?: string;
   swiftCode?: string;
   notes?: string;
- billingAddressLine1?: string;
+  billingAddressLine1?: string;
   billingAddressLine2?: string;
   billingPostalCode?: string;
   billingCity?: string;
@@ -155,7 +159,7 @@ interface FormData {
 const emptyForm: FormData = {
   CutomerName: "",
   subject: "",
-  dateOfInvoice: "",  
+  dateOfInvoice: "",
   dueDate: "",
   salesCommission: 0,
   accountName: "",
@@ -172,7 +176,7 @@ const emptyForm: FormData = {
   subTotal: 0,
   grandTotal: 0,
   currency: "",
-   notes:"",
+  notes: "",
   billingAddressLine1: "",
   billingAddressLine2: "",
   billingPostalCode: "",
@@ -188,18 +192,24 @@ const emptyForm: FormData = {
   sameAsBilling: true,
 };
 
-const InvoiceModal: React.FC<InvoiceModalProps> = ({ isOpen, onClose, onSubmit }) => {
+const InvoiceModal: React.FC<InvoiceModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+}) => {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
-  const [selectedTemplate, setSelectedTemplate] = useState("General Service Terms");
-  const itemsPerPage = 5;                          
-  const [page, setPage] = useState(0);             
+  const [selectedTemplate, setSelectedTemplate] = useState(
+    "General Service Terms",
+  );
+  const itemsPerPage = 5;
+  const [page, setPage] = useState(0);
   const paginatedItems = items.slice(
     page * itemsPerPage,
-    (page + 1) * itemsPerPage
+    (page + 1) * itemsPerPage,
   );
-const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details"
+  const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
+    "details",
   );
   // Set current date on mount
   useEffect(() => {
@@ -207,54 +217,55 @@ const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
     setForm((p) => ({ ...p, invoiceDate: today }));
   }, []);
 
-    const [isShippingOpen, setIsShippingOpen] = useState(false);
-   const [customers, setCustomers] = useState<{ name: string }[]>([]);
+  const [isShippingOpen, setIsShippingOpen] = useState(false);
+  const [customers, setCustomers] = useState<{ name: string }[]>([]);
   const [custLoading, setCustLoading] = useState(true);
 
-useEffect(() => {
-  if (!isOpen) return;
+  useEffect(() => {
+    if (!isOpen) return;
 
-  const controller = new AbortController();
+    const controller = new AbortController();
 
- const loadCustomers = async () => {
-  try {
-    setCustLoading(true);
+    const loadCustomers = async () => {
+      try {
+        setCustLoading(true);
 
-    const res = await fetch(`${base_url}/resource/Customer`, {
-      signal: controller.signal,
-      method: "GET",  
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": import.meta.env.VITE_AUTHORIZATION,
-      },
-    });
+        const res = await fetch(`${base_url}/resource/Customer`, {
+          signal: controller.signal,
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: import.meta.env.VITE_AUTHORIZATION,
+          },
+        });
 
-    if (!res.ok) throw new Error("Failed to load customers");
+        if (!res.ok) throw new Error("Failed to load customers");
 
-    const result = await res.json();
-    const customers = result.data?.map((c: any) => ({ name: c.name })) || [];
+        const result = await res.json();
+        const customers =
+          result.data?.map((c: any) => ({ name: c.name })) || [];
 
-    setCustomers(customers);
-  } catch (err: any) {
-    if (err.name !== "AbortError") {
-      console.error("Error loading customers:", err);
+        setCustomers(customers);
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          console.error("Error loading customers:", err);
+        }
+      } finally {
+        setCustLoading(false);
+      }
+    };
+
+    loadCustomers();
+
+    return () => controller.abort();
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const today = new Date().toISOString().split("T")[0];
+      setForm((prev) => ({ ...prev, dateOfInvoice: today }));
     }
-  } finally {
-    setCustLoading(false);
-  }
-};
-
-  loadCustomers();
-
-  return () => controller.abort();  
-}, [isOpen]);
-
-useEffect(() => {
-  if (isOpen) {
-    const today = new Date().toISOString().split("T")[0];  
-    setForm((prev) => ({ ...prev, dateOfInvoice: today }));
-  }
-}, [isOpen]);
+  }, [isOpen]);
 
   // --- Calculate Totals ---
   useEffect(() => {
@@ -262,14 +273,25 @@ useEffect(() => {
       const line = item.quantity * item.listPrice;
       return sum + (line - item.discount + item.tax);
     }, 0);
-    const grandTotal = subTotal - form.totalDiscount + form.totalTax + form.adjustment;
+    const grandTotal =
+      subTotal - form.totalDiscount + form.totalTax + form.adjustment;
     setForm((p) => ({ ...p, subTotal, grandTotal }));
   }, [items, form.totalDiscount, form.totalTax, form.adjustment]);
 
   // --- Form handlers ---
-  const handleForm = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleForm = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
-    const isNum = ["salesCommission", "exciseDuty", "totalDiscount", "totalTax", "adjustment"].includes(name);
+    const isNum = [
+      "salesCommission",
+      "exciseDuty",
+      "totalDiscount",
+      "totalTax",
+      "adjustment",
+    ].includes(name);
     setForm((p) => ({ ...p, [name]: isNum ? Number(value) : value }));
   };
 
@@ -287,29 +309,28 @@ useEffect(() => {
   };
 
   const addItem = () => {
-  const newItem = { ...emptyItem };
-  const newItems = [...items, newItem];
-  setItems(newItems);
+    const newItem = { ...emptyItem };
+    const newItems = [...items, newItem];
+    setItems(newItems);
 
-  const newItemIndex = newItems.length - 1;
-  const targetPage = Math.floor(newItemIndex / itemsPerPage);
-  setPage(targetPage);
-};
+    const newItemIndex = newItems.length - 1;
+    const targetPage = Math.floor(newItemIndex / itemsPerPage);
+    setPage(targetPage);
+  };
 
-useEffect(() => {
-  if (isOpen) {
-    const today = new Date().toISOString().split("T")[0];  
-    setForm((prev) => ({ ...prev, dateOfQuotation: today }));
-  }
-}, [isOpen]);
+  useEffect(() => {
+    if (isOpen) {
+      const today = new Date().toISOString().split("T")[0];
+      setForm((prev) => ({ ...prev, dateOfQuotation: today }));
+    }
+  }, [isOpen]);
 
-useEffect(() => {
-  if (isOpen) {
-    const today = new Date().toISOString().split("T")[0];  
-    setForm((prev) => ({ ...prev, dueDate: today }));
-  }
-}, [isOpen]);
-
+  useEffect(() => {
+    if (isOpen) {
+      const today = new Date().toISOString().split("T")[0];
+      setForm((prev) => ({ ...prev, dueDate: today }));
+    }
+  }, [isOpen]);
 
   const reset = () => {
     setForm({ ...emptyForm });
@@ -317,28 +338,28 @@ useEffect(() => {
     setActiveTab("details");
   };
 
- const submit = (e: React.FormEvent) => {
-     e.preventDefault();
-     const subTotal = items.reduce(
-       (s, i) => s + i.quantity * i.listPrice - i.discount + i.tax,
-       0
-     );
-     const grandTotal =
-       subTotal - form.totalDiscount + form.totalTax + form.adjustment;
-     onSubmit?.({ ...form, subTotal, grandTotal, items });
-     reset();
-     onClose();
-   };
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const subTotal = items.reduce(
+      (s, i) => s + i.quantity * i.listPrice - i.discount + i.tax,
+      0,
+    );
+    const grandTotal =
+      subTotal - form.totalDiscount + form.totalTax + form.adjustment;
+    onSubmit?.({ ...form, subTotal, grandTotal, items });
+    reset();
+    onClose();
+  };
 
   if (!isOpen) return null;
-    const getCurrencySymbol = () => {
+  const getCurrencySymbol = () => {
     switch (form.currency) {
       case "ZMW":
         return "ZK";
       case "INR":
         return "₹";
       case "USD":
-        return "$"; 
+        return "$";
       default:
         return "ZK";
     }
@@ -346,7 +367,7 @@ useEffect(() => {
 
   const symbol = getCurrencySymbol();
 
-   return (
+  return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
       <AnimatePresence>
         <motion.div
@@ -374,7 +395,7 @@ useEffect(() => {
             </header>
 
             {/* Tabs */}
-             {/* Tabs */}
+            {/* Tabs */}
             <div className="flex border-b bg-gray-50">
               {(["details", "terms", "address"] as const).map((tab) => (
                 <button
@@ -390,8 +411,8 @@ useEffect(() => {
                   {tab === "details"
                     ? "Details"
                     : tab === "terms"
-                    ? "Terms & Conditions"
-                    : "Additional Details"}
+                      ? "Terms & Conditions"
+                      : "Additional Details"}
                 </button>
               ))}
             </div>
@@ -399,20 +420,24 @@ useEffect(() => {
             {/* Tab Content */}
             <section className="flex-1 overflow-y-auto p-4 space-y-6">
               {/* ====================== DETAILS ====================== */}
-            {activeTab === "details" && (
-                 <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4">
+              {activeTab === "details" && (
+                <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4">
                   <div className=" col-span-2">
-                  {/* Invoice Information */}
-                   <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">Invoice Information</h3> 
+                    {/* Invoice Information */}
+                    <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
+                      Invoice Information
+                    </h3>
                     <div className="flex flex-col gap-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-<CustomerDropdown
-  value={form.CutomerName}
-  onChange={(name) => setForm((p) => ({ ...p, CutomerName: name }))}
-  className="w-full"
-  customers={customers}
-  custLoading={custLoading}
-/>
+                        <CustomerDropdown
+                          value={form.CutomerName}
+                          onChange={(name) =>
+                            setForm((p) => ({ ...p, CutomerName: name }))
+                          }
+                          className="w-full"
+                          customers={customers}
+                          custLoading={custLoading}
+                        />
                         <Input
                           label="Date of Invoice"
                           name="dateOfInvoice"
@@ -420,18 +445,18 @@ useEffect(() => {
                           value={form.dateOfInvoice}
                           onChange={handleForm}
                           className="w-full"
-                        /> 
-                        <div className="flex flex-col gap-1">
-                        <Input
-                          label="Due Date"
-                          name="dueDate"
-                          type="date"
-                          value={form.dueDate}
-                          onChange={handleForm}
-                          className="w-full col-span-3"
                         />
-                       </div>
-                       <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1">
+                          <Input
+                            label="Due Date"
+                            name="dueDate"
+                            type="date"
+                            value={form.dueDate}
+                            onChange={handleForm}
+                            className="w-full col-span-3"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1">
                           <label className="font-medium text-gray-600 text-sm">
                             Currency
                           </label>
@@ -444,460 +469,502 @@ useEffect(() => {
                             <option value="ZMW">ZMW (ZK)</option>
                             <option value="INR">INR (₹)</option>
                             <option value="USD">USD ($)</option>
-                           </select>
+                          </select>
                         </div>
-                       <div className=" flex flex-col gap-1">
-                         <Select
-                        label="Invoice Status"
-                        name="status"
-                        value={form.status}
-                        onChange={handleForm}
-                        options={[
-                          { value: 'Draft', label: 'Draft' },
-                          { value: 'Sent', label: 'Sent' },
-                          { value: 'Paid', label: 'Paid' },
-                          { value: 'Overdue', label: 'Overdue' },
-                        ]}
-                      />
-                       </div>
+                        <div className=" flex flex-col gap-1">
+                          <Select
+                            label="Invoice Status"
+                            name="status"
+                            value={form.status}
+                            onChange={handleForm}
+                            options={[
+                              { value: "Draft", label: "Draft" },
+                              { value: "Sent", label: "Sent" },
+                              { value: "Paid", label: "Paid" },
+                              { value: "Overdue", label: "Overdue" },
+                            ]}
+                          />
+                        </div>
                       </div>
-                     </div>
-                   
+                    </div>
 
-<div className="my-6 h-px bg-gray-600" />
-                  
- {/* <Card title="Invoiced Items"> */}
-  <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">Invoiced Items</h3>
-   <div className="flex items-center justify-between mb-3">
-    <span className="text-sm text-gray-600">
-      Showing {page * itemsPerPage + 1}–{Math.min((page + 1) * itemsPerPage, items.length)} of {items.length}
-    </span>
-    <div className="flex gap-1">
-      <button
-        type="button"
-        onClick={() => setPage(Math.max(0, page - 1))}
-        disabled={page === 0}
-        className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        ← Prev
-      </button>
-      <button
-        type="button"
-        onClick={() => setPage(page + 1)}
-        disabled={(page + 1) * itemsPerPage >= items.length}
-        className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Next →
-      </button>
-    </div>
-  </div>
+                    <div className="my-6 h-px bg-gray-600" />
 
-   <div className="overflow-x-auto rounded-lg border">
-    <table className="w-full text-sm">
-      <thead className="bg-gray-50 text-gray-700">
-        <tr>
-          <th className="px-2 py-2 text-left">#</th>
-          <th className="px-2 py-2 text-left">Product</th>
-          <th className="px-2 py-2 text-left">Description</th>
-          <th className="px-2 py-2 text-left">Qty</th>
-          <th className="px-2 py-2 text-left">Unit Price</th>
-          <th className="px-2 py-2 text-left">Discount</th>
-          <th className="px-2 py-2 text-left">Tax</th>
-          <th className="px-2 py-2 text-right">Amount</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody className="divide-y">
-        {paginatedItems.map((it, idx) => {
-          const i = page * itemsPerPage + idx;    
-          const amount = it.quantity * it.listPrice - it.discount + it.tax;
-          return (
-            <tr key={i} className="hover:bg-gray-50">
-              <td className="px-3 py-2 text-center">{i + 1}</td>
-              <td className="px-1 py-1">
-                <input
-                  className="w-full rounded border p-1 text-sm"
-                  name="productName"
-                  value={it.productName}
-                  onChange={(e) => handleItem(e, i)}
-                />
-              </td>
-              <td className="px-1 py-1">
-                <input
-                  className="w-full rounded border p-1 text-sm"
-                  name="description"
-                  value={it.description}
-                  onChange={(e) => handleItem(e, i)}
-                />
-              </td>
-              <td className="px-1 py-1">
-                <input
-                  type="number"
-                  className="w-full rounded border p-1 text-right text-sm"
-                  name="quantity"
-                  value={it.quantity}
-                  onChange={(e) => handleItem(e, i)}
-                />
-              </td>
-              <td className="px-1 py-1">
-                <input
-                  type="number"
-                  className="w-full rounded border p-1 text-right text-sm"
-                  name="listPrice"
-                  value={it.listPrice}
-                  onChange={(e) => handleItem(e, i)}
-                />
-              </td>
-              <td className="px-1 py-1">
-                <input
-                  type="number"
-                  className="w-full rounded border p-1 text-right text-sm"
-                  name="discount"
-                  value={it.discount}
-                  onChange={(e) => handleItem(e, i)}
-                />
-              </td>
-              <td className="px-1 py-1">
-                <input
-                  type="number"
-                  className="w-full rounded border p-1 text-right text-sm"
-                  name="tax"
-                  value={it.tax}
-                  onChange={(e) => handleItem(e, i)}
-                />
-              </td>
-              <td className="px-1 py-1 text-right font-medium">
-                {symbol}
-                {amount.toFixed(2)}
-              </td>
-              <td className="px-1 py-1 text-center">
-                <button
-                  type="button"
-                  onClick={() => removeItem(i)}
-                  className="p-1 text-red-600 hover:bg-red-50 rounded"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  </div>
+                    {/* <Card title="Invoiced Items"> */}
+                    <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
+                      Invoiced Items
+                    </h3>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm text-gray-600">
+                        Showing {page * itemsPerPage + 1}–
+                        {Math.min((page + 1) * itemsPerPage, items.length)} of{" "}
+                        {items.length}
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setPage(Math.max(0, page - 1))}
+                          disabled={page === 0}
+                          className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          ← Prev
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPage(page + 1)}
+                          disabled={(page + 1) * itemsPerPage >= items.length}
+                          className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Next →
+                        </button>
+                      </div>
+                    </div>
 
-  {/* ---------- ADD ITEM + SUBTOTAL ---------- */}
-  <div className="flex justify-between mt-3">
-    <button
-      type="button"
-      onClick={addItem}
-      className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
-    >
-      <Plus className="w-4 h-4" /> Add Item
-    </button>
-    <div className="py-2 px-2">
-      
-    </div>
-  </div>
-  </div>
-  
-{/* ---------- Customer Details + Summary ---------- */}
-{/* <div className="col-span-1 sticky top-4 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit"> */}
-<div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
-  <div className="w-full max-w-sm space-y-6">  
-  {/* ---------- Customer Details ---------- */}
-  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-    <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">Customer Details</h3>
-     <div className="space-y-2 text-sm">
-      <div className="flex justify-between">
-        <span className="font-medium text-gray-600">First Name</span>
-        <span className="font-medium text-gray-800">Rishab</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="font-medium text-gray-600">Last Name</span>
-        <span className="font-medium text-gray-800">
-          Negi
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="font-medium text-gray-600">Phone Number</span>
-        <span className="font-medium text-gray-800"> +91 9201564389
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-base font-semibold text-gray-700">Email Address</span>
-        <span className="text-base font-bold text-blue-600">
-           rn@gmail.com
-        </span>
-      </div>
-    </div>
-  </div>
+                    <div className="overflow-x-auto rounded-lg border">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50 text-gray-700">
+                          <tr>
+                            <th className="px-2 py-2 text-left">#</th>
+                            <th className="px-2 py-2 text-left">Product</th>
+                            <th className="px-2 py-2 text-left">Description</th>
+                            <th className="px-2 py-2 text-left">Qty</th>
+                            <th className="px-2 py-2 text-left">Unit Price</th>
+                            <th className="px-2 py-2 text-left">Discount</th>
+                            <th className="px-2 py-2 text-left">Tax</th>
+                            <th className="px-2 py-2 text-right">Amount</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                          {paginatedItems.map((it, idx) => {
+                            const i = page * itemsPerPage + idx;
+                            const amount =
+                              it.quantity * it.listPrice - it.discount + it.tax;
+                            return (
+                              <tr key={i} className="hover:bg-gray-50">
+                                <td className="px-3 py-2 text-center">
+                                  {i + 1}
+                                </td>
+                                <td className="px-1 py-1">
+                                  <input
+                                    className="w-full rounded border p-1 text-sm"
+                                    name="productName"
+                                    value={it.productName}
+                                    onChange={(e) => handleItem(e, i)}
+                                  />
+                                </td>
+                                <td className="px-1 py-1">
+                                  <input
+                                    className="w-full rounded border p-1 text-sm"
+                                    name="description"
+                                    value={it.description}
+                                    onChange={(e) => handleItem(e, i)}
+                                  />
+                                </td>
+                                <td className="px-1 py-1">
+                                  <input
+                                    type="number"
+                                    className="w-full rounded border p-1 text-right text-sm"
+                                    name="quantity"
+                                    value={it.quantity}
+                                    onChange={(e) => handleItem(e, i)}
+                                  />
+                                </td>
+                                <td className="px-1 py-1">
+                                  <input
+                                    type="number"
+                                    className="w-full rounded border p-1 text-right text-sm"
+                                    name="listPrice"
+                                    value={it.listPrice}
+                                    onChange={(e) => handleItem(e, i)}
+                                  />
+                                </td>
+                                <td className="px-1 py-1">
+                                  <input
+                                    type="number"
+                                    className="w-full rounded border p-1 text-right text-sm"
+                                    name="discount"
+                                    value={it.discount}
+                                    onChange={(e) => handleItem(e, i)}
+                                  />
+                                </td>
+                                <td className="px-1 py-1">
+                                  <input
+                                    type="number"
+                                    className="w-full rounded border p-1 text-right text-sm"
+                                    name="tax"
+                                    value={it.tax}
+                                    onChange={(e) => handleItem(e, i)}
+                                  />
+                                </td>
+                                <td className="px-1 py-1 text-right font-medium">
+                                  {symbol}
+                                  {amount.toFixed(2)}
+                                </td>
+                                <td className="px-1 py-1 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => removeItem(i)}
+                                    className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
 
-  {/* ---------- Summary ---------- */}
-  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-    <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">Summary</h3>
-    <div className="space-y-2 text-sm">
-      <div className="flex justify-between">
-        <span className="font-medium text-gray-600">Total Items</span>
-        <span className="font-medium text-gray-800">{items.length}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="font-medium text-gray-600">Sub Total</span>
-        <span className="font-medium text-gray-800">
-          {symbol}{form.subTotal.toFixed(2)}
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="font-medium text-gray-600">Total Tax</span>
-        <span className="font-medium text-gray-800">
-          {symbol}{items.reduce((sum, it) => sum + it.tax, 0).toFixed(2)}
-        </span>
-      </div>
-      <div className="flex justify-between border-t pt-2 mt-2">
-        <span className="text-base font-semibold text-gray-700">Total Amount</span>
-        <span className="text-base font-bold text-blue-600">
-          {symbol}
-          {(
-            form.subTotal +
-            items.reduce((sum, it) => sum + it.tax, 0) -
-            items.reduce((sum, it) => sum + it.discount, 0)
-          ).toFixed(2)}
-        </span>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-  </div>
-   )}
-  
- 
-  {/* === TAB: Terms & Conditions === */}
-              {activeTab === "terms" && (
-              <div className=" h-full w-full">
-              <TermsAndCondition/>
-              </div>
+                    {/* ---------- ADD ITEM + SUBTOTAL ---------- */}
+                    <div className="flex justify-between mt-3">
+                      <button
+                        type="button"
+                        onClick={addItem}
+                        className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
+                      >
+                        <Plus className="w-4 h-4" /> Add Item
+                      </button>
+                      <div className="py-2 px-2"></div>
+                    </div>
+                  </div>
+
+                  {/* ---------- Customer Details + Summary ---------- */}
+                  {/* <div className="col-span-1 sticky top-4 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit"> */}
+                  <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
+                    <div className="w-full max-w-sm space-y-6">
+                      {/* ---------- Customer Details ---------- */}
+                      <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
+                        <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
+                          Customer Details
+                        </h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="font-medium text-gray-600">
+                              First Name
+                            </span>
+                            <span className="font-medium text-gray-800">
+                              Rishab
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-medium text-gray-600">
+                              Last Name
+                            </span>
+                            <span className="font-medium text-gray-800">
+                              Negi
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-medium text-gray-600">
+                              Phone Number
+                            </span>
+                            <span className="font-medium text-gray-800">
+                              {" "}
+                              +91 9201564389
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-base font-semibold text-gray-700">
+                              Email Address
+                            </span>
+                            <span className="text-base font-bold text-blue-600">
+                              rn@gmail.com
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ---------- Summary ---------- */}
+                      <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
+                        <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
+                          Summary
+                        </h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="font-medium text-gray-600">
+                              Total Items
+                            </span>
+                            <span className="font-medium text-gray-800">
+                              {items.length}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-medium text-gray-600">
+                              Sub Total
+                            </span>
+                            <span className="font-medium text-gray-800">
+                              {symbol}
+                              {form.subTotal.toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-medium text-gray-600">
+                              Total Tax
+                            </span>
+                            <span className="font-medium text-gray-800">
+                              {symbol}
+                              {items
+                                .reduce((sum, it) => sum + it.tax, 0)
+                                .toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between border-t pt-2 mt-2">
+                            <span className="text-base font-semibold text-gray-700">
+                              Total Amount
+                            </span>
+                            <span className="text-base font-bold text-blue-600">
+                              {symbol}
+                              {(
+                                form.subTotal +
+                                items.reduce((sum, it) => sum + it.tax, 0) -
+                                items.reduce((sum, it) => sum + it.discount, 0)
+                              ).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
- 
+
+              {/* === TAB: Terms & Conditions === */}
+              {activeTab === "terms" && (
+                <div className=" h-full w-full">
+                  <TermsAndCondition />
+                </div>
+              )}
 
               {/* === TAB: ADDRESS & TERMS === */}
               {activeTab === "address" && (
                 <div className=" grid grid-cols-2 gap-10">
-                   <div className=" col-span-1 shadow px-4 rounded-lg border border-gray-300 bg-white py-6">
-        <div className=" flex justify-between">
-        <h3 className=" mb-4 text-lg font-semibold text-gray-700 underline ">Billing Address</h3>
- <div className="flex items-center space-x-2">
-    <label htmlFor="address" className="text-gray-600 font-medium">
-      More Address:
-    </label>
-    <select
-      name="address"
-      id="address"
-      className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-    >
-      <option value="address1">Address 1</option>
-      <option value="address2">Address 2</option>
-      <option value="address3">Address 3</option>
-      <option value="address4">Address 4</option>
-    </select>
-  </div>
-</div>
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-        <Input
-          label="Line 1"
-          name="billingAddressLine1"
-          value={form.billingAddressLine1 ?? ""}
-          onChange={handleForm}
-          placeholder="Street, Apartment"
-        />
-        <Input
-          label="Line 2"
-          name="billingAddressLine2"
-          value={form.billingAddressLine2 ?? ""}
-          onChange={handleForm}
-          placeholder="Landmark, City"
-        />
-        <Input
-          label="Postal Code"
-          name="billingPostalCode"
-          value={form.billingPostalCode ?? ""}
-          onChange={handleForm}
-          placeholder="Postal Code"
-        />
-        <Input
-          label="City"
-          name="billingCity"
-          value={form.billingCity ?? ""}
-          onChange={handleForm}
-          placeholder="City"
-        />
-        <Input
-          label="State"
-          name="billingState"
-          value={form.billingState ?? ""}
-          onChange={handleForm}
-          placeholder="State"
-        />
-        <Input
-          label="Country"
-          name="billingCountry"
-          value={form.billingCountry ?? ""}
-          onChange={handleForm}
-          placeholder="Country"
-        />
-      </div>
- 
-    {/* Shipping Address */}
+                  <div className=" col-span-1 shadow px-4 rounded-lg border border-gray-300 bg-white py-6">
+                    <div className=" flex justify-between">
+                      <h3 className=" mb-4 text-lg font-semibold text-gray-700 underline ">
+                        Billing Address
+                      </h3>
+                      <div className="flex items-center space-x-2">
+                        <label
+                          htmlFor="address"
+                          className="text-gray-600 font-medium"
+                        >
+                          More Address:
+                        </label>
+                        <select
+                          name="address"
+                          id="address"
+                          className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        >
+                          <option value="address1">Address 1</option>
+                          <option value="address2">Address 2</option>
+                          <option value="address3">Address 3</option>
+                          <option value="address4">Address 4</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
+                      <Input
+                        label="Line 1"
+                        name="billingAddressLine1"
+                        value={form.billingAddressLine1 ?? ""}
+                        onChange={handleForm}
+                        placeholder="Street, Apartment"
+                      />
+                      <Input
+                        label="Line 2"
+                        name="billingAddressLine2"
+                        value={form.billingAddressLine2 ?? ""}
+                        onChange={handleForm}
+                        placeholder="Landmark, City"
+                      />
+                      <Input
+                        label="Postal Code"
+                        name="billingPostalCode"
+                        value={form.billingPostalCode ?? ""}
+                        onChange={handleForm}
+                        placeholder="Postal Code"
+                      />
+                      <Input
+                        label="City"
+                        name="billingCity"
+                        value={form.billingCity ?? ""}
+                        onChange={handleForm}
+                        placeholder="City"
+                      />
+                      <Input
+                        label="State"
+                        name="billingState"
+                        value={form.billingState ?? ""}
+                        onChange={handleForm}
+                        placeholder="State"
+                      />
+                      <Input
+                        label="Country"
+                        name="billingCountry"
+                        value={form.billingCountry ?? ""}
+                        onChange={handleForm}
+                        placeholder="Country"
+                      />
+                    </div>
 
-   <div className=" px-4 py-4 flex items-center justify-between">
-    <button
-  type="button"
-  onClick={() => setIsShippingOpen(!isShippingOpen)}
-  className="flex items-center gap-2 text-lg font-semibold text-gray-700 hover:text-gray-900"
->
-  <span className="font-bold">
-    {isShippingOpen ? "−" : "+"}
-  </span>
-  Shipping Address
-</button>
+                    {/* Shipping Address */}
 
-<label className="flex items-center gap-2 cursor-pointer select-none">
-  <input
-    type="checkbox"
-    checked={form.sameAsBilling}
-    onChange={(e) => {
-      const checked = e.target.checked;
-      setForm((prev) => ({
-        ...prev,
-        sameAsBilling: checked, 
-        ...(checked
-          ? {
-              shippingAddressLine1: prev.billingAddressLine1 ?? "",
-              shippingAddressLine2: prev.billingAddressLine2 ?? "",
-              shippingPostalCode: prev.billingPostalCode ?? "",
-              shippingCity: prev.billingCity ?? "",
-              shippingState: prev.billingState ?? "",
-              shippingCountry: prev.billingCountry ?? "",
-            }
-          : {
-              shippingAddressLine1: "",
-              shippingAddressLine2: "",
-              shippingPostalCode: "",
-              shippingCity: "",
-              shippingState: "",
-              shippingCountry: "",
-            }),
-      }));
-    }}
-    className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
-  />
-  <span className="text-sm text-gray-600">Same as billing address</span>
-</label>
-  </div>
- 
-  {isShippingOpen && (
-       <div className=" grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-        <Input
-          label="Line 1"
-          name="shippingAddressLine1"
-          value={form.shippingAddressLine1 ?? ""}
-          onChange={handleForm}
-          placeholder="Street, Apartment"
-          disabled={form.sameAsBilling}
-        />
-        <Input
-          label="Line 2"
-          name="shippingAddressLine2"
-          value={form.shippingAddressLine2 ?? ""}
-          onChange={handleForm}
-          placeholder="Landmark, City"
-          disabled={form.sameAsBilling}
-        />
-        <Input
-          label="Postal Code"
-          name="shippingPostalCode"
-          value={form.shippingPostalCode ?? ""}
-          onChange={handleForm}
-          placeholder="Postal Code"
-          disabled={form.sameAsBilling}
-        />
-        <Input
-          label="City"
-          name="shippingCity"
-          value={form.shippingCity ?? ""}
-          onChange={handleForm}
-          placeholder="City"
-          disabled={form.sameAsBilling}
-        />
-        <Input
-          label="State"
-          name="shippingState"
-          value={form.shippingState ?? ""}
-          onChange={handleForm}
-          placeholder="State"
-          disabled={form.sameAsBilling}
-        />
-        <Input
-          label="Country"
-          name="shippingCountry"
-          value={form.shippingCountry ?? ""}
-          onChange={handleForm}
-          placeholder="Country"
-          disabled={form.sameAsBilling}
-        />
-      </div> 
-  )} 
-    
-    </div>
+                    <div className=" px-4 py-4 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setIsShippingOpen(!isShippingOpen)}
+                        className="flex items-center gap-2 text-lg font-semibold text-gray-700 hover:text-gray-900"
+                      >
+                        <span className="font-bold">
+                          {isShippingOpen ? "−" : "+"}
+                        </span>
+                        Shipping Address
+                      </button>
 
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={form.sameAsBilling}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setForm((prev) => ({
+                              ...prev,
+                              sameAsBilling: checked,
+                              ...(checked
+                                ? {
+                                    shippingAddressLine1:
+                                      prev.billingAddressLine1 ?? "",
+                                    shippingAddressLine2:
+                                      prev.billingAddressLine2 ?? "",
+                                    shippingPostalCode:
+                                      prev.billingPostalCode ?? "",
+                                    shippingCity: prev.billingCity ?? "",
+                                    shippingState: prev.billingState ?? "",
+                                    shippingCountry: prev.billingCountry ?? "",
+                                  }
+                                : {
+                                    shippingAddressLine1: "",
+                                    shippingAddressLine2: "",
+                                    shippingPostalCode: "",
+                                    shippingCity: "",
+                                    shippingState: "",
+                                    shippingCountry: "",
+                                  }),
+                            }));
+                          }}
+                          className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                        />
+                        <span className="text-sm text-gray-600">
+                          Same as billing address
+                        </span>
+                      </label>
+                    </div>
 
-  <div className=" col-span-1 px-4 shadow rounded-lg border border-gray-300 bg-white py-6 sticky h-fit">
-                   <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">Payment Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                    <Input
-                      label="Payment Terms"
-                      name="paymentTerms"
-                      value={form.paymentTerms || ""}
-                      onChange={handleForm}
-                      placeholder="e.g., Net 30, Due on Receipt"
-                    />
-                    <Input
-                      label="Payment Method"
-                      name="paymentMethod"
-                      value={form.paymentMethod || ""}
-                      onChange={handleForm}
-                      placeholder="e.g., Bank Transfer, Credit Card"
-                    />
-                    <Input
-                      label="Bank Name"
-                      name="bankName"
-                      value={form.bankName || ""}
-                      onChange={handleForm}
-                    />
-                    <Input
-                      label="Account Number"
-                      name="accountNumber"
-                      value={form.accountNumber || ""}
-                      onChange={handleForm}
-                    />
-                    <Input
-                      label="Routing Number / IBAN"
-                      name="routingNumber"
-                      value={form.routingNumber || ""}
-                      onChange={handleForm}
-                    />
-                    <Input
-                      label="SWIFT / BIC"
-                      name="swiftCode"
-                      value={form.swiftCode || ""}
-                      onChange={handleForm}
-                    />
+                    {isShippingOpen && (
+                      <div className=" grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
+                        <Input
+                          label="Line 1"
+                          name="shippingAddressLine1"
+                          value={form.shippingAddressLine1 ?? ""}
+                          onChange={handleForm}
+                          placeholder="Street, Apartment"
+                          disabled={form.sameAsBilling}
+                        />
+                        <Input
+                          label="Line 2"
+                          name="shippingAddressLine2"
+                          value={form.shippingAddressLine2 ?? ""}
+                          onChange={handleForm}
+                          placeholder="Landmark, City"
+                          disabled={form.sameAsBilling}
+                        />
+                        <Input
+                          label="Postal Code"
+                          name="shippingPostalCode"
+                          value={form.shippingPostalCode ?? ""}
+                          onChange={handleForm}
+                          placeholder="Postal Code"
+                          disabled={form.sameAsBilling}
+                        />
+                        <Input
+                          label="City"
+                          name="shippingCity"
+                          value={form.shippingCity ?? ""}
+                          onChange={handleForm}
+                          placeholder="City"
+                          disabled={form.sameAsBilling}
+                        />
+                        <Input
+                          label="State"
+                          name="shippingState"
+                          value={form.shippingState ?? ""}
+                          onChange={handleForm}
+                          placeholder="State"
+                          disabled={form.sameAsBilling}
+                        />
+                        <Input
+                          label="Country"
+                          name="shippingCountry"
+                          value={form.shippingCountry ?? ""}
+                          onChange={handleForm}
+                          placeholder="Country"
+                          disabled={form.sameAsBilling}
+                        />
+                      </div>
+                    )}
                   </div>
+
+                  <div className=" col-span-1 px-4 shadow rounded-lg border border-gray-300 bg-white py-6 sticky h-fit">
+                    <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
+                      Payment Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
+                      <Input
+                        label="Payment Terms"
+                        name="paymentTerms"
+                        value={form.paymentTerms || ""}
+                        onChange={handleForm}
+                        placeholder="e.g., Net 30, Due on Receipt"
+                      />
+                      <Input
+                        label="Payment Method"
+                        name="paymentMethod"
+                        value={form.paymentMethod || ""}
+                        onChange={handleForm}
+                        placeholder="e.g., Bank Transfer, Credit Card"
+                      />
+                      <Input
+                        label="Bank Name"
+                        name="bankName"
+                        value={form.bankName || ""}
+                        onChange={handleForm}
+                      />
+                      <Input
+                        label="Account Number"
+                        name="accountNumber"
+                        value={form.accountNumber || ""}
+                        onChange={handleForm}
+                      />
+                      <Input
+                        label="Routing Number / IBAN"
+                        name="routingNumber"
+                        value={form.routingNumber || ""}
+                        onChange={handleForm}
+                      />
+                      <Input
+                        label="SWIFT / BIC"
+                        name="swiftCode"
+                        value={form.swiftCode || ""}
+                        onChange={handleForm}
+                      />
+                    </div>
                   </div>
-                 </div>
+                </div>
               )}
             </section>
- 
+
             {/* Footer */}
             <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
               <button
@@ -928,24 +995,24 @@ useEffect(() => {
       </AnimatePresence>
     </div>
   );
-}
- 
+};
+
 const Input = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement> & { label: string }
->(({ label, className = '', ...props }, ref) => (
+>(({ label, className = "", ...props }, ref) => (
   <label className="flex flex-col gap-1 text-sm w-full">
     <span className="font-medium text-gray-600">{label}</span>
     <input
       ref={ref}
       className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-        props.disabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
+        props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
       } ${className}`}
       {...props}
     />
   </label>
 ));
-Input.displayName = 'Input';
+Input.displayName = "Input";
 
 const Select: React.FC<{
   label: string;

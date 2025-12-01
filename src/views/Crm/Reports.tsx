@@ -10,10 +10,26 @@ type Report = {
 const CRMReports: React.FC = () => {
   // Report array with type
   const reports: Report[] = [
-    { id: 1, name: "Lead Conversion Report", description: "Shows lead to customer conversion rates." },
-    { id: 2, name: "Ticket Resolution Times", description: "Average resolution time by priority." },
-    { id: 3, name: "Sales Funnel Analysis", description: "Visualizes sales opportunities by stage." },
-    { id: 4, name: "Customer Interaction Summary", description: "Aggregated interaction logs and activity." },
+    {
+      id: 1,
+      name: "Lead Conversion Report",
+      description: "Shows lead to customer conversion rates.",
+    },
+    {
+      id: 2,
+      name: "Ticket Resolution Times",
+      description: "Average resolution time by priority.",
+    },
+    {
+      id: 3,
+      name: "Sales Funnel Analysis",
+      description: "Visualizes sales opportunities by stage.",
+    },
+    {
+      id: 4,
+      name: "Customer Interaction Summary",
+      description: "Aggregated interaction logs and activity.",
+    },
   ];
 
   // Modal ke liye selectedReport state with type
@@ -38,7 +54,9 @@ const CRMReports: React.FC = () => {
             key={report.id}
             className="bg-white border rounded-lg shadow-sm hover:shadow-md transition transform hover:-translate-y-1 p-5"
           >
-            <h4 className="font-semibold text-lg text-gray-800 mb-1">{report.name}</h4>
+            <h4 className="font-semibold text-lg text-gray-800 mb-1">
+              {report.name}
+            </h4>
             <p className="text-sm text-gray-600 mb-3">{report.description}</p>
             <button
               onClick={() => handleViewReport(report)}
@@ -59,7 +77,8 @@ const CRMReports: React.FC = () => {
             </h3>
             <p className="text-gray-600 mb-4">{selectedReport.description}</p>
             <div className="border rounded-lg p-3 bg-gray-50 text-sm text-gray-700">
-              Demo placeholder: Here you can show charts or detailed analytics for this report.
+              Demo placeholder: Here you can show charts or detailed analytics
+              for this report.
             </div>
             <button
               className="mt-5 w-full rounded bg-teal-600 hover:bg-teal-700 text-white py-2 transition"

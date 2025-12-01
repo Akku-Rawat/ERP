@@ -336,7 +336,9 @@ const accountingModule = {
 
 // Main component
 const AccountingModule: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>(accountingModule.defaultTab);
+  const [activeTab, setActiveTab] = useState<string>(
+    accountingModule.defaultTab,
+  );
   const [glSubTab, setGlSubTab] = useState<string>("chart");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
@@ -471,4 +473,3 @@ const AccountingModule: React.FC = () => {
 };
 
 export default AccountingModule;
-

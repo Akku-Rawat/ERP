@@ -36,7 +36,6 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     }
   };
 
-
   const handleDelete = async (custid: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -45,7 +44,12 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
 
     const id = customerToDelete.custom_id;
 
-    if (!window.confirm(`Are you sure you want to delete customer with custid ${id}?`)) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete customer with custid ${id}?`,
+      )
+    )
+      return;
 
     try {
       setCustLoading(true);
@@ -60,7 +64,6 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
       setCustLoading(false);
     }
   };
-
 
   useEffect(() => {
     fetchCustomers();
@@ -84,7 +87,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   //   }
   // };
 
-   const handleEditCustomer = (customer: any, e: React.MouseEvent) => {
+  const handleEditCustomer = (customer: any, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditCustomer(customer);
     console.log("customer" + customer);
@@ -100,7 +103,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
       toast.success(
         editCustomer
           ? "Customer updated successfully!"
-          : "Customer created successfully!"
+          : "Customer created successfully!",
       );
     } catch (err) {
       toast.error("Failed to refresh customer list");
@@ -108,11 +111,17 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   };
 
   const filtered = customers.filter((c: any) =>
-    [c.custom_id, c.customer_name, c.customer_currency, c.customer_onboarding_balance, c.custom_customer_tpin,
-    c.custom_billing_adress_line_1]
+    [
+      c.custom_id,
+      c.customer_name,
+      c.customer_currency,
+      c.customer_onboarding_balance,
+      c.custom_customer_tpin,
+      c.custom_billing_adress_line_1,
+    ]
       .join(" ")
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+      .includes(searchTerm.toLowerCase()),
   );
 
   const handleRowClick = (customer: any) => {
@@ -178,14 +187,19 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
                         className="hover:bg-gray-50 cursor-pointer transition"
                       >
                         <td className="px-4 py-2 font-medium">{c.custom_id}</td>
-                        <td className="px-4 py-2 font-semibold">{c.customer_name}</td>
-                        <td className="px-4 py-2 font-medium">{c.custom_shipping_address_line_1}</td>
+                        <td className="px-4 py-2 font-semibold">
+                          {c.customer_name}
+                        </td>
+                        <td className="px-4 py-2 font-medium">
+                          {c.custom_shipping_address_line_1}
+                        </td>
                         <td className="px-4 py-2">
                           <span
-                            className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${c.customer_type === "Company"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-purple-100 text-purple-800"
-                              }`}
+                            className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
+                              c.customer_type === "Company"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-purple-100 text-purple-800"
+                            }`}
                           >
                             {c.customer_type}
                           </span>
@@ -240,7 +254,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
         </>
       ) : (
         <CustomerDetailView
-          customer={selectedCustomer!}
+          customer={selectedCustomer}
           customers={customers}
           onBack={handleBack}
           onCustomerSelect={handleRowClick}
@@ -256,7 +270,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
           setEditCustomer(null);
         }}
         // onSubmit={handleSaveCustomer}
-        // initialData={editCustomer} 
+        // initialData={editCustomer}
         onSubmit={handleCustomerSaved}
         initialData={editCustomer}
         isEditMode={!!editCustomer}

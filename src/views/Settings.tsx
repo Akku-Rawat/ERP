@@ -1,17 +1,15 @@
 import React, { useState } from "react";
 import { FaCogs } from "react-icons/fa";
 
-
 const settingsModule = {
   name: "Settings",
   icon: <FaCogs />,
   defaultTab: "settings",
-//   tabs: [
-//     { id: "accounts", name: "Tax", icon: <FaWrench /> },
-//     { id: "journals", name: "Journal Entries", icon: <FaFileAlt /> },
-//     { id: "reports", name: "Financial Reports", icon: <FaClipboardList /> },
-//   ],
-  
+  //   tabs: [
+  //     { id: "accounts", name: "Tax", icon: <FaWrench /> },
+  //     { id: "journals", name: "Journal Entries", icon: <FaFileAlt /> },
+  //     { id: "reports", name: "Financial Reports", icon: <FaClipboardList /> },
+  //   ],
 };
 
 const Settings = () => {
@@ -21,7 +19,7 @@ const Settings = () => {
   const [defaultPaymentMethod, setDefaultPaymentMethod] = useState("Cash");
 
   const handleSaveSettings = () => {
-     console.log({
+    console.log({
       taxRate,
       currency,
       invoicePrefix,
@@ -38,7 +36,7 @@ const Settings = () => {
           <span>{settingsModule.icon}</span> {settingsModule.name}
         </h2>
       </div>
-       <div className="space-y-4 max-w-md border-t">
+      <div className="space-y-4 max-w-md border-t">
         <div>
           <label className="block mb-1 font-medium">Tax Rate (%)</label>
           <input
@@ -69,7 +67,9 @@ const Settings = () => {
           />
         </div>
         <div>
-          <label className="block mb-1 font-medium">Default Payment Method</label>
+          <label className="block mb-1 font-medium">
+            Default Payment Method
+          </label>
           <select
             value={defaultPaymentMethod}
             onChange={(e) => setDefaultPaymentMethod(e.target.value)}
@@ -88,7 +88,7 @@ const Settings = () => {
         </button>
       </div>
     </div>
-   );
+  );
 };
 
 export default Settings;

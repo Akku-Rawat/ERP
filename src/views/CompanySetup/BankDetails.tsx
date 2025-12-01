@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { FaUniversity, FaPlus, FaSearch, FaEdit, FaTrash, FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+  FaUniversity,
+  FaPlus,
+  FaSearch,
+  FaEdit,
+  FaTrash,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
 
 interface BankAccount {
   bankName: string;
@@ -17,18 +25,21 @@ interface Props {
 const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAccount, setSelectedAccount] = useState<number | null>(
-    bankAccounts.length > 0 ? 0 : null
+    bankAccounts.length > 0 ? 0 : null,
   );
-  const [showAccountNumber, setShowAccountNumber] = useState<Record<number, boolean>>({});
+  const [showAccountNumber, setShowAccountNumber] = useState<
+    Record<number, boolean>
+  >({});
 
-  const filteredAccounts = bankAccounts.filter(acc =>
-    acc.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    acc.accountNumber.includes(searchTerm) ||
-    acc.ifscCode.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredAccounts = bankAccounts.filter(
+    (acc) =>
+      acc.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      acc.accountNumber.includes(searchTerm) ||
+      acc.ifscCode.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const toggleAccountVisibility = (index: number) => {
-    setShowAccountNumber(prev => ({ ...prev, [index]: !prev[index] }));
+    setShowAccountNumber((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
   const maskAccountNumber = (accountNumber: string) => {
@@ -37,7 +48,6 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
   };
 
   return (
-    
     <div className="bg-white">
       <div className=" mx-auto">
         <div className="grid grid-cols-5 gap-6">
@@ -88,15 +98,21 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                       }`}
                     >
                       <div className="flex justify-between items-start mb-1">
-                        <p className="font-semibold text-gray-800 text-sm">{acc.bankName}</p>
+                        <p className="font-semibold text-gray-800 text-sm">
+                          {acc.bankName}
+                        </p>
                         <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
                           {acc.currency}
                         </span>
                       </div>
                       <p className="text-xs text-gray-500 font-mono">
-                        {showAccountNumber[i] ? acc.accountNumber : maskAccountNumber(acc.accountNumber)}
+                        {showAccountNumber[i]
+                          ? acc.accountNumber
+                          : maskAccountNumber(acc.accountNumber)}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">IFSC: {acc.ifscCode}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        IFSC: {acc.ifscCode}
+                      </p>
                     </div>
                   ))
                 )}
@@ -107,7 +123,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
           {/* Account Details */}
           <div className="col-span-3 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
             <div className=" bg-teal-700 px-5 py-4 flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-white">Account Details</h2>
+              <h2 className="text-lg font-semibold text-white">
+                Account Details
+              </h2>
               {selectedAccount !== null && (
                 <div className="flex gap-2">
                   <button className="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-md transition-all text-white text-sm font-medium flex items-center gap-1.5">
@@ -127,7 +145,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                 <div className="inline-block bg-gray-100 p-6 rounded-full mb-4">
                   <FaUniversity className="w-12 h-12 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">No Account Selected</h3>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  No Account Selected
+                </h3>
                 <p className="text-gray-500">
                   Select an account from the list to view details
                 </p>
@@ -140,7 +160,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                       Bank Name
                     </label>
                     <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
-                      <p className="text-gray-800 font-medium">{bankAccounts[selectedAccount].bankName}</p>
+                      <p className="text-gray-800 font-medium">
+                        {bankAccounts[selectedAccount].bankName}
+                      </p>
                     </div>
                   </div>
 
@@ -149,7 +171,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                       SWIFT/BIC Code
                     </label>
                     <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
-                      <p className="text-gray-800 font-mono">{bankAccounts[selectedAccount].swiftCode}</p>
+                      <p className="text-gray-800 font-mono">
+                        {bankAccounts[selectedAccount].swiftCode}
+                      </p>
                       <span className="text-green-500">✓</span>
                     </div>
                   </div>
@@ -162,7 +186,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                       <p className="text-gray-800 font-mono font-semibold">
                         {showAccountNumber[selectedAccount]
                           ? bankAccounts[selectedAccount].accountNumber
-                          : maskAccountNumber(bankAccounts[selectedAccount].accountNumber)}
+                          : maskAccountNumber(
+                              bankAccounts[selectedAccount].accountNumber,
+                            )}
                       </p>
                       <button
                         onClick={() => toggleAccountVisibility(selectedAccount)}
@@ -182,7 +208,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                       IFSC Code
                     </label>
                     <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
-                      <p className="text-gray-800 font-mono">{bankAccounts[selectedAccount].ifscCode}</p>
+                      <p className="text-gray-800 font-mono">
+                        {bankAccounts[selectedAccount].ifscCode}
+                      </p>
                       <span className="text-green-500">✓</span>
                     </div>
                   </div>
@@ -192,10 +220,12 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                       Currency
                     </label>
                     <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
-                      <p className="text-gray-800 font-semibold">{bankAccounts[selectedAccount].currency}</p>
+                      <p className="text-gray-800 font-semibold">
+                        {bankAccounts[selectedAccount].currency}
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
                       Status
@@ -208,8 +238,6 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                     </div>
                   </div>
                 </div>
-
-                
               </div>
             )}
           </div>

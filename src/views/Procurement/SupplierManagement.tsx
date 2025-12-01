@@ -116,7 +116,9 @@ const SupplierManagement: React.FC<Props> = ({ onAdd }) => {
   const [suppliers] = useState<Supplier[]>(initialSuppliers);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "detail">("table");
-  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(
+    null,
+  );
 
   const filtered = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -125,7 +127,7 @@ const SupplierManagement: React.FC<Props> = ({ onAdd }) => {
         s.supplierName.toLowerCase().includes(term) ||
         (s.supplierCode ?? "").toLowerCase().includes(term) ||
         (s.tpin ?? "").toLowerCase().includes(term) ||
-        (s.status ?? "").toLowerCase().includes(term)
+        (s.status ?? "").toLowerCase().includes(term),
     );
   }, [suppliers, searchTerm]);
 
@@ -217,8 +219,8 @@ const SupplierManagement: React.FC<Props> = ({ onAdd }) => {
                           s.status === "active"
                             ? "bg-green-100 text-green-800"
                             : s.status === "inactive"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
                         {s.status || "active"}
@@ -252,7 +254,9 @@ const SupplierManagement: React.FC<Props> = ({ onAdd }) => {
 
             {filtered.length === 0 && (
               <div className="text-center py-16 text-gray-500">
-                {searchTerm ? "No suppliers match your search." : "No suppliers added yet."}
+                {searchTerm
+                  ? "No suppliers match your search."
+                  : "No suppliers added yet."}
               </div>
             )}
           </div>

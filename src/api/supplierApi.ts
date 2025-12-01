@@ -24,7 +24,7 @@ export async function createSupplier(payload: any): Promise<any> {
 
 export async function getSupplierById(id: string | number): Promise<any> {
   const resp: AxiosResponse = await api.get(
-    `${ENDPOINTS.getSupplierById}?custom_supplier_id=${id}`
+    `${ENDPOINTS.getSupplierById}?custom_supplier_id=${id}`,
   );
   return resp.data;
 }
@@ -36,7 +36,7 @@ export async function updateSupplier(payload: any): Promise<any> {
 
 export async function deleteSupplier(id: string | number): Promise<any> {
   const resp: AxiosResponse = await api.delete(
-    `${ENDPOINTS.deleteSupplier}?custom_supplier_id=${id}`
+    `${ENDPOINTS.deleteSupplier}?custom_supplier_id=${id}`,
   );
   return resp.data;
 }

@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { FaPlus, FaSearch, FaEdit, FaTrash } from "react-icons/fa";
-import AssignUserRoleModal from '../../components/User/AssignUserRoleModal';
-
-
+import AssignUserRoleModal from "../../components/User/AssignUserRoleModal";
 
 interface Role {
   id: number;
@@ -10,9 +8,8 @@ interface Role {
   description: string;
   modulePermissions: string[];
   actionPermissions: string[];
-  status: "Active" | "Inactive";   
+  status: "Active" | "Inactive";
 }
-
 
 interface AssignUserRoleForm {
   roleName: string;
@@ -24,20 +21,23 @@ interface AssignUserRoleForm {
 
 interface UserRoleProps {
   roles: Role[];
-  onSubmit: (data: AssignUserRoleForm, isEdit: boolean, roleId?: number) => void;
+  onSubmit: (
+    data: AssignUserRoleForm,
+    isEdit: boolean,
+    roleId?: number,
+  ) => void;
   onDelete: (id: number) => void;
 }
-
 
 const UserRole: React.FC<UserRoleProps> = ({ roles, onSubmit, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
 
-  const filteredRoles = roles.filter(role =>
-    Object.values(role).some(val =>
-      String(val).toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  const filteredRoles = roles.filter((role) =>
+    Object.values(role).some((val) =>
+      String(val).toLowerCase().includes(searchTerm.toLowerCase()),
+    ),
   );
 
   const handleAdd = () => {
@@ -50,16 +50,15 @@ const UserRole: React.FC<UserRoleProps> = ({ roles, onSubmit, onDelete }) => {
     setShowModal(true);
   };
 
-const handleModalSubmit = (data: AssignUserRoleForm) => {
-  if (editingRole) {
-    onSubmit(data, true, editingRole.id);
-  } else {
-    onSubmit(data, false);
-  }
-  setShowModal(false);
-  setEditingRole(null);
-};
-
+  const handleModalSubmit = (data: AssignUserRoleForm) => {
+    if (editingRole) {
+      onSubmit(data, true, editingRole.id);
+    } else {
+      onSubmit(data, false);
+    }
+    setShowModal(false);
+    setEditingRole(null);
+  };
 
   return (
     <div>
@@ -190,23 +189,27 @@ const handleModalSubmit = (data: AssignUserRoleForm) => {
       </div>
 
       {/* Role Modal */}
-    {showModal && (
-  <AssignUserRoleModal
-    isOpen={showModal}
-    onClose={() => {
-      setShowModal(false);
-      setEditingRole(null);
-    }}
-    onSubmit={handleModalSubmit}
-    initialData={editingRole ? {
-      roleName: editingRole.roleName,
-      description: editingRole.description,
-      modulePermissions: editingRole.modulePermissions,
-      actionPermissions: editingRole.actionPermissions,
-      status: editingRole.status as "Active" | "Inactive"
-    } : undefined}
-  />
-)}
+      {showModal && (
+        <AssignUserRoleModal
+          isOpen={showModal}
+          onClose={() => {
+            setShowModal(false);
+            setEditingRole(null);
+          }}
+          onSubmit={handleModalSubmit}
+          initialData={
+            editingRole
+              ? {
+                  roleName: editingRole.roleName,
+                  description: editingRole.description,
+                  modulePermissions: editingRole.modulePermissions,
+                  actionPermissions: editingRole.actionPermissions,
+                  status: editingRole.status,
+                }
+              : undefined
+          }
+        />
+      )}
     </div>
   );
 };

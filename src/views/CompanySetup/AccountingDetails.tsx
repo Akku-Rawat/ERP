@@ -1,30 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   FaDollarSign,
   FaChartArea,
   FaSyncAlt,
   FaBullseye,
-  FaCheckCircle
+  FaCheckCircle,
 } from "react-icons/fa";
-
 
 const AccountingDetails: React.FC = () => {
   const [formData, setFormData] = useState({
-    chartOfAccounts: '',
-    defaultExpenseGL: '',
-    exchangeGainLossAccount: '',
-    exchangeRateRevaluationFreq: 'Monthly',
-    roundOffAccount: '',
-    roundOffCostCenter: '',
-    depreciationExpenseAccount: '',
-    appreciationIncomeAccount: '',
+    chartOfAccounts: "",
+    defaultExpenseGL: "",
+    exchangeGainLossAccount: "",
+    exchangeRateRevaluationFreq: "Monthly",
+    roundOffAccount: "",
+    roundOffCostCenter: "",
+    depreciationExpenseAccount: "",
+    appreciationIncomeAccount: "",
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = () => {
@@ -40,11 +41,11 @@ const AccountingDetails: React.FC = () => {
         {showSuccess && (
           <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-3">
             <FaCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-800 font-medium text-sm">Configuration saved successfully!</p>
+            <p className="text-green-800 font-medium text-sm">
+              Configuration saved successfully!
+            </p>
           </div>
         )}
-
-   
 
         {/* Main Content - Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
@@ -54,9 +55,11 @@ const AccountingDetails: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-200">
                 <FaDollarSign className="w-4 h-4 text-slate-600" />
-                <h2 className="text-base font-semibold text-slate-900">General Accounts</h2>
+                <h2 className="text-base font-semibold text-slate-900">
+                  General Accounts
+                </h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">
@@ -92,9 +95,11 @@ const AccountingDetails: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-200">
                 <FaSyncAlt className="w-4 h-4 text-slate-600" />
-                <h2 className="text-base font-semibold text-slate-900">Exchange Rate</h2>
+                <h2 className="text-base font-semibold text-slate-900">
+                  Exchange Rate
+                </h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">
@@ -136,9 +141,11 @@ const AccountingDetails: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-200">
                 <FaBullseye className="w-4 h-4 text-slate-600" />
-                <h2 className="text-base font-semibold text-slate-900">Rounding Configuration</h2>
+                <h2 className="text-base font-semibold text-slate-900">
+                  Rounding Configuration
+                </h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">
@@ -174,9 +181,11 @@ const AccountingDetails: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-200">
                 <FaChartArea className="w-4 h-4 text-slate-600" />
-                <h2 className="text-base font-semibold text-slate-900">Asset Valuation</h2>
+                <h2 className="text-base font-semibold text-slate-900">
+                  Asset Valuation
+                </h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">
@@ -211,36 +220,36 @@ const AccountingDetails: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-       
-          
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => setFormData({
-                chartOfAccounts: '',
-                defaultExpenseGL: '',
-                exchangeGainLossAccount: '',
-                exchangeRateRevaluationFreq: 'Monthly',
-                roundOffAccount: '',
-                roundOffCostCenter: '',
-                depreciationExpenseAccount: '',
-                appreciationIncomeAccount: '',
-              })}
-              className="px-5 py-2 border border-slate-300 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors"
-            >
-              Reset
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="px-5 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 shadow-sm hover:shadow transition-all"
-            >
-              Save Configuration
-            </button>
-          </div>
+
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={() =>
+              setFormData({
+                chartOfAccounts: "",
+                defaultExpenseGL: "",
+                exchangeGainLossAccount: "",
+                exchangeRateRevaluationFreq: "Monthly",
+                roundOffAccount: "",
+                roundOffCostCenter: "",
+                depreciationExpenseAccount: "",
+                appreciationIncomeAccount: "",
+              })
+            }
+            className="px-5 py-2 border border-slate-300 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors"
+          >
+            Reset
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="px-5 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 shadow-sm hover:shadow transition-all"
+          >
+            Save Configuration
+          </button>
         </div>
       </div>
-   
+    </div>
   );
 };
 

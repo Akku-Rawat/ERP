@@ -1,5 +1,5 @@
 import type { AxiosResponse } from "axios";
-import {createAxiosInstance} from "./axiosInstance";
+import { createAxiosInstance } from "./axiosInstance";
 
 const base_url = import.meta.env.VITE_BASE_URL as string;
 const api = createAxiosInstance(base_url);
@@ -17,7 +17,10 @@ export async function getAllWarehouses(): Promise<any> {
 }
 
 export async function createWarehouse(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(ENDPOINTS.createWarehouse, payload);
+  const resp: AxiosResponse = await api.post(
+    ENDPOINTS.createWarehouse,
+    payload,
+  );
   return resp.data;
 }
 

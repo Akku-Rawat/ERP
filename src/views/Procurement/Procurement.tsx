@@ -4,7 +4,7 @@ import PurchaseOrdersTable from "./PurchaseOrders";
 import ApprovalsSection from "./Approvals";
 import Dashboard from "./ProcurementDashboard";
 import ApprovalModal from "../../components/procurement/ApprovalModal";
-import { 
+import {
   FaClipboardList,
   FaCheckCircle,
   FaShoppingBag,
@@ -12,7 +12,7 @@ import {
   FaFileSignature,
   FaFileInvoiceDollar,
   FaTruckLoading,
-  FaLandmark
+  FaLandmark,
 } from "react-icons/fa";
 import SupplierManagement from "./SupplierManagement";
 import SupplierModal from "../../components/procurement/SupplierModal";
@@ -23,12 +23,20 @@ const procurement = {
   icon: <FaShoppingBag />,
   defaultTab: "procurementdashboard",
   tabs: [
-    {id:"procurementdashboard", name: "Dashboard", icon: <FaTachometerAlt />},
-    {id: "supplier", name: "Supplier Management", icon: <FaLandmark/> },
+    {
+      id: "procurementdashboard",
+      name: "Dashboard",
+      icon: <FaTachometerAlt />,
+    },
+    { id: "supplier", name: "Supplier Management", icon: <FaLandmark /> },
     { id: "rfqs", name: "RFQs", icon: <FaFileSignature /> },
     { id: "orders", name: "Purchase Orders", icon: <FaClipboardList /> },
     { id: "approvals", name: "Approvals", icon: <FaCheckCircle /> },
-    { id: "invoicematching", name: "Invoice Matching", icon: <FaFileInvoiceDollar /> },
+    {
+      id: "invoicematching",
+      name: "Invoice Matching",
+      icon: <FaFileInvoiceDollar />,
+    },
     { id: "purchase", name: "Purchase Invoice", icon: <FaTruckLoading /> },
   ],
 };

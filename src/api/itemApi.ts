@@ -42,7 +42,7 @@ export async function createItem(payload: any): Promise<any> {
 
 export async function updateItemByItemCode(
   item_code: string,
-  payload: any
+  payload: any,
 ): Promise<any> {
   const url = `${ENDPOINTS.updateItem}?item_code=${item_code}`;
   const resp: AxiosResponse = await api.put(url, payload);

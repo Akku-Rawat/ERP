@@ -1,5 +1,5 @@
 import type { AxiosResponse } from "axios";
-import {createAxiosInstance} from "./axiosInstance";
+import { createAxiosInstance } from "./axiosInstance";
 
 const base_url = import.meta.env.VITE_BASE_URL as string;
 const api = createAxiosInstance(base_url);
@@ -12,7 +12,10 @@ const ENDPOINTS = {
 };
 
 export async function createItemStock(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(ENDPOINTS.createItemStock, payload);
+  const resp: AxiosResponse = await api.post(
+    ENDPOINTS.createItemStock,
+    payload,
+  );
   return resp.data;
 }
 
@@ -22,7 +25,9 @@ export async function getAllStockEntries(): Promise<any> {
 }
 
 export async function deleteStockEntry(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.delete(ENDPOINTS.deleteStockEntry, { data: payload });
+  const resp: AxiosResponse = await api.delete(ENDPOINTS.deleteStockEntry, {
+    data: payload,
+  });
   return resp.data;
 }
 
