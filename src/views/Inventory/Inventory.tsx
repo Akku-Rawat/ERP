@@ -7,10 +7,8 @@ import { FaBoxOpen, FaWarehouse, FaTruckMoving, FaBoxes } from "react-icons/fa";
 import Items from "./Items";
 import Warehouses from "./Warehouses";
 import Movements from "./Movements";
-import ItemModal from "../../components/inventory/ItemModal";
-import ItemsCategory from "./ItemsCategory";
-import ItemsCategoryModal from "../../components/inventory/ItemsCategoryModal";
-
+ import ItemsCategory from "./ItemsCategory";
+ 
 const inventory = {
   name: "Inventory",
   icon: <FaBoxes />,
@@ -106,12 +104,7 @@ const Inventory: React.FC = () => {
         {activeTab === "movements" && (
           <Movements onAdd={handleAdd} />
         )}
-      </div>      
-      <ItemsCategoryModal
-        isOpen={showCategoryModal}
-        onClose={() => setShowCategoryModal(false)}
-        onSubmit={(data) => console.log("New Items Category:", data)}
-      />
+      </div> 
       <WarehouseModal
         isOpen={showWarehouseModal}
         onClose={() => setShowWarehouseModal(false)}

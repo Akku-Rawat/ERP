@@ -1,4 +1,8 @@
-import React from "react";
+import React,{useEffect, useState} from "react";
+import ItemsCategoryModal from "../../components/inventory/ItemsCategoryModal";
+
+const base_url = import.meta.env.VITE_BASE_URL;
+const GET_ITEMS_CAT_ENDPOINT = `${base_url}.item.item.get_all_item_groups_api`;
 
 interface Product {
   id: string;
@@ -17,13 +21,39 @@ interface ProductsProps {
   onAdd: () => void;
 }
 
+
 const ItemsCategory: React.FC<ProductsProps> = ({ products, searchTerm, setSearchTerm, onAdd }) => {
-  const filteredProducts = products.filter(
-    (p) =>
-      p.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const [itemsCat, setItemsCat] = useState<any[]>([]);
+   const [showCategoryModal, setShowCategoryModal] = useState(false);
+   const [itemCatLoading, setItemCatLoading] = useState(false);
+
+
+const fetchItemsCategory = async () => {
+    try {
+      setItemCatLoading(true);
+      const response = await fetch(GET_ITEMS_CAT_ENDPOINT, {
+        headers: { Authorization: import.meta.env.VITE_AUTHORIZATION },
+      });
+      if (!response.ok) throw new Error("Failed to load items");
+      const result = await response.json();
+      setItemsCat(result.data || []);
+    } catch (err) {
+      console.error("Error loading item:", err);
+    } finally {
+      setItemCatLoading(false);
+    }
+  };
+
+  useEffect(()=>{
+    fetchItemsCategory();
+  }, []); 
+  
+   const filteredItemsCat = itemsCat.filter((i: any) =>
+    [i.item_code, i.item_name, i.item_group, i.custom_min_stock_level, i.custom_max_stock_level, 
+      i.custom_vendor, i.custom_selling_price]
+      .join(" ")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -40,33 +70,30 @@ const ItemsCategory: React.FC<ProductsProps> = ({ products, searchTerm, setSearc
           onClick={onAdd}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
-          + Add Items
+          Add Items Category
         </button>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 rounded-lg">
           <thead className="bg-gray-100 text-gray-700 text-sm">
             <tr>
-              <th className="px-4 py-2 text-left">Product ID</th>
               <th className="px-4 py-2 text-left">Name</th>
               <th className="px-4 py-2 text-left">Category</th>
-              <th className="px-4 py-2 text-left">Stock</th>
-              <th className="px-4 py-2 text-left">Min Stock</th>
-              <th className="px-4 py-2 text-left">Price</th>
-              <th className="px-4 py-2 text-left">Supplier</th>
-              <th className="px-4 py-2 text-center">Actions</th>
+              <th className="px-4 py-2 text-left">Description</th>
+              <th className="px-4 py-2 text-left">Unit of Measurement</th>
+              <th className="px-4 py-2 text-left">Selling Price</th>
+              <th className="px-4 py-2 text-left">Sales Account</th>
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((p) => (
+            {filteredItemsCat.map((p) => (
               <tr key={p.id} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-2">{p.id}</td>
                 <td className="px-4 py-2">{p.name}</td>
-                <td className="px-4 py-2">{p.category}</td>
-                <td className="px-4 py-2">{p.stock}</td>
-                <td className="px-4 py-2">{p.minStock}</td>
-                <td className="px-4 py-2">${p.price.toLocaleString()}</td>
-                <td className="px-4 py-2">{p.supplier}</td>
+                <td className="px-4 py-2">{p.item_group_name}</td>
+                <td className="px-4 py-2">{p.custom_description}</td>
+                <td className="px-4 py-2">{p.custom_unit_of_measurement}</td>
+                <td className="px-4 py-2">{p.custom_selling_price}</td>
+                 <td className="px-4 py-2">{p.custom_sales_account}</td>
                 <td className="px-4 py-2 text-center">
                   <button className="text-blue-600 hover:underline">View</button>
                 </td>
@@ -75,6 +102,11 @@ const ItemsCategory: React.FC<ProductsProps> = ({ products, searchTerm, setSearc
           </tbody>
         </table>
       </div>
+      <ItemsCategoryModal
+        isOpen={showCategoryModal}
+        onClose={() => setShowCategoryModal(false)}
+        onSubmit={(data) => console.log("New Items Category:", data)}
+      />
     </div>
   );
 };
