@@ -47,10 +47,7 @@ const InvoiceUploadModal: React.FC<InvoiceUploadModalProps> = ({
     if (dir === "left") {
       scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
     } else {
-      scrollRef.current.scrollTo({
-        left: scrollRef.current.scrollWidth,
-        behavior: "smooth",
-      });
+      scrollRef.current.scrollTo({ left: scrollRef.current.scrollWidth, behavior: "smooth" });
     }
   };
 
@@ -129,14 +126,14 @@ const InvoiceUploadModal: React.FC<InvoiceUploadModalProps> = ({
                       setSelectedTemplateId(template.id);
                       onClose();
                     }}
-                    className={`bg-white rounded-lg shadow-xl overflow-hidden flex flex-col items-center w-[370px] max-w-[370px] min-w-[340px] border-2 cursor-pointer transition
-                      ${
-                        selectedTemplateId === template.id
-                          ? "border-blue-700 ring-2 ring-blue-400"
-                          : "border-gray-300"
-                      }
+                    className={
+                      `bg-white rounded-lg shadow-xl overflow-hidden flex flex-col items-center w-[370px] max-w-[370px] min-w-[340px] border-2 cursor-pointer transition
+                      ${selectedTemplateId === template.id
+                        ? "border-blue-700 ring-2 ring-blue-400"
+                        : "border-gray-300"}
                       hover:shadow-2xl hover:scale-[1.02]"
-                      ${idx < templates.length - 1 ? "mr-8" : ""}`}
+                      ${idx < templates.length - 1 ? "mr-8" : ""}`
+                    }
                     tabIndex={0}
                     role="button"
                     aria-pressed={selectedTemplateId === template.id}

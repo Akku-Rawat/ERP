@@ -1,12 +1,6 @@
-import React, { useState } from "react";
-import {
-  FaCalendarAlt,
-  FaClock,
-  FaUserClock,
-  FaChartPie,
-  FaArrowRight,
-} from "react-icons/fa";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import React, { useState } from 'react';
+import { FaCalendarAlt, FaClock, FaUserClock, FaChartPie, FaArrowRight } from 'react-icons/fa';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 type AttendanceRecord = {
   id: string;
@@ -15,74 +9,26 @@ type AttendanceRecord = {
   checkIn: string;
   breakMin: string;
   totalHoursRatio: string;
-  status: "Present" | "Late" | "Early Departure" | "Absent";
+  status: 'Present' | 'Late' | 'Early Departure' | 'Absent';
 };
 
 const demoAttendanceRecords: AttendanceRecord[] = [
-  {
-    id: "A001",
-    employeeName: "John Smith",
-    date: "Nov 15, 2025",
-    checkIn: "8.55 AM",
-    breakMin: "0.50",
-    totalHoursRatio: "7.51 hrs",
-    status: "Present",
-  },
-  {
-    id: "A002",
-    employeeName: "Betni Smei",
-    date: "8.55 AM",
-    checkIn: "5.00 AM",
-    breakMin: "1.0h",
-    totalHoursRatio: "45 min",
-    status: "Present",
-  },
-  {
-    id: "A003",
-    employeeName: "Bevelopment",
-    date: "Nov 15, 2025",
-    checkIn: "45 min",
-    breakMin: "45 min",
-    totalHoursRatio: "7.52 hrs",
-    status: "Present",
-  },
-  {
-    id: "A004",
-    employeeName: "Bevelapment",
-    date: "Nov 15, 2025",
-    checkIn: "8AM",
-    breakMin: "18.50",
-    totalHoursRatio: "7.52 hrs",
-    status: "Present",
-  },
-  {
-    id: "A005",
-    employeeName: "Bevelopment",
-    date: "8.55 AM",
-    checkIn: "8AM",
-    breakMin: "2.50",
-    totalHoursRatio: "7.50 hrs",
-    status: "Present",
-  },
-  {
-    id: "A006",
-    employeeName: "John Smith",
-    date: "Nov 15, 2025",
-    checkIn: "8M.V",
-    breakMin: "2.50",
-    totalHoursRatio: "7.50 hrs",
-    status: "Present",
-  },
+  { id: 'A001', employeeName: 'John Smith', date: 'Nov 15, 2025', checkIn: '8.55 AM', breakMin: '0.50', totalHoursRatio: '7.51 hrs', status: 'Present' },
+  { id: 'A002', employeeName: 'Betni Smei', date: '8.55 AM', checkIn: '5.00 AM', breakMin: '1.0h', totalHoursRatio: '45 min', status: 'Present' },
+  { id: 'A003', employeeName: 'Bevelopment', date: 'Nov 15, 2025', checkIn: '45 min', breakMin: '45 min', totalHoursRatio: '7.52 hrs', status: 'Present' },
+  { id: 'A004', employeeName: 'Bevelapment', date: 'Nov 15, 2025', checkIn: '8AM', breakMin: '18.50', totalHoursRatio: '7.52 hrs', status: 'Present' },
+  { id: 'A005', employeeName: 'Bevelopment', date: '8.55 AM', checkIn: '8AM', breakMin: '2.50', totalHoursRatio: '7.50 hrs', status: 'Present' },
+  { id: 'A006', employeeName: 'John Smith', date: 'Nov 15, 2025', checkIn: '8M.V', breakMin: '2.50', totalHoursRatio: '7.50 hrs', status: 'Present' },
 ];
 
 const attendanceSummaryData = [
-  { name: "On-Time vs Late", value: 88 },
-  { name: "Late", value: 12 },
+  { name: 'On-Time vs Late', value: 88 },
+  { name: 'Late', value: 12 },
 ];
 
 const Attendance: React.FC = () => {
-  const [selectedDate] = useState("November 2025");
-  const [viewMode, setViewMode] = useState<"Today" | "Monthly">("Today");
+  const [selectedDate] = useState('November 2025');
+  const [viewMode, setViewMode] = useState<'Today' | 'Monthly'>('Today');
 
   return (
     <div className="space-y-6">
@@ -97,6 +43,7 @@ const Attendance: React.FC = () => {
             className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
         </div>
+       
       </div>
 
       {/* KPI Cards */}
@@ -111,16 +58,10 @@ const Attendance: React.FC = () => {
             <FaClock className="text-teal-500 text-3xl" />
           </div>
           <div className="flex gap-2 mt-4">
-            <button
-              className={`px-4 py-1 rounded text-sm font-medium ${viewMode === "Today" ? "bg-teal-100 text-teal-700" : "bg-gray-100 text-gray-600"}`}
-              onClick={() => setViewMode("Today")}
-            >
+            <button className={`px-4 py-1 rounded text-sm font-medium ${viewMode === 'Today' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`} onClick={() => setViewMode('Today')}>
               Today
             </button>
-            <button
-              className={`px-4 py-1 rounded text-sm font-medium ${viewMode === "Monthly" ? "bg-teal-100 text-teal-700" : "bg-gray-100 text-gray-600"}`}
-              onClick={() => setViewMode("Monthly")}
-            >
+            <button className={`px-4 py-1 rounded text-sm font-medium ${viewMode === 'Monthly' ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-600'}`} onClick={() => setViewMode('Monthly')}>
               Monthly
             </button>
           </div>
@@ -154,9 +95,7 @@ const Attendance: React.FC = () => {
         {/* Attendance Table */}
         <div className="col-span-2 bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">
-              Employee Attendance Record
-            </h3>
+            <h3 className="text-lg font-semibold">Employee Attendance Record</h3>
             <div className="flex gap-2">
               <button className="text-gray-400 hover:text-gray-600">
                 <FaCalendarAlt />
@@ -182,20 +121,13 @@ const Attendance: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {demoAttendanceRecords.map((record) => (
-                <tr
-                  key={record.id}
-                  className="border-b border-gray-200 hover:bg-gray-50"
-                >
-                  <td className="py-3 px-2 font-medium">
-                    {record.employeeName}
-                  </td>
+              {demoAttendanceRecords.map(record => (
+                <tr key={record.id} className="border-b border-gray-200 hover:bg-gray-50">
+                  <td className="py-3 px-2 font-medium">{record.employeeName}</td>
                   <td className="py-3 px-2 text-gray-600">{record.date}</td>
                   <td className="py-3 px-2 text-gray-600">{record.checkIn}</td>
                   <td className="py-3 px-2 text-gray-600">{record.breakMin}</td>
-                  <td className="py-3 px-2 font-medium">
-                    {record.totalHoursRatio}
-                  </td>
+                  <td className="py-3 px-2 font-medium">{record.totalHoursRatio}</td>
                   <td className="py-3 px-2">
                     <span className="bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-xs font-semibold">
                       {record.status}
@@ -240,16 +172,10 @@ const Attendance: React.FC = () => {
             </div>
 
             <div className="bg-gray-50 rounded p-3 space-y-2">
-              <p className="text-xs font-semibold text-gray-700">
-                88% On-Time vs Late
-              </p>
+              <p className="text-xs font-semibold text-gray-700">88% On-Time vs Late</p>
               <div className="space-y-1 text-xs text-gray-600">
-                <p>
-                  Late Arrivals: 15 <span className="float-right">A0</span>
-                </p>
-                <p>
-                  Early Departures: 8 <span className="float-right">B</span>
-                </p>
+                <p>Late Arrivals: 15 <span className="float-right">A0</span></p>
+                <p>Early Departures: 8 <span className="float-right">B</span></p>
               </div>
             </div>
           </div>

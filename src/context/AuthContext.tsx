@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import type { ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -9,13 +9,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = "isAuthenticated";
+const AUTH_STORAGE_KEY = 'isAuthenticated';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Initialize from localStorage
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-    return stored === "true";
+    return stored === 'true';
   });
 
   // Sync state changes to localStorage
@@ -24,10 +24,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [isAuthenticated]);
 
   const login = async (email: string, password: string) => {
-    if (email === "admin" && password === "admin") {
+    if (email === 'admin' && password === 'admin') {
       setIsAuthenticated(true);
     } else {
-      throw new Error("Invalid credentials");
+      throw new Error('Invalid credentials');
     }
   };
 
@@ -45,6 +45,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 };

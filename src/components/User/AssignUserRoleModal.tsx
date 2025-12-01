@@ -12,7 +12,7 @@ import {
   FaEdit,
   FaTrash,
   FaEye,
-  FaShareSquare,
+  FaShareSquare
 } from "react-icons/fa";
 
 interface AssignUserRoleForm {
@@ -22,6 +22,8 @@ interface AssignUserRoleForm {
   actionPermissions: string[];
   status: "Active" | "Inactive";
 }
+
+
 
 interface AssignUserRoleModalProps {
   isOpen: boolean;
@@ -34,16 +36,18 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  initialData,
+  initialData
 }) => {
-  const [formData, setFormData] = useState<AssignUserRoleForm>({
-    roleName: "",
-    description: "",
-    modulePermissions: [],
-    actionPermissions: [],
-    status: "Active",
-  });
+ const [formData, setFormData] = useState<AssignUserRoleForm>({
+  roleName: "",
+  description: "",
+  modulePermissions: [],
+  actionPermissions: [],
+  status: "Active"   
+});
 
+
+  
   const moduleOptions = [
     { id: "inventory", name: "Inventory", icon: <FaBoxOpen /> },
     { id: "sales", name: "Sales", icon: <FaMoneyBillAlt /> },
@@ -52,7 +56,7 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
     { id: "hr", name: "HR", icon: <FaUsers /> },
     { id: "manufacturing", name: "Manufacturing", icon: <FaIndustry /> },
     { id: "crm", name: "CRM", icon: <FaPhoneVolume /> },
-    { id: "reports", name: "Reports", icon: <FaChartBar /> },
+    { id: "reports", name: "Reports", icon: <FaChartBar /> }
   ];
 
   const actionOptions = [
@@ -60,12 +64,7 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
     { id: "edit", name: "Edit", icon: <FaEdit />, color: "text-blue-600" },
     { id: "delete", name: "Delete", icon: <FaTrash />, color: "text-red-600" },
     { id: "view", name: "View", icon: <FaEye />, color: "text-gray-600" },
-    {
-      id: "export",
-      name: "Export",
-      icon: <FaShareSquare />,
-      color: "text-purple-600",
-    },
+    { id: "export", name: "Export", icon: <FaShareSquare />, color: "text-purple-600" }
   ];
 
   useEffect(() => {
@@ -77,7 +76,7 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
         description: "",
         modulePermissions: [],
         actionPermissions: [],
-        status: "Active",
+        status: "Active"
       });
     }
   }, [initialData, isOpen]);
@@ -115,10 +114,7 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
   };
 
   const selectAllModules = () => {
-    setFormData({
-      ...formData,
-      modulePermissions: moduleOptions.map((m) => m.name),
-    });
+    setFormData({ ...formData, modulePermissions: moduleOptions.map(m => m.name) });
   };
 
   const clearAllModules = () => {
@@ -126,10 +122,7 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
   };
 
   const selectAllActions = () => {
-    setFormData({
-      ...formData,
-      actionPermissions: actionOptions.map((a) => a.name),
-    });
+    setFormData({ ...formData, actionPermissions: actionOptions.map(a => a.name) });
   };
 
   const clearAllActions = () => {
@@ -224,9 +217,7 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
                       className="rounded text-teal-600 focus:ring-teal-500"
                     />
                     <span className="text-lg">{module.icon}</span>
-                    <span className="text-sm font-semibold text-gray-700">
-                      {module.name}
-                    </span>
+                    <span className="text-sm font-semibold text-gray-700">{module.name}</span>
                   </label>
                 ))}
               </div>
@@ -279,9 +270,7 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
                       className="rounded text-purple-600 focus:ring-purple-500"
                     />
                     <span className="text-lg">{action.icon}</span>
-                    <span className={`text-sm font-semibold ${action.color}`}>
-                      {action.name}
-                    </span>
+                    <span className={`text-sm font-semibold ${action.color}`}>{action.name}</span>
                   </label>
                 ))}
               </div>

@@ -316,7 +316,7 @@ const Templates: React.FC = () => {
                 ? "Current Invoice"
                 : `Invoice Template ${selectedInvoiceTemplate.replace(
                     "template",
-                    "",
+                    ""
                   )}`}
             </div>
           </div>
@@ -350,7 +350,7 @@ const Templates: React.FC = () => {
                 ? "Current Quotation"
                 : `Quotation Template ${selectedQuotationTemplate.replace(
                     "quotation",
-                    "",
+                    ""
                   )}`}
             </div>
           </div>

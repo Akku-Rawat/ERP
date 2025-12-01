@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaUsers, FaUserShield, FaUserCog } from "react-icons/fa";
-import UserCreation from "./UserCreation";
-import UserRole from "./UserRoles";
+import UserCreation from './UserCreation';
+import UserRole from './UserRoles';
 
 // ===== Types =====
 type User = {
@@ -45,7 +45,7 @@ const sampleUsers: User[] = [
     language: "English",
     timezone: "Asia/Kolkata",
     role: "Admin",
-    status: "Active",
+    status: "Active"
   },
   {
     id: 2,
@@ -60,7 +60,7 @@ const sampleUsers: User[] = [
     language: "English",
     timezone: "Asia/Kolkata",
     role: "Sales Manager",
-    status: "Active",
+    status: "Active"
   },
   {
     id: 3,
@@ -75,8 +75,8 @@ const sampleUsers: User[] = [
     language: "Hindi",
     timezone: "Asia/Kolkata",
     role: "HR Manager",
-    status: "Inactive",
-  },
+    status: "Inactive"
+  }
 ];
 
 const sampleRoles: Role[] = [
@@ -86,7 +86,7 @@ const sampleRoles: Role[] = [
     description: "Full system access with all permissions",
     modulePermissions: ["Inventory", "Sales", "Purchase", "Accounting", "HR"],
     actionPermissions: ["Create", "Edit", "Delete", "View", "Export"],
-    status: "Active",
+    status: "Active"
   },
   {
     id: 2,
@@ -94,7 +94,7 @@ const sampleRoles: Role[] = [
     description: "Manage sales operations and customer relations",
     modulePermissions: ["Sales", "Inventory"],
     actionPermissions: ["Create", "Edit", "View", "Export"],
-    status: "Active",
+    status: "Active"
   },
   {
     id: 3,
@@ -102,7 +102,7 @@ const sampleRoles: Role[] = [
     description: "Manage human resources and employee data",
     modulePermissions: ["HR"],
     actionPermissions: ["Create", "Edit", "View"],
-    status: "Active",
+    status: "Active"
   },
   {
     id: 4,
@@ -110,8 +110,8 @@ const sampleRoles: Role[] = [
     description: "Manage financial records and accounting",
     modulePermissions: ["Accounting", "Reports"],
     actionPermissions: ["View", "Edit", "Export"],
-    status: "Active",
-  },
+    status: "Active"
+  }
 ];
 
 // ===== Module Meta =====
@@ -130,15 +130,9 @@ const UserModule: React.FC = () => {
   const [users, setUsers] = useState<User[]>(sampleUsers);
   const [roles, setRoles] = useState<Role[]>(sampleRoles);
 
-  const handleUserSubmit = (
-    data: Omit<User, "id">,
-    isEdit: boolean,
-    userId?: number,
-  ) => {
+  const handleUserSubmit = (data: Omit<User, "id">, isEdit: boolean, userId?: number) => {
     if (isEdit && userId !== undefined) {
-      setUsers(
-        users.map((u) => (u.id === userId ? { ...data, id: userId } : u)),
-      );
+      setUsers(users.map(u => u.id === userId ? { ...data, id: userId } : u));
     } else {
       setUsers([...users, { ...data, id: Date.now() }]);
     }
@@ -146,37 +140,27 @@ const UserModule: React.FC = () => {
 
   const handleUserDelete = (id: number) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
-      setUsers(users.filter((u) => u.id !== id));
+      setUsers(users.filter(u => u.id !== id));
     }
   };
 
-  const handleRoleSubmit = (
-    data: Omit<Role, "id">,
-    isEdit: boolean,
-    roleId?: number,
-  ) => {
+  const handleRoleSubmit = (data: Omit<Role, "id">, isEdit: boolean, roleId?: number) => {
     if (isEdit && roleId !== undefined) {
-      setRoles(
-        roles.map((r) => (r.id === roleId ? { ...data, id: roleId } : r)),
-      );
+      setRoles(roles.map(r => r.id === roleId ? { ...data, id: roleId } : r));
     } else {
       setRoles([...roles, { ...data, id: Date.now() }]);
     }
   };
 
   const handleRoleDelete = (id: number) => {
-    const roleToDelete = roles.find((r) => r.id === id);
-    const usersWithRole = users.filter(
-      (u) => u.role === roleToDelete?.roleName,
-    );
+    const roleToDelete = roles.find(r => r.id === id);
+    const usersWithRole = users.filter(u => u.role === roleToDelete?.roleName);
     if (usersWithRole.length > 0) {
-      alert(
-        `Cannot delete this role! ${usersWithRole.length} user(s) are assigned to "${roleToDelete?.roleName}" role. Please reassign users first.`,
-      );
+      alert(`Cannot delete this role! ${usersWithRole.length} user(s) are assigned to "${roleToDelete?.roleName}" role. Please reassign users first.`);
       return;
     }
     if (window.confirm("Are you sure you want to delete this role?")) {
-      setRoles(roles.filter((r) => r.id !== id));
+      setRoles(roles.filter(r => r.id !== id));
     }
   };
 

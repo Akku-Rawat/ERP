@@ -17,18 +17,13 @@ interface WarehousesProps {
   onAdd: () => void;
 }
 
-const Warehouses: React.FC<WarehousesProps> = ({
-  warehouses,
-  searchTerm,
-  setSearchTerm,
-  onAdd,
-}) => {
+const Warehouses: React.FC<WarehousesProps> = ({ warehouses, searchTerm, setSearchTerm, onAdd }) => {
   const filteredWarehouses = warehouses.filter(
     (w) =>
       w.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       w.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       w.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      w.manager.toLowerCase().includes(searchTerm.toLowerCase()),
+      w.manager.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -71,9 +66,7 @@ const Warehouses: React.FC<WarehousesProps> = ({
                 <td className="px-4 py-2">{w.items}</td>
                 <td className="px-4 py-2">{w.capacity}</td>
                 <td className="px-4 py-2 text-center">
-                  <button className="text-blue-600 hover:underline">
-                    View
-                  </button>
+                  <button className="text-blue-600 hover:underline">View</button>
                 </td>
               </tr>
             ))}

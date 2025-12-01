@@ -33,8 +33,7 @@ interface Props {
   onBack: () => void;
   onCustomerSelect: (customer: Customer) => void;
   onAdd: () => void;
-  onEdit: (customer: Customer, e: React.MouseEvent) => void;
-}
+onEdit: (customer: Customer, e: React.MouseEvent) => void;}
 
 const CustomerDetailView: React.FC<Props> = ({
   customer,
@@ -45,16 +44,13 @@ const CustomerDetailView: React.FC<Props> = ({
   onEdit,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "quotations" | "invoices"
-  >("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "quotations" | "invoices">("overview");
   const [showQuotationModal, setShowQuotationModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
-  const filteredCustomers = customers.filter(
-    (c) =>
-      c.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.custom_id.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredCustomers = customers.filter((c) =>
+    c.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.custom_id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusColor = (status?: string) => {
@@ -127,9 +123,7 @@ const CustomerDetailView: React.FC<Props> = ({
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                      c.custom_id === customer.custom_id
-                        ? "bg-indigo-600"
-                        : "bg-gray-400"
+                      c.custom_id === customer.custom_id ? "bg-indigo-600" : "bg-gray-400"
                     }`}
                   >
                     {c.customer_name.charAt(0).toUpperCase()}
@@ -138,14 +132,12 @@ const CustomerDetailView: React.FC<Props> = ({
                     <p className="font-medium text-sm text-gray-900 truncate">
                       {c.customer_name}
                     </p>
-                    <p className="text-xs text-gray-500 font-mono">
-                      {c.custom_id}
-                    </p>
+                    <p className="text-xs text-gray-500 font-mono">{c.custom_id}</p>
                   </div>
                   {c.custom_status && (
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                        c.custom_status,
+                        c.custom_status
                       )}`}
                     >
                       {c.custom_status.toUpperCase()}
@@ -268,7 +260,7 @@ const CustomerDetailView: React.FC<Props> = ({
                       <p className="mt-1">
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            customer.custom_status,
+                            customer.custom_status
                           )}`}
                         >
                           {(customer.custom_status || "unknown").toUpperCase()}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaPlus, FaSearch, FaEdit, FaTrash } from "react-icons/fa";
-import CreateUserModal from "../../components/User/CreateUserModal";
+import CreateUserModal from '../../components/User/CreateUserModal'
 
 interface Role {
   id: number;
@@ -21,7 +21,7 @@ interface UserFormData {
   language: string;
   timezone: string;
   role: string;
-  status: "Active" | "Inactive"; // this must be same everywhere
+  status: "Active" | "Inactive";  // this must be same everywhere
 }
 
 interface User extends UserFormData {
@@ -35,20 +35,15 @@ interface UserCreationProps {
   onDelete: (id: number) => void;
 }
 
-const UserCreation: React.FC<UserCreationProps> = ({
-  users,
-  roles,
-  onSubmit,
-  onDelete,
-}) => {
+const UserCreation: React.FC<UserCreationProps> = ({ users, roles, onSubmit, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
-  const filteredUsers = users.filter((user) =>
-    Object.values(user).some((val) =>
-      String(val).toLowerCase().includes(searchTerm.toLowerCase()),
-    ),
+  const filteredUsers = users.filter(user =>
+    Object.values(user).some(val =>
+      String(val).toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
   const handleAdd = () => {
@@ -130,18 +125,10 @@ const UserCreation: React.FC<UserCreationProps> = ({
                 <td className="px-4 py-3 text-sm font-medium text-gray-900">
                   {user.firstName} {user.middleName} {user.lastName}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  {user.email}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  {user.username}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  {user.phone}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  {user.language}
-                </td>
+                <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">{user.username}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">{user.phone}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">{user.language}</td>
                 <td className="px-4 py-3 text-sm">
                   <span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-medium">
                     {user.role || "No Role"}

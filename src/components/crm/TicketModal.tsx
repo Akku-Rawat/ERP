@@ -7,11 +7,7 @@ interface TicketModalProps {
   onSubmit: (data: any) => void;
 }
 
-const TicketModal: React.FC<TicketModalProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-}) => {
+const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onSubmit }) => {
   const [form, setForm] = useState({
     title: "",
     customer: "",
@@ -21,9 +17,7 @@ const TicketModal: React.FC<TicketModalProps> = ({
   });
 
   const handleFormChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -56,10 +50,7 @@ const TicketModal: React.FC<TicketModalProps> = ({
           exit={{ opacity: 0, y: 40 }}
           className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
-          <form
-            className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden"
-            onSubmit={handleSave}
-          >
+          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
             <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
               <h3 className="text-2xl w-full font-semibold text-blue-600">
                 Add Support Ticket
@@ -76,9 +67,7 @@ const TicketModal: React.FC<TicketModalProps> = ({
             <div className="flex-1 overflow-y-auto border-b px-4">
               {/* TICKET DETAILS */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">
-                  TICKET DETAILS
-                </div>
+                <div className="font-semibold text-gray-600 mb-4">TICKET DETAILS</div>
                 <div className="grid grid-cols-6 gap-4 mb-6">
                   <input
                     type="text"

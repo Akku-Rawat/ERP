@@ -1,35 +1,14 @@
 import React, { useState } from "react";
-import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal";
+import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal"
 
 interface PurchaseOrdersTableProps {
   onAdd?: () => void;
 }
 
 const initialOrders = [
-  {
-    id: "PO-001",
-    supplier: "TechSupply Co",
-    date: "2025-01-15",
-    amount: 48000,
-    status: "Approved",
-    deliveryDate: "2025-02-01",
-  },
-  {
-    id: "PO-002",
-    supplier: "Office Solutions",
-    date: "2025-01-16",
-    amount: 23000,
-    status: "Pending",
-    deliveryDate: "2025-02-05",
-  },
-  {
-    id: "PO-003",
-    supplier: "Equipment Plus",
-    date: "2025-01-17",
-    amount: 72000,
-    status: "Draft",
-    deliveryDate: "2025-02-10",
-  },
+  { id: "PO-001", supplier: "TechSupply Co", date: "2025-01-15", amount: 48000, status: "Approved", deliveryDate: "2025-02-01" },
+  { id: "PO-002", supplier: "Office Solutions", date: "2025-01-16", amount: 23000, status: "Pending", deliveryDate: "2025-02-05" },
+  { id: "PO-003", supplier: "Equipment Plus", date: "2025-01-17", amount: 72000, status: "Draft", deliveryDate: "2025-02-10" },
 ];
 
 const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
@@ -39,7 +18,7 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
   const filteredOrders = initialOrders.filter(
     (po) =>
       po.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      po.supplier.toLowerCase().includes(searchTerm.toLowerCase()),
+      po.supplier.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddClick = () => {
@@ -60,10 +39,7 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
           className="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleAddClick}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-          >
+          <button onClick={handleAddClick} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
             + Add
           </button>
           <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
@@ -94,9 +70,7 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
                 <td className="px-4 py-2">{po.status}</td>
                 <td className="px-4 py-2">{po.deliveryDate}</td>
                 <td className="px-4 py-2 text-center">
-                  <button className="text-blue-600 hover:underline">
-                    View
-                  </button>
+                  <button className="text-blue-600 hover:underline">View</button>
                 </td>
               </tr>
             ))}

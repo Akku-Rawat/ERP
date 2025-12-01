@@ -2,14 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { FaEdit, FaTimes, FaCheck } from "react-icons/fa";
 
 const TermsAndCondition = () => {
-  const [selectedTemplate, setSelectedTemplate] = useState(
-    "General Service Terms",
-  );
+  const [selectedTemplate, setSelectedTemplate] = useState("General Service Terms");
   const [content, setContent] = useState("");
   const [originalContent, setOriginalContent] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
-  const [localPhases, setLocalPhases] = useState<
+   const [localPhases, setLocalPhases] = useState<
     { phase: string; percent: string; when: string }[]
   >([]);
   const [localBullets, setLocalBullets] = useState<
@@ -35,13 +33,14 @@ const TermsAndCondition = () => {
     "Cancellation / Refund Policy": `1. Cancellation Conditions: Client may cancel anytime with written notice.
 2. Refund Rules: Advance payment is non-refundable, milestone payments refundable only for uninitiated work.`,
 
-    Warranty: `1.The Company warrants that the service will be performed professionally and function as intended for 30 days after completion.`,
+    "Warranty": `1.The Company warrants that the service will be performed professionally and function as intended for 30 days after completion.`,
 
     "Limitations and Liability": `1.The Company is not liable for delays caused by the client.
 2.The client is responsible for providing accurate information and resources.
 3.In no event shall the Company’s total liability, whether in contract or otherwise, exceed the total amount paid by the client for the service.`,
   };
 
+  
   useEffect(() => {
     const txt = templates[selectedTemplate] || "";
     setContent(txt);
@@ -51,6 +50,7 @@ const TermsAndCondition = () => {
     setLocalBullets([]);
   }, [selectedTemplate]);
 
+  
   interface PhaseRow {
     phase: string;
     percent: string;
@@ -61,17 +61,13 @@ const TermsAndCondition = () => {
     value: string;
   }
 
-  const parsePaymentTable = (
-    raw: string,
-  ): { phases: PhaseRow[]; bullets: Bullet[] } => {
-    const lines = raw
-      .split("\n")
-      .map((l) => l.trim())
-      .filter(Boolean);
+  const parsePaymentTable = (raw: string): { phases: PhaseRow[]; bullets: Bullet[] } => {
+    const lines = raw.split("\n").map((l) => l.trim()).filter(Boolean);
     const phases: PhaseRow[] = [];
     const bullets: Bullet[] = [];
 
     lines.forEach((line) => {
+      
       const phaseMatch = line.match(/^[abc]\)\s*(.+)$/);
       if (phaseMatch) {
         const clean = phaseMatch[1];
@@ -90,6 +86,7 @@ const TermsAndCondition = () => {
         return;
       }
 
+      
       const bulletMatch = line.match(/^\d+\.\s*(.+?):\s*(.+)$/);
       if (bulletMatch) {
         bullets.push({ title: bulletMatch[1], value: bulletMatch[2] });
@@ -99,6 +96,7 @@ const TermsAndCondition = () => {
     return { phases, bullets };
   };
 
+  
   useEffect(() => {
     if (selectedTemplate !== "Payment Terms") return;
     const { phases, bullets } = parsePaymentTable(content);
@@ -106,6 +104,7 @@ const TermsAndCondition = () => {
     setLocalBullets(bullets);
   }, [content, selectedTemplate]);
 
+  
   const startEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     setOriginalContent(content);
@@ -121,18 +120,19 @@ const TermsAndCondition = () => {
   const saveEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
 
+    
     const phaseLines = localPhases.map((p, i) => {
       const prefix = String.fromCharCode(97 + i) + ")";
       return `  ${prefix}${p.percent}, ${p.when}`;
     });
 
-    const bulletLines = localBullets.map(
-      (b, i) => `${i + 2}. ${b.title}: ${b.value}`,
-    );
+    const bulletLines = localBullets.map((b, i) => `${i + 2}. ${b.title}: ${b.value}`);
 
-    const newRaw = ["1.Payment Structure:", ...phaseLines, ...bulletLines].join(
-      "\n",
-    );
+    const newRaw = [
+      "1.Payment Structure:",
+      ...phaseLines,
+      ...bulletLines,
+    ].join("\n");
 
     setContent(newRaw);
     setOriginalContent(newRaw);
@@ -140,6 +140,7 @@ const TermsAndCondition = () => {
     setIsEditing(false);
   };
 
+  
   const EditableCell = ({
     value,
     onChange,
@@ -161,6 +162,7 @@ const TermsAndCondition = () => {
     );
   };
 
+  
   const renderPaymentTable = () => {
     const updatePhase = (idx: number, field: keyof PhaseRow, val: string) => {
       const copy = [...localPhases];
@@ -168,11 +170,7 @@ const TermsAndCondition = () => {
       setLocalPhases(copy);
     };
 
-    const updateBullet = (
-      idx: number,
-      field: "title" | "value",
-      val: string,
-    ) => {
+    const updateBullet = (idx: number, field: "title" | "value", val: string) => {
       const copy = [...localBullets];
       copy[idx] = { ...copy[idx], [field]: val };
       setLocalBullets(copy);
@@ -269,12 +267,14 @@ const TermsAndCondition = () => {
     );
   };
 
+  
   const renderNormalContent = () => (
     <pre className="whitespace-pre-wrap font-mono text-sm text-gray-700">
       {content}
     </pre>
   );
 
+  
   return (
     <div className="p-6 space-y-6">
       {/* Header + Template selector */}

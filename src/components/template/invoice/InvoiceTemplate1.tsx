@@ -70,20 +70,14 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
     const [signature, setSignature] = useState<string | null>(null);
     const signatureInputRef = useRef<HTMLInputElement>(null);
     const [signatureText, setSignatureText] = useState<string>("");
-    const [signatureMode, setSignatureMode] = useState<"upload" | "type">(
-      "upload",
-    );
+    const [signatureMode, setSignatureMode] = useState<"upload" | "type">("upload");
 
     const getCurrencySymbol = () => {
       switch (data.currency) {
-        case "ZMW":
-          return "ZK";
-        case "INR":
-          return "₹";
-        case "USD":
-          return "$";
-        default:
-          return "₹";
+        case "ZMW": return "ZK";
+        case "INR": return "₹";
+        case "USD": return "$";
+        default: return "₹";
       }
     };
     const symbol = getCurrencySymbol();
@@ -119,7 +113,7 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
               onClick={() => fileInputRef.current?.click()}
             >
               {logo || companyLogoUrl ? (
-                <img
+                <img  
                   src={logo || companyLogoUrl}
                   alt="Logo"
                   className="w-14 h-14 object-contain rounded"
@@ -135,20 +129,14 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
                 onChange={handleLogoChange}
               />
             </div>
-            <h1 className="text-2xl font-bold">
-              Rolaface Software Pvt Limited
-            </h1>
+            <h1 className="text-2xl font-bold">Rolaface Software Pvt Limited</h1>
           </div>
         </div>
 
         {/* Company Address */}
         <div className="mb-8">
-          <p className="font-semibold text-gray-800">
-            Rolaface Software Pvt Limited
-          </p>
-          <p className="text-sm text-gray-600">
-            Your Trusted Technology Partner
-          </p>
+          <p className="font-semibold text-gray-800">Rolaface Software Pvt Limited</p>
+          <p className="text-sm text-gray-600">Your Trusted Technology Partner</p>
           <p className="text-sm text-gray-600">Business District, Tech Park</p>
           <p className="text-sm text-gray-600">City, State 000000</p>
         </div>
@@ -169,8 +157,7 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
             <p className="font-semibold text-gray-800">{data.customerName}</p>
             <p className="text-sm text-gray-600">{data.shippingAddressLine1}</p>
             <p className="text-sm text-gray-600">
-              {data.shippingCity}, {data.shippingState}{" "}
-              {data.shippingPostalCode}
+              {data.shippingCity}, {data.shippingState} {data.shippingPostalCode}
             </p>
           </div>
 
@@ -178,9 +165,7 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
             <div className="space-y-1 text-sm">
               <div className="flex justify-between gap-4">
                 <span className="font-bold text-gray-700">Invoice #</span>
-                <span className="text-gray-800">
-                  {data.invoiceId || "IN-001"}
-                </span>
+                <span className="text-gray-800">{data.invoiceId || "IN-001"}</span>
               </div>
               <div className="flex justify-between gap-4">
                 <span className="font-bold text-gray-700">Invoice Date</span>
@@ -203,43 +188,24 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-t border-b border-gray-400">
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  QTY
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  DESCRIPTION
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-bold text-gray-700">
-                  UNIT PRICE
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-bold text-gray-700">
-                  AMOUNT
-                </th>
+                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">QTY</th>
+                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">DESCRIPTION</th>
+                <th className="px-4 py-3 text-right text-sm font-bold text-gray-700">UNIT PRICE</th>
+                <th className="px-4 py-3 text-right text-sm font-bold text-gray-700">AMOUNT</th>
               </tr>
             </thead>
             <tbody>
               {data.items.map((item, index) => {
-                const lineTotal =
-                  item.quantity * item.listPrice - item.discount;
+                const lineTotal = item.quantity * item.listPrice - item.discount;
                 return (
                   <tr key={index} className="border-b border-gray-300">
-                    <td className="px-4 py-3 text-sm text-gray-800">
-                      {item.quantity}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-800">
-                      {item.description}
+                    <td className="px-4 py-3 text-sm text-gray-800">{item.quantity}</td>
+                    <td className="px-4 py-3 text-sm text-gray-800">{item.description}</td>
+                    <td className="px-4 py-3 text-sm text-gray-800 text-right">
+                      {item.listPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-800 text-right">
-                      {item.listPrice.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-800 text-right">
-                      {lineTotal.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
+                      {lineTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                   </tr>
                 );
@@ -254,31 +220,19 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
             <div className="flex justify-between text-sm border-b border-gray-300 pb-2">
               <span className="text-gray-700">Subtotal</span>
               <span className="text-gray-800">
-                {data.subTotal.toLocaleString("en-IN", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                {data.subTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             <div className="flex justify-between text-sm border-b border-gray-300 pb-2">
-              <span className="text-gray-700">
-                GST {((data.totalTax / data.subTotal) * 100).toFixed(1)}%
-              </span>
+              <span className="text-gray-700">GST {((data.totalTax / data.subTotal) * 100).toFixed(1)}%</span>
               <span className="text-gray-800">
-                {data.totalTax.toLocaleString("en-IN", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                {data.totalTax.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             <div className="flex justify-between text-lg font-bold border-t-2 border-gray-400 pt-3">
               <span className="text-gray-800">TOTAL</span>
               <span className="text-gray-800">
-                {symbol}
-                {data.grandTotal.toLocaleString("en-IN", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                {symbol}{data.grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
           </div>
@@ -287,9 +241,7 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
         {/* Signature Section */}
         <div className="flex justify-end mb-12">
           <div className="w-80">
-            <h3 className="text-sm font-bold text-gray-700 mb-3">
-              Authorized Signature
-            </h3>
+            <h3 className="text-sm font-bold text-gray-700 mb-3">Authorized Signature</h3>
 
             {/* Toggle Buttons */}
             <div className="flex gap-2 mb-3">
@@ -330,9 +282,7 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
                 ) : (
                   <div className="text-center">
                     <UploadCloud className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-                    <span className="text-gray-500 text-xs">
-                      Click to upload
-                    </span>
+                    <span className="text-gray-500 text-xs">Click to upload</span>
                   </div>
                 )}
                 <input
@@ -387,21 +337,17 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
             <div>
               <p className="font-semibold text-gray-800">{data.bankName}</p>
               {data.accountNumber && (
-                <p className="text-sm text-gray-600">
-                  Account Number: {data.accountNumber}
-                </p>
+                <p className="text-sm text-gray-600">Account Number: {data.accountNumber}</p>
               )}
               {data.routingNumber && (
-                <p className="text-sm text-gray-600">
-                  Routing Number: {data.routingNumber}
-                </p>
+                <p className="text-sm text-gray-600">Routing Number: {data.routingNumber}</p>
               )}
             </div>
           )}
         </div>
       </div>
     );
-  },
+  }
 );
 
 InvoiceTemplate1.displayName = "InvoiceTemplate1";

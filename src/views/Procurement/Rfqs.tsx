@@ -6,30 +6,9 @@ interface RFQsTableProps {
 }
 
 const initialRFQs = [
-  {
-    id: "RFQ-001",
-    supplier: "TechSupply Co",
-    date: "2025-01-10",
-    amount: 50000,
-    status: "Awaiting Response",
-    dueDate: "2025-01-25",
-  },
-  {
-    id: "RFQ-002",
-    supplier: "Office Solutions",
-    date: "2025-01-12",
-    amount: 25000,
-    status: "Received",
-    dueDate: "2025-01-27",
-  },
-  {
-    id: "RFQ-003",
-    supplier: "Equipment Plus",
-    date: "2025-01-14",
-    amount: 75000,
-    status: "In Review",
-    dueDate: "2025-01-29",
-  },
+  { id: "RFQ-001", supplier: "TechSupply Co", date: "2025-01-10", amount: 50000, status: "Awaiting Response", dueDate: "2025-01-25" },
+  { id: "RFQ-002", supplier: "Office Solutions", date: "2025-01-12", amount: 25000, status: "Received", dueDate: "2025-01-27" },
+  { id: "RFQ-003", supplier: "Equipment Plus", date: "2025-01-14", amount: 75000, status: "In Review", dueDate: "2025-01-29" },
 ];
 
 const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
@@ -39,7 +18,7 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
   const filteredRFQs = initialRFQs.filter(
     (rfq) =>
       rfq.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      rfq.supplier.toLowerCase().includes(searchTerm.toLowerCase()),
+      rfq.supplier.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddClick = () => {
@@ -94,9 +73,7 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
                 <td className="px-4 py-2">{rfq.status}</td>
                 <td className="px-4 py-2">{rfq.dueDate}</td>
                 <td className="px-4 py-2 text-center">
-                  <button className="text-blue-600 hover:underline">
-                    View
-                  </button>
+                  <button className="text-blue-600 hover:underline">View</button>
                 </td>
               </tr>
             ))}

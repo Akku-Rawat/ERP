@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+ import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/SideBar";
 
@@ -14,7 +14,7 @@ const AppLayout: React.FC = () => {
           sidebarOpen ? "md:ml-64" : "md:ml-16"
         }`}
       >
-        <Outlet />
+         <Outlet />
       </div>
     </div>
   );

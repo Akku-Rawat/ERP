@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo } from 'react';
 
 interface Item {
   code: string | number;
@@ -10,50 +10,15 @@ interface Item {
 }
 
 const ItemsTable: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Sample data (replace with your actual data source)
   const items: Item[] = [
-    {
-      code: 1,
-      name: "Laptop Stand",
-      sku: "LS-001",
-      category: "Electronics",
-      price: 2500,
-      stock: 45,
-    },
-    {
-      code: 2,
-      name: "Wireless Mouse",
-      sku: "WM-101",
-      category: "Electronics",
-      price: 899,
-      stock: 120,
-    },
-    {
-      code: 3,
-      name: "Coffee Mug",
-      sku: "CM-005",
-      category: "Kitchen",
-      price: 299,
-      stock: 200,
-    },
-    {
-      code: 4,
-      name: "USB-C Hub",
-      sku: "UCH-202",
-      category: "Electronics",
-      price: 3499,
-      stock: 30,
-    },
-    {
-      code: 5,
-      name: "Desk Lamp",
-      sku: "DL-301",
-      category: "Furniture",
-      price: 1599,
-      stock: 75,
-    },
+    { code: 1, name: 'Laptop Stand', sku: 'LS-001', category: 'Electronics', price: 2500, stock: 45 },
+    { code: 2, name: 'Wireless Mouse', sku: 'WM-101', category: 'Electronics', price: 899, stock: 120 },
+    { code: 3, name: 'Coffee Mug', sku: 'CM-005', category: 'Kitchen', price: 299, stock: 200 },
+    { code: 4, name: 'USB-C Hub', sku: 'UCH-202', category: 'Electronics', price: 3499, stock: 30 },
+    { code: 5, name: 'Desk Lamp', sku: 'DL-301', category: 'Furniture', price: 1599, stock: 75 },
   ];
 
   const filteredItems = useMemo(() => {
@@ -63,13 +28,13 @@ const ItemsTable: React.FC = () => {
       (item) =>
         item.name.toLowerCase().includes(lowerSearch) ||
         item.sku.toLowerCase().includes(lowerSearch) ||
-        item.category.toLowerCase().includes(lowerSearch),
+        item.category.toLowerCase().includes(lowerSearch)
     );
   }, [items, searchTerm]);
 
   return (
     <div className="p-4">
-      <div className="flex items-center justify-between mb-4">
+       <div className="flex items-center justify-between mb-4">
         <input
           type="search"
           placeholder="Search Items..."
@@ -79,7 +44,7 @@ const ItemsTable: React.FC = () => {
         />
       </div>
 
-      <div className="overflow-x-auto">
+       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 rounded-lg bg-white">
           <thead className="bg-gray-100 text-gray-700 text-sm">
             <tr>
@@ -100,27 +65,28 @@ const ItemsTable: React.FC = () => {
                   <td className="px-4 py-2 font-medium">{item.name}</td>
                   <td className="px-4 py-2 text-sm">{item.sku}</td>
                   <td className="px-4 py-2 text-sm">{item.category}</td>
-                  <td className="px-4 py-2 text-right">
-                    K{item.price.toLocaleString("en-IN")}
-                  </td>
+                  <td className="px-4 py-2 text-right">K{item.price.toLocaleString('en-IN')}</td>
                   <td className="px-4 py-2 text-center">
                     <span
                       className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         item.stock > 50
-                          ? "bg-green-100 text-green-800"
+                          ? 'bg-green-100 text-green-800'
                           : item.stock > 10
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
                       }`}
                     >
                       {item.stock}
                     </span>
                   </td>
                   <td className="px-4 py-2 text-center">
-                    <button className="text-blue-600 hover:underline font-medium">
-                      View
-                    </button>
-                  </td>
+                  <button
+                    className="text-blue-600 hover:underline font-medium"
+                  >
+                    View
+                  </button>
+                </td>
+                  
                 </tr>
               ))
             ) : (

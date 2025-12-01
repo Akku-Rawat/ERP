@@ -36,29 +36,22 @@ const PerformanceModal: React.FC<PerformanceModalProps> = ({
     remarks: "",
   });
 
-  const [metrics, setMetrics] = useState<PerformanceMetric[]>([
-    { ...emptyMetric },
-  ]);
+  const [metrics, setMetrics] = useState<PerformanceMetric[]>([{ ...emptyMetric }]);
 
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    >
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleMetricChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
-    idx: number,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+    idx: number
   ) => {
     const updatedMetrics = [...metrics];
-    updatedMetrics[idx] = {
-      ...updatedMetrics[idx],
-      [e.target.name]: e.target.value,
-    };
+    updatedMetrics[idx] = { ...updatedMetrics[idx], [e.target.name]: e.target.value };
     setMetrics(updatedMetrics);
   };
 
@@ -98,14 +91,9 @@ const PerformanceModal: React.FC<PerformanceModalProps> = ({
           exit={{ opacity: 0, y: 40 }}
           className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
-          <form
-            className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden"
-            onSubmit={handleSave}
-          >
+          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
             <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
-              <h3 className="text-2xl w-full font-semibold text-blue-600">
-                Supplier Performance
-              </h3>
+              <h3 className="text-2xl w-full font-semibold text-blue-600">Supplier Performance</h3>
               <button
                 type="button"
                 className="text-gray-700 hover:bg-[#fefefe] rounded-full w-8 h-8"
@@ -118,9 +106,7 @@ const PerformanceModal: React.FC<PerformanceModalProps> = ({
             <div className="flex-1 overflow-y-auto border-b px-4">
               {/* PERFORMANCE INFO */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">
-                  PERFORMANCE REVIEW
-                </div>
+                <div className="font-semibold text-gray-600 mb-4">PERFORMANCE REVIEW</div>
                 <div className="grid grid-cols-8 gap-4 mb-6">
                   <input
                     className="col-span-3 border rounded p-2"
@@ -169,9 +155,7 @@ const PerformanceModal: React.FC<PerformanceModalProps> = ({
                   <table className="min-w-full text-xs table-fixed">
                     <thead>
                       <tr className="bg-gray-50 text-gray-800">
-                        <th className="w-1/6 px-2 py-1 text-left">
-                          METRIC NAME
-                        </th>
+                        <th className="w-1/6 px-2 py-1 text-left">METRIC NAME</th>
                         <th className="w-1/6 px-2 py-1 text-left">TARGET</th>
                         <th className="w-1/6 px-2 py-1 text-left">ACTUAL</th>
                         <th className="w-1/6 px-2 py-1 text-left">RATING</th>
@@ -242,11 +226,7 @@ const PerformanceModal: React.FC<PerformanceModalProps> = ({
                   </table>
                 </div>
                 <div>
-                  <button
-                    type="button"
-                    className="bg-blue-100 border border-blue-300 rounded px-2 py-1"
-                    onClick={addMetric}
-                  >
+                  <button type="button" className="bg-blue-100 border border-blue-300 rounded px-2 py-1" onClick={addMetric}>
                     Add
                   </button>
                 </div>

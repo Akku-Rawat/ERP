@@ -64,11 +64,7 @@ const emptyForm: FormData = {
   file: null,
 };
 
-const ProductModal: React.FC<ProductModalProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-}) => {
+const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, onSubmit }) => {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [openSections, setOpenSections] = useState({
     productInfo: true,
@@ -82,19 +78,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
     setOpenSections((s) => ({ ...s, [name]: !s[name] }));
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type, checked } = e.target as any;
     setForm((prev) => ({
       ...prev,
-      [name]:
-        type === "checkbox"
-          ? checked
-          : type === "number"
-            ? Number(value)
-            : value,
+      [name]: type === "checkbox" ? checked : type === "number" ? Number(value) : value,
     }));
   };
 
@@ -126,19 +115,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
           exit={{ opacity: 0, y: 40 }}
           className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
-          <form
-            className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden"
-            onSubmit={handleSubmit}
-          >
+          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSubmit}>
             <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
               <h3 className="text-2xl w-full font-semibold text-blue-600">
                 Create Product
               </h3>
-              <button
-                type="button"
-                className="text-gray-700 hover:bg-[#fefefe] rounded-full w-8 h-8"
-                onClick={onClose}
-              >
+              <button type="button" className="text-gray-700 hover:bg-[#fefefe] rounded-full w-8 h-8" onClick={onClose}>
                 <span className="text-2xl">&times;</span>
               </button>
             </div>
@@ -150,96 +132,24 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   onClick={() => toggleSection("productInfo")}
                 >
                   <span className="mr-2">PRODUCT INFORMATION</span>
-                  <span className="ml-auto">
-                    {openSections.productInfo ? "▾" : "▸"}
-                  </span>
+                  <span className="ml-auto">{openSections.productInfo ? "▾" : "▸"}</span>
                 </div>
                 {openSections.productInfo && (
                   <div className="grid grid-cols-4 gap-4 mb-6">
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      placeholder="Product Owner"
-                      name="productOwner"
-                      value={form.productOwner}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      placeholder="Product Code"
-                      name="productCode"
-                      value={form.productCode}
-                      onChange={handleChange}
-                    />
+                    <input className="col-span-1 border rounded p-2" placeholder="Product Owner" name="productOwner" value={form.productOwner} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" placeholder="Product Code" name="productCode" value={form.productCode} onChange={handleChange} />
                     <div className="col-span-1 flex items-center">
-                      <input
-                        type="checkbox"
-                        className="mr-2"
-                        name="productActive"
-                        checked={form.productActive}
-                        onChange={handleChange}
-                      />
+                      <input type="checkbox" className="mr-2" name="productActive" checked={form.productActive} onChange={handleChange} />
                       <label>Product Active</label>
                     </div>
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      placeholder="Product Category"
-                      name="productCategory"
-                      value={form.productCategory}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      type="date"
-                      placeholder="Sales End Date"
-                      name="salesEndDate"
-                      value={form.salesEndDate}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      type="date"
-                      placeholder="Support End Date"
-                      name="supportEndDate"
-                      value={form.supportEndDate}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      placeholder="Product Name"
-                      name="productName"
-                      value={form.productName}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      placeholder="Vendor Name"
-                      name="vendorName"
-                      value={form.vendorName}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      placeholder="Manufacturer"
-                      name="manufacturer"
-                      value={form.manufacturer}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      type="date"
-                      placeholder="Sales Start Date"
-                      name="salesStartDate"
-                      value={form.salesStartDate}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      type="date"
-                      placeholder="Support Start Date"
-                      name="supportStartDate"
-                      value={form.supportStartDate}
-                      onChange={handleChange}
-                    />
+                    <input className="col-span-1 border rounded p-2" placeholder="Product Category" name="productCategory" value={form.productCategory} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" type="date" placeholder="Sales End Date" name="salesEndDate" value={form.salesEndDate} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" type="date" placeholder="Support End Date" name="supportEndDate" value={form.supportEndDate} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" placeholder="Product Name" name="productName" value={form.productName} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" placeholder="Vendor Name" name="vendorName" value={form.vendorName} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" placeholder="Manufacturer" name="manufacturer" value={form.manufacturer} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" type="date" placeholder="Sales Start Date" name="salesStartDate" value={form.salesStartDate} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" type="date" placeholder="Support Start Date" name="supportStartDate" value={form.supportStartDate} onChange={handleChange} />
                   </div>
                 )}
               </div>
@@ -251,44 +161,15 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   onClick={() => toggleSection("priceInfo")}
                 >
                   <span className="mr-2">PRICE INFORMATION</span>
-                  <span className="ml-auto">
-                    {openSections.priceInfo ? "▾" : "▸"}
-                  </span>
+                  <span className="ml-auto">{openSections.priceInfo ? "▾" : "▸"}</span>
                 </div>
                 {openSections.priceInfo && (
                   <div className="grid grid-cols-4 gap-4 mb-6">
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      type="number"
-                      placeholder="Unit Price"
-                      name="unitPrice"
-                      value={form.unitPrice}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      type="number"
-                      placeholder="Tax"
-                      name="tax"
-                      value={form.tax}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      type="number"
-                      placeholder="Commission Rate"
-                      name="commissionRate"
-                      value={form.commissionRate}
-                      onChange={handleChange}
-                    />
+                    <input className="col-span-1 border rounded p-2" type="number" placeholder="Unit Price" name="unitPrice" value={form.unitPrice} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" type="number" placeholder="Tax" name="tax" value={form.tax} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" type="number" placeholder="Commission Rate" name="commissionRate" value={form.commissionRate} onChange={handleChange} />
                     <div className="col-span-1 flex items-center">
-                      <input
-                        type="checkbox"
-                        className="mr-2"
-                        name="taxable"
-                        checked={form.taxable}
-                        onChange={handleChange}
-                      />
+                      <input type="checkbox" className="mr-2" name="taxable" checked={form.taxable} onChange={handleChange} />
                       <label>Taxable</label>
                     </div>
                   </div>
@@ -302,58 +183,16 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   onClick={() => toggleSection("stockInfo")}
                 >
                   <span className="mr-2">STOCK INFORMATION</span>
-                  <span className="ml-auto">
-                    {openSections.stockInfo ? "▾" : "▸"}
-                  </span>
+                  <span className="ml-auto">{openSections.stockInfo ? "▾" : "▸"}</span>
                 </div>
                 {openSections.stockInfo && (
                   <div className="grid grid-cols-4 gap-4 mb-6">
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      placeholder="Usage Unit"
-                      name="usageUnit"
-                      value={form.usageUnit}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      type="number"
-                      placeholder="Quantity in Stock"
-                      name="quantityInStock"
-                      value={form.quantityInStock}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      placeholder="Handler"
-                      name="handler"
-                      value={form.handler}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      type="number"
-                      placeholder="Qty Ordered"
-                      name="qtyOrdered"
-                      value={form.qtyOrdered}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      type="number"
-                      placeholder="Reorder Level"
-                      name="reorderLevel"
-                      value={form.reorderLevel}
-                      onChange={handleChange}
-                    />
-                    <input
-                      className="col-span-1 border rounded p-2"
-                      type="number"
-                      placeholder="Quantity in Demand"
-                      name="quantityInDemand"
-                      value={form.quantityInDemand}
-                      onChange={handleChange}
-                    />
+                    <input className="col-span-1 border rounded p-2" placeholder="Usage Unit" name="usageUnit" value={form.usageUnit} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" type="number" placeholder="Quantity in Stock" name="quantityInStock" value={form.quantityInStock} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" placeholder="Handler" name="handler" value={form.handler} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" type="number" placeholder="Qty Ordered" name="qtyOrdered" value={form.qtyOrdered} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" type="number" placeholder="Reorder Level" name="reorderLevel" value={form.reorderLevel} onChange={handleChange} />
+                    <input className="col-span-1 border rounded p-2" type="number" placeholder="Quantity in Demand" name="quantityInDemand" value={form.quantityInDemand} onChange={handleChange} />
                   </div>
                 )}
               </div>
@@ -365,38 +204,15 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   onClick={() => toggleSection("descriptionInfo")}
                 >
                   <span className="mr-2">DESCRIPTION INFORMATION</span>
-                  <span className="ml-auto">
-                    {openSections.descriptionInfo ? "▾" : "▸"}
-                  </span>
+                  <span className="ml-auto">{openSections.descriptionInfo ? "▾" : "▸"}</span>
                 </div>
                 {openSections.descriptionInfo && (
                   <div className="mb-6">
-                    <textarea
-                      className="border rounded p-2 w-full h-32"
-                      placeholder="Description"
-                      name="description"
-                      value={form.description}
-                      onChange={handleChange}
-                    />
+                    <textarea className="border rounded p-2 w-full h-32" placeholder="Description" name="description" value={form.description} onChange={handleChange} />
                     <div className="mt-4 grid grid-cols-3 gap-4">
-                      <button
-                        type="button"
-                        className="border rounded p-2 text-sm"
-                      >
-                        Create Form Views
-                      </button>
-                      <button
-                        type="button"
-                        className="border rounded p-2 text-sm"
-                      >
-                        Standard View
-                      </button>
-                      <button
-                        type="button"
-                        className="border rounded p-2 text-sm"
-                      >
-                        Create a custom form page
-                      </button>
+                      <button type="button" className="border rounded p-2 text-sm">Create Form Views</button>
+                      <button type="button" className="border rounded p-2 text-sm">Standard View</button>
+                      <button type="button" className="border rounded p-2 text-sm">Create a custom form page</button>
                     </div>
                   </div>
                 )}
@@ -409,23 +225,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   onClick={() => toggleSection("productImage")}
                 >
                   <span className="mr-2">PRODUCT IMAGE</span>
-                  <span className="ml-auto">
-                    {openSections.productImage ? "▾" : "▸"}
-                  </span>
+                  <span className="ml-auto">{openSections.productImage ? "▾" : "▸"}</span>
                 </div>
                 {openSections.productImage && (
                   <div className="flex items-center gap-4">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFile}
-                      className="block"
-                    />
-                    {form.file && (
-                      <span className="text-xs text-green-700">
-                        {form.file.name}
-                      </span>
-                    )}
+                    <input type="file" accept="image/*" onChange={handleFile} className="block" />
+                    {form.file && <span className="text-xs text-green-700">{form.file.name}</span>}
                   </div>
                 )}
               </div>
@@ -433,8 +238,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
             {/* Controls */}
             <div className="m-3 flex items-center justify-between gap-x-7 shrink-0">
-              <button
-                type="button"
+              <button type="button"
                 className="w-24 rounded-3xl bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
                 onClick={onClose}
               >

@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TermsAndCondition from "../TermsAndCondition";
-import { X, Mail, Phone, Plus, Minus } from "lucide-react";
+import {
+  X,
+  Mail,
+  Phone,
+  Plus,
+  Minus
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 const base_url = import.meta.env.VITE_BASE_URL;
@@ -35,7 +41,9 @@ const emptyForm: Record<string, any> = {
   sameAsBilling: true,
 };
 
-const currencyOptions = ["ZMW", "USD", "INR"];
+const currencyOptions = [
+  "ZMW", "USD", "INR"
+];
 
 const CustomerModal: React.FC<{
   isOpen: boolean;
@@ -43,224 +51,211 @@ const CustomerModal: React.FC<{
   onSubmit?: (data: Record<string, any>) => void;
   initialData?: Record<string, any> | null;
   isEditMode?: boolean;
-}> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
-  const [form, setForm] = useState<Record<string, any>>(emptyForm);
-  const [loading, setLoading] = useState(false);
-  const [showAdditionalBilling, setShowAdditionalBilling] = useState(false);
-  const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details",
-  );
+}> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialData,
+  isEditMode = false,
+}) => {
+    const [form, setForm] = useState<Record<string, any>>(emptyForm);
+    const [loading, setLoading] = useState(false);
+    const [showAdditionalBilling, setShowAdditionalBilling] = useState(false);
+    const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">("details");
 
-  useEffect(() => {
-    if (initialData) {
-      setForm(initialData);
-    } else {
-      setForm(emptyForm);
-    }
-    setActiveTab("details");
-  }, [initialData, isOpen]);
-
-  useEffect(() => {
-    if (form.sameAsBilling) {
-      setForm((prev) => ({
-        ...prev,
-        custom_shipping_address_line_1:
-          prev.custom_billing_address_line_1 ?? "",
-        custom_shipping_address_line_2:
-          prev.custom_billing_address_line_2 ?? "",
-        custom_shipping_postal_code: prev.custom_billing_postal_code ?? "",
-        custom_shipping_city: prev.custom_billing_city ?? "",
-        custom_shipping_state: prev.custom_billing_state ?? "",
-        custom_shipping_country: prev.custom_billing_country ?? "",
-      }));
-    }
-  }, [
-    form.sameAsBilling,
-    form.custom_billing_address_line_1,
-    form.custom_billing_address_line_2,
-    form.custom_billing_postal_code,
-    form.custom_billing_city,
-    form.custom_billing_state,
-    form.custom_billing_country,
-  ]);
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => {
-    const { name, type, value } = e.target;
-    if (type === "checkbox") {
-      const checked = (e.target as HTMLInputElement).checked;
-      setForm((p) => ({ ...p, [name]: checked }));
-    } else {
-      setForm((p) => ({ ...p, [name]: value }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const payload = { ...form };
-      let response;
-
-      if (isEditMode && initialData?.custom_id) {
-        payload.id = initialData.custom_id;
-        console.log("payload.id " + initialData.custom_id);
-
-        const updateUrl = `${UPDATE_CUSTOMER_ENDPOINT}?id=${initialData.custom_id}`;
-
-        response = await fetch(updateUrl, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: import.meta.env.VITE_AUTHORIZATION,
-          },
-          body: JSON.stringify(payload),
-        });
+    useEffect(() => {
+      if (initialData) {
+        setForm(initialData);
       } else {
-        response = await fetch(CUSTOMER_ENDPOINT, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: import.meta.env.VITE_AUTHORIZATION,
-          },
-          body: JSON.stringify(payload),
-        });
+        setForm(emptyForm);
       }
+      setActiveTab("details");
+    }, [initialData, isOpen]);
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || "Failed to save customer");
+    useEffect(() => {
+      if (form.sameAsBilling) {
+        setForm((prev) => ({
+          ...prev,
+          custom_shipping_address_line_1: prev.custom_billing_address_line_1 ?? "",
+          custom_shipping_address_line_2: prev.custom_billing_address_line_2 ?? "",
+          custom_shipping_postal_code: prev.custom_billing_postal_code ?? "",
+          custom_shipping_city: prev.custom_billing_city ?? "",
+          custom_shipping_state: prev.custom_billing_state ?? "",
+          custom_shipping_country: prev.custom_billing_country ?? "",
+        }));
       }
+    }, [
+      form.sameAsBilling,
+      form.custom_billing_address_line_1,
+      form.custom_billing_address_line_2,
+      form.custom_billing_postal_code,
+      form.custom_billing_city,
+      form.custom_billing_state,
+      form.custom_billing_country
+    ]);
 
-      const data = await response.json();
+    const handleChange = (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    ) => {
+      const { name, type, value } = e.target;
+      if (type === "checkbox") {
+        const checked = (e.target as HTMLInputElement).checked;
+        setForm((p) => ({ ...p, [name]: checked }));
+      } else {
+        setForm((p) => ({ ...p, [name]: value }));
+      }
+    };
 
-      console.log(
-        isEditMode
-          ? "Customer updated successfully!"
-          : "Customer created successfully!",
-      );
 
-      // onSubmit?.(isEditMode ? { ...initialData, ...payload } : data.data || payload);
-      onSubmit?.({} as any);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-      handleClose();
-    } catch (err: any) {
-      console.error("Save customer error:", err);
-      console.log(err.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+  try {
+    const payload = { ...form };
+    let response;
+
+    if (isEditMode && initialData?.custom_id) {
+      payload.id = initialData.custom_id;
+      console.log("payload.id " + initialData.custom_id);
+      
+      const updateUrl = `${UPDATE_CUSTOMER_ENDPOINT}?id=${initialData.custom_id}`;
+
+      response = await fetch(updateUrl, {
+        method: "PUT", 
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: import.meta.env.VITE_AUTHORIZATION,
+        },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      response = await fetch(CUSTOMER_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: import.meta.env.VITE_AUTHORIZATION,
+        },
+        body: JSON.stringify(payload),
+      });
     }
-  };
 
-  const handleClose = () => {
-    setForm(emptyForm);
-    onClose();
-  };
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || "Failed to save customer");
+    }
 
-  const reset = () => {
-    setForm(initialData ?? emptyForm);
-  };
+    const data = await response.json();
 
-  if (!isOpen) return null;
+    console.log(isEditMode ? "Customer updated successfully!" : "Customer created successfully!");
+    
+    // onSubmit?.(isEditMode ? { ...initialData, ...payload } : data.data || payload);
+    onSubmit?.({} as any);
+    
+    handleClose();
+  } catch (err: any) {
+    console.error("Save customer error:", err);
+    console.log(err.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className=" w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
-        >
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col h-full overflow-hidden"
+    const handleClose = () => {
+      setForm(emptyForm);
+      onClose();
+    };
+
+    const reset = () => {
+      setForm(initialData ?? emptyForm);
+    };
+
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className=" w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
           >
-            {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-indigo-700">
-                {isEditMode ? "Edit Customer" : "Add New Customer"}
-              </h2>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="p-1 rounded-full hover:bg-gray-200"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-            </header>
-
-            {/* Tabs */}
-            <div className="flex border-b bg-gray-50">
-              {(["details", "terms", "address"] as const).map((tab) => (
+            <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
+              {/* Header */}
+              <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
+                <h2 className="text-2xl font-semibold text-indigo-700">
+                  {isEditMode ? "Edit Customer" : "Add New Customer"}
+                </h2>
                 <button
-                  key={tab}
                   type="button"
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${
-                    activeTab === tab
+                  onClick={handleClose}
+                  className="p-1 rounded-full hover:bg-gray-200"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+              </header>
+
+              {/* Tabs */}
+              <div className="flex border-b bg-gray-50">
+                {(["details", "terms", "address"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${activeTab === tab
                       ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
                       : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {tab === "details"
-                    ? "Details"
-                    : tab === "terms"
-                      ? "Terms & Conditions"
-                      : "Address"}
-                </button>
-              ))}
-            </div>
+                      }`}
+                  >
+                    {tab === "details" ? "Details" : tab === "terms" ? "Terms & Conditions" : "Address"}
+                  </button>
+                ))}
+              </div>
 
-            {/* Tab Content */}
-            <section className="flex-1 overflow-y-auto p-6 space-y-6">
-              {activeTab === "details" && (
-                <div className="space-y-6">
-                  {/* Customer Details */}
-                  <div>
-                    <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                      Customer Details
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <label className="flex flex-col gap-1 text-sm">
-                        <span className="font-medium text-gray-600">
-                          Customer Type *
-                        </span>
-                        <select
-                          name="customer_type"
-                          value={form.customer_type}
+              {/* Tab Content */}
+              <section className="flex-1 overflow-y-auto p-6 space-y-6">
+                {activeTab === "details" && (
+                  <div className="space-y-6">
+                    {/* Customer Details */}
+                    <div>
+                      <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
+                        Customer Details
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                        <label className="flex flex-col gap-1 text-sm">
+                          <span className="font-medium text-gray-600">
+                            Customer Type *
+                          </span>
+                          <select
+                            name="customer_type"
+                            value={form.customer_type}
+                            onChange={handleChange}
+                            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            required
+                          >
+                            <option value="Individual">Individual</option>
+                            <option value="Company">Company</option>
+                          </select>
+                        </label>
+                        <Input
+                          label="Customer Name"
+                          name="customer_name"
+                          value={form.customer_name}
                           onChange={handleChange}
-                          className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                          placeholder="Acme Corp"
                           required
-                        >
-                          <option value="Individual">Individual</option>
-                          <option value="Company">Company</option>
-                        </select>
-                      </label>
-                      <Input
-                        label="Customer Name"
-                        name="customer_name"
-                        value={form.customer_name}
-                        onChange={handleChange}
-                        placeholder="Acme Corp"
-                        required
-                      />
-                      <Input
-                        label="Contact Person"
-                        name="custom_contact_person"
-                        type="custom_contact_person"
-                        value={form.custom_contact_person}
-                        onChange={handleChange}
-                        placeholder="e.g. Timothy"
-                      />
-                      <label className="flex flex-col gap-1 text-sm">
-                        <span className="font-medium text-gray-600">
-                          Display Name *
-                        </span>
+                        />
+                        <Input
+                              label="Contact Person"
+                              name="custom_contact_person"
+                              type="custom_contact_person"
+                              value={form.custom_contact_person}
+                              onChange={handleChange}
+                              placeholder="e.g. Timothy"
+                        />
+                        <label className="flex flex-col gap-1 text-sm">
+                        <span className="font-medium text-gray-600">Display Name *</span>
                         <select
                           name="custom_display_name"
                           value={form.custom_display_name || ""}
@@ -273,159 +268,157 @@ const CustomerModal: React.FC<{
                           </option>
                           {form.customer_name && (
                             <option value={form.customer_name}>
-                              {form.customer_name}
+                              {form.customer_name} 
                             </option>
                           )}
                           {form.custom_contact_person && (
                             <option value={form.custom_contact_person}>
-                              {form.custom_contact_person}
+                              {form.custom_contact_person} 
                             </option>
                           )}
-                          {!form.customer_name &&
-                            !form.custom_contact_person && (
-                              <option value="" disabled></option>
-                            )}
+                          {!form.customer_name && !form.custom_contact_person && (
+                            <option value="" disabled>
+         
+                            </option>
+                         )}
                         </select>
                       </label>
-
-                      <Input
-                        label="Customer TPIN"
-                        name="custom_customer_tpin"
-                        value={form.custom_customer_tpin}
-                        onChange={handleChange}
-                        placeholder="TP12345678"
-                        required
-                      />
-                      {/* <Input
+                       
+                            <Input
+                              label="Customer TPIN"
+                              name="custom_customer_tpin"
+                              value={form.custom_customer_tpin}
+                              onChange={handleChange}
+                              placeholder="TP12345678"
+                              required
+                            />
+                            {/* <Input
                               label="ID"
                               name="id"
                               value={form.id}
                               onChange={handleChange}
                               placeholder="Identification Number"
                             /> */}
-                      <label className="flex flex-col gap-1 text-sm">
-                        <span className="font-medium text-gray-600">
-                          Currency
-                        </span>
-                        <select
-                          name="customer_currency"
-                          value={form.customer_currency ?? ""}
+                         <label className="flex flex-col gap-1 text-sm">
+                          <span className="font-medium text-gray-600">Currency</span>
+                          <select
+                            name="customer_currency"
+                            value={form.customer_currency ?? ""}
+                            onChange={handleChange}
+                            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                          >
+                            <option value="">Select Currency...</option>
+                            {currencyOptions.map((c) => (
+                              <option key={c} value={c}>{c}</option>
+                            ))}
+                          </select>
+                        </label>
+                        <Input
+                          label="Bank Account"
+                          name="customer_account_no"
+                          value={form.customer_account_no}
                           onChange={handleChange}
-                          className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                        >
-                          <option value="">Select Currency...</option>
-                          {currencyOptions.map((c) => (
-                            <option key={c} value={c}>
-                              {c}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <Input
-                        label="Bank Account"
-                        name="customer_account_no"
-                        value={form.customer_account_no}
-                        onChange={handleChange}
-                        placeholder="Bank Account"
-                      />
-                      <Input
-                        label="Onboard Balance"
-                        name="customer_onboarding_balance"
-                        type="customer_onboarding_balance"
-                        value={form.customer_onboarding_balance}
-                        onChange={handleChange}
-                        placeholder="e.g. 1000"
-                      />
-                      <Input
-                        label="Email"
-                        name="customer_email"
-                        type="customer_email"
-                        value={form.customer_email}
-                        onChange={handleChange}
-                        icon={<Mail className="w-4 h-4 text-gray-400" />}
-                      />
-                      <Input
-                        label="Mobile No"
-                        name="mobile_no"
-                        type="tel"
-                        value={form.mobile_no}
-                        onChange={handleChange}
-                        icon={<Phone className="w-4 h-4 text-gray-400" />}
-                      />
+                          placeholder="Bank Account"
+                        />
+                        <Input
+                              label="Onboard Balance"
+                              name="customer_onboarding_balance"
+                              type="customer_onboarding_balance"
+                              value={form.customer_onboarding_balance}
+                              onChange={handleChange}
+                              placeholder="e.g. 1000"
+                        />
+                        <Input
+                          label="Email"
+                          name="customer_email"
+                          type="customer_email"
+                          value={form.customer_email}
+                          onChange={handleChange}
+                          icon={<Mail className="w-4 h-4 text-gray-400" />}
+                        />
+                        <Input
+                          label="Mobile No"
+                          name="mobile_no"
+                          type="tel"
+                          value={form.mobile_no}
+                          onChange={handleChange}
+                          icon={<Phone className="w-4 h-4 text-gray-400" />}
+                        />
+                      </div>
                     </div>
+
+                    <div className="my-6  bg-gray-300" />
                   </div>
+                )}
 
-                  <div className="my-6  bg-gray-300" />
-                </div>
-              )}
-
-              {/* === TAB: Terms & Conditions === */}
+                {/* === TAB: Terms & Conditions === */}
               {activeTab === "terms" && (
-                <div className=" h-full w-full">
-                  <TermsAndCondition />
-                </div>
+              <div className=" h-full w-full">
+              <TermsAndCondition/>
+              </div>
               )}
 
-              {activeTab === "address" && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                    {/* ========== BILLING ADDRESS ========== */}
-                    <div className="rounded-lg border border-gray-300 bg-white shadow p-6">
-                      {/* Header */}
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-700 underline">
-                          Billing Address
-                        </h3>
-                      </div>
+                {activeTab === "address" && (
+                  <div className="space-y-6">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
 
-                      {/* Main Address Fields */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <Input
-                          label="Line 1"
-                          name="custom_billing_address_line_1"
-                          value={form.custom_billing_address_line_1 ?? ""}
-                          onChange={handleChange}
-                          placeholder="Street, Apartment"
-                        />
-                        <Input
-                          label="Line 2"
-                          name="custom_billing_address_line_2"
-                          value={form.custom_billing_address_line_2 ?? ""}
-                          onChange={handleChange}
-                          placeholder="Landmark, City"
-                        />
-                        <Input
-                          label="Postal Code"
-                          name="custom_billing_postal_code"
-                          value={form.custom_billing_postal_code ?? ""}
-                          onChange={handleChange}
-                          placeholder="Postal Code"
-                        />
-                        <Input
-                          label="City"
-                          name="custom_billing_city"
-                          value={form.custom_billing_city ?? ""}
-                          onChange={handleChange}
-                          placeholder="City"
-                        />
-                        <Input
-                          label="State"
-                          name="custom_billing_state"
-                          value={form.custom_billing_state ?? ""}
-                          onChange={handleChange}
-                          placeholder="State"
-                        />
-                        <Input
-                          label="Country"
-                          name="custom_billing_country"
-                          value={form.custom_billing_country ?? ""}
-                          onChange={handleChange}
-                          placeholder="Country"
-                        />
-                      </div>
+                      {/* ========== BILLING ADDRESS ========== */}
+                      <div className="rounded-lg border border-gray-300 bg-white shadow p-6">
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-gray-700 underline">
+                            Billing Address
+                          </h3>
+                        </div>
 
-                      {/* Add Address Button */}
-                      {/* <div className="mt-6 flex items-center justify-between">
+                        {/* Main Address Fields */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="Line 1"
+                            name="custom_billing_address_line_1"
+                            value={form.custom_billing_address_line_1 ?? ""}
+                            onChange={handleChange}
+                            placeholder="Street, Apartment"
+                          />
+                          <Input
+                            label="Line 2"
+                            name="custom_billing_address_line_2"
+                            value={form.custom_billing_address_line_2 ?? ""}
+                            onChange={handleChange}
+                            placeholder="Landmark, City"
+                          />
+                          <Input
+                            label="Postal Code"
+                            name="custom_billing_postal_code"
+                            value={form.custom_billing_postal_code ?? ""}
+                            onChange={handleChange}
+                            placeholder="Postal Code"
+                          />
+                          <Input
+                            label="City"
+                            name="custom_billing_city"
+                            value={form.custom_billing_city ?? ""}
+                            onChange={handleChange}
+                            placeholder="City"
+                          />
+                          <Input
+                            label="State"
+                            name="custom_billing_state"
+                            value={form.custom_billing_state ?? ""}
+                            onChange={handleChange}
+                            placeholder="State"
+                          />
+                          <Input
+                            label="Country"
+                            name="custom_billing_country"
+                            value={form.custom_billing_country ?? ""}
+                            onChange={handleChange}
+                            placeholder="Country"
+                          />
+                        </div>
+
+                        {/* Add Address Button */}
+                        {/* <div className="mt-6 flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
@@ -444,8 +437,8 @@ const CustomerModal: React.FC<{
                           </div>
                         </div> */}
 
-                      {/* Additional Address Fields */}
-                      {/* {showAdditionalBilling && (
+                        {/* Additional Address Fields */}
+                        {/* {showAdditionalBilling && (
                           <div className="mt-2 pt-2">
                             <div className="grid grid-cols-2 gap-4">
                               <Input
@@ -481,125 +474,127 @@ const CustomerModal: React.FC<{
                             </div>
                           </div>
                         )} */}
-                    </div>
-
-                    {/* ========== SHIPPING ADDRESS ========== */}
-                    <div className="rounded-lg border border-gray-300 bg-white shadow p-6">
-                      {/* Header with checkbox */}
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-700 underline">
-                          Shipping Address
-                        </h3>
-
-                        {/* Same as Billing Checkbox - RIGHT SIDE */}
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            name="sameAsBilling"
-                            checked={form.sameAsBilling || false}
-                            onChange={handleChange}
-                            className="w-4 h-4 text-indigo-600"
-                          />
-                          <span className="text-sm text-gray-600 font-medium">
-                            Same as billing
-                          </span>
-                        </div>
                       </div>
 
-                      {/* Address Fields - Always Visible */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <Input
-                          label="Line 1"
-                          name="custom_shipping_address_line_1"
-                          value={form.custom_shipping_address_line_1 ?? ""}
-                          onChange={handleChange}
-                          placeholder="Street, Apartment"
-                          disabled={form.sameAsBilling}
-                        />
-                        <Input
-                          label="Line 2"
-                          name="custom_shipping_address_line_2"
-                          value={form.custom_shipping_address_line_2 ?? ""}
-                          onChange={handleChange}
-                          placeholder="Landmark, City"
-                          disabled={form.sameAsBilling}
-                        />
-                        <Input
-                          label="Postal Code"
-                          name="custom_shipping_postal_code"
-                          value={form.custom_shipping_postal_code ?? ""}
-                          onChange={handleChange}
-                          placeholder="Postal Code"
-                          disabled={form.sameAsBilling}
-                        />
-                        <Input
-                          label="City"
-                          name="custom_shipping_city"
-                          value={form.custom_shipping_city ?? ""}
-                          onChange={handleChange}
-                          placeholder="City"
-                          disabled={form.sameAsBilling}
-                        />
-                        <Input
-                          label="State"
-                          name="custom_shipping_state"
-                          value={form.custom_shipping_state ?? ""}
-                          onChange={handleChange}
-                          placeholder="State"
-                          disabled={form.sameAsBilling}
-                        />
-                        <Input
-                          label="Country"
-                          name="custom_shipping_country"
-                          value={form.custom_shipping_country ?? ""}
-                          onChange={handleChange}
-                          placeholder="Country"
-                          disabled={form.sameAsBilling}
-                        />
+                      {/* ========== SHIPPING ADDRESS ========== */}
+                      <div className="rounded-lg border border-gray-300 bg-white shadow p-6">
+                        {/* Header with checkbox */}
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-gray-700 underline">
+                            Shipping Address
+                          </h3>
+
+                          {/* Same as Billing Checkbox - RIGHT SIDE */}
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              name="sameAsBilling"
+                              checked={form.sameAsBilling || false}
+                              onChange={handleChange}
+                              className="w-4 h-4 text-indigo-600"
+                            />
+                            <span className="text-sm text-gray-600 font-medium">
+                              Same as billing
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Address Fields - Always Visible */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="Line 1"
+                            name="custom_shipping_address_line_1"
+                            value={form.custom_shipping_address_line_1 ?? ""}
+                            onChange={handleChange}
+                            placeholder="Street, Apartment"
+                            disabled={form.sameAsBilling}
+                          />
+                          <Input
+                            label="Line 2"
+                            name="custom_shipping_address_line_2"
+                            value={form.custom_shipping_address_line_2 ?? ""}
+                            onChange={handleChange}
+                            placeholder="Landmark, City"
+                            disabled={form.sameAsBilling}
+                          />
+                          <Input
+                            label="Postal Code"
+                            name="custom_shipping_postal_code"
+                            value={form.custom_shipping_postal_code ?? ""}
+                            onChange={handleChange}
+                            placeholder="Postal Code"
+                            disabled={form.sameAsBilling}
+                          />
+                          <Input
+                            label="City"
+                            name="custom_shipping_city"
+                            value={form.custom_shipping_city ?? ""}
+                            onChange={handleChange}
+                            placeholder="City"
+                            disabled={form.sameAsBilling}
+                          />
+                          <Input
+                            label="State"
+                            name="custom_shipping_state"
+                            value={form.custom_shipping_state ?? ""}
+                            onChange={handleChange}
+                            placeholder="State"
+                            disabled={form.sameAsBilling}
+                          />
+                          <Input
+                            label="Country"
+                            name="custom_shipping_country"
+                            value={form.custom_shipping_country ?? ""}
+                            onChange={handleChange}
+                            placeholder="Country"
+                            disabled={form.sameAsBilling}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </section>
+                )}
 
-            {/* Footer */}
-            <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <div className="flex gap-2">
+
+              </section>
+
+              {/* Footer */}
+              <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
                 <button
                   type="button"
-                  onClick={reset}
-                  className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
+                  onClick={handleClose}
+                  className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
                 >
-                  Reset
+                  Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex items-center gap-2 rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600 disabled:opacity-50"
-                >
-                  {/* {loading ? (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={reset}
+                    className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex items-center gap-2 rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600 disabled:opacity-50"
+                  >
+                    {/* {loading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       <Save className="w-4 h-4" />
                     )} */}
-                  {isEditMode ? "Update" : "Save"} Customer
-                </button>
-              </div>
-            </footer>
-          </form>
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
-};
+                    {isEditMode ? "Update" : "Save"} Customer
+                  </button>
+                </div>
+              </footer>
+            </form>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    );
+  };
 
 // Reusable Input Component
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -622,15 +617,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <input
           ref={ref}
-          className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
-            icon ? "pl-10" : ""
-          } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
+          className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${icon ? "pl-10" : ""
+            } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
           {...props}
           value={props.value ?? ""}
         />
       </div>
     </label>
-  ),
+  )
 );
 Input.displayName = "Input";
 

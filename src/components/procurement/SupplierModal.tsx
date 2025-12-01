@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Phone, Save, Loader2 } from "lucide-react";
+import {
+  X,
+  Mail,
+  Phone,
+  Save,
+  Loader2,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 const base_url = import.meta.env.VITE_BASE_URL;
@@ -50,14 +56,18 @@ const SupplierModal: React.FC<{
   onSubmit?: (data: Record<string, any>) => void;
   initialData?: Record<string, any> | null;
   isEditMode?: boolean;
-}> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
+}> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialData,
+  isEditMode = false,
+}) => {
   const [form, setForm] = useState<Record<string, any>>(emptyForm);
   const [loading, setLoading] = useState(false);
 
   // Tab state
-  const [activeTab, setActiveTab] = useState<
-    "supplier" | "contact" | "payment" | "address"
-  >("supplier");
+  const [activeTab, setActiveTab] = useState<"supplier" | "contact" | "payment" | "address">("supplier");
 
   useEffect(() => {
     if (initialData) {
@@ -69,9 +79,7 @@ const SupplierModal: React.FC<{
   }, [initialData, isOpen]);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, type, value } = e.target;
     if (type === "checkbox") {
@@ -98,7 +106,7 @@ const SupplierModal: React.FC<{
               Authorization: import.meta.env.VITE_AUTHORIZATION,
             },
             body: JSON.stringify(payload),
-          },
+          }
         );
       } else {
         response = await fetch(CUSTOMER_ENDPOINT, {
@@ -145,10 +153,7 @@ const SupplierModal: React.FC<{
           exit={{ opacity: 0, scale: 0.95 }}
           className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
         >
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col h-full overflow-hidden"
-          >
+          <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
             {/* Header */}
             <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
               <h2 className="text-2xl font-semibold text-indigo-700">
@@ -216,115 +221,41 @@ const SupplierModal: React.FC<{
               {/* Supplier Details Tab */}
               {activeTab === "supplier" && (
                 <>
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700 underline">
-                      Supplier Details
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Tax Id/ TPIN"
-                        name="tpin"
-                        value={form.tpin || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Supplier Name"
-                        name="supplierName"
-                        value={form.supplierName || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Supplier Code"
-                        name="supplierCode"
-                        value={form.supplierCode || ""}
-                        onChange={handleChange}
-                      />
-                    </div>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700 underline">
+                    Supplier Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <Input label="Tax Id/ TPIN" name="tpin" value={form.tpin || ""} onChange={handleChange} required />
+                    <Input label="Supplier Name" name="supplierName" value={form.supplierName || ""} onChange={handleChange} required />
+                    <Input label="Supplier Code" name="supplierCode" value={form.supplierCode || ""} onChange={handleChange} />
                   </div>
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700 underline">
-                      Contact Details
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Contact Person Name"
-                        name="contactPerson"
-                        value={form.contactPerson || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Phone No"
-                        name="phoneNo"
-                        value={form.phoneNo || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Alternate No"
-                        name="alternateNo"
-                        value={form.alternateNo || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Email Id"
-                        name="emailId"
-                        value={form.emailId || ""}
-                        onChange={handleChange}
-                        icon={<Mail className="w-4 h-4 text-gray-400" />}
-                      />
-                    </div>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700 underline">
+                    Contact Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <Input label="Contact Person Name" name="contactPerson" value={form.contactPerson || ""} onChange={handleChange} required />
+                    <Input label="Phone No" name="phoneNo" value={form.phoneNo || ""} onChange={handleChange} />
+                    <Input label="Alternate No" name="alternateNo" value={form.alternateNo || ""} onChange={handleChange} />
+                    <Input label="Email Id" name="emailId" value={form.emailId || ""} onChange={handleChange} icon={<Mail className="w-4 h-4 text-gray-400" />} />
                   </div>
-                  <div className="space-y-6">
-                    <h3 className="text-lg font-semibold text-gray-700 underline">
-                      Address Details
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Address Line 1"
-                        name="billingAddressLine1"
-                        value={form.billingAddressLine1 || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Address Line 2"
-                        name="billingAddressLine2"
-                        value={form.billingAddressLine2 || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="City"
-                        name="billingCity"
-                        value={form.billingCity || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="District"
-                        name="district"
-                        value={form.district || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Province"
-                        name="province"
-                        value={form.province || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Country"
-                        name="billingCountry"
-                        value={form.billingCountry || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Postal Code"
-                        name="billingPostalCode"
-                        value={form.billingPostalCode || ""}
-                        onChange={handleChange}
-                      />
-                    </div>
+                </div>
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-700 underline">
+                    Address Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <Input label="Address Line 1" name="billingAddressLine1" value={form.billingAddressLine1 || ""} onChange={handleChange} />
+                    <Input label="Address Line 2" name="billingAddressLine2" value={form.billingAddressLine2 || ""} onChange={handleChange} />
+                    <Input label="City" name="billingCity" value={form.billingCity || ""} onChange={handleChange} />
+                    <Input label="District" name="district" value={form.district || ""} onChange={handleChange} />
+                    <Input label="Province" name="province" value={form.province || ""} onChange={handleChange} />
+                    <Input label="Country" name="billingCountry" value={form.billingCountry || ""} onChange={handleChange} />
+                    <Input label="Postal Code" name="billingPostalCode" value={form.billingPostalCode || ""} onChange={handleChange} />
                   </div>
+                </div>
                 </>
               )}
 
@@ -336,43 +267,23 @@ const SupplierModal: React.FC<{
                       Payment Details
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <label className="flex flex-col gap-1 text-sm">
-                        <span className="font-medium text-gray-600">
-                          Currency
-                        </span>
-                        <select
-                          name="currency"
-                          value={form.currency || ""}
-                          onChange={handleChange}
-                          className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                        >
-                          <option value="">Select currency...</option>
-                          {currencyOptions.map((c) => (
-                            <option key={c} value={c}>
-                              {c}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <Input
-                        label="Payment Terms (Days)"
-                        name="paymentTerms"
-                        value={form.paymentTerms || ""}
+                    <label className="flex flex-col gap-1 text-sm">
+                      <span className="font-medium text-gray-600">Currency</span>
+                      <select
+                        name="currency"
+                        value={form.currency || ""}
                         onChange={handleChange}
-                      />
-                      <Input
-                        label="Date of Addition"
-                        name="dateOfAddition"
-                        type="date"
-                        value={form.dateOfAddition || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Opening Balance"
-                        name="openingBalance"
-                        value={form.openingBalance || ""}
-                        onChange={handleChange}
-                      />
+                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      >
+                        <option value="">Select currency...</option>
+                        {currencyOptions.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </label>
+                      <Input label="Payment Terms (Days)" name="paymentTerms" value={form.paymentTerms || ""} onChange={handleChange} />
+                      <Input label="Date of Addition" name="dateOfAddition" type="date" value={form.dateOfAddition || ""} onChange={handleChange} />
+                      <Input label="Opening Balance" name="openingBalance" value={form.openingBalance || ""} onChange={handleChange} />
                     </div>
                   </div>
 
@@ -381,38 +292,11 @@ const SupplierModal: React.FC<{
                       Bank Details
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Account No"
-                        name="accountNumber"
-                        value={form.accountNumber || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Account Holder Name"
-                        name="accountHolder"
-                        value={form.accountHolder || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Sort Code"
-                        name="sortCode"
-                        value={form.sortCode || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="SWIFT Code"
-                        name="swiftCode"
-                        value={form.swiftCode || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Branch Address"
-                        name="branchAddress"
-                        value={form.branchAddress || ""}
-                        onChange={handleChange}
-                      />
+                      <Input label="Account No" name="accountNumber" value={form.accountNumber || ""} onChange={handleChange} required />
+                      <Input label="Account Holder Name" name="accountHolder" value={form.accountHolder || ""} onChange={handleChange} required />
+                      <Input label="Sort Code" name="sortCode" value={form.sortCode || ""} onChange={handleChange} />
+                      <Input label="SWIFT Code" name="swiftCode" value={form.swiftCode || ""} onChange={handleChange} />
+                      <Input label="Branch Address" name="branchAddress" value={form.branchAddress || ""} onChange={handleChange} />
                     </div>
                   </div>
                 </motion.div>
@@ -485,7 +369,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         />
       </div>
     </label>
-  ),
+  )
 );
 Input.displayName = "Input";
 

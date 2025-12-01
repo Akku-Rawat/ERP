@@ -61,20 +61,14 @@ const QuotationTemplate3 = forwardRef<HTMLDivElement, QuotationTemplate3Props>(
     const [signature, setSignature] = useState<string | null>(null);
     const signatureInputRef = useRef<HTMLInputElement>(null);
     const [signatureText, setSignatureText] = useState<string>("");
-    const [signatureMode, setSignatureMode] = useState<"upload" | "type">(
-      "upload",
-    );
+    const [signatureMode, setSignatureMode] = useState<"upload" | "type">("upload");
 
     const getCurrencySymbol = () => {
       switch (data.currency) {
-        case "ZMW":
-          return "ZK";
-        case "INR":
-          return "₹";
-        case "USD":
-          return "$";
-        default:
-          return "₹";
+        case "ZMW": return "ZK";
+        case "INR": return "₹";
+        case "USD": return "$";
+        default: return "₹";
       }
     };
 
@@ -112,11 +106,7 @@ const QuotationTemplate3 = forwardRef<HTMLDivElement, QuotationTemplate3Props>(
                 onClick={() => fileInputRef.current?.click()}
               >
                 {logo || companyLogoUrl ? (
-                  <img
-                    src={logo || companyLogoUrl}
-                    alt="Logo"
-                    className="w-18 h-18 object-contain"
-                  />
+                  <img src={logo || companyLogoUrl} alt="Logo" className="w-18 h-18 object-contain" />
                 ) : (
                   <UploadCloud className="w-8 h-8 text-[#D4AF37]" />
                 )}
@@ -161,68 +151,39 @@ const QuotationTemplate3 = forwardRef<HTMLDivElement, QuotationTemplate3Props>(
           <div className="grid grid-cols-4 gap-6 mb-8">
             {/* FROM */}
             <div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">
-                FROM
-              </h3>
+              <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">FROM</h3>
               <div className="text-sm space-y-1">
-                <p className="font-semibold text-gray-800">
-                  {data.companyName || "Rolaface Software Pvt Limited"}
-                </p>
-                <p className="text-gray-600">
-                  {data.companyAddress || "77 Namrata Bldg"}
-                </p>
-                <p className="text-gray-600">
-                  {data.companyCity || "Delhi"}, {data.companyState || "Delhi"}{" "}
-                  {data.companyPostalCode || "400077"}
-                </p>
+                <p className="font-semibold text-gray-800">{data.companyName || "Rolaface Software Pvt Limited"}</p>
+                <p className="text-gray-600">{data.companyAddress || "77 Namrata Bldg"}</p>
+                <p className="text-gray-600">{data.companyCity || "Delhi"}, {data.companyState || "Delhi"} {data.companyPostalCode || "400077"}</p>
               </div>
             </div>
 
             {/* QUOTE TO */}
             <div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">
-                QUOTE TO
-              </h3>
+              <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">QUOTE TO</h3>
               <div className="text-sm space-y-1">
-                <p className="font-semibold text-gray-800">
-                  {data.customerName}
-                </p>
+                <p className="font-semibold text-gray-800">{data.customerName}</p>
                 <p className="text-gray-600">{data.billingAddressLine1}</p>
-                <p className="text-gray-600">
-                  {data.billingCity}, {data.billingState}{" "}
-                  {data.billingPostalCode}
-                </p>
+                <p className="text-gray-600">{data.billingCity}, {data.billingState} {data.billingPostalCode}</p>
               </div>
             </div>
 
             {/* DELIVER TO */}
             <div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">
-                DELIVER TO
-              </h3>
+              <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">DELIVER TO</h3>
               <div className="text-sm space-y-1">
-                <p className="font-semibold text-gray-800">
-                  {data.customerName}
-                </p>
+                <p className="font-semibold text-gray-800">{data.customerName}</p>
                 <p className="text-gray-600">{data.shippingAddressLine1}</p>
-                <p className="text-gray-600">
-                  {data.shippingCity}, {data.shippingState}{" "}
-                  {data.shippingPostalCode}
-                </p>
+                <p className="text-gray-600">{data.shippingCity}, {data.shippingState} {data.shippingPostalCode}</p>
               </div>
             </div>
 
             {/* QUOTATION TOTAL */}
             <div className="text-right">
-              <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">
-                QUOTATION TOTAL
-              </h3>
+              <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">QUOTATION TOTAL</h3>
               <p className="text-3xl font-bold text-[#D4AF37]">
-                {symbol}
-                {data.grandTotal.toLocaleString("en-IN", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                {symbol}{data.grandTotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
           </div>
@@ -235,43 +196,24 @@ const QuotationTemplate3 = forwardRef<HTMLDivElement, QuotationTemplate3Props>(
             <table className="w-full">
               <thead>
                 <tr className="border-b-2 border-gray-300">
-                  <th className="py-3 text-left text-sm font-bold text-[#D4AF37] uppercase">
-                    DESCRIPTION
-                  </th>
-                  <th className="py-3 text-right text-sm font-bold text-[#D4AF37] uppercase">
-                    UNIT PRICE
-                  </th>
-                  <th className="py-3 text-center text-sm font-bold text-[#D4AF37] uppercase">
-                    QTY
-                  </th>
-                  <th className="py-3 text-right text-sm font-bold text-[#D4AF37] uppercase">
-                    AMOUNT
-                  </th>
+                  <th className="py-3 text-left text-sm font-bold text-[#D4AF37] uppercase">DESCRIPTION</th>
+                  <th className="py-3 text-right text-sm font-bold text-[#D4AF37] uppercase">UNIT PRICE</th>
+                  <th className="py-3 text-center text-sm font-bold text-[#D4AF37] uppercase">QTY</th>
+                  <th className="py-3 text-right text-sm font-bold text-[#D4AF37] uppercase">AMOUNT</th>
                 </tr>
               </thead>
               <tbody>
                 {data.items.map((item, index) => {
-                  const lineTotal =
-                    item.quantity * item.listPrice - item.discount;
+                  const lineTotal = item.quantity * item.listPrice - item.discount;
                   return (
                     <tr key={index} className="border-b border-gray-200">
-                      <td className="py-3 text-sm text-gray-800">
-                        {item.description}
-                      </td>
+                      <td className="py-3 text-sm text-gray-800">{item.description}</td>
                       <td className="py-3 text-sm text-gray-800 text-right">
-                        {item.listPrice.toLocaleString("en-IN", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
+                        {item.listPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
-                      <td className="py-3 text-sm text-gray-800 text-center">
-                        {item.quantity}
-                      </td>
+                      <td className="py-3 text-sm text-gray-800 text-center">{item.quantity}</td>
                       <td className="py-3 text-sm text-gray-800 text-right">
-                        {lineTotal.toLocaleString("en-IN", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
+                        {lineTotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                     </tr>
                   );
@@ -284,37 +226,21 @@ const QuotationTemplate3 = forwardRef<HTMLDivElement, QuotationTemplate3Props>(
           <div className="flex justify-end mb-8">
             <div className="w-80 space-y-2 text-sm">
               <div className="flex justify-between py-2">
-                <span className="text-[#D4AF37] font-bold uppercase">
-                  SUBTOTAL
-                </span>
+                <span className="text-[#D4AF37] font-bold uppercase">SUBTOTAL</span>
                 <span className="text-gray-800">
-                  {data.subTotal.toLocaleString("en-IN", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {data.subTotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
               <div className="flex justify-between py-2">
-                <span className="text-[#D4AF37] font-bold uppercase">
-                  GST {((data.totalTax / data.subTotal) * 100).toFixed(1)}%
-                </span>
+                <span className="text-[#D4AF37] font-bold uppercase">GST {((data.totalTax / data.subTotal) * 100).toFixed(1)}%</span>
                 <span className="text-gray-800">
-                  {data.totalTax.toLocaleString("en-IN", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {data.totalTax.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
               <div className="flex justify-between py-3 mt-2">
-                <span className="text-[#D4AF37] font-bold text-lg uppercase">
-                  TOTAL
-                </span>
+                <span className="text-[#D4AF37] font-bold text-lg uppercase">TOTAL</span>
                 <span className="text-gray-800 font-bold text-lg">
-                  {symbol}
-                  {data.grandTotal.toLocaleString("en-IN", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {symbol}{data.grandTotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
             </div>
@@ -323,9 +249,7 @@ const QuotationTemplate3 = forwardRef<HTMLDivElement, QuotationTemplate3Props>(
           {/* Signature Section */}
           <div className="flex justify-end mb-12">
             <div className="w-80">
-              <h3 className="text-sm font-bold text-gray-700 mb-3">
-                Authorized Signature
-              </h3>
+              <h3 className="text-sm font-bold text-gray-700 mb-3">Authorized Signature</h3>
 
               {/* Toggle Buttons */}
               <div className="flex gap-2 mb-3">
@@ -366,9 +290,7 @@ const QuotationTemplate3 = forwardRef<HTMLDivElement, QuotationTemplate3Props>(
                   ) : (
                     <div className="text-center">
                       <UploadCloud className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-                      <span className="text-gray-500 text-xs">
-                        Click to upload
-                      </span>
+                      <span className="text-gray-500 text-xs">Click to upload</span>
                     </div>
                   )}
                   <input
@@ -409,27 +331,18 @@ const QuotationTemplate3 = forwardRef<HTMLDivElement, QuotationTemplate3Props>(
           {/* Terms & Conditions */}
           <div className="border-t border-gray-300 pt-6 space-y-4 pb-8">
             <div>
-              <h3 className="text-sm font-bold text-gray-500 uppercase mb-2">
-                TERMS & CONDITIONS
-              </h3>
-              <p className="text-sm text-gray-700">
-                {data.termsAndConditions ||
-                  "This quotation is valid for 30 days from the date of issue."}
-              </p>
+              <h3 className="text-sm font-bold text-gray-500 uppercase mb-2">TERMS & CONDITIONS</h3>
+              <p className="text-sm text-gray-700">{data.termsAndConditions || "This quotation is valid for 30 days from the date of issue."}</p>
             </div>
 
             {data.bankName && (
               <div className="text-sm">
                 <p className="font-semibold text-gray-800">{data.bankName}</p>
                 {data.accountNumber && (
-                  <p className="text-gray-700">
-                    Account Number: {data.accountNumber}
-                  </p>
+                  <p className="text-gray-700">Account Number: {data.accountNumber}</p>
                 )}
                 {data.routingNumber && (
-                  <p className="text-gray-700">
-                    Routing Number: {data.routingNumber}
-                  </p>
+                  <p className="text-gray-700">Routing Number: {data.routingNumber}</p>
                 )}
               </div>
             )}
@@ -442,7 +355,7 @@ const QuotationTemplate3 = forwardRef<HTMLDivElement, QuotationTemplate3Props>(
         </div>
       </div>
     );
-  },
+  }
 );
 
 QuotationTemplate3.displayName = "QuotationTemplate3";

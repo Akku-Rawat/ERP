@@ -37,7 +37,7 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -207,9 +207,7 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
 
                 {/* Branch Address */}
                 <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">
-                    Branch Address
-                  </span>
+                  <span className="font-medium text-gray-600">Branch Address</span>
                   <input
                     type="text"
                     name="branchAddress"
@@ -222,9 +220,7 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
 
                 {/* Date of Addition */}
                 <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">
-                    Date of Addition
-                  </span>
+                  <span className="font-medium text-gray-600">Date of Addition</span>
                   <input
                     type="date"
                     name="dateOfAddition"
@@ -236,9 +232,7 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
 
                 {/* Opening Balance */}
                 <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">
-                    Opening Balance
-                  </span>
+                  <span className="font-medium text-gray-600">Opening Balance</span>
                   <input
                     type="number"
                     name="openingBalance"

@@ -13,9 +13,7 @@ const templates = [
   { id: "rfq3", name: "RFQ Template 3", color: "bg-[#B2B1CF]" },
 ];
 
-const templateComponents: {
-  [key: string]: React.FC<{ data: RFQData; companyLogoUrl?: string }>;
-} = {
+const templateComponents: { [key: string]: React.FC<{ data: RFQData; companyLogoUrl?: string }> } = {
   default: RFQDefaultTemplate,
   rfq1: RFQTemplate1,
   rfq2: RFQTemplate2,
@@ -50,10 +48,7 @@ const RFQUploadModal: React.FC<RFQUploadModalProps> = ({
     if (dir === "left") {
       scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
     } else {
-      scrollRef.current.scrollTo({
-        left: scrollRef.current.scrollWidth,
-        behavior: "smooth",
-      });
+      scrollRef.current.scrollTo({ left: scrollRef.current.scrollWidth, behavior: "smooth" });
     }
   };
 
@@ -80,12 +75,7 @@ const RFQUploadModal: React.FC<RFQUploadModalProps> = ({
           {/* Full Preview */}
           <div className="flex-1 overflow-auto p-8 bg-gray-100">
             <div className="max-w-[210mm] mx-auto bg-white shadow-lg">
-              {SelectedComponent && (
-                <SelectedComponent
-                  data={data}
-                  companyLogoUrl={companyLogoUrl}
-                />
-              )}
+              {SelectedComponent && <SelectedComponent data={data} companyLogoUrl={companyLogoUrl} />}
             </div>
           </div>
         </div>
@@ -95,8 +85,8 @@ const RFQUploadModal: React.FC<RFQUploadModalProps> = ({
 
   // Selection Mode: Show template gallery
   return (
-    <div
-      className="fixed inset-0 z-50 flex justify-center items-center p-4"
+    <div 
+      className="fixed inset-0 z-50 flex justify-center items-center p-4" 
       style={{ background: "rgba(255,255,255,0.85)" }}
     >
       <div className="bg-white rounded-2xl shadow-2xl max-w-[95vw] w-full max-h-[92vh] flex flex-col overflow-hidden relative">
@@ -139,14 +129,14 @@ const RFQUploadModal: React.FC<RFQUploadModalProps> = ({
                       setSelectedTemplateId(template.id);
                       onClose();
                     }}
-                    className={`bg-white rounded-lg shadow-xl overflow-hidden flex flex-col items-center w-[370px] max-w-[370px] min-w-[340px] border-2 cursor-pointer transition
-                      ${
-                        selectedTemplateId === template.id
-                          ? "border-blue-700 ring-2 ring-blue-400"
-                          : "border-gray-300"
-                      }
+                    className={
+                      `bg-white rounded-lg shadow-xl overflow-hidden flex flex-col items-center w-[370px] max-w-[370px] min-w-[340px] border-2 cursor-pointer transition
+                      ${selectedTemplateId === template.id
+                        ? "border-blue-700 ring-2 ring-blue-400"
+                        : "border-gray-300"}
                       hover:shadow-2xl hover:scale-[1.02]"
-                      ${idx < templates.length - 1 ? "mr-8" : ""}`}
+                      ${idx < templates.length - 1 ? "mr-8" : ""}`
+                    }
                     tabIndex={0}
                     role="button"
                     aria-pressed={selectedTemplateId === template.id}
@@ -154,16 +144,11 @@ const RFQUploadModal: React.FC<RFQUploadModalProps> = ({
                     <div className="w-full h-[370px] flex justify-center items-start p-2 overflow-hidden bg-gray-50">
                       <div className="w-[580px] h-[1050px] flex justify-center items-start scale-[0.36] origin-top">
                         {TemplateComponent && (
-                          <TemplateComponent
-                            data={data}
-                            companyLogoUrl={companyLogoUrl}
-                          />
+                          <TemplateComponent data={data} companyLogoUrl={companyLogoUrl} />
                         )}
                       </div>
                     </div>
-                    <div
-                      className={`text-white text-center w-full py-2 font-semibold text-base ${template.color}`}
-                    >
+                    <div className={`text-white text-center w-full py-2 font-semibold text-base ${template.color}`}>
                       {template.name}
                     </div>
                   </div>

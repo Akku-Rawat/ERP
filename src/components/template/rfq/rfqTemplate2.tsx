@@ -83,11 +83,7 @@ const RFQTemplate2 = forwardRef<HTMLDivElement, RFQTemplate2Props>(
               onClick={() => fileInputRef.current?.click()}
             >
               {logo || companyLogoUrl ? (
-                <img
-                  src={logo || companyLogoUrl}
-                  alt="Logo"
-                  className="w-18 h-18 object-contain"
-                />
+                <img src={logo || companyLogoUrl} alt="Logo" className="w-18 h-18 object-contain" />
               ) : (
                 <UploadCloud className="w-8 h-8 text-gray-400" />
               )}
@@ -101,18 +97,14 @@ const RFQTemplate2 = forwardRef<HTMLDivElement, RFQTemplate2Props>(
             </div>
             <div className="text-right">
               <div className="text-sm text-gray-600 mb-2">[Date]</div>
-              <div className="text-sm text-gray-600 italic">
-                [Vendor Name and Address]
-              </div>
+              <div className="text-sm text-gray-600 italic">[Vendor Name and Address]</div>
             </div>
           </div>
 
           {/* Orange Header Bar */}
           <div className="flex items-center mb-6">
             <div className="w-1 h-12 bg-orange-500 mr-4"></div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              REQUEST FOR QUOTE
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-800">REQUEST FOR QUOTE</h1>
             <div className="flex-1 h-1 bg-orange-500 ml-4"></div>
           </div>
         </div>
@@ -123,9 +115,7 @@ const RFQTemplate2 = forwardRef<HTMLDivElement, RFQTemplate2Props>(
             <strong>Dear [Vendor Name],</strong>
           </p>
           <p className="text-gray-700 mb-6">
-            We are seeking proposals for the following{" "}
-            <strong>IT services</strong> to support our organization. Please
-            provide your best quote for the services listed below:
+            We are seeking proposals for the following <strong>IT services</strong> to support our organization. Please provide your best quote for the services listed below:
           </p>
         </div>
 
@@ -134,41 +124,21 @@ const RFQTemplate2 = forwardRef<HTMLDivElement, RFQTemplate2Props>(
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-blue-900 text-white">
-                <th className="px-4 py-3 text-left text-sm font-bold">
-                  Service
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold">
-                  Description
-                </th>
-                <th className="px-4 py-3 text-center text-sm font-bold">
-                  Hours
-                </th>
-                <th className="px-4 py-3 text-center text-sm font-bold">
-                  Price/Hour
-                </th>
-                <th className="px-4 py-3 text-center text-sm font-bold">
-                  Total Price
-                </th>
+                <th className="px-4 py-3 text-left text-sm font-bold">Service</th>
+                <th className="px-4 py-3 text-left text-sm font-bold">Description</th>
+                <th className="px-4 py-3 text-center text-sm font-bold">Hours</th>
+                <th className="px-4 py-3 text-center text-sm font-bold">Price/Hour</th>
+                <th className="px-4 py-3 text-center text-sm font-bold">Total Price</th>
               </tr>
             </thead>
             <tbody>
               {data.items.map((item, index) => (
                 <tr key={index} className="border-b border-gray-300">
-                  <td className="px-4 py-3 text-sm text-gray-800 font-semibold">
-                    {item.service}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
-                    {item.description}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-800 text-center">
-                    {item.hours}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-800 text-center">
-                    {item.pricePerHour}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-800 text-center">
-                    {item.totalPrice}
-                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-800 font-semibold">{item.service}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">{item.description}</td>
+                  <td className="px-4 py-3 text-sm text-gray-800 text-center">{item.hours}</td>
+                  <td className="px-4 py-3 text-sm text-gray-800 text-center">{item.pricePerHour}</td>
+                  <td className="px-4 py-3 text-sm text-gray-800 text-center">{item.totalPrice}</td>
                 </tr>
               ))}
             </tbody>
@@ -178,56 +148,42 @@ const RFQTemplate2 = forwardRef<HTMLDivElement, RFQTemplate2Props>(
         {/* Additional Requirements */}
         <div className="px-8 mb-6 relative z-10">
           <p className="text-gray-700 mb-3">
-            <strong>
-              In addition to providing the above services, we require the
-              following information in your proposal:
-            </strong>
+            <strong>In addition to providing the above services, we require the following information in your proposal:</strong>
           </p>
           <ul className="list-disc list-inside space-y-1 text-gray-700 text-sm">
             <li>Your company's experience in providing IT services.</li>
             <li>Relevant qualifications and certifications</li>
             <li>A timeline for providing the services</li>
-            <li>
-              Any references or examples of similar projects you have completed
-              in the past.
-            </li>
+            <li>Any references or examples of similar projects you have completed in the past.</li>
           </ul>
         </div>
 
         {/* Additional Services */}
         <div className="px-8 mb-6 relative z-10">
           <p className="text-gray-700 text-sm italic">
-            Any additional services or solutions you may recommend enhancing our
-            IT capabilities.
+            Any additional services or solutions you may recommend enhancing our IT capabilities.
           </p>
         </div>
 
         {/* Evaluation Criteria */}
         <div className="px-8 mb-6 relative z-10">
           <p className="text-gray-700 text-sm">
-            We will evaluate proposals based on price, quality, and your
-            company's ability to meet our specific needs. Please submit your
-            proposal no later than <strong>[Deadline for Submission]</strong>.
-            If you have any questions or require additional information, please
-            do not hesitate to contact us.
+            We will evaluate proposals based on price, quality, and your company's ability to meet our specific needs. Please submit your proposal no later than <strong>[Deadline for Submission]</strong>. If you have any questions or require additional information, please do not hesitate to contact us.
           </p>
         </div>
 
         {/* Closing */}
         <div className="px-8 mb-8 relative z-10">
           <p className="text-gray-700 mb-6">
-            Thank you for your time and consideration. We look forward to
-            receiving your proposal.
+            Thank you for your time and consideration. We look forward to receiving your proposal.
           </p>
           <p className="text-gray-800">Sincerely,</p>
           <p className="text-gray-800 font-semibold mt-2">[Your Name]</p>
-          <p className="text-gray-600 text-sm">
-            [Your Company] [Phone] [Email Address] [Website URL]
-          </p>
+          <p className="text-gray-600 text-sm">[Your Company] [Phone] [Email Address] [Website URL]</p>
         </div>
       </div>
     );
-  },
+  }
 );
 
 RFQTemplate2.displayName = "RFQTemplate2";

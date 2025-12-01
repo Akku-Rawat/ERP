@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React,{useEffect, useState} from "react";
 import ItemsCategoryModal from "../../components/inventory/ItemsCategoryModal";
 
 const base_url = import.meta.env.VITE_BASE_URL;
@@ -21,17 +21,14 @@ interface ProductsProps {
   onAdd: () => void;
 }
 
-const ItemsCategory: React.FC<ProductsProps> = ({
-  products,
-  searchTerm,
-  setSearchTerm,
-  onAdd,
-}) => {
-  const [itemsCat, setItemsCat] = useState<any[]>([]);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [itemCatLoading, setItemCatLoading] = useState(false);
 
-  const fetchItemsCategory = async () => {
+const ItemsCategory: React.FC<ProductsProps> = ({ products, searchTerm, setSearchTerm, onAdd }) => {
+  const [itemsCat, setItemsCat] = useState<any[]>([]);
+   const [showCategoryModal, setShowCategoryModal] = useState(false);
+   const [itemCatLoading, setItemCatLoading] = useState(false);
+
+
+const fetchItemsCategory = async () => {
     try {
       setItemCatLoading(true);
       const response = await fetch(GET_ITEMS_CAT_ENDPOINT, {
@@ -47,23 +44,16 @@ const ItemsCategory: React.FC<ProductsProps> = ({
     }
   };
 
-  useEffect(() => {
+  useEffect(()=>{
     fetchItemsCategory();
-  }, []);
-
-  const filteredItemsCat = itemsCat.filter((i: any) =>
-    [
-      i.item_code,
-      i.item_name,
-      i.item_group,
-      i.custom_min_stock_level,
-      i.custom_max_stock_level,
-      i.custom_vendor,
-      i.custom_selling_price,
-    ]
+  }, []); 
+  
+   const filteredItemsCat = itemsCat.filter((i: any) =>
+    [i.item_code, i.item_name, i.item_group, i.custom_min_stock_level, i.custom_max_stock_level, 
+      i.custom_vendor, i.custom_selling_price]
       .join(" ")
       .toLowerCase()
-      .includes(searchTerm.toLowerCase()),
+      .includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -103,11 +93,9 @@ const ItemsCategory: React.FC<ProductsProps> = ({
                 <td className="px-4 py-2">{p.custom_description}</td>
                 <td className="px-4 py-2">{p.custom_unit_of_measurement}</td>
                 <td className="px-4 py-2">{p.custom_selling_price}</td>
-                <td className="px-4 py-2">{p.custom_sales_account}</td>
+                 <td className="px-4 py-2">{p.custom_sales_account}</td>
                 <td className="px-4 py-2 text-center">
-                  <button className="text-blue-600 hover:underline">
-                    View
-                  </button>
+                  <button className="text-blue-600 hover:underline">View</button>
                 </td>
               </tr>
             ))}

@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Phone, Save, Loader2 } from "lucide-react";
+import {
+  X,
+  Mail,
+  Phone,
+  Save,
+  Loader2,
+} from "lucide-react";
 
 const emptyForm: Record<string, any> = {
   // Supplier Details
@@ -44,7 +50,13 @@ const ItemsCategoryModal: React.FC<{
   onSubmit?: (data: Record<string, any>) => void;
   initialData?: Record<string, any> | null;
   isEditMode?: boolean;
-}> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
+}> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialData,
+  isEditMode = false,
+}) => {
   const [form, setForm] = useState<Record<string, any>>(emptyForm);
   const [loading, setLoading] = useState(false);
 
@@ -61,9 +73,7 @@ const ItemsCategoryModal: React.FC<{
   }, [initialData, isOpen]);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, type, value } = e.target;
     if (type === "checkbox") {
@@ -94,7 +104,7 @@ const ItemsCategoryModal: React.FC<{
           exit={{ opacity: 0, scale: 0.95 }}
           className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
         >
-          <form className="flex flex-col h-full overflow-hidden">
+          <form  className="flex flex-col h-full overflow-hidden">
             {/* Header */}
             <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
               <h2 className="text-2xl font-semibold text-indigo-700">
@@ -140,40 +150,18 @@ const ItemsCategoryModal: React.FC<{
               {/* Supplier Details Tab */}
               {activeTab === "type" && (
                 <>
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700 underline">
-                      Category Type
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Type"
-                        name="tpin"
-                        value={form.type || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Category Id"
-                        name="categoryId"
-                        value={form.categoryId || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Category Description"
-                        name="categoryDesc"
-                        value={form.categoryDesc || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Unit of Measurement"
-                        name="uom"
-                        value={form.uom || ""}
-                        onChange={handleChange}
-                      />
-                    </div>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700 underline">
+                    Category Type
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <Input label="Type" name="tpin" value={form.type || ""} onChange={handleChange} required />
+                    <Input label="Category Id" name="categoryId" value={form.categoryId || ""} onChange={handleChange} required />
+                    <Input label="Category Description" name="categoryDesc" value={form.categoryDesc || ""} onChange={handleChange} />
+                    <Input label="Unit of Measurement" name="uom" value={form.uom || ""} onChange={handleChange} />
                   </div>
-                  {/* <div className="space-y-4">
+                </div>
+                {/* <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-gray-700 underline">
                     Contact Details
                   </h3>
@@ -184,7 +172,7 @@ const ItemsCategoryModal: React.FC<{
                     <Input label="Email Id" name="emailId" value={form.emailId || ""} onChange={handleChange} icon={<Mail className="w-4 h-4 text-gray-400" />} />
                   </div>
                 </div> */}
-                  {/* <div className="space-y-6">
+                {/* <div className="space-y-6">
                   <h3 className="text-lg font-semibold text-gray-700 underline">
                     Address Details
                   </h3>
@@ -209,18 +197,8 @@ const ItemsCategoryModal: React.FC<{
                       Sales and Tax
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Selling Price"
-                        name="sellingPrice"
-                        value={form.sellingPrice || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Sales Account"
-                        name="dateOfAddition"
-                        value={form.dateOfAddition || ""}
-                        onChange={handleChange}
-                      />
+                      <Input label="Selling Price" name="sellingPrice" value={form.sellingPrice || ""} onChange={handleChange} />
+                      <Input label="Sales Account" name="dateOfAddition" value={form.dateOfAddition || ""} onChange={handleChange} />
                     </div>
                   </div>
                 </div>
@@ -261,6 +239,7 @@ const ItemsCategoryModal: React.FC<{
           </form>
         </motion.div>
       </AnimatePresence>
+       
     </div>
   );
 };
@@ -293,7 +272,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         />
       </div>
     </label>
-  ),
+  )
 );
 Input.displayName = "Input";
 

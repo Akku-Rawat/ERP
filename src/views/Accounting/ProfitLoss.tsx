@@ -62,21 +62,16 @@ export default function ProfitLossImproved({
 
   const revenueAccounts = useMemo(
     () => safeProfitLoss.activeAccounts.filter((a) => a.type === "Revenue"),
-    [safeProfitLoss.activeAccounts],
+    [safeProfitLoss.activeAccounts]
   );
   const expenseAccounts = useMemo(
     () => safeProfitLoss.activeAccounts.filter((a) => a.type === "Expense"),
-    [safeProfitLoss.activeAccounts],
+    [safeProfitLoss.activeAccounts]
   );
 
   const monthLabel = monthNames?.[reportMonth] ?? reportMonth ?? "";
-  const title =
-    reportPeriod === "monthly"
-      ? `${monthLabel} ${reportYear}`
-      : `${reportYear}`;
-  const cogsAccount = safeProfitLoss.activeAccounts.find(
-    (a) => a.code === "5000",
-  );
+  const title = reportPeriod === "monthly" ? `${monthLabel} ${reportYear}` : `${reportYear}`;
+  const cogsAccount = safeProfitLoss.activeAccounts.find((a) => a.code === "5000");
 
   return (
     <div className="space-y-6">
@@ -131,34 +126,24 @@ export default function ProfitLossImproved({
           <div className="flex items-center justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-              <p className="text-xs text-gray-500 mt-1">
-                Profit & Loss summary
-              </p>
+              <p className="text-xs text-gray-500 mt-1">Profit & Loss summary</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full sm:w-auto">
               <div className="p-3 rounded-lg bg-white border border-gray-100 shadow-sm text-center min-w-[160px]">
                 <div className="text-xs text-gray-500">Revenue</div>
-                <div className="text-lg font-semibold text-gray-800">
-                  {nf(safeProfitLoss.revenue)}
-                </div>
+                <div className="text-lg font-semibold text-gray-800">{nf(safeProfitLoss.revenue)}</div>
               </div>
               <div className="p-3 rounded-lg bg-white border border-gray-100 shadow-sm text-center min-w-[160px]">
                 <div className="text-xs text-gray-500">Gross Profit</div>
-                <div className="text-lg font-semibold text-gray-800">
-                  {nf(safeProfitLoss.grossProfit)}
-                </div>
+                <div className="text-lg font-semibold text-gray-800">{nf(safeProfitLoss.grossProfit)}</div>
               </div>
               <div
                 className={`p-3 rounded-lg border shadow-sm text-center min-w-[160px] ${
-                  safeProfitLoss.netIncome >= 0
-                    ? "border-green-100 bg-green-50"
-                    : "border-red-100 bg-red-50"
+                  safeProfitLoss.netIncome >= 0 ? "border-green-100 bg-green-50" : "border-red-100 bg-red-50"
                 }`}
               >
                 <div className="text-xs text-gray-500">Net Income</div>
-                <div
-                  className={`text-lg font-semibold ${safeProfitLoss.netIncome >= 0 ? "text-green-700" : "text-red-700"}`}
-                >
+                <div className={`text-lg font-semibold ${safeProfitLoss.netIncome >= 0 ? "text-green-700" : "text-red-700"}`}>
                   {nf(safeProfitLoss.netIncome)}
                 </div>
               </div>
@@ -171,9 +156,7 @@ export default function ProfitLossImproved({
             <div className="flex items-center justify-between">
               <h4 className="text-base font-semibold text-gray-800">Revenue</h4>
               <div className="flex items-center gap-3">
-                <div className="text-sm text-gray-600">
-                  Total: {nf(safeProfitLoss.revenue)}
-                </div>
+                <div className="text-sm text-gray-600">Total: {nf(safeProfitLoss.revenue)}</div>
                 <button
                   onClick={() => setShowRevenue((s) => !s)}
                   className="text-sm px-2 py-1 rounded-md border border-gray-200 bg-white"
@@ -187,56 +170,37 @@ export default function ProfitLossImproved({
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {revenueAccounts.map((acc) => (
-                    <div
-                      key={acc.code}
-                      className="flex justify-between text-sm bg-white p-3 rounded-md border"
-                    >
+                    <div key={acc.code} className="flex justify-between text-sm bg-white p-3 rounded-md border">
                       <div className="text-gray-700">{acc.name}</div>
-                      <div className="font-medium text-gray-900">
-                        {nf(acc.balance)}
-                      </div>
+                      <div className="font-medium text-gray-900">{nf(acc.balance)}</div>
                     </div>
                   ))}
-                  {revenueAccounts.length === 0 && (
-                    <div className="text-sm text-gray-500">
-                      No revenue accounts available
-                    </div>
-                  )}
+                  {revenueAccounts.length === 0 && <div className="text-sm text-gray-500">No revenue accounts available</div>}
                 </div>
               </div>
             )}
           </section>
 
           <section className="space-y-3">
-            <h4 className="text-base font-semibold text-gray-800">
-              Cost of Sales
-            </h4>
+            <h4 className="text-base font-semibold text-gray-800">Cost of Sales</h4>
             <div className="bg-white p-4 rounded-lg border">
               <div className="flex justify-between items-center">
                 <div className="text-sm text-gray-700">Cost of Goods Sold</div>
-                <div className="text-sm font-medium text-gray-900">
-                  {nf(cogsAccount?.balance)}
-                </div>
+                <div className="text-sm font-medium text-gray-900">{nf(cogsAccount?.balance)}</div>
               </div>
 
               <div className="mt-3 p-3 rounded-lg bg-blue-50 flex justify-between items-center font-semibold">
                 <div>Gross Profit</div>
-                <div className="text-blue-700">
-                  {nf(safeProfitLoss.grossProfit)}
-                </div>
+                <div className="text-blue-700">{nf(safeProfitLoss.grossProfit)}</div>
               </div>
             </div>
           </section>
 
           <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-base font-semibold text-gray-800">
-                Operating Expenses
-              </h4>
+              <h4 className="text-base font-semibold text-gray-800">Operating Expenses</h4>
               <div className="flex items-center gap-3">
-                <div className="text-sm text-gray-600">
-                  Total: {nf(safeProfitLoss.operatingExpenses)}
-                </div>
+                <div className="text-sm text-gray-600">Total: {nf(safeProfitLoss.operatingExpenses)}</div>
                 <button
                   onClick={() => setShowExpenses((s) => !s)}
                   className="text-sm px-2 py-1 rounded-md border border-gray-200 bg-white"
@@ -263,13 +227,10 @@ export default function ProfitLossImproved({
                         <tr key={acc.code} className="bg-white border-b">
                           <td className="p-2">{acc.name}</td>
                           <td className="p-2">{acc.code}</td>
-                          <td className="p-2 text-right font-medium">
-                            {nf(acc.balance)}
-                          </td>
+                          <td className="p-2 text-right font-medium">{nf(acc.balance)}</td>
                         </tr>
                       ))}
-                    {expenseAccounts.filter((a) => a.code !== "5000").length ===
-                      0 && (
+                    {expenseAccounts.filter((a) => a.code !== "5000").length === 0 && (
                       <tr>
                         <td colSpan={3} className="p-3 text-sm text-gray-500">
                           No operating expense accounts available
@@ -282,24 +243,15 @@ export default function ProfitLossImproved({
             )}
           </section>
 
-          <div
-            className={`p-4 rounded-lg ${safeProfitLoss.netIncome >= 0 ? "bg-green-50" : "bg-red-50"}`}
-          >
+          <div className={`p-4 rounded-lg ${safeProfitLoss.netIncome >= 0 ? "bg-green-50" : "bg-red-50"}`}>
             <div className="flex items-center justify-between text-lg font-bold">
               <div className="text-gray-800">Net Income</div>
-              <div
-                className={
-                  safeProfitLoss.netIncome >= 0
-                    ? "text-green-700"
-                    : "text-red-700"
-                }
-              >
-                {nf(safeProfitLoss.netIncome)}
-              </div>
+              <div className={safeProfitLoss.netIncome >= 0 ? "text-green-700" : "text-red-700"}>{nf(safeProfitLoss.netIncome)}</div>
             </div>
           </div>
         </div>
       </div>
+
     </div>
-  );
+    );
 }
