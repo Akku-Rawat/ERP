@@ -122,7 +122,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     "details",
   );
   const [isShippingOpen, setIsShippingOpen] = useState(false);
-  const [customers, setCustomers] = useState<{ name: string; custom_id: string }[]>([]);
+  const [customers, setCustomers] = useState<{ name: string; id: string }[]>([]);
   const [custLoading, setCustLoading] = useState(true);
   const [customerDetails, setCustomerDetails] = useState<any>(null);
 
@@ -142,7 +142,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
         const customers =
           response.data?.map((c: any) => ({
             name: c.name,
-            custom_id: c.custom_id,
+            id: c.id,
           })) || [];
 
 
@@ -161,9 +161,9 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     return () => controller.abort();
   }, [isOpen]);
 
-  const loadCustomerDetailsById = async (custom_id: string) => {
+  const loadCustomerDetailsById = async (id: string) => {
     try {
-      const response = await getCustomerByCustomerCode(custom_id);
+      const response = await getCustomerByCustomerCode(id);
       if (!response || response.status_code !== 200) return;
       setCustomerDetails(response.data);
     } catch (err) {
@@ -343,9 +343,9 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <CustomerSelect
                           value={form.CutomerName}
-                          onChange={async ({ name, custom_id }) => {
+                          onChange={async ({ name, id }) => {
                             setForm((p) => ({ ...p, CutomerName: name }));
-                            await loadCustomerDetailsById(custom_id);
+                            await loadCustomerDetailsById(id);
                           }}
                           className="w-full"
                         />
@@ -561,7 +561,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                               Customer Name
                             </span>
                             <span className="font-medium text-gray-800">
-                              {customerDetails?.customer_name ?? "Customer Name"}
+                              {customerDetails?.name ?? "Customer Name"}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -578,7 +578,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                               Email Address
                             </span>
                             <span className="text-base font-bold text-blue-600">
-                              {customerDetails?.customer_email ?? "customer@gmail.com"}
+                              {customerDetails?.email ?? "customer@gmail.com"}
                             </span>
                           </div>
                         </div>

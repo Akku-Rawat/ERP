@@ -140,7 +140,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   }, []);
 
   const [isShippingOpen, setIsShippingOpen] = useState(false);
-  const [customers, setCustomers] = useState<{ name: string; custom_id: string }[]>([]);
+  const [customers, setCustomers] = useState<{ name: string; id: string }[]>([]);
   const [custLoading, setCustLoading] = useState(true);
 
   useEffect(() => {
@@ -158,7 +158,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
         const customers =
           response.data?.map((c: any) => ({
             name: c.name,
-            custom_id: c.custom_id,
+            id: c.id,
           })) || [];
 
 
@@ -177,9 +177,9 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     return () => controller.abort();
   }, [isOpen]);
 
-  const loadCustomerDetailsById = async (custom_id: string) => {
+  const loadCustomerDetailsById = async (id: string) => {
     try {
-      const response = await getCustomerByCustomerCode(custom_id);
+      const response = await getCustomerByCustomerCode(id);
       if (!response || response.status_code !== 200) return;
       setCustomerDetails(response.data);
     } catch (err) {
@@ -371,9 +371,9 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <CustomerSelect
                           value={form.CutomerName}
-                          onChange={async ({ name, custom_id }) => {
+                          onChange={async ({ name, id }) => {
                             setForm((p) => ({ ...p, CutomerName: name }));
-                            await loadCustomerDetailsById(custom_id);
+                            await loadCustomerDetailsById(id);
                           }}
                           className="w-full"
                         />
@@ -591,7 +591,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                               Customer Name
                             </span>
                             <span className="font-medium text-gray-800">
-                              {customerDetails?.customer_name ?? "Customer Name"}
+                              {customerDetails?.name ?? "Customer Name"}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -608,7 +608,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                               Email Address
                             </span>
                             <span className="text-base font-bold text-blue-600">
-                              {customerDetails?.customer_email ?? "customer@gmail.com"}
+                              {customerDetails?.email ?? "customer@gmail.com"}
                             </span>
                           </div>
                         </div>

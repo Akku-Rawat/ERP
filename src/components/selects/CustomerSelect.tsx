@@ -3,7 +3,7 @@ import { getAllCustomers } from "../../api/customerApi";
 
 interface CustomerSelectProps {
   value?: string;
-  onChange: (cust: { name: string; custom_id: string }) => void;
+  onChange: (cust: { name: string; id: string }) => void;
   className?: string;
   label?: string;
 }
@@ -15,7 +15,7 @@ export default function CustomerSelect({
   label = "Customer",
 }: CustomerSelectProps) {
   const [customers, setCustomers] = useState<
-    { name: string; custom_id: string }[]
+    { name: string; id: string }[]
   >([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -33,7 +33,7 @@ export default function CustomerSelect({
         setCustomers(
           res.data.map((c: any) => ({
             name: c.name,
-            custom_id: c.custom_id,
+            id: c.id,
           }))
         );
       } finally {
@@ -85,7 +85,7 @@ export default function CustomerSelect({
             <ul className="max-h-56 overflow-y-auto text-sm">
               {filtered.map((cust) => (
                 <li
-                  key={cust.custom_id}
+                  key={cust.id}
                   className="px-4 py-2 cursor-pointer hover:bg-blue-100"
                   onClick={() => {
                     setSearch(cust.name);
