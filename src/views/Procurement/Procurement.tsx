@@ -23,21 +23,13 @@ const procurement = {
   icon: <FaShoppingBag />,
   defaultTab: "procurementdashboard",
   tabs: [
-    {
-      id: "procurementdashboard",
-      name: "Dashboard",
-      icon: <FaTachometerAlt />,
-    },
+    {id: "procurementdashboard",name: "Dashboard",icon: <FaTachometerAlt />,},
     { id: "supplier", name: "Supplier Management", icon: <FaLandmark /> },
     { id: "rfqs", name: "RFQs", icon: <FaFileSignature /> },
+    { id: "purchase", name: "Purchase Invoice", icon: <FaTruckLoading /> },
     { id: "orders", name: "Purchase Orders", icon: <FaClipboardList /> },
     { id: "approvals", name: "Approvals", icon: <FaCheckCircle /> },
-    {
-      id: "invoicematching",
-      name: "Invoice Matching",
-      icon: <FaFileInvoiceDollar />,
-    },
-    { id: "purchase", name: "Purchase Invoice", icon: <FaTruckLoading /> },
+    {id: "invoicematching", name: "Invoice Matching", icon: <FaFileInvoiceDollar />,},
   ],
 };
 
