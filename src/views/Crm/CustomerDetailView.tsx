@@ -3,37 +3,15 @@ import { X, Search, Edit, FileText, Receipt, Plus } from "lucide-react";
 import CustomerModal from "../../components/crm/CustomerModal";
 import QuotationModal from "../../components/sales/QuotationModal";
 import InvoiceModal from "../../components/sales/InvoiceModal";
-
-interface Customer {
-  custom_id: string;
-  customer_name: string;
-  customer_type: "Individual" | "Company";
-  customer_currency?: string;
-  customer_onboarding_balance?: string;
-  custom_customer_tpin?: string;
-  custom_billing_adress_line_1?: string;
-  custom_billing_adress_line_2?: string;
-  custom_billing_city?: string;
-  custom_billing_state?: string;
-  custom_billing_country?: string;
-  custom_billing_zip_code?: string;
-  custom_shipping_address_line_1?: string;
-  custom_shipping_address_line_2?: string;
-  custom_shipping_city?: string;
-  custom_shipping_state?: string;
-  custom_shipping_country?: string;
-  custom_shipping_zip_code?: string;
-  custom_status?: "active" | "inactive" | "prospect";
-  // Add more fields as needed
-}
+import type { CustomerDetail } from "./types/customer";
 
 interface Props {
-  customer: Customer;
-  customers: Customer[];
+  customer: CustomerDetail;
+  customers: CustomerDetail[];
   onBack: () => void;
-  onCustomerSelect: (customer: Customer) => void;
+  onCustomerSelect: (customer: CustomerDetail) => void;
   onAdd: () => void;
-  onEdit: (customer: Customer, e: React.MouseEvent) => void;
+  onEdit: (id: string, e: React.MouseEvent) => void;
 }
 
 const CustomerDetailView: React.FC<Props> = ({
@@ -53,12 +31,14 @@ const CustomerDetailView: React.FC<Props> = ({
 
   const filteredCustomers = customers.filter(
     (c) =>
-      c.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.custom_id.toLowerCase().includes(searchTerm.toLowerCase()),
+      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.id.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+  console.log("📌 CustomerDetailView received customer:", customer);
+
 
   const getStatusColor = (status?: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "active":
         return "bg-green-100 text-green-800";
       case "inactive":
@@ -70,18 +50,38 @@ const CustomerDetailView: React.FC<Props> = ({
     }
   };
 
-  const formatAddress = (c: Customer, type: "billing" | "shipping") => {
-    const prefix = type === "billing" ? "custom_billing" : "custom_shipping";
-    const line1 = c[`${prefix}_address_line_1` as keyof Customer] || "";
-    const line2 = c[`${prefix}_address_line_2` as keyof Customer] || "";
-    const city = c[`${prefix}_city` as keyof Customer] || "";
-    const state = c[`${prefix}_state` as keyof Customer] || "";
-    const country = c[`${prefix}_country` as keyof Customer] || "";
-    const zip = c[`${prefix}_zip_code` as keyof Customer] || "";
+  const formatAddress = (c: CustomerDetail, type: "billing" | "shipping") => {
+    const fields =
+      type === "billing"
+        ? {
+          line1: c.billingAddressLine1,
+          line2: c.billingAddressLine2,
+          city: c.billingCity,
+          state: c.billingState,
+          postal: c.billingPostalCode,
+          country: c.billingCountry,
+        }
+        : {
+          line1: c.shippingAddressLine1,
+          line2: c.shippingAddressLine2,
+          city: c.shippingCity,
+          state: c.shippingState,
+          postal: c.shippingPostalCode,
+          country: c.shippingCountry,
+        };
 
-    const parts = [line1, line2, city, state, zip, country].filter(Boolean);
-    return parts.length > 0 ? parts.join(", ") : "—";
+    const parts = [
+      fields.line1,
+      fields.line2,
+      fields.city,
+      fields.state,
+      fields.postal,
+      fields.country,
+    ].filter(Boolean);
+
+    return parts.length ? parts.join(", ") : "—";
   };
+
 
   return (
     <div className="flex flex-col bg-gray-50">
@@ -91,14 +91,13 @@ const CustomerDetailView: React.FC<Props> = ({
         <button
           onClick={onBack}
           className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
-          title="Back to list"
         >
           <X className="w-6 h-6 text-gray-600" />
         </button>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - Customer List */}
+        {/* Sidebar */}
         <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
           <div className="p-4 border-b">
             <div className="relative">
@@ -116,41 +115,37 @@ const CustomerDetailView: React.FC<Props> = ({
           <div className="flex-1 overflow-y-auto">
             {filteredCustomers.map((c) => (
               <div
-                key={c.custom_id}
+                key={c.id}
                 onClick={() => onCustomerSelect(c)}
-                className={`p-4 border-b cursor-pointer transition-all duration-200 ${
-                  c.custom_id === customer.custom_id
+                className={`p-4 border-b cursor-pointer transition-all duration-200 ${c.id === customer.id
                     ? "bg-indigo-50 border-l-4 border-l-indigo-600"
                     : "hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                      c.custom_id === customer.custom_id
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${c.id === customer.id
                         ? "bg-indigo-600"
                         : "bg-gray-400"
-                    }`}
+                      }`}
                   >
-                    {c.customer_name.charAt(0).toUpperCase()}
+                    {c.name.charAt(0).toUpperCase()}
                   </div>
+
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-gray-900 truncate">
-                      {c.customer_name}
+                      {c.name}
                     </p>
-                    <p className="text-xs text-gray-500 font-mono">
-                      {c.custom_id}
-                    </p>
+                    <p className="text-xs text-gray-500 font-mono">{c.id}</p>
                   </div>
-                  {c.custom_status && (
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                        c.custom_status,
-                      )}`}
-                    >
-                      {c.custom_status.toUpperCase()}
-                    </span>
-                  )}
+
+                  <span
+                    className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                      customer.status
+                    )}`}
+                  >
+                    {(customer.status || "UNKNOWN").toUpperCase()}
+                  </span>
                 </div>
               </div>
             ))}
@@ -164,32 +159,31 @@ const CustomerDetailView: React.FC<Props> = ({
             <div className="flex">
               <button
                 onClick={() => setActiveTab("overview")}
-                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors ${
-                  activeTab === "overview"
+                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors ${activeTab === "overview"
                     ? "border-indigo-600 text-indigo-600"
                     : "border-transparent text-gray-600 hover:text-gray-900"
-                }`}
+                  }`}
               >
                 Overview
               </button>
+
               <button
                 onClick={() => setActiveTab("quotations")}
-                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${
-                  activeTab === "quotations"
+                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${activeTab === "quotations"
                     ? "border-indigo-600 text-indigo-600"
                     : "border-transparent text-gray-600 hover:text-gray-900"
-                }`}
+                  }`}
               >
                 <FileText className="w-4 h-4" />
                 Quotations
               </button>
+
               <button
                 onClick={() => setActiveTab("invoices")}
-                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${
-                  activeTab === "invoices"
+                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${activeTab === "invoices"
                     ? "border-indigo-600 text-indigo-600"
                     : "border-transparent text-gray-600 hover:text-gray-900"
-                }`}
+                  }`}
               >
                 <Receipt className="w-4 h-4" />
                 Invoices
@@ -205,16 +199,16 @@ const CustomerDetailView: React.FC<Props> = ({
                   <div className="flex justify-between items-start mb-8">
                     <div>
                       <h2 className="text-2xl font-bold text-gray-900">
-                        {customer.customer_name}
+                        {customer.name}
                       </h2>
                       <p className="text-sm text-gray-500 font-mono mt-1">
-                        ID: {customer.custom_id}
+                        ID: {customer.id}
                       </p>
                     </div>
+
                     <button
-                      onClick={() => onEdit(customer)}
+                      onClick={(e) => onEdit(customer.id, e)}
                       className="p-3 hover:bg-gray-100 rounded-lg transition"
-                      title="Edit Customer"
                     >
                       <Edit className="w-5 h-5 text-gray-600" />
                     </button>
@@ -222,56 +216,59 @@ const CustomerDetailView: React.FC<Props> = ({
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">
                         Type
                       </p>
                       <p className="mt-1 text-sm font-medium">
                         <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                            customer.customer_type === "Company"
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${customer.type === "Company"
                               ? "bg-blue-100 text-blue-800"
                               : "bg-purple-100 text-purple-800"
-                          }`}
+                            }`}
                         >
-                          {customer.customer_type}
+                          {customer.type}
                         </span>
                       </p>
                     </div>
+
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">
                         TPIN
                       </p>
                       <p className="mt-1 text-sm font-medium">
-                        {customer.custom_customer_tpin || "—"}
+                        {customer.tpin || "—"}
                       </p>
                     </div>
+
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">
                         Currency
                       </p>
                       <p className="mt-1 text-sm font-medium">
-                        {customer.customer_currency || "—"}
+                        {customer.currency || "—"}
                       </p>
                     </div>
+
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">
                         Onboarding Balance
                       </p>
                       <p className="mt-1 text-sm font-medium">
-                        {customer.customer_onboarding_balance || "—"}
+                        {customer.onboardingBalance ?? "—"}
                       </p>
                     </div>
+
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">
                         Status
                       </p>
                       <p className="mt-1">
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            customer.custom_status,
+                            customer.status
                           )}`}
                         >
-                          {(customer.custom_status || "unknown").toUpperCase()}
+                          {(customer.status || "unknown").toUpperCase()}
                         </span>
                       </p>
                     </div>
@@ -285,7 +282,7 @@ const CustomerDetailView: React.FC<Props> = ({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6">
-                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center justify-between">
+                      <h4 className="font-semibold text-gray-900 mb-3">
                         Billing Address
                       </h4>
                       <p className="text-sm text-gray-700 leading-relaxed">
@@ -294,7 +291,7 @@ const CustomerDetailView: React.FC<Props> = ({
                     </div>
 
                     <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6">
-                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center justify-between">
+                      <h4 className="font-semibold text-gray-900 mb-3">
                         Shipping Address
                       </h4>
                       <p className="text-sm text-gray-700 leading-relaxed">
@@ -306,6 +303,7 @@ const CustomerDetailView: React.FC<Props> = ({
               </div>
             )}
 
+            {/* Quotations */}
             {activeTab === "quotations" && (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
@@ -327,6 +325,7 @@ const CustomerDetailView: React.FC<Props> = ({
               </div>
             )}
 
+            {/* Invoices */}
             {activeTab === "invoices" && (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
@@ -355,19 +354,13 @@ const CustomerDetailView: React.FC<Props> = ({
       <QuotationModal
         isOpen={showQuotationModal}
         onClose={() => setShowQuotationModal(false)}
-        onSubmit={() => {
-          setShowQuotationModal(false);
-          // Optionally refresh quotations
-        }}
+        onSubmit={() => setShowQuotationModal(false)}
       />
 
       <InvoiceModal
         isOpen={showInvoiceModal}
         onClose={() => setShowInvoiceModal(false)}
-        onSubmit={() => {
-          setShowInvoiceModal(false);
-          // Optionally refresh invoices
-        }}
+        onSubmit={() => setShowInvoiceModal(false)}
       />
     </div>
   );

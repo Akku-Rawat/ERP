@@ -13,10 +13,17 @@ const ENDPOINTS = {
 };
 
 
-export async function getAllCustomers(): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllCustomers);
+export async function getAllCustomers(
+  page: number = 1,
+  page_size: number = 10
+): Promise<any> {
+  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllCustomers, {
+    params: { page, page_size },
+  });
   return resp.data;
 }
+
+
 
 export async function deleteCustomerById(id: string): Promise<any> {
   const url = `${ENDPOINTS.deleteCustomer}?id=${id}`;
