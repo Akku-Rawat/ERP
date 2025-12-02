@@ -25,7 +25,7 @@ const ENDPOINTS = {
 
 export async function getAllSalesInvoices(): Promise<any> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getSalesInvoices);
-  return resp.data?.data || [];
+  return resp.data || [];
 }
 
 export async function getSalesInvoiceById(id: string): Promise<any | null> {

@@ -1,53 +1,7 @@
 import React, { useRef, useState, forwardRef } from "react";
 import { UploadCloud } from "lucide-react";
 
-export interface InvoiceItem {
-  productName: string;
-  description: string;
-  quantity: number;
-  listPrice: number;
-  discount: number;
-  tax: number;
-}
-
-export interface InvoiceData {
-  invoiceId?: string;
-  customerName: string;
-  dateOfInvoice: string;
-  dueDate: string;
-  poNumber?: string;
-  currency: string;
-
-  companyName?: string;
-  companyAddress?: string;
-  companyCity?: string;
-  companyState?: string;
-  companyPostalCode?: string;
-
-  billingAddressLine1?: string;
-  billingCity?: string;
-  billingState?: string;
-  billingPostalCode?: string;
-
-  shippingAddressLine1?: string;
-  shippingCity?: string;
-  shippingState?: string;
-  shippingPostalCode?: string;
-
-  items: InvoiceItem[];
-  subTotal: number;
-  totalDiscount: number;
-  totalTax: number;
-  adjustment: number;
-  grandTotal: number;
-
-  paymentTerms?: string;
-  notes?: string;
-  bankName?: string;
-  accountNumber?: string;
-  routingNumber?: string;
-  termsAndConditions?: string;
-}
+import type { InvoiceData, InvoiceItem } from "../../../views/Sales/types/invoice";
 
 export interface InvoiceTemplate3Props {
   data: InvoiceData;
@@ -62,7 +16,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
     const signatureInputRef = useRef<HTMLInputElement>(null);
     const [signatureText, setSignatureText] = useState<string>("");
     const [signatureMode, setSignatureMode] = useState<"upload" | "type">(
-      "upload",
+      "upload"
     );
 
     const getCurrencySymbol = () => {
@@ -79,6 +33,13 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
     };
 
     const symbol = getCurrencySymbol();
+
+    // safe number formatting helper
+    const safeFix = (val: any) =>
+      Number(val ?? 0).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
 
     const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files && e.target.files[0]) {
@@ -123,6 +84,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
               </div>
               <h1 className="text-5xl font-light tracking-wide">INVOICE</h1>
             </div>
+
             <input
               type="file"
               accept="image/*"
@@ -135,35 +97,40 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
           {/* Invoice Details */}
           <div className="grid grid-cols-2 gap-x-8 text-sm">
             <div></div>
+
             <div className="space-y-1">
               <div className="flex justify-between">
                 <span className="font-semibold">INVOICE #</span>
-                <span>{data.invoiceId || "IN-001"}</span>
+                <span>{data.invoiceNumber || "IN-001"}</span>
               </div>
+
               <div className="flex justify-between">
                 <span className="font-semibold">INVOICE DATE</span>
-                <span>{data.dateOfInvoice}</span>
+                <span>{data.invoiceDate}</span>
               </div>
+
               <div className="flex justify-between">
                 <span className="font-semibold">P.O.#</span>
                 <span>{data.poNumber || "2430/2019"}</span>
               </div>
+
               <div className="flex justify-between">
                 <span className="font-semibold">DUE DATE</span>
-                <span>{data.dueDate}</span>
+                <span>{data.invoiceDueDate}</span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="px-15">
-          {/* FROM, BILL TO, SHIP TO, INVOICE TOTAL */}
+          {/* FROM / BILL TO / SHIP TO / TOTAL */}
           <div className="grid grid-cols-4 gap-6 mb-8">
             {/* FROM */}
             <div>
               <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">
                 FROM
               </h3>
+
               <div className="text-sm space-y-1">
                 <p className="font-semibold text-gray-800">
                   {data.companyName || "Rolaface Software Pvt Limited"}
@@ -172,7 +139,8 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
                   {data.companyAddress || "77 Namrata Bldg"}
                 </p>
                 <p className="text-gray-600">
-                  {data.companyCity || "Delhi"}, {data.companyState || "Delhi"}{" "}
+                  {data.companyCity || "Delhi"},{" "}
+                  {data.companyState || "Delhi"}{" "}
                   {data.companyPostalCode || "400077"}
                 </p>
               </div>
@@ -183,6 +151,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
               <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">
                 BILL TO
               </h3>
+
               <div className="text-sm space-y-1">
                 <p className="font-semibold text-gray-800">
                   {data.customerName}
@@ -200,6 +169,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
               <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">
                 SHIP TO
               </h3>
+
               <div className="text-sm space-y-1">
                 <p className="font-semibold text-gray-800">
                   {data.customerName}
@@ -212,17 +182,15 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
               </div>
             </div>
 
-            {/* INVOICE TOTAL */}
+            {/* TOTAL */}
             <div className="text-right">
               <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">
                 INVOICE TOTAL
               </h3>
+
               <p className="text-3xl font-bold text-[#D4AF37]">
                 {symbol}
-                {data.grandTotal.toLocaleString("en-IN", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                {safeFix(data.grandTotal ?? (data as any).Total)}
               </p>
             </div>
           </div>
@@ -249,29 +217,30 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
                   </th>
                 </tr>
               </thead>
+
               <tbody>
-                {data.items.map((item, index) => {
-                  const lineTotal =
-                    item.quantity * item.listPrice - item.discount;
+                {data.items.map((item: any, index) => {
+                  const qty = item.qty ?? item.quantity ?? 0;
+                  const price = item.price ?? item.listPrice ?? 0;
+                  const discount = item.discount ?? 0;
+                  const amount = item.amount ?? qty * price - discount;
+
                   return (
                     <tr key={index} className="border-b border-gray-200">
                       <td className="py-3 text-sm text-gray-800">
-                        {item.description}
+                        {item.description || item.itemName}
                       </td>
+
                       <td className="py-3 text-sm text-gray-800 text-right">
-                        {item.listPrice.toLocaleString("en-IN", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
+                        {safeFix(price)}
                       </td>
+
                       <td className="py-3 text-sm text-gray-800 text-center">
-                        {item.quantity}
+                        {qty}
                       </td>
+
                       <td className="py-3 text-sm text-gray-800 text-right">
-                        {lineTotal.toLocaleString("en-IN", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
+                        {safeFix(amount)}
                       </td>
                     </tr>
                   );
@@ -287,47 +256,49 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
                 <span className="text-[#D4AF37] font-bold uppercase">
                   SUBTOTAL
                 </span>
+
                 <span className="text-gray-800">
-                  {data.subTotal.toLocaleString("en-IN", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {safeFix(data.subTotal)}
                 </span>
               </div>
+
               <div className="flex justify-between py-2">
                 <span className="text-[#D4AF37] font-bold uppercase">
-                  GST {((data.totalTax / data.subTotal) * 100).toFixed(1)}%
+                  GST{" "}
+                  {data.subTotal
+                    ? ((Number(data.totalTax ?? 0) /
+                        Number(data.subTotal ?? 1)) *
+                        100
+                      ).toFixed(1)
+                    : "0"}
+                  %
                 </span>
+
                 <span className="text-gray-800">
-                  {data.totalTax.toLocaleString("en-IN", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {safeFix(data.totalTax)}
                 </span>
               </div>
+
               <div className="flex justify-between py-3 mt-2">
                 <span className="text-[#D4AF37] font-bold text-lg uppercase">
                   TOTAL
                 </span>
+
                 <span className="text-gray-800 font-bold text-lg">
                   {symbol}
-                  {data.grandTotal.toLocaleString("en-IN", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {safeFix(data.grandTotal ?? (data as any).Total)}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Signature Section */}
+          {/* Signature */}
           <div className="flex justify-end mb-12">
             <div className="w-80">
               <h3 className="text-sm font-bold text-gray-700 mb-3">
                 Authorized Signature
               </h3>
 
-              {/* Toggle Buttons */}
               <div className="flex gap-2 mb-3">
                 <button
                   onClick={() => setSignatureMode("upload")}
@@ -339,6 +310,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
                 >
                   Upload
                 </button>
+
                 <button
                   onClick={() => setSignatureMode("type")}
                   className={`px-3 py-1 rounded text-xs font-medium transition ${
@@ -351,7 +323,6 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
                 </button>
               </div>
 
-              {/* Upload Mode */}
               {signatureMode === "upload" && (
                 <div
                   className="w-full h-24 border-2 border-dashed border-gray-300 rounded bg-gray-50 flex items-center justify-center cursor-pointer transition hover:border-[#D4AF37]"
@@ -371,6 +342,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
                       </span>
                     </div>
                   )}
+
                   <input
                     type="file"
                     accept="image/*"
@@ -381,7 +353,6 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
                 </div>
               )}
 
-              {/* Type Mode */}
               {signatureMode === "type" && (
                 <div className="space-y-2">
                   <input
@@ -391,6 +362,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
                     placeholder="Type your signature..."
                     className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-[#D4AF37] focus:outline-none text-sm"
                   />
+
                   {signatureText && (
                     <div className="w-full h-24 border-2 border-gray-300 rounded bg-white flex items-center justify-center">
                       <p
@@ -420,11 +392,13 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
             {data.bankName && (
               <div className="text-sm">
                 <p className="font-semibold text-gray-800">{data.bankName}</p>
+
                 {data.accountNumber && (
                   <p className="text-gray-700">
                     Account Number: {data.accountNumber}
                   </p>
                 )}
+
                 {data.routingNumber && (
                   <p className="text-gray-700">
                     Routing Number: {data.routingNumber}
@@ -436,7 +410,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
         </div>
       </div>
     );
-  },
+  }
 );
 
 InvoiceTemplate3.displayName = "InvoiceTemplate3";
