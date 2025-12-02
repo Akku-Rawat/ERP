@@ -106,7 +106,6 @@ const ItemModal: React.FC<{
 
       if (isEditMode && initialData?.item_code) {
         response = await updateItemByItemCode(initialData.item_code, payload);
-        console.log("responseOfUpdate: ", response);
       } else {
         response = await createItem(payload);
       }

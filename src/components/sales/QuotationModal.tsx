@@ -7,87 +7,9 @@ import {
   getAllCustomers,
   getCustomerByCustomerCode,
 } from "../../api/customerApi";
+import CustomerSelect from "../selects/CustomerSelect";
+import ItemSelect from "../selects/ItemSelect";
 
-function CustomerDropdown({
-  value,
-  onChange,
-  className = "",
-  customers,
-  custLoading,
-}: {
-  value: string;
-  onChange: (data: { name: string; custom_id: string }) => void;
-  className?: string;
-  customers: { name: string; custom_id: string }[];
-  custLoading: boolean;
-}) {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
-  const filtered = customers.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const selected = customers.find((c) => c.name === value);
-
-  return (
-    <div ref={ref} className={`relative w-full flex flex-col gap-1 ${className}`}>
-      <span className="font-medium text-gray-600 text-sm">Customer Name</span>
-
-      <button
-        type="button"
-        disabled={custLoading}
-        className="w-full rounded border px-3 py-2 text-left bg-white disabled:opacity-60"
-        onClick={() => !custLoading && setOpen((v) => !v)}
-      >
-        {custLoading ? "Loading customers..." : selected?.name || "Select customer..."}
-      </button>
-
-      {open && !custLoading && (
-        <div className="absolute left-0 w-full mt-1 bg-white border shadow-lg rounded z-10">
-          <input
-            className="w-full border-b px-2 py-1"
-            autoFocus
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          <ul className="max-h-40 overflow-y-auto">
-            {filtered.map((c) => (
-              <li
-                key={c.custom_id}
-                className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${c.name === value ? "bg-blue-200 font-bold" : ""
-                  }`}
-                onClick={() => {
-                  onChange({ name: c.name, custom_id: c.custom_id });
-                  setOpen(false);
-                  setSearch("");
-                }}
-              >
-                <span>{c.name}</span>
-              </li>
-            ))}
-
-            {filtered.length === 0 && (
-              <li className="px-4 py-2 text-gray-500">No match</li>
-            )}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
 interface ItemRow {
   productName: string;
   description: string;
@@ -200,7 +122,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     "details",
   );
   const [isShippingOpen, setIsShippingOpen] = useState(false);
- const [customers, setCustomers] = useState<{ name: string; custom_id: string }[]>([]);
+  const [customers, setCustomers] = useState<{ name: string; custom_id: string }[]>([]);
   const [custLoading, setCustLoading] = useState(true);
   const [customerDetails, setCustomerDetails] = useState<any>(null);
 
@@ -352,6 +274,14 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 
   const symbol = getCurrencySymbol();
 
+  const updateItem = (index: number, updated: Partial<ItemRow>) => {
+    setItems((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], ...updated };
+      return copy;
+    });
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
       <AnimatePresence>
@@ -411,15 +341,13 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     </h3>
                     <div className="flex flex-col gap-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <CustomerDropdown
+                        <CustomerSelect
                           value={form.CutomerName}
                           onChange={async ({ name, custom_id }) => {
                             setForm((p) => ({ ...p, CutomerName: name }));
                             await loadCustomerDetailsById(custom_id);
                           }}
                           className="w-full"
-                          customers={customers}
-                          custLoading={custLoading}
                         />
                         <Input
                           label="Date of Quotation"
@@ -508,7 +436,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                         <thead className="bg-gray-50 text-gray-700">
                           <tr>
                             <th className="px-2 py-2 text-left">#</th>
-                            <th className="px-2 py-2 text-left">Product</th>
+                            <th className="px-2 py-2 text-left">Item</th>
                             <th className="px-2 py-2 text-left">Description</th>
                             <th className="px-2 py-2 text-left">Qty</th>
                             <th className="px-2 py-2 text-left">Unit Price</th>
@@ -520,7 +448,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                         </thead>
                         <tbody className="divide-y">
                           {paginatedItems.map((it, idx) => {
-                            const i = page * itemsPerPage + idx; // real index in full array
+                            const i = page * itemsPerPage + idx;
                             const amount =
                               it.quantity * it.listPrice - it.discount + it.tax;
                             return (
@@ -529,12 +457,17 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   {i + 1}
                                 </td>
                                 <td className="px-1 py-1">
-                                  <input
-                                    className="w-full rounded border p-1 text-sm"
-                                    name="productName"
+                                  <ItemSelect
                                     value={it.productName}
-                                    onChange={(e) => handleItem(e, i)}
+                                    onChange={(item) => {
+                                      updateItem(i, {
+                                        productName: item.name,
+                                        description: item.description ?? it.description,
+                                        listPrice: item.price ?? it.listPrice,
+                                      });
+                                    }}
                                   />
+
                                 </td>
                                 <td className="px-1 py-1">
                                   <input

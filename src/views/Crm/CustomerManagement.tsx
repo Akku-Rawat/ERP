@@ -27,8 +27,8 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const fetchCustomers = async () => {
     try {
       setCustLoading(true);
-      const data = await getAllCustomers();
-      setCustomers(data);
+      const response = await getAllCustomers();
+      setCustomers(response.data);
     } catch (err) {
       console.error("Error loading customers:", err);
     } finally {

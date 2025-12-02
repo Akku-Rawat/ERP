@@ -8,6 +8,7 @@ import {
   getItemByItemCode,
   deleteItemByItemCode,
 } from "../../api/itemApi";
+import toast from "react-hot-toast";
 
 interface ItemsProps {
   onAdd: () => void;
@@ -23,8 +24,8 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
   const fetchItems = async () => {
     try {
       setItemLoading(true);
-      const data = await getAllItems();
-      setItem(data);
+      const response = await getAllItems();
+      setItem(response.data);
     } catch (err) {
       console.error("Error loading items:", err);
     } finally {
@@ -62,9 +63,19 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
     }
   };
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
     setEditItems(null);
     setShowItemsModal(true);
+    try {
+      await fetchItems();
+      toast.success(
+        editItems
+          ? "Item updated successfully!"
+          : "Item created successfully!",
+      );
+    } catch (err) {
+      toast.error("Failed to refresh item list");
+    }
   };
 
   const handleEditItem = async (item_code: string, e: React.MouseEvent) => {

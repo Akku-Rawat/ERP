@@ -14,7 +14,7 @@ const ENDPOINTS = {
 
 export async function getAllItems(): Promise<any> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getAllItems);
-  return resp.data?.data || [];
+  return resp.data || [];
 }
 
 export async function getItemByItemCode(item_code: string): Promise<any> {
