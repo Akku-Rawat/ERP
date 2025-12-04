@@ -1,14 +1,27 @@
-import React, { useMemo, useState } from 'react';
-import type { JSX } from 'react';
+import React, { useMemo, useState } from "react";
+import type { JSX } from "react";
 import {
-  FaBoxes, FaCheckCircle, FaTimes, FaSearch, FaExternalLinkAlt,
-  FaChartLine, FaUsers, FaShoppingCart, FaHandshake, FaMoneyCheckAlt, FaUserTie, FaWarehouse,
-  FaChevronDown, FaSortAmountDown, FaList, FaThLarge, FaSyncAlt, FaEraser, FaChevronRight, FaChevronLeft
-} from 'react-icons/fa';
+  FaBoxes,
+  FaCheckCircle,
+  FaSearch,
+  FaExternalLinkAlt,
+  FaChartLine,
+  FaUsers,
+  FaShoppingCart,
+  FaHandshake,
+  FaMoneyCheckAlt,
+  FaUserTie,
+  FaWarehouse,
+  FaEraser,
+  FaStar,
+  FaCrown,
+  FaRocket,
+  FaInfoCircle,
+  FaCog,
+} from "react-icons/fa";
 
 // ---------- Types ----------
-
-type Tier = 'Free' | 'Pro' | 'Enterprise';
+type Tier = "Free" | "Pro" | "Enterprise";
 
 type ModuleItem = {
   id: string;
@@ -21,340 +34,351 @@ type ModuleItem = {
 };
 
 // ---------- Sample Data ----------
-
 const sampleModules: ModuleItem[] = [
-  { id: 'sales', name: 'Sales Management', description: 'Lead pipeline, quotations, orders and sales analytics.', active: true, tier: 'Pro', users: 78, icon: <FaChartLine /> },
-  { id: 'crm', name: 'CRM', description: 'Customer interactions, contacts and relationship tracking.', active: true, tier: 'Pro', users: 145, icon: <FaUsers /> },
-  { id: 'procurement', name: 'Procurement', description: 'Purchase orders, approvals and supplier sourcing.', active: true, tier: 'Enterprise', users: 32, icon: <FaShoppingCart /> },
-  { id: 'inventory', name: 'Inventory Management', description: 'Stock levels, warehousing and stock valuation.', active: true, tier: 'Enterprise', users: 54, icon: <FaWarehouse /> },
-  { id: 'supplier', name: 'Supplier Management', description: 'Supplier records, performance and contracts.', active: false, tier: 'Free', users: 21, icon: <FaHandshake /> },
-  { id: 'accounting', name: 'Accounting', description: 'Ledger, invoicing, payments and financial reports.', active: true, tier: 'Enterprise', users: 17, icon: <FaMoneyCheckAlt /> },
-  { id: 'hr', name: 'HR', description: 'Employee lifecycle: onboarding, payroll, attendance and more.', active: true, tier: 'Pro', users: 210, icon: <FaUserTie /> },
+  {
+    id: "sales",
+    name: "Sales Management",
+    description: "Lead pipeline, quotations, orders and sales analytics.",
+    active: true,
+    tier: "Pro",
+    users: 78,
+    icon: <FaChartLine />,
+  },
+  {
+    id: "crm",
+    name: "CRM",
+    description: "Customer interactions, contacts and relationship tracking.",
+    active: true,
+    tier: "Pro",
+    users: 145,
+    icon: <FaUsers />,
+  },
+  {
+    id: "procurement",
+    name: "Procurement",
+    description: "Purchase orders, approvals and supplier sourcing.",
+    active: true,
+    tier: "Enterprise",
+    users: 32,
+    icon: <FaShoppingCart />,
+  },
+  {
+    id: "inventory",
+    name: "Inventory Management",
+    description: "Stock levels, warehousing and stock valuation.",
+    active: true,
+    tier: "Enterprise",
+    users: 54,
+    icon: <FaWarehouse />,
+  },
+  {
+    id: "supplier",
+    name: "Supplier Management",
+    description: "Supplier records, performance and contracts.",
+    active: false,
+    tier: "Free",
+    users: 21,
+    icon: <FaHandshake />,
+  },
+  {
+    id: "accounting",
+    name: "Accounting",
+    description: "Ledger, invoicing, payments and financial reports.",
+    active: true,
+    tier: "Enterprise",
+    users: 17,
+    icon: <FaMoneyCheckAlt />,
+  },
+  {
+    id: "hr",
+    name: "HR",
+    description:
+      "Employee lifecycle: onboarding, payroll, attendance and more.",
+    active: true,
+    tier: "Pro",
+    users: 210,
+    icon: <FaUserTie />,
+  },
 ];
 
 // ---------- Helpers ----------
-
-const tierBadge = (tier: Tier) => {
-  if (tier === 'Enterprise') return 'bg-gray-900 text-white';
-  if (tier === 'Pro') return 'bg-green-600 text-white';
-  return 'bg-gray-100 text-gray-700';
+// NOTE: replaced tier CSS-classes with inline style values so colours follow theme (teal)
+const tierStyle = (tier: Tier) => {
+  // subtle background + stronger text color for readability
+  return {
+    background: "rgba(13,148,136,0.06)", // subtle teal tint
+    color: "var(--primary-700)", // teal-800 like tone
+    padding: "0.25rem 0.625rem",
+    borderRadius: "9999px",
+    fontSize: "0.75rem",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "0.375rem",
+    fontWeight: 600 as const,
+  };
 };
 
 // ---------- Component ----------
-
 export default function SubscribedModules(): JSX.Element {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [modules, setModules] = useState<ModuleItem[]>(sampleModules);
-  const [selectedTier, setSelectedTier] = useState<Tier | 'All'>('All');
-  const [sortBy, setSortBy] = useState<'name' | 'users' | 'tier'>('users');
-  const [view, setView] = useState<'cards' | 'compact'>('cards');
-  const [showAvailable, setShowAvailable] = useState(false); // toggles available modules panel
+  const [selectedTier, setSelectedTier] = useState<Tier | "All">("All");
+  const [sortBy, setSortBy] = useState<"name" | "users" | "tier">("name");
 
-  // Derived lists
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return modules.filter(m => {
-      if (selectedTier !== 'All' && m.tier !== selectedTier) return false;
+    return modules.filter((m) => {
+      if (selectedTier !== "All" && m.tier !== selectedTier) return false;
       if (!q) return true;
       return (
         m.name.toLowerCase().includes(q) ||
-        m.description.toLowerCase().includes(q) ||
-        m.tier.toLowerCase().includes(q)
+        m.description.toLowerCase().includes(q)
       );
     });
   }, [modules, query, selectedTier]);
 
-  const subscribedModules = useMemo(() => filtered.filter(m => m.active), [filtered]);
-  const nonSubscribedModules = useMemo(() => filtered.filter(m => !m.active), [filtered]);
-
-  // Sorting
   const sortModules = (list: ModuleItem[]) => {
     const copy = [...list];
-    if (sortBy === 'users') return copy.sort((a, b) => b.users - a.users);
-    if (sortBy === 'name') return copy.sort((a, b) => a.name.localeCompare(b.name));
-    // tier ordering: Enterprise > Pro > Free
-    if (sortBy === 'tier') return copy.sort((a, b) => {
+    if (sortBy === "users") return copy.sort((a, b) => b.users - a.users);
+    if (sortBy === "name")
+      return copy.sort((a, b) => a.name.localeCompare(b.name));
+    if (sortBy === "tier") {
       const order = { Enterprise: 0, Pro: 1, Free: 2 } as any;
-      return order[a.tier] - order[b.tier];
-    });
+      return copy.sort((a, b) => order[a.tier] - order[b.tier]);
+    }
     return copy;
   };
 
+  const sortedModules = sortModules(filtered);
+
   function toggleActive(id: string) {
-    setModules(prev => prev.map(m => m.id === id ? { ...m, active: !m.active } : m));
+    setModules((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, active: !m.active } : m))
+    );
   }
 
   function resetFilters() {
-    setQuery('');
-    setSelectedTier('All');
-    setSortBy('users');
+    setQuery("");
+    setSelectedTier("All");
+    setSortBy("name");
   }
 
-  const lastSynced = new Date().toLocaleString();
-
-  // ---------- Render helpers ----------
-
-  function ModuleCard({ m }: { m: ModuleItem }) {
-    return (
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition">
-        <div className="flex items-start gap-3">
-          <div className="flex-shrink-0">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-green-50">
-              <div className="text-green-600 text-lg">{m.icon ?? <FaBoxes />}</div>
-            </div>
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-md font-semibold truncate">{m.name}</h3>
-              <div className="flex items-center gap-2">
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${tierBadge(m.tier)}`}>
-                  {m.tier}
-                </span>
-                {m.active ? <FaCheckCircle className="text-green-600" /> : <FaTimes className="text-gray-400" />}
-              </div>
-            </div>
-
-            <p className="text-sm text-gray-500 mt-2 truncate">{m.description}</p>
-
-            <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1"> 
-                  <span className="font-medium">Users:</span>
-                  <span className="text-gray-500">{m.users}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {m.active ? (
-                  <button
-                    onClick={() => toggleActive(m.id)}
-                    className="text-sm font-medium px-3 py-1 rounded-lg transition bg-white border border-green-200 text-green-700"
-                    title="Disable module"
-                  >
-                    Disable
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => toggleActive(m.id)}
-                    className="text-sm font-medium px-3 py-1 rounded-lg transition bg-green-600 text-white"
-                    title="Enable module"
-                  >
-                    Enable
-                  </button>
-                )}
-
-                <button className="text-sm px-2 py-1 rounded-lg bg-gray-50 border border-gray-100 text-gray-600 flex items-center gap-1" title="Open module settings">
-                  <FaExternalLinkAlt className="text-xs" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  function CompactRow({ m }: { m: ModuleItem }) {
-    return (
-      <div className="flex items-center justify-between bg-white rounded-lg p-3 shadow-sm border border-gray-100">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-green-50">
-            <div className="text-green-600">{m.icon ?? <FaBoxes />}</div>
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <div className="text-sm font-medium truncate">{m.name}</div>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${tierBadge(m.tier)}`}>{m.tier}</span>
-            </div>
-            <div className="text-xs text-gray-500 truncate">{m.description}</div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="text-xs text-gray-600">{m.users}</div>
-          <button onClick={() => toggleActive(m.id)} className={`text-sm px-2 py-1 rounded ${m.active ? 'bg-white border border-green-200 text-green-700' : 'bg-green-600 text-white'}`}>
-            {m.active ? 'Disable' : 'Enable'}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ---------- JSX ----------
+  const activeCount = modules.filter((m) => m.active).length;
 
   return (
-    <div className="bg-gray-50 p-6 rounded-lg">
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 gap-2 shadow-sm w-full md:w-72">
-            <FaSearch />
-            <input
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Search modules, tiers, descriptions..."
-              className="outline-none text-sm w-full"
-            />
-            {query && (
-              <button onClick={() => setQuery('')} className="text-gray-400 hover:text-gray-600" title="Clear">
-                <FaEraser />
-              </button>
-            )}
+    <div className="">
+      <div className="w-full ">
+        {/* Stats & Controls */}
+        <div
+          className="rounded-lg shadow-sm border border-gray-200 p-4 mb-2"
+          style={{
+            background: "var(--primary-600)",
+            color: "var(--table-head-text)",
+          }}
+        >
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-2">
+            {/* intentionally left visual content unchanged */}
           </div>
 
-          <div className="hidden md:flex items-center gap-2">
-            <button onClick={() => setView(v => v === 'cards' ? 'compact' : 'cards')} className="px-3 py-2 rounded-lg bg-white border border-gray-200">
-              {view === 'cards' ? <FaList /> : <FaThLarge />}
-            </button>
+          {/* Search & Filters */}
+          <div className="w-full">
+  <div className="flex flex-col sm:flex-row items-center gap-3 max-w-5xl mx-auto">
 
-            <div className="relative inline-block">
-              <button className="px-3 py-2 rounded-lg bg-white border border-gray-200 flex items-center gap-2">
-                <FaSortAmountDown />
-                <span className="text-sm">Sort</span>
-              </button>
-            </div>
-          </div>
+    {/* Search Bar */}
+    <div className="relative flex-1 w-full">
+      <FaSearch
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        style={{ width: 16, height: 16 }}
+      />
+      <input
+  value={query}
+  onChange={(e) => setQuery(e.target.value)}
+  placeholder="Search modules..."
+  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg 
+             text-sm bg-white shadow-sm text-gray-800
+             focus:ring-2 focus:ring-[var(--primary)]
+             focus:border-[var(--primary-600)] transition-all"
+/>
+
+    </div>
+
+    {/* Tier Dropdown */}
+    <select
+      value={selectedTier}
+      onChange={(e) => setSelectedTier(e.target.value)}
+      className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm 
+                 shadow-sm text-gray-700 focus:ring-2 focus:ring-[var(--primary)]"
+    >
+      <option value="All">All Tiers</option>
+      <option value="Enterprise">Enterprise</option>
+      <option value="Pro">Pro</option>
+      <option value="Free">Free</option>
+    </select>
+
+    {/* Sort Dropdown */}
+    <select
+      value={sortBy}
+      onChange={(e) => setSortBy(e.target.value)}
+      className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm 
+                 shadow-sm text-gray-700 focus:ring-2 focus:ring-[var(--primary)]"
+    >
+      <option value="name">Name (A-Z)</option>
+      <option value="users">Most Used</option>
+      <option value="tier">By Tier</option>
+    </select>
+
+  </div>
+</div>
+
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="text-sm text-gray-600 mr-2 hidden md:block">
-            <span className="font-medium">Total:</span> {modules.length} • <span className="font-medium">Subscribed:</span> {modules.filter(m => m.active).length} • <span className="font-medium">Available:</span> {modules.filter(m => !m.active).length}
+        {/* Module List */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Module
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Tier
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Users
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {sortedModules.map((m) => {
+                  return (
+                    <tr
+                      key={m.id}
+                      className={`transition-colors`}
+                      style={{
+                        background: m.active ? "var(--row-hover)" : undefined,
+                      }}
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                            style={{
+                              background: m.active
+                                ? "rgba(13,148,136,0.08)"
+                                : "#f3f4f6",
+                              color: m.active ? "var(--primary)" : "#9ca3af",
+                            }}
+                          >
+                            {m.icon ?? <FaBoxes />}
+                          </div>
+                          <div className="font-medium text-gray-900 text-sm">
+                            {m.name}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-600 max-w-xs">
+                          {m.description}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div style={tierStyle(m.tier)}>
+                          {/* keep small icon + label */}
+                          {m.tier === "Enterprise" ? (
+                            <FaCrown className="w-3 h-3" />
+                          ) : m.tier === "Pro" ? (
+                            <FaRocket className="w-3 h-3" />
+                          ) : (
+                            <FaStar className="w-3 h-3" />
+                          )}
+                          <span style={{ marginLeft: 6 }}>{m.tier}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1.5 text-sm text-gray-700">
+                          <FaUsers
+                            className="w-3.5 h-3.5"
+                            style={{ color: "#9ca3af" }}
+                          />
+                          {m.users}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {m.active ? (
+                          <div
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                            style={{
+                              background: "rgba(13,148,136,0.08)",
+                              color: "var(--primary)",
+                            }}
+                          >
+                            <FaCheckCircle className="w-3 h-3" />
+                            Active
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center text-gray-500 text-xs font-medium">
+                            Inactive
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => toggleActive(m.id)}
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                            style={
+                              m.active
+                                ? {
+                                    background: "#fff",
+                                    border: "1px solid #fca5a5",
+                                    color: "#b91c1c",
+                                  }
+                                : {
+                                    background: "var(--primary)",
+                                    color: "#fff",
+                                  }
+                            }
+                          >
+                            {m.active ? "Disable" : "Enable"}
+                          </button>
+                          <button
+                            className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+                            title="Settings"
+                          >
+                            <FaCog className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
 
-          <div className="flex items-center gap-2">
-            <select value={selectedTier} onChange={e => setSelectedTier(e.target.value as any)} className="text-sm px-3 py-2 rounded-lg border border-gray-200 bg-white">
-              <option value="All">All tiers</option>
-              <option value="Pro">Pro</option>
-              <option value="Enterprise">Enterprise</option>
-              <option value="Free">Free</option>
-            </select>
-
-            <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} className="text-sm px-3 py-2 rounded-lg border border-gray-200 bg-white">
-              <option value="users">Most used</option>
-              <option value="name">Name</option>
-              <option value="tier">Tier</option>
-            </select>
-
-            <button onClick={() => setModules(sampleModules)} className="px-3 py-2 rounded-lg bg-white border border-gray-200 flex items-center gap-2">
-              <FaSyncAlt />
-              Restore
-            </button>
-
-            <button onClick={resetFilters} className="px-3 py-2 rounded-lg bg-white border border-gray-200">
-              Reset
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Two Column Layout: left = subscribed, right = trigger + collapsible available */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* Subscribed Modules (left) */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <FaCheckCircle className="text-green-600" />
-            Subscribed Modules ({subscribedModules.length})
-          </h2>
-
-          <div className="space-y-4">
-            {sortModules(subscribedModules).map(m => (
-              view === 'cards' ? <ModuleCard key={m.id} m={m} /> : <CompactRow key={m.id} m={m} />
-            ))}
-
-            {subscribedModules.length === 0 && (
-              <div className="bg-white rounded-2xl p-8 border border-dashed border-gray-200 text-center">
-                <p className="text-lg font-semibold text-gray-700 mb-2">No subscribed modules</p>
-                <p className="text-sm text-gray-500">Enable modules from the available list.</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right column: trigger button + collapsible available modules */}
-        <div className="relative">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <FaTimes className="text-gray-500" />
-              Available
-            </h2>
-
-            {/* Trigger button that toggles the available modules panel */}
-            <button
-              onClick={() => setShowAvailable(s => !s)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-gray-200 shadow-sm"
-              aria-expanded={showAvailable}
-              aria-controls="available-panel"
-            >
-              <span className="text-sm font-medium">{showAvailable ? 'Hide' : 'Show'} available modules</span>
-              <span className="text-xs text-gray-500">({nonSubscribedModules.length})</span>
-              <span className={`transition-transform ${showAvailable ? 'rotate-180' : ''}`}>
-                <FaChevronDown />
-              </span>
-            </button>
-          </div>
-
-          {/* Collapsible panel */}
-          <div
-            id="available-panel"
-            className={`overflow-hidden transition-all duration-300 ${showAvailable ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}
-          >
-            <div className="space-y-4">
-              {sortModules(nonSubscribedModules).map(m => (
-                view === 'cards' ? <ModuleCard key={m.id} m={m} /> : <CompactRow key={m.id} m={m} />
-              ))}
-
-              {nonSubscribedModules.length === 0 && (
-                <div className="bg-white rounded-2xl p-8 border border-dashed border-gray-200 text-center">
-                  <p className="text-lg font-semibold text-gray-700 mb-2">All modules are subscribed!</p>
-                  <p className="text-sm text-gray-500">Visit the <span className="font-medium">Marketplace</span> to discover more.</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* When collapsed, show a small hint card with count so user knows it's available */}
-          {!showAvailable && (
-            <div className="mt-3 bg-white rounded-lg p-3 border border-gray-100 text-sm text-gray-600 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{nonSubscribedModules.length} available</div>
-                  <div className="text-xs text-gray-500">Click the button to view and enable modules.</div>
-                </div>
-                <div>
-                  <FaChevronRight className="text-gray-400" />
-                </div>
-              </div>
+          {sortedModules.length === 0 && (
+            <div className="text-center py-12">
+              <FaInfoCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">
+                No modules found matching your filters
+              </p>
             </div>
           )}
         </div>
 
-      </div>
-
-      {filtered.length === 0 && (
-        <div className="bg-white rounded-2xl p-8 border border-dashed border-gray-200 text-center mt-6">
-          <p className="text-lg font-semibold text-gray-700 mb-2">No modules match your search</p>
-          <p className="text-sm text-gray-500">Try clearing the search or browse the Marketplace.</p>
-          <div className="mt-4 flex items-center justify-center gap-3">
-            <button className="px-4 py-2 rounded-lg bg-green-600 text-white font-medium">Browse Marketplace</button>
-            <button onClick={() => setQuery('')} className="px-4 py-2 rounded-lg bg-white border border-gray-200">Reset</button>
-          </div>
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="mt-6 text-sm text-gray-600 flex items-center gap-2 justify-between">
-        <div className="text-xs text-gray-500">
-          Last synced: <span className="font-medium text-gray-700">{lastSynced}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button className="text-sm px-3 py-1 rounded-lg bg-white border border-gray-200 flex items-center gap-2">
-            <FaSyncAlt />
-            Sync now
-          </button>
-          <div className="text-xs text-gray-400">UI v2</div>
+        {/* Footer Info */}
+        <div className="mt-6 text-center text-sm text-gray-500">
+          Last synced: {new Date().toLocaleString()}
         </div>
       </div>
     </div>

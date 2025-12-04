@@ -1,281 +1,409 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   FaDollarSign,
   FaChartArea,
   FaSyncAlt,
   FaBullseye,
-  FaCheckCircle
+  FaCheckCircle,
+  FaCalendarAlt,
+  FaMoneyBillWave,
+  FaCoins,
+  FaSave,
+  FaUndo
 } from "react-icons/fa";
 
-const AccountingDetails: React.FC = () => {
-  const [formData, setFormData] = useState({
-    chartOfAccounts: '',
-    defaultExpenseGL: '',
-    exchangeGainLossAccount: '',
-    exchangeRateRevaluationFreq: 'Monthly',
-    roundOffAccount: '',
-    roundOffCostCenter: '',
-    depreciationExpenseAccount: '',
-    appreciationIncomeAccount: '',
-    currency: 'INR',
-    financialYearBegins: 'April',
-  });
+const STORAGE_KEY = 'company_accounting_details_v1';
 
+const defaultData = {
+  chartOfAccounts: '',
+  defaultExpenseGL: '',
+  exchangeGainLossAccount: '',
+  exchangeRateRevaluationFreq: 'Monthly',
+  roundOffAccount: '',
+  roundOffCostCenter: '',
+  depreciationExpenseAccount: '',
+  appreciationIncomeAccount: '',
+  currency: 'INR',
+  financialYearBegins: 'April',
+} as const;
+
+type FormKeys = keyof typeof defaultData;
+
+const AccountingDetails: React.FC = () => {
   const [showSuccess, setShowSuccess] = useState(false);
+  const [lastSaved, setLastSaved] = useState<string>('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [activeTab, setActiveTab] = useState('financial');
+  const refs = useRef<Record<string, HTMLInputElement | HTMLSelectElement | null>>({});
+  const restoring = useRef(false);
+
+  const tabs = [
+    { id: 'financial', label: 'Financial Config', icon: FaCoins },
+    { id: 'accounts', label: 'Account Setup', icon: FaDollarSign },
+  ];
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      restoring.current = true;
+      requestAnimationFrame(() => {
+        Object.keys(parsed).forEach((k) => {
+          const el = refs.current[k];
+          if (el) {
+            try {
+              el.value = parsed[k] ?? '';
+            } catch {
+              // ignore if not settable
+            }
+          }
+        });
+        const timestamp = parsed._savedAt || 'earlier';
+        setLastSaved(timestamp !== 'earlier' ? `Last saved: ${timestamp}` : 'Draft loaded');
+        setTimeout(() => { restoring.current = false; }, 0);
+      });
+    } catch (err) {
+      console.warn('[AccountingDetails] restore failed', err);
+      restoring.current = false;
+    }
+  }, []);
+
+  const saveKey = (name: string, value: string) => {
+    if (restoring.current) return;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const obj = raw ? JSON.parse(raw) : { ...defaultData };
+      obj[name] = value;
+      const now = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      obj._savedAt = now;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+      setLastSaved(`Last saved: ${now}`);
+      setHasUnsavedChanges(false);
+    } catch (err) {
+      console.warn('[AccountingDetails] save failed', err);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const target = e.currentTarget;
+    const name = target.getAttribute('name') ?? '';
+    if (!name) return;
+    setHasUnsavedChanges(true);
+    saveKey(name, target.value ?? '');
+  };
+
+  const buildFormDataFromRefs = () => {
+    const out: Record<string, string> = {};
+    (Object.keys(defaultData) as FormKeys[]).forEach((k) => {
+      const el = refs.current[k];
+      out[k] = el ? (el.value ?? '') : '';
+    });
+    return out as Record<FormKeys, string>;
   };
 
   const handleSubmit = () => {
-    console.log(formData);
+    const data = buildFormDataFromRefs();
+    console.log('[AccountingDetails] submit', data);
     setShowSuccess(true);
+    setHasUnsavedChanges(false);
     setTimeout(() => setShowSuccess(false), 3000);
   };
 
+  const handleReset = () => {
+    if (!confirm('Are you sure you want to reset all fields? This will clear all saved data.')) return;
+    (Object.keys(defaultData) as FormKeys[]).forEach((k) => {
+      const el = refs.current[k];
+      if (el) el.value = defaultData[k];
+    });
+    try { localStorage.removeItem(STORAGE_KEY); } catch {
+      console.warn('[AccountingDetails] clear storage failed');
+    }
+    setLastSaved('');
+    setHasUnsavedChanges(false);
+  };
+
+  const attachRef = (name: string) => (el: HTMLInputElement | HTMLSelectElement | null) => {
+    refs.current[name] = el;
+  };
+
+  interface InputFieldProps {
+    label: string;
+    name: FormKeys;
+    type?: string;
+    icon?: React.ComponentType<{ className?: string }>;
+    required?: boolean;
+    placeholder?: string;
+  }
+
+  const InputField = ({ label, name, type = 'text', icon: Icon, required = false, placeholder = '' }: InputFieldProps) => (
+    <div className="relative">
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="relative">
+        {Icon && <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none z-10" />}
+        <input
+          type={type}
+          name={name}
+          defaultValue={defaultData[name]}
+          ref={attachRef(name)}
+          onChange={handleChange}
+          placeholder={placeholder}
+          required={required}
+          className={`w-full border border-gray-300 rounded-lg ${Icon ? 'pl-10' : 'pl-3.5'} pr-3.5 py-2.5 text-sm focus:ring-2 focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary-600)] transition-all hover:border-gray-400`}
+        />
+      </div>
+    </div>
+  );
+
+  interface SelectOption { value: string; label: string; }
+  interface SelectFieldProps { 
+    label: string; 
+    name: FormKeys; 
+    options: SelectOption[]; 
+    icon?: React.ComponentType<{ className?: string }>; 
+    required?: boolean;
+  }
+
+  const SelectField = ({ label, name, options, icon: Icon, required = false }: SelectFieldProps) => (
+    <div className="relative">
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="relative">
+        {Icon && <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none z-10" />}
+        <select
+          name={name}
+          defaultValue={defaultData[name]}
+          ref={attachRef(name)}
+          onChange={handleChange}
+          required={required}
+          className={`w-full border border-gray-300 rounded-lg ${Icon ? 'pl-10' : 'pl-3.5'} pr-10 py-2.5 text-sm bg-white focus:ring-2 focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary-600)] transition-all hover:border-gray-400 appearance-none`}
+        >
+          {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+        </select>
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="bg-slate-50 min-h-screen p-1">
-      <div className="max-w-7xl mx-auto">
+    <div className="">
+      <div className="w-full ">
+        {/* Success Message */}
         {showSuccess && (
-          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-            <FaCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-sm font-medium text-green-800">Configuration saved successfully!</p>
+          <div className="mb-4 rounded-lg p-4 shadow-sm" style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.18)' }}>
+            <FaCheckCircle className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--success)' }} />
+            <div>
+              <p className="text-sm font-medium" style={{ color: 'var(--success)' }}>Configuration saved successfully!</p>
+              <p className="text-xs text-green-600 mt-0.5">All changes have been stored</p>
+            </div>
           </div>
         )}
 
-        <div className="bg-white rounded-lg border border-slate-200">
-          <div className="px-6 py-6">
+        {/* Main Card */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Tab Navigation */}
+          {/* Tab Navigation — filled active tab */}
+<div className="bg-gray-50" style={{ borderBottom: '1px solid var(--border)' }}>
+  <div className="flex items-stretch"
+       style={{ borderRadius: '0.5rem 0.5rem 0 0', overflow: 'hidden' }}>
+    {tabs.map((tab) => {
+      const Icon = tab.icon;
+      const isActive = activeTab === tab.id;
+      return (
+        <button
+          key={tab.id}
+          onClick={() => setActiveTab(tab.id)}
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all"
+          style={{
+            background: isActive ? 'var(--primary-600)' : 'transparent',
+            color: isActive ? 'var(--table-head-text)' : 'var(--muted)',
+            borderBottom: isActive ? `3px solid var(--primary-700)` : '3px solid transparent',
+          }}
+        >
+          <Icon style={{ width: 16, height: 16, color: isActive ? 'var(--table-head-text)' : 'var(--muted)' }} />
+          <span>{tab.label}</span>
+        </button>
+      );
+    })}
+  </div>
+</div>
 
-            <div className="mb-4 border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-900 mb-2">Currency</label>
-                  <select
+
+          {/* Tab Content */}
+          <div className="p-8">
+            {/* Financial Configuration Tab */}
+            {activeTab === 'financial' && (
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <SelectField
+                    label="Base Currency"
                     name="currency"
-                    value={formData.currency}
-                    onChange={handleChange}
-                    className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent cursor-pointer"
-                  >
-                    <option value="INR">INR - Indian Rupee</option>
-                    <option value="USD">USD - US Dollar</option>
-                    <option value="EUR">EUR - Euro</option>
-                    <option value="GBP">GBP - British Pound</option>
-                    <option value="AUD">AUD - Australian Dollar</option>
-                  </select>
-                  <p className="mt-1.5 text-xs text-slate-500">Base currency for financial reporting</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-900 mb-2">Financial Year Begins</label>
-                  <select
+                    icon={FaDollarSign}
+                    options={[
+                      { value: 'INR', label: 'INR - Indian Rupee (₹)' },
+                      { value: 'USD', label: 'USD - US Dollar ($)' },
+                      { value: 'zar', label: 'ZAR - South African Rand (R)' },
+                      { value: 'ngn', label: 'NGN - Nigerian Naira (₦)' },
+                      { value: 'EUR', label: 'EUR - Euro (€)' },
+                      { value: 'GBP', label: 'GBP - British Pound (£)' },
+                      { value: 'AUD', label: 'AUD - Australian Dollar (A$)' },
+                    ]}
+                    required
+                  />
+                  <SelectField
+                    label="Financial Year Start"
                     name="financialYearBegins"
-                    value={formData.financialYearBegins}
-                    onChange={handleChange}
-                    className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent cursor-pointer"
-                  >
-                    <option value="January">January</option>
-                    <option value="April">April</option>
-                    <option value="July">July</option>
-                    <option value="October">October</option>
-                  </select>
-                  <p className="mt-1.5 text-xs text-slate-500">Month when the financial year starts</p>
+                    icon={FaCalendarAlt}
+                    options={[
+                      { value: 'January', label: 'January (Jan - Dec)' },
+                      { value: 'April', label: 'April (Apr - Mar)' },
+                      { value: 'July', label: 'July (Jul - Jun)' },
+                      { value: 'October', label: 'October (Oct - Sep)' },
+                    ]}
+                    required
+                  />
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-md font-semibold text-slate-900 flex items-center gap-2">
-                      <FaDollarSign className="w-4 h-4 text-teal-600" />
-                      General Accounts
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1">Primary general ledger accounts</p>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">Chart of Accounts <span className="text-red-500">*</span></label>
-                    <input
-                      type="text"
+            {/* Account Setup Tab */}
+            {activeTab === 'accounts' && (
+              <div className="space-y-8">
+                {/* General Accounts Section */}
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <FaDollarSign className="text-[var(--primary)]" />
+                    General Accounts
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <InputField
+                      label="Chart of Accounts"
                       name="chartOfAccounts"
-                      value={formData.chartOfAccounts}
-                      onChange={handleChange}
-                      placeholder="e.g., Standard Chart of Accounts"
-                      className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      icon={FaMoneyBillWave}
+                      placeholder="e.g., Standard COA"
+                      required
                     />
-                    <p className="mt-1.5 text-xs text-slate-500">Primary chart of accounts for your organization</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">Default Expense GL</label>
-                    <input
-                      type="text"
+                    <InputField
+                      label="Default Expense GL"
                       name="defaultExpenseGL"
-                      value={formData.defaultExpenseGL}
-                      onChange={handleChange}
+                      icon={FaMoneyBillWave}
                       placeholder="e.g., 5000-001"
-                      className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
-                    <p className="mt-1.5 text-xs text-slate-500">Default account for general expense transactions</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-md font-semibold text-slate-900 flex items-center gap-2">
-                      <FaSyncAlt className="w-4 h-4 text-teal-600" />
-                      Exchange Rate
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1">Currency exchange settings and revaluation</p>
                   </div>
                 </div>
 
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">Exchange Gain and Loss Account</label>
-                    <input
-                      type="text"
+                {/* Foreign Exchange Section */}
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <FaSyncAlt className="text-[var(--primary)]" />
+                    Foreign Exchange
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <InputField
+                      label="FX Gain/Loss Account"
                       name="exchangeGainLossAccount"
-                      value={formData.exchangeGainLossAccount}
-                      onChange={handleChange}
+                      icon={FaDollarSign}
                       placeholder="e.g., 7500-001"
-                      className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
-                    <p className="mt-1.5 text-xs text-slate-500">Account to record foreign exchange gains and losses</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">Revaluation Frequency</label>
-                    <select
+                    <SelectField
+                      label="Revaluation Frequency"
                       name="exchangeRateRevaluationFreq"
-                      value={formData.exchangeRateRevaluationFreq}
-                      onChange={handleChange}
-                      className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent cursor-pointer"
-                    >
-                      <option value="Daily">Daily</option>
-                      <option value="Weekly">Weekly</option>
-                      <option value="Monthly">Monthly</option>
-                      <option value="Quarterly">Quarterly</option>
-                    </select>
-                    <p className="mt-1.5 text-xs text-slate-500">How often currency revaluation should be performed</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-md font-semibold text-slate-900 flex items-center gap-2">
-                      <FaBullseye className="w-4 h-4 text-teal-600" />
-                      Rounding Configuration
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1">Accounts for handling rounding differences</p>
+                      icon={FaCalendarAlt}
+                      options={[
+                        { value: 'Daily', label: 'Daily' },
+                        { value: 'Weekly', label: 'Weekly' },
+                        { value: 'Monthly', label: 'Monthly' },
+                        { value: 'Quarterly', label: 'Quarterly' },
+                      ]}
+                    />
                   </div>
                 </div>
 
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">Round Off Account</label>
-                    <input
-                      type="text"
+                {/* Rounding Section */}
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <FaBullseye className="text-[var(--primary)]" />
+                    Rounding
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <InputField
+                      label="Round-Off Account"
                       name="roundOffAccount"
-                      value={formData.roundOffAccount}
-                      onChange={handleChange}
+                      icon={FaBullseye}
                       placeholder="e.g., 6800-001"
-                      className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
-                    <p className="mt-1.5 text-xs text-slate-500">Account to track rounding adjustments in transactions</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">Round Off Cost Center</label>
-                    <input
-                      type="text"
+                    <InputField
+                      label="Round-Off Cost Center"
                       name="roundOffCostCenter"
-                      value={formData.roundOffCostCenter}
-                      onChange={handleChange}
+                      icon={FaBullseye}
                       placeholder="e.g., CC-001"
-                      className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
-                    <p className="mt-1.5 text-xs text-slate-500">Cost center for allocating rounding differences</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-md font-semibold text-slate-900 flex items-center gap-2">
-                      <FaChartArea className="w-4 h-4 text-teal-600" />
-                      Asset Valuation
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1">Accounts for depreciation and appreciation</p>
                   </div>
                 </div>
 
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">Depreciation Expense Account</label>
-                    <input
-                      type="text"
+                {/* Asset Valuation Section */}
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <FaChartArea className="text-[var(--primary)]" />
+                    Asset Valuation
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <InputField
+                      label="Depreciation Account"
                       name="depreciationExpenseAccount"
-                      value={formData.depreciationExpenseAccount}
-                      onChange={handleChange}
+                      icon={FaChartArea}
                       placeholder="e.g., 6500-001"
-                      className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
-                    <p className="mt-1.5 text-xs text-slate-500">Account to record asset depreciation expenses</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">Appreciation Income Account</label>
-                    <input
-                      type="text"
+                    <InputField
+                      label="Appreciation Account"
                       name="appreciationIncomeAccount"
-                      value={formData.appreciationIncomeAccount}
-                      onChange={handleChange}
+                      icon={FaChartArea}
                       placeholder="e.g., 4500-001"
-                      className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
-                    <p className="mt-1.5 text-xs text-slate-500">Account to record asset appreciation income</p>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+          </div>
 
-            <div className="mt-6 pt-6 border-t border-slate-200 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setFormData({
-                  chartOfAccounts: '',
-                  defaultExpenseGL: '',
-                  exchangeGainLossAccount: '',
-                  exchangeRateRevaluationFreq: 'Monthly',
-                  roundOffAccount: '',
-                  roundOffCostCenter: '',
-                  depreciationExpenseAccount: '',
-                  appreciationIncomeAccount: '',
-                  currency: 'INR',
-                  financialYearBegins: 'April',
-                })}
-                className="px-5 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                Reset
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                className="px-5 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors"
-              >
-                Save Configuration
-              </button>
-            </div>
+          {/* Action Footer */}
+          <div className="bg-gray-50 px-8 py-4 border-t border-gray-200 flex items-center justify-between">
+            <button
+  onClick={handleReset}
+  className="px-5 py-2.5 rounded-lg border shadow-sm 
+             text-sm font-semibold flex items-center gap-2 
+             hover:bg-gray-50 transition-all active:scale-[0.98]"
+  style={{
+    borderColor: 'var(--border)',
+    color: 'var(--text)',
+    background: 'var(--card)'
+  }}
+>
+  <FaUndo className="w-4 h-4 opacity-80" />
+  Reset All
+</button>
+
+
+            <button
+  onClick={handleSubmit}
+  className="px-5 py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 
+             text-white text-sm font-semibold shadow flex items-center gap-2 
+             transition-all active:scale-[0.98]"
+  style={{
+    background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)'
+  }}
+>
+  <FaSave className="w-4 h-4 opacity-90" />
+  Save Configuration
+</button>
+
           </div>
         </div>
       </div>

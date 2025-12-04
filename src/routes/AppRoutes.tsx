@@ -11,7 +11,7 @@ import SupplierModule from "../views/Supplier/SupplierManagment";
 import AccountingModule from "../views/Accounting/Accounting";
 import CrmModule from "../views/Crm/Crm";
 import Settings from "../views/Settings";
-import HrPayrollModule from "../views/hr/HrPayrollModule";
+import HrPayrollModule from "../views/hr/HR";
 import CompanySetup from "../views/CompanySetup/CompanySetup";
 import UserManagement from "../views/User/UserModule";
 

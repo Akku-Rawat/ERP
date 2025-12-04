@@ -1,23 +1,35 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  FaBuilding,
   FaCalendarAlt,
-  FaCheckCircle
+  FaCheckCircle,
+  FaEnvelope,
+  FaGlobe,
+  FaIdCard,
+  FaIndustry,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaUser,
+  FaFileAlt,
+  FaSave,
+  FaUndo,
+  FaInfoCircle
 } from 'react-icons/fa';
 
-const STORAGE_KEY = 'company_setup_basicdetails_v2_uncontrolled'; 
+const STORAGE_KEY = 'company_setup_basicdetails_v3_tabs';
 
 const defaultData = {
   companyName: '',
-  district:'',
-  city:'',
-  postalCode:'',
-  province:'',
-  companyEmail:'',
-  companyPhoneNo:'',
-  alternateNo:'',
-  companyStatus:'',
+  district: '',
+  city: '',
+  postalCode: '',
+  province: '',
+  companyEmail: '',
+  companyPhoneNo: '',
+  alternateNo: '',
+  companyStatus: '',
   contactPerson: '',
-  companyType:'',
+  companyType: '',
   legalName: '',
   parentCompany: '',
   timeZone: '',
@@ -48,8 +60,17 @@ type FormKeys = keyof typeof defaultData;
 
 const BasicDetails: React.FC = () => {
   const [showSuccess, setShowSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState('registration');
+  const [lastSaved, setLastSaved] = useState<string>('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const refs = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null>>({});
   const restoring = useRef(false);
+
+  const tabs = [
+    { id: 'registration', label: 'Registration', icon: FaFileAlt },
+    { id: 'contact', label: 'Contact Info', icon: FaPhone },
+    { id: 'address', label: 'Address', icon: FaMapMarkerAlt },
+  ];
 
   useEffect(() => {
     try {
@@ -68,8 +89,11 @@ const BasicDetails: React.FC = () => {
             }
           }
         });
-        console.debug('[BasicDetails] restored values to inputs from storage');
-        setTimeout(() => { restoring.current = false; }, 0);
+        const timestamp = parsed._savedAt || 'earlier';
+        setLastSaved(timestamp !== 'earlier' ? `Last saved: ${timestamp}` : 'Draft loaded');
+        setTimeout(() => {
+          restoring.current = false;
+        }, 0);
       });
     } catch (err) {
       console.warn('[BasicDetails] restore failed', err);
@@ -83,17 +107,28 @@ const BasicDetails: React.FC = () => {
       const raw = localStorage.getItem(STORAGE_KEY);
       const obj = raw ? JSON.parse(raw) : { ...defaultData };
       obj[name] = value;
+      const now = new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      obj._savedAt = now;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
-      console.debug('[BasicDetails] saved', { name, value });
+      setLastSaved(`Last saved: ${now}`);
+      setHasUnsavedChanges(false);
     } catch (err) {
       console.warn('[BasicDetails] save failed', err);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const target = e.currentTarget;
     const name = target.getAttribute('name') ?? '';
     if (!name) return;
+    setHasUnsavedChanges(true);
     saveKey(name, target.value ?? '');
   };
 
@@ -101,7 +136,7 @@ const BasicDetails: React.FC = () => {
     const out: Record<string, string> = {};
     (Object.keys(defaultData) as FormKeys[]).forEach((k) => {
       const el = refs.current[k];
-      out[k] = el ? (el.value ?? '') : '';
+      out[k] = el ? el.value ?? '' : '';
     });
     return out as Record<FormKeys, string>;
   };
@@ -110,23 +145,37 @@ const BasicDetails: React.FC = () => {
     const data = buildFormDataFromRefs();
     console.log('[BasicDetails] submit', data);
     setShowSuccess(true);
+    setHasUnsavedChanges(false);
     setTimeout(() => setShowSuccess(false), 3000);
   };
 
   const handleReset = () => {
+    if (
+      !confirm(
+        'Are you sure you want to reset all fields? This will clear all saved data.'
+      )
+    )
+      return;
     (Object.keys(defaultData) as FormKeys[]).forEach((k) => {
       const el = refs.current[k];
-      if (el) el.value = defaultData[k];
+      if (el) el.value = defaultData[k] as string;
     });
-    try { localStorage.removeItem(STORAGE_KEY); } catch {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
       console.warn('[BasicDetails] clear storage failed');
     }
-    console.debug('[BasicDetails] reset and cleared storage');
+    setLastSaved('');
+    setHasUnsavedChanges(false);
   };
 
-  const attachRef = (name: string) => (el: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null) => {
-    refs.current[name] = el;
-  };
+  const attachRef =
+    (name: string) =>
+    (
+      el: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null
+    ) => {
+      refs.current[name] = el;
+    };
 
   interface InputFieldProps {
     label: string;
@@ -135,199 +184,284 @@ const BasicDetails: React.FC = () => {
     icon?: React.ComponentType<{ className?: string }>;
     required?: boolean;
     placeholder?: string;
+    colSpan?: number;
   }
 
-  const InputField = ({ label, name, type = 'text', icon: Icon, required = false, placeholder = '' }: InputFieldProps) => (
-    <div className="relative">
-      <label className="block text-xs font-medium text-gray-700 mb-1.5">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <div className="relative">
-        {Icon && <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />}
-        <input
-          type={type}
-          name={name}
-          defaultValue={defaultData[name]}
-          ref={attachRef(name)}
-          onChange={handleChange}
-          placeholder={placeholder}
-          required={required}
-          className={`w-full border border-gray-300 rounded-md ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`}
-        />
-      </div>
-    </div>
-  );
+  const InputField = ({
+    label,
+    name,
+    type = 'text',
+    icon: Icon,
+    required = false,
+    placeholder = '',
+    colSpan = 1,
+  }: InputFieldProps) => {
+    const colClass = colSpan >= 2 ? 'md:col-span-2' : '';
+    const id = `input_${name}`;
 
-  interface SelectOption { value: string; label: string; disabled?: boolean; }
-  interface SelectFieldProps { label: string; name: FormKeys; options: SelectOption[]; icon?: React.ComponentType<{ className?: string }> | null; required?: boolean; }
-
-  const SelectField = ({ label, name, options, icon: Icon, required = false }: SelectFieldProps) => (
-    <div className="relative">
-      <label className="block text-xs font-medium text-gray-700 mb-1.5">{label} {required && <span className="text-red-500">*</span>}</label>
-      <div className="relative">
-        {Icon && <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />}
-        <select
-          name={name}
-          defaultValue={defaultData[name]}
-          ref={attachRef(name)}
-          onChange={handleChange}
-          required={required}
-          className={`w-full border border-gray-300 rounded-md ${Icon ? 'pl-10' : 'pl-3'} pr-10 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none`}
-        >
-          {options.map(opt => <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.label}</option>)}
-        </select>
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+    return (
+      <div className={`relative ${colClass}`}>
+        <label htmlFor={id} className="block text-sm font-medium text-main mb-1.5">
+          {label} {required && <span style={{ color: 'var(--danger)' }}>*</span>}
+        </label>
+        <div className="relative">
+          {Icon && (
+            <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4 pointer-events-none z-10" />
+          )}
+          <input
+            id={id}
+            type={type}
+            name={name}
+            defaultValue={defaultData[name] as string}
+            ref={attachRef(name)}
+            onChange={handleChange}
+            placeholder={placeholder}
+            required={required}
+            className={`w-full border border-gray-300 rounded-lg ${Icon ? 'pl-10' : 'pl-3.5'} pr-3.5 py-2.5 text-sm focus:outline-none focus-ring transition-all hover:border-gray-400 bg-card text-main`}
+          />
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
-    <div className="p-6 bg-white">
-      <div className="">
-        <div className="space-y-2">
-          <div className="bg-white overflow-hidden">
-            <div className="  px-4">
-              <h2 className=" text-base font-semibold text-gray-700 underline">Registration Details</h2>
+    <div>
+      <div className="w-full ">
+        {/* Success Message */}
+        {showSuccess && (
+          <div className="mb-4 bg-card border border-green-200 rounded-lg p-4 flex items-center gap-3 shadow-sm">
+            <FaCheckCircle className="w-5 h-5 text-[var(--success)] flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-main">
+                Details saved successfully!
+              </p>
+              <p className="text-xs text-muted mt-0.5">
+                All changes have been stored
+              </p>
             </div>
-            <div className="p-4">
-              <div className="space-y-4">
-                <div className="grid grid-cols-4 gap-4">
-                  <InputField label="Registration No" name="registerNo" placeholder="Enter Registration No" />
-                  <InputField label="Tax Id/ TPIN" name="tax" placeholder="Enter Tax Id" />
-                  <InputField label="Company Name" name="companyName" placeholder="Enter Company Name" />
-                  <InputField label="Date of Incorporation" name="dateOfIncorporation" type="date"/>
-                  <InputField label="Company Type" name="companyType" placeholder="Enter Company Type" />
-                  <InputField label="Company Status" name="companyStatus" placeholder="Enter Company Status" />
-                  <InputField label="Industry Type" name="industryType" placeholder="Enter Industry Type" />
-                  
-                </div>
-              </div>
+          </div>
+        )}
+
+        {/* Main Card */}
+        <div className="bg-card rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Tab Navigation */}
+          <div className="border-b border-gray-200 bg-[var(--card)]">
+            <div className="flex">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    aria-pressed={isActive}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3
+                       text-sm font-medium transition-all border-b-2 ${
+                      isActive
+                        ? 'table-head text-table-head-text'
+                        : 'border-transparent text-main hover:bg-[var(--row-hover)]'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden">
-            <div className="px-4 ">
-              <h2 className=" text-base font-semibold text-gray-700 underline">Contact Information</h2>
-            </div>
-            <div className="p-4">
-              <div className="space-y-4">
-                <div className="grid grid-cols-4 gap-4">
-                  <InputField label="Company Email Id" name="companyEmail" required placeholder="Enter Company Email Id" />
-                  <InputField label="Company Phone No" name="companyPhoneNo"  placeholder="Enter Company Phone No" />
-                  <InputField label="Alternate No" name="contactPerson" required placeholder="Alternate No" />
-                  <InputField label="Website" name="parentCompany" placeholder="Enter Website" />
-                  <InputField label="Contact Person" name="industryType" placeholder="Enter Contact Person" />
-                  <InputField label="E-mail" name="email" placeholder="Enter E-mail"/>
-                  <InputField label="Phone No" name="phoneNumber" placeholder="Enter Phone No" />
+          {/* Tab Content */}
+          <div className="p-8">
+            {/* Registration Tab */}
+            {activeTab === 'registration' && (
+              <div>
+                <div className="grid grid-cols-3 md:grid-cols-3 gap-6">
+                  <InputField
+                    label="Registration No"
+                    name="registerNo"
+                    icon={FaIdCard}
+                    placeholder="Enter Registration No"
+                  />
+                  <InputField
+                    label="Tax Id / TPIN"
+                    name="tax"
+                    icon={FaIdCard}
+                    placeholder="Enter Tax Id"
+                  />
+                  <InputField
+                    label="Company Name"
+                    name="companyName"
+                    icon={FaBuilding}
+                    placeholder="Enter Company Name"
+                    required
+                  />
+                  <InputField
+                    label="Date of Incorporation"
+                    name="dateOfIncorporation"
+                    type="date"
+                    icon={FaCalendarAlt}
+                  />
+                  <InputField
+                    label="Company Type"
+                    name="companyType"
+                    icon={FaBuilding}
+                    placeholder="e.g., Private Limited, LLC"
+                  />
+                  <InputField
+                    label="Company Status"
+                    name="companyStatus"
+                    placeholder="e.g., Active, Inactive"
+                  />
+                  <InputField
+                    label="Industry Type"
+                    name="industryType"
+                    icon={FaIndustry}
+                    placeholder="e.g., Technology, Manufacturing"
+                  />
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Contact Tab */}
+            {activeTab === 'contact' && (
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <InputField
+                    label="Company Email"
+                    name="companyEmail"
+                    type="email"
+                    icon={FaEnvelope}
+                    required
+                    placeholder="company@example.com"
+                  />
+                  <InputField
+                    label="Company Phone No"
+                    name="companyPhoneNo"
+                    type="tel"
+                    icon={FaPhone}
+                    placeholder="+1 (555) 000-0000"
+                  />
+                  <InputField
+                    label="Alternate Phone No"
+                    name="alternateNo"
+                    type="tel"
+                    icon={FaPhone}
+                    placeholder="+1 (555) 000-0000"
+                  />
+                  <InputField
+                    label="Website"
+                    name="website"
+                    type="url"
+                    icon={FaGlobe}
+                    placeholder="https://www.example.com"
+                  />
+                  <InputField
+                    label="Contact Person"
+                    name="contactPerson"
+                    icon={FaUser}
+                    placeholder="Full Name"
+                  />
+                  <InputField
+                    label="Contact Email"
+                    name="email"
+                    type="email"
+                    icon={FaEnvelope}
+                    placeholder="contact@example.com"
+                  />
+                  <InputField
+                    label="Contact Phone"
+                    name="phoneNumber"
+                    type="tel"
+                    icon={FaPhone}
+                    placeholder="+1 (555) 000-0000"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Address Tab */}
+            {activeTab === 'address' && (
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <InputField
+                    label="Address Line 1"
+                    name="addressLine1"
+                    icon={FaMapMarkerAlt}
+                    placeholder="Street address"
+                    colSpan={2}
+                  />
+                  <InputField
+                    label="Address Line 2"
+                    name="addressLine2"
+                    placeholder="Apartment, suite, etc. (optional)"
+                    colSpan={2}
+                  />
+                  <InputField
+                    label="City"
+                    name="city"
+                    placeholder="Enter City"
+                  />
+                  <InputField
+                    label="District"
+                    name="district"
+                    placeholder="Enter District"
+                  />
+                  <InputField
+                    label="Province / State"
+                    name="province"
+                    placeholder="Enter Province"
+                  />
+                  <InputField
+                    label="Country"
+                    name="country"
+                    placeholder="Enter Country"
+                  />
+                  <InputField
+                    label="Postal Code"
+                    name="postalCode"
+                    placeholder="ZIP / Postal Code"
+                  />
+                  <InputField
+                    label="Time Zone"
+                    name="timeZone"
+                    placeholder="e.g., UTC+05:30"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
-           <div className="bg-white overflow-hidden">
-            <div className=" px-4">
-              <h2 className=" text-base font-semibold text-gray-700 underline">Company Address</h2>
-            </div>
-            <div className="p-4">
-              <div className="space-y-4">
-                <div className="grid grid-cols-4 gap-4">
-                  <InputField label="Address Line 1" name="addressLine1"  placeholder="Enter Address Line 1" />
-                  <InputField label="Address Line 2" name="addressLine2" placeholder="Enter Address Line 2" />
-                  <InputField label="City" name="city" placeholder="Enter City" />
-                  <InputField label="District" name="district" placeholder="Enter District" />
-                  <InputField label="Province" name="province" placeholder="Enter Province" />
-                  <InputField label="Country" name="country" placeholder="Enter Country" />
-                  <InputField label="Postal Code" name="postalCode" placeholder="Enter District" />
-                  <InputField label="Time Zone" name="timeZone" placeholder="Enter time zone" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-blue-500 px-4 py-3">
-              <h2 className="text-sm font-semibold text-white"></h2>
-            </div>
-            <div className="p-4">
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="relative">
-                    <label className="block text-xs font-medium text-gray-700 mb-1.5">Address Line 1</label>
-                    <FaMapMarkerAlt className="absolute left-3 top-[38px] text-gray-400 w-4 h-4 pointer-events-none" />
-                    <textarea
-                      name="addressLine1"
-                      defaultValue={defaultData.addressLine1}
-                      ref={attachRef('addressLine1')}
-                      onChange={handleChange}
-                      rows={2}
-                      placeholder="Street address, P.O. box, company name"
-                      className="w-full border border-gray-300 rounded-md pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1.5">Address Line 2</label>
-                    <textarea
-                      name="addressLine2"
-                      defaultValue={defaultData.addressLine2}
-                      ref={attachRef('addressLine2')}
-                      onChange={handleChange}
-                      rows={2}
-                      placeholder="Apartment, suite, unit, building, floor, etc."
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1.5">State</label>
-                    <input
-                      type="text"
-                      name="state"
-                      defaultValue={defaultData.state}
-                      ref={attachRef('state')}
-                      onChange={handleChange}
-                      placeholder="State / Province"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1.5">Country</label>
-                    <input
-                      type="text"
-                      name="country"
-                      defaultValue={defaultData.country}
-                      ref={attachRef('country')}
-                      onChange={handleChange}
-                      placeholder="Country"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> */}
-
-          <div className="flex justify-end gap-3">
+          {/* Action Footer */}
+          <div className="bg-card px-8 py-4 border-t border-gray-200 flex items-center justify-between">
             <button
-              onClick={handleReset}
-              className="px-5 py-2 border border-slate-300 text-slate-700 text-sm font-medium rounded-md hover:bg-slate-50 transition-colors"
-            >
-              Reset
-            </button>
+             onClick={handleReset}
+             className="px-5 py-2.5 rounded-lg border shadow-sm 
+                        text-sm font-semibold flex items-center gap-2 
+                        hover:bg-gray-50 transition-all active:scale-[0.98]"
+             style={{
+               borderColor: 'var(--border)',
+               color: 'var(--text)',
+               background: 'var(--card)'
+             }}
+           >
+             <FaUndo className="w-4 h-4 opacity-80" />
+             Reset All
+           </button>
+
             <button
               onClick={handleSubmit}
-              className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 shadow-sm hover:shadow transition-all"
+              className="px-5 py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 
+             text-white text-sm font-semibold shadow flex items-center gap-2 
+             transition-all active:scale-[0.98]"
+              style={{
+    background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)',
+    color: '#fff'
+  }}
             >
-              Save Details
+              <FaSave className="w-4 h-4" />
+              Save All Changes
             </button>
           </div>
-
         </div>
       </div>
     </div>

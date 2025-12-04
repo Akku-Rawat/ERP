@@ -1,1 +1,107 @@
 @import "tailwindcss";
+:root{
+  /* core palette - change these to update the entire UI */
+  --bg: #ffe05514;             /* page background */
+  --card: #ffffff;           /* card / panel */
+  --muted: #64748b;          /* secondary text */
+  --text: #061332;           /* primary text */
+  --sidebar-bg: #d9dfe4;
+--sidebar-text: #0f172a;
+
+  --primary:#32daf0;        /* main accent (teal) */
+  --primary-600: #32daf0;
+  --primary-700: #32daf0;
+
+  --danger: #dc2626;
+  --danger-700: #b91c1c;
+
+  --success: #10b981;
+  --success-600: #059669;
+
+  --table-head: var(--primary);
+  --table-head-text: #ffffff;
+  --row-hover: rgba(13,148,136,0.06);
+}
+
+/* dark variant example (toggle by data-theme="dark" on <html>) */
+[data-theme="dark"] {
+  --bg: #0b1220;
+  --card: #0f172a;
+  --muted: #9aa6bb;
+  --text: #e6eef8;
+  --sidebar-bg: #d9dfe4;
+  --sidebar-text: #071220;
+  --primary: #60a5fa;
+  --primary-600: #3b82f6;
+  --primary-700: #1d4ed8;
+  --danger: #f87171;
+  --success: #34d399;
+  --table-head: var(--primary);
+  --table-head-text: #071025;
+  --row-hover: rgba(96,165,250,0.06);
+}
+.bg-app { background: var(--bg); }
+.text-main { color: var(--text); }
+.text-muted { color: var(--muted); }
+
+.bg-card { background: var(--card); color: var(--text); }
+.bg-sidebar { background: var(--sidebar-bg); color: var(--sidebar-text); }
+
+/* accents / buttons */
+.bg-primary { background: var(--primary) !important; color: white !important; }
+.bg-primary-600 { background: var(--primary-600) !important; color: white !important; }
+.text-primary { color: var(--primary) !important; }
+
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: var(--danger-700); }
+
+/* table / nav */
+.table-head { background: var(--table-head); color: var(--table-head-text); }
+.row-hover:hover { background: var(--row-hover); }
+
+/* small UI building blocks */
+.badge-success { background: rgba(16,185,129,0.08); color: var(--success); border: 1px solid rgba(16,185,129,0.18); }
+.icon-circle { display:inline-flex; align-items:center; justify-content:center; }
+
+.group-accent {} /* marker class used with .group hover below */
+.group:hover .group-accent { color: var(--primary) !important; }
+
+/* focus / ring helpers (if you rely on focus:ring-*) */
+.focus-ring { outline: 2px solid transparent; box-shadow: 0 0 0 3px rgba(13,148,136,0.12); border-radius: 6px; }
+/* Sidebar hover scoping */
+.nav-link {
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem; /* matches py-2.5 px-4 */
+  border-radius: 0.75rem;    /* matches rounded-2xl */
+  transition: background-color .2s, color .15s, transform .15s;
+}
+
+/* default text inside link */
+.nav-icon,
+.nav-text {
+  color: inherit;
+  transition: color .15s, transform .15s;
+}
+
+/* hover: only change icon + label color and nav background */
+.nav-link:hover {
+  background-color: rgba(13,148,136,0.06); /* subtle bg using primary variable if you prefer */
+}
+/* use variable for color */
+.nav-link:hover .nav-icon,
+.nav-link:hover .nav-text {
+  color: var(--primary) !important;
+}
+
+/* active state (replace inline class usage or keep both) */
+.nav-link.active {
+  background: var(--table-head);
+  color: var(--table-head-text);
+}
+.nav-link.active .nav-icon,
+.nav-link.active .nav-text {
+  color: inherit !important;
+}

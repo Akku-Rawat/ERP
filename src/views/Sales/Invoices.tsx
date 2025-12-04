@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Plus, Edit2, Trash2, Search } from "lucide-react";
-import InvoiceModal from "../../components/sales/InvoiceModal"; 
+import { Plus, Edit2, Trash2, Search, Calendar, MapPin, TrendingUp } from "lucide-react";
+import InvoiceModal from "../../components/sales/InvoiceModal";
 
 interface InvoiceItem {
   productName: string;
@@ -106,7 +106,6 @@ const InvoicesTable: React.FC = () => {
   const handleDelete = (invoice: InvoiceData, e: React.MouseEvent) => {
     e.stopPropagation();
     if (window.confirm(`Delete invoice "${invoice.invoiceId}"?`)) {
-      // Hook up real delete logic here
       alert("Delete functionality ready — connect to API later");
     }
   };
@@ -124,79 +123,142 @@ const InvoicesTable: React.FC = () => {
             placeholder="Search Invoices..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-700 transition"
           />
         </div>
         <button
           onClick={handleAddClick}
           className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm"
         >
-          <Plus className="w-5 h-5" /> Add Invoice
+          <Plus className="w-4.5 h-4.5" /> Add Invoice
         </button>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50 text-gray-700 text-sm font-medium">
-            <tr>
-              <th className="px-6 py-4 text-left">Invoice ID</th>
-              <th className="px-6 py-4 text-left">Customer</th>
-              <th className="px-6 py-4 text-left">Issue Date</th>
-              <th className="px-6 py-4 text-left">Due Date</th>
-              <th className="px-6 py-4 text-left">Amount</th>
-              <th className="px-6 py-4 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredInvoices.map((inv) => (
-              <tr key={inv.invoiceId || inv.invoiceNumber} className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150">
-                <td className="px-6 py-4">{inv.invoiceId}</td>
-                <td className="px-6 py-4">{inv.CutomerName}</td>
-                <td className="px-6 py-4">{inv.dateOfInvoice}</td>
-                <td className="px-6 py-4">{inv.dueDate}</td>
-                <td className="px-6 py-4">₹{inv.grandTotal.toLocaleString("en-IN")}</td>
-                <td className="px-6 py-4 text-center">
-                  <div className="flex items-center justify-center gap-3">
-                    <button
-                      onClick={(e) => handleEditClick(inv, e)}
-                      className="text-indigo-600 hover:text-indigo-800 transition"
-                      title="Edit"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={(e) => handleDelete(inv, e)}
-                      className="text-red-600 hover:text-red-800 transition"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
+      {/* Enhanced Table */}
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr className="bg-teal-700">
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  Invoice ID
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  Customer
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  Issue Date
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  Due Date
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  Amount
+                </th>
+                <th className="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
-            ))}
-            {filteredInvoices.length === 0 && (
-              <tr>
-                <td colSpan={6} className="text-center text-gray-400 py-6">
-                  No invoices found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredInvoices.map((inv, idx) => (
+                <tr 
+                  key={inv.invoiceId || inv.invoiceNumber} 
+                  className={`border-b border-gray-100 hover:bg-teal-50 cursor-pointer transition-all duration-300 group ${
+                    idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                  }`}
+                >
+                  <td className="px-6 py-5">
+                    <span className="font-semibold text-gray-900 text-sm group-hover:text-teal-700 transition-colors">
+                      {inv.invoiceId}
+                    </span>
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-10 h-10 rounded-lg bg-teal-700 flex items-center justify-center text-white font-bold text-base shadow-md group-hover:scale-105 transition-all duration-300">
+                          {inv.CutomerName.charAt(0)}
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-gray-900 text-sm group-hover:text-teal-700 transition-colors">
+                          {inv.CutomerName}
+                        </span>
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5">
+                          <MapPin className="w-3 h-3 text-gray-400" />
+                          <span>{inv.billingCity}, {inv.billingState}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="text-sm font-medium text-gray-700">{inv.dateOfInvoice}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="text-sm font-medium text-gray-700">{inv.dueDate}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 border border-emerald-200 shadow-sm group-hover:border-emerald-300 transition-all">
+                      <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-700 font-semibold text-sm">₹{inv.grandTotal.toLocaleString("en-IN")}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={(e) => handleEditClick(inv, e)}
+                        className="p-2.5 text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-all duration-200 hover:scale-110 shadow-sm hover:shadow-md border border-teal-200"
+                        title="Edit"
+                      >
+                        <Edit2 className="w-4.5 h-4.5" />
+                      </button>
+                      <button
+                        onClick={(e) => handleDelete(inv, e)}
+                        className="p-2.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-all duration-200 hover:scale-110 shadow-sm hover:shadow-md border border-red-200"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4.5 h-4.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredInvoices.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="text-center py-12">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+                        <Search className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 font-medium">No invoices found</p>
+                      <p className="text-gray-400 text-sm">Try adjusting your search</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
       
-      {/* Modal for invoice add/edit */}
-      <InvoiceModal
+     
+     <InvoiceModal
         isOpen={modalOpen}
         onClose={handleCloseModal}
         invoice={selectedInvoice}
         onSubmit={(data) => {
           setModalOpen(false);
-          // Save or update logic here (state/API)
+          // Add/save logic here
         }}
       />
+    
     </div>
   );
 };

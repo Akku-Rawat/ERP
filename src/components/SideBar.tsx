@@ -8,7 +8,6 @@ import {
   FaBoxes,
   FaBriefcase,
   FaUsers,
-  FaHandshake,
   FaSignOutAlt,
   FaCog,
   FaUserTie,
@@ -26,13 +25,11 @@ const menuItems = [
   { name: "CRM", to: "/crm", icon: <FaUsers /> },
   { name: "Procurement", to: "/procurement", icon: <FaShoppingBag /> },
   { name: "Inventory", to: "/inventory", icon: <FaBoxes /> },
-  // { name: "Supplier Management", to: "/suppliers", icon: <FaHandshake /> },
   { name: "Accounting", to: "/accounting", icon: <FaBriefcase /> },
-  {name : "Hr", to:"/hr",icon : <FaUserTie/>},
-  {name:"User Management", to:"/userManagement",icon:<FaUsers/>},
-  {name:"CompanySetup", to:"/companySetup",icon:<FaBuilding/>},
+  { name: "Hr", to: "/hr", icon: <FaUserTie /> },
+  { name: "User Management", to: "/userManagement", icon: <FaUsers /> },
+  { name: "CompanySetup", to: "/companySetup", icon: <FaBuilding /> },
   { name: "Settings", to: "/settings", icon: <FaCog /> }
-  
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
@@ -40,10 +37,8 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Example logout logic (replace with your own)
-    localStorage.clear()
-    console.log("User logged out");
-    navigate("/login"); // redirect to login
+    localStorage.clear();
+    navigate("/login");
   };
 
   return (
@@ -52,17 +47,17 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
       <div
         className={`hidden md:flex flex-col justify-between ${
           open ? "w-64" : "w-16"
-        } h-screen bg-gray-50 text-black fixed shadow-xl transition-all duration-300`}
+        } h-screen bg-sidebar text-main fixed shadow-xl transition-all duration-300`}
       >
         <div>
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b shadow-sm">
             <div className="flex items-center space-x-2">
-              {open && <h2 className="text-2xl font-semibold text-black">ERP</h2>}
+              {open && <h2 className="text-2xl font-semibold text-main">ERP</h2>}
             </div>
             <button
               onClick={() => setOpen(!open)}
-              className="text-2xl text-gray-600 hover:text-teal-700 focus:outline-none"
+              className="text-2xl text-muted hover:text-primary focus:outline-none"
               aria-label="Toggle sidebar"
             >
               <FaBars />
@@ -70,21 +65,17 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
           </div>
 
           {/* Navigation */}
-          <nav className="mt-6 flex flex-col space-y-2">
+          <nav className="mt-6 flex flex-col space-y-2 px-2">
             {menuItems.map((item) => (
               <NavLink
                 to={item.to}
                 key={item.name}
                 className={({ isActive }) =>
-                  `flex items-center py-2.5 px-4 rounded-2xl transition duration-200 ${
-                    isActive
-                      ? "bg-teal-700 text-white"
-                      : "hover:bg-gray-200 text-gray-700"
-                  }`
+                  `nav-link ${isActive ? "active" : ""}`
                 }
               >
-                <span className="text-xl mr-3">{item.icon}</span>
-                {open && <span>{item.name}</span>}
+                <span className="text-xl nav-icon">{item.icon}</span>
+                {open && <span className="nav-text">{item.name}</span>}
               </NavLink>
             ))}
           </nav>
@@ -94,7 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
         <div className="p-4 border-t">
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-red-700 text-white hover:bg-red-800 transition"
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl btn-danger hover:opacity-95 transition"
           >
             <FaSignOutAlt className="text-lg" />
             {open && <span className="font-medium">Logout</span>}
@@ -109,13 +100,13 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
             className="absolute inset-0 bg-black/40"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="absolute left-0 top-0 bg-gray-50 w-64 h-full p-4 shadow-xl flex flex-col justify-between">
+          <div className="absolute left-0 top-0 bg-sidebar w-64 h-full p-4 shadow-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold">ERP</h2>
+                <h2 className="text-2xl font-semibold text-main">ERP</h2>
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="text-2xl text-gray-600 hover:text-teal-700 focus:outline-none"
+                  className="text-2xl text-muted hover:text-primary focus:outline-none"
                   aria-label="Close mobile sidebar"
                 >
                   <FaBars />
@@ -128,16 +119,10 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
                     to={item.to}
                     key={item.name}
                     onClick={() => setMobileOpen(false)}
-                    className={({ isActive }) =>
-                      `flex items-center py-2.5 px-4 rounded-2xl transition duration-200 ${
-                        isActive
-                          ? "bg-teal-700 text-white"
-                          : "hover:bg-gray-200 text-gray-700"
-                      }`
-                    }
+                    className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
                   >
-                    <span className="text-xl mr-3">{item.icon}</span>
-                    <span>{item.name}</span>
+                    <span className="text-xl nav-icon">{item.icon}</span>
+                    <span className="nav-text">{item.name}</span>
                   </NavLink>
                 ))}
               </nav>
@@ -150,7 +135,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
                   handleLogout();
                   setMobileOpen(false);
                 }}
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-red-700 text-white hover:bg-red-800 transition"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl btn-danger hover:opacity-95 transition"
               >
                 <FaSignOutAlt className="text-lg" />
                 <span className="font-medium">Logout</span>
@@ -164,7 +149,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
       <div className="md:hidden p-4 fixed z-40">
         <button
           onClick={() => setMobileOpen(true)}
-          className="text-2xl text-gray-600 hover:text-teal-700 focus:outline-none"
+          className="text-2xl text-muted hover:text-primary focus:outline-none"
           aria-label="Open mobile sidebar"
         >
           <FaBars />

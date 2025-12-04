@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { FaUniversity, FaPlus, FaSearch, FaEdit, FaTrash, FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+  FaUniversity,
+  FaPlus,
+  FaSearch,
+  FaEdit,
+  FaTrash,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
 
 interface BankAccount {
   bankName: string;
@@ -7,6 +15,7 @@ interface BankAccount {
   ifscCode: string;
   currency: string;
   swiftCode: string;
+  isdefault?: boolean;
 }
 
 interface Props {
@@ -19,16 +28,19 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
   const [selectedAccount, setSelectedAccount] = useState<number | null>(
     bankAccounts.length > 0 ? 0 : null
   );
-  const [showAccountNumber, setShowAccountNumber] = useState<Record<number, boolean>>({});
+  const [showAccountNumber, setShowAccountNumber] = useState<
+    Record<number, boolean>
+  >({});
 
-  const filteredAccounts = bankAccounts.filter(acc =>
-    acc.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    acc.accountNumber.includes(searchTerm) ||
-    acc.ifscCode.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredAccounts = bankAccounts.filter(
+    (acc) =>
+      acc.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      acc.accountNumber.includes(searchTerm) ||
+      acc.ifscCode.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const toggleAccountVisibility = (index: number) => {
-    setShowAccountNumber(prev => ({ ...prev, [index]: !prev[index] }));
+    setShowAccountNumber((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
   const maskAccountNumber = (accountNumber: string) => {
@@ -37,12 +49,11 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
   };
 
   return (
-    
-    <div className="bg-white">
+    <div className="bg-card">
       <div className=" mx-auto">
         <div className="grid grid-cols-5 gap-6">
-          <div className="col-span-2 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-teal-700 px-5 py-4">
+          <div className="col-span-2 bg-card rounded-lg shadow-sm overflow-hidden">
+            <div className="px-4 py-2 bg-primary">
               <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                 <FaUniversity className="w-5 h-5" />
                 Bank Accounts
@@ -52,28 +63,35 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
             <div className="p-4 space-y-3">
               {/* Search Bar */}
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
+
                 <input
                   type="text"
                   placeholder="Find accounts..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-3 py-2 border rounded-md text-sm focus:outline-none focus-ring bg-card text-main"
                 />
               </div>
 
               {/* Add New Account Button */}
               <button
-                onClick={onAddAccount}
-                className="w-full bg-blue-600 text-white px-4 py-2.5 rounded-md hover:bg-blue-700 transition-all flex items-center justify-center gap-2 font-medium text-sm shadow-sm"
-              >
-                <FaPlus className="w-4 h-4" />
-                Add New Account
-              </button>
+  onClick={onAddAccount}
+  className="w-full px-4 py-2.5 rounded-lg shadow-sm
+             text-sm font-semibold text-white
+             flex items-center justify-center gap-2
+             transition-all hover:opacity-95"
+  style={{
+    background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)'
+  }}
+>
+  <FaPlus className="w-4 h-4" />
+  Add New Account
+</button>
 
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {filteredAccounts.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 text-sm">
+                  <div className="text-center py-8 text-muted text-sm">
                     No accounts found
                   </div>
                 ) : (
@@ -81,22 +99,28 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                     <div
                       key={i}
                       onClick={() => setSelectedAccount(i)}
-                      className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
                         selectedAccount === i
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-blue-300 bg-white"
+                          ? "table-head text-table-head-text"
+                          : "border bg-card hover:row-hover text-main"
                       }`}
                     >
                       <div className="flex justify-between items-start mb-1">
-                        <p className="font-semibold text-gray-800 text-sm">{acc.bankName}</p>
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                        <p className="font-semibold text-main text-sm">
+                          {acc.bankName}
+                        </p>
+                        <span className="text-xs badge-success px-2 py-0.5 rounded-full font-medium">
                           {acc.currency}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500 font-mono">
-                        {showAccountNumber[i] ? acc.accountNumber : maskAccountNumber(acc.accountNumber)}
+                      <p className="text-xs text-muted font-mono">
+                        {showAccountNumber[i]
+                          ? acc.accountNumber
+                          : maskAccountNumber(acc.accountNumber)}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">IFSC: {acc.ifscCode}</p>
+                      <p className="text-xs text-muted mt-1">
+                        IFSC: {acc.ifscCode}
+                      </p>
                     </div>
                   ))
                 )}
@@ -105,16 +129,24 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
           </div>
 
           {/* Account Details */}
-          <div className="col-span-3 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-            <div className=" bg-teal-700 px-5 py-4 flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-white">Account Details</h2>
+          <div className="col-span-3 bg-card rounded-lg shadow-sm overflow-hidden">
+            <div className="px-4 py-2 flex justify-between items-center bg-primary">
+              <h2 className="text-lg font-semibold text-white">
+                Account Details
+              </h2>
               {selectedAccount !== null && (
                 <div className="flex gap-2">
-                  <button className="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-md transition-all text-white text-sm font-medium flex items-center gap-1.5">
+                  <button
+                    className="px-3 py-1.5 rounded-md transition-all text-white"
+                    style={{ background: "rgba(255,255,255,0.12)" }}
+                  >
                     <FaEdit className="w-3.5 h-3.5" />
                     Edit
                   </button>
-                  <button className="bg-white/20 hover:bg-red-500 px-3 py-1.5 rounded-md transition-all text-white text-sm font-medium flex items-center gap-1.5">
+                  <button
+                    className="px-3 py-1.5 rounded-md transition-all text-white"
+                    style={{ background: "rgba(255,255,255,0.12)" }}
+                  >
                     <FaTrash className="w-3.5 h-3.5" />
                     Delete
                   </button>
@@ -124,11 +156,13 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
 
             {selectedAccount === null || bankAccounts.length === 0 ? (
               <div className="p-12 text-center">
-                <div className="inline-block bg-gray-100 p-6 rounded-full mb-4">
-                  <FaUniversity className="w-12 h-12 text-gray-400" />
+                <div className="inline-block p-6 rounded-full mb-4 bg-card">
+                  <FaUniversity className="w-12 h-12 text-muted" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">No Account Selected</h3>
-                <p className="text-gray-500">
+                <h3 className="text-lg font-semibold text-main mb-2">
+                  No Account Selected
+                </h3>
+                <p className="text-muted">
                   Select an account from the list to view details
                 </p>
               </div>
@@ -136,37 +170,43 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
               <div className="p-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+                    <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
                       Bank Name
                     </label>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
-                      <p className="text-gray-800 font-medium">{bankAccounts[selectedAccount].bankName}</p>
+                    <div className="bg-card border border-gray-200 rounded-lg px-4 py-3">
+                      <p className="text-muted font-medium">
+                        {bankAccounts[selectedAccount].bankName}
+                      </p>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+                    <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
                       SWIFT/BIC Code
                     </label>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
-                      <p className="text-gray-800 font-mono">{bankAccounts[selectedAccount].swiftCode}</p>
-                      <span className="text-green-500">✓</span>
+                    <div className="bg-card border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
+                      <p className="text-muted font-mono">
+                        {bankAccounts[selectedAccount].swiftCode}
+                      </p>
+                      <span className="text-[var(--success)]">✓</span>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+                    <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
                       Account Number
                     </label>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
-                      <p className="text-gray-800 font-mono font-semibold">
+                    <div className="bg-card border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
+                      <p className="text-muted font-mono font-semibold">
                         {showAccountNumber[selectedAccount]
                           ? bankAccounts[selectedAccount].accountNumber
-                          : maskAccountNumber(bankAccounts[selectedAccount].accountNumber)}
+                          : maskAccountNumber(
+                              bankAccounts[selectedAccount].accountNumber
+                            )}
                       </p>
                       <button
                         onClick={() => toggleAccountVisibility(selectedAccount)}
-                        className="text-gray-500 hover:text-gray-700 transition-colors"
+                        className="text-muted hover:text-muted transition-colors"
                       >
                         {showAccountNumber[selectedAccount] ? (
                           <FaEyeSlash className="w-4 h-4" />
@@ -178,38 +218,40 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+                    <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
                       IFSC Code
                     </label>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
-                      <p className="text-gray-800 font-mono">{bankAccounts[selectedAccount].ifscCode}</p>
-                      <span className="text-green-500">✓</span>
+                    <div className="bg-card border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
+                      <p className="text-muted font-mono">
+                        {bankAccounts[selectedAccount].ifscCode}
+                      </p>
+                      <span className="text-[var(--success)]">✓</span>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+                    <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
                       Currency
                     </label>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
-                      <p className="text-gray-800 font-semibold">{bankAccounts[selectedAccount].currency}</p>
+                    <div className="bg-card border border-gray-200 rounded-lg px-4 py-3">
+                      <p className="text-muted font-semibold">
+                        {bankAccounts[selectedAccount].currency}
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+                    <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
                       Status
                     </label>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
-                      <span className="inline-flex items-center gap-2 text-green-700 font-medium">
-                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <div className="bg-card border border-gray-200 rounded-lg px-4 py-3">
+                      <span className="inline-flex items-center gap-2 text-[var(--success)] font-medium">
+                       <span className="w-2 h-2" style={{ background: 'var(--success)', borderRadius: 4 }}></span> 
                         Active
                       </span>
                     </div>
                   </div>
                 </div>
-
-                
               </div>
             )}
           </div>
