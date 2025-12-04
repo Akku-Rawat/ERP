@@ -37,22 +37,27 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
     remarks: "",
   });
 
-  const [contacts, setContacts] = useState<SupplierContact[]>([{ ...emptyContact }]);
+  const [contacts, setContacts] = useState<SupplierContact[]>([
+    { ...emptyContact },
+  ]);
 
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleContactChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    idx: number
+    idx: number,
   ) => {
     const tempContacts = [...contacts];
-    tempContacts[idx] = { ...tempContacts[idx], [e.target.name]: e.target.value };
+    tempContacts[idx] = {
+      ...tempContacts[idx],
+      [e.target.name]: e.target.value,
+    };
     setContacts(tempContacts);
   };
 
@@ -95,7 +100,10 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
           exit={{ opacity: 0, y: 40 }}
           className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
-          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
+          <form
+            className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden"
+            onSubmit={handleSave}
+          >
             <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
               <h3 className="text-2xl w-full font-semibold text-blue-600">
                 Supplier Details
@@ -112,7 +120,9 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
             <div className="flex-1 overflow-y-auto border-b px-4">
               {/* SUPPLIER INFO */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">SUPPLIER INFO</div>
+                <div className="font-semibold text-gray-600 mb-4">
+                  SUPPLIER INFO
+                </div>
                 <div className="grid grid-cols-8 gap-4 mb-6">
                   <input
                     className="col-span-2 border rounded p-2"
@@ -175,7 +185,9 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
 
               {/* CONTACT PERSONS */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">CONTACT PERSONS</div>
+                <div className="font-semibold text-gray-600 mb-2">
+                  CONTACT PERSONS
+                </div>
                 <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2 py-4 px-2">
                   <table className="min-w-full text-xs table-fixed">
                     <thead>
@@ -189,7 +201,7 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
                     </thead>
                     <tbody>
                       {contacts.map((contact, idx) => (
-                        <tr key={idx}> 
+                        <tr key={idx}>
                           <td className="px-2 py-1">
                             <input
                               className="border rounded p-1 w-full"
@@ -241,9 +253,13 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
                   </table>
                 </div>
                 <div>
-                  <button type="button" className="bg-blue-100 border border-blue-300 rounded px-2 py-1" onClick={addContact} >
+                  <button
+                    type="button"
+                    className="bg-blue-100 border border-blue-300 rounded px-2 py-1"
+                    onClick={addContact}
+                  >
                     Add
-                   </button>
+                  </button>
                 </div>
               </div>
             </div>

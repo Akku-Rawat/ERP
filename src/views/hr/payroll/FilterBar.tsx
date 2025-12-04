@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, Download, DollarSign, Plus } from 'lucide-react';
+import React from "react";
+import { Search, Download, DollarSign, Plus } from "lucide-react";
 
 interface FilterBarProps {
   searchQuery: string;
@@ -28,7 +28,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onExport,
   onProcessPayroll,
   pendingCount,
-  hasRecords
+  hasRecords,
 }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
@@ -55,7 +55,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             className="px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             {departments.map((dept) => (
-              <option key={dept} value={dept}>{dept}</option>
+              <option key={dept} value={dept}>
+                {dept}
+              </option>
             ))}
           </select>
 
@@ -80,7 +82,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <Plus className="w-5 h-5" />
             Create New Payroll
           </button>
-          
+
           {hasRecords && (
             <button
               onClick={onExport}

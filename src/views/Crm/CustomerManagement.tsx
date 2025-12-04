@@ -1,7 +1,7 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Plus, Edit2, Trash2 } from "lucide-react";
 import CustomerDetailView from "./CustomerDetailView";
-import axios from "axios"; 
+import axios from "axios";
 import CustomerModal from "../../components/crm/CustomerModal";
 import toast from "react-hot-toast";
 
@@ -11,10 +11,10 @@ const DELETE_CUSTOMER_ENDPOINT = `${base_url}.customer.customer.delete_customer_
 const UPDATE_CUSTOMER_ENDPOINT = `${base_url}.customer.customer.update_customer_by_id`;
 
 interface Props {
-  onAdd: () => void;  
+  onAdd: () => void;
 }
 
-const CustomerManagement: React.FC<Props> = ({onAdd}) => {
+const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [customers, setCustomers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "detail">("table");
@@ -40,37 +40,43 @@ const CustomerManagement: React.FC<Props> = ({onAdd}) => {
   };
 
   const handleDelete = async (custid: string, e: React.MouseEvent) => {
-  e.stopPropagation();
+    e.stopPropagation();
 
-  const customerToDelete = customers.find((c) => c.custom_id === custid);
-  if (!customerToDelete) return;
+    const customerToDelete = customers.find((c) => c.custom_id === custid);
+    if (!customerToDelete) return;
 
-  const id = customerToDelete.custom_id;
-  console.log("cust id " + custid);
-  if (!custid) {
-    alert("Cannot delete — custid not found for this customer.");
-    return;
-  }
+    const id = customerToDelete.custom_id;
+    console.log("cust id " + custid);
+    if (!custid) {
+      alert("Cannot delete — custid not found for this customer.");
+      return;
+    }
 
-  if (!window.confirm(`Are you sure you want to delete customer with custid ${id}?`)) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete customer with custid ${id}?`,
+      )
+    )
+      return;
 
-  try {
-    setCustLoading(true);
+    try {
+      setCustLoading(true);
 
-    await axios.delete(`${DELETE_CUSTOMER_ENDPOINT}?id=${id}`, {
-      headers: { Authorization: import.meta.env.VITE_AUTHORIZATION },
-    });
+      await axios.delete(`${DELETE_CUSTOMER_ENDPOINT}?id=${id}`, {
+        headers: { Authorization: import.meta.env.VITE_AUTHORIZATION },
+      });
 
-    setCustomers((prev) => prev.filter((c) => c.custom_id !== id));
-    alert("Customer deleted successfully.");
-  } catch (err: any) {
-    console.error("Error deleting customer:", err);
-    const errorMsg = err.response?.data?.message || "Failed to delete customer.";
-    alert(errorMsg);
-  } finally {
-    setCustLoading(false);
-  }
-};
+      setCustomers((prev) => prev.filter((c) => c.custom_id !== id));
+      alert("Customer deleted successfully.");
+    } catch (err: any) {
+      console.error("Error deleting customer:", err);
+      const errorMsg =
+        err.response?.data?.message || "Failed to delete customer.";
+      alert(errorMsg);
+    } finally {
+      setCustLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchCustomers();
@@ -88,28 +94,34 @@ const CustomerManagement: React.FC<Props> = ({onAdd}) => {
     setShowModal(true);
   };
 
-const handleCustomerSaved = async () => {
-  setShowModal(false);
-  setEditCustomer(null);
+  const handleCustomerSaved = async () => {
+    setShowModal(false);
+    setEditCustomer(null);
 
-  try {
-    await fetchCustomers();
-    toast.success(
-      editCustomer 
-        ? "Customer updated successfully!" 
-        : "Customer created successfully!"
-    );
-  } catch (err) {
-    toast.error("Failed to refresh customer list");
-  }
-};
+    try {
+      await fetchCustomers();
+      toast.success(
+        editCustomer
+          ? "Customer updated successfully!"
+          : "Customer created successfully!",
+      );
+    } catch (err) {
+      toast.error("Failed to refresh customer list");
+    }
+  };
 
   const filtered = customers.filter((c: any) =>
-    [c.custom_id, c.customer_name, c.customer_currency, c.customer_onboarding_balance, c.custom_customer_tpin,
-       c.custom_billing_adress_line_1]
+    [
+      c.custom_id,
+      c.customer_name,
+      c.customer_currency,
+      c.customer_onboarding_balance,
+      c.custom_customer_tpin,
+      c.custom_billing_adress_line_1,
+    ]
       .join(" ")
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+      .includes(searchTerm.toLowerCase()),
   );
 
   const handleRowClick = (customer: any) => {
@@ -146,7 +158,7 @@ const handleCustomerSaved = async () => {
             </button>
           </div>
 
-           {custLoading ? (
+          {custLoading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
               <p className="mt-2 text-gray-600">Loading customers…</p>
@@ -175,8 +187,12 @@ const handleCustomerSaved = async () => {
                         className="hover:bg-gray-50 cursor-pointer transition"
                       >
                         <td className="px-4 py-2 font-medium">{c.custom_id}</td>
-                        <td className="px-4 py-2 font-semibold">{c.customer_name}</td>
-                        <td className="px-4 py-2 font-medium">{c.custom_shipping_address_line_1}</td>
+                        <td className="px-4 py-2 font-semibold">
+                          {c.customer_name}
+                        </td>
+                        <td className="px-4 py-2 font-medium">
+                          {c.custom_shipping_address_line_1}
+                        </td>
                         <td className="px-4 py-2">
                           <span
                             className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
@@ -238,13 +254,13 @@ const handleCustomerSaved = async () => {
         </>
       ) : (
         <CustomerDetailView
-  customer={selectedCustomer!}
-  customers={customers}
-  onBack={handleBack}
-  onCustomerSelect={handleRowClick}
-  onAdd={onAdd}
-  onEdit={handleEditCustomer}  
-/>
+          customer={selectedCustomer}
+          customers={customers}
+          onBack={handleBack}
+          onCustomerSelect={handleRowClick}
+          onAdd={onAdd}
+          onEdit={handleEditCustomer}
+        />
       )}
 
       <CustomerModal
@@ -254,8 +270,8 @@ const handleCustomerSaved = async () => {
           setEditCustomer(null);
         }}
         // onSubmit={handleSaveCustomer}
-        // initialData={editCustomer} 
-        onSubmit={handleCustomerSaved}  
+        // initialData={editCustomer}
+        onSubmit={handleCustomerSaved}
         initialData={editCustomer}
         isEditMode={!!editCustomer}
       />

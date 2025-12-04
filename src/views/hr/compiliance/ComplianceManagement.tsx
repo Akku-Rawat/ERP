@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
   ShieldCheck,
   FileText,
@@ -7,16 +7,16 @@ import {
   AlertTriangle,
   Layers,
   Clock,
-} from 'lucide-react';
-import OverviewCards from './OverviewCards';
-import StatutoryPanel from './StatutoryPanel';
-import PolicyPanel from './PolicyPanel';
-import DocumentPanel from './DocumentPanel';
-import TrainingPanel from './TrainingPanel';
-import AuditPanel from './AuditPanel';
-import WorkflowPanel from './WorkflowPanel';
-import VendorPanel from './VendorPanel';
-import MonitoringPanel from './MonitoringPanel';
+} from "lucide-react";
+import OverviewCards from "./OverviewCards";
+import StatutoryPanel from "./StatutoryPanel";
+import PolicyPanel from "./PolicyPanel";
+import DocumentPanel from "./DocumentPanel";
+import TrainingPanel from "./TrainingPanel";
+import AuditPanel from "./AuditPanel";
+import WorkflowPanel from "./WorkflowPanel";
+import VendorPanel from "./VendorPanel";
+import MonitoringPanel from "./MonitoringPanel";
 
 /**
  * Improvements in this version:
@@ -29,32 +29,32 @@ import MonitoringPanel from './MonitoringPanel';
 
 const ComplianceManagement: React.FC = () => {
   const [section, setSection] = useState<
-    | 'overview'
-    | 'statutory'
-    | 'policy'
-    | 'documents'
-    | 'training'
-    | 'audit'
-    | 'workflow'
-    | 'vendor'
-    | 'monitoring'
-  >('overview');
+    | "overview"
+    | "statutory"
+    | "policy"
+    | "documents"
+    | "training"
+    | "audit"
+    | "workflow"
+    | "vendor"
+    | "monitoring"
+  >("overview");
 
   const nav = [
-    { key: 'overview', label: 'Overview', icon: <Layers /> },
-    { key: 'statutory', label: 'Statutory', icon: <FileText /> },
-    { key: 'policy', label: 'Policies', icon: <Clipboard /> },
-    { key: 'documents', label: 'Documents', icon: <FileText /> },
-    { key: 'training', label: 'Training', icon: <Users /> },
-    { key: 'audit', label: 'Audit', icon: <ShieldCheck /> },
-    { key: 'workflow', label: 'Workflows', icon: <Clock /> },
-    { key: 'vendor', label: 'Vendors', icon: <Users /> },
-    { key: 'monitoring', label: 'Monitoring', icon: <AlertTriangle /> },
+    { key: "overview", label: "Overview", icon: <Layers /> },
+    { key: "statutory", label: "Statutory", icon: <FileText /> },
+    { key: "policy", label: "Policies", icon: <Clipboard /> },
+    { key: "documents", label: "Documents", icon: <FileText /> },
+    { key: "training", label: "Training", icon: <Users /> },
+    { key: "audit", label: "Audit", icon: <ShieldCheck /> },
+    { key: "workflow", label: "Workflows", icon: <Clock /> },
+    { key: "vendor", label: "Vendors", icon: <Users /> },
+    { key: "monitoring", label: "Monitoring", icon: <AlertTriangle /> },
   ];
 
   const content = useMemo(() => {
     switch (section) {
-      case 'overview':
+      case "overview":
         return (
           <>
             <div className="mb-4">
@@ -75,21 +75,21 @@ const ComplianceManagement: React.FC = () => {
             </div>
           </>
         );
-      case 'statutory':
+      case "statutory":
         return <StatutoryPanel />;
-      case 'policy':
+      case "policy":
         return <PolicyPanel />;
-      case 'documents':
+      case "documents":
         return <DocumentPanel />;
-      case 'training':
+      case "training":
         return <TrainingPanel />;
-      case 'audit':
+      case "audit":
         return <AuditPanel />;
-      case 'workflow':
+      case "workflow":
         return <WorkflowPanel />;
-      case 'vendor':
+      case "vendor":
         return <VendorPanel />;
-      case 'monitoring':
+      case "monitoring":
         return <MonitoringPanel />;
       default:
         return null;
@@ -107,7 +107,8 @@ const ComplianceManagement: React.FC = () => {
               <ShieldCheck className="text-teal-600" /> Compliance Management
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Policy, statutory, document and audit tracking — alerts, workflows and monitoring.
+              Policy, statutory, document and audit tracking — alerts, workflows
+              and monitoring.
             </p>
           </div>
 
@@ -133,8 +134,8 @@ const ComplianceManagement: React.FC = () => {
                 onClick={() => setSection(n.key as any)}
                 className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded transition ${
                   section === n.key
-                    ? 'bg-teal-50 text-teal-700 font-semibold ring-1 ring-teal-100'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? "bg-teal-50 text-teal-700 font-semibold ring-1 ring-teal-100"
+                    : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 <span className="w-5 h-5">{n.icon}</span>

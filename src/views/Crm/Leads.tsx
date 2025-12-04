@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Search, Plus, Edit2, Trash2 } from "lucide-react";
-import LeadModal from "../../components/crm/LeadModal";  // Adjust path if needed
+import LeadModal from "../../components/crm/LeadModal"; // Adjust path if needed
 
 interface Lead {
   id: string;
@@ -30,7 +30,7 @@ const Leads: React.FC<LeadsProps> = ({ leads, onAdd }) => {
         lead.contact.toLowerCase().includes(term) ||
         lead.status.toLowerCase().includes(term) ||
         lead.source.toLowerCase().includes(term) ||
-        lead.value.toString().includes(term)
+        lead.value.toString().includes(term),
     );
   }, [leads, searchTerm]);
 
@@ -94,9 +94,16 @@ const Leads: React.FC<LeadsProps> = ({ leads, onAdd }) => {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {filteredLeads.map((lead) => (
-              <tr key={lead.id} className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150">
-                <td className="px-6 py-4 font-mono text-sm text-indigo-600">{lead.id}</td>
-                <td className="px-6 py-4 font-semibold text-gray-900">{lead.name}</td>
+              <tr
+                key={lead.id}
+                className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
+              >
+                <td className="px-6 py-4 font-mono text-sm text-indigo-600">
+                  {lead.id}
+                </td>
+                <td className="px-6 py-4 font-semibold text-gray-900">
+                  {lead.name}
+                </td>
                 <td className="px-6 py-4">{lead.contact}</td>
                 <td className="px-6 py-4">
                   <span
@@ -104,8 +111,8 @@ const Leads: React.FC<LeadsProps> = ({ leads, onAdd }) => {
                       lead.status === "Qualified"
                         ? "bg-green-100 text-green-800"
                         : lead.status === "New"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-yellow-100 text-yellow-800"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
                     {lead.status}

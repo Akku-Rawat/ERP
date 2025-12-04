@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 import {
   FaBuilding,
   FaCalendarAlt,
@@ -13,63 +13,68 @@ import {
   FaFileAlt,
   FaSave,
   FaUndo,
-  FaInfoCircle
-} from 'react-icons/fa';
+  FaInfoCircle,
+} from "react-icons/fa";
 
-const STORAGE_KEY = 'company_setup_basicdetails_v3_tabs';
+const STORAGE_KEY = "company_setup_basicdetails_v3_tabs";
 
 const defaultData = {
-  companyName: '',
-  district: '',
-  city: '',
-  postalCode: '',
-  province: '',
-  companyEmail: '',
-  companyPhoneNo: '',
-  alternateNo: '',
-  companyStatus: '',
-  contactPerson: '',
-  companyType: '',
-  legalName: '',
-  parentCompany: '',
-  timeZone: '',
-  email: '',
-  contactEmail: '',
-  phoneNumber: '',
-  website: '',
-  status: 'Active',
-  crnCin: '',
-  tax: '',
-  registerNo: '',
-  tpin: '',
-  swiftCode: '',
-  dateOfIncorporation: '',
-  placeOfRegistration: '',
-  industryType: '',
-  financialYearBegins: '',
-  addressLine1: '',
-  addressLine2: '',
-  state: '',
-  country: '',
-  homeBranch: '',
-  branchOffice: '',
-  onboardingBalance: '',
+  companyName: "",
+  district: "",
+  city: "",
+  postalCode: "",
+  province: "",
+  companyEmail: "",
+  companyPhoneNo: "",
+  alternateNo: "",
+  companyStatus: "",
+  contactPerson: "",
+  companyType: "",
+  legalName: "",
+  parentCompany: "",
+  timeZone: "",
+  email: "",
+  contactEmail: "",
+  phoneNumber: "",
+  website: "",
+  status: "Active",
+  crnCin: "",
+  tax: "",
+  registerNo: "",
+  tpin: "",
+  swiftCode: "",
+  dateOfIncorporation: "",
+  placeOfRegistration: "",
+  industryType: "",
+  financialYearBegins: "",
+  addressLine1: "",
+  addressLine2: "",
+  state: "",
+  country: "",
+  homeBranch: "",
+  branchOffice: "",
+  onboardingBalance: "",
 } as const;
 
 type FormKeys = keyof typeof defaultData;
 
 const BasicDetails: React.FC = () => {
   const [showSuccess, setShowSuccess] = useState(false);
-  const [activeTab, setActiveTab] = useState('registration');
-  const [lastSaved, setLastSaved] = useState<string>('');
+  const [activeTab, setActiveTab] = useState("registration");
+  const [lastSaved, setLastSaved] = useState<string>("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const refs = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null>>({});
+  const refs = useRef<
+    Record<
+      string,
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null
+    >
+  >({});
   const restoring = useRef(false);
 
   const tabs = [
-    { id: 'registration', label: 'Registration', icon: FaFileAlt },
-    { id: 'contact', label: 'Contact Info', icon: FaPhone },
-    { id: 'address', label: 'Address', icon: FaMapMarkerAlt },
+    { id: "registration", label: "Registration", icon: FaFileAlt },
+    { id: "contact", label: "Contact Info", icon: FaPhone },
+    { id: "address", label: "Address", icon: FaMapMarkerAlt },
   ];
 
   useEffect(() => {
@@ -83,20 +88,22 @@ const BasicDetails: React.FC = () => {
           const el = refs.current[k];
           if (el) {
             try {
-              el.value = parsed[k] ?? '';
+              el.value = parsed[k] ?? "";
             } catch {
               // ignore if not settable
             }
           }
         });
-        const timestamp = parsed._savedAt || 'earlier';
-        setLastSaved(timestamp !== 'earlier' ? `Last saved: ${timestamp}` : 'Draft loaded');
+        const timestamp = parsed._savedAt || "earlier";
+        setLastSaved(
+          timestamp !== "earlier" ? `Last saved: ${timestamp}` : "Draft loaded",
+        );
         setTimeout(() => {
           restoring.current = false;
         }, 0);
       });
     } catch (err) {
-      console.warn('[BasicDetails] restore failed', err);
+      console.warn("[BasicDetails] restore failed", err);
       restoring.current = false;
     }
   }, []);
@@ -107,43 +114,43 @@ const BasicDetails: React.FC = () => {
       const raw = localStorage.getItem(STORAGE_KEY);
       const obj = raw ? JSON.parse(raw) : { ...defaultData };
       obj[name] = value;
-      const now = new Date().toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
+      const now = new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
       });
       obj._savedAt = now;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
       setLastSaved(`Last saved: ${now}`);
       setHasUnsavedChanges(false);
     } catch (err) {
-      console.warn('[BasicDetails] save failed', err);
+      console.warn("[BasicDetails] save failed", err);
     }
   };
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const target = e.currentTarget;
-    const name = target.getAttribute('name') ?? '';
+    const name = target.getAttribute("name") ?? "";
     if (!name) return;
     setHasUnsavedChanges(true);
-    saveKey(name, target.value ?? '');
+    saveKey(name, target.value ?? "");
   };
 
   const buildFormDataFromRefs = () => {
     const out: Record<string, string> = {};
     (Object.keys(defaultData) as FormKeys[]).forEach((k) => {
       const el = refs.current[k];
-      out[k] = el ? el.value ?? '' : '';
+      out[k] = el ? (el.value ?? "") : "";
     });
     return out as Record<FormKeys, string>;
   };
 
   const handleSubmit = () => {
     const data = buildFormDataFromRefs();
-    console.log('[BasicDetails] submit', data);
+    console.log("[BasicDetails] submit", data);
     setShowSuccess(true);
     setHasUnsavedChanges(false);
     setTimeout(() => setShowSuccess(false), 3000);
@@ -152,7 +159,7 @@ const BasicDetails: React.FC = () => {
   const handleReset = () => {
     if (
       !confirm(
-        'Are you sure you want to reset all fields? This will clear all saved data.'
+        "Are you sure you want to reset all fields? This will clear all saved data.",
       )
     )
       return;
@@ -163,17 +170,15 @@ const BasicDetails: React.FC = () => {
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {
-      console.warn('[BasicDetails] clear storage failed');
+      console.warn("[BasicDetails] clear storage failed");
     }
-    setLastSaved('');
+    setLastSaved("");
     setHasUnsavedChanges(false);
   };
 
   const attachRef =
     (name: string) =>
-    (
-      el: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null
-    ) => {
+    (el: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null) => {
       refs.current[name] = el;
     };
 
@@ -190,19 +195,23 @@ const BasicDetails: React.FC = () => {
   const InputField = ({
     label,
     name,
-    type = 'text',
+    type = "text",
     icon: Icon,
     required = false,
-    placeholder = '',
+    placeholder = "",
     colSpan = 1,
   }: InputFieldProps) => {
-    const colClass = colSpan >= 2 ? 'md:col-span-2' : '';
+    const colClass = colSpan >= 2 ? "md:col-span-2" : "";
     const id = `input_${name}`;
 
     return (
       <div className={`relative ${colClass}`}>
-        <label htmlFor={id} className="block text-sm font-medium text-main mb-1.5">
-          {label} {required && <span style={{ color: 'var(--danger)' }}>*</span>}
+        <label
+          htmlFor={id}
+          className="block text-sm font-medium text-main mb-1.5"
+        >
+          {label}{" "}
+          {required && <span style={{ color: "var(--danger)" }}>*</span>}
         </label>
         <div className="relative">
           {Icon && (
@@ -217,7 +226,7 @@ const BasicDetails: React.FC = () => {
             onChange={handleChange}
             placeholder={placeholder}
             required={required}
-            className={`w-full border border-theme rounded-lg ${Icon ? 'pl-10' : 'pl-3.5'} pr-3.5 py-2.5 text-sm focus:outline-none focus-ring transition-all hover:border-theme bg-card text-main`}
+            className={`w-full border border-theme rounded-lg ${Icon ? "pl-10" : "pl-3.5"} pr-3.5 py-2.5 text-sm focus:outline-none focus-ring transition-all hover:border-theme bg-card text-main`}
           />
         </div>
       </div>
@@ -229,7 +238,10 @@ const BasicDetails: React.FC = () => {
       <div className="w-full ">
         {/* Success Message */}
         {showSuccess && (
-          <div className="mb-4 rounded-lg p-4 flex items-center gap-3 shadow-sm badge-success" role="status">
+          <div
+            className="mb-4 rounded-lg p-4 flex items-center gap-3 shadow-sm badge-success"
+            role="status"
+          >
             <FaCheckCircle className="w-5 h-5 text-success flex-shrink-0" />
             <div>
               <p className="text-sm font-medium text-main">
@@ -257,10 +269,10 @@ const BasicDetails: React.FC = () => {
                     aria-pressed={isActive}
                     className={`flex-1 flex items-center justify-center gap-2 px-4 py-3
                        text-sm font-medium transition-all border-b-2 ${
-                      isActive
-                        ? 'table-head text-table-head-text'
-                        : 'border-transparent text-main hover:bg-[var(--row-hover)]'
-                    }`}
+                         isActive
+                           ? "table-head text-table-head-text"
+                           : "border-transparent text-main hover:bg-[var(--row-hover)]"
+                       }`}
                   >
                     <Icon className="w-4 h-4" />
                     <span>{tab.label}</span>
@@ -273,7 +285,7 @@ const BasicDetails: React.FC = () => {
           {/* Tab Content */}
           <div className="p-8">
             {/* Registration Tab */}
-            {activeTab === 'registration' && (
+            {activeTab === "registration" && (
               <div>
                 <div className="grid grid-cols-3 md:grid-cols-3 gap-6">
                   <InputField
@@ -323,7 +335,7 @@ const BasicDetails: React.FC = () => {
             )}
 
             {/* Contact Tab */}
-            {activeTab === 'contact' && (
+            {activeTab === "contact" && (
               <div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <InputField
@@ -380,7 +392,7 @@ const BasicDetails: React.FC = () => {
             )}
 
             {/* Address Tab */}
-            {activeTab === 'address' && (
+            {activeTab === "address" && (
               <div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <InputField
@@ -434,19 +446,19 @@ const BasicDetails: React.FC = () => {
           {/* Action Footer */}
           <div className="bg-card px-8 py-4 border-t border-theme flex items-center justify-between">
             <button
-             onClick={handleReset}
-             className="px-5 py-2.5 rounded-lg border shadow-sm 
+              onClick={handleReset}
+              className="px-5 py-2.5 rounded-lg border shadow-sm 
                         text-sm font-semibold flex items-center gap-2 
                          transition-all active:scale-[0.98]"
-             style={{
-               borderColor: 'var(--border)',
-               color: 'var(--text)',
-               background: 'var(--card)'
-             }}
-           >
-             <FaUndo className="w-4 h-4 opacity-80" />
-             Reset All
-           </button>
+              style={{
+                borderColor: "var(--border)",
+                color: "var(--text)",
+                background: "var(--card)",
+              }}
+            >
+              <FaUndo className="w-4 h-4 opacity-80" />
+              Reset All
+            </button>
 
             <button
               onClick={handleSubmit}
@@ -454,9 +466,10 @@ const BasicDetails: React.FC = () => {
              text-white text-sm font-semibold shadow flex items-center gap-2 
              transition-all active:scale-[0.98]"
               style={{
-    background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)',
-    color: '#fff'
-  }}
+                background:
+                  "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
+                color: "#fff",
+              }}
             >
               <FaSave className="w-4 h-4" />
               Save All Changes

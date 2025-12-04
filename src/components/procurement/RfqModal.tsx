@@ -44,7 +44,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
   // RFQ states
   const [rfqNumber, setRfqNumber] = useState("PUR-RFQ-");
   const [requestDate, setRequestDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [quoteDeadline, setQuoteDeadline] = useState("");
   const [status, setStatus] = useState("Draft");
@@ -75,14 +75,14 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
   const [suppliersPage, setSuppliersPage] = useState(0);
   const paginatedSuppliers = suppliers.slice(
     suppliersPage * suppliersPerPage,
-    (suppliersPage + 1) * suppliersPerPage
+    (suppliersPage + 1) * suppliersPerPage,
   );
 
   const itemsPerPage = 3;
   const [itemsPage, setItemsPage] = useState(0);
   const paginatedItems = items.slice(
     itemsPage * itemsPerPage,
-    (itemsPage + 1) * itemsPerPage
+    (itemsPage + 1) * itemsPerPage,
   );
 
   // Payment rows
@@ -99,7 +99,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
   const [paymentPage, setPaymentPage] = useState(0);
   const paginatedPaymentRows = paymentRows.slice(
     paymentPage * paymentItemsPerPage,
-    (paymentPage + 1) * paymentItemsPerPage
+    (paymentPage + 1) * paymentItemsPerPage,
   );
 
   const addPaymentRow = () => {
@@ -121,13 +121,13 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
 
   const removePaymentRow = (idx: number) =>
     setPaymentRows((rows) =>
-      rows.length === 1 ? rows : rows.filter((_, i) => i !== idx)
+      rows.length === 1 ? rows : rows.filter((_, i) => i !== idx),
     );
 
   const handlePaymentRowChange = (
     idx: number,
     key: keyof PaymentRow,
-    value: any
+    value: any,
   ) => {
     setPaymentRows((rows) => {
       const updated = [...rows];
@@ -150,7 +150,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
   const handleSupplier = (
     e: React.ChangeEvent<HTMLInputElement>,
     idx: number,
-    field: keyof SupplierRow
+    field: keyof SupplierRow,
   ) => {
     const copy = [...suppliers];
     if (field === "sendEmail") {
@@ -168,7 +168,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
     setSuppliers((prev) => {
       const newSuppliers = [...prev, { ...emptySupplier }];
       setSuppliersPage(
-        Math.floor((newSuppliers.length - 1) / suppliersPerPage)
+        Math.floor((newSuppliers.length - 1) / suppliersPerPage),
       );
       return newSuppliers;
     });
@@ -178,7 +178,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
   const handleItem = (
     e: React.ChangeEvent<HTMLInputElement>,
     idx: number,
-    field: keyof ItemRow
+    field: keyof ItemRow,
   ) => {
     const copy = [...items];
     const isNum = field === "quantity";
@@ -340,7 +340,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                     Showing {suppliersPage * suppliersPerPage + 1}–
                     {Math.min(
                       (suppliersPage + 1) * suppliersPerPage,
-                      suppliers.length
+                      suppliers.length,
                     )}{" "}
                     of {suppliers.length}
                   </span>
@@ -892,7 +892,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                                       handlePaymentRowChange(
                                         i,
                                         "paymentTerm",
-                                        e.target.value
+                                        e.target.value,
                                       )
                                     }
                                   />
@@ -906,7 +906,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                                       handlePaymentRowChange(
                                         i,
                                         "description",
-                                        e.target.value
+                                        e.target.value,
                                       )
                                     }
                                   />
@@ -921,7 +921,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                                       handlePaymentRowChange(
                                         i,
                                         "dueDate",
-                                        e.target.value
+                                        e.target.value,
                                       )
                                     }
                                   />
@@ -936,7 +936,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                                       handlePaymentRowChange(
                                         i,
                                         "invoicePortion",
-                                        Number(e.target.value)
+                                        Number(e.target.value),
                                       )
                                     }
                                   />
@@ -951,7 +951,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                                       handlePaymentRowChange(
                                         i,
                                         "paymentAmount",
-                                        Number(e.target.value)
+                                        Number(e.target.value),
                                       )
                                     }
                                   />
@@ -983,7 +983,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                       –
                       {Math.min(
                         (paymentPage + 1) * paymentItemsPerPage,
-                        paymentRows.length
+                        paymentRows.length,
                       )}{" "}
                       of {paymentRows.length}
                     </span>

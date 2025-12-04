@@ -76,7 +76,7 @@ const demoPrograms: TrainingProgram[] = [
 ];
 
 const uniqueCategories = Array.from(
-  new Set(demoPrograms.map((p) => p.category))
+  new Set(demoPrograms.map((p) => p.category)),
 );
 const uniqueModes = Array.from(new Set(demoPrograms.map((p) => p.mode)));
 
@@ -99,23 +99,20 @@ const TrainingDevelopment: React.FC = () => {
 
   const totalPrograms = demoPrograms.length;
   const completedPrograms = demoPrograms.filter(
-    (p) => p.status === "Completed"
+    (p) => p.status === "Completed",
   ).length;
   const ongoingPrograms = demoPrograms.filter(
-    (p) => p.status === "Ongoing"
+    (p) => p.status === "Ongoing",
   ).length;
   const plannedPrograms = demoPrograms.filter(
-    (p) => p.status === "Planned"
+    (p) => p.status === "Planned",
   ).length;
 
   const totalParticipants = demoPrograms.reduce(
     (sum, p) => sum + p.participants,
-    0
+    0,
   );
-  const totalCompleted = demoPrograms.reduce(
-    (sum, p) => sum + p.completed,
-    0
-  );
+  const totalCompleted = demoPrograms.reduce((sum, p) => sum + p.completed, 0);
   const overallCompletionRate =
     totalParticipants === 0
       ? 0
@@ -249,9 +246,7 @@ const TrainingDevelopment: React.FC = () => {
           <div className="relative">
             <select
               value={status}
-              onChange={(e) =>
-                setStatus(e.target.value as "" | TrainingStatus)
-              }
+              onChange={(e) => setStatus(e.target.value as "" | TrainingStatus)}
               className="px-4 py-2.5 pr-9 border border-gray-300 rounded-lg bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer"
             >
               <option value="">All Status</option>
@@ -329,8 +324,8 @@ const TrainingDevelopment: React.FC = () => {
                           p.status === "Completed"
                             ? "bg-emerald-100 text-emerald-700"
                             : p.status === "Ongoing"
-                            ? "bg-sky-100 text-sky-700"
-                            : "bg-yellow-100 text-yellow-800"
+                              ? "bg-sky-100 text-sky-700"
+                              : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
                         {p.status}

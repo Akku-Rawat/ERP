@@ -1,6 +1,6 @@
-import React from 'react';
-import { XCircle, Search, CheckCircle } from 'lucide-react';
-import type { Employee } from '../../../views/hr/payroll/types';
+import React from "react";
+import { XCircle, Search, CheckCircle } from "lucide-react";
+import type { Employee } from "../../../views/hr/payroll/types";
 
 interface CreatePayrollModalProps {
   show: boolean;
@@ -23,7 +23,7 @@ export const CreatePayrollModal: React.FC<CreatePayrollModalProps> = ({
   setEmployeeSearch,
   onSelectAll,
   onSelectEmployee,
-  onCreate
+  onCreate,
 }) => {
   if (!show) return null;
 
@@ -34,7 +34,9 @@ export const CreatePayrollModal: React.FC<CreatePayrollModalProps> = ({
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold">Create New Payroll</h2>
-              <p className="text-teal-100 mt-1">Select employees to include in payroll</p>
+              <p className="text-teal-100 mt-1">
+                Select employees to include in payroll
+              </p>
             </div>
             <button
               onClick={onClose}
@@ -63,13 +65,16 @@ export const CreatePayrollModal: React.FC<CreatePayrollModalProps> = ({
               onClick={onSelectAll}
               className="px-6 py-3 border-2 border-teal-600 text-teal-600 hover:bg-teal-50 rounded-lg font-semibold transition-colors whitespace-nowrap"
             >
-              {selectedEmployees.length === availableEmployees.length ? 'Deselect All' : 'Select All'}
+              {selectedEmployees.length === availableEmployees.length
+                ? "Deselect All"
+                : "Select All"}
             </button>
           </div>
 
           <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
             <p className="text-teal-800 font-semibold">
-              {selectedEmployees.length} of {availableEmployees.length} employees selected
+              {selectedEmployees.length} of {availableEmployees.length}{" "}
+              employees selected
             </p>
           </div>
 
@@ -77,19 +82,22 @@ export const CreatePayrollModal: React.FC<CreatePayrollModalProps> = ({
             {availableEmployees.length === 0 ? (
               <div className="py-12 text-center">
                 <p className="text-slate-400 text-lg">No employees available</p>
-                <p className="text-slate-500 text-sm mt-2">All employees are already in payroll</p>
+                <p className="text-slate-500 text-sm mt-2">
+                  All employees are already in payroll
+                </p>
               </div>
             ) : (
-              availableEmployees.map(employee => {
+              availableEmployees.map((employee) => {
                 const isSelected = selectedEmployees.includes(employee.id);
-                const salary = employee.basicSalary + employee.hra + employee.allowances;
+                const salary =
+                  employee.basicSalary + employee.hra + employee.allowances;
 
                 return (
                   <div
                     key={employee.id}
                     onClick={() => onSelectEmployee(employee.id)}
                     className={`flex items-center gap-4 p-4 border-b border-slate-200 cursor-pointer transition-colors ${
-                      isSelected ? 'bg-teal-50' : 'hover:bg-slate-50'
+                      isSelected ? "bg-teal-50" : "hover:bg-slate-50"
                     }`}
                   >
                     <input
@@ -100,20 +108,30 @@ export const CreatePayrollModal: React.FC<CreatePayrollModalProps> = ({
                     />
                     <div className="flex-1 grid grid-cols-5 gap-4 items-center">
                       <div>
-                        <p className="font-semibold text-slate-800">{employee.name}</p>
+                        <p className="font-semibold text-slate-800">
+                          {employee.name}
+                        </p>
                         <p className="text-xs text-slate-500">{employee.id}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-slate-600">{employee.department}</p>
+                        <p className="text-sm text-slate-600">
+                          {employee.department}
+                        </p>
                       </div>
                       <div>
-                        <p className="text-sm text-slate-600">{employee.designation}</p>
+                        <p className="text-sm text-slate-600">
+                          {employee.designation}
+                        </p>
                       </div>
                       <div>
-                        <p className="text-sm text-slate-600">Grade: {employee.grade}</p>
+                        <p className="text-sm text-slate-600">
+                          Grade: {employee.grade}
+                        </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-slate-800">₹{salary.toLocaleString()}</p>
+                        <p className="text-sm font-semibold text-slate-800">
+                          ₹{salary.toLocaleString()}
+                        </p>
                         <p className="text-xs text-slate-500">Gross salary</p>
                       </div>
                     </div>
@@ -136,8 +154,8 @@ export const CreatePayrollModal: React.FC<CreatePayrollModalProps> = ({
             disabled={selectedEmployees.length === 0}
             className={`flex-1 px-6 py-3 rounded-lg font-semibold shadow-lg transition-all flex items-center justify-center gap-2 ${
               selectedEmployees.length === 0
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white'
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
             }`}
           >
             <CheckCircle className="w-5 h-5" />

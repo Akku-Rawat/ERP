@@ -101,11 +101,10 @@ const sampleModules: ModuleItem[] = [
   },
 ];
 
-
 const tierStyle = (tier: Tier) => {
   return {
     background: "var(--row-hover)",
-    color: "var(--primary-700)", 
+    color: "var(--primary-700)",
     padding: "0.25rem 0.625rem",
     borderRadius: "9999px",
     fontSize: "0.75rem",
@@ -151,7 +150,7 @@ export default function SubscribedModules(): JSX.Element {
 
   function toggleActive(id: string) {
     setModules((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, active: !m.active } : m))
+      prev.map((m) => (m.id === id ? { ...m, active: !m.active } : m)),
     );
   }
 
@@ -180,54 +179,50 @@ export default function SubscribedModules(): JSX.Element {
 
           {/* Search & Filters */}
           <div className="w-full">
-  <div className="flex flex-col sm:flex-row items-center gap-3 max-w-5xl mx-auto">
-
-    {/* Search Bar */}
-    <div className="relative flex-1 w-full">
-      <FaSearch
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
-        style={{ width: 16, height: 16 }}
-      />
-      <input
-  value={query}
-  onChange={(e) => setQuery(e.target.value)}
-  placeholder="Search modules..."
-  className="w-full pl-10 pr-4 py-2.5 border border-theme rounded-lg 
+            <div className="flex flex-col sm:flex-row items-center gap-3 max-w-5xl mx-auto">
+              {/* Search Bar */}
+              <div className="relative flex-1 w-full">
+                <FaSearch
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+                  style={{ width: 16, height: 16 }}
+                />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search modules..."
+                  className="w-full pl-10 pr-4 py-2.5 border border-theme rounded-lg 
              text-sm bg-card shadow-sm text-main
              focus:ring-2 focus:ring-[var(--primary)]
              focus:border-[var(--primary-600)] transition-all"
-/>
+                />
+              </div>
 
-    </div>
-
-    {/* Tier Dropdown */}
-    <select
-      value={selectedTier}
-      onChange={(e) => setSelectedTier(e.target.value)}
-      className="px-4 py-2.5 border border-theme rounded-lg bg-card text-sm 
+              {/* Tier Dropdown */}
+              <select
+                value={selectedTier}
+                onChange={(e) => setSelectedTier(e.target.value)}
+                className="px-4 py-2.5 border border-theme rounded-lg bg-card text-sm 
                  shadow-sm text-muted focus:ring-2 focus:ring-[var(--primary)]"
-    >
-      <option value="All">All Tiers</option>
-      <option value="Enterprise">Enterprise</option>
-      <option value="Pro">Pro</option>
-      <option value="Free">Free</option>
-    </select>
+              >
+                <option value="All">All Tiers</option>
+                <option value="Enterprise">Enterprise</option>
+                <option value="Pro">Pro</option>
+                <option value="Free">Free</option>
+              </select>
 
-    {/* Sort Dropdown */}
-    <select
-      value={sortBy}
-      onChange={(e) => setSortBy(e.target.value)}
-      className="px-4 py-2.5 border border-theme rounded-lg bg-card text-sm 
+              {/* Sort Dropdown */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-2.5 border border-theme rounded-lg bg-card text-sm 
                  shadow-sm text-muted focus:ring-2 focus:ring-[var(--primary)]"
-    >
-      <option value="name">Name (A-Z)</option>
-      <option value="users">Most Used</option>
-      <option value="tier">By Tier</option>
-    </select>
-
-  </div>
-</div>
-
+              >
+                <option value="name">Name (A-Z)</option>
+                <option value="users">Most Used</option>
+                <option value="tier">By Tier</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Module List */}

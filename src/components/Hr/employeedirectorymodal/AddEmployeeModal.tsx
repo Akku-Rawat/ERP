@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Upload, User } from 'lucide-react';
+import React, { useState } from "react";
+import { X, Upload, User } from "lucide-react";
 
 type AddEmployeeModalProps = {
   isOpen: boolean;
@@ -7,56 +7,69 @@ type AddEmployeeModalProps = {
   departments: string[];
 };
 
-const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, departments }) => {
-  const [activeTab, setActiveTab] = useState('Work');
+const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
+  isOpen,
+  onClose,
+  departments,
+}) => {
+  const [activeTab, setActiveTab] = useState("Work");
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    mobile: '',
-    tags: '',
-    department: '',
-    jobPosition: '',
-    jobTitle: '',
-    manager: '',
-    workAddress: '',
-    workLocation: '',
-    monday: 'Unspecified',
-    tuesday: 'Unspecified',
-    wednesday: 'Unspecified',
-    thursday: 'Unspecified',
-    friday: 'Unspecified',
-    saturday: 'Unspecified',
-    sunday: 'Unspecified',
-    notes: ''
+    name: "",
+    email: "",
+    phone: "",
+    mobile: "",
+    tags: "",
+    department: "",
+    jobPosition: "",
+    jobTitle: "",
+    manager: "",
+    workAddress: "",
+    workLocation: "",
+    monday: "Unspecified",
+    tuesday: "Unspecified",
+    wednesday: "Unspecified",
+    thursday: "Unspecified",
+    friday: "Unspecified",
+    saturday: "Unspecified",
+    sunday: "Unspecified",
+    notes: "",
   });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = () => {
     if (!formData.name || !formData.email) {
-      alert('Please fill in required fields (Name and Email)');
+      alert("Please fill in required fields (Name and Email)");
       return;
     }
-    console.log('Saving employee:', formData);
-    alert('Employee created successfully!');
+    console.log("Saving employee:", formData);
+    alert("Employee created successfully!");
     onClose();
   };
 
   if (!isOpen) return null;
 
-  const tabs = ['Work', 'Resume', 'Certifications', 'Personal', 'Payroll', 'Salary Adjustments', 'Settings'];
+  const tabs = [
+    "Work",
+    "Resume",
+    "Certifications",
+    "Personal",
+    "Payroll",
+    "Salary Adjustments",
+    "Settings",
+  ];
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-start justify-center z-50 overflow-y-auto pt-8 pb-8">
       <div className="bg-white rounded-none shadow-2xl w-full max-w-5xl mx-4 min-h-[600px] flex flex-col">
-        
         {/* Top Bar with Close Button */}
         <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200">
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span className="bg-purple-600 text-white px-2 py-1 rounded text-xs font-semibold">A</span>
+            <span className="bg-purple-600 text-white px-2 py-1 rounded text-xs font-semibold">
+              A
+            </span>
             <span className="font-medium">MNSIS</span>
             <span className="text-gray-400">11:11 AM</span>
             <span className="ml-4">Creating a new record...</span>
@@ -90,10 +103,10 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
                 type="text"
                 placeholder="Employee's Name"
                 value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                onChange={(e) => handleInputChange("name", e.target.value)}
                 className="text-2xl font-normal text-gray-400 bg-transparent border-b-2 border-gray-300 outline-none w-full mb-4 pb-1 focus:border-gray-500 transition"
               />
-              
+
               <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
                 <div className="flex items-center gap-2 text-gray-600">
                   <span>📧</span>
@@ -101,40 +114,42 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
                     type="email"
                     placeholder="e.g. johndoe@example.com"
                     value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
                     className="bg-transparent outline-none flex-1 placeholder-gray-400"
                   />
                 </div>
-                
+
                 <div className="flex items-center gap-2 text-gray-600">
                   <span>☎️</span>
                   <input
                     type="tel"
                     placeholder="Work Phone"
                     value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    onChange={(e) => handleInputChange("phone", e.target.value)}
                     className="bg-transparent outline-none flex-1 placeholder-gray-400"
                   />
                 </div>
-                
+
                 <div className="flex items-center gap-2 text-gray-600">
                   <span>📱</span>
                   <input
                     type="tel"
                     placeholder="Work Mobile"
                     value={formData.mobile}
-                    onChange={(e) => handleInputChange('mobile', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("mobile", e.target.value)
+                    }
                     className="bg-transparent outline-none flex-1 placeholder-gray-400"
                   />
                 </div>
-                
+
                 <div className="flex items-center gap-2 text-gray-600">
                   <span>🏷️</span>
                   <input
                     type="text"
                     placeholder="e.g. Founder, Motorhead..."
                     value={formData.tags}
-                    onChange={(e) => handleInputChange('tags', e.target.value)}
+                    onChange={(e) => handleInputChange("tags", e.target.value)}
                     className="bg-transparent outline-none flex-1 placeholder-gray-400"
                   />
                 </div>
@@ -151,8 +166,8 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-3 text-sm font-medium transition relative ${
                 activeTab === tab
-                  ? 'text-gray-900 border-b-2 border-gray-900'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? "text-gray-900 border-b-2 border-gray-900"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               {tab}
@@ -162,47 +177,63 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto bg-gray-50">
-          {activeTab === 'Work' && (
+          {activeTab === "Work" && (
             <div className="px-8 py-6">
               <div className="grid grid-cols-2 gap-8">
                 {/* Left Column */}
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">WORK</h3>
-                    
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      WORK
+                    </h3>
+
                     <div className="space-y-4 bg-white p-4 rounded-sm border border-gray-200">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Department</label>
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Department
+                        </label>
                         <select
                           value={formData.department}
-                          onChange={(e) => handleInputChange('department', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("department", e.target.value)
+                          }
                           className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
                         >
                           <option value=""></option>
-                          {departments.map(d => (
-                            <option key={d} value={d}>{d}</option>
+                          {departments.map((d) => (
+                            <option key={d} value={d}>
+                              {d}
+                            </option>
                           ))}
                         </select>
                       </div>
 
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Job Position</label>
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Job Position
+                        </label>
                         <input
                           type="text"
                           placeholder="e.g. Sales Manager"
                           value={formData.jobPosition}
-                          onChange={(e) => handleInputChange('jobPosition', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("jobPosition", e.target.value)
+                          }
                           className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Job Title</label>
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Job Title
+                        </label>
                         <input
                           type="text"
                           placeholder="Manager"
                           value={formData.jobTitle}
-                          onChange={(e) => handleInputChange('jobTitle', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("jobTitle", e.target.value)
+                          }
                           className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
                         />
                       </div>
@@ -211,26 +242,36 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
 
                   {/* Location */}
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">LOCATION</h3>
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      LOCATION
+                    </h3>
                     <div className="space-y-4 bg-white p-4 rounded-sm border border-gray-200">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Work Address</label>
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Work Address
+                        </label>
                         <input
                           type="text"
                           placeholder="Indore, India"
                           value={formData.workAddress}
-                          onChange={(e) => handleInputChange('workAddress', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("workAddress", e.target.value)
+                          }
                           className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Work Location</label>
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Work Location
+                        </label>
                         <input
                           type="text"
                           placeholder="e.g. Building 2, Remote, etc."
                           value={formData.workLocation}
-                          onChange={(e) => handleInputChange('workLocation', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("workLocation", e.target.value)
+                          }
                           className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
                         />
                       </div>
@@ -239,14 +280,31 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
 
                   {/* Usual Work Location */}
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">USUAL WORK LOCATION</h3>
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      USUAL WORK LOCATION
+                    </h3>
                     <div className="space-y-3 bg-white p-4 rounded-sm border border-gray-200">
-                      {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
-                        <div key={day} className="flex items-center justify-between">
-                          <label className="text-xs text-gray-700 font-medium capitalize w-24">{day}</label>
+                      {[
+                        "monday",
+                        "tuesday",
+                        "wednesday",
+                        "thursday",
+                        "friday",
+                        "saturday",
+                        "sunday",
+                      ].map((day) => (
+                        <div
+                          key={day}
+                          className="flex items-center justify-between"
+                        >
+                          <label className="text-xs text-gray-700 font-medium capitalize w-24">
+                            {day}
+                          </label>
                           <select
-                            value={formData[day as keyof typeof formData] as string}
-                            onChange={(e) => handleInputChange(day, e.target.value)}
+                            value={formData[day as keyof typeof formData]}
+                            onChange={(e) =>
+                              handleInputChange(day, e.target.value)
+                            }
                             className="flex-1 px-2 py-1 text-xs border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
                           >
                             <option value="Unspecified">Unspecified</option>
@@ -261,12 +319,16 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
 
                   {/* Notes */}
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">NOTE</h3>
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      NOTE
+                    </h3>
                     <div className="bg-white p-4 rounded-sm border border-gray-200">
                       <textarea
                         placeholder="Provide additional information about this person..."
                         value={formData.notes}
-                        onChange={(e) => handleInputChange('notes', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("notes", e.target.value)
+                        }
                         rows={4}
                         className="w-full text-sm outline-none resize-none placeholder-gray-400"
                       />
@@ -276,9 +338,13 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
 
                 {/* Right Column - Organization Chart */}
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">ORGANIZATION CHART</h3>
+                  <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                    ORGANIZATION CHART
+                  </h3>
                   <div className="bg-white p-6 rounded-sm border border-gray-200">
-                    <p className="text-xs text-gray-500 mb-6">Set a manager for reports to show in org chart</p>
+                    <p className="text-xs text-gray-500 mb-6">
+                      Set a manager for reports to show in org chart
+                    </p>
                     <div className="space-y-4">
                       <div className="bg-gray-100 rounded p-4">
                         <div className="h-3 bg-gray-300 rounded w-3/4"></div>
@@ -296,7 +362,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
             </div>
           )}
 
-          {activeTab === 'Payroll' && (
+          {activeTab === "Payroll" && (
             <div className="px-8 py-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Left Column */}
@@ -304,27 +370,45 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
                   {/* Contract Overview */}
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-semibold text-gray-600 tracking-wider">CONTRACT OVERVIEW</h3>
+                      <h3 className="text-xs font-semibold text-gray-600 tracking-wider">
+                        CONTRACT OVERVIEW
+                      </h3>
                       <div className="flex gap-2">
-                        <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">Load a Template</button>
+                        <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                          Load a Template
+                        </button>
                         <span className="text-gray-300">|</span>
-                        <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">New Contract</button>
+                        <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                          New Contract
+                        </button>
                       </div>
                     </div>
-                    
+
                     <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">Contract</label>
-                          <input type="text" placeholder="20 Nov" className="w-20 px-2 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                          <label className="block text-xs text-gray-600 mb-1 font-medium">
+                            Contract
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="20 Nov"
+                            className="w-20 px-2 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                          />
                           <span className="text-xs text-gray-500 mx-2">to</span>
-                          <input type="text" placeholder="Indefinite" className="w-24 px-2 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                          <input
+                            type="text"
+                            placeholder="Indefinite"
+                            className="w-24 px-2 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                          />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">Wage Type</label>
+                          <label className="block text-xs text-gray-600 mb-1 font-medium">
+                            Wage Type
+                          </label>
                           <select className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent">
                             <option>Fixed Wage</option>
                             <option>Hourly</option>
@@ -335,33 +419,59 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">Wage</label>
+                          <label className="block text-xs text-gray-600 mb-1 font-medium">
+                            Wage
+                          </label>
                           <div className="flex items-center gap-2">
                             <span className="text-sm">₹</span>
-                            <input type="text" placeholder="0.00" className="w-24 px-2 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
-                            <span className="text-xs text-gray-500">/ month</span>
+                            <input
+                              type="text"
+                              placeholder="0.00"
+                              className="w-24 px-2 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                            />
+                            <span className="text-xs text-gray-500">
+                              / month
+                            </span>
                           </div>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">Employee Type</label>
-                          <input type="text" placeholder="Employee" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                          <label className="block text-xs text-gray-600 mb-1 font-medium">
+                            Employee Type
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Employee"
+                            className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                          />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">Contract Type</label>
-                          <input type="text" placeholder="Contract Type" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent text-gray-400" />
+                          <label className="block text-xs text-gray-600 mb-1 font-medium">
+                            Contract Type
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Contract Type"
+                            className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent text-gray-400"
+                          />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">Pay Category</label>
-                          <input type="text" placeholder="Employee" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                          <label className="block text-xs text-gray-600 mb-1 font-medium">
+                            Pay Category
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Employee"
+                            className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                          />
                         </div>
                       </div>
                     </div>
@@ -369,16 +479,30 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
 
                   {/* Schedule */}
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">SCHEDULE</h3>
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      SCHEDULE
+                    </h3>
                     <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Work Entry Source</label>
-                        <input type="text" placeholder="Working Schedule" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Work Entry Source
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Working Schedule"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
 
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Working Hours</label>
-                        <input type="text" placeholder="Standard 40 hours/week" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Working Hours
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Standard 40 hours/week"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
 
                       <button className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium mt-4">
@@ -397,7 +521,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
             </div>
           )}
 
-          {activeTab === 'Salary Adjustments' && (
+          {activeTab === "Salary Adjustments" && (
             <div className="px-8 py-6">
               <div className="bg-white rounded-sm border border-gray-200 overflow-hidden">
                 {/* Table Header */}
@@ -411,7 +535,9 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
 
                 {/* Empty State */}
                 <div className="p-12 text-center">
-                  <p className="text-gray-400 text-sm mb-4">No salary adjustments yet</p>
+                  <p className="text-gray-400 text-sm mb-4">
+                    No salary adjustments yet
+                  </p>
                   <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 mx-auto">
                     <Upload className="w-4 h-4" />
                     Add a salary adjustment
@@ -421,82 +547,142 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
             </div>
           )}
 
-          {activeTab === 'Personal' && (
+          {activeTab === "Personal" && (
             <div className="px-8 py-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8">
                 {/* Left Column */}
                 <div className="space-y-8">
                   {/* Private Contact */}
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">PRIVATE CONTACT</h3>
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      PRIVATE CONTACT
+                    </h3>
                     <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Email</label>
-                        <input type="email" placeholder="e.g. myprivateemail@example.com" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          placeholder="e.g. myprivateemail@example.com"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
+                        />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Phone</label>
-                        <input type="tel" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Phone
+                        </label>
+                        <input
+                          type="tel"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Bank Accounts</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Bank Accounts
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                     </div>
                   </div>
 
                   {/* Emergency Contact */}
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">EMERGENCY CONTACT</h3>
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      EMERGENCY CONTACT
+                    </h3>
                     <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Contact</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Contact
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Phone</label>
-                        <input type="tel" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Phone
+                        </label>
+                        <input
+                          type="tel"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                     </div>
                   </div>
 
                   {/* Citizenship */}
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">CITIZENSHIP</h3>
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      CITIZENSHIP
+                    </h3>
                     <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Nationality (Country)</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Nationality (Country)
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                       <div className="flex items-center gap-2">
                         <input type="checkbox" className="w-4 h-4" />
-                        <label className="text-xs text-gray-700 font-medium">Non-resident</label>
+                        <label className="text-xs text-gray-700 font-medium">
+                          Non-resident
+                        </label>
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Identification No</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Identification No
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">SSN No</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          SSN No
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Passport No</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Passport No
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                     </div>
                   </div>
 
                   {/* Family */}
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">FAMILY</h3>
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      FAMILY
+                    </h3>
                     <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
                       <div className="flex items-center gap-2">
                         <input type="checkbox" className="w-4 h-4" />
-                        <label className="text-xs text-gray-700 font-medium">Disabled</label>
+                        <label className="text-xs text-gray-700 font-medium">
+                          Disabled
+                        </label>
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Marital Status</label>
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Marital Status
+                        </label>
                         <select className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent">
                           <option>Single</option>
                           <option>Married</option>
@@ -505,8 +691,14 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Dependent Children</label>
-                        <input type="number" placeholder="0" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Dependent Children
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="0"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                     </div>
                   </div>
@@ -516,28 +708,54 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
                 <div className="space-y-8">
                   {/* Personal Information */}
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">PERSONAL INFORMATION</h3>
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      PERSONAL INFORMATION
+                    </h3>
                     <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Legal Name</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Legal Name
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Birthday</label>
-                        <input type="date" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Birthday
+                        </label>
+                        <input
+                          type="date"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">Place of Birth - City</label>
-                          <input type="text" placeholder="City" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400" />
+                          <label className="block text-xs text-gray-600 mb-1 font-medium">
+                            Place of Birth - City
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="City"
+                            className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
+                          />
                         </div>
                         <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">Country</label>
-                          <input type="text" placeholder="Country" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400" />
+                          <label className="block text-xs text-gray-600 mb-1 font-medium">
+                            Country
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Country"
+                            className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
+                          />
                         </div>
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Gender</label>
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Gender
+                        </label>
                         <select className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent">
                           <option value="">Select</option>
                           <option>Male</option>
@@ -546,26 +764,46 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Payslip Language</label>
-                        <input type="text" placeholder="User Language" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Payslip Language
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="User Language"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
+                        />
                       </div>
                     </div>
                   </div>
 
                   {/* Visa & Work Permit */}
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">VISA & WORK PERMIT</h3>
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      VISA & WORK PERMIT
+                    </h3>
                     <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Visa No</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Visa No
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Work Permit No</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Work Permit No
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Document</label>
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Document
+                        </label>
                         <button className="px-4 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50 transition">
                           Upload your file
                         </button>
@@ -575,23 +813,57 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
 
                   {/* Location */}
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">LOCATION</h3>
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      LOCATION
+                    </h3>
                     <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Private Address</label>
-                        <input type="text" placeholder="Street..." className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400 mb-2" />
-                        <input type="text" placeholder="Street 2..." className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400 mb-2" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Private Address
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Street..."
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400 mb-2"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Street 2..."
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400 mb-2"
+                        />
                         <div className="grid grid-cols-3 gap-2">
-                          <input type="text" placeholder="City" className="px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400" />
-                          <input type="text" placeholder="State" className="px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400" />
-                          <input type="text" placeholder="ZIP" className="px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="City"
+                            className="px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
+                          />
+                          <input
+                            type="text"
+                            placeholder="State"
+                            className="px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
+                          />
+                          <input
+                            type="text"
+                            placeholder="ZIP"
+                            className="px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
+                          />
                         </div>
-                        <input type="text" placeholder="Country" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400 mt-2" />
+                        <input
+                          type="text"
+                          placeholder="Country"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400 mt-2"
+                        />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Home-Work Distance</label>
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Home-Work Distance
+                        </label>
                         <div className="flex items-center gap-2">
-                          <input type="number" placeholder="0" className="w-20 px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                          <input
+                            type="number"
+                            placeholder="0"
+                            className="w-20 px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                          />
                           <span className="text-xs text-gray-500">km</span>
                         </div>
                       </div>
@@ -600,15 +872,27 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
 
                   {/* Education */}
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">EDUCATION</h3>
+                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
+                      EDUCATION
+                    </h3>
                     <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Certificate Level</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Certificate Level
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">Field of Study</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent" />
+                        <label className="block text-xs text-gray-600 mb-1 font-medium">
+                          Field of Study
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
+                        />
                       </div>
                     </div>
                   </div>
@@ -617,9 +901,13 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
             </div>
           )}
 
-          {!['Work', 'Payroll', 'Salary Adjustments', 'Personal'].includes(activeTab) && (
+          {!["Work", "Payroll", "Salary Adjustments", "Personal"].includes(
+            activeTab,
+          ) && (
             <div className="px-8 py-16 text-center">
-              <p className="text-gray-500">{activeTab} content will appear here</p>
+              <p className="text-gray-500">
+                {activeTab} content will appear here
+              </p>
             </div>
           )}
         </div>
@@ -646,4 +934,4 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onClose, de
   );
 };
 
-export default AddEmployeeModal;    
+export default AddEmployeeModal;

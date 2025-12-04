@@ -41,19 +41,21 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
     remarks: "",
   });
 
-  const [items, setItems] = useState<WarehouseItem[]>([{ ...emptyWarehouseItem }]);
+  const [items, setItems] = useState<WarehouseItem[]>([
+    { ...emptyWarehouseItem },
+  ]);
 
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleItemChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    idx: number
+    idx: number,
   ) => {
     const rows = [...items];
     const name = e.target.name;
@@ -100,7 +102,10 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
           exit={{ opacity: 0, y: 40 }}
           className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
-          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
+          <form
+            className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden"
+            onSubmit={handleSave}
+          >
             <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-indigo-100/30 shrink-0">
               <h3 className="text-2xl w-full font-semibold text-indigo-600">
                 Warehouse Details
@@ -117,7 +122,9 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
             <div className="flex-1 overflow-y-auto border-b px-4">
               {/* WAREHOUSE INFO */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">WAREHOUSE INFO</div>
+                <div className="font-semibold text-gray-600 mb-4">
+                  WAREHOUSE INFO
+                </div>
                 <div className="grid grid-cols-6 gap-4 mb-6">
                   <input
                     className="col-span-1 border rounded p-2"
@@ -166,7 +173,9 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
 
               {/* WAREHOUSE ITEMS */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">INVENTORY ITEMS</div>
+                <div className="font-semibold text-gray-600 mb-2">
+                  INVENTORY ITEMS
+                </div>
                 <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2 py-4 px-2">
                   <table className="min-w-full text-xs table-fixed">
                     <thead>
@@ -176,8 +185,12 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
                         <th className="w-1/8 px-2 py-1 text-left">QUANTITY</th>
                         <th className="w-1/8 px-2 py-1 text-left">LOCATION</th>
                         <th className="w-1/8 px-2 py-1 text-left">UOM</th>
-                        <th className="w-1/8 px-2 py-1 text-left">BATCH NUMBER</th>
-                        <th className="w-1/8 px-2 py-1 text-left">EXPIRY DATE</th>
+                        <th className="w-1/8 px-2 py-1 text-left">
+                          BATCH NUMBER
+                        </th>
+                        <th className="w-1/8 px-2 py-1 text-left">
+                          EXPIRY DATE
+                        </th>
                         <th className="w-1/10 px-2 py-1 text-center"></th>
                       </tr>
                     </thead>
@@ -262,7 +275,11 @@ const WarehouseModal: React.FC<WarehouseModalProps> = ({
                   </table>
                 </div>
                 <div>
-                  <button type="button" className="bg-indigo-100 border border-indigo-300 rounded px-2 py-1" onClick={addItem}>
+                  <button
+                    type="button"
+                    className="bg-indigo-100 border border-indigo-300 rounded px-2 py-1"
+                    onClick={addItem}
+                  >
                     Add
                   </button>
                 </div>

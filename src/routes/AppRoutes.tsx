@@ -1,8 +1,8 @@
- import React from "react";
+import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "../components/ProtectedRoutes";
 import Login from "../views/LoginPage";
-import AppLayout from "../layout/AppLayout"; 
+import AppLayout from "../layout/AppLayout";
 import Dashboard from "../views/DashbBoard";
 import SalesModule from "../views/Sales/Sales";
 import ProcurementModule from "../views/Procurement/Procurement";
@@ -14,7 +14,6 @@ import Settings from "../views/Settings";
 import HrPayrollModule from "../views/hr/HR";
 import CompanySetup from "../views/CompanySetup/CompanySetup";
 import UserManagement from "../views/User/UserModule";
-
 
 const AppRoutes: React.FC = () => {
   return (
@@ -32,12 +31,11 @@ const AppRoutes: React.FC = () => {
           <Route path="/suppliers" element={<SupplierModule />} />
           <Route path="/accounting" element={<AccountingModule />} />
           <Route path="/crm" element={<CrmModule />} />
-          <Route path="settings" element={<Settings/>}/>
+          <Route path="settings" element={<Settings />} />
           <Route path="/hr" element={<HrPayrollModule />} />
           <Route path="/companySetup" element={<CompanySetup />} />
           <Route path="/userManagement" element={<UserManagement />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
-
         </Route>
       </Route>
 

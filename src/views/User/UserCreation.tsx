@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { FaPlus, FaSearch, FaEdit, FaTrash, FaInfoCircle } from "react-icons/fa";
+import {
+  FaPlus,
+  FaSearch,
+  FaEdit,
+  FaTrash,
+  FaInfoCircle,
+} from "react-icons/fa";
 import CreateUserModal from "../../components/User/CreateUserModal";
 
 interface Role {
@@ -47,8 +53,8 @@ const UserCreation: React.FC<UserCreationProps> = ({
 
   const filteredUsers = users.filter((user) =>
     Object.values(user).some((val) =>
-      String(val).toLowerCase().includes(searchTerm.toLowerCase())
-    )
+      String(val).toLowerCase().includes(searchTerm.toLowerCase()),
+    ),
   );
 
   const handleAdd = () => {
@@ -99,14 +105,30 @@ const UserCreation: React.FC<UserCreationProps> = ({
           <table className="w-full">
             <thead className="table-head">
               <tr>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Name</th>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Email</th>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Username</th>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Phone</th>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Language</th>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Role</th>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Status</th>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Actions</th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Email
+                </th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Username
+                </th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Phone
+                </th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Language
+                </th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Role
+                </th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-theme">
@@ -116,11 +138,21 @@ const UserCreation: React.FC<UserCreationProps> = ({
                     {user.firstName} {user.middleName} {user.lastName}
                   </td>
                   <td className="px-6 py-4 text-sm text-muted">{user.email}</td>
-                  <td className="px-6 py-4 text-sm text-muted">{user.username}</td>
+                  <td className="px-6 py-4 text-sm text-muted">
+                    {user.username}
+                  </td>
                   <td className="px-6 py-4 text-sm text-muted">{user.phone}</td>
-                  <td className="px-6 py-4 text-sm text-muted">{user.language}</td>
+                  <td className="px-6 py-4 text-sm text-muted">
+                    {user.language}
+                  </td>
                   <td className="px-6 py-4 text-sm">
-                    <span className="px-2 py-1 rounded-full text-xs font-medium" style={{ background: 'var(--row-hover)', color: 'var(--primary)' }}>
+                    <span
+                      className="px-2 py-1 rounded-full text-xs font-medium"
+                      style={{
+                        background: "var(--row-hover)",
+                        color: "var(--primary)",
+                      }}
+                    >
                       {user.role || "No Role"}
                     </span>
                   </td>
@@ -201,7 +233,7 @@ export default function App() {
       language: "English",
       timezone: "UTC",
       role: "Admin",
-      status: "Active"
+      status: "Active",
     },
     {
       id: 2,
@@ -216,25 +248,36 @@ export default function App() {
       language: "English",
       timezone: "EST",
       role: "User",
-      status: "Active"
-    }
+      status: "Active",
+    },
   ]);
 
   const roles: Role[] = [
-    { id: 1, roleName: "Admin", description: "Administrator", status: "Active" },
-    { id: 2, roleName: "User", description: "Regular User", status: "Active" }
+    {
+      id: 1,
+      roleName: "Admin",
+      description: "Administrator",
+      status: "Active",
+    },
+    { id: 2, roleName: "User", description: "Regular User", status: "Active" },
   ];
 
-  const handleSubmit = (data: UserFormData, isEdit: boolean, userId?: number) => {
+  const handleSubmit = (
+    data: UserFormData,
+    isEdit: boolean,
+    userId?: number,
+  ) => {
     if (isEdit && userId) {
-      setUsers(users.map(u => u.id === userId ? { ...data, id: userId } : u));
+      setUsers(
+        users.map((u) => (u.id === userId ? { ...data, id: userId } : u)),
+      );
     } else {
       setUsers([...users, { ...data, id: Date.now() }]);
     }
   };
 
   const handleDelete = (id: number) => {
-    setUsers(users.filter(u => u.id !== id));
+    setUsers(users.filter((u) => u.id !== id));
   };
 
   return (

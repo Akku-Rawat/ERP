@@ -1,5 +1,9 @@
 import React from "react";
-import { FaDownload, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import {
+  FaDownload,
+  FaCheckCircle,
+  FaExclamationTriangle,
+} from "react-icons/fa";
 
 type TrialBalanceAccount = {
   code: string;
@@ -20,7 +24,9 @@ type Props = {
 };
 
 const nf = (v: number) =>
-  new Intl.NumberFormat("en-US", { minimumFractionDigits: 0 }).format(Math.round(v));
+  new Intl.NumberFormat("en-US", { minimumFractionDigits: 0 }).format(
+    Math.round(v),
+  );
 
 const TrialBalance: React.FC<Props> = ({
   trialBalance,
@@ -40,8 +46,12 @@ const TrialBalance: React.FC<Props> = ({
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Trial Balance</h2>
-            <p className="text-sm text-slate-500">{monthNames[reportMonth]} {reportYear} — amounts in USD</p>
+            <h2 className="text-2xl font-semibold text-slate-900">
+              Trial Balance
+            </h2>
+            <p className="text-sm text-slate-500">
+              {monthNames[reportMonth]} {reportYear} — amounts in USD
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -52,7 +62,9 @@ const TrialBalance: React.FC<Props> = ({
                 className="px-3 py-2 bg-white rounded-md text-sm focus:outline-none"
               >
                 {Object.entries(monthNames).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
                 ))}
               </select>
 
@@ -91,37 +103,71 @@ const TrialBalance: React.FC<Props> = ({
                     </thead>
                     <tbody className="divide-y divide-gray-100 bg-white">
                       {trialBalance.map((account, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/30 transition-colors">
-                          <td className="px-6 py-4 font-mono text-sm text-slate-700">{account.code}</td>
-                          <td className="px-6 py-4 font-medium text-gray-900">{account.name}</td>
-                          <td className="px-6 py-4 text-right font-medium text-gray-900">{account.debit > 0 ? nf(account.debit) : "—"}</td>
-                          <td className="px-6 py-4 text-right font-medium text-gray-900">{account.credit > 0 ? nf(account.credit) : "—"}</td>
+                        <tr
+                          key={idx}
+                          className="hover:bg-slate-50/30 transition-colors"
+                        >
+                          <td className="px-6 py-4 font-mono text-sm text-slate-700">
+                            {account.code}
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            {account.name}
+                          </td>
+                          <td className="px-6 py-4 text-right font-medium text-gray-900">
+                            {account.debit > 0 ? nf(account.debit) : "—"}
+                          </td>
+                          <td className="px-6 py-4 text-right font-medium text-gray-900">
+                            {account.credit > 0 ? nf(account.credit) : "—"}
+                          </td>
                         </tr>
                       ))}
 
                       {/* Totals */}
                       <tr className="bg-gray-50 font-semibold">
-                        <td colSpan={2} className="px-6 py-3">Total</td>
-                        <td className="px-6 py-3 text-right">{nf(totalDebit)}</td>
-                        <td className="px-6 py-3 text-right">{nf(totalCredit)}</td>
+                        <td colSpan={2} className="px-6 py-3">
+                          Total
+                        </td>
+                        <td className="px-6 py-3 text-right">
+                          {nf(totalDebit)}
+                        </td>
+                        <td className="px-6 py-3 text-right">
+                          {nf(totalCredit)}
+                        </td>
                       </tr>
 
                       {/* Balance status */}
-                      <tr className={`${balanced ? 'bg-emerald-50' : 'bg-rose-50'} font-semibold`}> 
-                        <td colSpan={2} className="px-6 py-3 flex items-center gap-3">
-                          <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${balanced ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}>
-                            {balanced ? <FaCheckCircle /> : <FaExclamationTriangle />}
+                      <tr
+                        className={`${balanced ? "bg-emerald-50" : "bg-rose-50"} font-semibold`}
+                      >
+                        <td
+                          colSpan={2}
+                          className="px-6 py-3 flex items-center gap-3"
+                        >
+                          <span
+                            className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${balanced ? "bg-emerald-600 text-white" : "bg-rose-600 text-white"}`}
+                          >
+                            {balanced ? (
+                              <FaCheckCircle />
+                            ) : (
+                              <FaExclamationTriangle />
+                            )}
                           </span>
-                          <span>{balanced ? 'Balanced' : 'Out of Balance'}</span>
+                          <span>
+                            {balanced ? "Balanced" : "Out of Balance"}
+                          </span>
                         </td>
-                        <td colSpan={2} className="px-6 py-3 text-right">{nf(Math.abs(totalDebit - totalCredit))}</td>
+                        <td colSpan={2} className="px-6 py-3 text-right">
+                          {nf(Math.abs(totalDebit - totalCredit))}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
 
                 {trialBalance.length === 0 && (
-                  <div className="text-center py-12 text-gray-500">No trial balance data for the selected period.</div>
+                  <div className="text-center py-12 text-gray-500">
+                    No trial balance data for the selected period.
+                  </div>
                 )}
               </div>
 
@@ -140,10 +186,12 @@ const TrialBalance: React.FC<Props> = ({
                     </div>
                   </div>
 
-                  <div className={`mt-4 p-3 rounded-md ${balanced ? 'bg-white/10' : 'bg-white/10'}`}>
+                  <div
+                    className={`mt-4 p-3 rounded-md ${balanced ? "bg-white/10" : "bg-white/10"}`}
+                  >
                     <div className="text-xs">Status</div>
                     <div className="mt-2 font-semibold flex items-center justify-between">
-                      <span>{balanced ? 'Balanced' : 'Difference'}</span>
+                      <span>{balanced ? "Balanced" : "Difference"}</span>
                       <span>{nf(Math.abs(totalDebit - totalCredit))}</span>
                     </div>
                   </div>
@@ -152,8 +200,12 @@ const TrialBalance: React.FC<Props> = ({
                 <div className="mt-4 bg-white rounded-lg border border-gray-100 p-3 shadow-sm">
                   <div className="text-xs text-gray-500">Actions</div>
                   <div className="mt-3 flex flex-col gap-2">
-                    <button className="px-3 py-2 rounded-md bg-blue-50 text-slate-700 font-medium">Download CSV</button>
-                    <button className="px-3 py-2 rounded-md bg-white border border-gray-200">Print</button>
+                    <button className="px-3 py-2 rounded-md bg-blue-50 text-slate-700 font-medium">
+                      Download CSV
+                    </button>
+                    <button className="px-3 py-2 rounded-md bg-white border border-gray-200">
+                      Print
+                    </button>
                   </div>
                 </div>
               </aside>

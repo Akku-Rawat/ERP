@@ -17,7 +17,9 @@ const ApprovalsSection: React.FC<ApprovalsSectionProps> = ({ onAdd }) => {
 
   return (
     <div className="text-center py-12">
-      <h3 className="text-xl font-semibold text-gray-700 mb-2">Pending Approvals</h3>
+      <h3 className="text-xl font-semibold text-gray-700 mb-2">
+        Pending Approvals
+      </h3>
       <p className="text-gray-500">
         Approval workflow interface will be implemented here.
       </p>

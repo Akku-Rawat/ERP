@@ -26,7 +26,9 @@ const ItemsCategory: React.FC<ProductsProps> = ({
   onAdd,
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<Product | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Product | null>(
+    null,
+  );
 
   const filteredProducts = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -35,7 +37,7 @@ const ItemsCategory: React.FC<ProductsProps> = ({
         p.id.toLowerCase().includes(term) ||
         p.name.toLowerCase().includes(term) ||
         p.supplier.toLowerCase().includes(term) ||
-        p.category.toLowerCase().includes(term)
+        p.category.toLowerCase().includes(term),
     );
   }, [products, searchTerm]);
 
@@ -104,8 +106,12 @@ const ItemsCategory: React.FC<ProductsProps> = ({
                 key={p.id}
                 className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
               >
-                <td className="px-6 py-4 font-mono text-sm text-indigo-600">{p.id}</td>
-                <td className="px-6 py-4 font-medium text-gray-900">{p.name}</td>
+                <td className="px-6 py-4 font-mono text-sm text-indigo-600">
+                  {p.id}
+                </td>
+                <td className="px-6 py-4 font-medium text-gray-900">
+                  {p.name}
+                </td>
                 <td className="px-6 py-4">{p.category}</td>
                 <td className="px-6 py-4">{p.stock}</td>
                 <td className="px-6 py-4">{p.minStock}</td>

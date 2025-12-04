@@ -1,7 +1,14 @@
-import React from 'react';
-import { XCircle, Download, Send, ArrowUp, ArrowDown, CheckCircle } from 'lucide-react';
-import type { PayrollRecord } from '../../../views/hr/payroll/types';
-import { downloadPayslip } from '../../../views/hr/payroll/utils';
+import React from "react";
+import {
+  XCircle,
+  Download,
+  Send,
+  ArrowUp,
+  ArrowDown,
+  CheckCircle,
+} from "lucide-react";
+import type { PayrollRecord } from "../../../views/hr/payroll/types";
+import { downloadPayslip } from "../../../views/hr/payroll/utils";
 
 interface PayslipModalProps {
   show: boolean;
@@ -11,20 +18,24 @@ interface PayslipModalProps {
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case 'Paid': return <CheckCircle className="w-4 h-4" />;
-    default: return null;
+    case "Paid":
+      return <CheckCircle className="w-4 h-4" />;
+    default:
+      return null;
   }
 };
 
 export const PayslipModal: React.FC<PayslipModalProps> = ({
   show,
   onClose,
-  employee
+  employee,
 }) => {
   if (!show || !employee) return null;
 
   const handleEmailPayslip = () => {
-    alert(`Payslip sent to ${employee.employeeName}'s registered email address!`);
+    alert(
+      `Payslip sent to ${employee.employeeName}'s registered email address!`,
+    );
   };
 
   return (
@@ -34,7 +45,12 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold">Payslip</h2>
-              <p className="text-teal-100 mt-1">{new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+              <p className="text-teal-100 mt-1">
+                {new Date().toLocaleDateString("en-US", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
             </div>
             <button
               onClick={onClose}
@@ -48,36 +64,66 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
         <div className="p-8 space-y-6">
           <div className="grid grid-cols-2 gap-6 pb-6 border-b border-slate-200">
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Employee ID</p>
-              <p className="font-semibold text-slate-800">{employee.employeeId}</p>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
+                Employee ID
+              </p>
+              <p className="font-semibold text-slate-800">
+                {employee.employeeId}
+              </p>
             </div>
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Name</p>
-              <p className="font-semibold text-slate-800">{employee.employeeName}</p>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
+                Name
+              </p>
+              <p className="font-semibold text-slate-800">
+                {employee.employeeName}
+              </p>
             </div>
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Designation</p>
-              <p className="font-semibold text-slate-800">{employee.designation}</p>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
+                Designation
+              </p>
+              <p className="font-semibold text-slate-800">
+                {employee.designation}
+              </p>
             </div>
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Department</p>
-              <p className="font-semibold text-slate-800">{employee.department}</p>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
+                Department
+              </p>
+              <p className="font-semibold text-slate-800">
+                {employee.department}
+              </p>
             </div>
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Grade</p>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
+                Grade
+              </p>
               <p className="font-semibold text-slate-800">{employee.grade}</p>
             </div>
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Bank Account</p>
-              <p className="font-semibold text-slate-800">{employee.bankAccount}</p>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
+                Bank Account
+              </p>
+              <p className="font-semibold text-slate-800">
+                {employee.bankAccount}
+              </p>
             </div>
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Working Days</p>
-              <p className="font-semibold text-slate-800">{employee.workingDays}</p>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
+                Working Days
+              </p>
+              <p className="font-semibold text-slate-800">
+                {employee.workingDays}
+              </p>
             </div>
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Paid Days</p>
-              <p className="font-semibold text-slate-800">{employee.paidDays}</p>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
+                Paid Days
+              </p>
+              <p className="font-semibold text-slate-800">
+                {employee.paidDays}
+              </p>
             </div>
           </div>
 
@@ -90,19 +136,27 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-slate-600">Basic Salary</span>
-                  <span className="font-semibold text-slate-800">₹{employee.basicSalary.toLocaleString()}</span>
+                  <span className="font-semibold text-slate-800">
+                    ₹{employee.basicSalary.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">HRA</span>
-                  <span className="font-semibold text-slate-800">₹{employee.hra.toLocaleString()}</span>
+                  <span className="font-semibold text-slate-800">
+                    ₹{employee.hra.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">Allowances</span>
-                  <span className="font-semibold text-slate-800">₹{employee.allowances.toLocaleString()}</span>
+                  <span className="font-semibold text-slate-800">
+                    ₹{employee.allowances.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between pt-3 border-t-2 border-emerald-200">
                   <span className="font-bold text-emerald-800">Gross Pay</span>
-                  <span className="font-bold text-emerald-800">₹{employee.grossPay.toLocaleString()}</span>
+                  <span className="font-bold text-emerald-800">
+                    ₹{employee.grossPay.toLocaleString()}
+                  </span>
                 </div>
               </div>
             </div>
@@ -115,19 +169,34 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-slate-600">Tax Deduction</span>
-                  <span className="font-semibold text-slate-800">₹{employee.taxDeduction.toLocaleString()}</span>
+                  <span className="font-semibold text-slate-800">
+                    ₹{employee.taxDeduction.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">PF Deduction</span>
-                  <span className="font-semibold text-slate-800">₹{employee.pfDeduction.toLocaleString()}</span>
+                  <span className="font-semibold text-slate-800">
+                    ₹{employee.pfDeduction.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600">Other Deductions</span>
-                  <span className="font-semibold text-slate-800">₹{employee.otherDeductions.toLocaleString()}</span>
+                  <span className="font-semibold text-slate-800">
+                    ₹{employee.otherDeductions.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between pt-3 border-t-2 border-red-200">
-                  <span className="font-bold text-red-800">Total Deductions</span>
-                  <span className="font-bold text-red-800">₹{(employee.taxDeduction + employee.pfDeduction + employee.otherDeductions).toLocaleString()}</span>
+                  <span className="font-bold text-red-800">
+                    Total Deductions
+                  </span>
+                  <span className="font-bold text-red-800">
+                    ₹
+                    {(
+                      employee.taxDeduction +
+                      employee.pfDeduction +
+                      employee.otherDeductions
+                    ).toLocaleString()}
+                  </span>
                 </div>
               </div>
             </div>
@@ -136,16 +205,22 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
           <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl p-6 text-white">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-teal-100 text-sm mb-1">Net Salary (Take Home)</p>
-                <p className="text-4xl font-bold">₹{employee.netPay.toLocaleString()}</p>
+                <p className="text-teal-100 text-sm mb-1">
+                  Net Salary (Take Home)
+                </p>
+                <p className="text-4xl font-bold">
+                  ₹{employee.netPay.toLocaleString()}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-teal-100 text-sm mb-1">Status</p>
-                <span className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold ${
-                  employee.status === 'Paid' 
-                    ? 'bg-white/20 text-white' 
-                    : 'bg-amber-100 text-amber-700'
-                }`}>
+                <span
+                  className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold ${
+                    employee.status === "Paid"
+                      ? "bg-white/20 text-white"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
                   {getStatusIcon(employee.status)}
                   {employee.status}
                 </span>
@@ -160,7 +235,8 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
 
           <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
             <p className="text-xs text-slate-600 text-center">
-              This is a computer-generated payslip and does not require a signature.
+              This is a computer-generated payslip and does not require a
+              signature.
             </p>
             <p className="text-xs text-slate-500 text-center mt-1">
               Generated on: {new Date().toLocaleString()}

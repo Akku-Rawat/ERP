@@ -16,9 +16,30 @@ interface RFQsTableProps {
 }
 
 const initialRFQs: RFQ[] = [
-  { id: "RFQ-001", supplier: "TechSupply Co", date: "2025-01-10", amount: 50000, status: "Awaiting Response", dueDate: "2025-01-25" },
-  { id: "RFQ-002", supplier: "Office Solutions", date: "2025-01-12", amount: 25000, status: "Received", dueDate: "2025-01-27" },
-  { id: "RFQ-003", supplier: "Equipment Plus", date: "2025-01-14", amount: 75000, status: "In Review", dueDate: "2025-01-29" },
+  {
+    id: "RFQ-001",
+    supplier: "TechSupply Co",
+    date: "2025-01-10",
+    amount: 50000,
+    status: "Awaiting Response",
+    dueDate: "2025-01-25",
+  },
+  {
+    id: "RFQ-002",
+    supplier: "Office Solutions",
+    date: "2025-01-12",
+    amount: 25000,
+    status: "Received",
+    dueDate: "2025-01-27",
+  },
+  {
+    id: "RFQ-003",
+    supplier: "Equipment Plus",
+    date: "2025-01-14",
+    amount: 75000,
+    status: "In Review",
+    dueDate: "2025-01-29",
+  },
 ];
 
 const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
@@ -32,7 +53,7 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
       (rfq) =>
         rfq.id.toLowerCase().includes(term) ||
         rfq.supplier.toLowerCase().includes(term) ||
-        rfq.status.toLowerCase().includes(term)
+        rfq.status.toLowerCase().includes(term),
     );
   }, [searchTerm]);
 
@@ -46,7 +67,7 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
 
   const handleEdit = (rfq: RFQ, e: React.MouseEvent) => {
     e.stopPropagation();
-    setSelectedRFQ(rfq);  // Set the RFQ being edited
+    setSelectedRFQ(rfq); // Set the RFQ being edited
     setModalOpen(true);
   };
 
@@ -102,8 +123,12 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
                 key={rfq.id}
                 className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
               >
-                <td className="px-6 py-4 font-mono text-sm text-indigo-600">{rfq.id}</td>
-                <td className="px-6 py-4 font-medium text-gray-900">{rfq.supplier}</td>
+                <td className="px-6 py-4 font-mono text-sm text-indigo-600">
+                  {rfq.id}
+                </td>
+                <td className="px-6 py-4 font-medium text-gray-900">
+                  {rfq.supplier}
+                </td>
                 <td className="px-6 py-4">{rfq.date}</td>
                 <td className="px-6 py-4">${rfq.amount.toLocaleString()}</td>
                 <td className="px-6 py-4">
@@ -112,8 +137,8 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
                       rfq.status === "Received"
                         ? "bg-green-100 text-green-800"
                         : rfq.status === "In Review"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-blue-100 text-blue-800"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-blue-100 text-blue-800"
                     }`}
                   >
                     {rfq.status}
@@ -149,7 +174,11 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
         )}
       </div>
       {/* Pass RFQ to modal for edit */}
-      <RfqTabsModal isOpen={modalOpen} onClose={handleCloseModal} rfq={selectedRFQ} />
+      <RfqTabsModal
+        isOpen={modalOpen}
+        onClose={handleCloseModal}
+        rfq={selectedRFQ}
+      />
     </div>
   );
 };

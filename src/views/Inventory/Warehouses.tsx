@@ -25,7 +25,9 @@ const Warehouses: React.FC<WarehousesProps> = ({
   onAdd,
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(
+    null,
+  );
 
   const filteredWarehouses = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -34,7 +36,7 @@ const Warehouses: React.FC<WarehousesProps> = ({
         w.id.toLowerCase().includes(term) ||
         w.name.toLowerCase().includes(term) ||
         w.location.toLowerCase().includes(term) ||
-        w.manager.toLowerCase().includes(term)
+        w.manager.toLowerCase().includes(term),
     );
   }, [warehouses, searchTerm]);
 
@@ -102,8 +104,12 @@ const Warehouses: React.FC<WarehousesProps> = ({
                 key={w.id}
                 className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
               >
-                <td className="px-6 py-4 font-mono text-sm text-indigo-600">{w.id}</td>
-                <td className="px-6 py-4 font-medium text-gray-900">{w.name}</td>
+                <td className="px-6 py-4 font-mono text-sm text-indigo-600">
+                  {w.id}
+                </td>
+                <td className="px-6 py-4 font-medium text-gray-900">
+                  {w.name}
+                </td>
                 <td className="px-6 py-4">{w.location}</td>
                 <td className="px-6 py-4">{w.manager}</td>
                 <td className="px-6 py-4">{w.items}</td>

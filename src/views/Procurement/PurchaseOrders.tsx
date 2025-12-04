@@ -16,15 +16,38 @@ interface PurchaseOrdersTableProps {
 }
 
 const initialOrders: PurchaseOrder[] = [
-  { id: "PO-001", supplier: "TechSupply Co", date: "2025-01-15", amount: 48000, status: "Approved", deliveryDate: "2025-02-01" },
-  { id: "PO-002", supplier: "Office Solutions", date: "2025-01-16", amount: 23000, status: "Pending", deliveryDate: "2025-02-05" },
-  { id: "PO-003", supplier: "Equipment Plus", date: "2025-01-17", amount: 72000, status: "Draft", deliveryDate: "2025-02-10" },
+  {
+    id: "PO-001",
+    supplier: "TechSupply Co",
+    date: "2025-01-15",
+    amount: 48000,
+    status: "Approved",
+    deliveryDate: "2025-02-01",
+  },
+  {
+    id: "PO-002",
+    supplier: "Office Solutions",
+    date: "2025-01-16",
+    amount: 23000,
+    status: "Pending",
+    deliveryDate: "2025-02-05",
+  },
+  {
+    id: "PO-003",
+    supplier: "Equipment Plus",
+    date: "2025-01-17",
+    amount: 72000,
+    status: "Draft",
+    deliveryDate: "2025-02-10",
+  },
 ];
 
 const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(
+    null,
+  );
 
   const filteredOrders = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -32,7 +55,7 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
       (po) =>
         po.id.toLowerCase().includes(term) ||
         po.supplier.toLowerCase().includes(term) ||
-        po.status.toLowerCase().includes(term)
+        po.status.toLowerCase().includes(term),
     );
   }, [searchTerm]);
 
@@ -102,8 +125,12 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
                 key={order.id}
                 className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
               >
-                <td className="px-6 py-4 font-mono text-sm text-indigo-600">{order.id}</td>
-                <td className="px-6 py-4 font-medium text-gray-900">{order.supplier}</td>
+                <td className="px-6 py-4 font-mono text-sm text-indigo-600">
+                  {order.id}
+                </td>
+                <td className="px-6 py-4 font-medium text-gray-900">
+                  {order.supplier}
+                </td>
                 <td className="px-6 py-4">{order.date}</td>
                 <td className="px-6 py-4">${order.amount.toLocaleString()}</td>
                 <td className="px-6 py-4">
@@ -112,8 +139,8 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
                       order.status === "Approved"
                         ? "bg-green-100 text-green-800"
                         : order.status === "Pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-gray-100 text-gray-800"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-gray-100 text-gray-800"
                     }`}
                   >
                     {order.status}
@@ -144,12 +171,18 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
         </table>
         {filteredOrders.length === 0 && (
           <div className="text-center py-16 text-gray-500">
-            {searchTerm ? "No Purchase Orders match your search." : "No Purchase Orders added yet."}
+            {searchTerm
+              ? "No Purchase Orders match your search."
+              : "No Purchase Orders added yet."}
           </div>
         )}
       </div>
       {/* Pass PO to modal for add/edit */}
-      <PurchaseOrderModal isOpen={modalOpen} onClose={handleCloseModal} order={selectedOrder} />
+      <PurchaseOrderModal
+        isOpen={modalOpen}
+        onClose={handleCloseModal}
+        order={selectedOrder}
+      />
     </div>
   );
 };

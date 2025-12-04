@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Plus, Edit2, Trash2, Search, Calendar, MapPin, TrendingUp } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Search,
+  Calendar,
+  MapPin,
+  TrendingUp,
+} from "lucide-react";
 import InvoiceModal from "../../components/sales/InvoiceModal";
 
 interface InvoiceItem {
@@ -50,8 +58,22 @@ const sampleInvoices: InvoiceData[] = [
     adjustment: 0,
     grandTotal: 25000,
     items: [
-      { productName: "ERP Setup", description: "Full company license", quantity: 1, listPrice: 20000, discount: 0, tax: 2500 },
-      { productName: "Support", description: "Annual maintenance", quantity: 1, listPrice: 2000, discount: 0, tax: 500 },
+      {
+        productName: "ERP Setup",
+        description: "Full company license",
+        quantity: 1,
+        listPrice: 20000,
+        discount: 0,
+        tax: 2500,
+      },
+      {
+        productName: "Support",
+        description: "Annual maintenance",
+        quantity: 1,
+        listPrice: 2000,
+        discount: 0,
+        tax: 500,
+      },
     ],
     paymentTerms: "Net 10",
     notes: "Thank you for your business!",
@@ -73,8 +95,22 @@ const sampleInvoices: InvoiceData[] = [
     adjustment: 0,
     grandTotal: 35000,
     items: [
-      { productName: "Data Import", description: "All branch migration", quantity: 1, listPrice: 30000, discount: 0, tax: 2400 },
-      { productName: "Consulting", description: "Site visit x2", quantity: 2, listPrice: 1000, discount: 0, tax: 600 },
+      {
+        productName: "Data Import",
+        description: "All branch migration",
+        quantity: 1,
+        listPrice: 30000,
+        discount: 0,
+        tax: 2400,
+      },
+      {
+        productName: "Consulting",
+        description: "Site visit x2",
+        quantity: 2,
+        listPrice: 1000,
+        discount: 0,
+        tax: 600,
+      },
     ],
     paymentTerms: "Net 10",
     notes: "",
@@ -84,12 +120,14 @@ const sampleInvoices: InvoiceData[] = [
 const InvoicesTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(
+    null,
+  );
 
   const filteredInvoices = sampleInvoices.filter(
     (inv) =>
       inv.invoiceId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inv.CutomerName.toLowerCase().includes(searchTerm.toLowerCase())
+      inv.CutomerName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleAddClick = () => {
@@ -162,10 +200,10 @@ const InvoicesTable: React.FC = () => {
             </thead>
             <tbody>
               {filteredInvoices.map((inv, idx) => (
-                <tr 
-                  key={inv.invoiceId || inv.invoiceNumber} 
+                <tr
+                  key={inv.invoiceId || inv.invoiceNumber}
                   className={`border-b border-gray-100 hover:bg-teal-50 cursor-pointer transition-all duration-300 group ${
-                    idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                    idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
                   }`}
                 >
                   <td className="px-6 py-5">
@@ -187,7 +225,9 @@ const InvoicesTable: React.FC = () => {
                         </span>
                         <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5">
                           <MapPin className="w-3 h-3 text-gray-400" />
-                          <span>{inv.billingCity}, {inv.billingState}</span>
+                          <span>
+                            {inv.billingCity}, {inv.billingState}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -195,19 +235,25 @@ const InvoicesTable: React.FC = () => {
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                      <span className="text-sm font-medium text-gray-700">{inv.dateOfInvoice}</span>
+                      <span className="text-sm font-medium text-gray-700">
+                        {inv.dateOfInvoice}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                      <span className="text-sm font-medium text-gray-700">{inv.dueDate}</span>
+                      <span className="text-sm font-medium text-gray-700">
+                        {inv.dueDate}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-5">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 border border-emerald-200 shadow-sm group-hover:border-emerald-300 transition-all">
                       <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-emerald-700 font-semibold text-sm">₹{inv.grandTotal.toLocaleString("en-IN")}</span>
+                      <span className="text-emerald-700 font-semibold text-sm">
+                        ₹{inv.grandTotal.toLocaleString("en-IN")}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-5">
@@ -237,8 +283,12 @@ const InvoicesTable: React.FC = () => {
                       <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
                         <Search className="w-8 h-8 text-gray-400" />
                       </div>
-                      <p className="text-gray-500 font-medium">No invoices found</p>
-                      <p className="text-gray-400 text-sm">Try adjusting your search</p>
+                      <p className="text-gray-500 font-medium">
+                        No invoices found
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Try adjusting your search
+                      </p>
                     </div>
                   </td>
                 </tr>
@@ -247,9 +297,8 @@ const InvoicesTable: React.FC = () => {
           </table>
         </div>
       </div>
-      
-     
-     <InvoiceModal
+
+      <InvoiceModal
         isOpen={modalOpen}
         onClose={handleCloseModal}
         invoice={selectedInvoice}
@@ -258,7 +307,6 @@ const InvoicesTable: React.FC = () => {
           // Add/save logic here
         }}
       />
-    
     </div>
   );
 };

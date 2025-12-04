@@ -35,7 +35,10 @@ export const LeaveType: React.FC<LeaveTypeProps> = ({ onAdd, onClose }) => {
         <div className="p-6 flex items-center justify-between border-b border-slate-100 bg-white">
           <div className="flex items-center gap-3">
             {onClose && (
-              <button onClick={onClose} className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+              <button
+                onClick={onClose}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+              >
                 <FaArrowLeft className="w-5 h-5" /> Back
               </button>
             )}
@@ -43,19 +46,29 @@ export const LeaveType: React.FC<LeaveTypeProps> = ({ onAdd, onClose }) => {
           </div>
 
           <div className="flex items-center gap-3">
-            <button onClick={onAdd} className="px-4 py-2 bg-gray-200 text-gray-700 rounded">+ Add Leave Type</button>
+            <button
+              onClick={onAdd}
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded"
+            >
+              + Add Leave Type
+            </button>
           </div>
         </div>
 
         <div className="p-4">
           <div className="flex items-center gap-3 mb-4">
-            <div className="ml-auto text-sm text-slate-600">Last Updated On</div>
+            <div className="ml-auto text-sm text-slate-600">
+              Last Updated On
+            </div>
           </div>
 
           <div className="min-h-[280px]">
             <ul className="divide-y divide-slate-100">
               {rows.map((t, i) => (
-                <li key={i} className="flex items-center justify-between py-3 px-2">
+                <li
+                  key={i}
+                  className="flex items-center justify-between py-3 px-2"
+                >
                   <div className="flex items-center gap-3">
                     <input type="checkbox" className="w-4 h-4" />
                     <div>

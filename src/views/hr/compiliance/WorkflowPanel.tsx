@@ -1,7 +1,6 @@
-
-import React from 'react';
-import Card from './Card';
-import { vendorList } from './data';
+import React from "react";
+import Card from "./Card";
+import { vendorList } from "./data";
 
 const VendorPanel: React.FC = () => {
   return (
@@ -14,8 +13,14 @@ const VendorPanel: React.FC = () => {
               <div className="text-xs text-gray-500">Expires: {v.expiry}</div>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`px-3 py-1 text-xs rounded-full ${v.risk === 'High' ? 'bg-red-100 text-red-700' : v.risk === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-700'}`}>{v.risk}</span>
-              <button className="text-sm text-indigo-600 hover:underline">View</button>
+              <span
+                className={`px-3 py-1 text-xs rounded-full ${v.risk === "High" ? "bg-red-100 text-red-700" : v.risk === "Medium" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-700"}`}
+              >
+                {v.risk}
+              </span>
+              <button className="text-sm text-indigo-600 hover:underline">
+                View
+              </button>
             </div>
           </div>
         ))}
@@ -25,4 +30,3 @@ const VendorPanel: React.FC = () => {
 };
 
 export default VendorPanel;
-

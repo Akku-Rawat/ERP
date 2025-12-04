@@ -1,8 +1,8 @@
 export const isDemoEnabled = (): boolean => {
   try {
-    const v = localStorage.getItem('useDemoData');
+    const v = localStorage.getItem("useDemoData");
     if (v === null) return true; // default ON
-    return v === 'true';
+    return v === "true";
   } catch (e) {
     return true;
   }

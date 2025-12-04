@@ -52,7 +52,7 @@ function SupplierDropdown({
   }, [open]);
 
   const filtered = suppliers.filter((s: { name: string }) =>
-    s.name.toLowerCase().includes(search.toLowerCase())
+    s.name.toLowerCase().includes(search.toLowerCase()),
   );
   const selected = suppliers.find((s) => s.name === value);
 
@@ -195,7 +195,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
   const [page, setPage] = useState(0);
   const paginatedItems = items.slice(
     page * itemsPerPage,
-    (page + 1) * itemsPerPage
+    (page + 1) * itemsPerPage,
   );
 
   const [suppliers, setSuppliers] = useState<{ name: string }[]>([]);
@@ -210,7 +210,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
   const [taxPage, setTaxPage] = useState(0);
   const paginatedTaxRows = taxRows.slice(
     taxPage * taxItemsPerPage,
-    (taxPage + 1) * taxItemsPerPage
+    (taxPage + 1) * taxItemsPerPage,
   );
 
   const addTaxRow = () => {
@@ -258,7 +258,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
   const [paymentPage, setPaymentPage] = useState(0);
   const paginatedPaymentRows = paymentRows.slice(
     paymentPage * paymentItemsPerPage,
-    (paymentPage + 1) * paymentItemsPerPage
+    (paymentPage + 1) * paymentItemsPerPage,
   );
 
   const addPaymentRow = () => {
@@ -280,13 +280,13 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
 
   const removePaymentRow = (idx: number) =>
     setPaymentRows((rows) =>
-      rows.length === 1 ? rows : rows.filter((_, i) => i !== idx)
+      rows.length === 1 ? rows : rows.filter((_, i) => i !== idx),
     );
 
   const handlePaymentRowChange = (
     idx: number,
     key: keyof PaymentRow,
-    value: any
+    value: any,
   ) => {
     setPaymentRows((rows) => {
       const updated = [...rows];
@@ -334,7 +334,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
     const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
     const grandTotal = items.reduce(
       (sum, item) => sum + item.quantity * item.rate,
-      0
+      0,
     );
     const roundedTotal = Math.round(grandTotal);
     const roundingAdjustment = roundedTotal - grandTotal;
@@ -351,7 +351,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
   const handleForm = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const name = e.target.name as keyof FormData;
     const value = e.target.value;
@@ -507,14 +507,14 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                     {tab === "details"
                       ? "Details"
                       : tab === "email"
-                      ? "Email"
-                      : tab === "tax"
-                      ? "Tax"
-                      : tab === "address"
-                      ? "Address"
-                      : "Terms and Conditions"}
+                        ? "Email"
+                        : tab === "tax"
+                          ? "Tax"
+                          : tab === "address"
+                            ? "Address"
+                            : "Terms and Conditions"}
                   </button>
-                )
+                ),
               )}
             </div>
 
@@ -1155,7 +1155,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                                         handleTaxRowChange(
                                           i,
                                           "type",
-                                          e.target.value
+                                          e.target.value,
                                         )
                                       }
                                     />
@@ -1169,7 +1169,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                                         handleTaxRowChange(
                                           i,
                                           "accountHead",
-                                          e.target.value
+                                          e.target.value,
                                         )
                                       }
                                     />
@@ -1184,7 +1184,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                                         handleTaxRowChange(
                                           i,
                                           "taxRate",
-                                          Number(e.target.value)
+                                          Number(e.target.value),
                                         )
                                       }
                                     />
@@ -1199,7 +1199,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                                         handleTaxRowChange(
                                           i,
                                           "amount",
-                                          Number(e.target.value)
+                                          Number(e.target.value),
                                         )
                                       }
                                     />
@@ -1233,7 +1233,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                         –
                         {Math.min(
                           (taxPage + 1) * taxItemsPerPage,
-                          taxRows.length
+                          taxRows.length,
                         )}{" "}
                         of {taxRows.length}
                       </span>
@@ -1343,7 +1343,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
 
               {/* TERMS TAB */}
               {activeTab === "terms" && (
-               <div className="space-y-8 mx-auto bg-white rounded-lg p-6  ">
+                <div className="space-y-8 mx-auto bg-white rounded-lg p-6  ">
                   <div>
                     <h3 className="mb-2 text-lg font-semibold text-gray-800">
                       Payment Terms
@@ -1393,7 +1393,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                                           handlePaymentRowChange(
                                             i,
                                             "paymentTerm",
-                                            e.target.value
+                                            e.target.value,
                                           )
                                         }
                                       />
@@ -1407,7 +1407,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                                           handlePaymentRowChange(
                                             i,
                                             "description",
-                                            e.target.value
+                                            e.target.value,
                                           )
                                         }
                                       />
@@ -1422,7 +1422,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                                           handlePaymentRowChange(
                                             i,
                                             "dueDate",
-                                            e.target.value
+                                            e.target.value,
                                           )
                                         }
                                       />
@@ -1437,7 +1437,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                                           handlePaymentRowChange(
                                             i,
                                             "invoicePortion",
-                                            Number(e.target.value)
+                                            Number(e.target.value),
                                           )
                                         }
                                       />
@@ -1452,7 +1452,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                                           handlePaymentRowChange(
                                             i,
                                             "paymentAmount",
-                                            Number(e.target.value)
+                                            Number(e.target.value),
                                           )
                                         }
                                       />
@@ -1484,7 +1484,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                           –
                           {Math.min(
                             (paymentPage + 1) * paymentItemsPerPage,
-                            paymentRows.length
+                            paymentRows.length,
                           )}{" "}
                           of {paymentRows.length}
                         </span>

@@ -1,7 +1,7 @@
-import React from 'react';
-import { ShieldCheck, Bell, AlertTriangle, FileText } from 'lucide-react';
-import Card from './Card';
-import { demoStats } from './data';
+import React from "react";
+import { ShieldCheck, Bell, AlertTriangle, FileText } from "lucide-react";
+import Card from "./Card";
+import { demoStats } from "./data";
 
 /**
  * Adjusted visuals:
@@ -20,8 +20,12 @@ const OverviewCards: React.FC = () => {
           </div>
           <div>
             <div className="text-xs text-gray-500">Compliance Score</div>
-            <div className="text-2xl font-bold text-gray-900">{demoStats.compliancePct}%</div>
-            <div className="text-xs text-gray-400">Overall organisational compliance</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {demoStats.compliancePct}%
+            </div>
+            <div className="text-xs text-gray-400">
+              Overall organisational compliance
+            </div>
           </div>
         </div>
       </Card>
@@ -33,8 +37,12 @@ const OverviewCards: React.FC = () => {
           </div>
           <div>
             <div className="text-xs text-gray-500">Upcoming Expiries</div>
-            <div className="text-2xl font-bold text-gray-900">{demoStats.upcomingExpiries}</div>
-            <div className="text-xs text-gray-400">Documents & certifications</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {demoStats.upcomingExpiries}
+            </div>
+            <div className="text-xs text-gray-400">
+              Documents & certifications
+            </div>
           </div>
         </div>
       </Card>
@@ -46,8 +54,12 @@ const OverviewCards: React.FC = () => {
           </div>
           <div>
             <div className="text-xs text-gray-500">Overdue Tasks</div>
-            <div className="text-2xl font-bold text-gray-900">{demoStats.overdueTasks}</div>
-            <div className="text-xs text-gray-400">Requires immediate action</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {demoStats.overdueTasks}
+            </div>
+            <div className="text-xs text-gray-400">
+              Requires immediate action
+            </div>
           </div>
         </div>
       </Card>
@@ -59,7 +71,9 @@ const OverviewCards: React.FC = () => {
           </div>
           <div>
             <div className="text-xs text-gray-500">Violations</div>
-            <div className="text-2xl font-bold text-gray-900">{demoStats.violations}</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {demoStats.violations}
+            </div>
             <div className="text-xs text-gray-400">Logged breaches</div>
           </div>
         </div>

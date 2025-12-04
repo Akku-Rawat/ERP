@@ -11,7 +11,7 @@ import {
   FaSignOutAlt,
   FaCog,
   FaUserTie,
-  FaBuilding
+  FaBuilding,
 } from "react-icons/fa";
 
 interface SidebarProps {
@@ -29,7 +29,7 @@ const menuItems = [
   { name: "Hr", to: "/hr", icon: <FaUserTie /> },
   { name: "User Management", to: "/userManagement", icon: <FaUsers /> },
   { name: "CompanySetup", to: "/companySetup", icon: <FaBuilding /> },
-  { name: "Settings", to: "/settings", icon: <FaCog /> }
+  { name: "Settings", to: "/settings", icon: <FaCog /> },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
@@ -53,7 +53,9 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b shadow-sm">
             <div className="flex items-center space-x-2">
-              {open && <h2 className="text-2xl font-semibold text-main">ERP</h2>}
+              {open && (
+                <h2 className="text-2xl font-semibold text-main">ERP</h2>
+              )}
             </div>
             <button
               onClick={() => setOpen(!open)}
@@ -119,7 +121,9 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
                     to={item.to}
                     key={item.name}
                     onClick={() => setMobileOpen(false)}
-                    className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                    className={({ isActive }) =>
+                      `nav-link ${isActive ? "active" : ""}`
+                    }
                   >
                     <span className="text-xl nav-icon">{item.icon}</span>
                     <span className="nav-text">{item.name}</span>

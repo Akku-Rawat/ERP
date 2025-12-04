@@ -30,7 +30,7 @@ const SupportTickets: React.FC<TicketsProps> = ({ tickets, onAdd }) => {
         t.customer.toLowerCase().includes(term) ||
         t.priority.toLowerCase().includes(term) ||
         t.status.toLowerCase().includes(term) ||
-        t.created.toLowerCase().includes(term)
+        t.created.toLowerCase().includes(term),
     );
   }, [tickets, searchTerm]);
 
@@ -91,9 +91,16 @@ const SupportTickets: React.FC<TicketsProps> = ({ tickets, onAdd }) => {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {filteredTickets.map((t) => (
-              <tr key={t.id} className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150">
-                <td className="px-6 py-4 font-mono text-sm text-indigo-600">{t.id}</td>
-                <td className="px-6 py-4 font-semibold text-gray-900">{t.title}</td>
+              <tr
+                key={t.id}
+                className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
+              >
+                <td className="px-6 py-4 font-mono text-sm text-indigo-600">
+                  {t.id}
+                </td>
+                <td className="px-6 py-4 font-semibold text-gray-900">
+                  {t.title}
+                </td>
                 <td className="px-6 py-4">{t.customer}</td>
                 <td className="px-6 py-4">
                   <span
@@ -101,8 +108,8 @@ const SupportTickets: React.FC<TicketsProps> = ({ tickets, onAdd }) => {
                       t.priority === "High"
                         ? "bg-red-100 text-red-800"
                         : t.priority === "Medium"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-green-100 text-green-800"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-green-100 text-green-800"
                     }`}
                   >
                     {t.priority}
@@ -114,8 +121,8 @@ const SupportTickets: React.FC<TicketsProps> = ({ tickets, onAdd }) => {
                       t.status === "Open"
                         ? "bg-blue-100 text-blue-800"
                         : t.status === "In Progress"
-                        ? "bg-purple-100 text-purple-800"
-                        : "bg-green-100 text-green-800"
+                          ? "bg-purple-100 text-purple-800"
+                          : "bg-green-100 text-green-800"
                     }`}
                   >
                     {t.status}

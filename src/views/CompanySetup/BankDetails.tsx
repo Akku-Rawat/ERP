@@ -26,7 +26,7 @@ interface Props {
 const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAccount, setSelectedAccount] = useState<number | null>(
-    bankAccounts.length > 0 ? 0 : null
+    bankAccounts.length > 0 ? 0 : null,
   );
   const [showAccountNumber, setShowAccountNumber] = useState<
     Record<number, boolean>
@@ -36,7 +36,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
     (acc) =>
       acc.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       acc.accountNumber.includes(searchTerm) ||
-      acc.ifscCode.toLowerCase().includes(searchTerm.toLowerCase())
+      acc.ifscCode.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const toggleAccountVisibility = (index: number) => {
@@ -76,18 +76,19 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
 
               {/* Add New Account Button */}
               <button
-  onClick={onAddAccount}
-  className="w-full px-4 py-2.5 rounded-lg shadow-sm
+                onClick={onAddAccount}
+                className="w-full px-4 py-2.5 rounded-lg shadow-sm
              text-sm font-semibold text-white
              flex items-center justify-center gap-2
              transition-all hover:opacity-95"
-  style={{
-    background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)'
-  }}
->
-  <FaPlus className="w-4 h-4" />
-  Add New Account
-</button>
+                style={{
+                  background:
+                    "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
+                }}
+              >
+                <FaPlus className="w-4 h-4" />
+                Add New Account
+              </button>
 
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {filteredAccounts.length === 0 ? (
@@ -201,7 +202,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                         {showAccountNumber[selectedAccount]
                           ? bankAccounts[selectedAccount].accountNumber
                           : maskAccountNumber(
-                              bankAccounts[selectedAccount].accountNumber
+                              bankAccounts[selectedAccount].accountNumber,
                             )}
                       </p>
                       <button
@@ -246,7 +247,13 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                     </label>
                     <div className="bg-card border border-theme rounded-lg px-4 py-3">
                       <span className="inline-flex items-center gap-2 text-success font-medium">
-                       <span className="w-2 h-2" style={{ background: 'var(--success)', borderRadius: 4 }}></span> 
+                        <span
+                          className="w-2 h-2"
+                          style={{
+                            background: "var(--success)",
+                            borderRadius: 4,
+                          }}
+                        ></span>
                         Active
                       </span>
                     </div>

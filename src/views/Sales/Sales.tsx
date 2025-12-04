@@ -22,7 +22,11 @@ const sales = {
     { id: "salesdashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
     { id: "quotations", name: "Quotations", icon: <FaFileInvoice /> },
     { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
-    { id: "proformaInvoice", name: "Proforma Invoice", icon: <FaFileInvoiceDollar /> },
+    {
+      id: "proformaInvoice",
+      name: "Proforma Invoice",
+      icon: <FaFileInvoiceDollar />,
+    },
     { id: "pos", name: "POS", icon: <FaCashRegister /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ],

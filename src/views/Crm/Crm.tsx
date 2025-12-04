@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 
-import CustomerManagement from "./CustomerManagement";        
+import CustomerManagement from "./CustomerManagement";
 import CRMDashboard from "./CRMDashboard";
 import CRMReports from "./Reports";
 import Leads from "./Leads";
 import SupportTickets from "./Support-tickets";
 
-import { 
-  FaUsers, 
+import {
+  FaUsers,
   FaUser,
-  FaTicketAlt,  
-  FaChartBar, 
+  FaTicketAlt,
+  FaChartBar,
   FaCalendarAlt,
-  FaIdBadge
+  FaIdBadge,
 } from "react-icons/fa";
 
 const crmModule = {
@@ -21,25 +21,92 @@ const crmModule = {
   defaultTab: "dashboard",
   tabs: [
     { id: "dashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
-    { id: "customer-managment", name: "Customer Management", icon: <FaIdBadge /> },
+    {
+      id: "customer-managment",
+      name: "Customer Management",
+      icon: <FaIdBadge />,
+    },
     { id: "leads", name: "Leads", icon: <FaUser /> },
     { id: "tickets", name: "Support Tickets", icon: <FaTicketAlt /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ],
   leads: [
-    { id: "LEAD-001", name: "Global Enterprises", contact: "Jane Wilson", status: "Qualified", value: 150000, source: "Website" },
-    { id: "LEAD-002", name: "StartupCo", contact: "Bob Chen", status: "New", value: 50000, source: "Referral" },
-    { id: "LEAD-003", name: "Manufacturing Inc", contact: "Alice Johnson", status: "Contacted", value: 80000, source: "Cold Call" },
+    {
+      id: "LEAD-001",
+      name: "Global Enterprises",
+      contact: "Jane Wilson",
+      status: "Qualified",
+      value: 150000,
+      source: "Website",
+    },
+    {
+      id: "LEAD-002",
+      name: "StartupCo",
+      contact: "Bob Chen",
+      status: "New",
+      value: 50000,
+      source: "Referral",
+    },
+    {
+      id: "LEAD-003",
+      name: "Manufacturing Inc",
+      contact: "Alice Johnson",
+      status: "Contacted",
+      value: 80000,
+      source: "Cold Call",
+    },
   ],
   opportunities: [
-    { id: "OPP-001", name: "Enterprise Software Deal", customer: "Global Enterprises", value: 150000, stage: "Proposal", probability: 70 },
-    { id: "OPP-002", name: "Startup Package", customer: "StartupCo", value: 50000, stage: "Qualification", probability: 30 },
-    { id: "OPP-003", name: "Manufacturing Solution", customer: "Manufacturing Inc", value: 80000, stage: "Needs Analysis", probability: 50 },
+    {
+      id: "OPP-001",
+      name: "Enterprise Software Deal",
+      customer: "Global Enterprises",
+      value: 150000,
+      stage: "Proposal",
+      probability: 70,
+    },
+    {
+      id: "OPP-002",
+      name: "Startup Package",
+      customer: "StartupCo",
+      value: 50000,
+      stage: "Qualification",
+      probability: 30,
+    },
+    {
+      id: "OPP-003",
+      name: "Manufacturing Solution",
+      customer: "Manufacturing Inc",
+      value: 80000,
+      stage: "Needs Analysis",
+      probability: 50,
+    },
   ],
   tickets: [
-    { id: "TICK-001", title: "System Login Issue", customer: "ABC Corporation", priority: "High", status: "Open", created: "2025-01-18" },
-    { id: "TICK-002", title: "Report Generation Error", customer: "XYZ Industries", priority: "Medium", status: "In Progress", created: "2025-01-17" },
-    { id: "TICK-003", title: "Feature Request - Export", customer: "Tech Solutions", priority: "Low", status: "Resolved", created: "2025-01-16" },
+    {
+      id: "TICK-001",
+      title: "System Login Issue",
+      customer: "ABC Corporation",
+      priority: "High",
+      status: "Open",
+      created: "2025-01-18",
+    },
+    {
+      id: "TICK-002",
+      title: "Report Generation Error",
+      customer: "XYZ Industries",
+      priority: "Medium",
+      status: "In Progress",
+      created: "2025-01-17",
+    },
+    {
+      id: "TICK-003",
+      title: "Feature Request - Export",
+      customer: "Tech Solutions",
+      priority: "Low",
+      status: "Resolved",
+      created: "2025-01-16",
+    },
   ],
 };
 
@@ -47,7 +114,7 @@ const CRM: React.FC = () => {
   const [activeTab, setActiveTab] = useState(crmModule.defaultTab);
 
   return (
-      <div className="bg-gray-50 h-screen overflow-auto">
+    <div className="bg-gray-50 h-screen overflow-auto">
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
         <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
@@ -72,26 +139,26 @@ const CRM: React.FC = () => {
         ))}
       </div>
 
-       <div className={activeTab === "customer-managment" ? "" : "p-6"}>
-        <div className={activeTab === "customer-managment" ? "" : "bg-white rounded-lg shadow-sm p-4"}>
+      <div className={activeTab === "customer-managment" ? "" : "p-6"}>
+        <div
+          className={
+            activeTab === "customer-managment"
+              ? ""
+              : "bg-white rounded-lg shadow-sm p-4"
+          }
+        >
           {activeTab === "dashboard" && <CRMDashboard />}
 
           {activeTab === "customer-managment" && (
             <CustomerManagement
-              // initialCustomers={crmModule.customers}
+            // initialCustomers={crmModule.customers}
             />
           )}
 
-          {activeTab === "leads" && (
-            <Leads
-              leads={crmModule.leads}
-            />
-          )}
+          {activeTab === "leads" && <Leads leads={crmModule.leads} />}
 
           {activeTab === "tickets" && (
-            <SupportTickets
-              tickets={crmModule.tickets}
-            />
+            <SupportTickets tickets={crmModule.tickets} />
           )}
 
           {activeTab === "reports" && <CRMReports />}

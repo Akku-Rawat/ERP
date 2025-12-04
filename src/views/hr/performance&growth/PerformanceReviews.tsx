@@ -76,7 +76,7 @@ const demoReviews: PerformanceReview[] = [
 ];
 
 const uniqueDepartments = Array.from(
-  new Set(demoReviews.map((r) => r.department))
+  new Set(demoReviews.map((r) => r.department)),
 );
 const uniqueCycles = Array.from(new Set(demoReviews.map((r) => r.cycle)));
 const uniqueManagers = Array.from(new Set(demoReviews.map((r) => r.manager)));
@@ -108,13 +108,13 @@ const PerformanceReviews: React.FC = () => {
   });
 
   const completedCount = demoReviews.filter(
-    (r) => r.status === "Completed"
+    (r) => r.status === "Completed",
   ).length;
   const inProgressCount = demoReviews.filter(
-    (r) => r.status === "In Progress"
+    (r) => r.status === "In Progress",
   ).length;
   const notStartedCount = demoReviews.filter(
-    (r) => r.status === "Not Started"
+    (r) => r.status === "Not Started",
   ).length;
 
   const avgRating =
@@ -279,9 +279,7 @@ const PerformanceReviews: React.FC = () => {
           <div className="relative">
             <select
               value={status}
-              onChange={(e) =>
-                setStatus(e.target.value as "" | ReviewStatus)
-              }
+              onChange={(e) => setStatus(e.target.value as "" | ReviewStatus)}
               className="px-4 py-2.5 pr-9 border border-gray-300 rounded-lg bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer"
             >
               <option value="">All Status</option>
@@ -349,9 +347,7 @@ const PerformanceReviews: React.FC = () => {
                         {r.rating.toFixed(1)} / 5
                       </span>
                     ) : (
-                      <span className="text-xs text-gray-400">
-                        Not rated
-                      </span>
+                      <span className="text-xs text-gray-400">Not rated</span>
                     )}
                   </td>
                   <td className="px-6 py-4">
@@ -360,8 +356,8 @@ const PerformanceReviews: React.FC = () => {
                         r.status === "Completed"
                           ? "bg-emerald-100 text-emerald-700"
                           : r.status === "In Progress"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-gray-100 text-gray-700"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-700"
                       }`}
                     >
                       {r.status}

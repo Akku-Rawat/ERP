@@ -1,7 +1,12 @@
 import React, { useState } from "react";
-import { FaPlus, FaSearch, FaEdit, FaTrash, FaInfoCircle } from "react-icons/fa";
-import AssignUserRoleModal
- from "../../components/User/AssignUserRoleModal";
+import {
+  FaPlus,
+  FaSearch,
+  FaEdit,
+  FaTrash,
+  FaInfoCircle,
+} from "react-icons/fa";
+import AssignUserRoleModal from "../../components/User/AssignUserRoleModal";
 interface Role {
   id: number;
   roleName: string;
@@ -21,7 +26,11 @@ interface AssignUserRoleForm {
 
 interface UserRoleProps {
   roles: Role[];
-  onSubmit: (data: AssignUserRoleForm, isEdit: boolean, roleId?: number) => void;
+  onSubmit: (
+    data: AssignUserRoleForm,
+    isEdit: boolean,
+    roleId?: number,
+  ) => void;
   onDelete: (id: number) => void;
 }
 
@@ -30,10 +39,10 @@ const UserRole: React.FC<UserRoleProps> = ({ roles, onSubmit, onDelete }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
 
-  const filteredRoles = roles.filter(role =>
-    Object.values(role).some(val =>
-      String(val).toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  const filteredRoles = roles.filter((role) =>
+    Object.values(role).some((val) =>
+      String(val).toLowerCase().includes(searchTerm.toLowerCase()),
+    ),
   );
 
   const handleAdd = () => {
@@ -73,7 +82,6 @@ const UserRole: React.FC<UserRoleProps> = ({ roles, onSubmit, onDelete }) => {
         <button
           onClick={handleAdd}
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium shadow-sm text-white bg-primary hover:bg-primary-600 transition"
-
         >
           <FaPlus /> Add Role
         </button>
@@ -85,26 +93,39 @@ const UserRole: React.FC<UserRoleProps> = ({ roles, onSubmit, onDelete }) => {
           <table className="w-full">
             <thead className="table-head">
               <tr>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Role Name</th>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Description</th>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Module Permissions</th>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Action Permissions</th>
-                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-center text-xs font-semibold text-muted uppercase tracking-wider">Actions</th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Role Name
+                </th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Description
+                </th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Module Permissions
+                </th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Action Permissions
+                </th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-semibold text-muted uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-theme">
               {filteredRoles.map((role) => (
                 <tr key={role.id} className="hover:row-hover transition-colors">
-                  <td className="px-6 py-4 font-medium text-main text-sm">{role.roleName}</td>
-                  <td className="px-6 py-4 text-sm text-muted max-w-xs truncate">{role.description}</td>
+                  <td className="px-6 py-4 font-medium text-main text-sm">
+                    {role.roleName}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-muted max-w-xs truncate">
+                    {role.description}
+                  </td>
                   <td className="px-6 py-4 text-sm">
                     <div className="flex flex-wrap gap-1">
                       {role.modulePermissions.slice(0, 3).map((module, idx) => (
-                        <span
-                          key={idx}
-                          className="badge-theme"
-                        >
+                        <span key={idx} className="badge-theme">
                           {module}
                         </span>
                       ))}
@@ -118,10 +139,7 @@ const UserRole: React.FC<UserRoleProps> = ({ roles, onSubmit, onDelete }) => {
                   <td className="px-6 py-4 text-sm">
                     <div className="flex flex-wrap gap-1">
                       {role.actionPermissions.slice(0, 3).map((action, idx) => (
-                        <span
-                          key={idx}
-                          className="badge-theme"
-                        >
+                        <span key={idx} className="badge-theme">
                           {action}
                         </span>
                       ))}
@@ -135,8 +153,9 @@ const UserRole: React.FC<UserRoleProps> = ({ roles, onSubmit, onDelete }) => {
                   <td className="px-6 py-4 text-sm">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        role.status === "Active" ? "badge-success" : "btn-danger"
-
+                        role.status === "Active"
+                          ? "badge-success"
+                          : "btn-danger"
                       }`}
                     >
                       {role.status}
@@ -147,7 +166,6 @@ const UserRole: React.FC<UserRoleProps> = ({ roles, onSubmit, onDelete }) => {
                       <button
                         onClick={() => handleEdit(role)}
                         className="text-primary hover:text-[var(--primary-700)] transition"
-
                         title="Edit"
                       >
                         <FaEdit size={16} />
@@ -176,7 +194,7 @@ const UserRole: React.FC<UserRoleProps> = ({ roles, onSubmit, onDelete }) => {
       </div>
 
       {/* Role Modal */}
-   {showModal && (
+      {showModal && (
         <AssignUserRoleModal
           isOpen={showModal}
           onClose={() => {
@@ -191,7 +209,7 @@ const UserRole: React.FC<UserRoleProps> = ({ roles, onSubmit, onDelete }) => {
                   description: editingRole.description,
                   modulePermissions: editingRole.modulePermissions,
                   actionPermissions: editingRole.actionPermissions,
-                  status: editingRole.status as "Active" | "Inactive",
+                  status: editingRole.status,
                 }
               : undefined
           }
@@ -208,9 +226,15 @@ export default function App() {
       id: 1,
       roleName: "Admin",
       description: "Full system access with all permissions",
-      modulePermissions: ["Sales", "CRM", "Procurement", "Inventory", "Accounting"],
+      modulePermissions: [
+        "Sales",
+        "CRM",
+        "Procurement",
+        "Inventory",
+        "Accounting",
+      ],
       actionPermissions: ["Create", "Read", "Update", "Delete", "Export"],
-      status: "Active"
+      status: "Active",
     },
     {
       id: 2,
@@ -218,7 +242,7 @@ export default function App() {
       description: "Department level access and management",
       modulePermissions: ["Sales", "CRM", "HR"],
       actionPermissions: ["Create", "Read", "Update"],
-      status: "Active"
+      status: "Active",
     },
     {
       id: 3,
@@ -226,27 +250,29 @@ export default function App() {
       description: "Read-only access to reports",
       modulePermissions: ["Sales", "CRM"],
       actionPermissions: ["Read"],
-      status: "Inactive"
-    }
+      status: "Inactive",
+    },
   ]);
 
-  const handleSubmit = (data: AssignUserRoleForm, isEdit: boolean, roleId?: number) => {
+  const handleSubmit = (
+    data: AssignUserRoleForm,
+    isEdit: boolean,
+    roleId?: number,
+  ) => {
     if (isEdit && roleId) {
-      setRoles(roles.map(r => r.id === roleId ? { ...data, id: roleId } : r));
+      setRoles(
+        roles.map((r) => (r.id === roleId ? { ...data, id: roleId } : r)),
+      );
     } else {
       setRoles([...roles, { ...data, id: Date.now() }]);
     }
   };
 
   const handleDelete = (id: number) => {
-    setRoles(roles.filter(r => r.id !== id));
+    setRoles(roles.filter((r) => r.id !== id));
   };
 
   return (
-    <UserRole
-      roles={roles}
-      onSubmit={handleSubmit}
-      onDelete={handleDelete}
-    />
+    <UserRole roles={roles} onSubmit={handleSubmit} onDelete={handleDelete} />
   );
 }

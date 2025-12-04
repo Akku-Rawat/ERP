@@ -18,8 +18,7 @@ export type Bonus = {
 };
 
 export interface PayrollRecord {
-
-  bonuses?: Bonus[];  
+  bonuses?: Bonus[];
 }
 
 export interface PayrollRecord {
@@ -37,12 +36,9 @@ export interface PayrollRecord {
   pfDeduction: number;
   otherDeductions: number;
   netPay: number;
-  status: 'Paid' | 'Pending' | 'Processing' | 'Failed';
+  status: "Paid" | "Pending" | "Processing" | "Failed";
   paymentDate: string | null;
   bankAccount: string;
   workingDays: number;
   paidDays: number;
 }
-
-
-

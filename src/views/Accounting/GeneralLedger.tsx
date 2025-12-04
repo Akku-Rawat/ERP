@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Search, Plus, Edit2, Trash2, ChevronDown, Settings, Star } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Edit2,
+  Trash2,
+  ChevronDown,
+  Settings,
+  Star,
+} from "lucide-react";
 
 type Account = {
   code: string;
@@ -63,7 +71,7 @@ const GeneralLedger: React.FC<Props> = ({
     .filter(
       (a) =>
         a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        a.code.includes(searchTerm)
+        a.code.includes(searchTerm),
     );
 
   const filteredJournalEntries = journalEntries.filter((entry) => {
@@ -147,7 +155,8 @@ const GeneralLedger: React.FC<Props> = ({
                     >
                       <span className="flex items-center gap-2">
                         <Star className="w-4 h-4" />
-                        {filter.charAt(0).toUpperCase() + filter.slice(1)} Accounts
+                        {filter.charAt(0).toUpperCase() + filter.slice(1)}{" "}
+                        Accounts
                       </span>
                       <span className="text-xs text-gray-500">
                         {getFilterCount(filter)}
@@ -206,7 +215,9 @@ const GeneralLedger: React.FC<Props> = ({
                     <td className="px-6 py-4 font-medium text-gray-900">
                       {account.balance.toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{account.parent}</td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {account.parent}
+                    </td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
@@ -246,7 +257,9 @@ const GeneralLedger: React.FC<Props> = ({
 
             {filteredAccounts.length === 0 && (
               <div className="text-center py-16 text-gray-500">
-                {searchTerm ? "No accounts match your search." : "No accounts added yet."}
+                {searchTerm
+                  ? "No accounts match your search."
+                  : "No accounts added yet."}
               </div>
             )}
           </div>

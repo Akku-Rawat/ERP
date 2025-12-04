@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Plus, Edit2, Trash2, Search } from "lucide-react";
-import QuotationModal from "../../components/sales/QuotationModal"; 
+import QuotationModal from "../../components/sales/QuotationModal";
 
 export interface QuotationItem {
   productName: string;
@@ -120,12 +120,13 @@ const sampleQuotations: QuotationData[] = [
 const QuotationsTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedQuotation, setSelectedQuotation] = useState<QuotationData | null>(null);
+  const [selectedQuotation, setSelectedQuotation] =
+    useState<QuotationData | null>(null);
 
   const filteredQuotations = sampleQuotations.filter(
     (q) =>
       (q.id ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      q.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+      q.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleAddClick = () => {
@@ -186,7 +187,10 @@ const QuotationsTable: React.FC = () => {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {filteredQuotations.map((q) => (
-              <tr key={q.id} className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150">
+              <tr
+                key={q.id}
+                className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
+              >
                 <td className="px-6 py-4">{q.id}</td>
                 <td className="px-6 py-4">{q.customerName}</td>
                 <td className="px-6 py-4">{q.validUntil}</td>
@@ -200,8 +204,8 @@ const QuotationsTable: React.FC = () => {
                       q.opportunityStage === "Approved"
                         ? "bg-green-100 text-green-800"
                         : q.opportunityStage === "Rejected"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-yellow-100 text-yellow-800"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
                     {q.opportunityStage || "Pending"}

@@ -21,7 +21,8 @@ const safeId = () => {
   // keeps id unique enough for demo / UI. Replace with server-generated id for production.
   try {
     // @ts-ignore - some TS targets don't include DOM crypto types
-    return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    return typeof crypto !== "undefined" &&
+      typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()
       : `b-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
   } catch {
@@ -29,7 +30,12 @@ const safeId = () => {
   }
 };
 
-export const AddBonusModal: React.FC<AddBonusModalProps> = ({ show, onClose, record, onSave }) => {
+export const AddBonusModal: React.FC<AddBonusModalProps> = ({
+  show,
+  onClose,
+  record,
+  onSave,
+}) => {
   const [label, setLabel] = useState<string>("");
   const [amount, setAmount] = useState<number | "">("");
 
@@ -69,18 +75,28 @@ export const AddBonusModal: React.FC<AddBonusModalProps> = ({ show, onClose, rec
       <div className="bg-white w-full max-w-md rounded-xl p-5 shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Add Bonus</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">Close</button>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            Close
+          </button>
         </div>
 
         {record && (
           <div className="mb-3 text-sm text-slate-600">
-            Adding bonus for <span className="font-medium text-slate-800">{record.employeeName} ({record.employeeId})</span>
+            Adding bonus for{" "}
+            <span className="font-medium text-slate-800">
+              {record.employeeName} ({record.employeeId})
+            </span>
           </div>
         )}
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Bonus Title</label>
+            <label className="block text-sm text-gray-600 mb-1">
+              Bonus Title
+            </label>
             <input
               value={label}
               onChange={(e) => setLabel(e.target.value)}
@@ -94,15 +110,27 @@ export const AddBonusModal: React.FC<AddBonusModalProps> = ({ show, onClose, rec
             <input
               type="number"
               value={amount === "" ? "" : amount}
-              onChange={(e) => setAmount(e.target.value === "" ? "" : Number(e.target.value))}
+              onChange={(e) =>
+                setAmount(e.target.value === "" ? "" : Number(e.target.value))
+              }
               placeholder="5000"
               className="w-full px-3 py-2 border rounded-lg"
             />
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
-            <button onClick={onClose} className="px-4 py-2 bg-gray-100 rounded-lg">Cancel</button>
-            <button onClick={handleSave} className="px-4 py-2 bg-teal-600 text-white rounded-lg">Add Bonus</button>
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-100 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-teal-600 text-white rounded-lg"
+            >
+              Add Bonus
+            </button>
           </div>
         </div>
       </div>

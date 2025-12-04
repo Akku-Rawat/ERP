@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Plus, Edit2, Trash2, Search } from "lucide-react";
-import ProformaInvoiceModal from "../../components/sales/ProformaInvoiceModal"; 
+import ProformaInvoiceModal from "../../components/sales/ProformaInvoiceModal";
 
 interface InvoiceItem {
   productName: string;
@@ -50,8 +50,22 @@ const sampleInvoices: InvoiceData[] = [
     adjustment: 0,
     grandTotal: 25000,
     items: [
-      { productName: "ERP Setup", description: "Full company license", quantity: 1, listPrice: 20000, discount: 0, tax: 2500 },
-      { productName: "Support", description: "Annual maintenance", quantity: 1, listPrice: 2000, discount: 0, tax: 500 },
+      {
+        productName: "ERP Setup",
+        description: "Full company license",
+        quantity: 1,
+        listPrice: 20000,
+        discount: 0,
+        tax: 2500,
+      },
+      {
+        productName: "Support",
+        description: "Annual maintenance",
+        quantity: 1,
+        listPrice: 2000,
+        discount: 0,
+        tax: 500,
+      },
     ],
     paymentTerms: "Net 10",
     notes: "Thank you for your business!",
@@ -73,8 +87,22 @@ const sampleInvoices: InvoiceData[] = [
     adjustment: 0,
     grandTotal: 35000,
     items: [
-      { productName: "Data Import", description: "All branch migration", quantity: 1, listPrice: 30000, discount: 0, tax: 2400 },
-      { productName: "Consulting", description: "Site visit x2", quantity: 2, listPrice: 1000, discount: 0, tax: 600 },
+      {
+        productName: "Data Import",
+        description: "All branch migration",
+        quantity: 1,
+        listPrice: 30000,
+        discount: 0,
+        tax: 2400,
+      },
+      {
+        productName: "Consulting",
+        description: "Site visit x2",
+        quantity: 2,
+        listPrice: 1000,
+        discount: 0,
+        tax: 600,
+      },
     ],
     paymentTerms: "Net 10",
     notes: "",
@@ -96,8 +124,22 @@ const sampleInvoices: InvoiceData[] = [
     adjustment: 0,
     grandTotal: 45000,
     items: [
-      { productName: "Server License", description: "Annual fee", quantity: 1, listPrice: 40000, discount: 0, tax: 3000 },
-      { productName: "Training", description: "3-day onsite", quantity: 1, listPrice: 1000, discount: 0, tax: 1000 },
+      {
+        productName: "Server License",
+        description: "Annual fee",
+        quantity: 1,
+        listPrice: 40000,
+        discount: 0,
+        tax: 3000,
+      },
+      {
+        productName: "Training",
+        description: "3-day onsite",
+        quantity: 1,
+        listPrice: 1000,
+        discount: 0,
+        tax: 1000,
+      },
     ],
     paymentTerms: "Due end of month",
     notes: "Late fee after due date.",
@@ -107,12 +149,14 @@ const sampleInvoices: InvoiceData[] = [
 const ProformaInvoicesTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(
+    null,
+  );
 
   const filteredInvoices = sampleInvoices.filter(
     (inv) =>
       inv.invoiceId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inv.CutomerName.toLowerCase().includes(searchTerm.toLowerCase())
+      inv.CutomerName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleAddClick = () => {
@@ -172,12 +216,17 @@ const ProformaInvoicesTable: React.FC = () => {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {filteredInvoices.map((inv) => (
-              <tr key={inv.invoiceId || inv.invoiceNumber} className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150">
+              <tr
+                key={inv.invoiceId || inv.invoiceNumber}
+                className="hover:bg-indigo-50/50 cursor-pointer transition-colors duration-150"
+              >
                 <td className="px-6 py-4">{inv.invoiceId}</td>
                 <td className="px-6 py-4">{inv.CutomerName}</td>
                 <td className="px-6 py-4">{inv.dateOfInvoice}</td>
                 <td className="px-6 py-4">{inv.dueDate}</td>
-                <td className="px-6 py-4">₹{inv.grandTotal.toLocaleString("en-IN")}</td>
+                <td className="px-6 py-4">
+                  ₹{inv.grandTotal.toLocaleString("en-IN")}
+                </td>
                 <td className="px-6 py-4 text-center">
                   <div className="flex items-center justify-center gap-3">
                     <button
