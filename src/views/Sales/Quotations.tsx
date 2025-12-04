@@ -181,6 +181,7 @@ const QuotationsTable: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const componentRef = useRef<HTMLDivElement>(null);
 
 
@@ -206,6 +207,7 @@ const QuotationsTable: React.FC = () => {
       }));
 
       setTotalPages(res.pagination?.total_pages || 1);
+      setTotalItems(res.pagination?.total || 1);
       setQuotations(mapped);
     } catch (err) {
       console.error("Error fetching quotations:", err);
@@ -473,10 +475,12 @@ const QuotationsTable: React.FC = () => {
 
       {/* Pagination */}
       <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={(p) => setPage(p)}
-      />
+            currentPage={page}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            onPageChange={setPage}
+          />
     </div>
   );
 };

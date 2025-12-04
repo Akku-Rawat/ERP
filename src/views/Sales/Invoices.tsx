@@ -82,6 +82,7 @@ const InvoicesTable: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(
     null
@@ -116,6 +117,7 @@ const InvoicesTable: React.FC = () => {
       }));
 
       setTotalPages(res.pagination?.total_pages || 1);
+      setTotalItems(res.pagination?.total || 1);
       setInvoices(mapped);
     } catch (err) {
       console.error("Error fetching invoices:", err);
@@ -349,11 +351,12 @@ const InvoicesTable: React.FC = () => {
             </div>
           )}
 
-          {/* Pagination */}
           <Pagination
             currentPage={page}
             totalPages={totalPages}
-            onPageChange={(p) => setPage(p)}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            onPageChange={setPage}
           />
         </>
       )}

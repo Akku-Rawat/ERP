@@ -29,6 +29,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const fetchCustomers = async () => {
     try {
@@ -36,6 +37,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
       const response = await getAllCustomers(page, pageSize);
       setCustomers(response.data);
       setTotalPages(response.pagination?.total_pages || 1);
+      setTotalItems(response.pagination?.total || 1);
     } catch (err) {
       console.error("Error loading customers:", err);
     } finally {
@@ -223,11 +225,12 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
                 )}
               </div>
 
-              {/* Pagination */}
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}
-                onPageChange={(p) => setPage(p)}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setPage}
               />
             </>
           )}

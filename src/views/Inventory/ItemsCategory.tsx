@@ -20,6 +20,7 @@ const ItemsCategory: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<ItemGroup | null>(null);
   const [search, setSearch] = useState("");
@@ -31,6 +32,7 @@ const ItemsCategory: React.FC = () => {
       const response = await getAllItemGroups(page, pageSize);
       setItemGroups(response.data);
       setTotalPages(response.pagination?.total_pages || 1);
+      setTotalItems(response.pagination?.total || 1);
     } catch (err) {
       console.error("Error loading item group:", err);
     } finally {
@@ -169,10 +171,12 @@ const ItemsCategory: React.FC = () => {
 
         {/* Pagination */}
         <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={(p) => setPage(p)}
-        />
+            currentPage={page}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            onPageChange={setPage}
+          />
       </div>
       <ItemsCategoryModal
         isOpen={isModalOpen}

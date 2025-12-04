@@ -22,6 +22,7 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [showItemsModal, setShowItemsModal] = useState(false);
   const [editItems, setEditItems] = useState<any | null>(null);
 
@@ -31,6 +32,7 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
       const response = await getAllItems(page, pageSize);
       setItem(response.data);
       setTotalPages(response.pagination?.total_pages || 1);
+      setTotalItems(response.pagination?.total || 1);
     } catch (err) {
       console.error("Error loading items:", err);
     } finally {
@@ -182,10 +184,12 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
         </table>
         {/* Pagination */}
         <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={(p) => setPage(p)}
-        />
+            currentPage={page}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            onPageChange={setPage}
+          />
       </div>
       <ItemModal
         isOpen={showItemsModal}
