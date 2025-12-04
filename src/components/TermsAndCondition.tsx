@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { FaEdit, FaTimes, FaCheck, FaPlus, FaTrash } from "react-icons/fa";
-import type { TermSection, PaymentTerms, TermPhase } from "../types/termsAndCondition";
+import type {
+  TermSection,
+  PaymentTerms,
+  TermPhase,
+} from "../types/termsAndCondition";
 
 interface Props {
   terms: TermSection | null;
@@ -12,7 +16,7 @@ const UI_TO_KEY: Record<string, keyof TermSection> = {
   "Payment Terms": "payment",
   "Service Delivery Terms": "delivery",
   "Cancellation / Refund Policy": "cancellation",
-  "Warranty": "warranty",
+  Warranty: "warranty",
   "Limitations and Liability": "liability",
 };
 
@@ -42,12 +46,16 @@ const emptyTerms: TermSection = {
 };
 
 const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
-  const [selectedTemplate, setSelectedTemplate] = useState("General Service Terms");
+  const [selectedTemplate, setSelectedTemplate] = useState(
+    "General Service Terms",
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState<TermSection | null>(null);
 
   const baseTerms: TermSection = terms ?? emptyTerms;
-  const currentTerms: TermSection = isEditing ? draft ?? baseTerms : baseTerms;
+  const currentTerms: TermSection = isEditing
+    ? (draft ?? baseTerms)
+    : baseTerms;
 
   const activeKey = UI_TO_KEY[selectedTemplate];
 
@@ -58,7 +66,6 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
     tax: src.payment?.tax ?? "",
     notes: src.payment?.notes ?? "",
   });
-
 
   const startEditing = () => {
     setDraft(terms ?? emptyTerms);
@@ -79,7 +86,6 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
     setDraft(null);
     setIsEditing(false);
   };
-
 
   const updateDraft = (updater: (prev: TermSection) => TermSection) => {
     if (!isEditing) return;
@@ -131,7 +137,6 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
     updatePayment({ phases: next });
   };
 
-
   const renderPaymentTable = () => {
     const payment = ensurePayment(currentTerms);
     const phases = payment.phases;
@@ -140,7 +145,9 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
       <div className="space-y-5">
         {/* Section Title */}
         <div className="flex items-center justify-between pb-1 border-b">
-          <h4 className="text-lg font-semibold text-gray-800">Payment Structure</h4>
+          <h4 className="text-lg font-semibold text-gray-800">
+            Payment Structure
+          </h4>
 
           {isEditing && (
             <button
@@ -158,11 +165,21 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">#</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">Phase</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">Percentage</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">Condition</th>
-                <th className="px-4 py-3 text-center font-medium text-gray-700 w-12">Action</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">
+                  #
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">
+                  Phase
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">
+                  Percentage
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">
+                  Condition
+                </th>
+                <th className="px-4 py-3 text-center font-medium text-gray-700 w-12">
+                  Action
+                </th>
               </tr>
             </thead>
 
@@ -180,7 +197,9 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
                         <input
                           className="w-full border rounded px-2 py-1 text-sm"
                           value={p.name}
-                          onChange={(e) => updatePhase(idx, { name: e.target.value })}
+                          onChange={(e) =>
+                            updatePhase(idx, { name: e.target.value })
+                          }
                         />
                       ) : (
                         <span className="text-gray-800">{p.name}</span>
@@ -193,7 +212,9 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
                         <input
                           className="w-full border rounded px-2 py-1 text-sm"
                           value={p.percentage}
-                          onChange={(e) => updatePhase(idx, { percentage: e.target.value })}
+                          onChange={(e) =>
+                            updatePhase(idx, { percentage: e.target.value })
+                          }
                         />
                       ) : (
                         <span>{p.percentage}</span>
@@ -206,7 +227,9 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
                         <input
                           className="w-full border rounded px-2 py-1 text-sm"
                           value={p.condition}
-                          onChange={(e) => updatePhase(idx, { condition: e.target.value })}
+                          onChange={(e) =>
+                            updatePhase(idx, { condition: e.target.value })
+                          }
                         />
                       ) : (
                         <span>{p.condition}</span>
@@ -287,10 +310,14 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
     <div className="p-6 space-y-8 bg-white rounded-lg shadow-sm border">
       {/* HEADER */}
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-800">Terms & Conditions</h2>
+        <h2 className="text-xl font-semibold text-gray-800">
+          Terms & Conditions
+        </h2>
 
         <div className="flex items-center gap-3">
-          <label className="text-sm text-gray-600 font-medium">Choose Section</label>
+          <label className="text-sm text-gray-600 font-medium">
+            Choose Section
+          </label>
 
           <select
             value={selectedTemplate}
@@ -363,10 +390,11 @@ const InputField = ({
       disabled={disabled}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full px-3 py-2 rounded border text-sm ${disabled
-        ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-        : "focus:ring-2 focus:ring-blue-400"
-        }`}
+      className={`w-full px-3 py-2 rounded border text-sm ${
+        disabled
+          ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+          : "focus:ring-2 focus:ring-blue-400"
+      }`}
     />
   </label>
 );
@@ -388,10 +416,11 @@ const TextareaField = ({
       disabled={disabled}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full px-3 py-2 min-h-[140px] rounded border text-sm ${disabled
-        ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-        : "focus:ring-2 focus:ring-blue-400"
-        }`}
+      className={`w-full px-3 py-2 min-h-[140px] rounded border text-sm ${
+        disabled
+          ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+          : "focus:ring-2 focus:ring-blue-400"
+      }`}
     />
   </label>
 );

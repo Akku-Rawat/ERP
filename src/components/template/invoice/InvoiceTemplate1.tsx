@@ -17,7 +17,7 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
     const signatureInputRef = useRef<HTMLInputElement>(null);
     const [signatureText, setSignatureText] = useState<string>("");
     const [signatureMode, setSignatureMode] = useState<"upload" | "type">(
-      "upload"
+      "upload",
     );
 
     const getCurrencySymbol = () => {
@@ -81,7 +81,9 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
               />
             </div>
 
-            <h1 className="text-2xl font-bold">Rolaface Software Pvt Limited</h1>
+            <h1 className="text-2xl font-bold">
+              Rolaface Software Pvt Limited
+            </h1>
           </div>
         </div>
 
@@ -90,7 +92,9 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
           <p className="font-semibold text-gray-800">
             Rolaface Software Pvt Limited
           </p>
-          <p className="text-sm text-gray-600">Your Trusted Technology Partner</p>
+          <p className="text-sm text-gray-600">
+            Your Trusted Technology Partner
+          </p>
           <p className="text-sm text-gray-600">Business District, Tech Park</p>
           <p className="text-sm text-gray-600">City, State 000000</p>
         </div>
@@ -119,12 +123,14 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
           <div className="text-right space-y-1 text-sm">
             <div className="flex justify-between gap-4">
               <span className="font-bold text-gray-700">Invoice #</span>
-              <span className="text-gray-800">{data.invoiceNumber || "IN-001"}</span>
+              <span className="text-gray-800">
+                {data.invoiceNumber || "IN-001"}
+              </span>
             </div>
 
             <div className="flex justify-between gap-4">
               <span className="font-bold text-gray-700">Invoice Date</span>
-              <span className="text-gray-800">{data.invoiceDate?? ''}</span>
+              <span className="text-gray-800">{data.invoiceDate ?? ""}</span>
             </div>
 
             <div className="flex justify-between gap-4">
@@ -134,7 +140,7 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
 
             <div className="flex justify-between gap-4">
               <span className="font-bold text-gray-700">Due Date</span>
-              <span className="text-gray-800">{data.invoiceDueDate?? ''}</span>
+              <span className="text-gray-800">{data.invoiceDueDate ?? ""}</span>
             </div>
           </div>
         </div>
@@ -144,10 +150,18 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-t border-b border-gray-400">
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">QTY</th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">DESCRIPTION</th>
-                <th className="px-4 py-3 text-right text-sm font-bold text-gray-700">UNIT PRICE</th>
-                <th className="px-4 py-3 text-right text-sm font-bold text-gray-700">AMOUNT</th>
+                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                  QTY
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                  DESCRIPTION
+                </th>
+                <th className="px-4 py-3 text-right text-sm font-bold text-gray-700">
+                  UNIT PRICE
+                </th>
+                <th className="px-4 py-3 text-right text-sm font-bold text-gray-700">
+                  AMOUNT
+                </th>
               </tr>
             </thead>
 
@@ -203,11 +217,12 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
             {/* TAX */}
             <div className="flex justify-between text-sm border-b border-gray-300 pb-2">
               <span className="text-gray-700">
-                GST
-                {" "}
-                {((data.totalTax ?? 0) && (data.total ?? 0)
-                  ? (((data.totalTax ?? 0) / (data.total ?? 1)) * 100).toFixed(1)
-                  : "0")}
+                GST{" "}
+                {(data.totalTax ?? 0) && (data.total ?? 0)
+                  ? (((data.totalTax ?? 0) / (data.total ?? 1)) * 100).toFixed(
+                      1,
+                    )
+                  : "0"}
                 %
               </span>
 
@@ -230,7 +245,7 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
                   {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                  }
+                  },
                 )}
               </span>
             </div>
@@ -283,7 +298,9 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
                 ) : (
                   <div className="text-center">
                     <UploadCloud className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-                    <span className="text-gray-500 text-xs">Click to upload</span>
+                    <span className="text-gray-500 text-xs">
+                      Click to upload
+                    </span>
                   </div>
                 )}
 
@@ -355,7 +372,7 @@ const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 InvoiceTemplate1.displayName = "InvoiceTemplate1";

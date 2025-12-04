@@ -36,7 +36,6 @@ const CustomerDetailView: React.FC<Props> = ({
   );
   console.log("📌 CustomerDetailView received customer:", customer);
 
-
   const getStatusColor = (status?: string) => {
     switch (status?.toLowerCase()) {
       case "active":
@@ -54,21 +53,21 @@ const CustomerDetailView: React.FC<Props> = ({
     const fields =
       type === "billing"
         ? {
-          line1: c.billingAddressLine1,
-          line2: c.billingAddressLine2,
-          city: c.billingCity,
-          state: c.billingState,
-          postal: c.billingPostalCode,
-          country: c.billingCountry,
-        }
+            line1: c.billingAddressLine1,
+            line2: c.billingAddressLine2,
+            city: c.billingCity,
+            state: c.billingState,
+            postal: c.billingPostalCode,
+            country: c.billingCountry,
+          }
         : {
-          line1: c.shippingAddressLine1,
-          line2: c.shippingAddressLine2,
-          city: c.shippingCity,
-          state: c.shippingState,
-          postal: c.shippingPostalCode,
-          country: c.shippingCountry,
-        };
+            line1: c.shippingAddressLine1,
+            line2: c.shippingAddressLine2,
+            city: c.shippingCity,
+            state: c.shippingState,
+            postal: c.shippingPostalCode,
+            country: c.shippingCountry,
+          };
 
     const parts = [
       fields.line1,
@@ -81,7 +80,6 @@ const CustomerDetailView: React.FC<Props> = ({
 
     return parts.length ? parts.join(", ") : "—";
   };
-
 
   return (
     <div className="flex flex-col bg-gray-50">
@@ -117,17 +115,17 @@ const CustomerDetailView: React.FC<Props> = ({
               <div
                 key={c.id}
                 onClick={() => onCustomerSelect(c)}
-                className={`p-4 border-b cursor-pointer transition-all duration-200 ${c.id === customer.id
+                className={`p-4 border-b cursor-pointer transition-all duration-200 ${
+                  c.id === customer.id
                     ? "bg-indigo-50 border-l-4 border-l-indigo-600"
                     : "hover:bg-gray-50"
-                  }`}
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${c.id === customer.id
-                        ? "bg-indigo-600"
-                        : "bg-gray-400"
-                      }`}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
+                      c.id === customer.id ? "bg-indigo-600" : "bg-gray-400"
+                    }`}
                   >
                     {c.name.charAt(0).toUpperCase()}
                   </div>
@@ -141,7 +139,7 @@ const CustomerDetailView: React.FC<Props> = ({
 
                   <span
                     className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                      customer.status
+                      customer.status,
                     )}`}
                   >
                     {(customer.status || "UNKNOWN").toUpperCase()}
@@ -159,20 +157,22 @@ const CustomerDetailView: React.FC<Props> = ({
             <div className="flex">
               <button
                 onClick={() => setActiveTab("overview")}
-                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors ${activeTab === "overview"
+                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors ${
+                  activeTab === "overview"
                     ? "border-indigo-600 text-indigo-600"
                     : "border-transparent text-gray-600 hover:text-gray-900"
-                  }`}
+                }`}
               >
                 Overview
               </button>
 
               <button
                 onClick={() => setActiveTab("quotations")}
-                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${activeTab === "quotations"
+                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${
+                  activeTab === "quotations"
                     ? "border-indigo-600 text-indigo-600"
                     : "border-transparent text-gray-600 hover:text-gray-900"
-                  }`}
+                }`}
               >
                 <FileText className="w-4 h-4" />
                 Quotations
@@ -180,10 +180,11 @@ const CustomerDetailView: React.FC<Props> = ({
 
               <button
                 onClick={() => setActiveTab("invoices")}
-                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${activeTab === "invoices"
+                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${
+                  activeTab === "invoices"
                     ? "border-indigo-600 text-indigo-600"
                     : "border-transparent text-gray-600 hover:text-gray-900"
-                  }`}
+                }`}
               >
                 <Receipt className="w-4 h-4" />
                 Invoices
@@ -221,10 +222,11 @@ const CustomerDetailView: React.FC<Props> = ({
                       </p>
                       <p className="mt-1 text-sm font-medium">
                         <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${customer.type === "Company"
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                            customer.type === "Company"
                               ? "bg-blue-100 text-blue-800"
                               : "bg-purple-100 text-purple-800"
-                            }`}
+                          }`}
                         >
                           {customer.type}
                         </span>
@@ -265,7 +267,7 @@ const CustomerDetailView: React.FC<Props> = ({
                       <p className="mt-1">
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            customer.status
+                            customer.status,
                           )}`}
                         >
                           {(customer.status || "unknown").toUpperCase()}

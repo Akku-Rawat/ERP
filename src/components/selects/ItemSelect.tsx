@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { getAllItems } from "../../api/itemApi";
 
 interface ItemSelectProps {
-  value?: string; 
+  value?: string;
   onChange: (item: {
     name: string;
     code: string;
@@ -40,7 +40,7 @@ export default function ItemSelect({
             code: it.item_code,
             description: it.description ?? "",
             price: it.standard_rate ?? 0,
-          }))
+          })),
         );
       } finally {
         setLoading(false);
@@ -64,14 +64,13 @@ export default function ItemSelect({
 
   /* ---------------- Filtering ---------------- */
   const filtered = items.filter((it) =>
-    it.name.toLowerCase().includes(search.toLowerCase())
+    it.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
       {/* Wrapper to control dropdown width */}
       <div ref={ref} className="relative w-full">
-
         {/* Search Input */}
         <input
           className="w-full rounded border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"

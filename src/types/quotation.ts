@@ -25,18 +25,18 @@ export interface QuotationSummary {
 }
 
 // export interface QuotationData {
-//   quotationNumber: string;        
-//   customerName: string;          
-//   currency: string;               
+//   quotationNumber: string;
+//   customerName: string;
+//   currency: string;
 
-//   industryType?: string;          
+//   industryType?: string;
 
-//   transactionDate: string;        
-//   validTill: string;              
+//   transactionDate: string;
+//   validTill: string;
 
-//   grandTotal: number;             
+//   grandTotal: number;
 
-//   termsAndConditionsId?: string;  
+//   termsAndConditionsId?: string;
 
 //   swift?: string;
 //   bankName?: string;

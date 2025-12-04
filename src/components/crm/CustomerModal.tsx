@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TermsAndCondition from "../TermsAndCondition";
-import type { TermPhase, PaymentTerms, TermSection } from "../../types/termsAndCondition";
+import type {
+  TermPhase,
+  PaymentTerms,
+  TermSection,
+} from "../../types/termsAndCondition";
 import { X, Mail, Phone, CloudCog } from "lucide-react";
 
 import {
@@ -40,7 +44,7 @@ const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   shippingCountry: "",
 
   terms: {
-    selling: {}
+    selling: {},
   },
   sameAsBilling: false,
 };
@@ -55,12 +59,12 @@ const CustomerModal: React.FC<{
   isEditMode?: boolean;
 }> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
   const [form, setForm] = useState<CustomerDetail & { sameAsBilling: boolean }>(
-    emptyForm
+    emptyForm,
   );
 
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details"
+    "details",
   );
 
   useEffect(() => {
@@ -98,7 +102,7 @@ const CustomerModal: React.FC<{
   ]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, type, value } = e.target;
 
@@ -123,7 +127,7 @@ const CustomerModal: React.FC<{
       delete (payload as any).sameAsBilling;
 
       let response;
-      console.log("payload: ",payload);
+      console.log("payload: ", payload);
 
       if (isEditMode && initialData?.id) {
         response = await updateCustomerByCustomerCode(initialData.id, payload);
@@ -131,7 +135,11 @@ const CustomerModal: React.FC<{
         response = await createCustomer(payload);
       }
 
-      alert(isEditMode ? "Customer updated successfully!" : "Customer created successfully!");
+      alert(
+        isEditMode
+          ? "Customer updated successfully!"
+          : "Customer created successfully!",
+      );
 
       onSubmit?.(payload);
       handleClose();
@@ -184,10 +192,11 @@ const CustomerModal: React.FC<{
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 font-medium text-sm capitalize ${activeTab === tab
-                    ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                    : "text-gray-600 hover:text-gray-900"
-                    }`}
+                  className={`px-6 py-3 font-medium text-sm capitalize ${
+                    activeTab === tab
+                      ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
                 >
                   {tab === "details"
                     ? "Details"
@@ -210,7 +219,9 @@ const CustomerModal: React.FC<{
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
                     {/* TYPE */}
                     <label className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-gray-600">Customer Type *</span>
+                      <span className="font-medium text-gray-600">
+                        Customer Type *
+                      </span>
                       <select
                         name="type"
                         value={form.type}
@@ -239,7 +250,9 @@ const CustomerModal: React.FC<{
 
                     {/* DISPLAY NAME */}
                     <label className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-gray-600">Display Name *</span>
+                      <span className="font-medium text-gray-600">
+                        Display Name *
+                      </span>
                       <select
                         name="displayName"
                         value={form.displayName}
@@ -250,9 +263,13 @@ const CustomerModal: React.FC<{
                         <option value="" disabled>
                           Select Name
                         </option>
-                        {form.name && <option value={form.name}>{form.name}</option>}
+                        {form.name && (
+                          <option value={form.name}>{form.name}</option>
+                        )}
                         {form.contactPerson && (
-                          <option value={form.contactPerson}>{form.contactPerson}</option>
+                          <option value={form.contactPerson}>
+                            {form.contactPerson}
+                          </option>
                         )}
                       </select>
                     </label>
@@ -266,7 +283,9 @@ const CustomerModal: React.FC<{
                     />
 
                     <label className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-gray-600">Currency</span>
+                      <span className="font-medium text-gray-600">
+                        Currency
+                      </span>
                       <select
                         name="currency"
                         value={form.currency}
@@ -318,11 +337,13 @@ const CustomerModal: React.FC<{
               {activeTab === "terms" && (
                 <div className="h-full w-full">
                   <TermsAndCondition
-                    terms={form.terms?.selling || {} as TermSection}
-                    setTerms={(updated) => setForm((p) => ({
-                      ...p,
-                      terms: { ...p.terms, selling: updated }
-                    }))}
+                    terms={form.terms?.selling || ({} as TermSection)}
+                    setTerms={(updated) =>
+                      setForm((p) => ({
+                        ...p,
+                        terms: { ...p.terms, selling: updated },
+                      }))
+                    }
                   />
                 </div>
               )}
@@ -498,12 +519,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           {...props}
           value={props.value ?? ""}
-          className={`w-full rounded border px-3 py-2 focus:ring-2 focus:ring-indigo-400 ${icon ? "pl-10" : ""
-            } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
+          className={`w-full rounded border px-3 py-2 focus:ring-2 focus:ring-indigo-400 ${
+            icon ? "pl-10" : ""
+          } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
         />
       </div>
     </label>
-  )
+  ),
 );
 Input.displayName = "Input";
 

@@ -17,7 +17,6 @@ import {
 import CustomerSelect from "../selects/CustomerSelect";
 import ItemSelect from "../selects/ItemSelect";
 
-
 interface ItemRow {
   productName: string;
   description: string;
@@ -141,7 +140,9 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
   }, []);
 
   const [isShippingOpen, setIsShippingOpen] = useState(false);
-  const [customers, setCustomers] = useState<{ name: string; id: string }[]>([]);
+  const [customers, setCustomers] = useState<{ name: string; id: string }[]>(
+    [],
+  );
   const [custLoading, setCustLoading] = useState(true);
 
   useEffect(() => {
@@ -155,13 +156,13 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
 
         const response = await getAllCustomers();
 
-        if (response.status_code !== 200) throw new Error("Failed to load customers");
+        if (response.status_code !== 200)
+          throw new Error("Failed to load customers");
         const customers =
           response.data?.map((c: any) => ({
             name: c.name,
             id: c.id,
           })) || [];
-
 
         setCustomers(customers);
       } catch (err: any) {
@@ -187,9 +188,6 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
       console.error("Error loading customer details:", err);
     }
   };
-
-
-
 
   useEffect(() => {
     if (isOpen) {
@@ -341,10 +339,11 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${activeTab === tab
-                    ? "text-blue-600 border-b-2 border-blue-600 bg-white"
-                    : "text-gray-600 hover:text-gray-900"
-                    }`}
+                  className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${
+                    activeTab === tab
+                      ? "text-blue-600 border-b-2 border-blue-600 bg-white"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
                 >
                   {tab === "details"
                     ? "Details"
@@ -489,12 +488,12 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                                     onChange={(item) => {
                                       updateItem(i, {
                                         productName: item.name,
-                                        description: item.description ?? it.description,
+                                        description:
+                                          item.description ?? it.description,
                                         listPrice: item.price ?? it.listPrice,
                                       });
                                     }}
                                   />
-
                                 </td>
                                 <td className="px-1 py-1">
                                   <input
@@ -769,24 +768,24 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                               sameAsBilling: checked,
                               ...(checked
                                 ? {
-                                  shippingAddressLine1:
-                                    prev.billingAddressLine1 ?? "",
-                                  shippingAddressLine2:
-                                    prev.billingAddressLine2 ?? "",
-                                  shippingPostalCode:
-                                    prev.billingPostalCode ?? "",
-                                  shippingCity: prev.billingCity ?? "",
-                                  shippingState: prev.billingState ?? "",
-                                  shippingCountry: prev.billingCountry ?? "",
-                                }
+                                    shippingAddressLine1:
+                                      prev.billingAddressLine1 ?? "",
+                                    shippingAddressLine2:
+                                      prev.billingAddressLine2 ?? "",
+                                    shippingPostalCode:
+                                      prev.billingPostalCode ?? "",
+                                    shippingCity: prev.billingCity ?? "",
+                                    shippingState: prev.billingState ?? "",
+                                    shippingCountry: prev.billingCountry ?? "",
+                                  }
                                 : {
-                                  shippingAddressLine1: "",
-                                  shippingAddressLine2: "",
-                                  shippingPostalCode: "",
-                                  shippingCity: "",
-                                  shippingState: "",
-                                  shippingCountry: "",
-                                }),
+                                    shippingAddressLine1: "",
+                                    shippingAddressLine2: "",
+                                    shippingPostalCode: "",
+                                    shippingCity: "",
+                                    shippingState: "",
+                                    shippingCountry: "",
+                                  }),
                             }));
                           }}
                           className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
@@ -940,8 +939,9 @@ const Input = React.forwardRef<
     <span className="font-medium text-gray-600">{label}</span>
     <input
       ref={ref}
-      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
-        } ${className}`}
+      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+        props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
+      } ${className}`}
       {...props}
     />
   </label>

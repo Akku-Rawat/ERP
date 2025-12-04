@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import ItemsCategoryModal from "../../components/inventory/ItemsCategoryModal";
 import { Search, Plus, Edit2, Trash2 } from "lucide-react";
-import { getAllItemGroups, deleteItemGroupByName, getItemGroupByName } from "../../api/itemCategoryApi";
+import {
+  getAllItemGroups,
+  deleteItemGroupByName,
+  getItemGroupByName,
+} from "../../api/itemCategoryApi";
 import toast from "react-hot-toast";
 import Pagination from "../../components/Pagination";
 
@@ -25,7 +29,6 @@ const ItemsCategory: React.FC = () => {
   const [editingGroup, setEditingGroup] = useState<ItemGroup | null>(null);
   const [search, setSearch] = useState("");
 
-
   const loadItemGroups = async () => {
     try {
       setLoading(true);
@@ -40,8 +43,10 @@ const ItemsCategory: React.FC = () => {
     }
   };
 
-
-  const handleDeleteItemsGroup = async (groupName: string, e: React.MouseEvent) => {
+  const handleDeleteItemsGroup = async (
+    groupName: string,
+    e: React.MouseEvent,
+  ) => {
     e.stopPropagation();
     if (!confirm(`Delete item group "${groupName}"?`)) return;
 
@@ -55,7 +60,9 @@ const ItemsCategory: React.FC = () => {
         return;
       }
 
-      setItemGroups(prev => prev.filter(g => g.item_group_name !== groupName));
+      setItemGroups((prev) =>
+        prev.filter((g) => g.item_group_name !== groupName),
+      );
       toast.success("Deleted successfully");
     } catch {
       toast.error("Delete failed");
@@ -63,7 +70,6 @@ const ItemsCategory: React.FC = () => {
       setLoading(false);
     }
   };
-
 
   const handleAddItemsGroup = async () => {
     setEditingGroup(null);
@@ -80,7 +86,10 @@ const ItemsCategory: React.FC = () => {
     }
   };
 
-  const handleEditItem = async (item_group_name: string, e: React.MouseEvent) => {
+  const handleEditItem = async (
+    item_group_name: string,
+    e: React.MouseEvent,
+  ) => {
     e.stopPropagation();
     try {
       const item = await getItemGroupByName(item_group_name);
@@ -96,7 +105,7 @@ const ItemsCategory: React.FC = () => {
     loadItemGroups();
   }, [page, pageSize]);
 
-  const filtered = itemGroups.filter(g =>
+  const filtered = itemGroups.filter((g) =>
     [
       g.name,
       g.item_group_name,
@@ -107,7 +116,7 @@ const ItemsCategory: React.FC = () => {
     ]
       .join(" ")
       .toLowerCase()
-      .includes(search.toLowerCase())
+      .includes(search.toLowerCase()),
   );
 
   return (
@@ -142,11 +151,16 @@ const ItemsCategory: React.FC = () => {
           </thead>
           <tbody>
             {filtered.map((group) => (
-              <tr key={group.item_group_name} className="border-t hover:bg-gray-50">
+              <tr
+                key={group.item_group_name}
+                className="border-t hover:bg-gray-50"
+              >
                 <td className="px-4 py-2">{group.name}</td>
                 <td className="px-4 py-2">{group.item_group_name}</td>
                 <td className="px-4 py-2">{group.custom_description}</td>
-                <td className="px-4 py-2">{group.custom_unit_of_measurement}</td>
+                <td className="px-4 py-2">
+                  {group.custom_unit_of_measurement}
+                </td>
                 <td className="px-4 py-2">{group.custom_selling_price}</td>
                 <td className="px-4 py-2">{group.custom_sales_account}</td>
                 <td className="px-4 py-2 text-center">
@@ -158,7 +172,9 @@ const ItemsCategory: React.FC = () => {
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={(e) => handleDeleteItemsGroup(group.item_group_name, e)}
+                    onClick={(e) =>
+                      handleDeleteItemsGroup(group.item_group_name, e)
+                    }
                     className="ml-2 text-red-600 hover:text-red-800"
                     title="Delete"
                   >
@@ -172,12 +188,12 @@ const ItemsCategory: React.FC = () => {
 
         {/* Pagination */}
         <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            pageSize={pageSize}
-            totalItems={totalItems}
-            onPageChange={setPage}
-          />
+          currentPage={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          onPageChange={setPage}
+        />
       </div>
       <ItemsCategoryModal
         isOpen={isModalOpen}

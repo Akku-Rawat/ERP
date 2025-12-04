@@ -76,9 +76,7 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
     try {
       await fetchItems();
       toast.success(
-        editItems
-          ? "Item updated successfully!"
-          : "Item created successfully!",
+        editItems ? "Item updated successfully!" : "Item created successfully!",
       );
     } catch (err) {
       toast.error("Failed to refresh item list");
@@ -100,7 +98,6 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
   useEffect(() => {
     fetchItems();
   }, [page, pageSize]);
-
 
   const filtered = item.filter((i: any) =>
     [
@@ -184,12 +181,12 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
         </table>
         {/* Pagination */}
         <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            pageSize={pageSize}
-            totalItems={totalItems}
-            onPageChange={setPage}
-          />
+          currentPage={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          onPageChange={setPage}
+        />
       </div>
       <ItemModal
         isOpen={showItemsModal}

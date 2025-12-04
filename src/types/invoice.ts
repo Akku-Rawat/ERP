@@ -21,9 +21,9 @@ export interface InvoiceSummary {
 
 export interface InvoiceData {
   invoiceNumber: string;
-  invoiceDate:string;
-  invoiceDueDate:string;
-  poNumber:string;
+  invoiceDate: string;
+  invoiceDueDate: string;
+  poNumber: string;
   customerName: string;
   postingDate: string;
   currency: string;

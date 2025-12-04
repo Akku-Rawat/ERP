@@ -28,4 +28,3 @@ export async function getProformaInvoiceById(id: string): Promise<any | null> {
   const resp: AxiosResponse = await api.get(url);
   return resp.data ?? null;
 }
-

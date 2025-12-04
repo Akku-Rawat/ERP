@@ -1,4 +1,9 @@
-import type { TermSection, PaymentTerms, TermPhase,Terms } from "./termsAndCondition";
+import type {
+  TermSection,
+  PaymentTerms,
+  TermPhase,
+  Terms,
+} from "./termsAndCondition";
 
 export interface CustomerSummary {
   id: string;

@@ -12,8 +12,10 @@ const ENDPOINTS = {
   createItem: `${base_url}.item.item.create_item_api`,
 };
 
-
-export async function getAllItems(page: number = 1, page_size: number = 10): Promise<any> {
+export async function getAllItems(
+  page: number = 1,
+  page_size: number = 10,
+): Promise<any> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getAllItems, {
     params: { page, page_size },
   });

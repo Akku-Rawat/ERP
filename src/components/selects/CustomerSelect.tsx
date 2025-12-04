@@ -14,9 +14,9 @@ export default function CustomerSelect({
   className = "",
   label = "Customer",
 }: CustomerSelectProps) {
-  const [customers, setCustomers] = useState<
-    { name: string; id: string }[]
-  >([]);
+  const [customers, setCustomers] = useState<{ name: string; id: string }[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState(value || "");
@@ -34,7 +34,7 @@ export default function CustomerSelect({
           res.data.map((c: any) => ({
             name: c.name,
             id: c.id,
-          }))
+          })),
         );
       } finally {
         setLoading(false);
@@ -57,16 +57,14 @@ export default function CustomerSelect({
 
   /* ---------------- Filter logic ---------------- */
   const filtered = customers.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
+    c.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-
       <span className="font-medium text-gray-600 text-sm">{label}</span>
 
       <div ref={ref} className="relative w-full">
-
         {/* Search Input */}
         <input
           className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -103,9 +101,7 @@ export default function CustomerSelect({
             </ul>
           </div>
         )}
-
       </div>
     </div>
-
   );
 }

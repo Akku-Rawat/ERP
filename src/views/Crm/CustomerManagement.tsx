@@ -21,7 +21,8 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [customers, setCustomers] = useState<CustomerSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "detail">("table");
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerDetail | null>(null);
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<CustomerDetail | null>(null);
   const [custLoading, setCustLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editCustomer, setEditCustomer] = useState<CustomerDetail | null>(null);
@@ -76,7 +77,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     e.stopPropagation();
     try {
       const customer = await getCustomerByCustomerCode(id);
-      console.log("customer: ", customer)
+      console.log("customer: ", customer);
       setEditCustomer(customer.data ?? customer);
       setShowModal(true);
     } catch (err) {
@@ -104,11 +105,11 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     ]
       .join(" ")
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+      .includes(searchTerm.toLowerCase()),
   );
 
   const handleRowClick = (customer: CustomerDetail) => {
-    console.log("setSelectedCustomer", customer)
+    console.log("setSelectedCustomer", customer);
     setSelectedCustomer(customer);
     setViewMode("detail");
   };
@@ -175,10 +176,11 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
 
                         <td className="px-4 py-2">
                           <span
-                            className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${c.type === "Company"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-purple-100 text-purple-800"
-                              }`}
+                            className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
+                              c.type === "Company"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-purple-100 text-purple-800"
+                            }`}
                           >
                             {c.type}
                           </span>

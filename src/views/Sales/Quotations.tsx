@@ -184,7 +184,6 @@ const QuotationsTable: React.FC = () => {
   const [totalItems, setTotalItems] = useState(0);
   const componentRef = useRef<HTMLDivElement>(null);
 
-
   const fetchQuotations = async () => {
     try {
       setLoading(true);
@@ -222,7 +221,9 @@ const QuotationsTable: React.FC = () => {
 
   const filteredQuotations = quotations.filter(
     (quote) =>
-      (quote.quotationNumber ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (quote.quotationNumber ?? "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       quote.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
@@ -319,12 +320,11 @@ const QuotationsTable: React.FC = () => {
                 <td className="px-4 py-2">{q.industryBases}</td>
                 <td className="px-4 py-2">{q.transactionDate}</td>
                 <td className="px-4 py-2">{q.validTill}</td>
-                <td className="px-4 py-2">
-                  {q.currency}
-                </td>
+                <td className="px-4 py-2">{q.currency}</td>
                 <td className="px-4 py-2">
                   {q.currency === "INR" ? "₹" : "$"}
-                  {q.grandTotal?.toLocaleString() ?? q.grandTotal.toLocaleString()}
+                  {q.grandTotal?.toLocaleString() ??
+                    q.grandTotal.toLocaleString()}
                 </td>
                 {/* <td className="px-4 py-2">
                   <span
@@ -475,12 +475,12 @@ const QuotationsTable: React.FC = () => {
 
       {/* Pagination */}
       <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            pageSize={pageSize}
-            totalItems={totalItems}
-            onPageChange={setPage}
-          />
+        currentPage={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        onPageChange={setPage}
+      />
     </div>
   );
 };

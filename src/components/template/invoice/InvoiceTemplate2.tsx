@@ -17,7 +17,7 @@ const InvoiceTemplate2 = forwardRef<HTMLDivElement, InvoiceTemplate2Props>(
     const signatureInputRef = useRef<HTMLInputElement>(null);
     const [signatureText, setSignatureText] = useState<string>("");
     const [signatureMode, setSignatureMode] = useState<"upload" | "type">(
-      "upload"
+      "upload",
     );
 
     const getCurrencySymbol = () => {
@@ -276,7 +276,10 @@ const InvoiceTemplate2 = forwardRef<HTMLDivElement, InvoiceTemplate2Props>(
                 className="pt-3 flex justify-between"
                 style={{ borderTop: "2px solid #2F3C7E" }}
               >
-                <span className="text-lg font-bold" style={{ color: "#1C1C1C" }}>
+                <span
+                  className="text-lg font-bold"
+                  style={{ color: "#1C1C1C" }}
+                >
                   Total
                 </span>
 
@@ -427,7 +430,7 @@ const InvoiceTemplate2 = forwardRef<HTMLDivElement, InvoiceTemplate2Props>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 InvoiceTemplate2.displayName = "InvoiceTemplate2";

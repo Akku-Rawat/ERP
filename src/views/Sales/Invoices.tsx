@@ -69,7 +69,7 @@ const previewDummyInvoice: InvoiceData = {
   invoiceDate: "",
   invoiceDueDate: "",
   poNumber: "",
-  totalDiscount: 0
+  totalDiscount: 0,
 };
 
 /* ============================================
@@ -85,11 +85,11 @@ const InvoicesTable: React.FC = () => {
   const [totalItems, setTotalItems] = useState(0);
 
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(
-    null
+    null,
   );
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType | null>(
-    null
+    null,
   );
 
   const componentRef = useRef<HTMLDivElement>(null);
@@ -126,8 +126,6 @@ const InvoicesTable: React.FC = () => {
     }
   };
 
-
-
   useEffect(() => {
     fetchInvoices();
   }, [page, pageSize]);
@@ -152,7 +150,7 @@ const InvoicesTable: React.FC = () => {
   const filteredInvoices = invoices.filter(
     (inv) =>
       inv.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inv.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+      inv.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleTemplateSelect = (templateId: TemplateType) => {
@@ -205,7 +203,6 @@ const InvoicesTable: React.FC = () => {
         </div>
       ) : (
         <>
-
           {/* Table */}
           <div className="overflow-x-auto">
             <table className="min-w-full border border-gray-200 rounded-lg bg-white">
@@ -223,7 +220,10 @@ const InvoicesTable: React.FC = () => {
 
               <tbody>
                 {filteredInvoices.map((inv) => (
-                  <tr key={inv.invoiceNumber} className="border-t hover:bg-gray-50">
+                  <tr
+                    key={inv.invoiceNumber}
+                    className="border-t hover:bg-gray-50"
+                  >
                     <td className="px-4 py-2">{inv.invoiceNumber}</td>
                     <td className="px-4 py-2">{inv.status}</td>
                     <td className="px-4 py-2">{inv.invoiceType}</td>
@@ -266,7 +266,9 @@ const InvoicesTable: React.FC = () => {
                   ×
                 </button>
 
-                <h2 className="text-2xl font-bold mb-2">Choose Invoice Template</h2>
+                <h2 className="text-2xl font-bold mb-2">
+                  Choose Invoice Template
+                </h2>
                 <p className="text-sm text-gray-600 mb-6">
                   Invoice for {selectedInvoice.customerName}
                 </p>
@@ -284,7 +286,9 @@ const InvoicesTable: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className={`text-white text-center w-full py-2 font-semibold text-sm ${template.color}`}>
+                      <div
+                        className={`text-white text-center w-full py-2 font-semibold text-sm ${template.color}`}
+                      >
                         {template.name}
                       </div>
                     </div>
@@ -341,7 +345,10 @@ const InvoicesTable: React.FC = () => {
 
                   <div className="flex-1 overflow-auto bg-gray-100 p-4">
                     <div className="flex justify-center">
-                      <div className="bg-gray-100 p-8 rounded-lg" ref={componentRef}>
+                      <div
+                        className="bg-gray-100 p-8 rounded-lg"
+                        ref={componentRef}
+                      >
                         {renderTemplate(selectedTemplate, false)}
                       </div>
                     </div>

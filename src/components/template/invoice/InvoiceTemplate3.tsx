@@ -16,7 +16,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
     const signatureInputRef = useRef<HTMLInputElement>(null);
     const [signatureText, setSignatureText] = useState<string>("");
     const [signatureMode, setSignatureMode] = useState<"upload" | "type">(
-      "upload"
+      "upload",
     );
 
     const getCurrencySymbol = () => {
@@ -139,8 +139,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
                   {data.companyAddress || "77 Namrata Bldg"}
                 </p>
                 <p className="text-gray-600">
-                  {data.companyCity || "Delhi"},{" "}
-                  {data.companyState || "Delhi"}{" "}
+                  {data.companyCity || "Delhi"}, {data.companyState || "Delhi"}{" "}
                   {data.companyPostalCode || "400077"}
                 </p>
               </div>
@@ -257,26 +256,23 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
                   SUBTOTAL
                 </span>
 
-                <span className="text-gray-800">
-                  {safeFix(data.subTotal)}
-                </span>
+                <span className="text-gray-800">{safeFix(data.subTotal)}</span>
               </div>
 
               <div className="flex justify-between py-2">
                 <span className="text-[#D4AF37] font-bold uppercase">
                   GST{" "}
                   {data.subTotal
-                    ? ((Number(data.totalTax ?? 0) /
-                        Number(data.subTotal ?? 1)) *
+                    ? (
+                        (Number(data.totalTax ?? 0) /
+                          Number(data.subTotal ?? 1)) *
                         100
                       ).toFixed(1)
                     : "0"}
                   %
                 </span>
 
-                <span className="text-gray-800">
-                  {safeFix(data.totalTax)}
-                </span>
+                <span className="text-gray-800">{safeFix(data.totalTax)}</span>
               </div>
 
               <div className="flex justify-between py-3 mt-2">
@@ -410,7 +406,7 @@ const InvoiceTemplate3 = forwardRef<HTMLDivElement, InvoiceTemplate3Props>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 InvoiceTemplate3.displayName = "InvoiceTemplate3";

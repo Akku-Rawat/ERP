@@ -14,8 +14,11 @@ const ENDPOINTS = {
   updateQuotation: `${base_url}.quotation.api.update_quotation`,
 };
 
-export async function getAllQuotations(page: number = 1, page_size: number = 10): Promise<any> {
- const resp: AxiosResponse = await api.get(ENDPOINTS.getAllQuotations, {
+export async function getAllQuotations(
+  page: number = 1,
+  page_size: number = 10,
+): Promise<any> {
+  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllQuotations, {
     params: { page, page_size },
   });
   return resp.data;
