@@ -153,14 +153,14 @@ const Dashboard = () => {
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 flex-wrap">
         <h1 className="text-2xl font-semibold text-gray-700">
           Dashboard Overview
         </h1>
       </div>
 
       {/* BUSINESS OVERVIEW CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
         {[
           {
             title: "Total Revenue",
@@ -201,16 +201,16 @@ const Dashboard = () => {
       </div>
 
       {/* CHARTS SECTION */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-8">
         {/* Payable and Receivable */}
         <div className="bg-white p-6 rounded-2xl shadow flex flex-col">
           <h2 className="font-semibold text-gray-700 mb-4">
             Payable and Receivable
           </h2>
 
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 overflow-auto">
             {/* Text Summary */}
-            <div className="flex-1 space-y-3 w-full md:w-1/2">
+            <div className="flex-1 space-y-3 w-full md:w-1/2 min-w-[220px]">
               <div className="flex justify-between text-gray-600">
                 <span>Total Payable</span>
                 <span className="font-semibold text-gray-800">K2,500</span>
@@ -227,7 +227,7 @@ const Dashboard = () => {
             </div>
 
             {/* Chart Section */}
-            <div className="w-full md:w-[70%] h-[230px]">
+            <div className="w-full md:w-[70%] h-[230px] min-w-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={commodityData}
@@ -259,15 +259,15 @@ const Dashboard = () => {
         </div>
 
         {/* Top Selling Categories Bar Chart */}
-        <div className="bg-white p-6 rounded-2xl shadow flex flex-col">
+        <div className="bg-white p-6 rounded-2xl shadow flex flex-col min-w-full lg:min-w-0">
           <h2 className="font-semibold text-gray-700 mb-4">
             Top Selling Categories
           </h2>
-          <div className="flex-grow">
+          <div className="flex-grow overflow-auto min-w-[300px]">
             <ResponsiveContainer width="100%" height={250}>
               <BarChart
                 data={categoryData}
-                layout="vertical" // keep vertical layout for horizontal bars
+                layout="vertical"
                 margin={{ top: 10, right: 20, left: 20, bottom: 10 }}
                 barSize={20}
               >
@@ -292,9 +292,9 @@ const Dashboard = () => {
       </div>
 
       {/* Lists Section: Pending Approvals, Top Customers, Top Suppliers */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-8">
         {/* Pending Approval List */}
-        <div className="bg-white p-6 rounded-2xl shadow flex flex-col">
+        <div className="bg-white p-6 rounded-2xl shadow flex flex-col overflow-hidden">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-semibold text-gray-700">Pending Approvals</h2>
             <select className="border rounded-lg px-3 py-1 text-sm">
@@ -302,7 +302,7 @@ const Dashboard = () => {
               <option>Last week</option>
             </select>
           </div>
-          <div className="flex-grow overflow-y-auto">
+          <div className="flex-grow overflow-y-auto max-h-[320px]">
             <ul className="space-y-3">
               {pendingApprovals.map((item) => (
                 <li key={item.id} className="border-b pb-3 last:border-0">
@@ -325,7 +325,7 @@ const Dashboard = () => {
         </div>
 
         {/* Top 5 Customers */}
-        <div className="bg-white p-6 rounded-2xl shadow flex flex-col">
+        <div className="bg-white p-6 rounded-2xl shadow flex flex-col overflow-hidden">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-semibold text-gray-700">
               Top 5 Customers (by Revenue)
@@ -335,7 +335,7 @@ const Dashboard = () => {
               <option>Last month</option>
             </select>
           </div>
-          <div className="flex-grow overflow-y-auto">
+          <div className="flex-grow overflow-y-auto max-h-[320px]">
             <ul className="space-y-3">
               {topCustomers.map((cust) => (
                 <li key={cust.id} className="border-b pb-3 last:border-0">
@@ -360,7 +360,7 @@ const Dashboard = () => {
         </div>
 
         {/* Top 5 Suppliers */}
-        <div className="bg-white p-6 rounded-2xl shadow flex flex-col">
+        <div className="bg-white p-6 rounded-2xl shadow flex flex-col overflow-hidden">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-semibold text-gray-700">
               Top 5 Suppliers (by Spend)
@@ -370,7 +370,7 @@ const Dashboard = () => {
               <option>Last month</option>
             </select>
           </div>
-          <div className="flex-grow overflow-y-auto">
+          <div className="flex-grow overflow-y-auto max-h-[320px]">
             <ul className="space-y-3">
               {topSuppliers.map((sup) => (
                 <li key={sup.id} className="border-b pb-3 last:border-0">

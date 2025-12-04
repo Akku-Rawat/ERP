@@ -43,10 +43,6 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleToggle = () => {
-    setForm((prev) => ({ ...prev, isEnabled: !prev.isEnabled }));
-  };
-
   const handleReset = () => {
     setForm({
       accountNumber: "",
@@ -65,7 +61,6 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (
       !form.accountNumber ||
       !form.accountHolderName ||
@@ -75,7 +70,6 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
       alert("Please fill in all required fields.");
       return;
     }
-
     onSubmit(form);
     handleReset();
     onClose();
@@ -107,9 +101,9 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
 
             {/* Scrollable Content */}
             <section className="flex-1 overflow-y-auto p-6 space-y-8">
-              {/* Main Fields - 4 Columns */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Account Number */}
+              {/* Fields - 3 Columns */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* First Row */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">
                     Account No <span className="text-red-500">*</span>
@@ -125,7 +119,6 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   />
                 </label>
 
-                {/* Account Holder Name */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">
                     Account Holder Name <span className="text-red-500">*</span>
@@ -141,7 +134,6 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   />
                 </label>
 
-                {/* Bank Name */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">
                     Bank Name <span className="text-red-500">*</span>
@@ -156,8 +148,7 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                     placeholder="HDFC Bank"
                   />
                 </label>
-
-                {/* Sort Code */}
+                {/* Second Row */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">Sort Code</span>
                   <input
@@ -170,7 +161,6 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   />
                 </label>
 
-                {/* SWIFT Code */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">SWIFT Code</span>
                   <input
@@ -183,7 +173,20 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   />
                 </label>
 
-                {/* Currency */}
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="font-medium text-gray-600">
+                    Branch Address
+                  </span>
+                  <input
+                    type="text"
+                    name="branchAddress"
+                    value={form.branchAddress}
+                    onChange={handleChange}
+                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    placeholder="123 MG Road, Mumbai"
+                  />
+                </label>
+                {/* Third Row */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">
                     Currency <span className="text-red-500">*</span>
@@ -205,22 +208,6 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   </select>
                 </label>
 
-                {/* Branch Address */}
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">
-                    Branch Address
-                  </span>
-                  <input
-                    type="text"
-                    name="branchAddress"
-                    value={form.branchAddress}
-                    onChange={handleChange}
-                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="123 MG Road, Mumbai"
-                  />
-                </label>
-
-                {/* Date of Addition */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">
                     Date of Addition
@@ -234,7 +221,6 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   />
                 </label>
 
-                {/* Opening Balance */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">
                     Opening Balance

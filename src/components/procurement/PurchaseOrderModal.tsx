@@ -89,8 +89,8 @@ function SupplierDropdown({
             {filtered.map((s) => (
               <li
                 key={s.name}
-                className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
-                  s.name === value ? "bg-blue-200 font-bold" : ""
+                className={`px-4 py-2 cursor-pointer hover:bg-indigo-100 ${
+                  s.name === value ? "bg-indigo-200 font-bold" : ""
                 }`}
                 onClick={() => {
                   onChange(s.name);
@@ -191,7 +191,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
   const [activeTab, setActiveTab] = useState<
     "details" | "email" | "tax" | "address" | "terms"
   >("details");
-  const itemsPerPage = 3;
+  const itemsPerPage = 4;
   const [page, setPage] = useState(0);
   const paginatedItems = items.slice(
     page * itemsPerPage,
@@ -206,18 +206,23 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
     { type: "", accountHead: "", taxRate: 0, amount: 0 },
   ]);
 
-  const taxItemsPerPage = 5;
+  const taxItemsPerPage = 4;
   const [taxPage, setTaxPage] = useState(0);
   const paginatedTaxRows = taxRows.slice(
     taxPage * taxItemsPerPage,
     (taxPage + 1) * taxItemsPerPage,
   );
 
-  const addTaxRow = () =>
-    setTaxRows((rows) => [
-      ...rows,
-      { type: "", accountHead: "", taxRate: 0, amount: 0 },
-    ]);
+  const addTaxRow = () => {
+    setTaxRows((prev) => {
+      const newRows = [
+        ...prev,
+        { type: "", accountHead: "", taxRate: 0, amount: 0 },
+      ];
+      setTaxPage(Math.floor((newRows.length - 1) / taxItemsPerPage));
+      return newRows;
+    });
+  };
 
   const removeTaxRow = (idx: number) =>
     setTaxRows((rows) => rows.filter((_, i) => i !== idx));
@@ -249,24 +254,29 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
       paymentAmount: 0,
     },
   ]);
-  const paymentItemsPerPage = 3;
+  const paymentItemsPerPage = 4;
   const [paymentPage, setPaymentPage] = useState(0);
   const paginatedPaymentRows = paymentRows.slice(
     paymentPage * paymentItemsPerPage,
     (paymentPage + 1) * paymentItemsPerPage,
   );
 
-  const addPaymentRow = () =>
-    setPaymentRows((rows) => [
-      ...rows,
-      {
-        paymentTerm: "",
-        description: "",
-        dueDate: "",
-        invoicePortion: 0,
-        paymentAmount: 0,
-      },
-    ]);
+  const addPaymentRow = () => {
+    setPaymentRows((prev) => {
+      const newRows = [
+        ...prev,
+        {
+          paymentTerm: "",
+          description: "",
+          dueDate: "",
+          invoicePortion: 0,
+          paymentAmount: 0,
+        },
+      ];
+      setPaymentPage(Math.floor((newRows.length - 1) / paymentItemsPerPage));
+      return newRows;
+    });
+  };
 
   const removePaymentRow = (idx: number) =>
     setPaymentRows((rows) =>
@@ -467,8 +477,8 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
             className="flex flex-col h-full overflow-hidden"
           >
             {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-blue-700">
+            <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
+              <h2 className="text-2xl font-semibold text-indigo-700">
                 Create Purchase Order
               </h2>
               <button
@@ -488,7 +498,11 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                     key={tab}
                     type="button"
                     onClick={() => setActiveTab(tab)}
-                    className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${activeTab === tab ? "text-blue-600 border-b-2 border-blue-600 bg-white" : "text-gray-600 hover:text-gray-900"}`}
+                    className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${
+                      activeTab === tab
+                        ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
                   >
                     {tab === "details"
                       ? "Details"
@@ -554,7 +568,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                             name="currency"
                             value={form.currency}
                             onChange={handleForm}
-                            className="rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                           >
                             <option value="INR">INR (₹)</option>
                             <option value="USD">USD ($)</option>
@@ -714,7 +728,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                       <button
                         type="button"
                         onClick={addItem}
-                        className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
+                        className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200"
                       >
                         <Plus className="w-4 h-4" /> Add Item
                       </button>
@@ -750,7 +764,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                             <span className="text-base font-semibold text-gray-700">
                               Email Address
                             </span>
-                            <span className="text-base font-bold text-blue-600">
+                            <span className="text-base font-bold text-indigo-600">
                               supplier@example.com
                             </span>
                           </div>
@@ -801,7 +815,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                             <span className="text-base font-semibold text-gray-700">
                               Rounded Total
                             </span>
-                            <span className="text-base font-bold text-blue-600">
+                            <span className="text-base font-bold text-indigo-600">
                               {symbol}
                               {form.roundedTotal.toFixed(2)}
                             </span>
@@ -813,7 +827,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                 </div>
               )}
 
-              {/* EMAIL TAB (BLANK) */}
+              {/* EMAIL TAB */}
               {activeTab === "email" && (
                 <div className="mx-auto bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                   <div className="flex items-center justify-between mb-4">
@@ -835,7 +849,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                         value={templateName}
                         onChange={(e) => setTemplateName(e.target.value)}
                         placeholder="Template name (e.g., RFQ Invitation)"
-                        className="px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       />
                     </div>
 
@@ -846,7 +860,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                       <select
                         value={templateType}
                         onChange={(e) => setTemplateType(e.target.value)}
-                        className="px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       >
                         <option>Quote Email</option>
                         <option>Order Confirmation</option>
@@ -862,7 +876,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
                         placeholder="Email subject line"
-                        className="px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       />
                     </div>
                   </div>
@@ -997,7 +1011,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                       </button>
                       <button
                         onClick={handleSaveTemplate}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm"
                       >
                         Save Template
                       </button>
@@ -1080,16 +1094,17 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                     />
                   </div>
 
-                  <Input
-                    label="Purchase Taxes and Charges Template"
-                    name="taxesChargesTemplate"
-                    type="text"
-                    value={form.taxesChargesTemplate}
-                    onChange={handleForm}
-                    placeholder="Enter Template"
-                    className="w-full"
-                  />
-
+                  <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-2">
+                    <Input
+                      label="Purchase Taxes and Charges Template"
+                      name="taxesChargesTemplate"
+                      type="text"
+                      value={form.taxesChargesTemplate}
+                      onChange={handleForm}
+                      placeholder="Enter Template"
+                      className="w-full"
+                    />
+                  </div>
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <span className="font-medium text-gray-700">
@@ -1247,7 +1262,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                     <button
                       type="button"
                       onClick={addTaxRow}
-                      className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200 mt-2"
+                      className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200 mt-2"
                     >
                       <Plus className="w-4 h-4" /> Add Row
                     </button>
@@ -1328,7 +1343,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
 
               {/* TERMS TAB */}
               {activeTab === "terms" && (
-                <div className="space-y-8">
+                <div className="space-y-8 mx-auto bg-white rounded-lg p-6  ">
                   <div>
                     <h3 className="mb-2 text-lg font-semibold text-gray-800">
                       Payment Terms
@@ -1501,25 +1516,182 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                       <button
                         type="button"
                         onClick={addPaymentRow}
-                        className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200 mt-2"
+                        className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200 mt-2"
                       >
                         <Plus className="w-4 h-4" /> Add Row
                       </button>
                     </div>
                   </div>
 
-                  <div>
-                    <div className="mt-3">
-                      <label className="font-medium text-gray-700 mb-1 block">
+                  {/* Terms and Conditions */}
+                  <div className="bg-white rounded-lg border border-gray-200">
+                    <div className="p-4 border-b border-gray-200">
+                      <h3 className="font-semibold text-gray-900">
                         Terms and Conditions
-                      </label>
+                      </h3>
+                    </div>
+                    <div className="p-6">
+                      {/* Rich Text Editor Toolbar */}
+                      <div className="border border-gray-300 rounded-t-lg bg-gray-50 p-2 flex items-center gap-1 flex-wrap">
+                        <select className="px-2 py-1 text-sm border border-gray-300 rounded bg-white">
+                          <option>Normal</option>
+                          <option>Heading 1</option>
+                          <option>Heading 2</option>
+                        </select>
+
+                        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                        <select className="px-2 py-1 text-sm border border-gray-300 rounded bg-white">
+                          <option>---</option>
+                          <option>Arial</option>
+                          <option>Times New Roman</option>
+                        </select>
+
+                        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded"
+                          title="Bold"
+                        >
+                          <strong className="text-sm">B</strong>
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded"
+                          title="Italic"
+                        >
+                          <em className="text-sm">I</em>
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded"
+                          title="Underline"
+                        >
+                          <u className="text-sm">U</u>
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded"
+                          title="Strikethrough"
+                        >
+                          <s className="text-sm">S</s>
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Subscript"
+                        >
+                          T<sub>x</sub>
+                        </button>
+
+                        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Font Color"
+                        >
+                          A
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Background Color"
+                        >
+                          A̲
+                        </button>
+
+                        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Quote"
+                        >
+                          "
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Code"
+                        >
+                          {"</>"}
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Bullet Point"
+                        >
+                          •¶
+                        </button>
+
+                        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Link"
+                        >
+                          🔗
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Image"
+                        >
+                          🖼
+                        </button>
+
+                        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Bullet List"
+                        >
+                          ≡
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Numbered List"
+                        >
+                          ☰
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Checklist"
+                        >
+                          ☑
+                        </button>
+
+                        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Align Left"
+                        >
+                          ≡
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Align Center"
+                        >
+                          ≡
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                          title="Align Right"
+                        >
+                          ≡
+                        </button>
+
+                        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                        <select className="px-2 py-1 text-sm border border-gray-300 rounded bg-white">
+                          <option>Table</option>
+                        </select>
+                      </div>
+
+                      {/* Text Area */}
                       <textarea
-                        name="termsAndConditions"
                         value={form.termsAndConditions}
-                        onChange={handleForm}
-                        rows={8}
-                        className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 mt-1"
-                        placeholder="Enter detailed terms and conditions…"
+                        onChange={(e) =>
+                          setForm((p) => ({
+                            ...p,
+                            termsAndConditions: e.target.value,
+                          }))
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 border-t-0 rounded-b-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        rows={12}
+                        placeholder="Enter terms and conditions..."
                       />
                     </div>
                   </div>
@@ -1546,7 +1718,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
+                  className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600"
                 >
                   Save Purchase Order
                 </button>
@@ -1567,7 +1739,9 @@ const Input = React.forwardRef<
     <span className="font-medium text-gray-600">{label}</span>
     <input
       ref={ref}
-      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""} ${className}`}
+      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
+        props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
+      } ${className}`}
       {...props}
     />
   </label>
@@ -1587,7 +1761,7 @@ const Select: React.FC<{
       name={name}
       value={value}
       onChange={onChange}
-      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>
@@ -1612,7 +1786,7 @@ const TextArea: React.FC<{
       value={value}
       onChange={onChange}
       rows={rows}
-      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
     />
   </label>
 );

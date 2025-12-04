@@ -257,35 +257,40 @@ const SalesDashboard: React.FC = () => {
         </div>
 
         {/* Top Products Table */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <div className="font-semibold text-lg mb-3">Top Products</div>
-          <table className="min-w-full ">
-            <thead>
-              <tr className="bg-gray-100 text-gray-700 text-xs uppercase">
-                <th className="px-4 py-3 text-left rounded-l-xl font-bold">
-                  Product
-                </th>
-                <th className="px-4 py-3 text-left font-bold">Category</th>
-                <th className="px-4 py-3 text-left font-bold">Units Sold</th>
-                <th className="px-4 py-3 text-left rounded-r-xl font-bold">
-                  Revenue
-                </th>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6">
+          <div className="font-semibold text-lg mb-4">Top Products</div>
+          <table className="min-w-full">
+            <thead className="bg-gray-50 text-gray-700 text-sm font-medium">
+              <tr>
+                <th className="px-6 py-4 text-left rounded-l-xl">Product</th>
+                <th className="px-6 py-4 text-left">Category</th>
+                <th className="px-6 py-4 text-left">Units Sold</th>
+                <th className="px-6 py-4 text-left rounded-r-xl">Revenue</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-200">
               {topProducts.map((p) => (
                 <tr
                   key={p.name}
-                  className="bg-white group hover:bg-blue-50 transition border-t"
+                  className="hover:bg-indigo-50/70 cursor-pointer transition-colors duration-150"
                 >
-                  <td className="px-4 py-3 font-semibold">{p.name}</td>
-                  <td className="px-4 py-3 text-gray-700">{p.category}</td>
-                  <td className="px-4 py-3 text-gray-700">{p.units}</td>
-                  <td className="px-4 py-3 text-gray-700">{p.revenue}</td>
+                  <td className="px-6 py-4 font-semibold text-gray-900">
+                    {p.name}
+                  </td>
+                  <td className="px-6 py-4 text-gray-700">{p.category}</td>
+                  <td className="px-6 py-4 text-indigo-700">{p.units}</td>
+                  <td className="px-6 py-4 font-semibold text-green-600">
+                    ₹{p.revenue.toLocaleString()}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {topProducts.length === 0 && (
+            <div className="text-center py-10 text-gray-400">
+              No top products found.
+            </div>
+          )}
         </div>
       </div>
     </div>

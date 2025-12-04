@@ -9,6 +9,8 @@ import {
   FaDownload,
   FaTrash,
   FaClock,
+  FaCheck,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 
 type UploadedFile = {
@@ -25,16 +27,6 @@ type UploadProgress = {
   isUploading: boolean;
 };
 
-const theme = {
-  bg: "bg-white",
-  border: "border border-slate-200",
-  shadow: "shadow-sm",
-  rounded: "rounded-xl",
-  textBase: "text-base font-semibold text-slate-900",
-  textSub: "text-xs text-slate-500",
-  button: "px-4 py-2 rounded-lg font-medium text-sm transition-all",
-};
-
 const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
@@ -43,9 +35,9 @@ const formatFileSize = (bytes: number): string => {
 
 const formatDate = (date: Date): string => {
   return date.toLocaleDateString("en-US", {
-    year: "numeric",
     month: "short",
     day: "numeric",
+    year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -64,6 +56,9 @@ const Upload: React.FC = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(
     null,
+  );
+  const [selectedType, setSelectedType] = useState<"logo" | "signature">(
+    "logo",
   );
 
   const simulateUpload = (
@@ -161,399 +156,608 @@ const Upload: React.FC = () => {
     setTimeout(() => setShowSuccess(false), 3000);
   };
 
-  const UploadCard = ({
-    type,
-    title,
-    icon: Icon,
-    uploadedFile,
-  }: {
-    type: "logo" | "signature";
-    title: string;
-    icon: React.ComponentType<{ className?: string }>;
-    uploadedFile: UploadedFile | null;
-  }) => {
-    const isUploading =
-      uploadProgress?.type === type && uploadProgress.isUploading;
-    const progress =
-      uploadProgress?.type === type ? uploadProgress.progress : 0;
-    const bgColor = type === "logo" ? "bg-teal-100" : "bg-blue-100";
-    const iconColor = type === "logo" ? "text-teal-600" : "text-blue-600";
-    const hoverBg = type === "logo" ? "hover:bg-teal-700" : "hover:bg-blue-700";
-    const bgPrimary = type === "logo" ? "bg-teal-600" : "bg-blue-600";
-
-    return (
-      <div
-        className={`${theme.bg} ${theme.shadow} ${theme.rounded} ${theme.border} p-6`}
-      >
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
-          <div
-            className={`w-10 h-10 ${bgColor} rounded-lg flex items-center justify-center flex-shrink-0`}
-          >
-            <Icon className={`w-5 h-5 ${iconColor}`} />
-          </div>
-          <div>
-            <h2 className={`${theme.textBase} mb-1`}>{title}</h2>
-            <p className={theme.textSub}>
-              Upload your{" "}
-              {type === "logo" ? "company logo" : "authorized signature"}
-            </p>
-          </div>
-        </div>
-
-        {/* Upload States */}
-        <div>
-          {isUploading ? (
-            <div className="p-8 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border border-slate-200">
-              <div className="flex flex-col items-center">
-                <div
-                  className={`w-16 h-16 rounded-full ${bgColor} flex items-center justify-center mb-4`}
-                >
-                  <FaUpload className={`w-7 h-7 ${iconColor} animate-pulse`} />
-                </div>
-                <p className="text-sm font-semibold text-slate-800 mb-3">
-                  Uploading...
-                </p>
-
-                {/* Progress Bar */}
-                <div className="w-full space-y-2 mb-3">
-                  <div className="bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                    <div
-                      className={`${bgPrimary} h-2.5 rounded-full transition-all duration-300`}
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <p className="text-xs font-semibold text-slate-600 text-center">
-                    {progress}% Complete
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : !uploadedFile ? (
-            <div
-              onDragEnter={(e) => handleDrag(e, type)}
-              onDragLeave={(e) => handleDrag(e, type)}
-              onDragOver={(e) => handleDrag(e, type)}
-              onDrop={(e) => handleDrop(e, type)}
-              className={`relative border-2 border-dashed ${theme.rounded} p-8 transition-all ${
-                dragActive === type
-                  ? "border-teal-500 bg-teal-50 scale-105"
-                  : "border-slate-300 bg-slate-50 hover:border-slate-400"
-              }`}
-            >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileSelect(e, type)}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                id={`${type}-upload`}
-              />
-              <div className="flex flex-col items-center text-center">
-                <div
-                  className={`w-14 h-14 rounded-full ${bgColor} flex items-center justify-center mb-4`}
-                >
-                  <FaUpload className={`w-6 h-6 ${iconColor}`} />
-                </div>
-                <p className="text-sm font-semibold text-slate-800 mb-1">
-                  {dragActive === type
-                    ? "Drop file here"
-                    : "Drag & drop your file"}
-                </p>
-                <p className="text-xs text-slate-500 mb-4">or</p>
-
-                <label
-                  htmlFor={`${type}-upload`}
-                  className={`${theme.button} ${bgPrimary} ${hoverBg} text-white flex items-center gap-2 cursor-pointer mb-4`}
-                >
-                  <FaUpload className="w-4 h-4" /> Browse Files
-                </label>
-
-                <div className="pt-4 border-t border-slate-200 w-full">
-                  <p className="text-xs text-slate-600 font-medium">
-                    Supported: PNG, JPG, SVG • Max 5MB
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            // Uploaded State
-            <div className="space-y-4">
-              <div className="bg-slate-50 rounded-lg p-5 border border-slate-200">
-                <div className="flex gap-5 mb-4">
-                  <div className="relative group flex-shrink-0">
-                    <div className="w-28 h-28 bg-white rounded-lg border border-slate-300 overflow-hidden flex items-center justify-center shadow-sm">
-                      <img
-                        src={uploadedFile.preview}
-                        alt={type}
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    </div>
-
-                    <div className="absolute inset-0 bg-black/40 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => openPreview(type, uploadedFile.preview)}
-                        className="bg-white text-slate-800 p-2 rounded-lg hover:bg-slate-100 transition"
-                      >
-                        <FaEye className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-xs text-slate-500 font-semibold mb-1">
-                          File Name
-                        </p>
-                        <p
-                          className="text-sm font-semibold text-slate-800 truncate"
-                          title={uploadedFile.file.name}
-                        >
-                          {uploadedFile.file.name}
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <p className="text-xs text-slate-500 font-semibold mb-1">
-                            Size
-                          </p>
-                          <p className="text-sm font-semibold text-slate-700">
-                            {uploadedFile.size}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500 font-semibold mb-1">
-                            Format
-                          </p>
-                          <p className="text-sm font-semibold text-slate-700 uppercase">
-                            {uploadedFile.file.type.split("/")[1]}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <p className="text-xs text-slate-500 font-semibold mb-1">
-                          Uploaded
-                        </p>
-                        <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
-                          <FaClock className="w-3.5 h-3.5 text-slate-500" />
-                          {formatDate(uploadedFile.uploadedAt)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2 pt-4 border-t border-slate-200">
-                  <button
-                    onClick={() => openPreview(type, uploadedFile.preview)}
-                    className="flex-1 bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-lg text-xs font-medium hover:bg-slate-100 transition flex items-center justify-center gap-1.5"
-                  >
-                    <FaEye className="w-3.5 h-3.5" /> Preview
-                  </button>
-                  <button
-                    onClick={() => downloadFile(uploadedFile)}
-                    className="flex-1 bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-lg text-xs font-medium hover:bg-slate-100 transition flex items-center justify-center gap-1.5"
-                  >
-                    <FaDownload className="w-3.5 h-3.5" /> Download
-                  </button>
-                  <button
-                    onClick={() => removeFile(type)}
-                    className="flex-1 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs font-medium hover:bg-red-100 transition flex items-center justify-center gap-1.5"
-                  >
-                    <FaTrash className="w-3.5 h-3.5" /> Remove
-                  </button>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <label
-                  htmlFor={`${type}-replace`}
-                  className={`inline-flex items-center gap-1.5 ${type === "logo" ? "text-teal-600 hover:text-teal-700" : "text-blue-600 hover:text-blue-700"} font-medium cursor-pointer text-xs`}
-                >
-                  <FaUpload className="w-3.5 h-3.5" />
-                  Upload a different file
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileSelect(e, type)}
-                  className="hidden"
-                  id={`${type}-replace`}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
+  const currentFile = selectedType === "logo" ? logo : signature;
+  const isUploading =
+    uploadProgress?.type === selectedType && uploadProgress.isUploading;
+  const progress =
+    uploadProgress?.type === selectedType ? uploadProgress.progress : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            Company Documentation
-          </h1>
-          <p className="text-slate-600 text-sm">
-            Upload your official company logo and authorized signature for
-            document generation and verification purposes.
-          </p>
-        </div>
-
-        {/* Success Message */}
+    <div className="">
+      <div className="max-w-full">
+        {/* Success Alert */}
         {showSuccess && (
-          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 animate-in fade-in">
-            <FaCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-800 font-medium text-sm">
-              All documents saved successfully!
+          <div className="mb-6 rounded-lg p-4 flex items-center gap-3 shadow-sm badge-success">
+            <FaCheckCircle className="w-5 h-5 text-success flex-shrink-0" />
+            <p className="text-success font-medium text-sm">
+              Documents saved successfully!
             </p>
           </div>
         )}
 
-        {/* Guidelines Section */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-5 mb-8">
-          <h3 className="text-sm font-semibold text-blue-900 mb-3">
-            Upload Guidelines
-          </h3>
-          <ul className="space-y-2">
-            <li className="text-xs text-blue-800 flex items-start gap-2">
-              <span className="text-blue-600 font-bold mt-0.5">•</span>
-              <span>
-                Upload high-quality images for better clarity on documents
-              </span>
-            </li>
-            <li className="text-xs text-blue-800 flex items-start gap-2">
-              <span className="text-blue-600 font-bold mt-0.5">•</span>
-              <span>
-                Logos should have transparent background (PNG recommended)
-              </span>
-            </li>
-            <li className="text-xs text-blue-800 flex items-start gap-2">
-              <span className="text-blue-600 font-bold mt-0.5">•</span>
-              <span>Authorized signatures must be clear and legible</span>
-            </li>
-            <li className="text-xs text-blue-800 flex items-start gap-2">
-              <span className="text-blue-600 font-bold mt-0.5">•</span>
-              <span>Maximum file size: 5MB • Supported: PNG, JPG, SVG</span>
-            </li>
-          </ul>
-        </div>
+        {/* Main Grid Layout */}
+        <div className="grid grid-cols-5 gap-6">
+          {/* Left Sidebar - Document Types */}
+          <div className="col-span-2 bg-card rounded-lg shadow-sm border border-theme overflow-hidden">
+            <div className="px-4 py-2 bg-primary-600 text-table-head-text">
+              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                <FaUpload className="w-5 h-5" />
+                Upload Documents
+              </h2>
+            </div>
 
-        {/* Upload Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <UploadCard
-            type="logo"
-            title="Company Logo"
-            icon={FaImage}
-            uploadedFile={logo}
-          />
-          <UploadCard
-            type="signature"
-            title="Authorized Signature"
-            icon={FaFileSignature}
-            uploadedFile={signature}
-          />
-        </div>
-
-        {/* Upload Summary */}
-        {(logo || signature) && (
-          <div
-            className={`${theme.bg} ${theme.rounded} ${theme.shadow} ${theme.border} p-6 mb-8`}
-          >
-            <h3 className={`${theme.textBase} mb-4`}>Upload Summary</h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {/* Logo Summary */}
-              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">
-                      <FaImage className="w-4 h-4 text-teal-600" />
+            <div className="p-4 space-y-2">
+              {/* Upload Type Cards */}
+              <div className="space-y-2">
+                <button
+                  onClick={() => setSelectedType("logo")}
+                  className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                    selectedType === "logo"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-theme hover:row-hover bg-card"
+                  }`}
+                  /* keep classes for layout; override colors via style where needed below */
+                  style={{
+                    // make selected card use full theme tint if selected
+                    background:
+                      selectedType === "logo"
+                        ? "var(--primary-600)"
+                        : undefined,
+                    color:
+                      selectedType === "logo"
+                        ? "var(--table-head-text)"
+                        : undefined,
+                  }}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center"
+                        style={{
+                          background:
+                            selectedType === "logo"
+                              ? "rgba(255,255,255,0.12)"
+                              : "var(--primary-100)",
+                        }}
+                      >
+                        <FaImage
+                          className="w-5 h-5"
+                          style={{
+                            color:
+                              selectedType === "logo"
+                                ? "white"
+                                : "var(--primary-700)",
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <p
+                          className="font-semibold"
+                          style={{
+                            color:
+                              selectedType === "logo" ? "white" : undefined,
+                          }}
+                        >
+                          Company Logo
+                        </p>
+                        <p
+                          className="text-xs"
+                          style={{
+                            color:
+                              selectedType === "logo"
+                                ? "rgba(255,255,255,0.85)"
+                                : undefined,
+                          }}
+                        >
+                          PNG, JPG, SVG
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-semibold text-slate-600">
-                        Company Logo
-                      </p>
-                      <p className="text-sm font-semibold text-slate-900">
-                        {logo ? "Uploaded" : "Pending"}
-                      </p>
-                    </div>
+                    {logo && (
+                      <span className="text-xs badge-success px-2 py-1 rounded-full font-medium flex items-center gap-1">
+                        <FaCheck className="w-3 h-3" /> Uploaded
+                      </span>
+                    )}
                   </div>
                   {logo && (
-                    <FaCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div className="mt-3 pt-3 border-t border-theme">
+                      <p
+                        className="text-xs"
+                        style={{
+                          color:
+                            selectedType === "logo"
+                              ? "rgba(255,255,255,0.95)"
+                              : undefined,
+                        }}
+                      >
+                        {logo.file.name}
+                      </p>
+                      <p
+                        className="text-xs"
+                        style={{
+                          color:
+                            selectedType === "logo"
+                              ? "rgba(255,255,255,0.85)"
+                              : undefined,
+                        }}
+                      >
+                        {logo.size}
+                      </p>
+                    </div>
                   )}
-                </div>
-                {logo && (
-                  <div className="text-xs text-slate-600 space-y-1 pl-10">
-                    <p>Size: {logo.size}</p>
-                    <p>Uploaded: {formatDate(logo.uploadedAt)}</p>
-                  </div>
-                )}
-              </div>
+                </button>
 
-              {/* Signature Summary */}
-              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <FaFileSignature className="w-4 h-4 text-blue-600" />
+                <button
+                  onClick={() => setSelectedType("signature")}
+                  className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                    selectedType === "signature"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-theme hover:row-hover bg-card"
+                  }`}
+                  style={{
+                    background:
+                      selectedType === "signature"
+                        ? "var(--primary-600)"
+                        : undefined,
+                    color:
+                      selectedType === "signature"
+                        ? "var(--table-head-text)"
+                        : undefined,
+                  }}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center"
+                        style={{
+                          background:
+                            selectedType === "signature"
+                              ? "rgba(255,255,255,0.12)"
+                              : "var(--primary-100)",
+                        }}
+                      >
+                        <FaFileSignature
+                          className="w-5 h-5"
+                          style={{
+                            color:
+                              selectedType === "signature"
+                                ? "white"
+                                : "var(--primary-700)",
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <p
+                          className="font-semibold"
+                          style={{
+                            color:
+                              selectedType === "signature"
+                                ? "white"
+                                : undefined,
+                          }}
+                        >
+                          Authorized Signature
+                        </p>
+                        <p
+                          className="text-xs"
+                          style={{
+                            color:
+                              selectedType === "signature"
+                                ? "rgba(255,255,255,0.85)"
+                                : undefined,
+                          }}
+                        >
+                          PNG, JPG, SVG
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-semibold text-slate-600">
-                        Authorized Signature
-                      </p>
-                      <p className="text-sm font-semibold text-slate-900">
-                        {signature ? "Uploaded" : "Pending"}
-                      </p>
-                    </div>
+                    {signature && (
+                      <span className="text-xs badge-success px-2 py-1 rounded-full font-medium flex items-center gap-1">
+                        <FaCheck className="w-3 h-3" /> Uploaded
+                      </span>
+                    )}
                   </div>
                   {signature && (
-                    <FaCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div className="mt-3 pt-3 border-t border-theme">
+                      <p
+                        className="text-xs"
+                        style={{
+                          color:
+                            selectedType === "signature"
+                              ? "rgba(255,255,255,0.95)"
+                              : undefined,
+                        }}
+                      >
+                        {signature.file.name}
+                      </p>
+                      <p
+                        className="text-xs"
+                        style={{
+                          color:
+                            selectedType === "signature"
+                              ? "rgba(255,255,255,0.85)"
+                              : undefined,
+                        }}
+                      >
+                        {signature.size}
+                      </p>
+                    </div>
                   )}
-                </div>
-                {signature && (
-                  <div className="text-xs text-slate-600 space-y-1 pl-10">
-                    <p>Size: {signature.size}</p>
-                    <p>Uploaded: {formatDate(signature.uploadedAt)}</p>
-                  </div>
-                )}
+                </button>
               </div>
-            </div>
 
-            {/* Overall Progress Bar */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-slate-600">
-                  Overall Completion
-                </p>
-                <p className="text-xs font-bold text-teal-600">
-                  {(logo ? 50 : 0) + (signature ? 50 : 0)}%
-                </p>
+              {/* Upload Guidelines */}
+              <div className="mt-6 pt-4 border-t border-theme">
+                <h3
+                  className="text-sm font-semibold mb-3 flex items-center gap-2"
+                  style={{ color: "var(--text)" }}
+                >
+                  <FaExclamationTriangle
+                    className="w-4 h-4"
+                    style={{ color: "var(--danger)" }}
+                  />
+                  Guidelines
+                </h3>
+                <ul className="space-y-2">
+                  <li className="text-xs flex items-start gap-2">
+                    <span
+                      style={{
+                        color: "var(--primary-700)",
+                        fontWeight: 700,
+                        marginTop: 2,
+                      }}
+                    >
+                      •
+                    </span>
+                    <span>Maximum file size: 5MB</span>
+                  </li>
+                  <li className="text-xs flex items-start gap-2">
+                    <span
+                      style={{
+                        color: "var(--primary-700)",
+                        fontWeight: 700,
+                        marginTop: 2,
+                      }}
+                    >
+                      •
+                    </span>
+                    <span>Supported formats: PNG, JPG, SVG</span>
+                  </li>
+                  <li className="text-xs flex items-start gap-2">
+                    <span
+                      style={{
+                        color: "var(--primary-700)",
+                        fontWeight: 700,
+                        marginTop: 2,
+                      }}
+                    >
+                      •
+                    </span>
+                    <span>Use transparent background for logos</span>
+                  </li>
+                  <li className="text-xs flex items-start gap-2">
+                    <span
+                      style={{
+                        color: "var(--primary-700)",
+                        fontWeight: 700,
+                        marginTop: 2,
+                      }}
+                    >
+                      •
+                    </span>
+                    <span>Ensure signatures are clear and legible</span>
+                  </li>
+                </ul>
               </div>
-              <div className="bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-teal-600 to-blue-600 h-2.5 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${(logo ? 50 : 0) + (signature ? 50 : 0)}%`,
-                  }}
-                />
-              </div>
+
+              {/* Progress Summary */}
+              {(logo || signature) && (
+                <div className="mt-6 pt-4 border-t border-theme">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide">
+                      Overall Progress
+                    </p>
+                    <p
+                      className="text-sm font-bold"
+                      style={{ color: "var(--primary-700)" }}
+                    >
+                      {(logo ? 50 : 0) + (signature ? 50 : 0)}%
+                    </p>
+                  </div>
+                  <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="h-2 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${(logo ? 50 : 0) + (signature ? 50 : 0)}%`,
+                        background: "var(--primary)",
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
+
+          {/* Right Panel - Upload Area & Details */}
+          <div className="col-span-3 bg-card rounded-lg shadow-sm border border-theme overflow-hidden">
+            <div
+              className="px-4 py-2 flex justify-between items-center"
+              style={{ background: "var(--primary-600)" }}
+            >
+              <h2 className="text-lg font-semibold text-white">
+                {selectedType === "logo"
+                  ? "Company Logo"
+                  : "Authorized Signature"}
+              </h2>
+              {currentFile && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() =>
+                      openPreview(selectedType, currentFile.preview)
+                    }
+                    className="px-3 py-1.5 rounded-md transition-all text-sm font-medium flex items-center gap-1.5 btn-ghost text-table-head-text"
+                  >
+                    <FaEye className="w-3.5 h-3.5" />
+                    Preview
+                  </button>
+                  <button
+                    onClick={() => removeFile(selectedType)}
+                    className="px-3 py-1.5 rounded-md transition-all text-sm font-medium flex items-center gap-1.5"
+                    style={{
+                      background: "rgba(255,255,255,0.12)",
+                      color: "white",
+                    }}
+                  >
+                    <FaTrash className="w-3.5 h-3.5" />
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6">
+              {isUploading ? (
+                // Uploading State
+                <div className="p-12 text-center">
+                  <div
+                    className="inline-block p-6 rounded-full mb-4"
+                    style={{ background: "var(--primary-100)" }}
+                  >
+                    <FaUpload
+                      className="w-12 h-12 animate-pulse"
+                      style={{ color: "var(--primary-700)" }}
+                    />
+                  </div>
+                  <h3 className="text-lg font-semibold text-muted mb-2">
+                    Uploading...
+                  </h3>
+                  <p className="text-muted mb-4">
+                    Please wait while we process your file
+                  </p>
+
+                  <div className="max-w-md mx-auto space-y-2">
+                    <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
+                      <div
+                        className="h-3 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${progress}%`,
+                          background: "var(--primary)",
+                        }}
+                      />
+                    </div>
+                    <p
+                      className="text-sm font-semibold"
+                      style={{ color: "var(--primary-700)" }}
+                    >
+                      {progress}% Complete
+                    </p>
+                  </div>
+                </div>
+              ) : !currentFile ? (
+                // Upload Zone
+                <div
+                  onDragEnter={(e) => handleDrag(e, selectedType)}
+                  onDragLeave={(e) => handleDrag(e, selectedType)}
+                  onDragOver={(e) => handleDrag(e, selectedType)}
+                  onDrop={(e) => handleDrop(e, selectedType)}
+                  className={`relative border-2 border-dashed rounded-lg p-12 transition-all`}
+                  style={{
+                    borderColor:
+                      dragActive === selectedType
+                        ? "var(--primary-700)"
+                        : undefined,
+                    background:
+                      dragActive === selectedType
+                        ? "var(--row-hover)"
+                        : undefined,
+                    transform:
+                      dragActive === selectedType ? "scale(1.02)" : undefined,
+                  }}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileSelect(e, selectedType)}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    id={`${selectedType}-upload`}
+                  />
+                  <div className="flex flex-col items-center text-center">
+                    <div
+                      className={`w-20 h-20 rounded-full flex items-center justify-center mb-4`}
+                      style={{
+                        background:
+                          selectedType === "logo"
+                            ? "var(--primary-100)"
+                            : "var(--primary-100)",
+                      }}
+                    >
+                      <FaUpload
+                        className={`w-10 h-10`}
+                        style={{ color: "var(--primary-700)" }}
+                      />
+                    </div>
+                    <p className="text-lg font-semibold text-main mb-2">
+                      {dragActive === selectedType
+                        ? "Drop your file here"
+                        : "Drag & drop your file"}
+                    </p>
+                    <p className="text-sm text-muted mb-6">or</p>
+
+                    <label
+                      htmlFor={`${selectedType}-upload`}
+                      className="px-6 py-3 rounded-md font-medium text-sm flex items-center gap-2 cursor-pointer transition-all shadow-sm bg-primary text-white"
+                    >
+                      <FaUpload className="w-4 h-4" /> Browse Files
+                    </label>
+
+                    <div className="mt-8 pt-6 border-t border-theme w-full">
+                      <p className="text-xs text-muted">
+                        Supported formats: PNG, JPG, SVG • Maximum size: 5MB
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // File Details View
+                <div className="space-y-6">
+                  {/* Preview Image */}
+                  <div className="flex justify-center">
+                    <div className="relative group">
+                      <div className="w-64 h-64 bg-card border-2 border-theme rounded-lg overflow-hidden flex items-center justify-center shadow-sm">
+                        <img
+                          src={currentFile.preview}
+                          alt={selectedType}
+                          className="max-w-full max-h-full object-contain"
+                        />
+                      </div>
+                      <div className="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                        <button
+                          onClick={() =>
+                            openPreview(selectedType, currentFile.preview)
+                          }
+                          className="bg-card text-main p-3 rounded-lg hover:bg-gray-100 transition"
+                        >
+                          <FaEye className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => downloadFile(currentFile)}
+                          className="bg-card text-main p-3 rounded-lg hover:bg-gray-100 transition"
+                        >
+                          <FaDownload className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* File Information Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        className="block text-xs font-semibold mb-2 uppercase tracking-wide"
+                        style={{ color: "var(--text)" }}
+                      >
+                        File Name
+                      </label>
+                      <div className="bg-card border border-theme rounded-lg px-4 py-3">
+                        <p
+                          className="font-medium text-sm truncate"
+                          title={currentFile.file.name}
+                          style={{ color: "var(--text)" }}
+                        >
+                          {currentFile.file.name}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        className="block text-xs font-semibold mb-2 uppercase tracking-wide"
+                        style={{ color: "var(--text)" }}
+                      >
+                        File Size
+                      </label>
+                      <div className="bg-card border border-theme rounded-lg px-4 py-3 flex items-center justify-between">
+                        <p
+                          className="font-medium text-sm"
+                          style={{ color: "var(--text)" }}
+                        >
+                          {currentFile.size}
+                        </p>
+                        <span className="text-success">✓</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        className="block text-xs font-semibold mb-2 uppercase tracking-wide"
+                        style={{ color: "var(--text)" }}
+                      >
+                        Format
+                      </label>
+                      <div className="bg-card border border-theme rounded-lg px-4 py-3">
+                        <p
+                          className="font-medium text-sm uppercase"
+                          style={{ color: "var(--text)" }}
+                        >
+                          {currentFile.file.type.split("/")[1]}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        className="block text-xs font-semibold mb-2 uppercase tracking-wide"
+                        style={{ color: "var(--text)" }}
+                      >
+                        Uploaded
+                      </label>
+                      <div className="bg-card border border-theme rounded-lg px-4 py-3">
+                        <p
+                          className="font-medium text-sm flex items-center gap-2"
+                          style={{ color: "var(--text)" }}
+                        >
+                          <FaClock
+                            className="w-3.5 h-3.5"
+                            style={{ color: "var(--muted)" }}
+                          />
+                          {formatDate(currentFile.uploadedAt)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Replace File Button */}
+                  <div className="pt-4 border-t border-theme text-center">
+                    <label
+                      htmlFor={`${selectedType}-replace`}
+                      className="inline-flex items-center gap-2 font-medium cursor-pointer text-sm"
+                      style={{ color: "var(--primary-700)" }}
+                    >
+                      <FaUpload className="w-4 h-4" />
+                      Upload a different file
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileSelect(e, selectedType)}
+                      className="hidden"
+                      id={`${selectedType}-replace`}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-4">
+        <div className="mt-6 flex justify-end gap-4">
           <button
             onClick={() => {
               setLogo(null);
               setSignature(null);
             }}
-            className="px-6 py-2.5 border border-slate-300 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition"
+            className="px-6 py-2.5 border border-gray-300 text-muted text-sm font-semibold rounded-lg hover:bg-card transition"
           >
             Reset All
           </button>
@@ -562,9 +766,12 @@ const Upload: React.FC = () => {
             disabled={!logo && !signature}
             className={`px-8 py-2.5 text-white text-sm font-semibold rounded-lg transition-all ${
               logo || signature
-                ? "bg-teal-600 hover:bg-teal-700 cursor-pointer shadow-md hover:shadow-lg"
-                : "bg-slate-300 cursor-not-allowed"
+                ? "cursor-pointer shadow-sm"
+                : "bg-gray-300 cursor-not-allowed"
             }`}
+            style={
+              logo || signature ? { background: "var(--primary)" } : undefined
+            }
           >
             Save Documents
           </button>
@@ -574,16 +781,15 @@ const Upload: React.FC = () => {
       {/* Preview Modal */}
       {previewModal && (
         <div
-          className="fixed inset-0 bg-black/70 flex items-center justify-center p-6 z-50 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/70 flex items-center justify-center p-6 z-50"
           onClick={() => setPreviewModal(null)}
         >
           <div
-            className={`${theme.bg} ${theme.rounded} max-w-2xl w-full shadow-2xl`}
+            className="bg-card rounded-lg max-w-3xl w-full shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-              <h3 className={theme.textBase}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-theme">
+              <h3 className="text-lg font-semibold text-main">
                 {previewModal.type === "logo"
                   ? "Company Logo"
                   : "Authorized Signature"}{" "}
@@ -591,14 +797,13 @@ const Upload: React.FC = () => {
               </h3>
               <button
                 onClick={() => setPreviewModal(null)}
-                className="text-slate-600 hover:bg-slate-100 p-2 rounded-lg transition"
+                className="text-muted hover:bg-gray-100 p-2 rounded-lg transition"
               >
-                <FaTimes className="w-4 h-4" />
+                <FaTimes className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Modal Content */}
-            <div className="bg-slate-50 flex items-center justify-center p-8 min-h-96">
+            <div className="bg-card flex items-center justify-center p-12 min-h-96">
               <img
                 src={previewModal.url}
                 alt="Preview"

@@ -47,25 +47,28 @@ const CompanySetup: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen p-8 pb-20">
+    <div className="bg-app min-h-screen p-8 pb-20">
       {/* Header */}
-      <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
+      <h1 className="text-3xl font-bold mb-6 flex items-center gap-2 text-main">
         <FaBuilding /> Company Setup
       </h1>
       {/* Navbar */}
-      <div className="flex gap-8 mb-8 border-b border-gray-300">
+      <div className="flex gap-8 mb-8 border-b border-theme">
         {navTabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-4
-              ${
-                tab === t.key
-                  ? "text-teal-600 border-teal-500"
-                  : "text-gray-500 border-transparent hover:text-teal-600"
-              }`}
+            className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-2 border-theme 
+    ${
+      tab === t.key
+        ? "border-[var(--primary)] text-main font-semibold"
+        : "border-transparent text-muted hover:text-primary"
+    }
+  `}
+            style={{ background: "transparent" }}
           >
-            {t.icon} {t.label}
+            {t.icon}
+            <span className="ml-1">{t.label}</span>
           </button>
         ))}
       </div>

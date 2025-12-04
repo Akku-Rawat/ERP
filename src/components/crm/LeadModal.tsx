@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface LeadModalProps {
+export interface LeadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (data: LeadFormData) => void;
+  lead: Lead | null;
+  onSubmit: (data: any) => void;
 }
 
 export interface LeadFormData {
@@ -103,8 +104,8 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
         >
           <form onSubmit={handleSubmit} className="flex flex-col h-full">
             {/* Header */}
-            <header className="flex items-center justify-between border-b bg-blue-50 px-6 py-3">
-              <h3 className="text-xl font-semibold text-blue-700">
+            <header className="flex items-center justify-between border-b bg-indigo-50 px-6 py-3">
+              <h3 className="text-xl font-semibold text-indigo-700">
                 Create Lead
               </h3>
               <button
@@ -263,7 +264,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
                 onToggle={() => toggleSection("notes")}
               >
                 <textarea
-                  className="w-full rounded border p-3 text-sm h-28 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full rounded border p-3 text-sm h-28 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   name="description"
                   value={form.description || ""}
                   onChange={handleChange}
@@ -281,7 +282,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
                   type="file"
                   accept="image/*"
                   onChange={handleFile}
-                  className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
                 />
               </div>
             </section>
@@ -305,7 +306,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-full bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  className="rounded-full bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                 >
                   Save Lead
                 </button>
@@ -356,7 +357,7 @@ const Input: React.FC<{
       value={value ?? ""}
       onChange={onChange}
       placeholder={placeholder}
-      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
     />
   </label>
 );
@@ -374,7 +375,7 @@ const Select: React.FC<{
       name={name}
       value={value}
       onChange={onChange}
-      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>

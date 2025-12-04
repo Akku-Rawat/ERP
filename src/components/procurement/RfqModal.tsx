@@ -52,7 +52,6 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
     { ...emptySupplier },
   ]);
   const [items, setItems] = useState<ItemRow[]>([{ ...emptyItem }]);
-  const [terms, setTerms] = useState("");
 
   // Email template states
   const [templateName, setTemplateName] = useState("");
@@ -62,9 +61,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
   const [sendAttachedFiles, setSendAttachedFiles] = useState(true);
   const [sendPrint, setSendPrint] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-
-  const paymentItemsPerPage = 5;
-  const [paymentPage, setPaymentPage] = useState(0);
+  const [termsAndConditions, setTermsAndConditions] = useState("");
 
   interface PaymentRow {
     paymentTerm: string;
@@ -74,49 +71,70 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
     paymentAmount: number;
   }
 
-  const emptyPaymentRow: PaymentRow = {
-    paymentTerm: "",
-    description: "",
-    dueDate: new Date().toISOString().split("T")[0],
-    invoicePortion: 0,
-    paymentAmount: 0,
-  };
+  const suppliersPerPage = 3;
+  const [suppliersPage, setSuppliersPage] = useState(0);
+  const paginatedSuppliers = suppliers.slice(
+    suppliersPage * suppliersPerPage,
+    (suppliersPage + 1) * suppliersPerPage,
+  );
 
+  const itemsPerPage = 3;
+  const [itemsPage, setItemsPage] = useState(0);
+  const paginatedItems = items.slice(
+    itemsPage * itemsPerPage,
+    (itemsPage + 1) * itemsPerPage,
+  );
+
+  // Payment rows
   const [paymentRows, setPaymentRows] = useState<PaymentRow[]>([
-    { ...emptyPaymentRow },
+    {
+      paymentTerm: "",
+      description: "",
+      dueDate: "",
+      invoicePortion: 0,
+      paymentAmount: 0,
+    },
   ]);
+  const paymentItemsPerPage = 4;
+  const [paymentPage, setPaymentPage] = useState(0);
   const paginatedPaymentRows = paymentRows.slice(
     paymentPage * paymentItemsPerPage,
     (paymentPage + 1) * paymentItemsPerPage,
   );
 
+  const addPaymentRow = () => {
+    setPaymentRows((prev) => {
+      const newRows = [
+        ...prev,
+        {
+          paymentTerm: "",
+          description: "",
+          dueDate: "",
+          invoicePortion: 0,
+          paymentAmount: 0,
+        },
+      ];
+      setPaymentPage(Math.floor((newRows.length - 1) / paymentItemsPerPage));
+      return newRows;
+    });
+  };
+
+  const removePaymentRow = (idx: number) =>
+    setPaymentRows((rows) =>
+      rows.length === 1 ? rows : rows.filter((_, i) => i !== idx),
+    );
+
   const handlePaymentRowChange = (
     idx: number,
-    field: keyof PaymentRow,
-    value: string | number,
+    key: keyof PaymentRow,
+    value: any,
   ) => {
-    const updated = [...paymentRows];
-    updated[idx] = { ...updated[idx], [field]: value };
-    setPaymentRows(updated);
+    setPaymentRows((rows) => {
+      const updated = [...rows];
+      updated[idx] = { ...updated[idx], [key]: value };
+      return updated;
+    });
   };
-
-  const addPaymentRow = () => {
-    setPaymentRows([...paymentRows, { ...emptyPaymentRow }]);
-    setPaymentPage(Math.floor(paymentRows.length / paymentItemsPerPage));
-  };
-
-  const removePaymentRow = (idx: number) => {
-    if (paymentRows.length === 1) return;
-    setPaymentRows(paymentRows.filter((_, i) => i !== idx));
-  };
-
-  const handlePaymentPrev = () => setPaymentPage(Math.max(0, paymentPage - 1));
-  const handlePaymentNext = () =>
-    setPaymentPage(
-      paymentPage + 1 < Math.ceil(paymentRows.length / paymentItemsPerPage)
-        ? paymentPage + 1
-        : paymentPage,
-    );
 
   if (!isOpen) return null;
 
@@ -124,7 +142,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
   const tabClass = (active: boolean) =>
     `px-6 py-3 font-medium text-sm capitalize transition-colors ${
       active
-        ? "text-blue-600 border-b-2 border-blue-600 bg-white"
+        ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
         : "text-gray-600 hover:text-gray-900"
     }`;
 
@@ -146,6 +164,17 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
     setSuppliers(copy);
   };
 
+  const addSupplier = () => {
+    setSuppliers((prev) => {
+      const newSuppliers = [...prev, { ...emptySupplier }];
+      setSuppliersPage(
+        Math.floor((newSuppliers.length - 1) / suppliersPerPage),
+      );
+      return newSuppliers;
+    });
+  };
+
+  // Item handlers
   const handleItem = (
     e: React.ChangeEvent<HTMLInputElement>,
     idx: number,
@@ -159,14 +188,10 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
     };
     setItems(copy);
   };
-
-  const addSupplier = () => setSuppliers([...suppliers, { ...emptySupplier }]);
-  const removeSupplier = (idx: number) => {
-    if (suppliers.length === 1) return;
-    setSuppliers(suppliers.filter((_, i) => i !== idx));
+  const addItem = () => {
+    setItems([...items, { ...emptyItem }]);
+    setItemsPage(Math.floor(items.length / itemsPerPage));
   };
-
-  const addItem = () => setItems([...items, { ...emptyItem }]);
   const removeItem = (idx: number) => {
     if (items.length === 1) return;
     setItems(items.filter((_, i) => i !== idx));
@@ -210,8 +235,8 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
       <div className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col">
         {/* Header */}
-        <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
-          <h2 className="text-2xl font-semibold text-blue-700">
+        <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
+          <h2 className="text-2xl font-semibold text-indigo-700">
             New Request For Quotation
           </h2>
           <button
@@ -254,9 +279,6 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
             <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4">
               {/* Main form (left, col-span-2) */}
               <div className="col-span-2">
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  RFQ Information
-                </h3>
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <label className="flex flex-col gap-1 text-sm w-full">
@@ -267,7 +289,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                         type="text"
                         value={rfqNumber}
                         onChange={(e) => setRfqNumber(e.target.value)}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       />
                     </label>
                     <label className="flex flex-col gap-1 text-sm w-full">
@@ -278,7 +300,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                         type="date"
                         value={requestDate}
                         onChange={(e) => setRequestDate(e.target.value)}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       />
                     </label>
                     <label className="flex flex-col gap-1 text-sm w-full">
@@ -289,7 +311,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                         type="date"
                         value={quoteDeadline}
                         onChange={(e) => setQuoteDeadline(e.target.value)}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       />
                     </label>
                     <label className="flex flex-col gap-1 text-sm w-full">
@@ -297,7 +319,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                       <select
                         value={status}
                         onChange={(e) => setStatus(e.target.value)}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                       >
                         <option>Draft</option>
                         <option>Sent</option>
@@ -309,176 +331,241 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
 
                 <div className="my-6 h-px bg-gray-600" />
 
-                {/* Suppliers */}
+                {/* SUPPLIERS TABLE */}
                 <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
                   Suppliers
                 </h3>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm text-gray-600">
+                    Showing {suppliersPage * suppliersPerPage + 1}–
+                    {Math.min(
+                      (suppliersPage + 1) * suppliersPerPage,
+                      suppliers.length,
+                    )}{" "}
+                    of {suppliers.length}
+                  </span>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSuppliersPage(Math.max(0, suppliersPage - 1))
+                      }
+                      disabled={suppliersPage === 0}
+                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      ← Prev
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSuppliersPage(suppliersPage + 1)}
+                      disabled={
+                        (suppliersPage + 1) * suppliersPerPage >=
+                        suppliers.length
+                      }
+                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                </div>
                 <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow mb-4">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 text-gray-700">
                       <tr>
-                        <th className="py-2 px-2 w-12"></th>
-                        <th className="py-2 px-2">No.</th>
-                        <th className="py-2 px-2">Supplier</th>
-                        <th className="py-2 px-2">Contact</th>
-                        <th className="py-2 px-2">Email Id</th>
-                        <th className="py-2 px-2">Send Email</th>
-                        <th></th>
+                        <th className="py-2 px-2 text-center">#</th>
+                        <th className="py-2 px-2 text-left">Supplier</th>
+                        <th className="py-2 px-2 text-left">Contact</th>
+                        <th className="py-2 px-2 text-left">Email Id</th>
+                        <th className="py-2 px-2 text-center">Send Email</th>
+                        <th className="py-2 px-2"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {suppliers.map((sup, idx) => (
-                        <tr key={idx} className="hover:bg-gray-50">
-                          <td className="py-2 px-2"></td>
-                          <td className="py-2 px-2">{idx + 1}</td>
-                          <td className="py-1 px-1">
-                            <input
-                              type="text"
-                              value={sup.supplier}
-                              onChange={(e) =>
-                                handleSupplier(e, idx, "supplier")
-                              }
-                              className="w-full rounded border p-1 text-sm"
-                            />
-                          </td>
-                          <td className="py-1 px-1">
-                            <input
-                              type="text"
-                              value={sup.contact}
-                              onChange={(e) =>
-                                handleSupplier(e, idx, "contact")
-                              }
-                              className="w-full rounded border p-1 text-sm"
-                            />
-                          </td>
-                          <td className="py-1 px-1">
-                            <input
-                              type="text"
-                              value={sup.email}
-                              onChange={(e) => handleSupplier(e, idx, "email")}
-                              className="w-full rounded border p-1 text-sm"
-                            />
-                          </td>
-                          <td className="py-2 px-2 text-center">
-                            <input
-                              type="checkbox"
-                              checked={sup.sendEmail}
-                              onChange={(e) =>
-                                handleSupplier(e, idx, "sendEmail")
-                              }
-                            />
-                          </td>
-                          <td className="py-2 px-2 text-center">
-                            <button
-                              type="button"
-                              onClick={() => removeSupplier(idx)}
-                              className="p-1 text-red-600 hover:bg-red-50 rounded"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                      {paginatedSuppliers.map((sup, idx) => {
+                        const i = suppliersPage * suppliersPerPage + idx;
+                        const removeSupplier = (idx: number) => {
+                          if (suppliers.length === 1) return;
+                          setSuppliers(suppliers.filter((_, i) => i !== idx));
+                        };
+
+                        return (
+                          <tr key={i} className="hover:bg-gray-50">
+                            <td className="py-2 px-2 text-center">{i + 1}</td>
+                            <td className="py-1 px-1">
+                              <input
+                                type="text"
+                                value={sup.supplier}
+                                onChange={(e) =>
+                                  handleSupplier(e, i, "supplier")
+                                }
+                                className="w-full rounded border p-1 text-sm"
+                              />
+                            </td>
+                            <td className="py-1 px-1">
+                              <input
+                                type="text"
+                                value={sup.contact}
+                                onChange={(e) =>
+                                  handleSupplier(e, i, "contact")
+                                }
+                                className="w-full rounded border p-1 text-sm"
+                              />
+                            </td>
+                            <td className="py-1 px-1">
+                              <input
+                                type="text"
+                                value={sup.email}
+                                onChange={(e) => handleSupplier(e, i, "email")}
+                                className="w-full rounded border p-1 text-sm"
+                              />
+                            </td>
+                            <td className="py-2 px-2 text-center">
+                              <input
+                                type="checkbox"
+                                checked={sup.sendEmail}
+                                onChange={(e) =>
+                                  handleSupplier(e, i, "sendEmail")
+                                }
+                              />
+                            </td>
+                            <td className="py-2 px-2 text-center">
+                              <button
+                                type="button"
+                                onClick={() => removeSupplier(i)}
+                                className="p-1 text-red-600 hover:bg-red-50 rounded"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
-                  <div className="p-3 bg-gray-50">
-                    <button
-                      type="button"
-                      onClick={addSupplier}
-                      className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
-                    >
-                      <Plus className="w-4 h-4" /> Add Supplier
-                    </button>
-                  </div>
+                </div>
+                <div className="flex justify-between mt-3">
+                  <button
+                    type="button"
+                    onClick={addSupplier}
+                    className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200"
+                  >
+                    <Plus className="w-4 h-4" /> Add Supplier
+                  </button>
                 </div>
 
-                {/* Items */}
+                {/* ITEMS TABLE */}
                 <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
                   Items
                 </h3>
-                <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm text-gray-600">
+                    Showing {itemsPage * itemsPerPage + 1}–
+                    {Math.min((itemsPage + 1) * itemsPerPage, items.length)} of{" "}
+                    {items.length}
+                  </span>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setItemsPage(Math.max(0, itemsPage - 1))}
+                      disabled={itemsPage === 0}
+                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      ← Prev
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setItemsPage(itemsPage + 1)}
+                      disabled={(itemsPage + 1) * itemsPerPage >= items.length}
+                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                </div>
+                <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow mb-4">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 text-gray-700">
                       <tr>
-                        <th className="py-2 px-2 w-12"></th>
-                        <th className="py-2 px-2">No.</th>
-                        <th className="py-2 px-2">Item Code</th>
-                        <th className="py-2 px-2">Required Date</th>
-                        <th className="py-2 px-2">Quantity</th>
-                        <th className="py-2 px-2">UOM</th>
-                        <th className="py-2 px-2">Warehouse</th>
-                        <th></th>
+                        <th className="py-2 px-2 text-center">No.</th>
+                        <th className="py-2 px-2 text-left">Item Code</th>
+                        <th className="py-2 px-2 text-left">Required Date</th>
+                        <th className="py-2 px-2 text-right">Quantity</th>
+                        <th className="py-2 px-2 text-left">UOM</th>
+                        <th className="py-2 px-2 text-left">Warehouse</th>
+                        <th className="py-2 px-2"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {items.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-gray-50">
-                          <td className="py-2 px-2"></td>
-                          <td className="py-2 px-2">{idx + 1}</td>
-                          <td className="py-1 px-1">
-                            <input
-                              type="text"
-                              value={item.itemCode}
-                              onChange={(e) => handleItem(e, idx, "itemCode")}
-                              className="w-full rounded border p-1 text-sm"
-                            />
-                          </td>
-                          <td className="py-1 px-1">
-                            <input
-                              type="date"
-                              value={item.requiredDate}
-                              onChange={(e) =>
-                                handleItem(e, idx, "requiredDate")
-                              }
-                              className="w-full rounded border p-1 text-sm"
-                            />
-                          </td>
-                          <td className="py-1 px-1">
-                            <input
-                              type="number"
-                              value={item.quantity}
-                              onChange={(e) => handleItem(e, idx, "quantity")}
-                              className="w-full rounded border p-1 text-right text-sm"
-                            />
-                          </td>
-                          <td className="py-1 px-1">
-                            <input
-                              type="text"
-                              value={item.uom}
-                              onChange={(e) => handleItem(e, idx, "uom")}
-                              className="w-full rounded border p-1 text-sm"
-                            />
-                          </td>
-                          <td className="py-1 px-1">
-                            <input
-                              type="text"
-                              value={item.warehouse}
-                              onChange={(e) => handleItem(e, idx, "warehouse")}
-                              className="w-full rounded border p-1 text-sm"
-                            />
-                          </td>
-                          <td className="py-2 px-2 text-center">
-                            <button
-                              type="button"
-                              onClick={() => removeItem(idx)}
-                              className="p-1 text-red-600 hover:bg-red-50 rounded"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                      {paginatedItems.map((item, idx) => {
+                        const i = itemsPage * itemsPerPage + idx;
+                        return (
+                          <tr key={i} className="hover:bg-gray-50">
+                            <td className="py-2 px-2 text-center">{i + 1}</td>
+                            <td className="py-1 px-1">
+                              <input
+                                type="text"
+                                value={item.itemCode}
+                                onChange={(e) => handleItem(e, i, "itemCode")}
+                                className="w-full rounded border p-1 text-sm"
+                              />
+                            </td>
+                            <td className="py-1 px-1">
+                              <input
+                                type="date"
+                                value={item.requiredDate}
+                                onChange={(e) =>
+                                  handleItem(e, i, "requiredDate")
+                                }
+                                className="w-full rounded border p-1 text-sm"
+                              />
+                            </td>
+                            <td className="py-1 px-1">
+                              <input
+                                type="number"
+                                value={item.quantity}
+                                onChange={(e) => handleItem(e, i, "quantity")}
+                                className="w-full rounded border p-1 text-right text-sm"
+                              />
+                            </td>
+                            <td className="py-1 px-1">
+                              <input
+                                type="text"
+                                value={item.uom}
+                                onChange={(e) => handleItem(e, i, "uom")}
+                                className="w-full rounded border p-1 text-sm"
+                              />
+                            </td>
+                            <td className="py-1 px-1">
+                              <input
+                                type="text"
+                                value={item.warehouse}
+                                onChange={(e) => handleItem(e, i, "warehouse")}
+                                className="w-full rounded border p-1 text-sm"
+                              />
+                            </td>
+                            <td className="py-2 px-2 text-center">
+                              <button
+                                type="button"
+                                onClick={() => removeItem(i)}
+                                className="p-1 text-red-600 hover:bg-red-50 rounded"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
-                  <div className="p-3 bg-gray-50">
-                    <button
-                      type="button"
-                      onClick={addItem}
-                      className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
-                    >
-                      <Plus className="w-4 h-4" /> Add Item
-                    </button>
-                  </div>
+                </div>
+                <div className="flex justify-between mt-3">
+                  <button
+                    type="button"
+                    onClick={addItem}
+                    className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200"
+                  >
+                    <Plus className="w-4 h-4" /> Add Item
+                  </button>
                 </div>
               </div>
 
@@ -509,7 +596,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                       <span className="text-base font-semibold text-gray-700">
                         Status
                       </span>
-                      <span className="text-base font-bold text-blue-600">
+                      <span className="text-base font-bold text-indigo-600">
                         {status}
                       </span>
                     </div>
@@ -540,7 +627,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                       <span className="text-base font-semibold text-gray-700">
                         Quote Deadline
                       </span>
-                      <span className="text-base font-bold text-blue-600">
+                      <span className="text-base font-bold text-indigo-600">
                         {quoteDeadline || "Not set"}
                       </span>
                     </div>
@@ -568,7 +655,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                     value={templateName}
                     onChange={(e) => setTemplateName(e.target.value)}
                     placeholder="Template name"
-                    className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   />
                 </label>
                 <label className="flex flex-col gap-1 text-sm">
@@ -576,7 +663,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                   <select
                     value={templateType}
                     onChange={(e) => setTemplateType(e.target.value)}
-                    className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   >
                     <option>Quote Email</option>
                     <option>Order Confirmation</option>
@@ -589,7 +676,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder="Subject line"
-                    className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   />
                 </label>
               </div>
@@ -713,7 +800,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                   </button>
                   <button
                     onClick={handleSaveTemplate}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-sm"
+                    className="px-4 py-2 bg-indigo-500 text-white rounded-full hover:bg-indigo-600 text-sm"
                   >
                     Save Template
                   </button>
@@ -754,186 +841,353 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
               )}
             </div>
           )}
+          {/* TERMS TAB */}
           {activeTab === "terms" && (
-            <div className="space-y-8 mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
+            <div className="space-y-8 mx-auto bg-white rounded-lg p-6  ">
               <div>
                 <h3 className="mb-2 text-lg font-semibold text-gray-800">
                   Payment Terms
                 </h3>
-                <span className="font-medium text-gray-700">
-                  Payment Schedule
-                </span>
-                <div className="flex items-center justify-between mb-3 mt-2">
-                  <span className="text-sm text-gray-600">
-                    Showing {paymentPage * paymentItemsPerPage + 1}–
-                    {Math.min(
-                      (paymentPage + 1) * paymentItemsPerPage,
-                      paymentRows.length,
-                    )}{" "}
-                    of {paymentRows.length}
+                <div className="mt-4">
+                  <span className="font-medium text-gray-700">
+                    Payment Schedule
                   </span>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      onClick={handlePaymentPrev}
-                      disabled={paymentPage === 0}
-                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ← Prev
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handlePaymentNext}
-                      disabled={
-                        (paymentPage + 1) * paymentItemsPerPage >=
-                        paymentRows.length
-                      }
-                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next →
-                    </button>
-                  </div>
-                </div>
-                <div className="overflow-x-auto rounded-lg border mt-2">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-gray-700">
-                      <tr>
-                        <th className="px-2 py-2">No.</th>
-                        <th className="px-2 py-2">Payment Term</th>
-                        <th className="px-2 py-2">Description</th>
-                        <th className="px-2 py-2">Due Date *</th>
-                        <th className="px-2 py-2">Invoice Portion</th>
-                        <th className="px-2 py-2">Payment Amount *</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {paginatedPaymentRows.length === 0 ? (
+                  <div className="overflow-x-auto rounded-lg border mt-2">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50 text-gray-700">
                         <tr>
-                          <td
-                            colSpan={7}
-                            className="text-center p-6 text-gray-400"
-                          >
-                            No Data
-                          </td>
+                          <th className="px-2 py-2">No.</th>
+                          <th className="px-2 py-2">Payment Term</th>
+                          <th className="px-2 py-2">Description</th>
+                          <th className="px-2 py-2">Due Date *</th>
+                          <th className="px-2 py-2">Invoice Portion</th>
+                          <th className="px-2 py-2">Payment Amount *</th>
+                          <th></th>
                         </tr>
-                      ) : (
-                        paginatedPaymentRows.map((row, idx) => {
-                          const i = paymentPage * paymentItemsPerPage + idx;
-                          return (
-                            <tr key={i} className="hover:bg-gray-50">
-                              <td className="px-3 py-2 text-center">{i + 1}</td>
-                              <td className="px-1 py-1">
-                                <input
-                                  className="w-full rounded border p-1 text-sm"
-                                  name="paymentTerm"
-                                  value={row.paymentTerm}
-                                  onChange={(e) =>
-                                    handlePaymentRowChange(
-                                      i,
-                                      "paymentTerm",
-                                      e.target.value,
-                                    )
-                                  }
-                                />
-                              </td>
-                              <td className="px-1 py-1">
-                                <input
-                                  className="w-full rounded border p-1 text-sm"
-                                  name="description"
-                                  value={row.description}
-                                  onChange={(e) =>
-                                    handlePaymentRowChange(
-                                      i,
-                                      "description",
-                                      e.target.value,
-                                    )
-                                  }
-                                />
-                              </td>
-                              <td className="px-1 py-1">
-                                <input
-                                  type="date"
-                                  className="w-full rounded border p-1 text-sm"
-                                  name="dueDate"
-                                  value={row.dueDate}
-                                  onChange={(e) =>
-                                    handlePaymentRowChange(
-                                      i,
-                                      "dueDate",
-                                      e.target.value,
-                                    )
-                                  }
-                                />
-                              </td>
-                              <td className="px-1 py-1">
-                                <input
-                                  type="number"
-                                  className="w-full rounded border p-1 text-sm"
-                                  name="invoicePortion"
-                                  value={row.invoicePortion}
-                                  onChange={(e) =>
-                                    handlePaymentRowChange(
-                                      i,
-                                      "invoicePortion",
-                                      Number(e.target.value),
-                                    )
-                                  }
-                                />
-                              </td>
-                              <td className="px-1 py-1">
-                                <input
-                                  type="number"
-                                  className="w-full rounded border p-1 text-sm"
-                                  name="paymentAmount"
-                                  value={row.paymentAmount}
-                                  onChange={(e) =>
-                                    handlePaymentRowChange(
-                                      i,
-                                      "paymentAmount",
-                                      Number(e.target.value),
-                                    )
-                                  }
-                                />
-                              </td>
-                              <td className="px-1 py-1 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => removePaymentRow(i)}
-                                  className="p-1 text-red-600 hover:bg-red-50 rounded"
-                                  disabled={paymentRows.length === 1}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="flex justify-between mt-3">
+                      </thead>
+                      <tbody className="divide-y">
+                        {paginatedPaymentRows.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={7}
+                              className="text-center p-6 text-gray-400"
+                            >
+                              No Data
+                            </td>
+                          </tr>
+                        ) : (
+                          paginatedPaymentRows.map((row, idx) => {
+                            const i = paymentPage * paymentItemsPerPage + idx;
+                            return (
+                              <tr key={i} className="hover:bg-gray-50">
+                                <td className="px-3 py-2 text-center">
+                                  {i + 1}
+                                </td>
+                                <td className="px-1 py-1">
+                                  <input
+                                    className="w-full rounded border p-1 text-sm"
+                                    name="paymentTerm"
+                                    value={row.paymentTerm}
+                                    onChange={(e) =>
+                                      handlePaymentRowChange(
+                                        i,
+                                        "paymentTerm",
+                                        e.target.value,
+                                      )
+                                    }
+                                  />
+                                </td>
+                                <td className="px-1 py-1">
+                                  <input
+                                    className="w-full rounded border p-1 text-sm"
+                                    name="description"
+                                    value={row.description}
+                                    onChange={(e) =>
+                                      handlePaymentRowChange(
+                                        i,
+                                        "description",
+                                        e.target.value,
+                                      )
+                                    }
+                                  />
+                                </td>
+                                <td className="px-1 py-1">
+                                  <input
+                                    type="date"
+                                    className="w-full rounded border p-1 text-sm"
+                                    name="dueDate"
+                                    value={row.dueDate}
+                                    onChange={(e) =>
+                                      handlePaymentRowChange(
+                                        i,
+                                        "dueDate",
+                                        e.target.value,
+                                      )
+                                    }
+                                  />
+                                </td>
+                                <td className="px-1 py-1">
+                                  <input
+                                    type="number"
+                                    className="w-full rounded border p-1 text-sm"
+                                    name="invoicePortion"
+                                    value={row.invoicePortion}
+                                    onChange={(e) =>
+                                      handlePaymentRowChange(
+                                        i,
+                                        "invoicePortion",
+                                        Number(e.target.value),
+                                      )
+                                    }
+                                  />
+                                </td>
+                                <td className="px-1 py-1">
+                                  <input
+                                    type="number"
+                                    className="w-full rounded border p-1 text-sm"
+                                    name="paymentAmount"
+                                    value={row.paymentAmount}
+                                    onChange={(e) =>
+                                      handlePaymentRowChange(
+                                        i,
+                                        "paymentAmount",
+                                        Number(e.target.value),
+                                      )
+                                    }
+                                  />
+                                </td>
+                                <td className="px-1 py-1 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => removePaymentRow(i)}
+                                    className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                    disabled={paymentRows.length === 1}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-3">
+                    <span className="text-sm text-gray-600">
+                      Showing{" "}
+                      {paymentRows.length === 0
+                        ? 0
+                        : paymentPage * paymentItemsPerPage + 1}
+                      –
+                      {Math.min(
+                        (paymentPage + 1) * paymentItemsPerPage,
+                        paymentRows.length,
+                      )}{" "}
+                      of {paymentRows.length}
+                    </span>
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPaymentPage(Math.max(0, paymentPage - 1))
+                        }
+                        disabled={paymentPage === 0}
+                        className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Prev
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentPage(paymentPage + 1)}
+                        disabled={
+                          (paymentPage + 1) * paymentItemsPerPage >=
+                          paymentRows.length
+                        }
+                        className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  </div>
+
                   <button
                     type="button"
                     onClick={addPaymentRow}
-                    className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
+                    className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200 mt-2"
                   >
                     <Plus className="w-4 h-4" /> Add Row
                   </button>
                 </div>
               </div>
-              <div>
-                <h3 className="mb-4 text-lg font-semibold text-gray-800">
-                  Extra Terms & Conditions
-                </h3>
-                <textarea
-                  rows={6}
-                  className="w-full px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"
-                  value={terms}
-                  onChange={(e) => setTerms(e.target.value)}
-                  placeholder="Add standard terms and conditions for RFQs here..."
-                />
+
+              {/* Terms and Conditions */}
+              <div className="bg-white rounded-lg border border-gray-200">
+                <div className="p-4 border-b border-gray-200">
+                  <h3 className="font-semibold text-gray-900">
+                    Terms and Conditions
+                  </h3>
+                </div>
+                <div className="p-6">
+                  {/* Rich Text Editor Toolbar */}
+                  <div className="border border-gray-300 rounded-t-lg bg-gray-50 p-2 flex items-center gap-1 flex-wrap">
+                    <select className="px-2 py-1 text-sm border border-gray-300 rounded bg-white">
+                      <option>Normal</option>
+                      <option>Heading 1</option>
+                      <option>Heading 2</option>
+                    </select>
+
+                    <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                    <select className="px-2 py-1 text-sm border border-gray-300 rounded bg-white">
+                      <option>---</option>
+                      <option>Arial</option>
+                      <option>Times New Roman</option>
+                    </select>
+
+                    <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded"
+                      title="Bold"
+                    >
+                      <strong className="text-sm">B</strong>
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded"
+                      title="Italic"
+                    >
+                      <em className="text-sm">I</em>
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded"
+                      title="Underline"
+                    >
+                      <u className="text-sm">U</u>
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded"
+                      title="Strikethrough"
+                    >
+                      <s className="text-sm">S</s>
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Subscript"
+                    >
+                      T<sub>x</sub>
+                    </button>
+
+                    <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Font Color"
+                    >
+                      A
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Background Color"
+                    >
+                      A̲
+                    </button>
+
+                    <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Quote"
+                    >
+                      "
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Code"
+                    >
+                      {"</>"}
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Bullet Point"
+                    >
+                      •¶
+                    </button>
+
+                    <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Link"
+                    >
+                      🔗
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Image"
+                    >
+                      🖼
+                    </button>
+
+                    <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Bullet List"
+                    >
+                      ≡
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Numbered List"
+                    >
+                      ☰
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Checklist"
+                    >
+                      ☑
+                    </button>
+
+                    <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Align Left"
+                    >
+                      ≡
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Align Center"
+                    >
+                      ≡
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded text-sm"
+                      title="Align Right"
+                    >
+                      ≡
+                    </button>
+
+                    <div className="w-px h-6 bg-gray-300 mx-1"></div>
+
+                    <select className="px-2 py-1 text-sm border border-gray-300 rounded bg-white">
+                      <option>Table</option>
+                    </select>
+                  </div>
+
+                  {/* Text Area */}
+                  <textarea
+                    value={termsAndConditions}
+                    onChange={(e) => setTermsAndConditions(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 border-t-0 rounded-b-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    rows={12}
+                    placeholder="Enter terms and conditions..."
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -956,7 +1210,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
             </button>
             <button
               type="button"
-              className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
+              className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600"
             >
               Save RFQ
             </button>

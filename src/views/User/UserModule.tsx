@@ -38,7 +38,7 @@ const sampleUsers: User[] = [
     middleName: "A",
     lastName: "Doe",
     gender: "Male",
-    phone: "+91-9876543210",
+    phone: "9876543210",
     dob: "1990-05-15",
     email: "john.doe@company.com",
     username: "johndoe",
@@ -53,7 +53,7 @@ const sampleUsers: User[] = [
     middleName: "M",
     lastName: "Smith",
     gender: "Female",
-    phone: "+91-9876543211",
+    phone: "9876543211",
     dob: "1988-08-22",
     email: "sarah.smith@company.com",
     username: "sarahsmith",
@@ -68,7 +68,7 @@ const sampleUsers: User[] = [
     middleName: "",
     lastName: "Kumar",
     gender: "Male",
-    phone: "+91-9876543212",
+    phone: "9876543212",
     dob: "1992-03-10",
     email: "raj.kumar@company.com",
     username: "rajkumar",
@@ -181,36 +181,50 @@ const UserModule: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-main">
           <span>{userManagementModule.icon}</span> {userManagementModule.name}
         </h2>
-        <div className="flex items-center gap-4 bg-white px-4 py-2 rounded-lg shadow-sm border">
+        <div className="flex items-center gap-4 px-4 py-2 rounded-lg shadow-sm bg-card border border-theme">
           <div className="text-sm">
-            <span className="font-semibold text-gray-700">{users.length}</span>
-            <span className="text-gray-500 ml-1">Users</span>
+            <span className="font-semibold text-main">{users.length}</span>
+            <span className="text-muted ml-1">Users</span>
           </div>
-          <div className="w-px h-6 bg-gray-300"></div>
+          <div
+            className="w-px h-6"
+            style={{ background: "var(--border)" }}
+          ></div>
           <div className="text-sm">
-            <span className="font-semibold text-gray-700">{roles.length}</span>
-            <span className="text-gray-500 ml-1">Roles</span>
+            <span className="font-semibold text-main">{roles.length}</span>
+            <span className="text-muted ml-1">Roles</span>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-4">
+      <div
+        className="flex border-b mb-4"
+        style={{ borderColor: "var(--border)" }}
+      >
         {userManagementModule.tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
-                ? "text-teal-600 border-b-2 border-teal-600"
-                : "text-gray-500 hover:text-gray-700"
+                ? "text-table-head-text"
+                : "text-muted hover:text-main"
             }`}
+            style={
+              activeTab === tab.id
+                ? {
+                    background: "transparent",
+                    borderBottom: `3px solid var(--primary-700)`,
+                  }
+                : undefined
+            }
           >
             <span>{tab.icon}</span> {tab.name}
           </button>
@@ -218,7 +232,7 @@ const UserModule: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="">
         {activeTab === "users" && (
           <UserCreation
             users={users}

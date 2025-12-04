@@ -182,27 +182,24 @@ const BuyingSelling: React.FC = () => {
     return (
       <div className="space-y-4">
         {/* Payment Schedule Table */}
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <div className="border border-theme rounded-lg overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-3 py-2 font-medium text-gray-600 w-1/4">
+              <tr className="table-head">
+                <th className="text-left px-3 py-2 font-medium text-muted w-1/4">
                   Phase
                 </th>
-                <th className="text-left px-3 py-2 font-medium text-gray-600 w-2/5">
+                <th className="text-left px-3 py-2 font-medium text-muted w-2/5">
                   Percentage
                 </th>
-                <th className="text-left px-3 py-2 font-medium text-gray-600">
+                <th className="text-left px-3 py-2 font-medium text-muted">
                   When
                 </th>
               </tr>
             </thead>
             <tbody>
               {data.phases.map((row, idx) => (
-                <tr
-                  key={idx}
-                  className="border-b border-gray-100 last:border-0"
-                >
+                <tr key={idx} className="border-b border-theme last:border-0">
                   <td className="px-3 py-2">
                     <input
                       type="text"
@@ -210,7 +207,7 @@ const BuyingSelling: React.FC = () => {
                       onChange={(e) =>
                         handlePaymentChange(tab, "phase", e.target.value, idx)
                       }
-                      className="w-full bg-transparent text-gray-700 focus:outline-none"
+                      className="w-full bg-transparent text-muted focus:outline-none"
                     />
                   </td>
                   <td className="px-3 py-2">
@@ -225,7 +222,7 @@ const BuyingSelling: React.FC = () => {
                           idx,
                         )
                       }
-                      className="w-full bg-transparent text-gray-700 focus:outline-none"
+                      className="w-full bg-transparent text-muted focus:outline-none"
                     />
                   </td>
                   <td className="px-3 py-2">
@@ -235,7 +232,7 @@ const BuyingSelling: React.FC = () => {
                       onChange={(e) =>
                         handlePaymentChange(tab, "when", e.target.value, idx)
                       }
-                      className="w-full bg-transparent text-gray-700 focus:outline-none"
+                      className="w-full bg-transparent text-muted focus:outline-none"
                     />
                   </td>
                 </tr>
@@ -247,7 +244,7 @@ const BuyingSelling: React.FC = () => {
         {/* Additional Fields */}
         <div className="space-y-3 text-sm">
           <div className="flex">
-            <span className="w-40 flex-shrink-0 text-gray-600 font-medium">
+            <span className="w-40 flex-shrink-0 text-muted font-medium">
               Due Dates:
             </span>
             <input
@@ -256,11 +253,11 @@ const BuyingSelling: React.FC = () => {
               onChange={(e) =>
                 handlePaymentChange(tab, "dueDates", e.target.value)
               }
-              className="flex-1 bg-transparent text-gray-700 focus:outline-none"
+              className="flex-1 bg-transparent text-muted focus:outline-none"
             />
           </div>
           <div className="flex">
-            <span className="w-40 flex-shrink-0 text-gray-600 font-medium">
+            <span className="w-40 flex-shrink-0 text-muted font-medium">
               Late Payment Charges:
             </span>
             <input
@@ -269,11 +266,11 @@ const BuyingSelling: React.FC = () => {
               onChange={(e) =>
                 handlePaymentChange(tab, "lateCharges", e.target.value)
               }
-              className="flex-1 bg-transparent text-gray-700 focus:outline-none"
+              className="flex-1 bg-transparent text-muted focus:outline-none"
             />
           </div>
           <div className="flex">
-            <span className="w-40 flex-shrink-0 text-gray-600 font-medium">
+            <span className="w-40 flex-shrink-0 text-muted font-medium">
               Taxes / Additional Charges:
             </span>
             <input
@@ -282,11 +279,11 @@ const BuyingSelling: React.FC = () => {
               onChange={(e) =>
                 handlePaymentChange(tab, "taxes", e.target.value)
               }
-              className="flex-1 bg-transparent text-gray-700 focus:outline-none"
+              className="flex-1 bg-transparent text-muted focus:outline-none"
             />
           </div>
           <div className="flex">
-            <span className="w-40 flex-shrink-0 text-gray-600 font-medium">
+            <span className="w-40 flex-shrink-0 text-muted font-medium">
               Special Notes / Conditions:
             </span>
             <input
@@ -295,7 +292,7 @@ const BuyingSelling: React.FC = () => {
               onChange={(e) =>
                 handlePaymentChange(tab, "specialNotes", e.target.value)
               }
-              className="flex-1 bg-transparent text-gray-700 focus:outline-none"
+              className="flex-1 bg-transparent text-muted focus:outline-none"
             />
           </div>
         </div>
@@ -317,59 +314,79 @@ const BuyingSelling: React.FC = () => {
         value={formData[tab][section]}
         onChange={(e) => handleChange(tab, e.target.value)}
         placeholder={`Enter ${sectionData?.label.toLowerCase()}...`}
-        className={`w-full h-64 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent focus:bg-white transition-all resize-none ${
-          tab === "buying" ? "focus:ring-blue-500" : "focus:ring-emerald-500"
+        className={`w-full h-64 bg-card border border-theme rounded-lg px-4 py-3 text-sm text-main placeholder-card focus:outline-none focus:ring-2 focus:border-transparent focus:bg-card transition-all resize-none ${
+          tab === "buying"
+            ? "focus:ring-[var(--primary)]"
+            : "focus:ring-[var(--primary)]"
         }`}
       />
     );
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-app">
       {/* Success Toast */}
       <div
         className={`fixed top-4 right-4 z-50 transition-all duration-500 ${showSuccess ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"}`}
       >
-        <div className="bg-white border border-green-200 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
+        <div className="bg-card border border-green-200 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
           <div className="w-7 h-7 bg-green-100 rounded-full flex items-center justify-center">
-            <Check className="w-4 h-4 text-green-600" />
+            <Check className="w-4 h-4 text-success" />
           </div>
-          <p className="font-medium text-gray-900 text-sm">
+          <p className="font-medium text-main text-sm">
             Terms saved successfully!
           </p>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="p-4 lg:p-6">
+      <div className="">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           {/* Buying Terms Card */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="h-1 bg-blue-500" />
-
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
-              <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center">
-                <ShoppingCart className="w-4 h-4 text-white" />
+          <div className="bg-card rounded-xl border border-theme shadow-sm overflow-hidden">
+            {/* filled header using theme */}
+            <div
+              className="px-4 py-2 border-b border-theme flex items-center gap-3"
+              style={{
+                background: "var(--primary-600)",
+                color: "var(--table-head-text)",
+              }}
+            >
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center"
+                style={{
+                  background: "var(--primary)",
+                  color: "var(--table-head-text)",
+                }}
+              >
+                <ShoppingCart className="w-4 h-4" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold text-gray-900 text-sm">
+                <h2 className="font-semibold text-white text-sm">
                   Buying Terms
                 </h2>
-                <p className="text-xs text-gray-500">Purchase order terms</p>
+                <p className="text-xs text-white">Purchase order terms</p>
               </div>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600">
+              <span
+                className="text-xs px-2 py-0.5 rounded-full"
+                style={{
+                  background: "rgba(255,255,255,0.12)",
+                  color: "var(--table-head-text)",
+                }}
+              >
                 {getFilledCount("buying")}/6
               </span>
             </div>
 
-            <div className="px-4 py-3 border-b border-gray-100">
+            <div className="px-4 py-3 border-b border-theme">
               <div className="relative">
                 <select
                   value={buyingSection}
                   onChange={(e) =>
                     setBuyingSection(e.target.value as SectionId)
                   }
-                  className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 pr-10 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                  className="w-full appearance-none bg-card border border-theme rounded-lg px-4 py-2 pr-10 text-sm font-medium text-muted focus:outline-none focus:ring-2 focus:border-transparent cursor-pointer"
+                  style={{ outline: "none" }}
                 >
                   {sections.map((section) => (
                     <option key={section.id} value={section.id}>
@@ -377,7 +394,7 @@ const BuyingSelling: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-4 h-4 text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
 
@@ -385,32 +402,49 @@ const BuyingSelling: React.FC = () => {
           </div>
 
           {/* Selling Terms Card */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="h-1 bg-emerald-500" />
-
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
-              <div className="w-9 h-9 bg-emerald-500 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-white" />
+          <div className="bg-card rounded-xl border border-theme shadow-sm overflow-hidden">
+            <div
+              className="px-4 py-2 border-b border-theme flex items-center gap-3"
+              style={{
+                background: "var(--primary-600)",
+                color: "var(--table-head-text)",
+              }}
+            >
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center"
+                style={{
+                  background: "var(--primary)",
+                  color: "var(--table-head-text)",
+                }}
+              >
+                <TrendingUp className="w-4 h-4" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold text-gray-900 text-sm">
+                <h2 className="font-semibold text-white text-sm">
                   Selling Terms
                 </h2>
-                <p className="text-xs text-gray-500">Sales order terms</p>
+                <p className="text-xs text-white">Sales order terms</p>
               </div>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-600">
+              <span
+                className="text-xs px-2 py-0.5 rounded-full"
+                style={{
+                  background: "rgba(255,255,255,0.12)",
+                  color: "var(--table-head-text)",
+                }}
+              >
                 {getFilledCount("selling")}/6
               </span>
             </div>
 
-            <div className="px-4 py-3 border-b border-gray-100">
+            <div className="px-4 py-3 border-b border-theme">
               <div className="relative">
                 <select
                   value={sellingSection}
                   onChange={(e) =>
                     setSellingSection(e.target.value as SectionId)
                   }
-                  className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 pr-10 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent cursor-pointer"
+                  className="w-full appearance-none bg-card border border-theme rounded-lg px-4 py-2 pr-10 text-sm font-medium text-muted focus:outline-none focus:ring-2 focus:border-transparent cursor-pointer"
+                  style={{ outline: "none" }}
                 >
                   {sections.map((section) => (
                     <option key={section.id} value={section.id}>
@@ -418,7 +452,7 @@ const BuyingSelling: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="w-4 h-4 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-4 h-4 text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
 
@@ -430,14 +464,18 @@ const BuyingSelling: React.FC = () => {
         <div className="flex justify-end gap-3 mt-4">
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted bg-card border border-theme rounded-lg hover:bg-card transition-all"
           >
             <RotateCcw className="w-4 h-4" />
             Reset
           </button>
           <button
             onClick={handleSubmit}
-            className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-all"
+            className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white rounded-lg transition-all"
+            style={{
+              background:
+                "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
+            }}
           >
             <Save className="w-4 h-4" />
             Save Terms

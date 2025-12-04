@@ -200,30 +200,40 @@ const CRMDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Top Opportunities Table */}
-        <div className="bg-white rounded-xl shadow p-8">
-          <div className="font-semibold text-lg mb-3">Top Opportunities</div>
-          <table className="min-w-full text-left ">
-            <thead>
-              <tr className="bg-gray-100 text-gray-700 text-xs uppercase">
-                <th className="px-4 py-3 rounded-l-xl font-bold">Client</th>
-                <th className="px-4 py-3 font-bold">Stage</th>
-                <th className="px-4 py-3 rounded-r-xl font-bold">Value</th>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6">
+          <div className="font-semibold text-lg mb-4">Top Opportunities</div>
+          <table className="min-w-full">
+            <thead className="bg-gray-50 text-gray-700 text-sm font-medium">
+              <tr>
+                <th className="px-6 py-4 rounded-l-xl text-left">Client</th>
+                <th className="px-6 py-4 text-left">Stage</th>
+                <th className="px-6 py-4 rounded-r-xl text-left">Value</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-200">
               {topOpportunities.map((op) => (
                 <tr
                   key={op.name}
-                  className="bg-white group hover:bg-blue-50 transition border-t"
+                  className="hover:bg-indigo-50/70 cursor-pointer transition-colors duration-150"
                 >
-                  <td className="px-4 py-3 font-semibold">{op.name}</td>
-                  <td className="px-4 py-3 text-gray-700">{op.stage}</td>
-                  <td className="px-4 py-3 text-gray-700">{op.value}</td>
+                  <td className="px-6 py-4 font-semibold text-gray-900">
+                    {op.name}
+                  </td>
+                  <td className="px-6 py-4 text-indigo-700 font-medium">
+                    {op.stage}
+                  </td>
+                  <td className="px-6 py-4 font-semibold text-green-600">
+                    ₹{op.value.toLocaleString()}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {topOpportunities.length === 0 && (
+            <div className="text-center py-10 text-gray-400">
+              No opportunities found.
+            </div>
+          )}
         </div>
       </div>
     </div>

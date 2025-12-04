@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import PosModal from "../../components/sales/PosModal";
 
 interface Product {
   id: number;
@@ -41,6 +42,7 @@ const POS: React.FC = () => {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [search, setSearch] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
 
   const totalRevenue = useMemo(
     () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -80,20 +82,23 @@ const POS: React.FC = () => {
     setCart(cart.filter((item) => item.id !== id));
   const clearCart = () => setCart([]);
 
-  const checkout = () => {
+  const handleCheckoutOpen = () => {
     if (!cart.length) return alert("Cart is empty!");
+    setModalOpen(true);
+  };
 
+  const handleCheckoutConfirm = (checkoutData: any) => {
+    // Example: save transaction, print receipt, etc. (use checkoutData as needed)
     const invoice = "INV-" + Math.floor(Math.random() * 100000);
     alert(`✅ Invoice ${invoice} created! Total: ₹${totalRevenue}`);
-
     setProducts(
       products.map((p) => {
         const item = cart.find((c) => c.id === p.id);
         return item ? { ...p, stock: p.stock - item.quantity } : p;
       }),
     );
-
     clearCart();
+    setModalOpen(false);
   };
 
   const filteredProducts = products.filter(
@@ -120,6 +125,7 @@ const POS: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Product selection */}
         <div>
           <input
             type="text"
@@ -128,7 +134,6 @@ const POS: React.FC = () => {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full border border-gray-200 rounded-xl px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4"
           />
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[70vh] pr-2">
             {filteredProducts.map((product) => (
               <div
@@ -162,7 +167,7 @@ const POS: React.FC = () => {
             ))}
           </div>
         </div>
-
+        {/* Cart Summary */}
         <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-lg">
           <h2 className="text-2xl font-semibold mb-4 text-indigo-700">
             🧾 Cart Summary
@@ -216,7 +221,7 @@ const POS: React.FC = () => {
                   Clear Cart
                 </button>
                 <button
-                  onClick={checkout}
+                  onClick={handleCheckoutOpen}
                   className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
                 >
                   Checkout
@@ -226,6 +231,13 @@ const POS: React.FC = () => {
           )}
         </div>
       </div>
+      {/* POS Modal for checkout */}
+      <PosModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        cart={cart}
+        onSave={handleCheckoutConfirm}
+      />
     </div>
   );
 };

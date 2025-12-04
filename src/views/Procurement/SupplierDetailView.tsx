@@ -7,12 +7,7 @@ import {
   Receipt,
   Plus,
   Building2,
-  Phone,
-  Mail,
-  MapPin,
-  DollarSign,
 } from "lucide-react";
-import SupplierModal from "../../components/procurement/SupplierModal";
 
 interface Supplier {
   supplierName: string;

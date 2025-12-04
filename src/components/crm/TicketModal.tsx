@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface TicketModalProps {
+export interface TicketModalProps {
   isOpen: boolean;
   onClose: () => void;
+  ticket: Ticket | null;
   onSubmit: (data: any) => void;
 }
 
@@ -60,8 +61,8 @@ const TicketModal: React.FC<TicketModalProps> = ({
             className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden"
             onSubmit={handleSave}
           >
-            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
-              <h3 className="text-2xl w-full font-semibold text-blue-600">
+            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-indigo-100/30 shrink-0">
+              <h3 className="text-2xl w-full font-semibold text-indigo-600">
                 Add Support Ticket
               </h3>
               <button
@@ -141,7 +142,7 @@ const TicketModal: React.FC<TicketModalProps> = ({
               <div className="flex gap-x-2">
                 <button
                   type="submit"
-                  className="w-24 rounded-3xl bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+                  className="w-24 rounded-3xl bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
                 >
                   Save
                 </button>

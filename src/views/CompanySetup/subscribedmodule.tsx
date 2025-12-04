@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import type { JSX } from "react";
 import {
   FaBoxes,
   FaCheckCircle,
-  FaTimes,
   FaSearch,
   FaExternalLinkAlt,
   FaChartLine,
@@ -13,18 +12,28 @@ import {
   FaMoneyCheckAlt,
   FaUserTie,
   FaWarehouse,
+  FaEraser,
+  FaStar,
+  FaCrown,
+  FaRocket,
+  FaInfoCircle,
+  FaCog,
 } from "react-icons/fa";
+
+// ---------- Types ----------
+type Tier = "Free" | "Pro" | "Enterprise";
 
 type ModuleItem = {
   id: string;
   name: string;
   description: string;
   active: boolean;
-  tier: "Free" | "Pro" | "Enterprise";
+  tier: Tier;
   users: number;
   icon?: JSX.Element;
 };
 
+// ---------- Sample Data ----------
 const sampleModules: ModuleItem[] = [
   {
     id: "sales",
@@ -92,22 +101,52 @@ const sampleModules: ModuleItem[] = [
   },
 ];
 
+const tierStyle = (tier: Tier) => {
+  return {
+    background: "var(--row-hover)",
+    color: "var(--primary-700)",
+    padding: "0.25rem 0.625rem",
+    borderRadius: "9999px",
+    fontSize: "0.75rem",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "0.375rem",
+    fontWeight: 600 as const,
+  };
+};
+
+// ---------- Component ----------
 export default function SubscribedModules(): JSX.Element {
   const [query, setQuery] = useState("");
   const [modules, setModules] = useState<ModuleItem[]>(sampleModules);
+  const [selectedTier, setSelectedTier] = useState<Tier | "All">("All");
+  const [sortBy, setSortBy] = useState<"name" | "users" | "tier">("name");
 
-  const filtered = modules.filter((m) => {
-    if (!query) return true;
-    const q = query.toLowerCase();
-    return (
-      m.name.toLowerCase().includes(q) ||
-      m.description.toLowerCase().includes(q) ||
-      m.tier.toLowerCase().includes(q)
-    );
-  });
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return modules.filter((m) => {
+      if (selectedTier !== "All" && m.tier !== selectedTier) return false;
+      if (!q) return true;
+      return (
+        m.name.toLowerCase().includes(q) ||
+        m.description.toLowerCase().includes(q)
+      );
+    });
+  }, [modules, query, selectedTier]);
 
-  const subscribedModules = filtered.filter((m) => m.active);
-  const nonSubscribedModules = filtered.filter((m) => !m.active);
+  const sortModules = (list: ModuleItem[]) => {
+    const copy = [...list];
+    if (sortBy === "users") return copy.sort((a, b) => b.users - a.users);
+    if (sortBy === "name")
+      return copy.sort((a, b) => a.name.localeCompare(b.name));
+    if (sortBy === "tier") {
+      const order = { Enterprise: 0, Pro: 1, Free: 2 } as any;
+      return copy.sort((a, b) => order[a.tier] - order[b.tier]);
+    }
+    return copy;
+  };
+
+  const sortedModules = sortModules(filtered);
 
   function toggleActive(id: string) {
     setModules((prev) =>
@@ -115,221 +154,225 @@ export default function SubscribedModules(): JSX.Element {
     );
   }
 
+  function resetFilters() {
+    setQuery("");
+    setSelectedTier("All");
+    setSortBy("name");
+  }
+
+  const activeCount = modules.filter((m) => m.active).length;
+
   return (
-    <div className="bg-gray-50 p-6 rounded-lg">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 gap-2 shadow-sm">
-            <FaSearch />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search modules, tiers, descriptions..."
-              className="outline-none text-sm w-56"
-            />
+    <div className="">
+      <div className="w-full ">
+        {/* Stats & Controls */}
+        <div
+          className="rounded-lg shadow-sm border border-theme p-4 mb-2"
+          style={{
+            background: "var(--primary-600)",
+            color: "var(--table-head-text)",
+          }}
+        >
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-2">
+            {/* intentionally left visual content unchanged */}
           </div>
-        </div>
 
-        <div className="text-sm text-gray-600">
-          <span className="font-medium">Total:</span> {modules.length} modules •{" "}
-          <span className="font-medium">Subscribed:</span>{" "}
-          {modules.filter((m) => m.active).length} •{" "}
-          <span className="font-medium">Available:</span>{" "}
-          {modules.filter((m) => !m.active).length}
-        </div>
-      </div>
+          {/* Search & Filters */}
+          <div className="w-full">
+            <div className="flex flex-col sm:flex-row items-center gap-3 max-w-5xl mx-auto">
+              {/* Search Bar */}
+              <div className="relative flex-1 w-full">
+                <FaSearch
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+                  style={{ width: 16, height: 16 }}
+                />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search modules..."
+                  className="w-full pl-10 pr-4 py-2.5 border border-theme rounded-lg 
+             text-sm bg-card shadow-sm text-main
+             focus:ring-2 focus:ring-[var(--primary)]
+             focus:border-[var(--primary-600)] transition-all"
+                />
+              </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Subscribed Modules */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <FaCheckCircle className="text-teal-600" />
-            Subscribed Modules ({subscribedModules.length})
-          </h2>
-          <div className="space-y-4">
-            {subscribedModules.map((m) => (
-              <div
-                key={m.id}
-                className="bg-white rounded-2xl p-4 shadow-sm border border-teal-100"
+              {/* Tier Dropdown */}
+              <select
+                value={selectedTier}
+                onChange={(e) => setSelectedTier(e.target.value)}
+                className="px-4 py-2.5 border border-theme rounded-lg bg-card text-sm 
+                 shadow-sm text-muted focus:ring-2 focus:ring-[var(--primary)]"
               >
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-teal-50">
-                      <div className="text-teal-600">
-                        {m.icon ?? <FaBoxes />}
-                      </div>
-                    </div>
-                  </div>
+                <option value="All">All Tiers</option>
+                <option value="Enterprise">Enterprise</option>
+                <option value="Pro">Pro</option>
+                <option value="Free">Free</option>
+              </select>
 
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between gap-4">
-                      <h3 className="text-md font-semibold">{m.name}</h3>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-xs font-medium px-2 py-1 rounded-full ${m.tier === "Enterprise" ? "bg-gray-900 text-white" : m.tier === "Pro" ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-700"}`}
-                        >
-                          {m.tier}
-                        </span>
-                        <span className="text-xs flex items-center gap-1 text-teal-700">
-                          <FaCheckCircle />
-                        </span>
-                      </div>
-                    </div>
-
-                    <p className="text-sm text-gray-500 mt-2">
-                      {m.description}
-                    </p>
-
-                    <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <span className="font-medium">Users:</span>
-                          <span className="text-gray-500">{m.users}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleActive(m.id)}
-                          className="text-sm font-medium px-3 py-1 rounded-lg transition bg-white border border-teal-200 text-teal-700"
-                          title="Disable module"
-                        >
-                          Disable
-                        </button>
-
-                        <button
-                          className="text-sm px-2 py-1 rounded-lg bg-gray-50 border border-gray-100 text-gray-600 flex items-center gap-1"
-                          title="Open module settings"
-                        >
-                          <FaExternalLinkAlt className="text-xs" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {subscribedModules.length === 0 && (
-              <div className="bg-white rounded-2xl p-8 border border-dashed border-gray-200 text-center">
-                <p className="text-lg font-semibold text-gray-700 mb-2">
-                  No subscribed modules
-                </p>
-                <p className="text-sm text-gray-500">
-                  Enable modules from the available list.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Available Modules (Non-Subscribed) */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <FaTimes className="text-gray-500" />
-            Available Modules ({nonSubscribedModules.length})
-          </h2>
-          <div className="space-y-4">
-            {nonSubscribedModules.map((m) => (
-              <div
-                key={m.id}
-                className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+              {/* Sort Dropdown */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-2.5 border border-theme rounded-lg bg-card text-sm 
+                 shadow-sm text-muted focus:ring-2 focus:ring-[var(--primary)]"
               >
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-100">
-                      <div className="text-gray-500">
-                        {m.icon ?? <FaBoxes />}
-                      </div>
-                    </div>
-                  </div>
+                <option value="name">Name (A-Z)</option>
+                <option value="users">Most Used</option>
+                <option value="tier">By Tier</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between gap-4">
-                      <h3 className="text-md font-semibold">{m.name}</h3>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-xs font-medium px-2 py-1 rounded-full ${m.tier === "Enterprise" ? "bg-gray-900 text-white" : m.tier === "Pro" ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-700"}`}
-                        >
-                          {m.tier}
-                        </span>
-                      </div>
-                    </div>
-
-                    <p className="text-sm text-gray-500 mt-2">
-                      {m.description}
-                    </p>
-
-                    <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <span className="font-medium">Users:</span>
-                          <span className="text-gray-500">{m.users}</span>
+        {/* Module List */}
+        <div className="bg-card rounded-lg shadow-sm border border-theme overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="table-head">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                    Module
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                    Tier
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                    Users
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-muted uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-theme">
+                {sortedModules.map((m) => {
+                  return (
+                    <tr
+                      key={m.id}
+                      className={`transition-colors`}
+                      style={{
+                        background: m.active ? "var(--row-hover)" : undefined,
+                      }}
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                            style={{
+                              background: m.active
+                                ? "rgba(13,148,136,0.08)"
+                                : "#f3f4f6",
+                              color: m.active ? "var(--primary)" : "#9ca3af",
+                            }}
+                          >
+                            {m.icon ?? <FaBoxes />}
+                          </div>
+                          <div className="font-medium text-main text-sm">
+                            {m.name}
+                          </div>
                         </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleActive(m.id)}
-                          className="text-sm font-medium px-3 py-1 rounded-lg transition bg-teal-600 text-white"
-                          title="Enable module"
-                        >
-                          Enable
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {nonSubscribedModules.length === 0 && (
-              <div className="bg-white rounded-2xl p-8 border border-dashed border-gray-200 text-center">
-                <p className="text-lg font-semibold text-gray-700 mb-2">
-                  All modules are subscribed!
-                </p>
-                <p className="text-sm text-gray-500">
-                  Visit the <span className="font-medium">Marketplace</span> to
-                  discover more.
-                </p>
-              </div>
-            )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-muted max-w-xs">
+                          {m.description}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div style={tierStyle(m.tier)}>
+                          {/* keep small icon + label */}
+                          {m.tier === "Enterprise" ? (
+                            <FaCrown className="w-3 h-3" />
+                          ) : m.tier === "Pro" ? (
+                            <FaRocket className="w-3 h-3" />
+                          ) : (
+                            <FaStar className="w-3 h-3" />
+                          )}
+                          <span style={{ marginLeft: 6 }}>{m.tier}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1.5 text-sm text-muted">
+                          <FaUsers
+                            className="w-3.5 h-3.5"
+                            style={{ color: "var(--muted)" }}
+                          />
+                          {m.users}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {m.active ? (
+                          <div
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                            style={{
+                              background: "rgba(13,148,136,0.08)",
+                              color: "var(--primary)",
+                            }}
+                          >
+                            <FaCheckCircle className="w-3 h-3" />
+                            Active
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center text-muted text-xs font-medium">
+                            Inactive
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => toggleActive(m.id)}
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                            style={
+                              m.active
+                                ? {
+                                    background: "var(--card)",
+                                    border: "1px solid var(--danger)",
+                                    color: "var(--danger)",
+                                  }
+                                : {
+                                    background: "var(--primary)",
+                                    color: "#fff",
+                                  }
+                            }
+                          >
+                            {m.active ? "Disable" : "Enable"}
+                          </button>
+                          <button
+                            className="p-2 rounded-lg text-muted hover:text-muted hover:bg-app transition-all"
+                            title="Settings"
+                          >
+                            <FaCog className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        </div>
-      </div>
 
-      {filtered.length === 0 && (
-        <div className="bg-white rounded-2xl p-8 border border-dashed border-gray-200 text-center mt-6">
-          <p className="text-lg font-semibold text-gray-700 mb-2">
-            No modules match your search
-          </p>
-          <p className="text-sm text-gray-500">
-            Try clearing the search or browse the Marketplace.
-          </p>
-          <div className="mt-4 flex items-center justify-center gap-3">
-            <button className="px-4 py-2 rounded-lg bg-teal-600 text-white font-medium">
-              Browse Marketplace
-            </button>
-            <button
-              onClick={() => setQuery("")}
-              className="px-4 py-2 rounded-lg bg-white border border-gray-200"
-            >
-              Reset
-            </button>
-          </div>
+          {sortedModules.length === 0 && (
+            <div className="text-center py-12">
+              <FaInfoCircle className="w-12 h-12 text-muted mx-auto mb-3" />
+              <p className="text-muted">
+                No modules found matching your filters
+              </p>
+            </div>
+          )}
         </div>
-      )}
 
-      {/* Footer */}
-      <div className="mt-6 text-sm text-gray-600 flex items-center gap-2">
-        <div className="text-xs text-gray-500">
-          Last synced:{" "}
-          <span className="font-medium text-gray-700">Oct 25, 2025</span>
+        {/* Footer Info */}
+        <div className="mt-6 text-center text-sm text-muted">
+          Last synced: {new Date().toLocaleString()}
         </div>
-        <button className="text-sm px-3 py-1 rounded-lg bg-white border border-gray-200">
-          Sync now
-        </button>
       </div>
     </div>
   );

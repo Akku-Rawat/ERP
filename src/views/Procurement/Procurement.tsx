@@ -30,7 +30,6 @@ const procurement = {
     },
     { id: "supplier", name: "Supplier Management", icon: <FaLandmark /> },
     { id: "rfqs", name: "RFQs", icon: <FaFileSignature /> },
-    { id: "purchase", name: "Purchase Invoice", icon: <FaTruckLoading /> },
     { id: "orders", name: "Purchase Orders", icon: <FaClipboardList /> },
     { id: "approvals", name: "Approvals", icon: <FaCheckCircle /> },
     {
@@ -38,6 +37,7 @@ const procurement = {
       name: "Invoice Matching",
       icon: <FaFileInvoiceDollar />,
     },
+    { id: "purchase", name: "Purchase Invoice", icon: <FaTruckLoading /> },
   ],
 };
 

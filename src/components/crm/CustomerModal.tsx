@@ -50,6 +50,7 @@ const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
 };
 
 const currencyOptions = ["ZMW", "USD", "INR"];
+const currencyOptions = ["ZMW", "USD", "INR"];
 
 const CustomerModal: React.FC<{
   isOpen: boolean;
@@ -154,11 +155,16 @@ const CustomerModal: React.FC<{
     setForm(emptyForm);
     onClose();
   };
+  const handleClose = () => {
+    setForm(emptyForm);
+    onClose();
+  };
 
   const reset = () => {
     setForm(initialData ? { ...initialData, sameAsBilling: true } : emptyForm);
   };
 
+  if (!isOpen) return null;
   if (!isOpen) return null;
 
   return (
@@ -196,6 +202,16 @@ const CustomerModal: React.FC<{
                     activeTab === tab
                       ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
                       : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  {tab === "details"
+                    ? "Details"
+                    : tab === "terms"
+                      ? "Terms & Conditions"
+                      : "Address"}
+                </button>
+              ))}
+            </div>
                   }`}
                 >
                   {tab === "details"
@@ -525,6 +541,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         />
       </div>
     </label>
+  ),
   ),
 );
 Input.displayName = "Input";
