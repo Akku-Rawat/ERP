@@ -1,16 +1,16 @@
 @import "tailwindcss";
 :root{
   /* core palette - change these to update the entire UI */
-  --bg: #ffe05514;             /* page background */
+  --bg: #f6f8fa;           /* page background */
   --card: #ffffff;           /* card / panel */
   --muted: #64748b;          /* secondary text */
   --text: #061332;           /* primary text */
-  --sidebar-bg: #d9dfe4;
+  --sidebar-bg: #e8eff5;
 --sidebar-text: #0f172a;
 
-  --primary:#32daf0;        /* main accent (teal) */
-  --primary-600: #32daf0;
-  --primary-700: #32daf0;
+  --primary:#237ca9;        /* main accent (teal) */
+  --primary-600: #237ca9;
+  --primary-700: #237ca9;
 
   --danger: #dc2626;
   --danger-700: #b91c1c;
@@ -29,7 +29,7 @@
   --card: #0f172a;
   --muted: #9aa6bb;
   --text: #e6eef8;
-  --sidebar-bg: #d9dfe4;
+  --sidebar-bg: #e8eff5;
   --sidebar-text: #071220;
   --primary: #60a5fa;
   --primary-600: #3b82f6;

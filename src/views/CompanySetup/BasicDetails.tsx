@@ -217,7 +217,7 @@ const BasicDetails: React.FC = () => {
             onChange={handleChange}
             placeholder={placeholder}
             required={required}
-            className={`w-full border border-gray-300 rounded-lg ${Icon ? 'pl-10' : 'pl-3.5'} pr-3.5 py-2.5 text-sm focus:outline-none focus-ring transition-all hover:border-gray-400 bg-card text-main`}
+            className={`w-full border border-theme rounded-lg ${Icon ? 'pl-10' : 'pl-3.5'} pr-3.5 py-2.5 text-sm focus:outline-none focus-ring transition-all hover:border-theme bg-card text-main`}
           />
         </div>
       </div>
@@ -229,8 +229,8 @@ const BasicDetails: React.FC = () => {
       <div className="w-full ">
         {/* Success Message */}
         {showSuccess && (
-          <div className="mb-4 bg-card border border-green-200 rounded-lg p-4 flex items-center gap-3 shadow-sm">
-            <FaCheckCircle className="w-5 h-5 text-[var(--success)] flex-shrink-0" />
+          <div className="mb-4 rounded-lg p-4 flex items-center gap-3 shadow-sm badge-success" role="status">
+            <FaCheckCircle className="w-5 h-5 text-success flex-shrink-0" />
             <div>
               <p className="text-sm font-medium text-main">
                 Details saved successfully!
@@ -243,9 +243,9 @@ const BasicDetails: React.FC = () => {
         )}
 
         {/* Main Card */}
-        <div className="bg-card rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-card rounded-xl shadow-sm border border-theme overflow-hidden">
           {/* Tab Navigation */}
-          <div className="border-b border-gray-200 bg-[var(--card)]">
+          <div className="border-b border-theme bg-[var(--card)]">
             <div className="flex">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -432,12 +432,12 @@ const BasicDetails: React.FC = () => {
           </div>
 
           {/* Action Footer */}
-          <div className="bg-card px-8 py-4 border-t border-gray-200 flex items-center justify-between">
+          <div className="bg-card px-8 py-4 border-t border-theme flex items-center justify-between">
             <button
              onClick={handleReset}
              className="px-5 py-2.5 rounded-lg border shadow-sm 
                         text-sm font-semibold flex items-center gap-2 
-                        hover:bg-gray-50 transition-all active:scale-[0.98]"
+                         transition-all active:scale-[0.98]"
              style={{
                borderColor: 'var(--border)',
                color: 'var(--text)',
@@ -450,7 +450,7 @@ const BasicDetails: React.FC = () => {
 
             <button
               onClick={handleSubmit}
-              className="px-5 py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 
+              className="px-5 py-2.5 rounded-lg bg-primary 
              text-white text-sm font-semibold shadow flex items-center gap-2 
              transition-all active:scale-[0.98]"
               style={{

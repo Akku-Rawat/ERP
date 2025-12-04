@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaPlus, FaSearch, FaEdit, FaTrash, FaInfoCircle } from "react-icons/fa";
+import CreateUserModal from "../../components/User/CreateUserModal";
 
 interface Role {
   id: number;
@@ -71,55 +72,55 @@ const UserCreation: React.FC<UserCreationProps> = ({
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app min-h-screen">
       {/* Search and Add Bar */}
       <div className="flex items-center justify-between mb-6">
         <div className="relative w-96">
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
           <input
             type="text"
             placeholder="Search users..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+            className="w-full pl-10 pr-4 py-2.5 border border-theme rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition bg-card text-main"
           />
         </div>
         <button
           onClick={handleAdd}
-          className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-white font-medium shadow-sm bg-primary hover:bg-primary-600 transition"
         >
           <FaPlus /> Add User
         </button>
       </div>
 
       {/* User Table - Updated Theme */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-card rounded-lg shadow-sm border border-theme overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="table-head">
               <tr>
-                <th className="bg-primary px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</th>
-                <th className="bg-primary px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-                <th className="bg-primary px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Username</th>
-                <th className="bg-primary px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Phone</th>
-                <th className="bg-primary px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Language</th>
-                <th className="bg-primary px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
-                <th className="bg-primary px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                <th className="bg-primary px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Name</th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Email</th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Username</th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Phone</th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Language</th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Role</th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Status</th>
+                <th className="table-head px-6 py-3 text-left text-xs font-semibold text-table-head-text uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-theme">
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-gray-900 text-sm">
+                <tr key={user.id} className="hover:row-hover transition-colors">
+                  <td className="px-6 py-4 font-medium text-main text-sm">
                     {user.firstName} {user.middleName} {user.lastName}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{user.username}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{user.phone}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{user.language}</td>
+                  <td className="px-6 py-4 text-sm text-muted">{user.email}</td>
+                  <td className="px-6 py-4 text-sm text-muted">{user.username}</td>
+                  <td className="px-6 py-4 text-sm text-muted">{user.phone}</td>
+                  <td className="px-6 py-4 text-sm text-muted">{user.language}</td>
                   <td className="px-6 py-4 text-sm">
-                    <span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-medium">
+                    <span className="px-2 py-1 rounded-full text-xs font-medium" style={{ background: 'var(--row-hover)', color: 'var(--primary)' }}>
                       {user.role || "No Role"}
                     </span>
                   </td>
@@ -127,8 +128,8 @@ const UserCreation: React.FC<UserCreationProps> = ({
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
                         user.status === "Active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
+                          ? "badge-success"
+                          : "btn-danger"
                       }`}
                     >
                       {user.status}
@@ -138,14 +139,14 @@ const UserCreation: React.FC<UserCreationProps> = ({
                     <div className="flex items-center justify-center gap-3">
                       <button
                         onClick={() => handleEdit(user)}
-                        className="text-indigo-600 hover:text-indigo-800 transition"
+                        className="text-primary hover:text-primary-700 transition"
                         title="Edit"
                       >
                         <FaEdit size={16} />
                       </button>
                       <button
                         onClick={() => onDelete(user.id)}
-                        className="text-red-600 hover:text-red-800 transition"
+                        className="text-danger hover:text-danger-700 transition"
                         title="Delete"
                       >
                         <FaTrash size={16} />
@@ -160,33 +161,25 @@ const UserCreation: React.FC<UserCreationProps> = ({
 
         {filteredUsers.length === 0 && (
           <div className="text-center py-12">
-            <FaInfoCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No users found</p>
+            <FaInfoCircle className="w-12 h-12 text-muted mx-auto mb-3" />
+            <p className="text-muted">No users found</p>
           </div>
         )}
       </div>
 
       {/* User Modal */}
+      {/* User Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-            <h2 className="text-xl font-semibold mb-4">
-              {editingUser ? "Edit User" : "Create User"}
-            </h2>
-            <p className="text-gray-500 text-sm">
-              Modal component would go here (CreateUserModal)
-            </p>
-            <button
-              onClick={() => {
-                setShowModal(false);
-                setEditingUser(null);
-              }}
-              className="mt-4 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-            >
-              Close
-            </button>
-          </div>
-        </div>
+        <CreateUserModal
+          isOpen={showModal}
+          onClose={() => {
+            setShowModal(false);
+            setEditingUser(null);
+          }}
+          onSubmit={handleModalSubmit}
+          initialData={editingUser ?? undefined}
+          availableRoles={roles}
+        />
       )}
     </div>
   );

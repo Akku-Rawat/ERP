@@ -149,9 +149,9 @@ const Upload: React.FC = () => {
         
         {/* Success Alert */}
         {showSuccess && (
-          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-            <FaCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-800 font-medium text-sm">
+          <div className="mb-6 rounded-lg p-4 flex items-center gap-3 shadow-sm badge-success">
+            <FaCheckCircle className="w-5 h-5 text-success flex-shrink-0" />
+            <p className="text-success font-medium text-sm">
               Documents saved successfully!
             </p>
           </div>
@@ -161,10 +161,9 @@ const Upload: React.FC = () => {
         <div className="grid grid-cols-5 gap-6">
           
           {/* Left Sidebar - Document Types */}
-          <div className="col-span-2 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+          <div className="col-span-2 bg-card rounded-lg shadow-sm border border-theme overflow-hidden">
             <div
-              className="px-4 py-2"
-              style={{ background: 'var(--primary-600)' }}
+              className="px-4 py-2 bg-primary-600 text-table-head-text"
             >
               <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                 <FaUpload className="w-5 h-5" />
@@ -181,7 +180,7 @@ const Upload: React.FC = () => {
                   className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                     selectedType === 'logo'
                       ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-300 bg-white'
+                      : 'border-theme hover:row-hover bg-card'
                   }`}
                   /* keep classes for layout; override colors via style where needed below */
                   style={{
@@ -204,13 +203,13 @@ const Upload: React.FC = () => {
                       </div>
                     </div>
                     {logo && (
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium flex items-center gap-1">
+                      <span className="text-xs badge-success px-2 py-1 rounded-full font-medium flex items-center gap-1">
                         <FaCheck className="w-3 h-3" /> Uploaded
                       </span>
                     )}
                   </div>
                   {logo && (
-                    <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className="mt-3 pt-3 border-t border-theme">
                       <p className="text-xs" style={{ color: selectedType === 'logo' ? 'rgba(255,255,255,0.95)' : undefined }}>{logo.file.name}</p>
                       <p className="text-xs" style={{ color: selectedType === 'logo' ? 'rgba(255,255,255,0.85)' : undefined }}>{logo.size}</p>
                     </div>
@@ -222,7 +221,7 @@ const Upload: React.FC = () => {
                   className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                     selectedType === 'signature'
                       ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-300 bg-white'
+                      : 'border-theme hover:row-hover bg-card'
                   }`}
                   style={{
                     background: selectedType === 'signature' ? 'var(--primary-600)' : undefined,
@@ -243,13 +242,13 @@ const Upload: React.FC = () => {
                       </div>
                     </div>
                     {signature && (
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium flex items-center gap-1">
+                      <span className="text-xs badge-success px-2 py-1 rounded-full font-medium flex items-center gap-1">
                         <FaCheck className="w-3 h-3" /> Uploaded
                       </span>
                     )}
                   </div>
                   {signature && (
-                    <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className="mt-3 pt-3 border-t border-theme">
                       <p className="text-xs" style={{ color: selectedType === 'signature' ? 'rgba(255,255,255,0.95)' : undefined }}>{signature.file.name}</p>
                       <p className="text-xs" style={{ color: selectedType === 'signature' ? 'rgba(255,255,255,0.85)' : undefined }}>{signature.size}</p>
                     </div>
@@ -258,7 +257,7 @@ const Upload: React.FC = () => {
               </div>
 
               {/* Upload Guidelines */}
-              <div className="mt-6 pt-4 border-t border-gray-200">
+              <div className="mt-6 pt-4 border-t border-theme">
                 <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--text)' }}>
                   <FaExclamationTriangle className="w-4 h-4" style={{ color: 'var(--danger)' }} />
                   Guidelines
@@ -285,7 +284,7 @@ const Upload: React.FC = () => {
 
               {/* Progress Summary */}
               {(logo || signature) && (
-                <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="mt-6 pt-4 border-t border-theme">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-xs font-semibold uppercase tracking-wide">
                       Overall Progress
@@ -309,7 +308,7 @@ const Upload: React.FC = () => {
           </div>
 
           {/* Right Panel - Upload Area & Details */}
-          <div className="col-span-3 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+          <div className="col-span-3 bg-card rounded-lg shadow-sm border border-theme overflow-hidden">
             <div
               className="px-4 py-2 flex justify-between items-center"
               style={{ background: 'var(--primary-600)' }}
@@ -321,8 +320,7 @@ const Upload: React.FC = () => {
                 <div className="flex gap-2">
                   <button 
                     onClick={() => openPreview(selectedType, currentFile.preview)}
-                    className="px-3 py-1.5 rounded-md transition-all text-sm font-medium flex items-center gap-1.5"
-                    style={{ background: 'rgba(255,255,255,0.12)', color: 'white' }}
+                    className="px-3 py-1.5 rounded-md transition-all text-sm font-medium flex items-center gap-1.5 btn-ghost text-table-head-text"
                   >
                     <FaEye className="w-3.5 h-3.5" />
                     Preview
@@ -346,8 +344,8 @@ const Upload: React.FC = () => {
                   <div className="inline-block p-6 rounded-full mb-4" style={{ background: 'var(--primary-100)' }}>
                     <FaUpload className="w-12 h-12 animate-pulse" style={{ color: 'var(--primary-700)' }} />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Uploading...</h3>
-                  <p className="text-gray-500 mb-4">Please wait while we process your file</p>
+                  <h3 className="text-lg font-semibold text-muted mb-2">Uploading...</h3>
+                  <p className="text-muted mb-4">Please wait while we process your file</p>
                   
                   <div className="max-w-md mx-auto space-y-2">
                     <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
@@ -384,21 +382,20 @@ const Upload: React.FC = () => {
                     <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-4`} style={{ background: selectedType === 'logo' ? 'var(--primary-100)' : 'var(--primary-100)' }}>
                       <FaUpload className={`w-10 h-10`} style={{ color: 'var(--primary-700)' }} />
                     </div>
-                    <p className="text-lg font-semibold text-gray-800 mb-2">
+                    <p className="text-lg font-semibold text-main mb-2">
                       {dragActive === selectedType ? 'Drop your file here' : 'Drag & drop your file'}
                     </p>
-                    <p className="text-sm text-gray-500 mb-6">or</p>
+                    <p className="text-sm text-muted mb-6">or</p>
                     
                     <label
                       htmlFor={`${selectedType}-upload`}
-                      className="px-6 py-3 rounded-md font-medium text-sm flex items-center gap-2 cursor-pointer transition-all shadow-sm"
-                      style={{ background: 'var(--primary)', color: 'white' }}
+                      className="px-6 py-3 rounded-md font-medium text-sm flex items-center gap-2 cursor-pointer transition-all shadow-sm bg-primary text-white"
                     >
                       <FaUpload className="w-4 h-4" /> Browse Files
                     </label>
                     
-                    <div className="mt-8 pt-6 border-t border-gray-200 w-full">
-                      <p className="text-xs text-gray-500">
+                    <div className="mt-8 pt-6 border-t border-theme w-full">
+                      <p className="text-xs text-muted">
                         Supported formats: PNG, JPG, SVG • Maximum size: 5MB
                       </p>
                     </div>
@@ -410,7 +407,7 @@ const Upload: React.FC = () => {
                   {/* Preview Image */}
                   <div className="flex justify-center">
                     <div className="relative group">
-                      <div className="w-64 h-64 bg-gray-50 border-2 border-gray-200 rounded-lg overflow-hidden flex items-center justify-center shadow-sm">
+                      <div className="w-64 h-64 bg-card border-2 border-theme rounded-lg overflow-hidden flex items-center justify-center shadow-sm">
                         <img 
                           src={currentFile.preview} 
                           alt={selectedType} 
@@ -420,13 +417,13 @@ const Upload: React.FC = () => {
                       <div className="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                         <button
                           onClick={() => openPreview(selectedType, currentFile.preview)}
-                          className="bg-white text-gray-800 p-3 rounded-lg hover:bg-gray-100 transition"
+                          className="bg-card text-main p-3 rounded-lg hover:bg-gray-100 transition"
                         >
                           <FaEye className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => downloadFile(currentFile)}
-                          className="bg-white text-gray-800 p-3 rounded-lg hover:bg-gray-100 transition"
+                          className="bg-card text-main p-3 rounded-lg hover:bg-gray-100 transition"
                         >
                           <FaDownload className="w-5 h-5" />
                         </button>
@@ -440,7 +437,7 @@ const Upload: React.FC = () => {
                       <label className="block text-xs font-semibold mb-2 uppercase tracking-wide" style={{ color: 'var(--text)' }}>
                         File Name
                       </label>
-                      <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+                      <div className="bg-card border border-theme rounded-lg px-4 py-3">
                         <p className="font-medium text-sm truncate" title={currentFile.file.name} style={{ color: 'var(--text)' }}>
                           {currentFile.file.name}
                         </p>
@@ -451,9 +448,9 @@ const Upload: React.FC = () => {
                       <label className="block text-xs font-semibold mb-2 uppercase tracking-wide" style={{ color: 'var(--text)' }}>
                         File Size
                       </label>
-                      <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
+                      <div className="bg-card border border-theme rounded-lg px-4 py-3 flex items-center justify-between">
                         <p className="font-medium text-sm" style={{ color: 'var(--text)' }}>{currentFile.size}</p>
-                        <span className="text-green-500">✓</span>
+                        <span className="text-success">✓</span>
                       </div>
                     </div>
 
@@ -461,7 +458,7 @@ const Upload: React.FC = () => {
                       <label className="block text-xs font-semibold mb-2 uppercase tracking-wide" style={{ color: 'var(--text)' }}>
                         Format
                       </label>
-                      <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+                      <div className="bg-card border border-theme rounded-lg px-4 py-3">
                         <p className="font-medium text-sm uppercase" style={{ color: 'var(--text)' }}>
                           {currentFile.file.type.split('/')[1]}
                         </p>
@@ -472,9 +469,9 @@ const Upload: React.FC = () => {
                       <label className="block text-xs font-semibold mb-2 uppercase tracking-wide" style={{ color: 'var(--text)' }}>
                         Uploaded
                       </label>
-                      <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+                      <div className="bg-card border border-theme rounded-lg px-4 py-3">
                         <p className="font-medium text-sm flex items-center gap-2" style={{ color: 'var(--text)' }}>
-                          <FaClock className="w-3.5 h-3.5" style={{ color: '#9CA3AF' }} />
+                          <FaClock className="w-3.5 h-3.5" style={{ color: 'var(--muted)' }} />
                           {formatDate(currentFile.uploadedAt)}
                         </p>
                       </div>
@@ -482,7 +479,7 @@ const Upload: React.FC = () => {
                   </div>
 
                   {/* Replace File Button */}
-                  <div className="pt-4 border-t border-gray-200 text-center">
+                  <div className="pt-4 border-t border-theme text-center">
                     <label
                       htmlFor={`${selectedType}-replace`}
                       className="inline-flex items-center gap-2 font-medium cursor-pointer text-sm"
@@ -512,7 +509,7 @@ const Upload: React.FC = () => {
               setLogo(null);
               setSignature(null);
             }}
-            className="px-6 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition"
+            className="px-6 py-2.5 border border-gray-300 text-muted text-sm font-semibold rounded-lg hover:bg-card transition"
           >
             Reset All
           </button>
@@ -538,22 +535,22 @@ const Upload: React.FC = () => {
           onClick={() => setPreviewModal(null)}
         >
           <div
-            className="bg-white rounded-lg max-w-3xl w-full shadow-2xl"
+            className="bg-card rounded-lg max-w-3xl w-full shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-theme">
+              <h3 className="text-lg font-semibold text-main">
                 {previewModal.type === 'logo' ? 'Company Logo' : 'Authorized Signature'} Preview
               </h3>
               <button
                 onClick={() => setPreviewModal(null)}
-                className="text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition"
+                className="text-muted hover:bg-gray-100 p-2 rounded-lg transition"
               >
                 <FaTimes className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="bg-gray-50 flex items-center justify-center p-12 min-h-96">
+            <div className="bg-card flex items-center justify-center p-12 min-h-96">
               <img
                 src={previewModal.url}
                 alt="Preview"

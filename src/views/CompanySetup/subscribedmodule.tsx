@@ -101,13 +101,11 @@ const sampleModules: ModuleItem[] = [
   },
 ];
 
-// ---------- Helpers ----------
-// NOTE: replaced tier CSS-classes with inline style values so colours follow theme (teal)
+
 const tierStyle = (tier: Tier) => {
-  // subtle background + stronger text color for readability
   return {
-    background: "rgba(13,148,136,0.06)", // subtle teal tint
-    color: "var(--primary-700)", // teal-800 like tone
+    background: "var(--row-hover)",
+    color: "var(--primary-700)", 
     padding: "0.25rem 0.625rem",
     borderRadius: "9999px",
     fontSize: "0.75rem",
@@ -170,7 +168,7 @@ export default function SubscribedModules(): JSX.Element {
       <div className="w-full ">
         {/* Stats & Controls */}
         <div
-          className="rounded-lg shadow-sm border border-gray-200 p-4 mb-2"
+          className="rounded-lg shadow-sm border border-theme p-4 mb-2"
           style={{
             background: "var(--primary-600)",
             color: "var(--table-head-text)",
@@ -187,15 +185,15 @@ export default function SubscribedModules(): JSX.Element {
     {/* Search Bar */}
     <div className="relative flex-1 w-full">
       <FaSearch
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
         style={{ width: 16, height: 16 }}
       />
       <input
   value={query}
   onChange={(e) => setQuery(e.target.value)}
   placeholder="Search modules..."
-  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg 
-             text-sm bg-white shadow-sm text-gray-800
+  className="w-full pl-10 pr-4 py-2.5 border border-theme rounded-lg 
+             text-sm bg-card shadow-sm text-main
              focus:ring-2 focus:ring-[var(--primary)]
              focus:border-[var(--primary-600)] transition-all"
 />
@@ -206,8 +204,8 @@ export default function SubscribedModules(): JSX.Element {
     <select
       value={selectedTier}
       onChange={(e) => setSelectedTier(e.target.value)}
-      className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm 
-                 shadow-sm text-gray-700 focus:ring-2 focus:ring-[var(--primary)]"
+      className="px-4 py-2.5 border border-theme rounded-lg bg-card text-sm 
+                 shadow-sm text-muted focus:ring-2 focus:ring-[var(--primary)]"
     >
       <option value="All">All Tiers</option>
       <option value="Enterprise">Enterprise</option>
@@ -219,8 +217,8 @@ export default function SubscribedModules(): JSX.Element {
     <select
       value={sortBy}
       onChange={(e) => setSortBy(e.target.value)}
-      className="px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm 
-                 shadow-sm text-gray-700 focus:ring-2 focus:ring-[var(--primary)]"
+      className="px-4 py-2.5 border border-theme rounded-lg bg-card text-sm 
+                 shadow-sm text-muted focus:ring-2 focus:ring-[var(--primary)]"
     >
       <option value="name">Name (A-Z)</option>
       <option value="users">Most Used</option>
@@ -233,32 +231,32 @@ export default function SubscribedModules(): JSX.Element {
         </div>
 
         {/* Module List */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-card rounded-lg shadow-sm border border-theme overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="table-head">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Module
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Description
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Tier
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Users
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-muted uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-theme">
                 {sortedModules.map((m) => {
                   return (
                     <tr
@@ -281,13 +279,13 @@ export default function SubscribedModules(): JSX.Element {
                           >
                             {m.icon ?? <FaBoxes />}
                           </div>
-                          <div className="font-medium text-gray-900 text-sm">
+                          <div className="font-medium text-main text-sm">
                             {m.name}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-600 max-w-xs">
+                        <div className="text-sm text-muted max-w-xs">
                           {m.description}
                         </div>
                       </td>
@@ -305,10 +303,10 @@ export default function SubscribedModules(): JSX.Element {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-1.5 text-sm text-gray-700">
+                        <div className="flex items-center gap-1.5 text-sm text-muted">
                           <FaUsers
                             className="w-3.5 h-3.5"
-                            style={{ color: "#9ca3af" }}
+                            style={{ color: "var(--muted)" }}
                           />
                           {m.users}
                         </div>
@@ -326,7 +324,7 @@ export default function SubscribedModules(): JSX.Element {
                             Active
                           </div>
                         ) : (
-                          <div className="inline-flex items-center text-gray-500 text-xs font-medium">
+                          <div className="inline-flex items-center text-muted text-xs font-medium">
                             Inactive
                           </div>
                         )}
@@ -339,9 +337,9 @@ export default function SubscribedModules(): JSX.Element {
                             style={
                               m.active
                                 ? {
-                                    background: "#fff",
-                                    border: "1px solid #fca5a5",
-                                    color: "#b91c1c",
+                                    background: "var(--card)",
+                                    border: "1px solid var(--danger)",
+                                    color: "var(--danger)",
                                   }
                                 : {
                                     background: "var(--primary)",
@@ -352,7 +350,7 @@ export default function SubscribedModules(): JSX.Element {
                             {m.active ? "Disable" : "Enable"}
                           </button>
                           <button
-                            className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+                            className="p-2 rounded-lg text-muted hover:text-muted hover:bg-app transition-all"
                             title="Settings"
                           >
                             <FaCog className="w-4 h-4" />
@@ -368,8 +366,8 @@ export default function SubscribedModules(): JSX.Element {
 
           {sortedModules.length === 0 && (
             <div className="text-center py-12">
-              <FaInfoCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">
+              <FaInfoCircle className="w-12 h-12 text-muted mx-auto mb-3" />
+              <p className="text-muted">
                 No modules found matching your filters
               </p>
             </div>
@@ -377,7 +375,7 @@ export default function SubscribedModules(): JSX.Element {
         </div>
 
         {/* Footer Info */}
-        <div className="mt-6 text-center text-sm text-gray-500">
+        <div className="mt-6 text-center text-sm text-muted">
           Last synced: {new Date().toLocaleString()}
         </div>
       </div>

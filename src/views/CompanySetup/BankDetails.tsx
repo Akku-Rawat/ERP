@@ -173,7 +173,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                     <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
                       Bank Name
                     </label>
-                    <div className="bg-card border border-gray-200 rounded-lg px-4 py-3">
+                    <div className="bg-card border border-theme rounded-lg px-4 py-3">
                       <p className="text-muted font-medium">
                         {bankAccounts[selectedAccount].bankName}
                       </p>
@@ -184,11 +184,11 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                     <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
                       SWIFT/BIC Code
                     </label>
-                    <div className="bg-card border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
+                    <div className="bg-card border border-theme rounded-lg px-4 py-3 flex items-center justify-between">
                       <p className="text-muted font-mono">
                         {bankAccounts[selectedAccount].swiftCode}
                       </p>
-                      <span className="text-[var(--success)]">✓</span>
+                      <span className="text-success">✓</span>
                     </div>
                   </div>
 
@@ -196,7 +196,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                     <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
                       Account Number
                     </label>
-                    <div className="bg-card border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
+                    <div className="bg-card border border-theme rounded-lg px-4 py-3 flex items-center justify-between">
                       <p className="text-muted font-mono font-semibold">
                         {showAccountNumber[selectedAccount]
                           ? bankAccounts[selectedAccount].accountNumber
@@ -221,11 +221,11 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                     <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
                       IFSC Code
                     </label>
-                    <div className="bg-card border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
+                    <div className="bg-card border border-theme rounded-lg px-4 py-3 flex items-center justify-between">
                       <p className="text-muted font-mono">
                         {bankAccounts[selectedAccount].ifscCode}
                       </p>
-                      <span className="text-[var(--success)]">✓</span>
+                      <span className="text-success">✓</span>
                     </div>
                   </div>
 
@@ -233,7 +233,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                     <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
                       Currency
                     </label>
-                    <div className="bg-card border border-gray-200 rounded-lg px-4 py-3">
+                    <div className="bg-card border border-theme rounded-lg px-4 py-3">
                       <p className="text-muted font-semibold">
                         {bankAccounts[selectedAccount].currency}
                       </p>
@@ -244,8 +244,8 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                     <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
                       Status
                     </label>
-                    <div className="bg-card border border-gray-200 rounded-lg px-4 py-3">
-                      <span className="inline-flex items-center gap-2 text-[var(--success)] font-medium">
+                    <div className="bg-card border border-theme rounded-lg px-4 py-3">
+                      <span className="inline-flex items-center gap-2 text-success font-medium">
                        <span className="w-2 h-2" style={{ background: 'var(--success)', borderRadius: 4 }}></span> 
                         Active
                       </span>

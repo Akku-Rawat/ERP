@@ -138,11 +138,11 @@ const AccountingDetails: React.FC = () => {
 
   const InputField = ({ label, name, type = 'text', icon: Icon, required = false, placeholder = '' }: InputFieldProps) => (
     <div className="relative">
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+      <label className="block text-sm font-medium text-muted mb-1.5">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="relative">
-        {Icon && <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none z-10" />}
+        {Icon && <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4 pointer-events-none z-10" />}
         <input
           type={type}
           name={name}
@@ -151,7 +151,7 @@ const AccountingDetails: React.FC = () => {
           onChange={handleChange}
           placeholder={placeholder}
           required={required}
-          className={`w-full border border-gray-300 rounded-lg ${Icon ? 'pl-10' : 'pl-3.5'} pr-3.5 py-2.5 text-sm focus:ring-2 focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary-600)] transition-all hover:border-gray-400`}
+          className={`w-full border bg-theme rounded-lg ${Icon ? 'pl-10' : 'pl-3.5'} pr-3.5 py-2.5 text-sm focus:ring-2 focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary-600)] transition-all hover:border-theme`}
         />
       </div>
     </div>
@@ -168,23 +168,23 @@ const AccountingDetails: React.FC = () => {
 
   const SelectField = ({ label, name, options, icon: Icon, required = false }: SelectFieldProps) => (
     <div className="relative">
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+      <label className="block text-sm font-medium text-muted mb-1.5">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="relative">
-        {Icon && <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none z-10" />}
+        {Icon && <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4 pointer-events-none z-10" />}
         <select
           name={name}
           defaultValue={defaultData[name]}
           ref={attachRef(name)}
           onChange={handleChange}
           required={required}
-          className={`w-full border border-gray-300 rounded-lg ${Icon ? 'pl-10' : 'pl-3.5'} pr-10 py-2.5 text-sm bg-white focus:ring-2 focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary-600)] transition-all hover:border-gray-400 appearance-none`}
+          className={`w-full border bg-theme rounded-lg ${Icon ? 'pl-10' : 'pl-3.5'} pr-10 py-2.5 text-sm bg-card focus:ring-2 focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary-600)] transition-all hover:border-theme appearance-none`}
         >
           {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
@@ -197,20 +197,20 @@ const AccountingDetails: React.FC = () => {
       <div className="w-full ">
         {/* Success Message */}
         {showSuccess && (
-          <div className="mb-4 rounded-lg p-4 shadow-sm" style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.18)' }}>
+          <div className="mb-4 rounded-lg p-4 shadow-sm" className="badge-success">
             <FaCheckCircle className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--success)' }} />
             <div>
               <p className="text-sm font-medium" style={{ color: 'var(--success)' }}>Configuration saved successfully!</p>
-              <p className="text-xs text-green-600 mt-0.5">All changes have been stored</p>
+              <p className="text-xs text-success mt-0.5">All changes have been stored</p>
             </div>
           </div>
         )}
 
         {/* Main Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-card rounded-xl shadow-sm border bg-theme overflow-hidden">
           {/* Tab Navigation */}
           {/* Tab Navigation — filled active tab */}
-<div className="bg-gray-50" style={{ borderBottom: '1px solid var(--border)' }}>
+<div className="bg-app" style={{ borderBottom: '1px solid var(--border)' }}>
   <div className="flex items-stretch"
        style={{ borderRadius: '0.5rem 0.5rem 0 0', overflow: 'hidden' }}>
     {tabs.map((tab) => {
@@ -278,8 +278,8 @@ const AccountingDetails: React.FC = () => {
               <div className="space-y-8">
                 {/* General Accounts Section */}
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <FaDollarSign className="text-[var(--primary)]" />
+                  <h3 className="text-base font-semibold text-main mb-4 flex items-center gap-2">
+                    <FaDollarSign className="text-primary" />
                     General Accounts
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -301,8 +301,8 @@ const AccountingDetails: React.FC = () => {
 
                 {/* Foreign Exchange Section */}
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <FaSyncAlt className="text-[var(--primary)]" />
+                  <h3 className="text-base font-semibold text-main mb-4 flex items-center gap-2">
+                    <FaSyncAlt className="text-primary" />
                     Foreign Exchange
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -328,8 +328,8 @@ const AccountingDetails: React.FC = () => {
 
                 {/* Rounding Section */}
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <FaBullseye className="text-[var(--primary)]" />
+                  <h3 className="text-base font-semibold text-main mb-4 flex items-center gap-2">
+                    <FaBullseye className="text-primary" />
                     Rounding
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -350,8 +350,8 @@ const AccountingDetails: React.FC = () => {
 
                 {/* Asset Valuation Section */}
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <FaChartArea className="text-[var(--primary)]" />
+                  <h3 className="text-base font-semibold text-main mb-4 flex items-center gap-2">
+                    <FaChartArea className="text-primary" />
                     Asset Valuation
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -374,12 +374,12 @@ const AccountingDetails: React.FC = () => {
           </div>
 
           {/* Action Footer */}
-          <div className="bg-gray-50 px-8 py-4 border-t border-gray-200 flex items-center justify-between">
+          <div className="bg-app px-8 py-4 border-t bg-theme flex items-center justify-between">
             <button
   onClick={handleReset}
   className="px-5 py-2.5 rounded-lg border shadow-sm 
              text-sm font-semibold flex items-center gap-2 
-             hover:bg-gray-50 transition-all active:scale-[0.98]"
+             hover:bg-app transition-all active:scale-[0.98]"
   style={{
     borderColor: 'var(--border)',
     color: 'var(--text)',
@@ -393,7 +393,7 @@ const AccountingDetails: React.FC = () => {
 
             <button
   onClick={handleSubmit}
-  className="px-5 py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 
+  className="px-5 py-2.5 rounded-lg bg-primary hover:bg-primary-600 
              text-white text-sm font-semibold shadow flex items-center gap-2 
              transition-all active:scale-[0.98]"
   style={{
