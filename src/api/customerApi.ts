@@ -49,6 +49,6 @@ export async function updateCustomerByCustomerCode(
   payload: any,
 ): Promise<any> {
   const url = `${ENDPOINTS.updateCustomer}?id=${custom_id}`;
-  const resp: AxiosResponse = await api.put(url, payload);
+  const resp: AxiosResponse = await api.patch(url, payload);
   return resp.data;
 }
