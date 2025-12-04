@@ -27,7 +27,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [editCustomer, setEditCustomer] = useState<CustomerDetail | null>(null);
 
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(5);
+  const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 

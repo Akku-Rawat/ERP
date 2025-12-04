@@ -20,7 +20,7 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(5);
+  const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [showItemsModal, setShowItemsModal] = useState(false);

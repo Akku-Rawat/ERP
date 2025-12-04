@@ -18,7 +18,7 @@ const ItemsCategory: React.FC = () => {
   const [itemGroups, setItemGroups] = useState<ItemGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(5);
+  const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -137,6 +137,7 @@ const ItemsCategory: React.FC = () => {
               <th className="px-4 py-2 text-left">Unit of Measurement</th>
               <th className="px-4 py-2 text-left">Selling Price</th>
               <th className="px-4 py-2 text-left">Sales Account</th>
+              <th className="px-4 py-2 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
