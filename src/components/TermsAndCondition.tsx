@@ -1,334 +1,333 @@
-import { useState, useEffect, useRef } from "react";
-import { FaEdit, FaTimes, FaCheck } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaEdit, FaTimes, FaCheck, FaPlus, FaTrash } from "react-icons/fa";
+import type { TermSection, PaymentTerms, TermPhase } from "../types/termsAndCondition";
 
-const TermsAndCondition = () => {
-  const [selectedTemplate, setSelectedTemplate] = useState(
-    "General Service Terms",
-  );
-  const [content, setContent] = useState("");
-  const [originalContent, setOriginalContent] = useState("");
+interface Props {
+  terms: TermSection | null;
+  setTerms: (updated: TermSection) => void;
+}
+
+const UI_TO_KEY: Record<string, keyof TermSection> = {
+  "General Service Terms": "general",
+  "Payment Terms": "payment",
+  "Service Delivery Terms": "delivery",
+  "Cancellation / Refund Policy": "cancellation",
+  "Warranty": "warranty",
+  "Limitations and Liability": "liability",
+};
+
+const TABS = Object.keys(UI_TO_KEY);
+
+const emptyPhase = (): TermPhase => ({
+  name: "",
+  percentage: "",
+  condition: "",
+});
+
+const emptyPayment: PaymentTerms = {
+  phases: [],
+  dueDates: "",
+  lateCharges: "",
+  tax: "",
+  notes: "",
+};
+
+const emptyTerms: TermSection = {
+  general: "",
+  payment: emptyPayment,
+  delivery: "",
+  cancellation: "",
+  warranty: "",
+  liability: "",
+};
+
+const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
+  const [selectedTemplate, setSelectedTemplate] = useState("General Service Terms");
   const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState<TermSection | null>(null);
 
-  const [localPhases, setLocalPhases] = useState<
-    { phase: string; percent: string; when: string }[]
-  >([]);
-  const [localBullets, setLocalBullets] = useState<
-    { title: string; value: string }[]
-  >([]);
+  const baseTerms: TermSection = terms ?? emptyTerms;
+  const currentTerms: TermSection = isEditing ? draft ?? baseTerms : baseTerms;
 
-  const templates: Record<string, string> = {
-    "General Service Terms": `1.This Quotation is subject to the following terms and conditions. By accepting this quotation, {{CustomerName}} agrees to be bound by these terms. This quotation, identified by number {{QuotationNumber}}, was issued on {{QuotationDate}} and is valid until {{ValidUntil}}.
-2.The services to be provided are: {{ServiceName}}. The total amount payable for these services is {{TotalAmount}}.
-3.Payment is due upon receipt of the invoice. Any disputes must be raised within 14 days of the invoice date.`,
+  const activeKey = UI_TO_KEY[selectedTemplate];
 
-    "Payment Terms": `1.Payment Structure:
-  a)Advance Payment 20%, Upon quotation acceptance.
-  b)Phase 1 Completion 30%, After Phase 1 delivery
-  c)Final Completion 50%, On project sign-off 
-2.Due Dates:Payment due within 30 days from invoice. 
-3. Late Payment Charges:  12% p.a. on overdue payments. 
-4. Taxes / Additional Charges: Tax applicable @ 18%. 
-5. Special Notes / Conditions:  Advance payment is non-refundable.`,
+  const ensurePayment = (src: TermSection): PaymentTerms => ({
+    phases: src.payment?.phases ?? [],
+    dueDates: src.payment?.dueDates ?? "",
+    lateCharges: src.payment?.lateCharges ?? "",
+    tax: src.payment?.tax ?? "",
+    notes: src.payment?.notes ?? "",
+  });
 
-    "Service Delivery Terms": `1. Estimated delivery timelines are as follows: Phase 1 – 2 weeks, Phase 2 – 3 weeks, with a total project duration of 5 weeks.`,
 
-    "Cancellation / Refund Policy": `1. Cancellation Conditions: Client may cancel anytime with written notice.
-2. Refund Rules: Advance payment is non-refundable, milestone payments refundable only for uninitiated work.`,
-
-    Warranty: `1.The Company warrants that the service will be performed professionally and function as intended for 30 days after completion.`,
-
-    "Limitations and Liability": `1.The Company is not liable for delays caused by the client.
-2.The client is responsible for providing accurate information and resources.
-3.In no event shall the Company’s total liability, whether in contract or otherwise, exceed the total amount paid by the client for the service.`,
-  };
-
-  useEffect(() => {
-    const txt = templates[selectedTemplate] || "";
-    setContent(txt);
-    setOriginalContent(txt);
-    // reset table editing state when template changes
-    setLocalPhases([]);
-    setLocalBullets([]);
-  }, [selectedTemplate]);
-
-  interface PhaseRow {
-    phase: string;
-    percent: string;
-    when: string;
-  }
-  interface Bullet {
-    title: string;
-    value: string;
-  }
-
-  const parsePaymentTable = (
-    raw: string,
-  ): { phases: PhaseRow[]; bullets: Bullet[] } => {
-    const lines = raw
-      .split("\n")
-      .map((l) => l.trim())
-      .filter(Boolean);
-    const phases: PhaseRow[] = [];
-    const bullets: Bullet[] = [];
-
-    lines.forEach((line) => {
-      const phaseMatch = line.match(/^[abc]\)\s*(.+)$/);
-      if (phaseMatch) {
-        const clean = phaseMatch[1];
-        const [percent, ...whenParts] = clean.split(",");
-        const phaseMap: Record<string, string> = {
-          a: "Advance",
-          b: "Phase 1",
-          c: "Final",
-        };
-        const key = line.charAt(0);
-        phases.push({
-          phase: phaseMap[key] || "",
-          percent: percent.trim(),
-          when: whenParts.join(",").trim(),
-        });
-        return;
-      }
-
-      const bulletMatch = line.match(/^\d+\.\s*(.+?):\s*(.+)$/);
-      if (bulletMatch) {
-        bullets.push({ title: bulletMatch[1], value: bulletMatch[2] });
-      }
-    });
-
-    return { phases, bullets };
-  };
-
-  useEffect(() => {
-    if (selectedTemplate !== "Payment Terms") return;
-    const { phases, bullets } = parsePaymentTable(content);
-    setLocalPhases(phases);
-    setLocalBullets(bullets);
-  }, [content, selectedTemplate]);
-
-  const startEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setOriginalContent(content);
+  const startEditing = () => {
+    setDraft(terms ?? emptyTerms);
     setIsEditing(true);
   };
 
-  const cancelEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setContent(originalContent);
+  const cancelEditing = () => {
+    setDraft(null);
     setIsEditing(false);
   };
 
-  const saveEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const saveEditing = () => {
+    if (!draft) {
+      setIsEditing(false);
+      return;
+    }
+    setTerms(draft);
+    setDraft(null);
+    setIsEditing(false);
+  };
 
-    const phaseLines = localPhases.map((p, i) => {
-      const prefix = String.fromCharCode(97 + i) + ")";
-      return `  ${prefix}${p.percent}, ${p.when}`;
+
+  const updateDraft = (updater: (prev: TermSection) => TermSection) => {
+    if (!isEditing) return;
+    setDraft((prev) => {
+      const base = prev ?? baseTerms;
+      return updater(base);
     });
-
-    const bulletLines = localBullets.map(
-      (b, i) => `${i + 2}. ${b.title}: ${b.value}`,
-    );
-
-    const newRaw = ["1.Payment Structure:", ...phaseLines, ...bulletLines].join(
-      "\n",
-    );
-
-    setContent(newRaw);
-    setOriginalContent(newRaw);
-    alert("Terms saved successfully!");
-    setIsEditing(false);
   };
 
-  const EditableCell = ({
-    value,
-    onChange,
-  }: {
-    value: string;
-    onChange: (v: string) => void;
-  }) => {
-    const ref = useRef<HTMLDivElement>(null);
-
-    return (
-      <div
-        ref={ref}
-        contentEditable={isEditing}
-        suppressContentEditableWarning
-        onBlur={() => onChange(ref.current?.innerText || "")}
-        className="px-1 outline-none min-h-[1.5em]"
-        dangerouslySetInnerHTML={{ __html: value }}
-      />
-    );
+  const updateTopField = (key: keyof TermSection, value: string) => {
+    updateDraft((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
   };
+
+  const updatePayment = (patch: Partial<PaymentTerms>) => {
+    updateDraft((prev) => {
+      const current = ensurePayment(prev);
+      return {
+        ...prev,
+        payment: {
+          ...current,
+          ...patch,
+        },
+      };
+    });
+  };
+
+  const addPhase = () => {
+    if (!isEditing) return;
+    const phases = ensurePayment(currentTerms).phases;
+    updatePayment({
+      phases: [...phases, emptyPhase()],
+    });
+  };
+
+  const updatePhase = (index: number, patch: Partial<TermPhase>) => {
+    if (!isEditing) return;
+    const phases = ensurePayment(currentTerms).phases;
+    const next = phases.map((p, i) => (i === index ? { ...p, ...patch } : p));
+    updatePayment({ phases: next });
+  };
+
+  const removePhase = (index: number) => {
+    if (!isEditing) return;
+    const phases = ensurePayment(currentTerms).phases;
+    const next = phases.filter((_, i) => i !== index);
+    updatePayment({ phases: next });
+  };
+
 
   const renderPaymentTable = () => {
-    const updatePhase = (idx: number, field: keyof PhaseRow, val: string) => {
-      const copy = [...localPhases];
-      copy[idx] = { ...copy[idx], [field]: val };
-      setLocalPhases(copy);
-    };
-
-    const updateBullet = (
-      idx: number,
-      field: "title" | "value",
-      val: string,
-    ) => {
-      const copy = [...localBullets];
-      copy[idx] = { ...copy[idx], [field]: val };
-      setLocalBullets(copy);
-    };
+    const payment = ensurePayment(currentTerms);
+    const phases = payment.phases;
 
     return (
-      <div className="space-y-6">
-        {/* Phases table */}
-        <table className="w-full table-auto border-collapse">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">
-                Phase
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">
-                Percentage
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">
-                When
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {localPhases.map((row, idx) => (
-              <tr
-                key={idx}
-                className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
-              >
-                <td className="border border-gray-300 px-4 py-2 text-sm">
-                  {isEditing ? (
-                    <EditableCell
-                      value={row.phase}
-                      onChange={(v) => updatePhase(idx, "phase", v)}
-                    />
-                  ) : (
-                    row.phase
-                  )}
-                </td>
-                <td className="border border-gray-300 px-4 py-2 text-sm">
-                  {isEditing ? (
-                    <EditableCell
-                      value={row.percent}
-                      onChange={(v) => updatePhase(idx, "percent", v)}
-                    />
-                  ) : (
-                    row.percent
-                  )}
-                </td>
-                <td className="border border-gray-300 px-4 py-2 text-sm">
-                  {isEditing ? (
-                    <EditableCell
-                      value={row.when}
-                      onChange={(v) => updatePhase(idx, "when", v)}
-                    />
-                  ) : (
-                    row.when
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="space-y-5">
+        {/* Section Title */}
+        <div className="flex items-center justify-between pb-1 border-b">
+          <h4 className="text-lg font-semibold text-gray-800">Payment Structure</h4>
 
-        {/* Other bullets */}
-        {localBullets.length > 0 && (
-          <dl className="grid grid-cols-1 gap-3 text-sm">
-            {localBullets.map((b, i) => (
-              <div key={i} className="flex">
-                <dt className="font-medium text-gray-700 w-48">
-                  {isEditing ? (
-                    <EditableCell
-                      value={b.title}
-                      onChange={(v) => updateBullet(i, "title", v)}
-                    />
-                  ) : (
-                    b.title + ":"
-                  )}
-                </dt>
-                <dd className="text-gray-600 flex-1">
-                  {isEditing ? (
-                    <EditableCell
-                      value={b.value}
-                      onChange={(v) => updateBullet(i, "value", v)}
-                    />
-                  ) : (
-                    b.value
-                  )}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        )}
+          {isEditing && (
+            <button
+              onClick={addPhase}
+              type="button"
+              className="flex items-center gap-2 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            >
+              <FaPlus /> Add Phase
+            </button>
+          )}
+        </div>
+
+        {/* Table */}
+        <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">#</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">Phase</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">Percentage</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">Condition</th>
+                <th className="px-4 py-3 text-center font-medium text-gray-700 w-12">Action</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y">
+              {phases.length > 0 &&
+                phases.map((p, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-4 py-2">
+                      <span className="text-gray-800">{idx + 1}</span>
+                    </td>
+
+                    {/* PHASE */}
+                    <td className="px-4 py-2">
+                      {isEditing ? (
+                        <input
+                          className="w-full border rounded px-2 py-1 text-sm"
+                          value={p.name}
+                          onChange={(e) => updatePhase(idx, { name: e.target.value })}
+                        />
+                      ) : (
+                        <span className="text-gray-800">{p.name}</span>
+                      )}
+                    </td>
+
+                    {/* PERCENTAGE */}
+                    <td className="px-4 py-2">
+                      {isEditing ? (
+                        <input
+                          className="w-full border rounded px-2 py-1 text-sm"
+                          value={p.percentage}
+                          onChange={(e) => updatePhase(idx, { percentage: e.target.value })}
+                        />
+                      ) : (
+                        <span>{p.percentage}</span>
+                      )}
+                    </td>
+
+                    {/* CONDITION */}
+                    <td className="px-4 py-2">
+                      {isEditing ? (
+                        <input
+                          className="w-full border rounded px-2 py-1 text-sm"
+                          value={p.condition}
+                          onChange={(e) => updatePhase(idx, { condition: e.target.value })}
+                        />
+                      ) : (
+                        <span>{p.condition}</span>
+                      )}
+                    </td>
+
+                    {/* DELETE */}
+                    <td className="px-4 py-2 text-center">
+                      {isEditing && (
+                        <button
+                          type="button"
+                          onClick={() => removePhase(idx)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+
+              {phases.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="py-4 text-center text-gray-500 italic"
+                  >
+                    No phases added yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* EXTRA PAYMENT FIELDS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <InputField
+            label="Due Dates"
+            disabled={!isEditing}
+            value={payment.dueDates ?? ""}
+            onChange={(v) => updatePayment({ dueDates: v })}
+          />
+          <InputField
+            label="Late Charges"
+            disabled={!isEditing}
+            value={payment.lateCharges ?? ""}
+            onChange={(v) => updatePayment({ lateCharges: v })}
+          />
+          <InputField
+            label="Tax"
+            disabled={!isEditing}
+            value={payment.tax ?? ""}
+            onChange={(v) => updatePayment({ tax: v })}
+          />
+        </div>
+
+        <TextareaField
+          label="Notes"
+          disabled={!isEditing}
+          value={payment.notes ?? ""}
+          onChange={(v) => updatePayment({ notes: v })}
+        />
       </div>
     );
   };
 
-  const renderNormalContent = () => (
-    <pre className="whitespace-pre-wrap font-mono text-sm text-gray-700">
-      {content}
-    </pre>
+  const renderTextSection = (field: keyof TermSection) => (
+    <TextareaField
+      label={selectedTemplate}
+      disabled={!isEditing}
+      value={(currentTerms[field] as string) ?? ""}
+      onChange={(v) => updateTopField(field, v)}
+    />
   );
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header + Template selector */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-700 underline">
-          Terms and Conditions
-        </h3>
+    <div className="p-6 space-y-8 bg-white rounded-lg shadow-sm border">
+      {/* HEADER */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-800">Terms & Conditions</h2>
 
-        <div className="flex items-center space-x-2">
-          <label className="text-sm text-gray-600">Select a template</label>
+        <div className="flex items-center gap-3">
+          <label className="text-sm text-gray-600 font-medium">Choose Section</label>
+
           <select
-            className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={selectedTemplate}
             onChange={(e) => setSelectedTemplate(e.target.value)}
             disabled={isEditing}
-            onClick={(e) => e.stopPropagation()}
+            className="px-3 py-1.5 border rounded-md bg-gray-50 hover:bg-gray-100 text-sm"
           >
-            {Object.keys(templates).map((key) => (
-              <option key={key} value={key}>
-                {key}
-              </option>
+            {TABS.map((tab) => (
+              <option key={tab}>{tab}</option>
             ))}
           </select>
         </div>
       </div>
 
-      {/* Content area */}
-      <div
-        className={`
-          w-full min-h-64 p-4 border border-gray-300 rounded-md text-sm font-mono
-          ${!isEditing ? "bg-gray-50" : "bg-white"}
-        `}
-        style={{ whiteSpace: "pre-wrap" }}
-      >
-        {selectedTemplate === "Payment Terms"
+      {/* CONTENT AREA */}
+      <div className="p-5 rounded-lg border bg-white shadow-inner min-h-[300px]">
+        {activeKey === "payment"
           ? renderPaymentTable()
-          : renderNormalContent()}
+          : renderTextSection(activeKey)}
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex justify-end space-x-3">
+      {/* BUTTONS */}
+      <div className="flex justify-end gap-3 pt-2">
         {isEditing ? (
           <>
             <button
               type="button"
-              onClick={cancelEdit}
-              className="flex items-center gap-2 px-5 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              className="px-5 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 flex items-center gap-2"
+              onClick={cancelEditing}
             >
               <FaTimes /> Cancel
             </button>
+
             <button
               type="button"
-              onClick={saveEdit}
-              className="flex items-center gap-2 px-5 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="px-5 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 flex items-center gap-2"
+              onClick={saveEditing}
             >
               <FaCheck /> Save
             </button>
@@ -336,8 +335,8 @@ const TermsAndCondition = () => {
         ) : (
           <button
             type="button"
-            onClick={startEdit}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2"
+            onClick={startEditing}
           >
             <FaEdit /> Edit
           </button>
@@ -346,5 +345,55 @@ const TermsAndCondition = () => {
     </div>
   );
 };
+
+const InputField = ({
+  label,
+  value,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  disabled: boolean;
+  onChange: (v: string) => void;
+}) => (
+  <label className="space-y-1 text-sm">
+    <span className="font-medium text-gray-700">{label}</span>
+    <input
+      disabled={disabled}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`w-full px-3 py-2 rounded border text-sm ${disabled
+        ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+        : "focus:ring-2 focus:ring-blue-400"
+        }`}
+    />
+  </label>
+);
+
+const TextareaField = ({
+  label,
+  value,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  disabled: boolean;
+  onChange: (v: string) => void;
+}) => (
+  <label className="space-y-1 text-sm">
+    <span className="font-medium text-gray-700">{label}</span>
+    <textarea
+      disabled={disabled}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`w-full px-3 py-2 min-h-[140px] rounded border text-sm ${disabled
+        ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+        : "focus:ring-2 focus:ring-blue-400"
+        }`}
+    />
+  </label>
+);
 
 export default TermsAndCondition;

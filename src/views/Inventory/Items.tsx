@@ -9,6 +9,7 @@ import {
   deleteItemByItemCode,
 } from "../../api/itemApi";
 import toast from "react-hot-toast";
+import Pagination from "../../components/Pagination";
 
 interface ItemsProps {
   onAdd: () => void;
@@ -17,19 +18,23 @@ interface ItemsProps {
 const Items: React.FC<ItemsProps> = ({ onAdd }) => {
   const [item, setItem] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [itemLoading, setItemLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(5);
+  const [totalPages, setTotalPages] = useState(1);
   const [showItemsModal, setShowItemsModal] = useState(false);
   const [editItems, setEditItems] = useState<any | null>(null);
 
   const fetchItems = async () => {
     try {
-      setItemLoading(true);
-      const response = await getAllItems();
+      setLoading(true);
+      const response = await getAllItems(page, pageSize);
       setItem(response.data);
+      setTotalPages(response.pagination?.total_pages || 1);
     } catch (err) {
       console.error("Error loading items:", err);
     } finally {
-      setItemLoading(false);
+      setLoading(false);
     }
   };
 
@@ -50,7 +55,7 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
       return;
 
     try {
-      setItemLoading(true);
+      setLoading(true);
       await deleteItemByItemCode(code);
       setItem((prev) => prev.filter((c) => c.item_code !== code));
       alert("Item deleted successfully.");
@@ -59,7 +64,7 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
       const errorMsg = err.response?.data?.message || "Failed to delete item.";
       alert(errorMsg);
     } finally {
-      setItemLoading(false);
+      setLoading(false);
     }
   };
 
@@ -92,7 +97,8 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
 
   useEffect(() => {
     fetchItems();
-  }, []);
+  }, [page, pageSize]);
+
 
   const filtered = item.filter((i: any) =>
     [
@@ -174,6 +180,12 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
             ))}
           </tbody>
         </table>
+        {/* Pagination */}
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(p) => setPage(p)}
+        />
       </div>
       <ItemModal
         isOpen={showItemsModal}

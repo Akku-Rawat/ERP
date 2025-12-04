@@ -1,7 +1,7 @@
 import React, { useRef, useState, forwardRef } from "react";
 import { UploadCloud } from "lucide-react";
 
-import type { InvoiceData, InvoiceItem } from "../../../views/Sales/types/invoice";
+import type { InvoiceData, InvoiceItem } from "../../../types/invoice";
 
 export interface InvoiceTemplate3Props {
   data: InvoiceData;

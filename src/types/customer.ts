@@ -1,3 +1,5 @@
+import type { TermSection, PaymentTerms, TermPhase,Terms } from "./termsAndCondition";
+
 export interface CustomerSummary {
   id: string;
   tpin: string;
@@ -27,17 +29,8 @@ export interface CustomerTermsPayment {
   notes: string;
 }
 
-export interface CustomerTermsSelling {
-  general: string;
-  payment: CustomerTermsPayment;
-  delivery: string;
-  cancellation: string;
-  warranty: string;
-  liability: string;
-}
-
 export interface CustomerTerms {
-  selling: CustomerTermsSelling;
+  selling: TermSection;
 }
 
 export interface CustomerDetail extends CustomerSummary {

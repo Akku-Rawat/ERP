@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TermsAndCondition from "../TermsAndCondition";
-import { X, Mail, Phone } from "lucide-react";
+import type { TermPhase, PaymentTerms, TermSection } from "../../types/termsAndCondition";
+import { X, Mail, Phone, CloudCog } from "lucide-react";
 
 import {
   createCustomer,
   updateCustomerByCustomerCode,
 } from "../../api/customerApi";
 
-import type {CustomerDetail } from "../../views/Crm/types/customer";
+import type { CustomerDetail, CustomerTerms } from "../../types/customer";
 
 const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   id: "",
@@ -38,7 +39,9 @@ const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   shippingState: "",
   shippingCountry: "",
 
-  terms: undefined,
+  terms: {
+    selling: {}
+  },
   sameAsBilling: false,
 };
 
@@ -120,6 +123,7 @@ const CustomerModal: React.FC<{
       delete (payload as any).sameAsBilling;
 
       let response;
+      console.log("payload: ",payload);
 
       if (isEditMode && initialData?.id) {
         response = await updateCustomerByCustomerCode(initialData.id, payload);
@@ -180,17 +184,16 @@ const CustomerModal: React.FC<{
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 font-medium text-sm capitalize ${
-                    activeTab === tab
-                      ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
+                  className={`px-6 py-3 font-medium text-sm capitalize ${activeTab === tab
+                    ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
+                    : "text-gray-600 hover:text-gray-900"
+                    }`}
                 >
                   {tab === "details"
                     ? "Details"
                     : tab === "terms"
-                    ? "Terms & Conditions"
-                    : "Address"}
+                      ? "Terms & Conditions"
+                      : "Address"}
                 </button>
               ))}
             </div>
@@ -314,7 +317,13 @@ const CustomerModal: React.FC<{
 
               {activeTab === "terms" && (
                 <div className="h-full w-full">
-                  <TermsAndCondition />
+                  <TermsAndCondition
+                    terms={form.terms?.selling || {} as TermSection}
+                    setTerms={(updated) => setForm((p) => ({
+                      ...p,
+                      terms: { ...p.terms, selling: updated }
+                    }))}
+                  />
                 </div>
               )}
 
@@ -489,9 +498,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           {...props}
           value={props.value ?? ""}
-          className={`w-full rounded border px-3 py-2 focus:ring-2 focus:ring-indigo-400 ${
-            icon ? "pl-10" : ""
-          } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
+          className={`w-full rounded border px-3 py-2 focus:ring-2 focus:ring-indigo-400 ${icon ? "pl-10" : ""
+            } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
         />
       </div>
     </label>

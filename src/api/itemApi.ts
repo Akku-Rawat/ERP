@@ -12,9 +12,12 @@ const ENDPOINTS = {
   createItem: `${base_url}.item.item.create_item_api`,
 };
 
-export async function getAllItems(): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllItems);
-  return resp.data || [];
+
+export async function getAllItems(page: number = 1, page_size: number = 10): Promise<any> {
+  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllItems, {
+    params: { page, page_size },
+  });
+  return resp.data;
 }
 
 export async function getItemByItemCode(item_code: string): Promise<any> {

@@ -5,7 +5,7 @@ const base_url = import.meta.env.VITE_BASE_URL as string;
 const api = createAxiosInstance(base_url);
 
 const ENDPOINTS = {
-  getAllQuotations: `${base_url}.quotation.api.get_all_quotations`,
+  getAllQuotations: `http://41.60.191.7:8081/api/method/erpnext.quotation.api.get_all_quotations`,
   getQuotationDetails: `${base_url}.quotation.api.get_quotation_details`,
   createQuotation: `${base_url}.quotation.api.create_quotation`,
   deleteQuotation: `${base_url}.quotation.api.delete_quotation`,
@@ -14,15 +14,17 @@ const ENDPOINTS = {
   updateQuotation: `${base_url}.quotation.api.update_quotation`,
 };
 
-export async function getAllQuotations(): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllQuotations);
-  return resp.data?.data || [];
+export async function getAllQuotations(page: number = 1, page_size: number = 10): Promise<any> {
+ const resp: AxiosResponse = await api.get(ENDPOINTS.getAllQuotations, {
+    params: { page, page_size },
+  });
+  return resp.data;
 }
 
 export async function getQuotationById(id: string): Promise<any> {
   const url = `${ENDPOINTS.getQuotationDetails}?quotation_id=${encodeURIComponent(id)}`;
   const resp: AxiosResponse = await api.get(url);
-  return resp.data?.data ?? null;
+  return resp.data ?? null;
 }
 
 export async function createQuotation(payload: any): Promise<any> {

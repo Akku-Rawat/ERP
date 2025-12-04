@@ -1,68 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { X, Printer } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useReactToPrint } from "react-to-print";
 import Template1 from "../../components/template/quotation/QuotationTemplate1";
 import Template2 from "../../components/template/quotation/QuotationTemplate2";
 import Template3 from "../../components/template/quotation/QuotationTemplate3";
-
-// === Types ===
-export interface QuotationItem {
-  productName: string;
-  description: string;
-  quantity: number;
-  listPrice: number;
-  discount: number;
-  tax: number;
-}
-
-export interface QuotationData {
-  id?: string; // Added for table
-  quotationId?: string;
-  quotationNumber?: string;
-  customerName: string;
-  quotationDate: string;
-  validUntil: string;
-  currency: string;
-
-  billingAddressLine1?: string;
-  billingAddressLine2?: string;
-  billingCity?: string;
-  billingState?: string;
-  billingPostalCode?: string;
-  billingCountry?: string;
-
-  shippingAddressLine1?: string;
-  shippingAddressLine2?: string;
-  shippingCity?: string;
-  shippingState?: string;
-  shippingPostalCode?: string;
-  shippingCountry?: string;
-
-  items: QuotationItem[];
-
-  subTotal: number;
-  totalDiscount: number;
-  totalTax: number;
-  adjustment: number;
-  grandTotal: number;
-
-  amount?: number; // Added for table
-  opportunityStage?: string; // Added for table
-
-  subject?: string;
-  poNumber?: string;
-  poDate?: string;
-  paymentTerms?: string;
-  termsAndConditions?: string;
-  notes?: string;
-
-  bankName?: string;
-  accountNumber?: string;
-  routingNumber?: string;
-  iban?: string;
-  swiftCode?: string;
-}
+import { getAllQuotations } from "../../api/quotationApi";
+import type { QuotationSummary, QuotationData } from "../../types/quotation";
+import Pagination from "../../components/Pagination";
 
 type TemplateType = "template1" | "template2" | "template3";
 
@@ -231,12 +176,52 @@ const QuotationsTable: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType | null>(
     null,
   );
+  const [quotations, setQuotations] = useState<QuotationSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(5);
+  const [totalPages, setTotalPages] = useState(1);
   const componentRef = useRef<HTMLDivElement>(null);
 
-  const filteredQuotations = sampleQuotations.filter(
-    (q) =>
-      (q.id ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      q.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
+
+  const fetchQuotations = async () => {
+    try {
+      setLoading(true);
+
+      const res = await getAllQuotations(page, pageSize);
+      if (!res || res.status_code !== 200) {
+        console.error("Failed to load quotations");
+        return;
+      }
+      console.log("res: ", res);
+
+      const mapped: QuotationSummary[] = res.data.map((quote: any) => ({
+        quotationNumber: quote.name,
+        customerName: quote.customer_name,
+        industryBases: quote.custom_industry_bases,
+        transactionDate: quote.transaction_date,
+        validTill: quote.valid_till,
+        grandTotal: Number(quote.grand_total ?? 0),
+        currency: quote.currency,
+      }));
+
+      setTotalPages(res.pagination?.total_pages || 1);
+      setQuotations(mapped);
+    } catch (err) {
+      console.error("Error fetching quotations:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuotations();
+  }, [page, pageSize]);
+
+  const filteredQuotations = quotations.filter(
+    (quote) =>
+      (quote.quotationNumber ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quote.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handlePrint = useReactToPrint({
@@ -244,9 +229,11 @@ const QuotationsTable: React.FC = () => {
     documentTitle: `Quotation-${selectedQuotation?.customerName}-${selectedQuotation?.quotationId}`,
   });
 
-  const handleViewClick = (quotation: QuotationData) => {
-    setSelectedQuotation(quotation);
+  const handleViewClick = (quote: QuotationSummary) => {
+    // setSelectedQuotation(quote);
+    setSelectedQuotation(previewDummyQuotation);
     setShowTemplateSelector(true);
+    setSelectedTemplate(null);
   };
 
   const handleTemplateSelect = (templateId: TemplateType) => {
@@ -312,37 +299,43 @@ const QuotationsTable: React.FC = () => {
         <table className="min-w-full border border-gray-200 rounded-lg bg-white">
           <thead className="bg-gray-100 text-gray-700 text-sm">
             <tr>
-              <th className="px-4 py-2 text-left">Quotation ID</th>
+              <th className="px-4 py-2 text-left">Quotation No</th>
               <th className="px-4 py-2 text-left">Customer</th>
-              <th className="px-4 py-2 text-left">Follow-Up Date</th>
+              <th className="px-4 py-2 text-left">Customer Industry Bases</th>
+              <th className="px-4 py-2 text-left">Transaction Date</th>
+              <th className="px-4 py-2 text-left">Valid Till</th>
+              <th className="px-4 py-2 text-left">Currency</th>
               <th className="px-4 py-2 text-left">Amount</th>
-              <th className="px-4 py-2 text-left">Opportunity Stage</th>
               <th className="px-4 py-2 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredQuotations.map((q) => (
-              <tr key={q.id} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-2">{q.id}</td>
+              <tr key={q.quotationNumber} className="border-t hover:bg-gray-50">
+                <td className="px-4 py-2">{q.quotationNumber}</td>
                 <td className="px-4 py-2">{q.customerName}</td>
-                <td className="px-4 py-2">{q.validUntil}</td>
+                <td className="px-4 py-2">{q.industryBases}</td>
+                <td className="px-4 py-2">{q.transactionDate}</td>
+                <td className="px-4 py-2">{q.validTill}</td>
                 <td className="px-4 py-2">
-                  {q.currency === "INR" ? "₹" : "$"}
-                  {q.amount?.toLocaleString() ?? q.grandTotal.toLocaleString()}
+                  {q.currency}
                 </td>
                 <td className="px-4 py-2">
+                  {q.currency === "INR" ? "₹" : "$"}
+                  {q.grandTotal?.toLocaleString() ?? q.grandTotal.toLocaleString()}
+                </td>
+                {/* <td className="px-4 py-2">
                   <span
-                    className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                      q.opportunityStage === "Approved"
-                        ? "bg-green-100 text-green-800"
-                        : q.opportunityStage === "Rejected"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-yellow-100 text-yellow-800"
-                    }`}
+                    className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${q.opportunityStage === "Approved"
+                      ? "bg-green-100 text-green-800"
+                      : q.opportunityStage === "Rejected"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
+                      }`}
                   >
                     {q.opportunityStage || "Pending"}
                   </span>
-                </td>
+                </td> */}
                 <td className="px-4 py-2 text-center">
                   <button
                     onClick={() => handleViewClick(q)}
@@ -477,6 +470,13 @@ const QuotationsTable: React.FC = () => {
           </AnimatePresence>
         </div>
       )}
+
+      {/* Pagination */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={(p) => setPage(p)}
+      />
     </div>
   );
 };

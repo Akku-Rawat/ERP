@@ -11,7 +11,7 @@ import {
 
 import CustomerModal from "../../components/crm/CustomerModal";
 import Pagination from "../../components/Pagination";
-import type { CustomerSummary, CustomerDetail } from "./types/customer";
+import type { CustomerSummary, CustomerDetail } from "../../types/customer";
 
 interface Props {
   onAdd: () => void;
@@ -26,17 +26,14 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [showModal, setShowModal] = useState(false);
   const [editCustomer, setEditCustomer] = useState<CustomerDetail | null>(null);
 
-  // Pagination
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(2);
+  const [pageSize] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch customers
   const fetchCustomers = async () => {
     try {
       setCustLoading(true);
       const response = await getAllCustomers(page, pageSize);
-      console.log(response)
       setCustomers(response.data);
       setTotalPages(response.pagination?.total_pages || 1);
     } catch (err) {
@@ -48,9 +45,8 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
 
   useEffect(() => {
     fetchCustomers();
-  }, [page]);
+  }, [page, pageSize]);
 
-  // Delete Customer
   const handleDelete = async (customerId: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -69,7 +65,6 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     }
   };
 
-  // Add Customer
   const handleAddCustomer = () => {
     setEditCustomer(null);
     setShowModal(true);
@@ -79,6 +74,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     e.stopPropagation();
     try {
       const customer = await getCustomerByCustomerCode(id);
+      console.log("customer: ", customer)
       setEditCustomer(customer.data ?? customer);
       setShowModal(true);
     } catch (err) {
