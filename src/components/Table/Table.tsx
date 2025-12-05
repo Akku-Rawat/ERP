@@ -121,7 +121,7 @@ function Table<T extends Record<string, any>>({
   // Loading view
   if (loading) {
     return (
-      <div className="bg-card rounded-xl shadow-lg overflow-hidden">
+      <div className="bg-card rounded-xl  overflow-hidden">
         <div className="p-12 text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
           <p className="mt-4 text-muted font-medium">Loading data...</p>
@@ -143,17 +143,17 @@ function Table<T extends Record<string, any>>({
     totalItems > 0;
 
   return (
-    <div className="bg-card rounded-xl shadow-lg border border-gray-200 flex flex-col">
+    <div className="bg-card rounded-xl  border border-[var(--border)] flex flex-col">
       {/* TOOLBAR */}
       {showToolbar && (
-        <div className="px-6 py-4 border-b bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="px-6 py-4 border-b bg-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           {/* Search */}
           <div className="flex items-center w-full sm:max-w-md">
             <input
               value={effectiveSearch}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={toolbarPlaceholder}
-              className="w-full pl-4 pr-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
+              className="w-full pl-4 pr-3 py-2 border border-[var(--border)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
             />
           </div>
 
@@ -167,7 +167,7 @@ function Table<T extends Record<string, any>>({
                     e.stopPropagation();
                     setColMenuOpen((v) => !v);
                   }}
-                  className="px-3 py-2 border rounded-md text-sm bg-white hover:bg-gray-50 flex items-center gap-2"
+                  className="px-3 py-2 border rounded-md text-sm bg-card hover:bg-gray-50 flex items-center gap-2"
                   type="button"
                   aria-haspopup="dialog"
                   aria-expanded={colMenuOpen}
@@ -187,7 +187,7 @@ function Table<T extends Record<string, any>>({
 
                 {colMenuOpen && (
                   <div
-                    className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-2xl z-[100] overflow-hidden"
+                    className="absolute right-0 mt-2 w-72 bg-card border border-[var(--border)] rounded-lg shadow-2xl z-[100] overflow-hidden"
                     role="dialog"
                     aria-label="Column selector"
                     onClick={(e) => e.stopPropagation()}
@@ -208,7 +208,7 @@ function Table<T extends Record<string, any>>({
                           setColMenuOpen(false);
                           setMenuSearch("");
                         }}
-                        className="p-1 rounded hover:bg-white/20 text-white transition-colors"
+                        className="p-1 rounded hover:bg-card/20 text-white transition-colors"
                         type="button"
                         aria-label="Close"
                       >
@@ -229,23 +229,23 @@ function Table<T extends Record<string, any>>({
                           placeholder="Search columns..."
                           value={menuSearch}
                           onChange={(e) => setMenuSearch(e.target.value)}
-                          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#177ba5] focus:border-transparent"
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-[var(--border)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                         />
                       </div>
                     </div>
 
                     {/* Controls */}
-                    <div className="flex items-center justify-between px-4 py-2 bg-white border-b">
+                    <div className="flex items-center justify-between px-4 py-2 bg-card border-b">
                       <button
                         onClick={() => setVisibleKeys(allKeys)}
-                        className="text-xs font-medium text-[#177ba5] hover:text-[#1a8cc4] transition-colors"
+                        className="text-xs font-medium bg-primary transition-colors"
                         type="button"
                       >
                         ✓ Show all
                       </button>
                       <button
                         onClick={() => setVisibleKeys([])}
-                        className="text-xs font-medium text-red-600 hover:text-red-700 transition-colors"
+                        className="text-xs font-medium text-[var(--danger)] transition-colors"
                         type="button"
                       >
                         ✕ Hide all
@@ -253,7 +253,7 @@ function Table<T extends Record<string, any>>({
                     </div>
 
                     {/* List */}
-                    <div className="max-h-64 overflow-y-auto bg-white">
+                    <div className="max-h-64 overflow-y-auto bg-card">
                       {menuFilteredColumns.length > 0 ? (
                         <div className="p-2">
                           {menuFilteredColumns.map((col) => (
@@ -266,11 +266,12 @@ function Table<T extends Record<string, any>>({
                                 checked={isVisible(col.key)}
                                 onChange={() => toggleColumn(col.key)}
                                 onClick={(e) => e.stopPropagation()}
-                                className="w-4 h-4 text-[#177ba5] rounded border-gray-300 focus:ring-[#177ba5]"
+                                className="w-4 h-4 text-[var(--primary)] rounded border-[var(--border)] focus:ring-[var(--primary)]"
+
                               />
                               <div className="flex-1 text-sm text-gray-700 group-hover:text-gray-900 font-medium">{col.header}</div>
                               {isVisible(col.key) && (
-                                <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <svg className="w-4 h-4 text-[var(--success)]" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                 </svg>
                               )}
@@ -291,7 +292,7 @@ function Table<T extends Record<string, any>>({
                           setColMenuOpen(false);
                           setMenuSearch("");
                         }}
-                        className="text-sm px-4 py-1.5 rounded-md border border-gray-300 hover:bg-gray-100 transition-colors font-medium"
+                        className="text-sm px-4 py-1.5 rounded-md border border-[var(--border)] hover:bg-gray-100 transition-colors font-medium"
                         type="button"
                       >
                         Cancel
@@ -301,7 +302,7 @@ function Table<T extends Record<string, any>>({
                           setColMenuOpen(false);
                           setMenuSearch("");
                         }}
-                        className="text-sm px-4 py-1.5 rounded-md bg-[#177ba5] text-white hover:bg-[#1a8cc4] transition-colors font-medium shadow-sm"
+                        className="text-sm px-4 py-1.5 rounded-md bg-primary text-white transition-colors font-medium shadow-sm"
                         type="button"
                       >
                         Done
@@ -337,7 +338,7 @@ function Table<T extends Record<string, any>>({
                   .map((column) => (
                     <th
                       key={column.key}
-                      className={`px-6 py-3 text-sm font-semibold uppercase tracking-wide bg-[#177ba5] text-white align-middle ${getAlignment(
+                      className={`px-6 py-3 text-sm font-semibold uppercase tracking-wide bg-primary text-white align-middle ${getAlignment(
                         column.align,
                       )}`}
                     >
@@ -420,7 +421,7 @@ function Table<T extends Record<string, any>>({
 
       {/* FOOTER: summary + pagination */}
       {showPagination && (
-        <div className="px-6 py-4 border-t bg-white flex flex-col sm:flex-row items-center justify-between gap-3 mt-auto">
+        <div className="px-6 py-4 border-t bg-card flex flex-col sm:flex-row items-center justify-between gap-3 mt-auto">
           <div className="text-sm text-gray-600">
             Showing{" "}
             <span className="font-medium">
@@ -440,8 +441,8 @@ function Table<T extends Record<string, any>>({
               disabled={currentPage === 1}
               className={`px-3 py-1.5 rounded-md border font-medium text-sm flex items-center gap-1 transition-colors ${
                 currentPage === 1
-                  ? "border-gray-200 text-gray-400 cursor-not-allowed"
-                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                  ? "border-[var(--border)] text-gray-400 cursor-not-allowed"
+                  : "border-[var(--border)] text-gray-700 hover:bg-gray-50"
               }`}
               type="button"
             >
@@ -466,8 +467,8 @@ function Table<T extends Record<string, any>>({
               disabled={currentPage === totalPages}
               className={`px-3 py-1.5 rounded-md border font-medium text-sm flex items-center gap-1 transition-colors ${
                 currentPage === totalPages
-                  ? "border-gray-200 text-gray-400 cursor-not-allowed"
-                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                  ? "border-[var(--border)] text-gray-400 cursor-not-allowed"
+                  : "border-[var(--border)] text-gray-700 hover:bg-gray-50"
               }`}
               type="button"
             >
