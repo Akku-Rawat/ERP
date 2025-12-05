@@ -7,11 +7,13 @@ import {
   FaShoppingBag,
   FaBoxes,
   FaBriefcase,
-  FaUsers,
-  FaSignOutAlt,
-  FaCog,
   FaUserTie,
   FaBuilding,
+  FaCog,
+  FaSignOutAlt,
+  FaBars,
+  FaChevronDown,
+  FaChevronUp,
 } from "react-icons/fa";
 
 const menuItems = [
@@ -22,10 +24,12 @@ const menuItems = [
   { name: "Inventory", to: "/inventory", icon: <FaBoxes /> },
   { name: "Accounting", to: "/accounting", icon: <FaBriefcase /> },
   { name: "Hr", to: "/hr", icon: <FaUserTie /> },
-  { name: "User Management", to: "/userManagement", icon: <FaUsers /> },
-  { name: "CompanySetup", to: "/companySetup", icon: <FaBuilding /> },
-  { name: "Settings", to: "/settings", icon: <FaCog /> },
 ];
+
+interface SidebarProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
 
 const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -33,122 +37,131 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
 
   const handleLogout = () => {
     localStorage.clear();
+    console.log("User logged out");
     navigate("/login");
   };
 
   return (
-    <>
-      {/* Desktop Sidebar */}
-      <div
-        className={`hidden md:flex flex-col justify-between ${
-          open ? "w-64" : "w-16"
-        } h-screen bg-sidebar text-main fixed shadow-xl transition-all duration-300`}
-      >
-        <div>
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b shadow-sm">
-            <div className="flex items-center space-x-2">
-              {open && (
-                <h2 className="text-2xl font-semibold text-main">ERP</h2>
-              )}
-            </div>
-            <button
-              onClick={() => setOpen(!open)}
-              className="text-2xl text-muted hover:text-primary focus:outline-none"
-              aria-label="Toggle sidebar"
-            >
-              <FaBars />
-            </button>
+    <div
+      className={` md:flex flex-col justify-between ${
+        open ? "w-64" : "w-16"
+      } h-screen bg-gray-50 text-black fixed shadow-xl transition-all duration-300 overflow-hidden`}
+    >
+      <div>
+        <div className="flex items-center justify-between p-4 border-b shadow-sm">
+          <div className="flex items-center space-x-3">
+            {open && <h2 className="text-2xl font-bold text-teal-700">ERP</h2>}
           </div>
-
-          {/* Navigation */}
-          <nav className="mt-6 flex flex-col space-y-2 px-2">
-            {menuItems.map((item) => (
-              <NavLink
-                to={item.to}
-                key={item.name}
-                className={({ isActive }) =>
-                  `nav-link ${isActive ? "active" : ""}`
-                }
-              >
-                <span className="text-xl nav-icon">{item.icon}</span>
-                {open && <span className="nav-text">{item.name}</span>}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
-
-        {/* Logout Button */}
-        <div className="p-4 border-t">
           <button
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl btn-danger hover:opacity-95 transition"
+            onClick={() => setOpen(!open)}
+            className="text-2xl text-gray-600 hover:text-teal-700 focus:outline-none transition"
+            aria-label="Toggle sidebar"
           >
-            <FaSignOutAlt className="text-lg" />
-            {open && <span className="font-medium">Logout</span>}
+            <FaBars />
           </button>
         </div>
-      </div>
 
-      {/* Mobile Sidebar */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setMobileOpen(false)}
-          />
-          <div className="absolute left-0 top-0 bg-sidebar w-64 h-full p-4 shadow-xl flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold text-main">ERP</h2>
-                <button
-                  onClick={() => setMobileOpen(false)}
-                  className="text-2xl text-muted hover:text-primary focus:outline-none"
-                  aria-label="Close mobile sidebar"
-                >
-                  <FaBars />
-                </button>
+        <nav className="mt-6 flex flex-col space-y-1 px-2">
+          {menuItems.map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.to}
+              className={({ isActive }) =>
+                `flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-200 group ${
+                  isActive
+                    ? "bg-teal-700 text-white shadow-md"
+                    : "text-gray-700 hover:bg-gray-200"
+                }`
+              }
+            >
+              <span className="text-xl">{item.icon}</span>
+              {open && <span className="font-medium">{item.name}</span>}
+              {!open && (
+                <span className="absolute left-16 bg-gray-800 text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                  {item.name}
+                </span>
+              )}
+            </NavLink>
+          ))}
+
+          <div className="pt-2">
+            <button
+              onClick={() => setSettingsOpen(!settingsOpen)}
+              className={`w-full flex items-center justify-between gap-3 py-3 px-4 rounded-xl transition-all duration-200 group ${
+                settingsOpen || location.pathname.startsWith("/settings")
+                  ? "bg-teal-700 text-white shadow-md"
+                  : "text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <FaCog className="text-xl" />
+                {open && <span className="font-medium">Settings</span>}
               </div>
+              {open && (
+                <span className="text-sm">
+                  {settingsOpen ? <FaChevronUp /> : <FaChevronDown />}
+                </span>
+              )}
+              {!open && (
+                <span className="absolute left-16 bg-gray-800 text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                  Settings
+                </span>
+              )}
+            </button>
 
-              <nav className="flex flex-col space-y-2">
-                {menuItems.map((item) => (
-                  <NavLink
-                    to={item.to}
-                    key={item.name}
-                    onClick={() => setMobileOpen(false)}
-                    className={({ isActive }) =>
-                      `nav-link ${isActive ? "active" : ""}`
-                    }
-                  >
-                    <span className="text-xl nav-icon">{item.icon}</span>
-                    <span className="nav-text">{item.name}</span>
-                  </NavLink>
-                ))}
-              </nav>
-            </div>
+            {open && settingsOpen && (
+              <div className="ml-9 mt-1 space-y-1  border-teal-600">
+                <NavLink
+                  to="/companySetup"
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 py-2.5 pl-6 pr-4 rounded-r-xl text-sm transition-all ${
+                      isActive
+                        ? "bg-teal-600 text-white font-medium"
+                        : "text-gray-600 hover:bg-teal-50 hover:text-teal-700"
+                    }`
+                  }
+                >
+                  <FaBuilding className="text-lg" />
+                  <span>Company Setup</span>
+                </NavLink>
 
-            {/* Mobile Logout Button */}
-            <div className="mt-4 border-t pt-4">
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setMobileOpen(false);
-                }}
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl btn-danger hover:opacity-95 transition"
-              >
-                <FaSignOutAlt className="text-lg" />
-                <span className="font-medium">Logout</span>
-              </button>
-            </div>
+                <NavLink
+                  to="/userManagement"
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 py-2.5 pl-6 pr-4 rounded-r-xl text-sm transition-all ${
+                      isActive
+                        ? "bg-teal-600 text-white font-medium"
+                        : "text-gray-600 hover:bg-teal-50 hover:text-teal-700"
+                    }`
+                  }
+                >
+                  <FaUsers className="text-lg" />
+                  <span>User Management</span>
+                </NavLink>
+
+                <NavLink
+                  to="/settings"
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 py-2.5 pl-6 pr-4 rounded-r-xl text-sm transition-all ${
+                      isActive
+                        ? "bg-teal-600 text-white font-medium"
+                        : "text-gray-600 hover:bg-teal-50 hover:text-teal-700"
+                    }`
+                  }
+                >
+                  <FaCog className="text-lg" />
+                  <span>General Settings</span>
+                </NavLink>
+              </div>
+            )}
           </div>
         </nav>
       </div>
 
       <div className="p-4 border-t">
         <button
-          onClick={() => setMobileOpen(true)}
-          className="text-2xl text-muted hover:text-primary focus:outline-none"
-          aria-label="Open mobile sidebar"
+          onClick={handleLogout}
+          className="flex items-center justify-center gap-3 w-full py-3 rounded-xl bg-red-700 text-white hover:bg-red-800 transition font-medium shadow-md"
         >
           <FaSignOutAlt className="text-lg" />
           {open && "Logout"}
