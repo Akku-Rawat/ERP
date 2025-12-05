@@ -50,7 +50,6 @@ const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
 };
 
 const currencyOptions = ["ZMW", "USD", "INR"];
-const currencyOptions = ["ZMW", "USD", "INR"];
 
 const CustomerModal: React.FC<{
   isOpen: boolean;
@@ -155,16 +154,11 @@ const CustomerModal: React.FC<{
     setForm(emptyForm);
     onClose();
   };
-  const handleClose = () => {
-    setForm(emptyForm);
-    onClose();
-  };
 
   const reset = () => {
     setForm(initialData ? { ...initialData, sameAsBilling: true } : emptyForm);
   };
 
-  if (!isOpen) return null;
   if (!isOpen) return null;
 
   return (
@@ -198,21 +192,10 @@ const CustomerModal: React.FC<{
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 font-medium text-sm capitalize ${
-                    activeTab === tab
+                  className={`px-6 py-3 font-medium text-sm capitalize ${activeTab === tab
                       ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
                       : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {tab === "details"
-                    ? "Details"
-                    : tab === "terms"
-                      ? "Terms & Conditions"
-                      : "Address"}
-                </button>
-              ))}
-            </div>
-                  }`}
+                    }`}
                 >
                   {tab === "details"
                     ? "Details"
@@ -535,13 +518,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           {...props}
           value={props.value ?? ""}
-          className={`w-full rounded border px-3 py-2 focus:ring-2 focus:ring-indigo-400 ${
-            icon ? "pl-10" : ""
-          } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
+          className={`w-full rounded border px-3 py-2 focus:ring-2 focus:ring-indigo-400 ${icon ? "pl-10" : ""
+            } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
         />
       </div>
     </label>
-  ),
   ),
 );
 Input.displayName = "Input";
