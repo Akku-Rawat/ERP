@@ -1,7 +1,9 @@
 export interface TermPhase {
+  id: string;
   name: string;
   percentage: string;
   condition: string;
+  isDelete?: number;
 }
 
 export interface PaymentTerms {
