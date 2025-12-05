@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Search, Plus, Edit2, Trash2 } from "lucide-react";
 import CustomerDetailView from "./CustomerDetailView";
 import toast from "react-hot-toast";
 
@@ -10,8 +9,16 @@ import {
 } from "../../api/customerApi";
 
 import CustomerModal from "../../components/crm/CustomerModal";
-import Pagination from "../../components/Pagination";
+
 import type { CustomerSummary, CustomerDetail } from "../../types/customer";
+
+import Table from "../../components/Table/Table";                
+import StatusBadge from "../../components/Table/StatusBadge";  
+import ActionButton, { ActionGroup } from "../../components/Table/ActionButton"; 
+
+import type { Column } from "../../components/Table/Table";
+
+
 
 interface Props {
   onAdd: () => void;
@@ -119,13 +126,54 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     setSelectedCustomer(null);
   };
 
+//columns definition for Table component can be added here 
+const columns: Column<CustomerSummary>[] = [
+  { key: "id", header: "Customer ID", align: "left" },
+  { key: "name", header: "Name", align: "left" },
+  {
+    key: "type",
+    header: "Type",
+    align: "left",
+    render: (c) => (
+      <StatusBadge status={c.type} />
+    ),
+  },
+  {
+    key: "currency",
+    header: "Currency",
+    align: "left",
+    render: (c) => <code className="text-xs bg-gray-100 px-2 py-1 rounded">{c.currency}</code>,
+  },
+  {
+    key: "onboardingBalance",
+    header: "Onboard Balance",
+    align: "right",
+    render: (c) => <code className="text-xs bg-gray-100 px-2 py-1 rounded">{c.onboardingBalance}</code>,
+  },
+  {
+    key: "actions",
+    header: "Actions",
+    align: "center",
+    render: (c) => (
+      <ActionGroup>
+        <ActionButton type="view" onClick={() => handleRowClick(c as any)} />
+        <ActionButton type="edit" onClick={(e: any) => handleEditCustomer(c.id, e)} />
+        <ActionButton type="delete" onClick={(e: any) => handleDelete(c.id, e)} variant="danger" />
+      </ActionGroup>
+    ),
+  },
+];
+
+
+
+
   return (
     <div className="p-4">
       {viewMode === "table" ? (
         <>
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <div className="relative w-1/3">
+            {/* <div className="relative w-1/3">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="search"
@@ -134,14 +182,14 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500"
               />
-            </div>
+            </div> */}
 
-            <button
+            {/* <button
               onClick={handleAddCustomer}
               className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
             >
               <Plus className="w-5 h-5" /> Add Customer
-            </button>
+            </button> */}
           </div>
 
           {custLoading ? (
@@ -152,88 +200,29 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
           ) : (
             <>
               {/* Table */}
-              <div className="overflow-x-auto rounded-lg border border-gray-200">
-                <table className="min-w-full">
-                  <thead className="bg-gray-100 text-gray-700 text-sm">
-                    <tr>
-                      <th className="px-4 py-3 text-left">Customer ID</th>
-                      <th className="px-4 py-3 text-left">Name</th>
-                      <th className="px-4 py-3 text-left">Type</th>
-                      <th className="px-4 py-3 text-left">Currency</th>
-                      <th className="px-4 py-3 text-left">Onboard Balance</th>
-                      <th className="px-4 py-3 text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {filtered.map((c) => (
-                      <tr
-                        key={c.id}
-                        onClick={() => handleRowClick(c)}
-                        className="hover:bg-gray-50 cursor-pointer transition"
-                      >
-                        <td className="px-4 py-2 font-medium">{c.id}</td>
-                        <td className="px-4 py-2 font-semibold">{c.name}</td>
+  <Table
+  columns={columns}
+  data={filtered}
+  showToolbar
+  searchValue={searchTerm}
+  onSearch={setSearchTerm}
+  enableAdd
+  addLabel="Add Customer"
+  onAdd={handleAddCustomer}
+  enableColumnSelector
 
-                        <td className="px-4 py-2">
-                          <span
-                            className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                              c.type === "Company"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-purple-100 text-purple-800"
-                            }`}
-                          >
-                            {c.type}
-                          </span>
-                        </td>
+  // pagination forwarded into Table (Table will render Pagination inside card)
+  currentPage={page}
+  totalPages={totalPages}
+  pageSize={pageSize}
+  totalItems={totalItems}
+  onPageChange={setPage}
 
-                        <td className="px-4 py-2">
-                          <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            {c.currency}
-                          </code>
-                        </td>
+/>
 
-                        <td className="px-4 py-2">
-                          <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            {c.onboardingBalance}
-                          </code>
-                        </td>
 
-                        <td className="px-4 py-2 text-center">
-                          <button
-                            onClick={(e) => handleEditCustomer(c.id, e)}
-                            className="text-indigo-600 hover:text-indigo-800"
-                            title="Edit"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
 
-                          <button
-                            onClick={(e) => handleDelete(c.id, e)}
-                            className="ml-2 text-red-600 hover:text-red-800"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {filtered.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    {searchTerm ? "No matching results." : "No customers yet."}
-                  </div>
-                )}
-              </div>
-
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                pageSize={pageSize}
-                totalItems={totalItems}
-                onPageChange={setPage}
-              />
+             
             </>
           )}
         </>
