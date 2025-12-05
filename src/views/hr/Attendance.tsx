@@ -3,7 +3,6 @@ import {
   FaCalendarAlt,
   FaClock,
   FaUserClock,
-  FaChartPie,
   FaArrowRight,
 } from "react-icons/fa";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";

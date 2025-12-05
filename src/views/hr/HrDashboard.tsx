@@ -8,15 +8,7 @@ import {
   FaBell,
   FaSearch,
 } from "react-icons/fa";
-import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-} from "recharts";
-import { useNavigate } from "react-router-dom";
+import { BarChart, Bar, Cell, ResponsiveContainer } from "recharts";
 
 // ----- Mock data -----
 const fullHeadcountData = { week: [], month: [], quarter: [] };

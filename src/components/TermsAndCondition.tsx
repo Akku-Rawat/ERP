@@ -13,7 +13,6 @@ interface Props {
 
 type LocalPhase = TermPhase & { id?: string; isDelete?: number };
 
-
 const UI_TO_KEY: Record<string, keyof TermSection> = {
   "General Service Terms": "general",
   "Payment Terms": "payment",
@@ -30,7 +29,7 @@ const emptyPhase = (): TermPhase => ({
   name: "",
   percentage: "",
   condition: "",
-  isDelete: undefined
+  isDelete: undefined,
 });
 
 const emptyPayment: PaymentTerms = {
@@ -142,24 +141,24 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
 
     const phases = ensurePayment(currentTerms).phases as LocalPhase[];
 
-    const next = phases.map((p, i) => {
-      if (i !== index) return p;
+    const next = phases
+      .map((p, i) => {
+        if (i !== index) return p;
 
-      if (p.id) {
-        return { ...p, isDelete: 1 };
-      }
+        if (p.id) {
+          return { ...p, isDelete: 1 };
+        }
 
-      return null;
-    }).filter(Boolean) as LocalPhase[];
+        return null;
+      })
+      .filter(Boolean) as LocalPhase[];
 
     updatePayment({ phases: next });
   };
 
-
   const renderPaymentTable = () => {
     const payment = ensurePayment(currentTerms);
     const rawPhases = payment.phases as LocalPhase[];
-
 
     return (
       <div className="space-y-5">
@@ -203,7 +202,6 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
               </tr>
             </thead>
 
-
             <tbody className="divide-y">
               {rawPhases.map((p, realIndex) => {
                 if (p.isDelete === 1) return null; // hide deleted rows
@@ -236,7 +234,9 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
                           className="w-full border rounded px-2 py-1 text-sm"
                           value={p.percentage}
                           onChange={(e) =>
-                            updatePhase(realIndex, { percentage: e.target.value })
+                            updatePhase(realIndex, {
+                              percentage: e.target.value,
+                            })
                           }
                         />
                       ) : (
@@ -251,7 +251,9 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
                           className="w-full border rounded px-2 py-1 text-sm"
                           value={p.condition}
                           onChange={(e) =>
-                            updatePhase(realIndex, { condition: e.target.value })
+                            updatePhase(realIndex, {
+                              condition: e.target.value,
+                            })
                           }
                         />
                       ) : (
@@ -277,13 +279,15 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
 
               {rawPhases.filter((p) => p.isDelete !== 1).length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-4 text-center text-gray-500 italic">
+                  <td
+                    colSpan={5}
+                    className="py-4 text-center text-gray-500 italic"
+                  >
                     No phases added yet.
                   </td>
                 </tr>
               )}
             </tbody>
-
           </table>
         </div>
 
@@ -412,10 +416,11 @@ const InputField = ({
       disabled={disabled}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full px-3 py-2 rounded border text-sm ${disabled
-        ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-        : "focus:ring-2 focus:ring-blue-400"
-        }`}
+      className={`w-full px-3 py-2 rounded border text-sm ${
+        disabled
+          ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+          : "focus:ring-2 focus:ring-blue-400"
+      }`}
     />
   </label>
 );
@@ -437,10 +442,11 @@ const TextareaField = ({
       disabled={disabled}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full px-3 py-2 min-h-[140px] rounded border text-sm ${disabled
-        ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-        : "focus:ring-2 focus:ring-blue-400"
-        }`}
+      className={`w-full px-3 py-2 min-h-[140px] rounded border text-sm ${
+        disabled
+          ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+          : "focus:ring-2 focus:ring-blue-400"
+      }`}
     />
   </label>
 );

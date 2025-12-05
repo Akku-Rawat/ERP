@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Phone, Save, Loader2 } from "lucide-react";
+import { X, Save, Loader2 } from "lucide-react";
 
 const emptyForm: Record<string, any> = {
   // Supplier Details

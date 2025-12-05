@@ -2,11 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Trash2 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
-import type {
-  TermPhase,
-  PaymentTerms,
-  TermSection,
-} from "../../types/termsAndCondition";
+import type { TermSection } from "../../types/termsAndCondition";
 
 import { getCustomerByCustomerCode } from "../../api/customerApi";
 import CustomerSelect from "../selects/CustomerSelect";

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ItemModal from "../../components/inventory/ItemModal";
-import axios from "axios";
-import { Search, Plus, Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2 } from "lucide-react";
 
 import {
   getAllItems,

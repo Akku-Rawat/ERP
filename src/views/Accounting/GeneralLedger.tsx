@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  Search,
-  Plus,
-  Edit2,
-  Trash2,
-  ChevronDown,
-  Settings,
-  Star,
-} from "lucide-react";
+import { Search, Plus, Edit2, Trash2, ChevronDown, Star } from "lucide-react";
 
 type Account = {
   code: string;

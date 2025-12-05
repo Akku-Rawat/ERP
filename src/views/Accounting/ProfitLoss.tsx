@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { FaDownload, FaFileAlt, FaPrint, FaChartPie } from "react-icons/fa";
+import { FaDownload, FaChartPie } from "react-icons/fa";
 
 type Account = {
   code: string;

@@ -13,7 +13,6 @@ import {
   FaFileAlt,
   FaSave,
   FaUndo,
-  FaInfoCircle,
 } from "react-icons/fa";
 
 const STORAGE_KEY = "company_setup_basicdetails_v3_tabs";

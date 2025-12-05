@@ -250,9 +250,7 @@ const AccountingDetails: React.FC = () => {
       <div className="w-full ">
         {/* Success Message */}
         {showSuccess && (
-          <div
-            className="mb-4 rounded-lg p-4 shadow-sm"
-          >
+          <div className="mb-4 rounded-lg p-4 shadow-sm">
             <FaCheckCircle
               className="w-5 h-5 flex-shrink-0"
               style={{ color: "var(--success)" }}

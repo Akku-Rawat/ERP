@@ -15,7 +15,6 @@ import {
   FaFileInvoiceDollar,
   FaCashRegister,
   FaChartBar,
-  FaCog,
 } from "react-icons/fa";
 import ProformaInvoicesTable from "./ProformaInvoice";
 import ProformaInvoiceModal from "../../components/sales/ProformaInvoiceModal";
