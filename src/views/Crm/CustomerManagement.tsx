@@ -12,11 +12,11 @@ import CustomerModal from "../../components/crm/CustomerModal";
 
 import type { CustomerSummary, CustomerDetail } from "../../types/customer";
 
-import Table from "../../components/Table/Table";                
-import StatusBadge from "../../components/Table/StatusBadge";  
-import ActionButton, { ActionGroup } from "../../components/Table/ActionButton"; 
+import Table from "../../components/UI/Table/Table";                
+import StatusBadge from "../../components/UI/Table/StatusBadge";  
+import ActionButton, { ActionGroup } from "../../components/UI/Table/ActionButton"; 
 
-import type { Column } from "../../components/Table/Table";
+import type { Column } from "../../components/UI/Table/Table";
 
 
 

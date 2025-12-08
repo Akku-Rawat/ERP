@@ -359,7 +359,7 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
       </div>
 
       {/* CONTENT AREA */}
-      <div className="p-5 rounded-lg border bg-white shadow-inner min-h-[240px]">
+      <div className="p-5 rounded-lg border bg-white shadow-inner min-h-[auto]">
         {activeKey === "payment"
           ? renderPaymentTable()
           : renderTextSection(activeKey)}

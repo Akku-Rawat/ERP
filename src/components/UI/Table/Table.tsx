@@ -1,5 +1,4 @@
 import React from "react";
-import Pagination from "../Pagination";
 
 export interface Column<T> {
   key: string;
@@ -141,6 +140,9 @@ function Table<T extends Record<string, any>>({
     typeof totalPages === "number" &&
     typeof onPageChange === "function" &&
     totalItems > 0;
+
+  // Display all data as passed from parent (no slicing)
+  const displayData = data;
 
   return (
     <div className="bg-card rounded-xl  border border-[var(--border)] flex flex-col">
@@ -330,7 +332,7 @@ function Table<T extends Record<string, any>>({
       {/* TABLE: fixed-height scroll body */}
       <div className="flex-1 w-full overflow-x-auto">
         <div className="max-h-[420px] overflow-y-auto">
-          <table className="min-w-full table-fixed">
+          <table className="min-w-full table-auto">
             <thead className="table-head sticky top-0 z-10">
               <tr>
                 {columns
@@ -338,11 +340,11 @@ function Table<T extends Record<string, any>>({
                   .map((column) => (
                     <th
                       key={column.key}
-                      className={`px-6 py-3 text-sm font-semibold uppercase tracking-wide bg-primary text-white align-middle ${getAlignment(
+                      className={`px-6 py-3 text-sm font-semibold uppercase tracking-wide bg-primary text-white align-middle whitespace-nowrap ${getAlignment(
                         column.align,
                       )}`}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className={`flex items-center gap-2 ${column.align === 'center' ? 'justify-center' : column.align === 'right' ? 'justify-end' : 'justify-start'}`}>
                         {column.header}
                         {column.sortable && (
                           <svg
@@ -366,7 +368,7 @@ function Table<T extends Record<string, any>>({
             </thead>
 
             <tbody className="divide-y divide-gray-200">
-              {data.length === 0 ? (
+              {displayData.length === 0 ? (
                 <tr>
                   <td
                     colSpan={visibleKeys.length || columns.length}
@@ -391,7 +393,7 @@ function Table<T extends Record<string, any>>({
                   </td>
                 </tr>
               ) : (
-                data.map((item, index) => (
+                displayData.map((item, index) => (
                   <tr
                     key={index}
                     onClick={() => onRowClick?.(item)}
@@ -404,7 +406,7 @@ function Table<T extends Record<string, any>>({
                       .map((column) => (
                         <td
                           key={column.key}
-                          className={`px-6 py-3 text-sm text-main align-middle ${getAlignment(
+                          className={`px-6 py-3 text-sm text-main align-middle whitespace-nowrap ${getAlignment(
                             column.align,
                           )}`}
                         >
@@ -421,7 +423,7 @@ function Table<T extends Record<string, any>>({
 
       {/* FOOTER: summary + pagination */}
       {showPagination && (
-        <div className="px-6 py-4 border-t bg-card flex flex-col sm:flex-row items-center justify-between gap-3 mt-auto">
+        <div className="px-6 py-3 border-t bg-card flex flex-col sm:flex-row items-center justify-between gap-3 mt-auto">
           <div className="text-sm text-gray-600">
             Showing{" "}
             <span className="font-medium">
@@ -439,10 +441,10 @@ function Table<T extends Record<string, any>>({
             <button
               onClick={() => onPageChange!(currentPage! - 1)}
               disabled={currentPage === 1}
-              className={`px-3 py-1.5 rounded-md border font-medium text-sm flex items-center gap-1 transition-colors ${
+              className={`px-3 py-2 rounded-md border font-medium text-sm flex items-center gap-1 transition-colors ${
                 currentPage === 1
-                  ? "border-[var(--border)] text-gray-400 cursor-not-allowed"
-                  : "border-[var(--border)] text-gray-700 hover:bg-gray-50"
+                  ? "border-gray-300 text-gray-400 cursor-not-allowed bg-gray-50"
+                  : "border-gray-300 text-gray-700 hover:bg-gray-100 bg-white"
               }`}
               type="button"
             >
@@ -452,23 +454,22 @@ function Table<T extends Record<string, any>>({
               Previous
             </button>
 
-            {/* Pagination Component */}
-            <Pagination
-              currentPage={currentPage!}
-              totalPages={totalPages!}
-              pageSize={pageSize}
-              totalItems={totalItems}
-              onPageChange={onPageChange!}
-            />
+            {/* Page indicator */}
+            <div className="flex items-center gap-1.5 px-4 py-2 bg-white rounded-md border border-gray-300">
+              <span className="text-sm text-gray-600">Page</span>
+              <span className="font-semibold text-gray-900">{currentPage}</span>
+              <span className="text-sm text-gray-400">of</span>
+              <span className="font-semibold text-gray-900">{totalPages}</span>
+            </div>
 
             {/* Next Button */}
             <button
               onClick={() => onPageChange!(currentPage! + 1)}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1.5 rounded-md border font-medium text-sm flex items-center gap-1 transition-colors ${
+              className={`px-3 py-2 rounded-md border font-medium text-sm flex items-center gap-1 transition-colors ${
                 currentPage === totalPages
-                  ? "border-[var(--border)] text-gray-400 cursor-not-allowed"
-                  : "border-[var(--border)] text-gray-700 hover:bg-gray-50"
+                  ? "border-gray-300 text-gray-400 cursor-not-allowed bg-gray-50"
+                  : "border-gray-300 text-gray-700 hover:bg-gray-100 bg-white"
               }`}
               type="button"
             >

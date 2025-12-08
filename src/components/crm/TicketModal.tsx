@@ -1,164 +1,172 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+// components/modals/TicketModal.tsx
+import React, { useEffect, useState } from "react";
+import Modal from "../UI/modal/modal";
+import { Input, Select, Textarea, Card, Button } from "../UI/modal/formComponent";
+import { Ticket as TicketIcon, FileText, Check } from "lucide-react";
 
 export interface TicketModalProps {
   isOpen: boolean;
   onClose: () => void;
-  ticket: Ticket | null;
-  onSubmit: (data: any) => void;
+  ticket?: {
+    id?: string | number;
+    title?: string;
+    customer?: string;
+    priority?: string;
+    status?: string;
+    description?: string;
+    [key: string]: any;
+  } | null;
+  onSubmit: (data: {
+    title: string;
+    customer: string;
+    priority: string;
+    status: string;
+    description: string;
+    id?: string | number;
+  }) => void;
 }
 
-const TicketModal: React.FC<TicketModalProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-}) => {
-  const [form, setForm] = useState({
-    title: "",
-    customer: "",
-    priority: "",
-    status: "",
-    description: "",
-  });
+const emptyForm = {
+  title: "",
+  customer: "",
+  priority: "",
+  status: "",
+  description: "",
+};
 
-  const handleFormChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, ticket = null, onSubmit }) => {
+  const [form, setForm] = useState({ ...emptyForm });
+
+  useEffect(() => {
+    // ensure controlled inputs never get undefined
+    setForm(ticket ? { ...emptyForm, ...ticket } : { ...emptyForm });
+  }, [ticket, isOpen]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(form);
-    handleReset();
-    onClose();
+    const { name, value, type } = e.target as HTMLInputElement;
+    setForm((p) => ({ ...p, [name]: value }));
   };
 
   const handleReset = () => {
-    setForm({
-      title: "",
-      customer: "",
-      priority: "",
-      status: "",
-      description: "",
-    });
+    setForm(ticket ? { ...emptyForm, ...ticket } : { ...emptyForm });
   };
+
+  const handleSave = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    // minimal required-field check (optional)
+    if (!form.title.trim() || !form.customer.trim() || !form.description.trim()) {
+      alert("Please fill Title, Customer and Description.");
+      return;
+    }
+    const payload = { ...form, id: ticket?.id };
+    onSubmit(payload);
+    // reset local state and close (parent may also close)
+    setForm({ ...emptyForm });
+    onClose();
+  };
+
+  const footer = (
+    <>
+      <Button variant="secondary" onClick={() => { setForm({ ...emptyForm }); onClose(); }}>
+        Cancel
+      </Button>
+
+      <div className="flex gap-3">
+        <Button variant="secondary" onClick={handleReset}>
+          Reset
+        </Button>
+        <Button variant="primary" onClick={handleSave} type="button" icon={<Check className="w-4 h-4" />}>
+          {ticket ? "Update Ticket" : "Save Ticket"}
+        </Button>
+      </div>
+    </>
+  );
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed z-50 inset-0 flex items-center justify-center bg-black/40">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 40 }}
-          className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
+    <Modal
+      isOpen={isOpen}
+      onClose={() => { setForm({ ...emptyForm }); onClose(); }}
+      title={ticket ? "Edit Ticket" : "Add Support Ticket"}
+      subtitle={ticket ? "Update ticket details" : "Create a new support ticket"}
+      icon={TicketIcon}
+      footer={footer}
+      maxWidth="4xl"
+      height="85vh"
+    >
+      <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-6">
+        <Card
+          title="Ticket Details"
+          subtitle="Essential ticket information"
+          icon={<FileText className="w-5 h-5 text-primary" />}
         >
-          <form
-            className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden"
-            onSubmit={handleSave}
-          >
-            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-indigo-100/30 shrink-0">
-              <h3 className="text-2xl w-full font-semibold text-indigo-600">
-                Add Support Ticket
-              </h3>
-              <button
-                type="button"
-                className="text-gray-700 hover:bg-[#fefefe] rounded-full w-8 h-8"
-                onClick={onClose}
+          <div className="space-y-5">
+            <Input
+              label="Ticket Title"
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              required
+              placeholder="Brief description of the issue"
+              icon={<TicketIcon className="w-4 h-4" />}
+            />
+
+            <Input
+              label="Customer"
+              name="customer"
+              value={form.customer}
+              onChange={handleChange}
+              required
+              placeholder="Customer name or ID"
+              icon={<TicketIcon className="w-4 h-4" />}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <Select
+                label="Priority"
+                name="priority"
+                value={form.priority}
+                onChange={handleChange}
+                required
+                icon={<FileText className="w-4 h-4" />}
               >
-                <span className="text-2xl">&times;</span>
-              </button>
+                <option value="">Select Priority</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </Select>
+
+              <Select
+                label="Status"
+                name="status"
+                value={form.status}
+                onChange={handleChange}
+                required
+                icon={<FileText className="w-4 h-4" />}
+              >
+                <option value="">Select Status</option>
+                <option value="Open">Open</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+              </Select>
             </div>
 
-            <div className="flex-1 overflow-y-auto border-b px-4">
-              {/* TICKET DETAILS */}
-              <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">
-                  TICKET DETAILS
-                </div>
-                <div className="grid grid-cols-6 gap-4 mb-6">
-                  <input
-                    type="text"
-                    className="col-span-4 border rounded p-2"
-                    placeholder="Ticket Title"
-                    name="title"
-                    value={form.title}
-                    onChange={handleFormChange}
-                  />
-                  <input
-                    type="text"
-                    className="col-span-2 border rounded p-2"
-                    placeholder="Customer"
-                    name="customer"
-                    value={form.customer}
-                    onChange={handleFormChange}
-                  />
-                  <select
-                    className="col-span-3 border rounded p-2"
-                    name="priority"
-                    value={form.priority}
-                    onChange={handleFormChange}
-                  >
-                    <option value="">Select Priority</option>
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                  </select>
-                  <select
-                    className="col-span-3 border rounded p-2"
-                    name="status"
-                    value={form.status}
-                    onChange={handleFormChange}
-                  >
-                    <option value="">Select Status</option>
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Resolved">Resolved</option>
-                  </select>
-                  <textarea
-                    className="col-span-6 border rounded p-2"
-                    placeholder="Description / Issue Details"
-                    name="description"
-                    value={form.description}
-                    onChange={handleFormChange}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Controls */}
-            <div className="m-3 flex items-center justify-between gap-x-7 shrink-0">
-              <button
-                type="button"
-                className="w-24 rounded-3xl bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
-                onClick={onClose}
-              >
-                Cancel
-              </button>
-              <div className="flex gap-x-2">
-                <button
-                  type="submit"
-                  className="w-24 rounded-3xl bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="w-24 rounded-3xl bg-gray-300 text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-500 hover:text-white"
-                  onClick={handleReset}
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-          </form>
-        </motion.div>
-      </AnimatePresence>
-    </div>
+            <Textarea
+              label="Description / Issue Details"
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              required
+              placeholder="Provide detailed information about the issue..."
+              className="h-32"
+            />
+          </div>
+        </Card>
+      </form>
+    </Modal>
   );
 };
 

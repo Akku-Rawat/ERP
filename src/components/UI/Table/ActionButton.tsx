@@ -3,10 +3,9 @@ import { Eye, Edit, Trash2, Download, MoreVertical } from "lucide-react";
 
 type ActionType = "view" | "edit" | "delete" | "download" | "custom";
 
-// change prop signature to accept the mouse event
 interface ActionButtonProps {
   type: ActionType;
-  onClick: (e?: React.MouseEvent<HTMLButtonElement>) => void; // <- updated
+  onClick?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
   label?: string;
   icon?: React.ReactNode;
   variant?: "primary" | "secondary" | "danger";
@@ -23,7 +22,6 @@ const ActionButton: React.FC<ActionButtonProps> = ({
 }) => {
   const getIcon = () => {
     if (icon) return icon;
-    
     switch (type) {
       case "view":
         return <Eye className="w-4 h-4" />;
@@ -40,7 +38,6 @@ const ActionButton: React.FC<ActionButtonProps> = ({
 
   const getLabel = () => {
     if (label) return label;
-    
     switch (type) {
       case "view":
         return "View";
@@ -63,9 +60,10 @@ const ActionButton: React.FC<ActionButtonProps> = ({
 
   return (
     <button
+      type="button"                       // <<-- critical: prevents accidental form submit
       onClick={(e) => {
-        e.stopPropagation();
-        onClick();
+        e.stopPropagation();              // keep original flow: stop row click
+        onClick?.(e);                     // pass event to parent handler exactly as before
       }}
       disabled={disabled}
       className={`
@@ -81,17 +79,13 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   );
 };
 
-// Action Group Component for multiple actions
+
 interface ActionGroupProps {
   children: React.ReactNode;
 }
 
 export const ActionGroup: React.FC<ActionGroupProps> = ({ children }) => {
-  return (
-    <div className="flex items-center gap-1 justify-center">
-      {children}
-    </div>
-  );
+  return <div className="flex items-center gap-1 justify-center">{children}</div>;
 };
 
 export default ActionButton;
