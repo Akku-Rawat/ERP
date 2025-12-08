@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaBuilding,
   FaIdCard,
@@ -18,6 +18,12 @@ import Templates from "./Templates";
 import AddBankAccountModal from "../../components/CompanySetup/AddBankAccountModal";
 import Upload from "./upload";
 
+import type { BasicDetailsForm, Company, RegistrationDetails } from "../../types/company";
+
+import {
+  getCompanyById
+} from "../../api/companySetupApi";
+
 const navTabs = [
   { key: "basic", label: "Basic Details", icon: <FaIdCard /> },
   { key: "bank", label: "Bank Details", icon: <FaUniversity /> },
@@ -36,15 +42,60 @@ interface BankAccount {
   swiftCode: string;
 }
 
+let basicDetail: BasicDetailsForm = {};
+
 const CompanySetup: React.FC = () => {
   const [tab, setTab] = useState(navTabs[0].key);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [showBankModal, setShowBankModal] = useState(false);
+  const [companyDetail, setCompanyDetail] = useState<Company | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const handleAddBankAccount = (newAccount: BankAccount) => {
     setBankAccounts((prev) => [...prev, newAccount]);
     setShowBankModal(false);
   };
+  const fetchCompanyDetail = async () => {
+    try {
+      setLoading(true);
+      const response = await getCompanyById("COMP-00003");
+      console.log("response: ", response);
+      let registrationDetails: RegistrationDetails = {
+        registerNo: response.data.registrationNumber ?? "",
+        tpin: response.data.tpin ?? "",
+        companyName: response.data.companyName ?? "",
+        dateOfIncorporation: response.data.dateOfIncorporation ?? "",
+        companyType: response.data.companyType ?? "",
+        companyStatus: response.data.companyStatus ?? "",
+        industryType: response.data.industryType ?? "",
+      };
+
+
+      basicDetail.registration = registrationDetails,
+      basicDetail.contact = response.data.contactInfo,
+      basicDetail.address = response.data.address
+      // console.log("registrationDetails: ", registrationDetails);
+      // console.log("contacts: ", response.data.contactInfo);
+      // console.log("adress: ", response.data.address);
+      // console.log("bank: ", response.data.bankAccounts);
+      // console.log("financialConfig: ", response.data.financialConfig);
+      // console.log("terms: ", response.data.terms);
+      // console.log("accounsetup: ", response);
+      // console.log("modules: ", response.data.modules);
+      // console.log("document: ", response.data.documents);
+      // console.log("templates: ", response.data.templates);
+      setCompanyDetail(response.data as Company);
+    } catch (err) {
+      console.error("Error loading company data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchCompanyDetail();
+  }, []);
 
   return (
     <div className="bg-app min-h-screen p-8 pb-20">
@@ -59,11 +110,10 @@ const CompanySetup: React.FC = () => {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-2 border-theme 
-    ${
-      tab === t.key
-        ? "border-[var(--primary)] text-main font-semibold"
-        : "border-transparent text-muted hover:text-primary"
-    }
+    ${tab === t.key
+                ? "border-[var(--primary)] text-main font-semibold"
+                : "border-transparent text-muted hover:text-primary"
+              }
   `}
             style={{ background: "transparent" }}
           >
@@ -73,7 +123,7 @@ const CompanySetup: React.FC = () => {
         ))}
       </div>
       <div>
-        {tab === "basic" && <BasicDetails />}
+        {tab === "basic" && <BasicDetails basic={basicDetail} />}
         {tab === "bank" && (
           <BankDetails
             bankAccounts={bankAccounts}
