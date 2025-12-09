@@ -1,88 +1,81 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-
+import { toast } from "sonner";
 import { updateItemByItemCode, createItem } from "../../api/itemApi";
+import ItemCategorySelect from "../selects/ItemCategorySelect";
+import {getItemGroupByName} from "../../api/itemCategoryApi";
+import ItemGenericSelect from "../selects/ItemGenericSelect";
+import { getPackagingUnits, getCountries, getUOMs, getItemClasses } from "../../api/itemZraApi";
 
 type FormState = Record<string, any>;
 
 const emptyForm: Record<string, any> = {
-  item_type: "Goods",
-  item_name: "",
-  item_code: "",
-  item_group: "",
-  custom_itemclscd: "",
-  custom_itemtycd: 0,
-  custom_orgnnatcd: "",
-  custom_pkgunitcd: "",
-  custom_svcchargeyn: "Y",
-  custom_isrcaplcbyn: "Y",
-  custom_selling_price: 0,
-  custom_purchase_amount: "",
-  custom_buying_price: 0,
-  custom_suk: "",
-  custom_vendor: "",
-  custom_non_export_tax: "",
-  custom_non_export_code: "",
-  custom_non_export_name: "",
-  custom_non_export_description: "",
-  custom_non_export_tax_perct: "",
-  custom_export_tax: "",
-  custom_export_code: "",
-  custom_export_name: "",
-  custom_export_description: "",
-  custom_export_tax_perct: "",
+  itemType: "Goods",
+  itemName: "",
+  itemGroup: "",
 
-  custom_local_purchase_order_tax: "",
-  custom_local_purchase_order_code: "",
-  custom_local_purchase_order_name: "",
-  custom_local_purchase_order_description: "",
-  custom_local_purchase_order_perct: "",
+  itemClassCode: "",
+  itemTypeCode: 0,
+  originNationCode: "",
+  packagingUnitCode: "",
+  svcCharge: "Y",
+  ins: "Y",
+  sellingPrice: 0,
+  buyingPrice: 0,
 
-  custom_dimension: "",
-  custom_weight: "",
-  custom_valuation: "",
-  custom_is_track_inventory: true,
-  custom_tracking_method: "None",
-  custom_reorder_level: 0,
-  custom_min_stock_level: 0,
-  custom_max_stock_level: 0,
-  custom_sales_account: "",
-  custom_purchase_account: "",
   unitOfMeasureCd: "Nos",
-  hsn_sac_unspc: "",
+  hsnSacUnspc: "",
   description: "",
   sku: "",
-  tax_preference: "Taxable",
-  tax_rate: 0,
-  preferred_vendor: "",
-  opening_stock: 0,
-  opening_stock_value: 0,
-  valuation_method: "FIFO",
-  tracking_method: "None",
-  weight: 0,
-  weight_unit: "kg",
-  dimensions: "",
+  taxPreference: "Taxable",
+  preferredVendor: "",
+  salesAccount: "",
+  purchaseAccount: "",
+
+  nonExportTax: "",
+  nonExportCode: "",
+  nonExportName: "",
+  nonExportDescription: "",
+  nonExportTaxPerct: "",
+
+  exportTax: "",
+  exportCode: "",
+  exportName: "",
+  exportDescription: "",
+  exportTaxPerct: "",
+
+  localPurchaseOrderTax: "",
+  localPurchaseOrderCode: "",
+  localPurchaseOrderName: "",
+  localPurchaseOrderDescription: "",
+  localPurchaseOrderPerct: "",
+
+  dimensionUnit: "",
+  weight: "",
+  valuationMethod: "",
+  trackingMethod: "None",
+  reorderLevel: 0,
+  minStockLevel: 0,
+  maxStockLevel: 0,
+
   brand: "",
-  is_active: true,
-  allow_alternative_unit: false,
-  has_batch_or_serial: false,
-  length: "",
-  width: "",
-  height: "",
-  weightUnit: "",
+  dimension: "",
+  weightUnit: ""
 };
 
 const ItemModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (data: Record<string, any>) => void;
+  // onSubmit?: (data: Record<string, any>) => void;
+  onSubmit?: () => void;
   initialData?: Record<string, any> | null;
   isEditMode?: boolean;
 }> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [loading, setLoading] = useState(false);
   const [fetchingItem, setFetchingItem] = useState(false);
+  const [itemCategoryDetails, setItemCategoryDetails] = useState<any>(null);
 
   const [activeTab, setActiveTab] = useState<
     "details" | "taxDetails" | "inventoryDetails"
@@ -95,51 +88,109 @@ const ItemModal: React.FC<{
     }
   }, [isOpen, initialData]);
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+
+  //   try {
+  //     const payload = { ...form };
+
+  //     let response;
+
+  //     if (isEditMode && initialData?.item_code) {
+  //       response = await updateItemByItemCode(initialData.item_code, payload);
+  //     } else {
+  //       response = await createItem(payload);
+  //     }
+
+  //     if (response.status_code !== 200) {
+  //       let errorMessage = "Failed to save item";
+  //       try {
+  //         const errData = await response;
+  //         errorMessage = errData.message || errorMessage;
+  //       } catch {}
+  //       throw new Error(errorMessage);
+  //     }
+
+  //     onSubmit?.(response);
+
+  //     handleClose();
+  //   } catch (err: any) {
+  //     console.error("Save item error:", err);
+  //     alert(err.message || "Something went wrong while saving the item.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const payload = { ...form };
+  try {
+    const payload = { ...form };
 
-      let response;
+    let response;
 
-      if (isEditMode && initialData?.item_code) {
-        response = await updateItemByItemCode(initialData.item_code, payload);
-      } else {
-        response = await createItem(payload);
-      }
-
-      if (response.status_code !== 200) {
-        let errorMessage = "Failed to save item";
-        try {
-          const errData = await response;
-          errorMessage = errData.message || errorMessage;
-        } catch {}
-        throw new Error(errorMessage);
-      }
-
-      alert(
-        isEditMode
-          ? "Item updated successfully!"
-          : "Item created successfully!",
-      );
-
-      // This triggers refresh in parent
-      onSubmit?.(response);
-      handleClose();
-    } catch (err: any) {
-      console.error("Save item error:", err);
-      alert(err.message || "Something went wrong while saving the item.");
-    } finally {
-      setLoading(false);
+    if (isEditMode && initialData?.id) {
+      response = await updateItemByItemCode(initialData.id, payload);
+    } else {
+      response = await createItem(payload);
     }
-  };
+   onSubmit?.();
 
+  } catch (err: any) {
+
+    let errorMessage = "Something went wrong while saving the item.";
+
+    if (err.response?.data) {
+      const data = err.response.data;
+
+      if (data._server_messages) {
+        try {
+          const msgs = JSON.parse(data._server_messages);
+          errorMessage = msgs
+            .map((m: string) => {
+              try { return JSON.parse(m).message || ""; }
+              catch { return m; }
+            })
+            .filter(Boolean)
+            .join("\n");
+        } catch {}
+      } else if (data.message) {
+        errorMessage = data.message;
+      }
+    } else if (err.message) {
+      errorMessage = err.message;
+    }
+
+    toast.error(errorMessage, {
+      duration: 8000,
+      style: { whiteSpace: "pre-line" },
+    });
+  } finally {
+    setLoading(false);
+  }
+};
   const handleClose = () => {
     setForm(emptyForm);
     onClose();
   };
+
+  const loadItemCategoryDetailsById = async (id: string) => {
+  try {
+    const response = await getItemGroupByName(id); 
+    if (!response || response.status_code !== 200) return;
+
+    console.log("Item category response: ", response);
+
+    setForm((p) => ({...p, item_group: response.data.name,
+    }));
+    setItemCategoryDetails(response.data);
+  } catch (err) {
+    console.error("Error loading item category details:", err);
+  }
+};
 
   const handleForm = (
     e: React.ChangeEvent<
@@ -245,11 +296,27 @@ const ItemModal: React.FC<{
                             <option value="Service">Service</option>
                           </select>
                         </label>
+                          {/* <Input
+                          label="Item Group"
+                          name="item_group"
+                          value={form.item_group || ""}
+                          onChange={handleForm}
+                          className="w-full"
+                          required
+                        /> */}
+                        <ItemCategorySelect
+                          value={form.itemGroup}
+                          onChange={async ({ name, id }) => {
+                            setForm((p) => ({ ...p, itemGroup: name }));
+                            await loadItemCategoryDetailsById(id);
+                          }}
+                          className="w-full"
+                        />
 
                         <Input
                           label="Items Name"
-                          name="item_name"
-                          value={form.item_name || ""}
+                          name="itemName"
+                          value={form.itemName || ""}
                           onChange={handleForm}
                           className="w-full col-span-3"
                           required
@@ -261,63 +328,101 @@ const ItemModal: React.FC<{
                           onChange={handleForm}
                           className="w-full col-span-3"
                         />
-                        <Input
-                          label="Item Group"
-                          name="item_group"
-                          value={form.item_group || ""}
-                          onChange={handleForm}
-                          className="w-full"
-                          required
-                        />
-                        <Input
+
+                        {/* <Input
                           label="Item Class Code"
                           name="custom_itemclscd"
                           value={form.custom_itemclscd || ""}
                           onChange={handleForm}
                           className="w-full col-span-3"
-                        />
-                        <Input
+                        /> */}
+                        <ItemGenericSelect
+  label="Item Class"
+  value={form.itemClassCode}
+  fetchData={getItemClasses}
+  displayField="code"
+  onChange={({ id }) => {
+    setForm(p => ({ ...p, itemClassCode: id }));
+  }}
+/>
+                        {/* <Input
                           label="Item Packaging Code "
                           name="custom_pkgunitcd"
                           value={form.custom_pkgunitcd || ""}
                           onChange={handleForm}
                           className="w-full col-span-3"
-                        />
+                        /> */}
+                        {/* <ItemGenericSelect
+                          label="Packaging Unit"
+                          value={form.custom_pkgunitcd}  // ← this should be "PACK", "AC", etc.
+                          fetchData={getPackagingUnits}
+                          onChange={({ name, id }) => {
+                              setForm(p => ({ ...p, custom_pkgunitcd: id, packaging_unit: name 
+                          }));
+                          }}
+                        /> */}
+                        <ItemGenericSelect
+  label="Packaging Unit"
+  value={form.packagingUnitCode}
+  fetchData={getPackagingUnits}
+  displayField="code"           // ← Shows only "AM", "PACK", etc.
+  onChange={({ id }) => {
+    setForm(p => ({ ...p, packagingUnitCode: id }));
+  }}
+/>
                         <Input
                           label="Item Type Code"
-                          name="custom_itemtycd"
-                          value={form.custom_itemtycd || ""}
+                          name="itemTypeCode"
+                          value={form.itemTypeCode || ""}
                           onChange={handleForm}
                           className="w-full col-span-3"
                         />
-                        <Input
+                        {/* <Input
                           label="Country Code"
                           name="custom_orgnnatcd"
                           value={form.custom_orgnnatcd || ""}
                           onChange={handleForm}
                           className="w-full col-span-3"
-                        />
+                        /> */}
+                        <ItemGenericSelect
+  label="Country Code"
+  value={form.originNationCode}
+  fetchData={getCountries}
+  displayField="code"
+  onChange={({ id }) => {
+    setForm(p => ({ ...p, originNationCode: id }));
+  }}
+/>
                         <Input
                           label="HSN/SAC/UNSPC"
-                          name="unspc"
-                          value={form.unspc || ""}
+                          name="hsnSacUnspc"
+                          value={form.hsnSacUnspc || ""}
                           onChange={handleForm}
                           className="w-full col-span-3"
                         />
-                        <Input
+                        {/* <Input
                           label="Unit of Measurement"
                           name="unitOfMeasureCd"
                           value={form.unitOfMeasureCd || ""}
                           onChange={handleForm}
                           className="w-full col-span-3"
-                        />
+                        /> */}
+                        <ItemGenericSelect
+  label="UOM"
+  value={form.unitOfMeasureCd}
+  fetchData={getUOMs}
+  displayField="code"
+  onChange={({ id }) => {
+    setForm(p => ({ ...p, unitOfMeasureCd: id }));
+  }}
+/>
                         <label className="flex flex-col gap-1 text-sm">
                           <span className="font-medium text-gray-600">
                             SVC Charge
                           </span>
                           <select
-                            name="svcChargeYn"
-                            value={form.svcChargeYn || ""}
+                            name="svcCharge"
+                            value={form.svcCharge || ""}
                             onChange={handleForm}
                             className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                             required
@@ -329,8 +434,8 @@ const ItemModal: React.FC<{
                         <label className="flex flex-col gap-1 text-sm">
                           <span className="font-medium text-gray-600">INS</span>
                           <select
-                            name="isrcAplcbYn"
-                            value={form.isrcAplcbYn || ""}
+                            name="ins"
+                            value={form.ins || ""}
                             onChange={handleForm}
                             className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                             required
@@ -356,8 +461,8 @@ const ItemModal: React.FC<{
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <Input
                           label="Selling Price"
-                          name="custom_selling_price"
-                          value={form.custom_selling_price || ""}
+                          name="sellingPrice"
+                          value={form.sellingPrice || ""}
                           onChange={handleForm}
                           className="w-full col-span-3"
                         />
@@ -370,8 +475,8 @@ const ItemModal: React.FC<{
                         />
                         <Input
                           label="Buying Price"
-                          name="custom_buying_price"
-                          value={form.custom_buying_price || ""}
+                          name="buyingPrice"
+                          value={form.buyingPrice || ""}
                           onChange={handleForm}
                           className="w-full"
                         />
@@ -384,15 +489,15 @@ const ItemModal: React.FC<{
                         />
                         <Input
                           label="Tax"
-                          name="tax"
-                          value={form.tax || ""}
+                          name="taxPreference"
+                          value={form.taxPreference || ""}
                           onChange={handleForm}
                           className="w-full col-span-3"
                         />
                         <Input
                           label="Preferred Vendor"
-                          name="prefferedVendor"
-                          value={form.prefferedVendor || ""}
+                          name="preferredVendor"
+                          value={form.preferredVendor || ""}
                           onChange={handleForm}
                           className="w-full col-span-3"
                         />
@@ -598,8 +703,8 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_non_export_tax"
-                                  value={form.custom_non_export_tax || ""}
+                                  name="nonExportTax"
+                                  value={form.nonExportTax || ""}
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
                                   placeholder="e.g. VAT"
@@ -608,8 +713,8 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_non_export_code"
-                                  value={form.custom_non_export_code || ""}
+                                  name="nonExportCode"
+                                  value={form.nonExportCode || ""}
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
                                   placeholder="V001"
@@ -618,8 +723,8 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_non_export_name"
-                                  value={form.custom_non_export_name || ""}
+                                  name="nonExportName"
+                                  value={form.nonExportName || ""}
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
                                   placeholder="Standard VAT"
@@ -628,9 +733,9 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_non_export_description"
+                                  name="nonExportDescription"
                                   value={
-                                    form.custom_non_export_description || ""
+                                    form.nonExportDescription || ""
                                   }
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
@@ -640,8 +745,8 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_non_export_tax_perct"
-                                  value={form.custom_non_export_tax_perct || ""}
+                                  name="nonExportTaxPerct"
+                                  value={form.nonExportTaxPerct || ""}
                                   onChange={handleForm}
                                   className="w-20 px-2 py-1.5 border rounded text-xs text-right"
                                   placeholder="12"
@@ -684,8 +789,8 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_export_tax"
-                                  value={form.custom_export_tax || ""}
+                                  name="exportTax"
+                                  value={form.exportTax || ""}
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
                                   placeholder="Zero Rated"
@@ -694,8 +799,8 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_export_code"
-                                  value={form.custom_export_code || ""}
+                                  name="exportCode"
+                                  value={form.exportCode || ""}
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
                                   placeholder="ZR01"
@@ -704,8 +809,8 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_export_name"
-                                  value={form.custom_export_name || ""}
+                                  name="exportName"
+                                  value={form.exportName || ""}
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
                                   placeholder="Zero Rated Export"
@@ -714,8 +819,8 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_export_description"
-                                  value={form.custom_export_description || ""}
+                                  name="exportDescription"
+                                  value={form.exportDescription || ""}
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
                                   placeholder="0% on exports"
@@ -724,8 +829,8 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_export_tax_perct"
-                                  value={form.custom_export_tax_perct || ""}
+                                  name="exportTaxPerct"
+                                  value={form.exportTaxPerct || ""}
                                   onChange={handleForm}
                                   className="w-20 px-2 py-1.5 border rounded text-xs text-right"
                                   placeholder="0"
@@ -768,9 +873,9 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_local_purchase_order_tax"
+                                  name="localPurchaseOrderTax"
                                   value={
-                                    form.custom_local_purchase_order_tax || ""
+                                    form.localPurchaseOrderTax || ""
                                   }
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
@@ -780,9 +885,9 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_local_purchase_order_code"
+                                  name="localPurchaseOrderCode"
                                   value={
-                                    form.custom_local_purchase_order_code || ""
+                                    form.localPurchaseOrderCode || ""
                                   }
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
@@ -792,9 +897,9 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_local_purchase_order_name"
+                                  name="localPurchaseOrderName"
                                   value={
-                                    form.custom_local_purchase_order_name || ""
+                                    form.localPurchaseOrderName || ""
                                   }
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
@@ -804,9 +909,9 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_local_purchase_order_description"
+                                  name="localPurchaseOrderDescription"
                                   value={
-                                    form.custom_local_purchase_order_description ||
+                                    form.localPurchaseOrderDescription ||
                                     ""
                                   }
                                   onChange={handleForm}
@@ -817,9 +922,9 @@ const ItemModal: React.FC<{
                               <td className="border px-2 py-1">
                                 <input
                                   type="text"
-                                  name="custom_local_purchase_order_perct"
+                                  name="localPurchaseOrderPerct"
                                   value={
-                                    form.custom_local_purchase_order_perct || ""
+                                    form.localPurchaseOrderPerct || ""
                                   }
                                   onChange={handleForm}
                                   className="w-20 px-2 py-1.5 border rounded text-xs text-right"
@@ -886,8 +991,8 @@ const ItemModal: React.FC<{
                             />
 
                             <select
-                              name="dimensionType"
-                              value={form.dimensionType || "cm"}
+                              name="dimensionUnit"
+                              value={form.dimensionUnit || "cm"}
                               onChange={handleForm}
                               className="w-16 px-1 py-1.5 text-xs border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
                             >
@@ -904,9 +1009,9 @@ const ItemModal: React.FC<{
                           <div className="flex gap-2">
                             <Input
                               label=""
-                              name="custom_weight"
+                              name="weight"
                               placeholder="0"
-                              value={form.custom_weight}
+                              value={form.weight}
                               onChange={handleForm}
                               className="flex-1"
                             />
@@ -930,9 +1035,9 @@ const ItemModal: React.FC<{
                           <span className="font-medium text-gray-600">
                             Valuation Method
                           </span>
-                          <select
-                            name="valutaionMethod"
-                            value={form.valutaionMethod || ""}
+                          <select 
+                            name="valuationMethod"
+                            value={form.valuationMethod}  
                             onChange={handleForm}
                             className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full"
                           >
@@ -946,7 +1051,7 @@ const ItemModal: React.FC<{
 
                     <div className=" mt-6 col-span-full lg:col-span-4 xl:col-span-3 space-y-4">
                       <div className="flex items-center gap-3">
-                        <input
+                        {/* <input
                           type="checkbox"
                           id="trackInventory"
                           name="trackInventory"
@@ -958,6 +1063,17 @@ const ItemModal: React.FC<{
                                 value: e.target.checked,
                               },
                             })
+                          } */}
+                          <input
+                          type="checkbox"
+                          id="trackInventory"
+                          name="trackInventory"
+                          checked={form.trackInventory || false}
+                          onChange={(e) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              trackInventory: e.target.checked,
+                            }))
                           }
                           className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
                         />
@@ -1000,22 +1116,22 @@ const ItemModal: React.FC<{
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <Input
                           label="Min Stock Level"
-                          name="custom_min_stock_level"
-                          value={form.custom_min_stock_level}
+                          name="minStockLevel"
+                          value={form.minStockLevel}
                           onChange={handleForm}
                           className="w-full col-span-3"
                         />
                         <Input
                           label="Max Stock Level"
-                          name="custom_max_stock_level"
-                          value={form.custom_max_stock_level}
+                          name="maxStockLevel"
+                          value={form.maxStockLevel}
                           onChange={handleForm}
                           className="w-full col-span-3"
                         />
                         <Input
                           label="Re-order Level"
-                          name="custom_reorder_level"
-                          value={form.custom_reorder_level}
+                          name="reorderLevel"
+                          value={form.reorderLevel}
                           onChange={handleForm}
                           className="w-full"
                         />

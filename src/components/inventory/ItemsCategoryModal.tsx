@@ -120,7 +120,7 @@ const ItemsCategoryModal: React.FC<{
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
-                Supplier Details
+                Category Details
               </button>
               <button
                 type="button"
