@@ -68,14 +68,7 @@ let basicDetail: BasicDetailsForm = {
     timeZone: "",
   },
 };
-let terms: Terms = {
-  buying: {},
-  selling: {}
-};
-let financialConfig: FinancialConfig = {
-  baseCurrency: "",
-  financialYearStart: ""
-};
+
 let accountingSetup: AccountingSetup = {
   chartOfAccounts: "Standard Chart - 2025",
   defaultExpenseGL: "5000-EXP-GENERAL",
@@ -95,6 +88,7 @@ const CompanySetup: React.FC = () => {
   const [tab, setTab] = useState(navTabs[0].key);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [financialConfig, setFinancialConfig] = useState<FinancialConfig>();
+  const [terms, setTerms] = useState<Terms>();
   const [showBankModal, setShowBankModal] = useState(false);
   const [companyDetail, setCompanyDetail] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
@@ -122,9 +116,8 @@ const CompanySetup: React.FC = () => {
       basicDetail.registration = registrationDetails,
         basicDetail.contact = response.data.contactInfo,
         basicDetail.address = response.data.address
-      terms.buying = response.data.terms.buying;
-      terms.selling = response.data.terms.selling;
       setBankAccounts(response.data.bankAccounts ?? []);
+      setTerms(response.data.terms);
 
       // console.log("bank: ", response.data.bankAccounts);
       // financialConfig.baseCurrency = response.data.financialConfig.baseCurrency;
