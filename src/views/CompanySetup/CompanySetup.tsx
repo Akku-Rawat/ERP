@@ -38,8 +38,6 @@ const navTabs = [
   { key: "logo", label: "Logo & Signature", icon: <FaFileUpload /> },
 ];
 
-
-
 let basicDetail: BasicDetailsForm = {
   registration: {
     registerNo: "",
@@ -123,13 +121,10 @@ const CompanySetup: React.FC = () => {
       basicDetail.registration = registrationDetails,
         basicDetail.contact = response.data.contactInfo,
         basicDetail.address = response.data.address
-
-      // console.log("terms: ", response.data.terms);
       terms.buying = response.data.terms.buying;
       terms.selling = response.data.terms.selling;
-      // console.log("registrationDetails: ", registrationDetails);
-      // console.log("contacts: ", response.data.contactInfo);
-      // console.log("adress: ", response.data.address);
+      setBankAccounts(response.data.bankAccounts ?? []);
+
       // console.log("bank: ", response.data.bankAccounts);
       financialConfig.baseCurrency = response.data.financialConfig.baseCurrency;
       financialConfig.financialYearStart = response.data.financialConfig.financialYearStart;

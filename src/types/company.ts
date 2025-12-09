@@ -30,15 +30,15 @@ export interface Address {
   timeZone?: string;
 }
 export interface BankAccount {
-  accountNo?: string;
+  accountNo: string;
   accountHolderName?: string;
-  bankName?: string;
-  swiftCode?: string;
+  bankName: string;
+  swiftCode: string;
   sortCode?: string;
-  branchAddress?: string;
-  currency?: string;
-  dateAdded?: string;
-  openingBalance?: number;
+  branchAddress: string;
+  currency: string;
+  dateAdded: string;
+  openingBalance: number;
 }
 export interface FinancialConfig {
   baseCurrency?: string;
