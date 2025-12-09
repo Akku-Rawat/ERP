@@ -94,6 +94,7 @@ let accountingSetup: AccountingSetup = {
 const CompanySetup: React.FC = () => {
   const [tab, setTab] = useState(navTabs[0].key);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+  const [financialConfig, setFinancialConfig] = useState<FinancialConfig>();
   const [showBankModal, setShowBankModal] = useState(false);
   const [companyDetail, setCompanyDetail] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
@@ -126,8 +127,9 @@ const CompanySetup: React.FC = () => {
       setBankAccounts(response.data.bankAccounts ?? []);
 
       // console.log("bank: ", response.data.bankAccounts);
-      financialConfig.baseCurrency = response.data.financialConfig.baseCurrency;
-      financialConfig.financialYearStart = response.data.financialConfig.financialYearStart;
+      // financialConfig.baseCurrency = response.data.financialConfig.baseCurrency;
+      // financialConfig.financialYearStart = response.data.financialConfig.financialYearStart;
+      setFinancialConfig(response.data.financialConfig);
       // console.log("accounsetup: ", response);
       // console.log("modules: ", response.data.modules);
       // console.log("document: ", response.data.documents);
