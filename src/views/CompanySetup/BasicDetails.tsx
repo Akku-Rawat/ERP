@@ -186,8 +186,6 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
     { id: "address", label: "Address", icon: FaMapMarkerAlt },
   ];
 
-  console.log("basic:  ", basic);
-
   return (
     <div className="w-full">
       {showSuccess && (
