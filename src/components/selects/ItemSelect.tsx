@@ -63,10 +63,12 @@ export default function ItemSelect({
   }, []);
 
   /* ---------------- Filtering ---------------- */
-  const filtered = items.filter((it) =>
-    it.name.toLowerCase().includes(search.toLowerCase()),
-  );
+ const q = (search || "").toLowerCase();
 
+const filtered = (items || []).filter((it) => {
+  const name = (it?.name || "").toLowerCase();
+  return name.includes(q);
+});
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
       {/* Wrapper to control dropdown width */}

@@ -45,13 +45,8 @@ const crmModule = {
 const CRM: React.FC = () => {
   const [activeTab, setActiveTab] = useState(crmModule.defaultTab);
 
-  // --- handlers to pass down to children ---
-  // Replace these with modal open logic if you have modals in parent
   const handleAddCustomer = () => {
-    // keep user on customer tab and open child modal (child should open modal on this callback)
     setActiveTab("customer-managment");
-    // optional: emit an event or set a shared state to tell child to open its modal
-    // e.g. window.dispatchEvent(new CustomEvent('crm:addCustomer'))
     console.log("onAdd -> Customer (parent handler called)");
   };
 
@@ -64,13 +59,12 @@ const CRM: React.FC = () => {
     setActiveTab("tickets");
     console.log("onAdd -> Ticket (parent handler called)");
   };
-  // ----------------------------------------
 
   return (
-    <div className="bg-gray-50 h-screen overflow-auto">
+    <div className="bg-app min-h-screen">  
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-main">
           <span>{crmModule.icon}</span> {crmModule.name}
         </h2>
       </div>
@@ -82,7 +76,7 @@ const CRM: React.FC = () => {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
-              activeTab === tab.id ? "text-teal-600 border-b-2 border-teal-600" : "text-gray-500 hover:text-gray-700"
+              activeTab === tab.id ? "text-primary border-b-2 border-current" : "text-muted hover:text-main"
             }`}
           >
             <span>{tab.icon}</span> {tab.name}
@@ -96,21 +90,21 @@ const CRM: React.FC = () => {
 
           {activeTab === "customer-managment" && (
             <CustomerManagement
-              onAdd={handleAddCustomer}          // <-- pass handler
+              onAdd={handleAddCustomer}
             />
           )}
 
           {activeTab === "leads" && (
             <Leads
               leads={crmModule.leads}
-              onAdd={handleAddLead}              // <-- pass handler
+              onAdd={handleAddLead}
             />
           )}
 
           {activeTab === "tickets" && (
             <SupportTickets
               tickets={crmModule.tickets}
-              onAdd={handleAddTicket}           // <-- pass handler
+              onAdd={handleAddTicket}
             />
           )}
 
