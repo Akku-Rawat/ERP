@@ -1,3 +1,4 @@
+// CompanySetup.tsx
 import React, { useState } from "react";
 import {
   FaBuilding,
@@ -34,16 +35,50 @@ interface BankAccount {
   ifscCode: string;
   currency: string;
   swiftCode: string;
+  isdefault?: boolean;
 }
+
+// Dummy initial accounts (2) — you can remove/replace with real API data later
+const initialAccounts: BankAccount[] = [
+  {
+    bankName: "HDFC Bank",
+    accountNumber: "123456789012",
+    ifscCode: "HDFC0001234",
+    currency: "INR",
+    swiftCode: "HDFCINBB",
+    isdefault: true,
+  },
+  {
+    bankName: "Barclays UK",
+    accountNumber: "987654321000",
+    ifscCode: "BARC00UK01",
+    currency: "GBP",
+    swiftCode: "BARCGB22",
+    isdefault: false,
+  },
+];
 
 const CompanySetup: React.FC = () => {
   const [tab, setTab] = useState(navTabs[0].key);
-  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+
+  // single source of truth for accounts
+  const [accounts, setAccounts] = useState<BankAccount[]>(initialAccounts);
+
+  // modal toggles
   const [showBankModal, setShowBankModal] = useState(false);
 
+  // open modal (passed to BankDetails as onAddAccount)
+  const openAddModal = () => setShowBankModal(true);
+
+  // called by AddBankAccountModal on submit (adds to accounts)
   const handleAddBankAccount = (newAccount: BankAccount) => {
-    setBankAccounts((prev) => [...prev, newAccount]);
+    setAccounts((prev) => [...prev, newAccount]);
     setShowBankModal(false);
+  };
+
+  // mark one account default by index (global index in `accounts`)
+  const handleSetDefault = (index: number) => {
+    setAccounts((prev) => prev.map((a, i) => ({ ...a, isdefault: i === index })));
   };
 
   return (
@@ -52,6 +87,7 @@ const CompanySetup: React.FC = () => {
       <h1 className="text-3xl font-bold mb-6 flex items-center gap-2 text-main">
         <FaBuilding /> Company Setup
       </h1>
+
       {/* Navbar */}
       <div className="flex gap-8 mb-8 border-b border-theme">
         {navTabs.map((t) => (
@@ -59,12 +95,12 @@ const CompanySetup: React.FC = () => {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-2 border-theme 
-    ${
-      tab === t.key
-        ? "border-[var(--primary)] text-main font-semibold"
-        : "border-transparent text-muted hover:text-primary"
-    }
-  `}
+              ${
+                tab === t.key
+                  ? "border-[var(--primary)] text-main font-semibold"
+                  : "border-transparent text-muted hover:text-primary"
+              }
+            `}
             style={{ background: "transparent" }}
           >
             {t.icon}
@@ -72,12 +108,15 @@ const CompanySetup: React.FC = () => {
           </button>
         ))}
       </div>
+
+      {/* Tab content */}
       <div>
         {tab === "basic" && <BasicDetails />}
         {tab === "bank" && (
           <BankDetails
-            bankAccounts={bankAccounts}
-            onAddAccount={() => setShowBankModal(true)}
+            bankAccounts={accounts}
+            onAddAccount={openAddModal}
+            onSetDefault={handleSetDefault}
           />
         )}
         {tab === "accounting" && <AccountingDetails />}
