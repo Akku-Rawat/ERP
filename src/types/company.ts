@@ -70,7 +70,7 @@ export interface CompanyDocuments {
   companyLogoUrl?: string;
   authorizedSignatureUrl?: string;
 }
-export interface Templates {
+export interface CompanyTemplates {
   invoiceTemplate?: string;
   quotationTemplate?: string;
   rfqTemplate?: string;
@@ -86,7 +86,7 @@ export interface Company {
   accountingSetup?: AccountingSetup;
   modules?: ModuleSubscriptions;
   documents?: CompanyDocuments;
-  templates?: Templates;
+  templates?: CompanyTemplates;
   terms?: Terms;
   createdAt?: string;
   updatedAt?: string;

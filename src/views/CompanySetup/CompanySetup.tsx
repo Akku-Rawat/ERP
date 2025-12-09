@@ -14,11 +14,10 @@ import AccountingDetails from "./AccountingDetails";
 import BuyingSelling from "./BuyingSelling";
 import SubscribedModules from "./subscribedmodule";
 import BankDetails from "./BankDetails";
-import Templates from "./Templates";
 import AddBankAccountModal from "../../components/CompanySetup/AddBankAccountModal";
 import Upload from "./upload";
 
-import type { AccountingSetup, BankAccount, BasicDetailsForm, Company, FinancialConfig, RegistrationDetails } from "../../types/company";
+import type { CompanyDocuments, AccountingSetup, BankAccount, BasicDetailsForm, Company, FinancialConfig, ModuleSubscriptions, RegistrationDetails, CompanyTemplates } from "../../types/company";
 
 import {
   getCompanyById
@@ -27,6 +26,7 @@ import {
 import type {
   Terms,
 } from "../../types/termsAndCondition";
+import Templates from "./Templates";
 
 const navTabs = [
   { key: "basic", label: "Basic Details", icon: <FaIdCard /> },
@@ -38,51 +38,6 @@ const navTabs = [
   { key: "logo", label: "Logo & Signature", icon: <FaFileUpload /> },
 ];
 
-let basicDetail: BasicDetailsForm = {
-  registration: {
-    registerNo: "",
-    tpin: "",
-    companyName: "",
-    dateOfIncorporation: "",
-    companyType: "",
-    companyStatus: "",
-    industryType: "",
-  },
-  contact: {
-    companyEmail: "",
-    companyPhone: "",
-    alternatePhone: "",
-    website: "",
-    contactPerson: "",
-    contactEmail: "",
-    contactPhone: "",
-  },
-  address: {
-    addressLine1: "",
-    addressLine2: "",
-    city: "",
-    district: "",
-    province: "",
-    postalCode: "",
-    country: "",
-    timeZone: "",
-  },
-};
-
-let accountingSetup: AccountingSetup = {
-  chartOfAccounts: "Standard Chart - 2025",
-  defaultExpenseGL: "5000-EXP-GENERAL",
-
-  fxGainLossAccount: "4300-FX-GAIN-LOSS",
-  revaluationFrequency: "Monthly",
-
-  roundOffAccount: "4800-ROUND-OFF",
-  roundOffCostCenter: "CC-001-MAIN",
-
-  depreciationAccount: "5100-DEPRECIATION",
-  appreciationAccount: "5200-ASSET-APPRECIATION"
-};
-
 
 const CompanySetup: React.FC = () => {
   const [tab, setTab] = useState(navTabs[0].key);
@@ -91,7 +46,42 @@ const CompanySetup: React.FC = () => {
   const [terms, setTerms] = useState<Terms>();
   const [showBankModal, setShowBankModal] = useState(false);
   const [companyDetail, setCompanyDetail] = useState<Company | null>(null);
+  const [modules, setModules] = useState<ModuleSubscriptions | null>(null);
+  const [accountingSetup, setAccountingSetup] = useState<AccountingSetup | null>(null);
+  const [companytemplates, setCompanyTemplates] = useState<CompanyTemplates | null>(null);
+  const [companyDocuments, setCompanyDocuments] = useState<CompanyDocuments | null>(null);
   const [loading, setLoading] = useState(true);
+  const [basicDetail, setBasicDetail] = useState<BasicDetailsForm>({
+    registration: {
+      registerNo: "",
+      tpin: "",
+      companyName: "",
+      dateOfIncorporation: "",
+      companyType: "",
+      companyStatus: "",
+      industryType: "",
+    },
+    contact: {
+      companyEmail: "",
+      companyPhone: "",
+      alternatePhone: "",
+      website: "",
+      contactPerson: "",
+      contactEmail: "",
+      contactPhone: "",
+    },
+    address: {
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      district: "",
+      province: "",
+      postalCode: "",
+      country: "",
+      timeZone: "",
+    },
+  });
+
 
   const handleAddBankAccount = (newAccount: BankAccount) => {
     setBankAccounts((prev) => [...prev, newAccount]);
@@ -101,6 +91,8 @@ const CompanySetup: React.FC = () => {
     try {
       setLoading(true);
       const response = await getCompanyById("1");
+      setCompanyDetail(response.data as Company);
+
       // console.log("response: ", response);
       let registrationDetails: RegistrationDetails = {
         registerNo: response.data.registrationNumber ?? "",
@@ -112,22 +104,30 @@ const CompanySetup: React.FC = () => {
         industryType: response.data.industryType ?? "",
       };
 
+      setAccountingSetup(response.data.accountingSetup ?? {
+        chartOfAccounts: "Standard Chart - 2025",
+        defaultExpenseGL: "5000-EXP-GENERAL",
+        fxGainLossAccount: "4300-FX-GAIN-LOSS",
+        revaluationFrequency: "Monthly",
+        roundOffAccount: "4800-ROUND-OFF",
+        roundOffCostCenter: "CC-001-MAIN",
+        depreciationAccount: "5100-DEPRECIATION",
+        appreciationAccount: "5200-ASSET-APPRECIATION"
+      });
 
-      basicDetail.registration = registrationDetails,
-        basicDetail.contact = response.data.contactInfo,
-        basicDetail.address = response.data.address
+      setBasicDetail({
+        registration: registrationDetails,
+        contact: response.data.contactInfo,
+        address: response.data.address,
+      });
+
       setBankAccounts(response.data.bankAccounts ?? []);
       setTerms(response.data.terms);
-
-      // console.log("bank: ", response.data.bankAccounts);
-      // financialConfig.baseCurrency = response.data.financialConfig.baseCurrency;
-      // financialConfig.financialYearStart = response.data.financialConfig.financialYearStart;
       setFinancialConfig(response.data.financialConfig);
       // console.log("accounsetup: ", response);
       // console.log("modules: ", response.data.modules);
       // console.log("document: ", response.data.documents);
       // console.log("templates: ", response.data.templates);
-      setCompanyDetail(response.data as Company);
     } catch (err) {
       console.error("Error loading company data:", err);
     } finally {

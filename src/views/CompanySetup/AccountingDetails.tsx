@@ -44,9 +44,6 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
   const refs = useRef<Record<string, HTMLInputElement | HTMLSelectElement | null>>({});
   const restoring = useRef(false);
 
-  console.log("financialConfig: ", financialConfig);
-  console.log("accountingSetup: ", accountingSetup);
-
 
   const mergedProps = {
     chartOfAccounts: accountingSetup?.chartOfAccounts ?? "",
