@@ -18,11 +18,15 @@ import Templates from "./Templates";
 import AddBankAccountModal from "../../components/CompanySetup/AddBankAccountModal";
 import Upload from "./upload";
 
-import type { BasicDetailsForm, Company, RegistrationDetails } from "../../types/company";
+import type { AccountingSetup, BankAccount, BasicDetailsForm, Company, FinancialConfig, RegistrationDetails } from "../../types/company";
 
 import {
   getCompanyById
 } from "../../api/companySetupApi";
+
+import type {
+  Terms,
+} from "../../types/termsAndCondition";
 
 const navTabs = [
   { key: "basic", label: "Basic Details", icon: <FaIdCard /> },
@@ -34,15 +38,60 @@ const navTabs = [
   { key: "logo", label: "Logo & Signature", icon: <FaFileUpload /> },
 ];
 
-interface BankAccount {
-  bankName: string;
-  accountNumber: string;
-  ifscCode: string;
-  currency: string;
-  swiftCode: string;
-}
 
-let basicDetail: BasicDetailsForm = {};
+
+let basicDetail: BasicDetailsForm = {
+  registration: {
+    registerNo: "",
+    tpin: "",
+    companyName: "",
+    dateOfIncorporation: "",
+    companyType: "",
+    companyStatus: "",
+    industryType: "",
+  },
+  contact: {
+    companyEmail: "",
+    companyPhone: "",
+    alternatePhone: "",
+    website: "",
+    contactPerson: "",
+    contactEmail: "",
+    contactPhone: "",
+  },
+  address: {
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    district: "",
+    province: "",
+    postalCode: "",
+    country: "",
+    timeZone: "",
+  },
+};
+let terms: Terms = {
+  buying: {},
+  selling: {}
+};
+let financialConfig: FinancialConfig = {
+  baseCurrency: "",
+  financialYearStart: ""
+};
+let accountingSetup: AccountingSetup = {
+  chartOfAccounts: "Standard Chart - 2025",
+  defaultExpenseGL: "5000-EXP-GENERAL",
+
+  fxGainLossAccount: "4300-FX-GAIN-LOSS",
+  revaluationFrequency: "Monthly",
+
+  roundOffAccount: "4800-ROUND-OFF",
+  roundOffCostCenter: "CC-001-MAIN",
+
+  depreciationAccount: "5100-DEPRECIATION",
+  appreciationAccount: "5200-ASSET-APPRECIATION"
+};
+
 
 const CompanySetup: React.FC = () => {
   const [tab, setTab] = useState(navTabs[0].key);
@@ -58,8 +107,8 @@ const CompanySetup: React.FC = () => {
   const fetchCompanyDetail = async () => {
     try {
       setLoading(true);
-      const response = await getCompanyById("COMP-00003");
-      console.log("response: ", response);
+      const response = await getCompanyById("1");
+      // console.log("response: ", response);
       let registrationDetails: RegistrationDetails = {
         registerNo: response.data.registrationNumber ?? "",
         tpin: response.data.tpin ?? "",
@@ -72,14 +121,18 @@ const CompanySetup: React.FC = () => {
 
 
       basicDetail.registration = registrationDetails,
-      basicDetail.contact = response.data.contactInfo,
-      basicDetail.address = response.data.address
+        basicDetail.contact = response.data.contactInfo,
+        basicDetail.address = response.data.address
+
+      // console.log("terms: ", response.data.terms);
+      terms.buying = response.data.terms.buying;
+      terms.selling = response.data.terms.selling;
       // console.log("registrationDetails: ", registrationDetails);
       // console.log("contacts: ", response.data.contactInfo);
       // console.log("adress: ", response.data.address);
       // console.log("bank: ", response.data.bankAccounts);
-      // console.log("financialConfig: ", response.data.financialConfig);
-      // console.log("terms: ", response.data.terms);
+      financialConfig.baseCurrency = response.data.financialConfig.baseCurrency;
+      financialConfig.financialYearStart = response.data.financialConfig.financialYearStart;
       // console.log("accounsetup: ", response);
       // console.log("modules: ", response.data.modules);
       // console.log("document: ", response.data.documents);
@@ -130,8 +183,8 @@ const CompanySetup: React.FC = () => {
             onAddAccount={() => setShowBankModal(true)}
           />
         )}
-        {tab === "accounting" && <AccountingDetails />}
-        {tab === "buyingSelling" && <BuyingSelling />}
+        {tab === "accounting" && <AccountingDetails financialConfig={financialConfig} accountingSetup={accountingSetup} />}
+        {tab === "buyingSelling" && <BuyingSelling terms={terms} />}
         {tab === "subscribed" && <SubscribedModules />}
         {tab === "Templates" && <Templates />}
         {tab === "logo" && <Upload />}

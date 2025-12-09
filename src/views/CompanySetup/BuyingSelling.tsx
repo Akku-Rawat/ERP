@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ShoppingCart,
   TrendingUp,
@@ -14,7 +14,17 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-// Section type IDs
+import type {
+  Terms,
+  TermPhase,
+  TermSection,
+  PaymentTerms
+} from "../../types/termsAndCondition";
+
+interface BuyingSellingProps {
+  terms?: Terms | null;
+}
+
 type SectionId =
   | "general"
   | "payment"
@@ -25,52 +35,26 @@ type SectionId =
 
 type Tab = "buying" | "selling";
 
-interface SectionTerm {
-  general: string;
-  payment: string;
-  delivery: string;
-  cancellation: string;
-  warranty: string;
-  liability: string;
-}
-
-interface PaymentPhase {
-  phase: string;
-  percentage: string;
-  when: string;
-}
-
-// PaymentData for each tab
-interface PaymentDataType {
-  phases: PaymentPhase[];
-  dueDates: string;
-  lateCharges: string;
-  taxes: string;
-  specialNotes: string;
-}
-
 interface AllPaymentData {
-  buying: PaymentDataType;
-  selling: PaymentDataType;
+  buying: PaymentTerms;
+  selling: PaymentTerms;
 }
 
 interface AllFormData {
-  buying: SectionTerm;
-  selling: SectionTerm;
+  buying: TermSection;
+  selling: TermSection;
 }
 
-// Section object for dropdowns
 interface SectionOption {
   id: SectionId;
   label: string;
   icon: React.ComponentType<any>;
 }
 
-const defaultTerms: SectionTerm = {
+const defaultTerms: TermSection = {
   general: `1. This Quotation is subject to the following terms and conditions. By accepting this quotation, {{CustomerName}} agrees to be bound by these terms. This quotation, identified by number {{QuotationNumber}}, was issued on {{QuotationDate}} and is valid until {{ValidUntil}}.
 2. The services to be provided are: {{ServiceName}}. The total amount payable for these services is {{TotalAmount}}.
 3. Payment is due upon receipt of the invoice. Any disputes must be raised within 14 days of the invoice date.`,
-  payment: "PAYMENT_TABLE",
   delivery: `1. Estimated delivery timelines are as follows: Phase 1 – 2 weeks, Phase 2 – 3 weeks, with a total project duration of 5 weeks.`,
   cancellation: `1. Cancellation Conditions: Client may cancel anytime with written notice.
 2. Refund Rules: Advance payment is non-refundable, milestone payments refundable only for uninitiated work.`,
@@ -78,30 +62,33 @@ const defaultTerms: SectionTerm = {
   liability: `1. The Company is not liable for delays caused by the client.
 2. The client is responsible for providing accurate information and resources.
 3. In no event shall the Company's total liability, whether in contract or otherwise, exceed the total amount paid by the client for the service.`,
+  payment: { phases: [], dueDates: "", lateCharges: "", tax: "", notes: "" },
 };
-
-const defaultPayment: PaymentDataType = {
+const defaultPayment: PaymentTerms = {
   phases: [
     {
-      phase: "Advance",
+      id: "1",
+      name: "Advance",
       percentage: "Advance Payment 20%",
-      when: "Upon quotation acceptance.",
+      condition: "Upon quotation acceptance.",
     },
     {
-      phase: "Phase 1",
+      id: "2",
+      name: "Phase 1",
       percentage: "Phase 1 Completion 30%",
-      when: "After Phase 1 delivery",
+      condition: "After Phase 1 delivery",
     },
     {
-      phase: "Final",
+      id: "3",
+      name: "Final",
       percentage: "Final Completion 50%",
-      when: "On project sign-off",
+      condition: "On project sign-off",
     },
   ],
   dueDates: "Payment due within 30 days from invoice.",
   lateCharges: "12% p.a. on overdue payments.",
-  taxes: "Tax applicable @ 18%.",
-  specialNotes: "Advance payment is non-refundable.",
+  tax: "Tax applicable @ 18%.",
+  notes: "Advance payment is non-refundable.",
 };
 
 const sections: SectionOption[] = [
@@ -113,20 +100,139 @@ const sections: SectionOption[] = [
   { id: "liability", label: "Limitations and Liability", icon: AlertTriangle },
 ];
 
-const BuyingSelling: React.FC = () => {
+const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [buyingSection, setBuyingSection] = useState<SectionId>("general");
   const [sellingSection, setSellingSection] = useState<SectionId>("general");
 
-  const [formData, setFormData] = useState<AllFormData>({
-    buying: { ...defaultTerms },
-    selling: { ...defaultTerms },
+  // console.log("BuyingSelling terms: ", terms);
+
+  const [formData, setFormData] = useState<AllFormData>(() => {
+    const buying = terms?.buying;
+    const selling = terms?.selling;
+
+    if (buying && selling) {
+      return {
+        buying: {
+          general: buying.general || "",
+          delivery: buying.delivery || "",
+          cancellation: buying.cancellation || "",
+          warranty: buying.warranty || "",
+          liability: buying.liability || "",
+          payment: buying.payment || { phases: [], dueDates: "", lateCharges: "", tax: "", notes: "" },
+        },
+        selling: {
+          general: selling.general || "",
+          delivery: selling.delivery || "",
+          cancellation: selling.cancellation || "",
+          warranty: selling.warranty || "",
+          liability: selling.liability || "",
+          payment: selling.payment || { phases: [], dueDates: "", lateCharges: "", tax: "", notes: "" },
+        },
+      };
+    }
+
+    return {
+      buying: { ...defaultTerms },
+      selling: { ...defaultTerms },
+    };
   });
 
-  const [paymentData, setPaymentData] = useState<AllPaymentData>({
-    buying: { ...defaultPayment },
-    selling: { ...defaultPayment },
+  const [paymentData, setPaymentData] = useState<AllPaymentData>(() => {
+    const buying = terms?.buying;
+    const selling = terms?.selling;
+
+    return {
+      buying: buying
+        ? {
+          phases:
+            buying.payment?.phases?.map((p: TermPhase) => ({
+              id: p.id || "",
+              name: p.name || "",
+              percentage: p.percentage || "",
+              condition: p.condition || "",
+              isDelete: p.isDelete,
+            })) || [],
+          dueDates: buying.payment?.dueDates || "",
+          lateCharges: buying.payment?.lateCharges || "",
+          tax: buying.payment?.tax || "",
+          notes: buying.payment?.notes || "",
+        }
+        : { ...defaultPayment },
+      selling: selling
+        ? {
+          phases:
+            selling.payment?.phases?.map((p: TermPhase) => ({
+              id: p.id || "",
+              name: p.name || "",
+              percentage: p.percentage || "",
+              condition: p.condition || "",
+              isDelete: p.isDelete,
+            })) || [],
+          dueDates: selling.payment?.dueDates || "",
+          lateCharges: selling.payment?.lateCharges || "",
+          tax: selling.payment?.tax || "",
+          notes: selling.payment?.notes || "",
+        }
+        : { ...defaultPayment },
+    };
   });
+
+  useEffect(() => {
+    const buying = terms?.buying;
+    const selling = terms?.selling;
+
+    if (!buying || !selling) return;
+
+    setFormData({
+      buying: {
+        general: buying.general || "",
+        delivery: buying.delivery || "",
+        cancellation: buying.cancellation || "",
+        warranty: buying.warranty || "",
+        liability: buying.liability || "",
+        payment: buying.payment || { phases: [], dueDates: "", lateCharges: "", tax: "", notes: "" },
+      },
+      selling: {
+        general: selling.general || "",
+        delivery: selling.delivery || "",
+        cancellation: selling.cancellation || "",
+        warranty: selling.warranty || "",
+        liability: selling.liability || "",
+        payment: selling.payment || { phases: [], dueDates: "", lateCharges: "", tax: "", notes: "" },
+      },
+    });
+
+    setPaymentData({
+      buying: {
+        phases:
+          buying.payment?.phases?.map((p: TermPhase) => ({
+            id: p.id,
+            name: p.name || "",
+            percentage: p.percentage || "",
+            condition: p.condition || "",
+          })) || [],
+        dueDates: buying.payment?.dueDates || "",
+        lateCharges: buying.payment?.lateCharges || "",
+        tax: buying.payment?.tax || "",
+        notes: buying.payment?.notes || "",
+      },
+      selling: {
+        phases:
+          selling.payment?.phases?.map((p: TermPhase) => ({
+            id: p.id,
+            name: p.name || "",
+            percentage: p.percentage || "",
+            condition: p.condition || "",
+          })) || [],
+        dueDates: selling.payment?.dueDates || "",
+        lateCharges: selling.payment?.lateCharges || "",
+        tax: selling.payment?.tax || "",
+        notes: selling.payment?.notes || "",
+      },
+    });
+  }, [terms]);
+
 
   const handleChange = (tab: Tab, value: string) => {
     const section = tab === "buying" ? buyingSection : sellingSection;
@@ -141,7 +247,7 @@ const BuyingSelling: React.FC = () => {
 
   const handlePaymentChange = (
     tab: Tab,
-    field: keyof PaymentDataType | keyof PaymentPhase,
+    field: keyof PaymentTerms | keyof TermPhase,
     value: string,
     index: number | null = null,
   ) => {
@@ -150,8 +256,8 @@ const BuyingSelling: React.FC = () => {
         index !== null &&
         field !== "dueDates" &&
         field !== "lateCharges" &&
-        field !== "taxes" &&
-        field !== "specialNotes"
+        field !== "tax" &&
+        field !== "notes"
       ) {
         const newPhases = [...prev[tab].phases];
         newPhases[index] = { ...newPhases[index], [field]: value };
@@ -171,7 +277,10 @@ const BuyingSelling: React.FC = () => {
   };
 
   const getFilledCount = (tab: Tab) => {
-    return Object.values(formData[tab]).filter((v) => v.trim() !== "").length;
+    return Object.values(formData[tab])
+      .filter((v) => typeof v === "string" && v.trim() !== "")
+      .length;
+
   };
 
   const buyingSectionData = sections.find((s) => s.id === buyingSection);
@@ -179,6 +288,7 @@ const BuyingSelling: React.FC = () => {
 
   const PaymentTermsUI: React.FC<{ tab: Tab }> = ({ tab }) => {
     const data = paymentData[tab];
+    console.log("data: ", data);
     return (
       <div className="space-y-4">
         {/* Payment Schedule Table */}
@@ -193,7 +303,7 @@ const BuyingSelling: React.FC = () => {
                   Percentage
                 </th>
                 <th className="text-left px-3 py-2 font-medium text-muted">
-                  When
+                  condition
                 </th>
               </tr>
             </thead>
@@ -203,9 +313,9 @@ const BuyingSelling: React.FC = () => {
                   <td className="px-3 py-2">
                     <input
                       type="text"
-                      value={row.phase}
+                      value={row.name}
                       onChange={(e) =>
-                        handlePaymentChange(tab, "phase", e.target.value, idx)
+                        handlePaymentChange(tab, "name", e.target.value, idx)
                       }
                       className="w-full bg-transparent text-muted focus:outline-none"
                     />
@@ -228,9 +338,9 @@ const BuyingSelling: React.FC = () => {
                   <td className="px-3 py-2">
                     <input
                       type="text"
-                      value={row.when}
+                      value={row.condition}
                       onChange={(e) =>
-                        handlePaymentChange(tab, "when", e.target.value, idx)
+                        handlePaymentChange(tab, "condition", e.target.value, idx)
                       }
                       className="w-full bg-transparent text-muted focus:outline-none"
                     />
@@ -271,13 +381,13 @@ const BuyingSelling: React.FC = () => {
           </div>
           <div className="flex">
             <span className="w-40 flex-shrink-0 text-muted font-medium">
-              Taxes / Additional Charges:
+              Tax / Additional Charges:
             </span>
             <input
               type="text"
-              value={data.taxes}
+              value={data.tax}
               onChange={(e) =>
-                handlePaymentChange(tab, "taxes", e.target.value)
+                handlePaymentChange(tab, "tax", e.target.value)
               }
               className="flex-1 bg-transparent text-muted focus:outline-none"
             />
@@ -288,9 +398,9 @@ const BuyingSelling: React.FC = () => {
             </span>
             <input
               type="text"
-              value={data.specialNotes}
+              value={data.notes}
               onChange={(e) =>
-                handlePaymentChange(tab, "specialNotes", e.target.value)
+                handlePaymentChange(tab, "notes", e.target.value)
               }
               className="flex-1 bg-transparent text-muted focus:outline-none"
             />
@@ -314,11 +424,10 @@ const BuyingSelling: React.FC = () => {
         value={formData[tab][section]}
         onChange={(e) => handleChange(tab, e.target.value)}
         placeholder={`Enter ${sectionData?.label.toLowerCase()}...`}
-        className={`w-full h-64 bg-card border border-theme rounded-lg px-4 py-3 text-sm text-main placeholder-card focus:outline-none focus:ring-2 focus:border-transparent focus:bg-card transition-all resize-none ${
-          tab === "buying"
-            ? "focus:ring-[var(--primary)]"
-            : "focus:ring-[var(--primary)]"
-        }`}
+        className={`w-full h-64 bg-card border border-theme rounded-lg px-4 py-3 text-sm text-main placeholder-card focus:outline-none focus:ring-2 focus:border-transparent focus:bg-card transition-all resize-none ${tab === "buying"
+          ? "focus:ring-[var(--primary)]"
+          : "focus:ring-[var(--primary)]"
+          }`}
       />
     );
   };

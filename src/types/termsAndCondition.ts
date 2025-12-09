@@ -23,8 +23,6 @@ export interface TermSection {
   liability?: string;
 }
 export interface Terms {
-  terms: {
-    buying?: TermSection;
-    selling: TermSection;
-  };
+  buying?: TermSection;
+  selling: TermSection;
 }
