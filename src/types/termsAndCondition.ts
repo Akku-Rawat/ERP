@@ -16,7 +16,7 @@ export interface PaymentTerms {
 
 export interface TermSection {
   general?: string;
-  payment?: PaymentTerms;
+  payment: PaymentTerms;
   delivery?: string;
   cancellation?: string;
   warranty?: string;

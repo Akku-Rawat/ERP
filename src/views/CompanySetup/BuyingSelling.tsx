@@ -18,7 +18,7 @@ import type {
   Terms,
   TermPhase,
   TermSection,
-  PaymentTerms
+  PaymentTerms,
 } from "../../types/termsAndCondition";
 
 interface BuyingSellingProps {
@@ -35,63 +35,7 @@ type SectionId =
 
 type Tab = "buying" | "selling";
 
-interface AllPaymentData {
-  buying: PaymentTerms;
-  selling: PaymentTerms;
-}
-
-interface AllFormData {
-  buying: TermSection;
-  selling: TermSection;
-}
-
-interface SectionOption {
-  id: SectionId;
-  label: string;
-  icon: React.ComponentType<any>;
-}
-
-const defaultTerms: TermSection = {
-  general: `1. This Quotation is subject to the following terms and conditions. By accepting this quotation, {{CustomerName}} agrees to be bound by these terms. This quotation, identified by number {{QuotationNumber}}, was issued on {{QuotationDate}} and is valid until {{ValidUntil}}.
-2. The services to be provided are: {{ServiceName}}. The total amount payable for these services is {{TotalAmount}}.
-3. Payment is due upon receipt of the invoice. Any disputes must be raised within 14 days of the invoice date.`,
-  delivery: `1. Estimated delivery timelines are as follows: Phase 1 – 2 weeks, Phase 2 – 3 weeks, with a total project duration of 5 weeks.`,
-  cancellation: `1. Cancellation Conditions: Client may cancel anytime with written notice.
-2. Refund Rules: Advance payment is non-refundable, milestone payments refundable only for uninitiated work.`,
-  warranty: `1. The Company warrants that the service will be performed professionally and function as intended for 30 days after completion.`,
-  liability: `1. The Company is not liable for delays caused by the client.
-2. The client is responsible for providing accurate information and resources.
-3. In no event shall the Company's total liability, whether in contract or otherwise, exceed the total amount paid by the client for the service.`,
-  payment: { phases: [], dueDates: "", lateCharges: "", tax: "", notes: "" },
-};
-const defaultPayment: PaymentTerms = {
-  phases: [
-    {
-      id: "1",
-      name: "Advance",
-      percentage: "Advance Payment 20%",
-      condition: "Upon quotation acceptance.",
-    },
-    {
-      id: "2",
-      name: "Phase 1",
-      percentage: "Phase 1 Completion 30%",
-      condition: "After Phase 1 delivery",
-    },
-    {
-      id: "3",
-      name: "Final",
-      percentage: "Final Completion 50%",
-      condition: "On project sign-off",
-    },
-  ],
-  dueDates: "Payment due within 30 days from invoice.",
-  lateCharges: "12% p.a. on overdue payments.",
-  tax: "Tax applicable @ 18%.",
-  notes: "Advance payment is non-refundable.",
-};
-
-const sections: SectionOption[] = [
+const sections = [
   { id: "general", label: "General Service Terms", icon: FileText },
   { id: "payment", label: "Payment Terms", icon: CreditCard },
   { id: "delivery", label: "Service Delivery Terms", icon: Truck },
@@ -100,143 +44,73 @@ const sections: SectionOption[] = [
   { id: "liability", label: "Limitations and Liability", icon: AlertTriangle },
 ];
 
+// Empty section structure for reset
+const emptySection = (): TermSection => ({
+  general: "",
+  delivery: "",
+  cancellation: "",
+  warranty: "",
+  liability: "",
+  payment: {
+    phases: [],
+    dueDates: "",
+    lateCharges: "",
+    tax: "",
+    notes: "",
+  },
+});
+
+
 const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
-  const [showSuccess, setShowSuccess] = useState<boolean>(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [buyingSection, setBuyingSection] = useState<SectionId>("general");
   const [sellingSection, setSellingSection] = useState<SectionId>("general");
 
-  // console.log("BuyingSelling terms: ", terms);
-
-  const [formData, setFormData] = useState<AllFormData>(() => {
-    const buying = terms?.buying;
-    const selling = terms?.selling;
-
-    if (buying && selling) {
-      return {
-        buying: {
-          general: buying.general || "",
-          delivery: buying.delivery || "",
-          cancellation: buying.cancellation || "",
-          warranty: buying.warranty || "",
-          liability: buying.liability || "",
-          payment: buying.payment || { phases: [], dueDates: "", lateCharges: "", tax: "", notes: "" },
-        },
-        selling: {
-          general: selling.general || "",
-          delivery: selling.delivery || "",
-          cancellation: selling.cancellation || "",
-          warranty: selling.warranty || "",
-          liability: selling.liability || "",
-          payment: selling.payment || { phases: [], dueDates: "", lateCharges: "", tax: "", notes: "" },
-        },
-      };
-    }
-
-    return {
-      buying: { ...defaultTerms },
-      selling: { ...defaultTerms },
-    };
-  });
-
-  const [paymentData, setPaymentData] = useState<AllPaymentData>(() => {
-    const buying = terms?.buying;
-    const selling = terms?.selling;
-
-    return {
-      buying: buying
-        ? {
-          phases:
-            buying.payment?.phases?.map((p: TermPhase) => ({
-              id: p.id || "",
-              name: p.name || "",
-              percentage: p.percentage || "",
-              condition: p.condition || "",
-              isDelete: p.isDelete,
-            })) || [],
-          dueDates: buying.payment?.dueDates || "",
-          lateCharges: buying.payment?.lateCharges || "",
-          tax: buying.payment?.tax || "",
-          notes: buying.payment?.notes || "",
-        }
-        : { ...defaultPayment },
-      selling: selling
-        ? {
-          phases:
-            selling.payment?.phases?.map((p: TermPhase) => ({
-              id: p.id || "",
-              name: p.name || "",
-              percentage: p.percentage || "",
-              condition: p.condition || "",
-              isDelete: p.isDelete,
-            })) || [],
-          dueDates: selling.payment?.dueDates || "",
-          lateCharges: selling.payment?.lateCharges || "",
-          tax: selling.payment?.tax || "",
-          notes: selling.payment?.notes || "",
-        }
-        : { ...defaultPayment },
-    };
+  const [formData, setFormData] = useState({
+    buying: emptySection(),
+    selling: emptySection(),
   });
 
   useEffect(() => {
-    const buying = terms?.buying;
-    const selling = terms?.selling;
-
-    if (!buying || !selling) return;
+    if (!terms) return;
 
     setFormData({
       buying: {
-        general: buying.general || "",
-        delivery: buying.delivery || "",
-        cancellation: buying.cancellation || "",
-        warranty: buying.warranty || "",
-        liability: buying.liability || "",
-        payment: buying.payment || { phases: [], dueDates: "", lateCharges: "", tax: "", notes: "" },
+        general: terms.buying?.general ?? "",
+        delivery: terms.buying?.delivery ?? "",
+        cancellation: terms.buying?.cancellation ?? "",
+        warranty: terms.buying?.warranty ?? "",
+        liability: terms.buying?.liability ?? "",
+        payment: {
+          phases: terms.buying?.payment?.phases ?? [],
+          dueDates: terms.buying?.payment?.dueDates ?? "",
+          lateCharges: terms.buying?.payment?.lateCharges ?? "",
+          tax: terms.buying?.payment?.tax ?? "",
+          notes: terms.buying?.payment?.notes ?? "",
+        },
       },
-      selling: {
-        general: selling.general || "",
-        delivery: selling.delivery || "",
-        cancellation: selling.cancellation || "",
-        warranty: selling.warranty || "",
-        liability: selling.liability || "",
-        payment: selling.payment || { phases: [], dueDates: "", lateCharges: "", tax: "", notes: "" },
-      },
-    });
 
-    setPaymentData({
-      buying: {
-        phases:
-          buying.payment?.phases?.map((p: TermPhase) => ({
-            id: p.id,
-            name: p.name || "",
-            percentage: p.percentage || "",
-            condition: p.condition || "",
-          })) || [],
-        dueDates: buying.payment?.dueDates || "",
-        lateCharges: buying.payment?.lateCharges || "",
-        tax: buying.payment?.tax || "",
-        notes: buying.payment?.notes || "",
-      },
       selling: {
-        phases:
-          selling.payment?.phases?.map((p: TermPhase) => ({
-            id: p.id,
-            name: p.name || "",
-            percentage: p.percentage || "",
-            condition: p.condition || "",
-          })) || [],
-        dueDates: selling.payment?.dueDates || "",
-        lateCharges: selling.payment?.lateCharges || "",
-        tax: selling.payment?.tax || "",
-        notes: selling.payment?.notes || "",
+        general: terms.selling?.general ?? "",
+        delivery: terms.selling?.delivery ?? "",
+        cancellation: terms.selling?.cancellation ?? "",
+        warranty: terms.selling?.warranty ?? "",
+        liability: terms.selling?.liability ?? "",
+        payment: {
+          phases: terms.selling?.payment?.phases ?? [],
+          dueDates: terms.selling?.payment?.dueDates ?? "",
+          lateCharges: terms.selling?.payment?.lateCharges ?? "",
+          tax: terms.selling?.payment?.tax ?? "",
+          notes: terms.selling?.payment?.notes ?? "",
+        },
       },
     });
   }, [terms]);
 
-
-  const handleChange = (tab: Tab, value: string) => {
+  const handleSectionChange = (tab: Tab, value: string) => {
     const section = tab === "buying" ? buyingSection : sellingSection;
-    setFormData((prev) => ({
+
+    setFormData(prev => ({
       ...prev,
       [tab]: {
         ...prev[tab],
@@ -249,101 +123,137 @@ const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
     tab: Tab,
     field: keyof PaymentTerms | keyof TermPhase,
     value: string,
-    index: number | null = null,
+    index: number | null = null
   ) => {
-    setPaymentData((prev) => {
-      if (
-        index !== null &&
-        field !== "dueDates" &&
-        field !== "lateCharges" &&
-        field !== "tax" &&
-        field !== "notes"
-      ) {
-        const newPhases = [...prev[tab].phases];
-        newPhases[index] = { ...newPhases[index], [field]: value };
-        return { ...prev, [tab]: { ...prev[tab], phases: newPhases } };
-      }
-      return { ...prev, [tab]: { ...prev[tab], [field]: value } };
+    const p = formData[tab].payment;
+
+    if (index !== null) {
+      const updated = [...p.phases];
+      updated[index] = { ...updated[index], [field]: value };
+      setFormData(prev => ({
+        ...prev,
+        [tab]: {
+          ...prev[tab],
+          payment: { ...p, phases: updated },
+        },
+      }));
+      return;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      [tab]: {
+        ...prev[tab],
+        payment: { ...p, [field]: value },
+      },
+    }));
+  };
+
+  const addPhase = (tab: Tab) => {
+    const newPhase: TermPhase = {
+      id: Date.now().toString(),
+      name: "",
+      percentage: "",
+      condition: "",
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      [tab]: {
+        ...prev[tab],
+        payment: {
+          ...prev[tab].payment,
+          phases: [...prev[tab].payment.phases, newPhase],
+        },
+      },
+    }));
+  };
+
+  const removePhase = (tab: Tab, index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      [tab]: {
+        ...prev[tab],
+        payment: {
+          ...prev[tab].payment,
+          phases: prev[tab].payment.phases.filter((_, i) => i !== index),
+        },
+      },
+    }));
+  };
+
+  const getFilledCount = (tab: Tab) =>
+    Object.values(formData[tab]).filter(
+      v => typeof v === "string" && v.trim() !== ""
+    ).length;
+
+
+  const handleReset = () => {
+    setFormData({
+      buying: emptySection(),
+      selling: emptySection(),
     });
   };
 
   const handleSubmit = () => {
+    console.log("Final payload:", formData);
     setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+    setTimeout(() => setShowSuccess(false), 2000);
   };
 
-  const handleReset = () => {
-    setFormData({ buying: { ...defaultTerms }, selling: { ...defaultTerms } });
-  };
 
-  const getFilledCount = (tab: Tab) => {
-    return Object.values(formData[tab])
-      .filter((v) => typeof v === "string" && v.trim() !== "")
-      .length;
+  const PaymentTermsUI = ({ tab }: { tab: Tab }) => {
+    const p = formData[tab].payment;
 
-  };
-
-  const buyingSectionData = sections.find((s) => s.id === buyingSection);
-  const sellingSectionData = sections.find((s) => s.id === sellingSection);
-
-  const PaymentTermsUI: React.FC<{ tab: Tab }> = ({ tab }) => {
-    const data = paymentData[tab];
-    console.log("data: ", data);
     return (
       <div className="space-y-4">
-        {/* Payment Schedule Table */}
         <div className="border border-theme rounded-lg overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="table-head">
-                <th className="text-left px-3 py-2 font-medium text-muted w-1/4">
-                  Phase
-                </th>
-                <th className="text-left px-3 py-2 font-medium text-muted w-2/5">
-                  Percentage
-                </th>
-                <th className="text-left px-3 py-2 font-medium text-muted">
-                  condition
-                </th>
+                <th className="px-3 py-2">Phase</th>
+                <th className="px-3 py-2">Percentage</th>
+                <th className="px-3 py-2">Condition</th>
+                <th className="px-3 py-2 w-12"></th>
               </tr>
             </thead>
             <tbody>
-              {data.phases.map((row, idx) => (
-                <tr key={idx} className="border-b border-theme last:border-0">
+              {p.phases.map((row, idx) => (
+                <tr key={row.id} className="border-b border-theme">
                   <td className="px-3 py-2">
                     <input
-                      type="text"
                       value={row.name}
-                      onChange={(e) =>
+                      onChange={e =>
                         handlePaymentChange(tab, "name", e.target.value, idx)
                       }
-                      className="w-full bg-transparent text-muted focus:outline-none"
+                      className="bg-transparent w-full"
                     />
                   </td>
                   <td className="px-3 py-2">
                     <input
-                      type="text"
                       value={row.percentage}
-                      onChange={(e) =>
-                        handlePaymentChange(
-                          tab,
-                          "percentage",
-                          e.target.value,
-                          idx,
-                        )
+                      onChange={e =>
+                        handlePaymentChange(tab, "percentage", e.target.value, idx)
                       }
-                      className="w-full bg-transparent text-muted focus:outline-none"
+                      className="bg-transparent w-full"
                     />
                   </td>
                   <td className="px-3 py-2">
                     <input
-                      type="text"
                       value={row.condition}
-                      onChange={(e) =>
+                      onChange={e =>
                         handlePaymentChange(tab, "condition", e.target.value, idx)
                       }
-                      className="w-full bg-transparent text-muted focus:outline-none"
+                      className="bg-transparent w-full"
                     />
+                  </td>
+                  <td className="px-3 py-2">
+                    <button
+                      className="text-red-500 text-xs"
+                      onClick={() => removePhase(tab, idx)}
+                    >
+                      Remove
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -351,58 +261,47 @@ const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
           </table>
         </div>
 
-        {/* Additional Fields */}
+        <button
+          className="px-3 py-1 border border-theme rounded text-sm"
+          onClick={() => addPhase(tab)}
+        >
+          Add Phase
+        </button>
+
         <div className="space-y-3 text-sm">
           <div className="flex">
-            <span className="w-40 flex-shrink-0 text-muted font-medium">
-              Due Dates:
-            </span>
+            <span className="w-40">Due Dates:</span>
             <input
-              type="text"
-              value={data.dueDates}
-              onChange={(e) =>
-                handlePaymentChange(tab, "dueDates", e.target.value)
-              }
-              className="flex-1 bg-transparent text-muted focus:outline-none"
+              value={p.dueDates}
+              onChange={e => handlePaymentChange(tab, "dueDates", e.target.value)}
+              className="flex-1 bg-transparent"
             />
           </div>
+
           <div className="flex">
-            <span className="w-40 flex-shrink-0 text-muted font-medium">
-              Late Payment Charges:
-            </span>
+            <span className="w-40">Late Charges:</span>
             <input
-              type="text"
-              value={data.lateCharges}
-              onChange={(e) =>
-                handlePaymentChange(tab, "lateCharges", e.target.value)
-              }
-              className="flex-1 bg-transparent text-muted focus:outline-none"
+              value={p.lateCharges}
+              onChange={e => handlePaymentChange(tab, "lateCharges", e.target.value)}
+              className="flex-1 bg-transparent"
             />
           </div>
+
           <div className="flex">
-            <span className="w-40 flex-shrink-0 text-muted font-medium">
-              Tax / Additional Charges:
-            </span>
+            <span className="w-40">Tax:</span>
             <input
-              type="text"
-              value={data.tax}
-              onChange={(e) =>
-                handlePaymentChange(tab, "tax", e.target.value)
-              }
-              className="flex-1 bg-transparent text-muted focus:outline-none"
+              value={p.tax}
+              onChange={e => handlePaymentChange(tab, "tax", e.target.value)}
+              className="flex-1 bg-transparent"
             />
           </div>
+
           <div className="flex">
-            <span className="w-40 flex-shrink-0 text-muted font-medium">
-              Special Notes / Conditions:
-            </span>
+            <span className="w-40">Notes:</span>
             <input
-              type="text"
-              value={data.notes}
-              onChange={(e) =>
-                handlePaymentChange(tab, "notes", e.target.value)
-              }
-              className="flex-1 bg-transparent text-muted focus:outline-none"
+              value={p.notes}
+              onChange={e => handlePaymentChange(tab, "notes", e.target.value)}
+              className="flex-1 bg-transparent"
             />
           </div>
         </div>
@@ -410,186 +309,101 @@ const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
     );
   };
 
-  const renderContent = (tab: Tab) => {
+  const renderSection = (tab: Tab) => {
     const section = tab === "buying" ? buyingSection : sellingSection;
-    const sectionData =
-      tab === "buying" ? buyingSectionData : sellingSectionData;
 
-    if (section === "payment") {
-      return <PaymentTermsUI tab={tab} />;
-    }
+    if (section === "payment") return <PaymentTermsUI tab={tab} />;
 
     return (
       <textarea
         value={formData[tab][section]}
-        onChange={(e) => handleChange(tab, e.target.value)}
-        placeholder={`Enter ${sectionData?.label.toLowerCase()}...`}
-        className={`w-full h-64 bg-card border border-theme rounded-lg px-4 py-3 text-sm text-main placeholder-card focus:outline-none focus:ring-2 focus:border-transparent focus:bg-card transition-all resize-none ${tab === "buying"
-          ? "focus:ring-[var(--primary)]"
-          : "focus:ring-[var(--primary)]"
-          }`}
+        onChange={e => handleSectionChange(tab, e.target.value)}
+        className="w-full h-64 bg-card border border-theme rounded-lg p-3"
       />
     );
   };
 
   return (
     <div className="min-h-screen bg-app">
-      {/* Success Toast */}
-      <div
-        className={`fixed top-4 right-4 z-50 transition-all duration-500 ${showSuccess ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"}`}
-      >
-        <div className="bg-card border border-green-200 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
-          <div className="w-7 h-7 bg-green-100 rounded-full flex items-center justify-center">
-            <Check className="w-4 h-4 text-success" />
+      {/* SUCCESS TOAST */}
+      {showSuccess && (
+        <div className="fixed top-4 right-4 bg-card border border-green-200 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
+          <Check className="text-success" />
+          <span>Terms saved successfully!</span>
+        </div>
+      )}
+
+      {/* MAIN */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        {/* BUYING CARD */}
+        <div className="bg-card rounded-xl border border-theme">
+          <div className="px-4 py-2 bg-primary text-white flex items-center gap-3">
+            <ShoppingCart />
+            <span className="font-semibold">Buying Terms</span>
+            <span className="ml-auto text-xs bg-white/20 px-2 rounded">
+              {getFilledCount("buying")}/6
+            </span>
           </div>
-          <p className="font-medium text-main text-sm">
-            Terms saved successfully!
-          </p>
+
+          <div className="p-4">
+            <select
+              value={buyingSection}
+              onChange={e => setBuyingSection(e.target.value as SectionId)}
+              className="w-full border border-theme p-2 rounded bg-card"
+            >
+              {sections.map(s => (
+                <option key={s.id} value={s.id}>{s.label}</option>
+              ))}
+            </select>
+
+            <div className="mt-4">{renderSection("buying")}</div>
+          </div>
+        </div>
+
+        {/* SELLING CARD */}
+        <div className="bg-card rounded-xl border border-theme">
+          <div className="px-4 py-2 bg-primary text-white flex items-center gap-3">
+            <TrendingUp />
+            <span className="font-semibold">Selling Terms</span>
+            <span className="ml-auto text-xs bg-white/20 px-2 rounded">
+              {getFilledCount("selling")}/6
+            </span>
+          </div>
+
+          <div className="p-4">
+            <select
+              value={sellingSection}
+              onChange={e => setSellingSection(e.target.value as SectionId)}
+              className="w-full border border-theme p-2 rounded bg-card"
+            >
+              {sections.map(s => (
+                <option key={s.id} value={s.id}>{s.label}</option>
+              ))}
+            </select>
+
+            <div className="mt-4">{renderSection("selling")}</div>
+          </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-          {/* Buying Terms Card */}
-          <div className="bg-card rounded-xl border border-theme shadow-sm overflow-hidden">
-            {/* filled header using theme */}
-            <div
-              className="px-4 py-2 border-b border-theme flex items-center gap-3"
-              style={{
-                background: "var(--primary-600)",
-                color: "var(--table-head-text)",
-              }}
-            >
-              <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center"
-                style={{
-                  background: "var(--primary)",
-                  color: "var(--table-head-text)",
-                }}
-              >
-                <ShoppingCart className="w-4 h-4" />
-              </div>
-              <div className="flex-1">
-                <h2 className="font-semibold text-white text-sm">
-                  Buying Terms
-                </h2>
-                <p className="text-xs text-white">Purchase order terms</p>
-              </div>
-              <span
-                className="text-xs px-2 py-0.5 rounded-full"
-                style={{
-                  background: "rgba(255,255,255,0.12)",
-                  color: "var(--table-head-text)",
-                }}
-              >
-                {getFilledCount("buying")}/6
-              </span>
-            </div>
+      {/* ACTION BUTTONS */}
+      <div className="flex justify-end gap-3 mt-4">
+        <button
+          onClick={handleReset}
+          className="px-4 py-2 border border-theme rounded bg-card"
+        >
+          <RotateCcw className="inline-block mr-2" />
+          Reset
+        </button>
 
-            <div className="px-4 py-3 border-b border-theme">
-              <div className="relative">
-                <select
-                  value={buyingSection}
-                  onChange={(e) =>
-                    setBuyingSection(e.target.value as SectionId)
-                  }
-                  className="w-full appearance-none bg-card border border-theme rounded-lg px-4 py-2 pr-10 text-sm font-medium text-muted focus:outline-none focus:ring-2 focus:border-transparent cursor-pointer"
-                  style={{ outline: "none" }}
-                >
-                  {sections.map((section) => (
-                    <option key={section.id} value={section.id}>
-                      {section.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-4 h-4 text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-            </div>
-
-            <div className="p-4 h-87">{renderContent("buying")}</div>
-          </div>
-
-          {/* Selling Terms Card */}
-          <div className="bg-card rounded-xl border border-theme shadow-sm overflow-hidden">
-            <div
-              className="px-4 py-2 border-b border-theme flex items-center gap-3"
-              style={{
-                background: "var(--primary-600)",
-                color: "var(--table-head-text)",
-              }}
-            >
-              <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center"
-                style={{
-                  background: "var(--primary)",
-                  color: "var(--table-head-text)",
-                }}
-              >
-                <TrendingUp className="w-4 h-4" />
-              </div>
-              <div className="flex-1">
-                <h2 className="font-semibold text-white text-sm">
-                  Selling Terms
-                </h2>
-                <p className="text-xs text-white">Sales order terms</p>
-              </div>
-              <span
-                className="text-xs px-2 py-0.5 rounded-full"
-                style={{
-                  background: "rgba(255,255,255,0.12)",
-                  color: "var(--table-head-text)",
-                }}
-              >
-                {getFilledCount("selling")}/6
-              </span>
-            </div>
-
-            <div className="px-4 py-3 border-b border-theme">
-              <div className="relative">
-                <select
-                  value={sellingSection}
-                  onChange={(e) =>
-                    setSellingSection(e.target.value as SectionId)
-                  }
-                  className="w-full appearance-none bg-card border border-theme rounded-lg px-4 py-2 pr-10 text-sm font-medium text-muted focus:outline-none focus:ring-2 focus:border-transparent cursor-pointer"
-                  style={{ outline: "none" }}
-                >
-                  {sections.map((section) => (
-                    <option key={section.id} value={section.id}>
-                      {section.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-4 h-4 text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-            </div>
-
-            <div className="p-4 h-72">{renderContent("selling")}</div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-3 mt-4">
-          <button
-            onClick={handleReset}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted bg-card border border-theme rounded-lg hover:bg-card transition-all"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Reset
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white rounded-lg transition-all"
-            style={{
-              background:
-                "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
-            }}
-          >
-            <Save className="w-4 h-4" />
-            Save Terms
-          </button>
-        </div>
+        <button
+          onClick={handleSubmit}
+          className="px-5 py-2 rounded bg-primary text-white"
+        >
+          <Save className="inline-block mr-2" />
+          Save Terms
+        </button>
       </div>
     </div>
   );

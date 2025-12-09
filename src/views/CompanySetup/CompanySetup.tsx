@@ -124,6 +124,10 @@ const CompanySetup: React.FC = () => {
       setBankAccounts(response.data.bankAccounts ?? []);
       setTerms(response.data.terms);
       setFinancialConfig(response.data.financialConfig);
+      setModules(response.data.modules);
+      setCompanyTemplates(response.data.templates);
+      setCompanyDocuments(response.data.documents);
+      
       // console.log("accounsetup: ", response);
       // console.log("modules: ", response.data.modules);
       // console.log("document: ", response.data.documents);
