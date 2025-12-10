@@ -32,7 +32,7 @@ const sales = {
       icon: <FaFileInvoiceDollar />,
     },
     { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
-    { id: "pos", name: "POS", icon: <FaCashRegister /> },
+    // { id: "pos", name: "POS", icon: <FaCashRegister /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ],
   quotations: [],
@@ -130,7 +130,7 @@ const SalesModule: React.FC = () => {
           </>
         )}
 
-        {/* POS */}
+        {/* POS
         {activeTab === "pos" && (
           <>
             <div className="flex items-center justify-end gap-4 mb-4">
@@ -146,7 +146,7 @@ const SalesModule: React.FC = () => {
             </div>
             <POS />
           </>
-        )}
+        )} */}
 
         {activeTab === "reports" && <ReportTable />}
       </div>

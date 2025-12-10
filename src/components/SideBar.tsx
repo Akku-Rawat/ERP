@@ -19,11 +19,11 @@ import {
 const menuItems = [
   { name: "Dashboard", to: "/dashboard", icon: <FaChartBar /> },
   { name: "Sales", to: "/sales", icon: <FaMoneyBillWave /> },
-  { name: "CRM", to: "/crm", icon: <FaUsers /> },
+  { name: "Customer", to: "/crm", icon: <FaUsers /> },
   { name: "Procurement", to: "/procurement", icon: <FaShoppingBag /> },
   { name: "Inventory", to: "/inventory", icon: <FaBoxes /> },
   { name: "Accounting", to: "/accounting", icon: <FaBriefcase /> },
-  { name: "Hr", to: "/hr", icon: <FaUserTie /> },
+  { name: "Human Resource", to: "/hr", icon: <FaUserTie /> },
 ];
 
 interface SidebarProps {

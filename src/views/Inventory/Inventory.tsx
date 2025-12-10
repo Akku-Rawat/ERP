@@ -13,8 +13,8 @@ const inventory = {
   tabs: [
     { id: "items", name: "Items", icon: <FaBoxOpen /> },
     { id: "itemsCategory", name: "Items Category", icon: <FaBoxOpen /> },
-    { id: "warehouses", name: "Warehouses", icon: <FaWarehouse /> },
-    { id: "movements", name: "Movements", icon: <FaTruckMoving /> },
+    // { id: "warehouses", name: "Warehouses", icon: <FaWarehouse /> },
+    // { id: "movements", name: "Movements", icon: <FaTruckMoving /> },
   ],
   products: [
     {

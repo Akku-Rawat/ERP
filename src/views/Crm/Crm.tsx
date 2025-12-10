@@ -7,8 +7,8 @@ import SupportTickets from "./Support-tickets";
 
 import {
   FaUsers,
-  FaUser,
-  FaTicketAlt,
+  // FaUser,
+  // FaTicketAlt,
   FaChartBar,
   FaCalendarAlt,
   FaIdBadge,
@@ -21,8 +21,8 @@ const crmModule = {
   tabs: [
     { id: "dashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
     { id: "customer-managment", name: "Customer Management", icon: <FaIdBadge /> },
-    { id: "leads", name: "Leads", icon: <FaUser /> },
-    { id: "tickets", name: "Support Tickets", icon: <FaTicketAlt /> },
+    // { id: "leads", name: "Leads", icon: <FaUser /> },
+    // { id: "tickets", name: "Support Tickets", icon: <FaTicketAlt /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ],
   leads: [
