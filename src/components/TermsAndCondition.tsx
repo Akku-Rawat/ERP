@@ -1,10 +1,6 @@
-import React, { useState } from "react";
-import { FaEdit, FaTimes, FaCheck, FaPlus, FaTrash } from "react-icons/fa";
-import type {
-  TermSection,
-  PaymentTerms,
-  TermPhase,
-} from "../types/termsAndCondition";
+import React, { useState } from 'react';
+import { FaEdit, FaTimes, FaCheck, FaPlus, FaTrash } from 'react-icons/fa';
+import type { TermSection, PaymentTerms, TermPhase } from '../types/termsAndCondition';
 
 interface Props {
   terms: TermSection | null;
@@ -14,61 +10,58 @@ interface Props {
 type LocalPhase = TermPhase & { id?: string; isDelete?: number };
 
 const UI_TO_KEY: Record<string, keyof TermSection> = {
-  "General Service Terms": "general",
-  "Payment Terms": "payment",
-  "Service Delivery Terms": "delivery",
-  "Cancellation / Refund Policy": "cancellation",
-  Warranty: "warranty",
-  "Limitations and Liability": "liability",
+  'General Service Terms': 'general',
+  'Payment Terms': 'payment',
+  'Service Delivery Terms': 'delivery',
+  'Cancellation / Refund Policy': 'cancellation',
+  Warranty: 'warranty',
+  'Limitations and Liability': 'liability',
 };
 
 const TABS = Object.keys(UI_TO_KEY);
 
+
 const emptyPhase = (): TermPhase => ({
-  id: "",
-  name: "",
-  percentage: "",
-  condition: "",
+  id: '',
+  name: '',
+  percentage: '',
+  condition: '',
   isDelete: undefined,
 });
 
 const emptyPayment: PaymentTerms = {
   phases: [],
-  dueDates: "",
-  lateCharges: "",
-  tax: "",
-  notes: "",
+  dueDates: '',
+  lateCharges: '',
+  tax: '',
+  notes: '',
 };
 
 const emptyTerms: TermSection = {
-  general: "",
+  general: '',
   payment: emptyPayment,
-  delivery: "",
-  cancellation: "",
-  warranty: "",
-  liability: "",
+  delivery: '',
+  cancellation: '',
+  warranty: '',
+  liability: '',
 };
 
 const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
-  const [selectedTemplate, setSelectedTemplate] = useState(
-    "General Service Terms",
-  );
+  const [selectedTemplate, setSelectedTemplate] = useState('General Service Terms');
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState<TermSection | null>(null);
 
   const baseTerms: TermSection = terms ?? emptyTerms;
-  const currentTerms: TermSection = isEditing
-    ? (draft ?? baseTerms)
-    : baseTerms;
+  const currentTerms: TermSection = isEditing ? (draft ?? baseTerms) : baseTerms;
 
   const activeKey = UI_TO_KEY[selectedTemplate];
 
   const ensurePayment = (src: TermSection): PaymentTerms => ({
     phases: src.payment?.phases ?? [],
-    dueDates: src.payment?.dueDates ?? "",
-    lateCharges: src.payment?.lateCharges ?? "",
-    tax: src.payment?.tax ?? "",
-    notes: src.payment?.notes ?? "",
+    dueDates: src.payment?.dueDates ?? '',
+    lateCharges: src.payment?.lateCharges ?? '',
+    tax: src.payment?.tax ?? '',
+    notes: src.payment?.notes ?? '',
   });
 
   const startEditing = () => {
@@ -135,9 +128,9 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
   };
 
   const removePhase = (index: number) => {
-    console.log("removePhase index: ", index);
+    console.log('removePhase index: ', index);
     if (!isEditing) return;
-    console.log("isEditing: ", isEditing);
+    console.log('isEditing: ', isEditing);
 
     const phases = ensurePayment(currentTerms).phases as LocalPhase[];
 
@@ -156,119 +149,73 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
     updatePayment({ phases: next });
   };
 
+
   const renderPaymentTable = () => {
     const payment = ensurePayment(currentTerms);
     const rawPhases = payment.phases as LocalPhase[];
 
     return (
       <div className="space-y-5">
-        {/* Section Title */}
-        <div className="flex items-center justify-between pb-1 border-b">
-          <h4 className="text-lg font-semibold text-gray-800">
-            Payment Structure
-          </h4>
-
-          {isEditing && (
-            <button
-              onClick={addPhase}
-              type="button"
-              className="flex items-center gap-2 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-            >
-              <FaPlus /> Add Phase
-            </button>
-          )}
-        </div>
-
         {/* Table */}
-        <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
+        <div className="border border-theme rounded-lg overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">
-                  #
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">
-                  Phase
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">
-                  Percentage
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">
-                  Condition
-                </th>
-                <th className="px-4 py-3 text-center font-medium text-gray-700 w-12">
-                  Action
-                </th>
+            <thead>
+              <tr className="table-head">
+                <th className="px-3 py-2 text-left font-medium text-muted">#</th>
+                <th className="px-3 py-2 text-left font-medium text-muted">Phase</th>
+                <th className="px-3 py-2 text-left font-medium text-muted">Percentage</th>
+                <th className="px-3 py-2 text-left font-medium text-muted">Condition</th>
+                <th className="px-3 py-2 text-center font-medium text-muted">Action</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y">
-              {rawPhases.map((p, realIndex) => {
-                if (p.isDelete === 1) return null; // hide deleted rows
+            <tbody>
+              {rawPhases.map((p, idx) => {
+                if (p.isDelete === 1) return null;
 
                 return (
-                  <tr key={realIndex} className="hover:bg-gray-50">
-                    <td className="px-4 py-2">
-                      <span className="text-gray-800">{realIndex + 1}</span>
-                    </td>
+                  <tr key={idx} className="border-b border-theme row-hover last:border-0">
+                    <td className="px-3 py-2">{idx + 1}</td>
 
-                    {/* PHASE */}
-                    <td className="px-4 py-2">
+                    <td className="px-3 py-2">
                       {isEditing ? (
                         <input
-                          className="w-full border rounded px-2 py-1 text-sm"
+                          className="w-full bg-transparent text-muted outline-none"
                           value={p.name}
-                          onChange={(e) =>
-                            updatePhase(realIndex, { name: e.target.value })
-                          }
+                          onChange={(e) => updatePhase(idx, { name: e.target.value })}
                         />
                       ) : (
-                        <span className="text-gray-800">{p.name}</span>
+                        <span>{p.name}</span>
                       )}
                     </td>
 
-                    {/* PERCENTAGE */}
-                    <td className="px-4 py-2">
+                    <td className="px-3 py-2">
                       {isEditing ? (
                         <input
-                          className="w-full border rounded px-2 py-1 text-sm"
+                          className="w-full bg-transparent text-muted outline-none"
                           value={p.percentage}
-                          onChange={(e) =>
-                            updatePhase(realIndex, {
-                              percentage: e.target.value,
-                            })
-                          }
+                          onChange={(e) => updatePhase(idx, { percentage: e.target.value })}
                         />
                       ) : (
                         <span>{p.percentage}</span>
                       )}
                     </td>
 
-                    {/* CONDITION */}
-                    <td className="px-4 py-2">
+                    <td className="px-3 py-2">
                       {isEditing ? (
                         <input
-                          className="w-full border rounded px-2 py-1 text-sm"
+                          className="w-full bg-transparent text-muted outline-none"
                           value={p.condition}
-                          onChange={(e) =>
-                            updatePhase(realIndex, {
-                              condition: e.target.value,
-                            })
-                          }
+                          onChange={(e) => updatePhase(idx, { condition: e.target.value })}
                         />
                       ) : (
                         <span>{p.condition}</span>
                       )}
                     </td>
 
-                    {/* DELETE */}
-                    <td className="px-4 py-2 text-center">
+                    <td className="px-3 py-2 text-center">
                       {isEditing && (
-                        <button
-                          type="button"
-                          onClick={() => removePhase(realIndex)}
-                          className="text-red-500 hover:text-red-700"
-                        >
+                        <button type="button" onClick={() => removePhase(idx)} className="text-red-500 hover:text-red-700">
                           <FaTrash />
                         </button>
                       )}
@@ -276,120 +223,118 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
                   </tr>
                 );
               })}
-
-              {rawPhases.filter((p) => p.isDelete !== 1).length === 0 && (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="py-4 text-center text-gray-500 italic"
-                  >
-                    No phases added yet.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
+        {isEditing && (
+          <div className="flex justify-end w-full">
+            <button
+            type="button"
+              onClick={addPhase}
+              className="px-4 py-2 bg-primary text-white rounded-lg text-sm flex items-center gap-2"
+            >
+              <FaPlus className="w-4 h-4" /> Add Phase
+            </button>
+          </div>
+        )}
 
-        {/* EXTRA PAYMENT FIELDS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <InputField
-            label="Due Dates"
+        {/* Additional Payment Inputs */}
+        <div className="space-y-3 text-sm">
+          <LabeledRow
+            label="Due Dates:"
+            value={payment.dueDates ?? ''}
             disabled={!isEditing}
-            value={payment.dueDates ?? ""}
             onChange={(v) => updatePayment({ dueDates: v })}
           />
-          <InputField
-            label="Late Charges"
+
+          <LabeledRow
+            label="Late Payment Charges:"
+            value={payment.lateCharges ?? ''}
             disabled={!isEditing}
-            value={payment.lateCharges ?? ""}
             onChange={(v) => updatePayment({ lateCharges: v })}
           />
-          <InputField
-            label="Tax"
+
+          <LabeledRow
+            label="Tax / Additional Charges:"
+            value={payment.tax ?? ''}
             disabled={!isEditing}
-            value={payment.tax ?? ""}
             onChange={(v) => updatePayment({ tax: v })}
           />
-        </div>
 
-        <TextareaField
-          label="Notes"
-          disabled={!isEditing}
-          value={payment.notes ?? ""}
-          onChange={(v) => updatePayment({ notes: v })}
-        />
+          <LabeledRow
+            label="Notes:"
+            value={payment.notes ?? ''}
+            disabled={!isEditing}
+            onChange={(v) => updatePayment({ notes: v })}
+          />
+        </div>
       </div>
     );
   };
 
   const renderTextSection = (field: keyof TermSection) => (
-    <TextareaField
-      label={selectedTemplate}
+    <textarea
       disabled={!isEditing}
-      value={(currentTerms[field] as string) ?? ""}
-      onChange={(v) => updateTopField(field, v)}
+      value={(currentTerms[field] as string) ?? ''}
+      onChange={(e) => updateTopField(field, e.target.value)}
+      placeholder={`Enter ${selectedTemplate.toLowerCase()}...`}
+      className="w-full h-64 bg-card border border-theme rounded-lg px-4 py-3 text-sm text-main focus:ring-2 outline-none"
     />
   );
 
   return (
-    <div className="p-6 space-y-8 bg-white rounded-lg shadow-sm border">
-      {/* HEADER */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Terms & Conditions
-        </h2>
+    <div className="bg-card rounded-xl border border-theme shadow-sm overflow-hidden">
+      {/* HEADER (MATCHES BuyingSelling HEADER) */}
+      <div
+        className="px-4 py-2 border-b border-theme flex items-center gap-3"
+        style={{
+          background: 'var(--primary-600)',
+          color: 'var(--table-head-text)',
+        }}
+      >
+        <h2 className="font-semibold text-white text-sm">Terms & Conditions</h2>
 
-        <div className="flex items-center gap-3">
-          <label className="text-sm text-gray-600 font-medium">
-            Choose Section
-          </label>
-
-          <select
-            value={selectedTemplate}
-            onChange={(e) => setSelectedTemplate(e.target.value)}
-            disabled={isEditing}
-            className="px-3 py-1.5 border rounded-md bg-gray-50 hover:bg-gray-100 text-sm"
-          >
-            {TABS.map((tab) => (
-              <option key={tab}>{tab}</option>
-            ))}
-          </select>
-        </div>
+        <select
+          disabled={isEditing}
+          value={selectedTemplate}
+          onChange={(e) => setSelectedTemplate(e.target.value)}
+          className="ml-auto px-2 py-1 rounded bg-card border border-theme text-sm text-white"
+        >
+          {TABS.map((tab) => (
+            <option key={tab} value={tab} className="text-main">
+              {tab}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {/* CONTENT AREA */}
-      <div className="p-5 rounded-lg border bg-white shadow-inner min-h-[300px]">
-        {activeKey === "payment"
-          ? renderPaymentTable()
-          : renderTextSection(activeKey)}
-      </div>
+      {/* CONTENT */}
+      <div className="p-4">{activeKey === 'payment' ? renderPaymentTable() : renderTextSection(activeKey)}</div>
 
-      {/* BUTTONS */}
-      <div className="flex justify-end gap-3 pt-2">
+      {/* ACTION BUTTONS */}
+      <div className="flex justify-end gap-3 p-4 border-t border-theme">
         {isEditing ? (
           <>
-            <button
-              type="button"
-              className="px-5 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 flex items-center gap-2"
-              onClick={cancelEditing}
-            >
-              <FaTimes /> Cancel
+            <button type="button" onClick={cancelEditing} className="px-4 py-2 bg-card border border-theme text-muted rounded-lg">
+              <FaTimes className="inline mr-2" /> Cancel
             </button>
 
             <button
               type="button"
-              className="px-5 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 flex items-center gap-2"
               onClick={saveEditing}
+              className="px-5 py-2 rounded-lg text-white font-medium"
+              style={{
+                background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)',
+              }}
             >
-              <FaCheck /> Save
+              <FaCheck className="inline mr-2" /> Save Terms
             </button>
           </>
         ) : (
           <button
             type="button"
-            className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2"
             onClick={startEditing}
+            className="px-5 py-2 bg-primary text-white rounded-lg font-medium flex items-center gap-2"
           >
             <FaEdit /> Edit
           </button>
@@ -399,7 +344,7 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
   );
 };
 
-const InputField = ({
+const LabeledRow = ({
   label,
   value,
   disabled,
@@ -410,45 +355,15 @@ const InputField = ({
   disabled: boolean;
   onChange: (v: string) => void;
 }) => (
-  <label className="space-y-1 text-sm">
-    <span className="font-medium text-gray-700">{label}</span>
+  <div className="flex text-sm">
+    <span className="w-40 flex-shrink-0 text-muted font-medium">{label}</span>
     <input
       disabled={disabled}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full px-3 py-2 rounded border text-sm ${
-        disabled
-          ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-          : "focus:ring-2 focus:ring-blue-400"
-      }`}
+      className="flex-1 bg-transparent text-muted outline-none"
     />
-  </label>
-);
-
-const TextareaField = ({
-  label,
-  value,
-  disabled,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  disabled: boolean;
-  onChange: (v: string) => void;
-}) => (
-  <label className="space-y-1 text-sm">
-    <span className="font-medium text-gray-700">{label}</span>
-    <textarea
-      disabled={disabled}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={`w-full px-3 py-2 min-h-[140px] rounded border text-sm ${
-        disabled
-          ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-          : "focus:ring-2 focus:ring-blue-400"
-      }`}
-    />
-  </label>
+  </div>
 );
 
 export default TermsAndCondition;
