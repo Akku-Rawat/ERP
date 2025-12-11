@@ -38,7 +38,7 @@ interface BankAccount {
   isdefault?: boolean;
 }
 
-// Dummy initial accounts (2) — you can remove/replace with real API data later
+// Dummy initial accounts
 const initialAccounts: BankAccount[] = [
   {
     bankName: "HDFC Bank",
@@ -60,48 +60,42 @@ const initialAccounts: BankAccount[] = [
 
 const CompanySetup: React.FC = () => {
   const [tab, setTab] = useState(navTabs[0].key);
-
-  // single source of truth for accounts
   const [accounts, setAccounts] = useState<BankAccount[]>(initialAccounts);
-
-  // modal toggles
   const [showBankModal, setShowBankModal] = useState(false);
 
-  // open modal (passed to BankDetails as onAddAccount)
   const openAddModal = () => setShowBankModal(true);
 
-  // called by AddBankAccountModal on submit (adds to accounts)
   const handleAddBankAccount = (newAccount: BankAccount) => {
     setAccounts((prev) => [...prev, newAccount]);
     setShowBankModal(false);
   };
 
-  // mark one account default by index (global index in `accounts`)
   const handleSetDefault = (index: number) => {
-    setAccounts((prev) => prev.map((a, i) => ({ ...a, isdefault: i === index })));
+    setAccounts((prev) =>
+      prev.map((a, i) => ({ ...a, isdefault: i === index }))
+    );
   };
 
   return (
-    <div className="bg-app min-h-screen p-8 pb-20">
+    <div className="bg-app min-h-screen p-8 pb-20 text-main">
       {/* Header */}
-      <h1 className="text-3xl font-bold mb-6 flex items-center gap-2 text-main">
-        <FaBuilding /> Company Setup
+      <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
+        <FaBuilding className="text-primary" /> Company Setup
       </h1>
 
       {/* Navbar */}
-      <div className="flex gap-8 mb-8 border-b border-theme">
+      <div className="flex gap-8 mb-8 border-b border-[var(--border)] overflow-x-auto">
         {navTabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-2 border-theme 
+            className={`flex items-center gap-2 pb-3 text-base font-medium transition-colors border-b-2 whitespace-nowrap
               ${
                 tab === t.key
-                  ? "border-[var(--primary)] text-main font-semibold"
-                  : "border-transparent text-muted hover:text-primary"
+                  ? "border-primary text-primary font-semibold"
+                  : "border-transparent text-muted hover:text-main hover:border-[var(--border)]"
               }
             `}
-            style={{ background: "transparent" }}
           >
             {t.icon}
             <span className="ml-1">{t.label}</span>
@@ -110,7 +104,7 @@ const CompanySetup: React.FC = () => {
       </div>
 
       {/* Tab content */}
-      <div>
+      <div className="animate-in fade-in duration-300">
         {tab === "basic" && <BasicDetails />}
         {tab === "bank" && (
           <BankDetails

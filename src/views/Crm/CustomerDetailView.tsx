@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   X,
   Search,
@@ -28,7 +28,7 @@ interface Props {
 const Avatar: React.FC<{ name: string; active?: boolean }> = ({ name, active }) => (
   <div
     className={`w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-sm select-none ${
-      active ? "bg-primary" : "bg-slate-400"
+      active ? "bg-primary" : "bg-muted"
     }`}
     aria-hidden
   >
@@ -48,14 +48,20 @@ const CustomerDetailView: React.FC<Props> = ({
   const [isCustomerModalOpen, setCustomerModalOpen] = useState(false);
   const [showQuotationModal, setShowQuotationModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  
+
   const handleCustomerCreated = (newCustomer: CustomerDetail) => {
     onCustomerSelect(newCustomer);
-    try { onAdd && onAdd(); } catch (err) { /* ignore */ }
+    try {
+      onAdd && onAdd();
+    } catch {
+      /* ignore */
+    }
     setCustomerModalOpen(false);
   };
-  
-  const [activeTab, setActiveTab] = useState<"overview" | "quotations" | "invoices">("overview");
+
+  const [activeTab, setActiveTab] = useState<"overview" | "quotations" | "invoices">(
+    "overview",
+  );
 
   const q = searchTerm.trim().toLowerCase();
   const filteredCustomers = (customers || []).filter((c) => {
@@ -69,11 +75,11 @@ const CustomerDetailView: React.FC<Props> = ({
       case "active":
         return "bg-emerald-50 text-emerald-700 border-emerald-200";
       case "inactive":
-        return "bg-slate-100 text-muted border-slate-200";
+        return "bg-card text-muted border-[var(--border)]";
       case "prospect":
-        return "bg-primary-600 text-white border-primary-600";
+        return "bg-primary text-white border-primary";
       default:
-        return "bg-slate-50 text-muted border-slate-200";
+        return "bg-row-hover text-main border-[var(--border)]";
     }
   };
 
@@ -112,11 +118,11 @@ const CustomerDetailView: React.FC<Props> = ({
   return (
     <div className="flex flex-col h-screen bg-app text-main">
       {/* Header */}
-      <div className="bg-card shadow-sm px-6 py-3 flex items-center justify-between border-b border-slate-200">
+      <div className="bg-card shadow-sm px-6 py-3 flex items-center justify-between border-b border-[var(--border)]">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-row-hover rounded-lg transition-colors"
             aria-label="Back"
           >
             <X className="w-5 h-5 text-muted" />
@@ -124,7 +130,7 @@ const CustomerDetailView: React.FC<Props> = ({
 
           <div>
             <h1 className="text-lg font-semibold text-main">Customer Details</h1>
-            <p className="text-xs text-muted">Profile & transactions</p>
+            <p className="text-xs text-muted">Profile &amp; transactions</p>
           </div>
         </div>
 
@@ -141,8 +147,8 @@ const CustomerDetailView: React.FC<Props> = ({
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-80 bg-sidebar border-r border-slate-200 flex flex-col">
-          <div className="p-4 border-b border-slate-200">
+        <aside className="w-80 bg-sidebar border-r border-[var(--border)] flex flex-col">
+          <div className="p-4 border-b border-[var(--border)]">
             <label className="relative block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
               <input
@@ -150,14 +156,14 @@ const CustomerDetailView: React.FC<Props> = ({
                 placeholder="Search customers, id or email"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-10 py-2.5 text-sm bg-card border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all"
+                className="w-full pl-9 pr-10 py-2.5 text-sm bg-card border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all text-main placeholder:text-muted"
                 aria-label="Search customers"
               />
 
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-slate-100"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-row-hover"
                   aria-label="Clear search"
                 >
                   ✕
@@ -165,30 +171,32 @@ const CustomerDetailView: React.FC<Props> = ({
               )}
             </label>
 
-            <p className="mt-3 text-xs text-muted">{filteredCustomers.length} customers</p>
+            <p className="mt-3 text-xs text-muted">
+              {filteredCustomers.length} customers
+            </p>
           </div>
 
           <div className="flex-1 overflow-y-auto">
             {filteredCustomers.map((c) => {
-              const name = (c?.name || "");
-              const id = (c?.id || "");
-              const status = (c?.status || "N/A");
+              const name = c?.name || "";
+              const id = c?.id || "";
+              const status = c?.status || "N/A";
               const isActive = id === customer?.id;
 
               return (
                 <button
                   key={id || Math.random().toString(36).slice(2)}
                   onClick={() => onCustomerSelect(c)}
-                  className={`w-full text-left p-4 border-b border-slate-100 cursor-pointer transition-all flex items-center gap-3 ${
+                  className={`w-full text-left p-4 border-b border-[var(--border)] cursor-pointer transition-all flex items-center gap-3 ${
                     isActive
-                      ? "bg-blue-50 border-l-4 border-l-primary"
-                      : "hover:bg-slate-50"
+                      ? "bg-row-hover border-l-4 border-l-primary"
+                      : "hover:bg-row-hover"
                   }`}
                   aria-current={isActive}
                 >
                   <div
                     className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-sm ${
-                      isActive ? "bg-primary" : "bg-slate-400"
+                      isActive ? "bg-primary" : "bg-muted"
                     }`}
                     aria-hidden
                   >
@@ -196,12 +204,18 @@ const CustomerDetailView: React.FC<Props> = ({
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-main truncate">{name || "—"}</p>
-                    <p className="text-xs text-muted font-mono truncate">{id || "—"}</p>
+                    <p className="font-medium text-sm text-main truncate">
+                      {name || "—"}
+                    </p>
+                    <p className="text-xs text-muted font-mono truncate">
+                      {id || "—"}
+                    </p>
                   </div>
 
                   <span
-                    className={`px-2 py-1 text-xs font-medium rounded border ${getStatusColor(status)}`}
+                    className={`px-2 py-1 text-xs font-medium rounded border ${getStatusColor(
+                      status,
+                    )}`}
                   >
                     {status.toUpperCase()}
                   </span>
@@ -214,7 +228,7 @@ const CustomerDetailView: React.FC<Props> = ({
         {/* Main */}
         <main className="flex-1 flex flex-col">
           {/* Tabs */}
-          <div className="bg-card border-b border-slate-200 sticky top-0 z-10">
+          <div className="bg-card border-b border-[var(--border)] sticky top-0 z-10">
             <div className="flex px-6">
               <button
                 onClick={() => setActiveTab("overview")}
@@ -252,10 +266,10 @@ const CustomerDetailView: React.FC<Props> = ({
               </button>
 
               <div className="ml-auto flex items-center gap-3 px-4">
-                <button className="text-sm px-3 py-2 rounded-md border border-slate-200 hover:shadow-sm text-muted transition-shadow">
+                <button className="text-sm px-3 py-2 rounded-md border border-[var(--border)] hover:shadow-sm text-muted bg-card transition-shadow">
                   Export
                 </button>
-                <button className="text-sm px-3 py-2 rounded-md border border-slate-200 hover:shadow-sm text-muted transition-shadow">
+                <button className="text-sm px-3 py-2 rounded-md border border-[var(--border)] hover:shadow-sm text-muted bg-card transition-shadow">
                   More
                 </button>
               </div>
@@ -266,15 +280,19 @@ const CustomerDetailView: React.FC<Props> = ({
           <div className="flex-1 overflow-y-auto p-8 bg-app">
             {activeTab === "overview" && (
               <div className="max-w-6xl mx-auto">
-                {/* Single Consolidated Card */}
-                <section className="bg-card rounded-xl shadow-sm border border-slate-200 p-8">
+                {/* Consolidated Card */}
+                <section className="bg-card rounded-xl shadow-sm border border-[var(--border)] p-8">
                   {/* Header Section */}
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-6">
                       <Avatar name={customer.name} active />
                       <div>
-                        <h2 className="text-3xl font-bold text-main mb-1">{customer.name}</h2>
-                        <p className="text-sm text-muted font-mono mb-3">{customer.id}</p>
+                        <h2 className="text-3xl font-bold text-main mb-1">
+                          {customer.name}
+                        </h2>
+                        <p className="text-sm text-muted font-mono mb-3">
+                          {customer.id}
+                        </p>
                         <span
                           className={`inline-flex px-3 py-1.5 text-xs font-semibold rounded-full border ${getStatusColor(
                             customer.status,
@@ -294,11 +312,11 @@ const CustomerDetailView: React.FC<Props> = ({
                     </button>
                   </div>
 
-                  <hr className="border-slate-200 mb-8" />
+                  <hr className="border-[var(--border)] mb-8" />
 
                   {/* Quick Stats Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="flex items-center gap-4 p-5 rounded-lg bg-blue-50 border border-blue-100">
+                    <div className="flex items-center gap-4 p-5 rounded-lg bg-row-hover border border-[var(--border)]">
                       <div className="p-3 rounded-lg bg-card shadow-sm">
                         <Building2 className="w-6 h-6 text-primary" />
                       </div>
@@ -306,11 +324,13 @@ const CustomerDetailView: React.FC<Props> = ({
                         <p className="text-xs font-medium text-muted uppercase tracking-wide mb-1">
                           Customer Type
                         </p>
-                        <p className="text-lg font-bold text-main">{customer.type || "—"}</p>
+                        <p className="text-lg font-bold text-main">
+                          {customer.type || "—"}
+                        </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 p-5 rounded-lg bg-emerald-50 border border-emerald-100">
+                    <div className="flex items-center gap-4 p-5 rounded-lg bg-row-hover border border-[var(--border)]">
                       <div className="p-3 rounded-lg bg-card shadow-sm">
                         <FileText className="w-6 h-6 text-emerald-600" />
                       </div>
@@ -318,11 +338,13 @@ const CustomerDetailView: React.FC<Props> = ({
                         <p className="text-xs font-medium text-muted uppercase tracking-wide mb-1">
                           Tax ID (TPIN)
                         </p>
-                        <p className="text-lg font-bold text-main">{customer.tpin || "—"}</p>
+                        <p className="text-lg font-bold text-main">
+                          {customer.tpin || "—"}
+                        </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 p-5 rounded-lg bg-amber-50 border border-amber-100">
+                    <div className="flex items-center gap-4 p-5 rounded-lg bg-row-hover border border-[var(--border)]">
                       <div className="p-3 rounded-lg bg-card shadow-sm">
                         <Receipt className="w-6 h-6 text-amber-600" />
                       </div>
@@ -330,28 +352,32 @@ const CustomerDetailView: React.FC<Props> = ({
                         <p className="text-xs font-medium text-muted uppercase tracking-wide mb-1">
                           Currency
                         </p>
-                        <p className="text-lg font-bold text-main">{customer.currency || "—"}</p>
+                        <p className="text-lg font-bold text-main">
+                          {customer.currency || "—"}
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  <hr className="border-slate-200 mb-8" />
+                  <hr className="border-[var(--border)] mb-8" />
 
                   {/* Contact & Address Section */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Contact Information */}
                     <div>
                       <div className="flex items-center gap-2 mb-5">
-                        <div className="p-2 rounded-lg bg-blue-50">
+                        <div className="p-2 rounded-lg bg-row-hover">
                           <Mail className="w-5 h-5 text-primary" />
                         </div>
-                        <h3 className="text-lg font-bold text-main">Contact Information</h3>
+                        <h3 className="text-lg font-bold text-main">
+                          Contact Information
+                        </h3>
                       </div>
 
                       <div className="space-y-4">
-                        <div className="flex items-start gap-4 p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <div className="flex items-start gap-4 p-4 rounded-lg bg-row-hover border border-[var(--border)]">
                           <div className="p-2 rounded-lg bg-card shadow-sm">
-                            <Mail className="w-5 h-5 text-slate-600" />
+                            <Mail className="w-5 h-5 text-muted" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-1">
@@ -363,15 +389,17 @@ const CustomerDetailView: React.FC<Props> = ({
                           </div>
                         </div>
 
-                        <div className="flex items-start gap-4 p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <div className="flex items-start gap-4 p-4 rounded-lg bg-row-hover border border-[var(--border)]">
                           <div className="p-2 rounded-lg bg-card shadow-sm">
-                            <Phone className="w-5 h-5 text-slate-600" />
+                            <Phone className="w-5 h-5 text-muted" />
                           </div>
                           <div className="flex-1">
                             <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-1">
                               Mobile Number
                             </p>
-                            <p className="text-sm font-medium text-main">{customer.mobile || "—"}</p>
+                            <p className="text-sm font-medium text-main">
+                              {customer.mobile || "—"}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -380,14 +408,14 @@ const CustomerDetailView: React.FC<Props> = ({
                     {/* Addresses */}
                     <div>
                       <div className="flex items-center gap-2 mb-5">
-                        <div className="p-2 rounded-lg bg-blue-50">
+                        <div className="p-2 rounded-lg bg-row-hover">
                           <MapPin className="w-5 h-5 text-primary" />
                         </div>
                         <h3 className="text-lg font-bold text-main">Addresses</h3>
                       </div>
 
                       <div className="space-y-4">
-                        <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <div className="p-4 rounded-lg bg-row-hover border border-[var(--border)]">
                           <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
                             Billing Address
                           </p>
@@ -396,7 +424,7 @@ const CustomerDetailView: React.FC<Props> = ({
                           </p>
                         </div>
 
-                        <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                        <div className="p-4 rounded-lg bg-row-hover border border-[var(--border)]">
                           <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
                             Shipping Address
                           </p>
@@ -414,10 +442,12 @@ const CustomerDetailView: React.FC<Props> = ({
             {activeTab === "quotations" && (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
-                  <div className="w-24 h-24 mx-auto bg-gradient-to-b from-slate-50 to-slate-100 rounded-full flex items-center justify-center mb-4">
+                  <div className="w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 bg-row-hover">
                     <FileText className="w-12 h-12 text-muted" />
                   </div>
-                  <p className="text-xl font-semibold text-main mb-2">No Quotations Yet</p>
+                  <p className="text-xl font-semibold text-main mb-2">
+                    No Quotations Yet
+                  </p>
                   <p className="text-sm text-muted mb-6">
                     Create your first quotation for this customer
                   </p>
@@ -434,10 +464,12 @@ const CustomerDetailView: React.FC<Props> = ({
             {activeTab === "invoices" && (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
-                  <div className="w-24 h-24 mx-auto bg-gradient-to-b from-slate-50 to-slate-100 rounded-full flex items-center justify-center mb-4">
+                  <div className="w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 bg-row-hover">
                     <Receipt className="w-12 h-12 text-muted" />
                   </div>
-                  <p className="text-xl font-semibold text-main mb-2">No Invoices Yet</p>
+                  <p className="text-xl font-semibold text-main mb-2">
+                    No Invoices Yet
+                  </p>
                   <p className="text-sm text-muted mb-6">
                     Create your first invoice for this customer
                   </p>
@@ -478,4 +510,4 @@ const CustomerDetailView: React.FC<Props> = ({
   );
 };
 
-export default CustomerDetailView;
+export default CustomerDetailView;                                                                                                                                

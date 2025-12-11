@@ -14,6 +14,7 @@ export const useTableLogic = <T extends Record<string, any>,>({ columns, data, s
   const [internalSearch, setInternalSearch] = React.useState("");
   const effectiveSearch = searchValue ?? internalSearch;
   const setSearch = (v: string) => setInternalSearch(v);
+  
 
   // column visibility
   const allKeys = React.useMemo(() => columns.map((c) => c.key), [columns]);
@@ -33,12 +34,14 @@ export const useTableLogic = <T extends Record<string, any>,>({ columns, data, s
   const [typeFilter, setTypeFilter] = React.useState("");
   const [minFilter, setMinFilter] = React.useState("");
   const [maxFilter, setMaxFilter] = React.useState("");
+  
 
   // sort
   const [sortOrder, setSortOrder] = React.useState<"asc" | "desc" | null>("asc");
 
   const numericKey = React.useMemo(() => detectNumericKey(columns), [columns]);
   const customerIdKey = React.useMemo(() => detectCustomerIdKey(columns), [columns]);
+  
 
   const processedData = React.useMemo(() => {
     const q = (effectiveSearch ?? "").trim().toLowerCase();
@@ -125,6 +128,7 @@ export const useTableLogic = <T extends Record<string, any>,>({ columns, data, s
     setColMenuOpen,
     menuSearch,
     setMenuSearch,
+     setVisibleKeys, 
 
     filtersOpen,
     setFiltersOpen,
@@ -142,7 +146,7 @@ export const useTableLogic = <T extends Record<string, any>,>({ columns, data, s
 
     numericKey,
     customerIdKey,
-
+  allKeys,   
     // result
     processedData,
   };

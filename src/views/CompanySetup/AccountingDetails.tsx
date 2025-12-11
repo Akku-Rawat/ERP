@@ -57,7 +57,7 @@ const AccountingDetails: React.FC = () => {
             try {
               el.value = parsed[k] ?? "";
             } catch {
-              // ignore if not settable
+              // ignore
             }
           }
         });
@@ -169,7 +169,7 @@ const AccountingDetails: React.FC = () => {
       </label>
       <div className="relative">
         {Icon && (
-          <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4 pointer-events-none z-10" />
+          <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4 pointer-events-none z-10" />
         )}
         <input
           type={type}
@@ -179,7 +179,12 @@ const AccountingDetails: React.FC = () => {
           onChange={handleChange}
           placeholder={placeholder}
           required={required}
-          className={`w-full border bg-theme rounded-lg ${Icon ? "pl-10" : "pl-3.5"} pr-3.5 py-2.5 text-sm focus:ring-2 focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary-600)] transition-all hover:border-theme`}
+          className={`w-full rounded-lg border-2 bg-card text-main placeholder:text-muted ${
+            Icon ? "pl-10" : "pl-3.5"
+          } pr-3.5 py-2.5 text-sm 
+          border-[var(--border)]
+          focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary-600)]
+          transition-all hover:border-[var(--primary-600)]/50`}
         />
       </div>
     </div>
@@ -210,7 +215,7 @@ const AccountingDetails: React.FC = () => {
       </label>
       <div className="relative">
         {Icon && (
-          <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4 pointer-events-none z-10" />
+          <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4 pointer-events-none z-10" />
         )}
         <select
           name={name}
@@ -218,7 +223,12 @@ const AccountingDetails: React.FC = () => {
           ref={attachRef(name)}
           onChange={handleChange}
           required={required}
-          className={`w-full border bg-theme rounded-lg ${Icon ? "pl-10" : "pl-3.5"} pr-10 py-2.5 text-sm bg-card focus:ring-2 focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary-600)] transition-all hover:border-theme appearance-none`}
+          className={`w-full rounded-lg border-2 bg-card text-main ${
+            Icon ? "pl-10" : "pl-3.5"
+          } pr-10 py-2.5 text-sm 
+          border-[var(--border)] appearance-none
+          focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary-600)]
+          transition-all hover:border-[var(--primary-600)]/50`}
         >
           {options.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -226,19 +236,14 @@ const AccountingDetails: React.FC = () => {
             </option>
           ))}
         </select>
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
           <svg
             className="w-4 h-4 text-muted"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
       </div>
@@ -246,23 +251,17 @@ const AccountingDetails: React.FC = () => {
   );
 
   return (
-    <div className="">
-      <div className="w-full ">
+    <div>
+      <div className="w-full">
         {/* Success Message */}
         {showSuccess && (
-          <div className="mb-4 rounded-lg p-4 shadow-sm">
-            <FaCheckCircle
-              className="w-5 h-5 flex-shrink-0"
-              style={{ color: "var(--success)" }}
-            />
+          <div className="mb-4 rounded-lg p-4 shadow-sm bg-card border border-[var(--border)] flex gap-3 items-center">
+            <FaCheckCircle className="w-5 h-5 flex-shrink-0 text-[var(--success)]" />
             <div>
-              <p
-                className="text-sm font-medium"
-                style={{ color: "var(--success)" }}
-              >
+              <p className="text-sm font-medium text-[var(--success)]">
                 Configuration saved successfully!
               </p>
-              <p className="text-xs text-success mt-0.5">
+              <p className="text-xs text-muted mt-0.5">
                 All changes have been stored
               </p>
             </div>
@@ -270,17 +269,10 @@ const AccountingDetails: React.FC = () => {
         )}
 
         {/* Main Card */}
-        <div className="bg-card rounded-xl shadow-sm border bg-theme overflow-hidden">
-          {/* Tab Navigation */}
-          {/* Tab Navigation — filled active tab */}
-          <div
-            className="bg-app"
-            style={{ borderBottom: "1px solid var(--border)" }}
-          >
-            <div
-              className="flex items-stretch"
-              style={{ borderRadius: "0.5rem 0.5rem 0 0", overflow: "hidden" }}
-            >
+        <div className="bg-card rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
+          {/* Tabs */}
+          <div className="bg-app border-b border-[var(--border)]">
+            <div className="flex items-stretch rounded-t-lg overflow-hidden">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -291,7 +283,7 @@ const AccountingDetails: React.FC = () => {
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all"
                     style={{
                       background: isActive
-                        ? "var(--primary-600)"
+                        ? "var(--primary)"
                         : "transparent",
                       color: isActive
                         ? "var(--table-head-text)"
@@ -317,47 +309,43 @@ const AccountingDetails: React.FC = () => {
             </div>
           </div>
 
-          {/* Tab Content */}
+          {/* Content */}
           <div className="p-8">
-            {/* Financial Configuration Tab */}
             {activeTab === "financial" && (
-              <div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <SelectField
-                    label="Base Currency"
-                    name="currency"
-                    icon={FaDollarSign}
-                    options={[
-                      { value: "INR", label: "INR - Indian Rupee (₹)" },
-                      { value: "USD", label: "USD - US Dollar ($)" },
-                      { value: "zar", label: "ZAR - South African Rand (R)" },
-                      { value: "ngn", label: "NGN - Nigerian Naira (₦)" },
-                      { value: "EUR", label: "EUR - Euro (€)" },
-                      { value: "GBP", label: "GBP - British Pound (£)" },
-                      { value: "AUD", label: "AUD - Australian Dollar (A$)" },
-                    ]}
-                    required
-                  />
-                  <SelectField
-                    label="Financial Year Start"
-                    name="financialYearBegins"
-                    icon={FaCalendarAlt}
-                    options={[
-                      { value: "January", label: "January (Jan - Dec)" },
-                      { value: "April", label: "April (Apr - Mar)" },
-                      { value: "July", label: "July (Jul - Jun)" },
-                      { value: "October", label: "October (Oct - Sep)" },
-                    ]}
-                    required
-                  />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <SelectField
+                  label="Base Currency"
+                  name="currency"
+                  icon={FaDollarSign}
+                  options={[
+                    { value: "INR", label: "INR - Indian Rupee (₹)" },
+                    { value: "USD", label: "USD - US Dollar ($)" },
+                    { value: "zar", label: "ZAR - South African Rand (R)" },
+                    { value: "ngn", label: "NGN - Nigerian Naira (₦)" },
+                    { value: "EUR", label: "EUR - Euro (€)" },
+                    { value: "GBP", label: "GBP - British Pound (£)" },
+                    { value: "AUD", label: "AUD - Australian Dollar (A$)" },
+                  ]}
+                  required
+                />
+                <SelectField
+                  label="Financial Year Start"
+                  name="financialYearBegins"
+                  icon={FaCalendarAlt}
+                  options={[
+                    { value: "January", label: "January (Jan - Dec)" },
+                    { value: "April", label: "April (Apr - Mar)" },
+                    { value: "July", label: "July (Jul - Jun)" },
+                    { value: "October", label: "October (Oct - Sep)" },
+                  ]}
+                  required
+                />
               </div>
             )}
 
-            {/* Account Setup Tab */}
             {activeTab === "accounts" && (
               <div className="space-y-8">
-                {/* General Accounts Section */}
+                {/* General Accounts */}
                 <div>
                   <h3 className="text-base font-semibold text-main mb-4 flex items-center gap-2">
                     <FaDollarSign className="text-primary" />
@@ -380,7 +368,7 @@ const AccountingDetails: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Foreign Exchange Section */}
+                {/* Foreign Exchange */}
                 <div>
                   <h3 className="text-base font-semibold text-main mb-4 flex items-center gap-2">
                     <FaSyncAlt className="text-primary" />
@@ -407,7 +395,7 @@ const AccountingDetails: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Rounding Section */}
+                {/* Rounding */}
                 <div>
                   <h3 className="text-base font-semibold text-main mb-4 flex items-center gap-2">
                     <FaBullseye className="text-primary" />
@@ -429,7 +417,7 @@ const AccountingDetails: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Asset Valuation Section */}
+                {/* Asset Valuation */}
                 <div>
                   <h3 className="text-base font-semibold text-main mb-4 flex items-center gap-2">
                     <FaChartArea className="text-primary" />
@@ -454,18 +442,13 @@ const AccountingDetails: React.FC = () => {
             )}
           </div>
 
-          {/* Action Footer */}
-          <div className="bg-app px-8 py-4 border-t bg-theme flex items-center justify-between">
+          {/* Footer */}
+          <div className="bg-app px-8 py-4 border-t border-[var(--border)] flex items-center justify-between">
             <button
               onClick={handleReset}
               className="px-5 py-2.5 rounded-lg border shadow-sm 
              text-sm font-semibold flex items-center gap-2 
-             hover:bg-app transition-all active:scale-[0.98]"
-              style={{
-                borderColor: "var(--border)",
-                color: "var(--text)",
-                background: "var(--card)",
-              }}
+             hover:bg-row-hover transition-all active:scale-[0.98] bg-card text-main border-[var(--border)]"
             >
               <FaUndo className="w-4 h-4 opacity-80" />
               Reset All
@@ -473,9 +456,7 @@ const AccountingDetails: React.FC = () => {
 
             <button
               onClick={handleSubmit}
-              className="px-5 py-2.5 rounded-lg bg-primary hover:bg-primary-600 
-             text-white text-sm font-semibold shadow flex items-center gap-2 
-             transition-all active:scale-[0.98]"
+              className="px-5 py-2.5 rounded-lg text-white text-sm font-semibold shadow flex items-center gap-2 transition-all active:scale-[0.98]"
               style={{
                 background:
                   "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",

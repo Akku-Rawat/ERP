@@ -1,12 +1,10 @@
 import React from "react";
+import { useTableLogic } from "./useTableLogic";
+import type { Column } from "../Table/type";
+import ColumnSelector from "./ColumnSelector";
+import Pagination from "../../Pagination";
+import { FaFilter } from "react-icons/fa";
 
-export interface Column<T> {
-  key: string;
-  header: string;
-  render?: (item: T) => React.ReactNode;
-  align?: "left" | "center" | "right";
-  sortable?: boolean;
-}
 
 interface TableProps<T> {
   columns: Column<T>[];
@@ -14,29 +12,20 @@ interface TableProps<T> {
   onRowClick?: (item: T) => void;
   loading?: boolean;
   emptyMessage?: string;
-  zebraStripes?: boolean;
-  hoverable?: boolean;
-
-  // Add button label (parent controls it)
-  addLabel?: string;
-
-  // Toolbar + column selector
   showToolbar?: boolean;
   enableAdd?: boolean;
   onAdd?: () => void;
   searchValue?: string;
   onSearch?: (q: string) => void;
   toolbarPlaceholder?: string;
-
   enableColumnSelector?: boolean;
   initialVisibleColumns?: string[];
-
-  // pagination props (optional)
   currentPage?: number;
   totalPages?: number;
   pageSize?: number;
   totalItems?: number;
   onPageChange?: (page: number) => void;
+  addLabel?: string;
 }
 
 function Table<T extends Record<string, any>>({
@@ -45,28 +34,42 @@ function Table<T extends Record<string, any>>({
   onRowClick,
   loading = false,
   emptyMessage = "No data found.",
-  zebraStripes = false,
-  hoverable = true,
-
-  addLabel = "+ Add",
-
   showToolbar = false,
   enableAdd = false,
   onAdd,
   searchValue,
-  onSearch,
   toolbarPlaceholder = "Search...",
-
   enableColumnSelector = false,
-  initialVisibleColumns,
-
-  // pagination (destructured)
+  addLabel = "+ Add",
   currentPage,
   totalPages,
   pageSize = 10,
   totalItems = 0,
   onPageChange,
+  onSearch,
 }: TableProps<T>) {
+  const {
+    effectiveSearch,
+    setSearch,
+    visibleKeys,
+    setVisibleKeys,
+    allKeys,
+    toggleColumn,
+    filtersOpen,
+    setFiltersOpen,
+    nameFilter,
+    setNameFilter,
+    typeFilter,
+    setTypeFilter,
+    minFilter,
+    setMinFilter,
+    maxFilter,
+    setMaxFilter,
+    sortOrder,
+    setSortOrder,
+    processedData,
+  } = useTableLogic<T>({ columns, data, searchValue });
+
   const getAlignment = (align?: "left" | "center" | "right") => {
     switch (align) {
       case "center":
@@ -78,49 +81,28 @@ function Table<T extends Record<string, any>>({
     }
   };
 
-  // Search state (toolbar)
-  const [internalSearch, setInternalSearch] = React.useState("");
-  const effectiveSearch = searchValue ?? internalSearch;
-  const setSearch = (val: string) => {
-    if (onSearch) onSearch(val);
-    else setInternalSearch(val);
-  };
-
-  // Column visibility state
-  const allKeys = columns.map((c) => c.key);
-  const initialKeys = initialVisibleColumns ?? allKeys;
-  const [visibleKeys, setVisibleKeys] = React.useState<string[]>(() =>
-    allKeys.filter((k) => initialKeys.includes(k)),
-  );
-
-  const isVisible = (key: string) => visibleKeys.includes(key);
-  const toggleColumn = (key: string) => {
-    setVisibleKeys((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
-    );
-  };
-
-  // Column selector menu toggle + menu search
-  const [colMenuOpen, setColMenuOpen] = React.useState(false);
-  const [menuSearch, setMenuSearch] = React.useState("");
-  const menuRef = React.useRef<HTMLDivElement | null>(null);
+  const filterRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
-    const handleDocClick = (e: MouseEvent) => {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target as Node)) {
-        setColMenuOpen(false);
-        setMenuSearch("");
-      }
+    const onDocClick = (e: MouseEvent) => {
+      if (!filtersOpen) return;
+      if (!filterRef.current) return;
+      if (!filterRef.current.contains(e.target as Node)) setFiltersOpen(false);
     };
-    document.addEventListener("click", handleDocClick);
-    return () => document.removeEventListener("click", handleDocClick);
-  }, []);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFiltersOpen(false);
+    };
+    document.addEventListener("click", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("click", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [filtersOpen, setFiltersOpen]);
 
-  // Loading view
   if (loading) {
     return (
-      <div className="bg-card rounded-xl  overflow-hidden">
+      <div className="bg-card rounded-lg border border-[var(--border)] overflow-hidden">
         <div className="p-12 text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
           <p className="mt-4 text-muted font-medium">Loading data...</p>
@@ -129,197 +111,217 @@ function Table<T extends Record<string, any>>({
     );
   }
 
-  // filtered columns for the menu search
-  const menuFilteredColumns = columns.filter((c) =>
-    c.header.toLowerCase().includes(menuSearch.trim().toLowerCase()),
-  );
-
-  // Check if pagination should be shown - show even if only 1 page for visibility
-  const showPagination = 
-    typeof currentPage === "number" &&
-    typeof totalPages === "number" &&
-    typeof onPageChange === "function" &&
-    totalItems > 0;
-
-  // Display all data as passed from parent (no slicing)
-  const displayData = data;
+  const displayData = processedData;
+  const visibleCount = visibleKeys.length || columns.length;
 
   return (
-    <div className="bg-card rounded-xl  border border-[var(--border)] flex flex-col">
-      {/* TOOLBAR */}
+    <div className="bg-card rounded-lg border border-[var(--border)] flex flex-col overflow-hidden shadow-sm">
       {showToolbar && (
-        <div className="px-6 py-4 border-b bg-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="px-5 py-4 border-b border-[var(--border)] bg-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           {/* Search */}
-          <div className="flex items-center w-full sm:max-w-md">
+          <div className="relative w-full sm:max-w-md">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"
+                />
+              </svg>
+            </span>
+
             <input
               value={effectiveSearch}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (typeof onSearch === "function") onSearch(v);
+                else setSearch(v);
+              }}
               placeholder={toolbarPlaceholder}
-              className="w-full pl-4 pr-3 py-2 border border-[var(--border)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
+              className="w-full pl-10 pr-3 py-2 border border-[var(--border)] rounded-md 
+                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary
+                         transition text-sm bg-card text-main"
+              aria-label="Search table"
             />
           </div>
 
-          {/* Column Selector + Add Button */}
-          <div className="flex items-center gap-3 justify-end w-full sm:w-auto">
-            {enableColumnSelector && (
-              <div className="relative" ref={menuRef}>
-                {/* Button shows selected count */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setColMenuOpen((v) => !v);
-                  }}
-                  className="px-3 py-2 border rounded-md text-sm bg-card hover:bg-gray-50 flex items-center gap-2"
-                  type="button"
-                  aria-haspopup="dialog"
-                  aria-expanded={colMenuOpen}
-                >
-                  <span className="whitespace-nowrap">
-                    {visibleKeys.length} Selected
-                  </span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${colMenuOpen ? "rotate-180" : "rotate-0"}`}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                  </svg>
-                </button>
+          <div className="flex items-center gap-2 justify-end w-full sm:w-auto">
+            {/* Sort button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSortOrder((p) => (p === "asc" ? "desc" : "asc"));
+              }}
+              className={`px-3 py-2 border border-[var(--border)] rounded-md text-sm bg-card row-hover flex items-center gap-2 transition ${
+                sortOrder ? "border-primary ring-1 ring-primary" : ""
+              } text-main`}
+              type="button"
+              aria-pressed={sortOrder === "asc" ? "true" : "false"}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d={sortOrder === "asc" ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
+                />
+              </svg>
+              <span className="text-sm font-medium">
+                {sortOrder === "asc" ? "Cust ID ↑" : "Cust ID ↓"}
+              </span>
+            </button>
 
-                {colMenuOpen && (
-                  <div
-                    className="absolute right-0 mt-2 w-72 bg-card border border-[var(--border)] rounded-lg shadow-2xl z-[100] overflow-hidden"
-                    role="dialog"
-                    aria-label="Column selector"
-                    onClick={(e) => e.stopPropagation()}
-                    style={{ position: 'absolute' }}
-                  >
-                    {/* Header with gradient */}
-                    <div className="bg-primary px-4 py-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-                        </svg>
-                        <div className="text-sm font-semibold text-white">
-                          Columns ({visibleKeys.length}/{columns.length})
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setColMenuOpen(false);
-                          setMenuSearch("");
-                        }}
-                        className="p-1 rounded hover:bg-card/20 text-white transition-colors"
-                        type="button"
-                        aria-label="Close"
+            {/* Filters */}
+            <div className="relative">
+              <button
+  onClick={(e) => {
+    e.stopPropagation();
+    setFiltersOpen((v) => !v);
+  }}
+  className="px-3 py-2 rounded-md text-sm bg-primary hover:opacity-90 
+             text-white flex items-center gap-2 font-medium transition"
+  type="button"
+>
+  <FaFilter className="w-4 h-4" />
+  Filters
+</button>
+
+
+              {filtersOpen && (
+                <div
+                  ref={filterRef}
+                  className="absolute right-0 mt-2 w-[340px] bg-card border border-[var(--border)] rounded-lg shadow-lg z-[100] overflow-hidden"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="px-4 py-3 bg-primary text-white flex items-center justify-between rounded-t-lg">
+                    <span className="text-sm font-semibold">Filters</span>
+                    <button
+                      onClick={() => setFiltersOpen(false)}
+                      className="p-1 rounded hover:bg-white/20 transition"
+                      type="button"
+                      aria-label="Close filters"
+                    >
+                      <svg
+                        className="w-4 h-4 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="p-4 space-y-3 max-h-72 overflow-y-auto bg-card">
+                    <div>
+                      <label className="text-xs font-semibold text-muted mb-1 block">
+                        Name or Email
+                      </label>
+                      <input
+                        type="text"
+                        value={nameFilter}
+                        onChange={(e) => setNameFilter(e.target.value)}
+                        placeholder="Search name or email"
+                        className="w-full px-3 py-2 border border-[var(--border)] rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary bg-card text-main"
+                      />
                     </div>
 
-                    {/* Search inside menu */}
-                    <div className="p-3 bg-gray-50 border-b">
-                      <div className="relative">
-                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                    <div>
+                      <label className="text-xs font-semibold text-muted mb-1 block">
+                        Type
+                      </label>
+                      <select
+                        value={typeFilter}
+                        onChange={(e) => setTypeFilter(e.target.value)}
+                        className="w-full px-3 py-2 border border-[var(--border)] rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary bg-card text-main"
+                      >
+                        <option value="">— Any —</option>
+                        <option value="Individual">Individual</option>
+                        <option value="Company">Company</option>
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs font-semibold text-muted mb-1 block">
+                          Min
+                        </label>
                         <input
-                          type="search"
-                          placeholder="Search columns..."
-                          value={menuSearch}
-                          onChange={(e) => setMenuSearch(e.target.value)}
-                          className="w-full pl-9 pr-3 py-2 text-sm border border-[var(--border)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                          type="number"
+                          value={minFilter}
+                          onChange={(e) => setMinFilter(e.target.value)}
+                          placeholder="0"
+                          className="w-full px-3 py-2 border border-[var(--border)] rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary bg-card text-main"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-muted mb-1 block">
+                          Max
+                        </label>
+                        <input
+                          type="number"
+                          value={maxFilter}
+                          onChange={(e) => setMaxFilter(e.target.value)}
+                          placeholder="∞"
+                          className="w-full px-3 py-2 border border-[var(--border)] rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary bg-card text-main"
                         />
                       </div>
                     </div>
-
-                    {/* Controls */}
-                    <div className="flex items-center justify-between px-4 py-2 bg-card border-b">
-                      <button
-                        onClick={() => setVisibleKeys(allKeys)}
-                        className="text-xs font-medium bg-primary transition-colors"
-                        type="button"
-                      >
-                        ✓ Show all
-                      </button>
-                      <button
-                        onClick={() => setVisibleKeys([])}
-                        className="text-xs font-medium text-[var(--danger)] transition-colors"
-                        type="button"
-                      >
-                        ✕ Hide all
-                      </button>
-                    </div>
-
-                    {/* List */}
-                    <div className="max-h-64 overflow-y-auto bg-card">
-                      {menuFilteredColumns.length > 0 ? (
-                        <div className="p-2">
-                          {menuFilteredColumns.map((col) => (
-                            <label
-                              key={col.key}
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-blue-50 cursor-pointer select-none transition-colors group"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isVisible(col.key)}
-                                onChange={() => toggleColumn(col.key)}
-                                onClick={(e) => e.stopPropagation()}
-                                className="w-4 h-4 text-[var(--primary)] rounded border-[var(--border)] focus:ring-[var(--primary)]"
-
-                              />
-                              <div className="flex-1 text-sm text-gray-700 group-hover:text-gray-900 font-medium">{col.header}</div>
-                              {isVisible(col.key) && (
-                                <svg className="w-4 h-4 text-[var(--success)]" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              )}
-                            </label>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="px-4 py-8 text-center text-sm text-gray-500">
-                          No columns found
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Footer */}
-                    <div className="px-3 py-3 bg-gray-50 border-t flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => {
-                          setColMenuOpen(false);
-                          setMenuSearch("");
-                        }}
-                        className="text-sm px-4 py-1.5 rounded-md border border-[var(--border)] hover:bg-gray-100 transition-colors font-medium"
-                        type="button"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={() => {
-                          setColMenuOpen(false);
-                          setMenuSearch("");
-                        }}
-                        className="text-sm px-4 py-1.5 rounded-md bg-primary text-white transition-colors font-medium shadow-sm"
-                        type="button"
-                      >
-                        Done
-                      </button>
-                    </div>
                   </div>
-                )}
-              </div>
+
+                  <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-[var(--border)] bg-app">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNameFilter("");
+                        setTypeFilter("");
+                        setMinFilter("");
+                        setMaxFilter("");
+                      }}
+                      className="px-3 py-1.5 rounded-md border border-[var(--border)] text-sm font-medium row-hover transition text-main bg-card"
+                    >
+                      Reset
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFiltersOpen(false)}
+                      className="px-3 py-1.5 rounded-md bg-primary text-white text-sm font-medium hover:opacity-90 transition"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Column selector */}
+            {enableColumnSelector && (
+              <ColumnSelector
+                columns={columns}
+                visibleKeys={visibleKeys}
+                toggleColumn={toggleColumn}
+                setVisibleKeys={setVisibleKeys}
+                allKeys={allKeys}
+              />
             )}
 
-            {/* Add Button */}
+            {/* Add */}
             {enableAdd && (
               <button
                 onClick={() => onAdd?.()}
-                className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md hover:opacity-95 transition shadow-sm text-sm"
+                className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md hover:opacity-90 transition text-sm font-medium"
                 type="button"
               >
                 {addLabel}
@@ -329,85 +331,51 @@ function Table<T extends Record<string, any>>({
         </div>
       )}
 
-      {/* TABLE: fixed-height scroll body */}
+      {/* TABLE */}
       <div className="flex-1 w-full overflow-x-auto">
         <div className="max-h-[420px] overflow-y-auto">
-          <table className="min-w-full table-auto">
-            <thead className="table-head sticky top-0 z-10">
+          <table className="w-full border-collapse">
+            <thead>
               <tr>
                 {columns
-                  .filter((c) => isVisible(c.key))
+                  .filter((c) => visibleKeys.includes(c.key))
                   .map((column) => (
                     <th
                       key={column.key}
-                      className={`px-6 py-3 text-sm font-semibold uppercase tracking-wide bg-primary text-white align-middle whitespace-nowrap ${getAlignment(
-                        column.align,
+                      className={`px-4 py-3 text-xs font-bold uppercase tracking-wider table-head sticky top-0 z-10 ${getAlignment(
+                        column.align
                       )}`}
                     >
-                      <div className={`flex items-center gap-2 ${column.align === 'center' ? 'justify-center' : column.align === 'right' ? 'justify-end' : 'justify-start'}`}>
-                        {column.header}
-                        {column.sortable && (
-                          <svg
-                            className="w-4 h-4 opacity-60"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
-                            />
-                          </svg>
-                        )}
-                      </div>
+                      {column.header}
                     </th>
                   ))}
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-200">
+            <tbody>
               {displayData.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={visibleKeys.length || columns.length}
-                    className="px-6 py-12 text-center"
+                    colSpan={visibleCount || columns.length}
+                    className="px-4 py-12 text-center border-b border-[var(--border)]"
                   >
-                    <div className="flex flex-col items-center gap-3">
-                      <svg
-                        className="w-16 h-16 text-muted opacity-30"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                        />
-                      </svg>
-                      <p className="text-muted font-medium">{emptyMessage}</p>
-                    </div>
+                    <p className="text-muted font-medium">{emptyMessage}</p>
                   </td>
                 </tr>
               ) : (
-                displayData.map((item, index) => (
+                displayData.map((item, idx) => (
                   <tr
-                    key={index}
+                    key={idx}
                     onClick={() => onRowClick?.(item)}
-                    className={`transition-colors duration-150 ${
-                      hoverable ? "hover:bg-gray-50 cursor-pointer" : ""
-                    }`}
+                    className="border-b border-[var(--border)] row-hover cursor-pointer transition"
                   >
                     {columns
-                      .filter((c) => isVisible(c.key))
+                      .filter((c) => visibleKeys.includes(c.key))
                       .map((column) => (
                         <td
                           key={column.key}
-                          className={`px-6 py-3 text-sm text-main align-middle whitespace-nowrap ${getAlignment(
-                            column.align,
+                          className={`px-4 py-3.5 text-sm text-main ${getAlignment(
+                            column.align
                           )}`}
                         >
                           {column.render ? column.render(item) : item[column.key]}
@@ -421,66 +389,16 @@ function Table<T extends Record<string, any>>({
         </div>
       </div>
 
-      {/* FOOTER: summary + pagination */}
-      {showPagination && (
-        <div className="px-6 py-3 border-t bg-card flex flex-col sm:flex-row items-center justify-between gap-3 mt-auto">
-          <div className="text-sm text-gray-600">
-            Showing{" "}
-            <span className="font-medium">
-              {Math.min((currentPage! - 1) * pageSize + 1, totalItems)}
-            </span>{" "}
-            –{" "}
-            <span className="font-medium">
-              {Math.min(currentPage! * pageSize, totalItems)}
-            </span>{" "}
-            of <span className="font-medium">{totalItems}</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Previous Button */}
-            <button
-              onClick={() => onPageChange!(currentPage! - 1)}
-              disabled={currentPage === 1}
-              className={`px-3 py-2 rounded-md border font-medium text-sm flex items-center gap-1 transition-colors ${
-                currentPage === 1
-                  ? "border-gray-300 text-gray-400 cursor-not-allowed bg-gray-50"
-                  : "border-gray-300 text-gray-700 hover:bg-gray-100 bg-white"
-              }`}
-              type="button"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Previous
-            </button>
-
-            {/* Page indicator */}
-            <div className="flex items-center gap-1.5 px-4 py-2 bg-white rounded-md border border-gray-300">
-              <span className="text-sm text-gray-600">Page</span>
-              <span className="font-semibold text-gray-900">{currentPage}</span>
-              <span className="text-sm text-gray-400">of</span>
-              <span className="font-semibold text-gray-900">{totalPages}</span>
-            </div>
-
-            {/* Next Button */}
-            <button
-              onClick={() => onPageChange!(currentPage! + 1)}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-2 rounded-md border font-medium text-sm flex items-center gap-1 transition-colors ${
-                currentPage === totalPages
-                  ? "border-gray-300 text-gray-400 cursor-not-allowed bg-gray-50"
-                  : "border-gray-300 text-gray-700 hover:bg-gray-100 bg-white"
-              }`}
-              type="button"
-            >
-              Next
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Pagination */}
+      <div className="px-5 py-3 border-t border-[var(--border)] bg-card">
+        <Pagination
+          currentPage={currentPage || 1}
+          totalPages={totalPages || 1}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          onPageChange={onPageChange || (() => {})}
+        />
+      </div>
     </div>
   );
 }

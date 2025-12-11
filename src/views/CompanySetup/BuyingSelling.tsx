@@ -182,7 +182,7 @@ const BuyingSelling: React.FC = () => {
     return (
       <div className="space-y-4">
         {/* Payment Schedule Table */}
-        <div className="border border-theme rounded-lg overflow-hidden">
+        <div className="border border-[var(--border)] rounded-lg overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="table-head">
@@ -199,7 +199,7 @@ const BuyingSelling: React.FC = () => {
             </thead>
             <tbody>
               {data.phases.map((row, idx) => (
-                <tr key={idx} className="border-b border-theme last:border-0">
+                <tr key={idx} className="border-b border-[var(--border)] last:border-0">
                   <td className="px-3 py-2">
                     <input
                       type="text"
@@ -314,7 +314,7 @@ const BuyingSelling: React.FC = () => {
         value={formData[tab][section]}
         onChange={(e) => handleChange(tab, e.target.value)}
         placeholder={`Enter ${sectionData?.label.toLowerCase()}...`}
-        className={`w-full h-64 bg-card border border-theme rounded-lg px-4 py-3 text-sm text-main placeholder-card focus:outline-none focus:ring-2 focus:border-transparent focus:bg-card transition-all resize-none ${
+        className={`w-full h-64 bg-card border border-[var(--border)] rounded-lg px-4 py-3 text-sm text-main placeholder-card focus:outline-none focus:ring-2 focus:border-transparent focus:bg-card transition-all resize-none ${
           tab === "buying"
             ? "focus:ring-[var(--primary)]"
             : "focus:ring-[var(--primary)]"
@@ -343,12 +343,12 @@ const BuyingSelling: React.FC = () => {
       <div className="">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           {/* Buying Terms Card */}
-          <div className="bg-card rounded-xl border border-theme shadow-sm overflow-hidden">
+          <div className="bg-card rounded-xl border border-[var(--border)] shadow-sm overflow-hidden">
             {/* filled header using theme */}
             <div
-              className="px-4 py-2 border-b border-theme flex items-center gap-3"
+              className="px-4 py-2 border-b border-[var(--border)] flex items-center gap-3"
               style={{
-                background: "var(--primary-600)",
+                background: "var(--primary)",
                 color: "var(--table-head-text)",
               }}
             >
@@ -378,14 +378,14 @@ const BuyingSelling: React.FC = () => {
               </span>
             </div>
 
-            <div className="px-4 py-3 border-b border-theme">
+            <div className="px-4 py-3 border-b border-[var(--border)]">
               <div className="relative">
                 <select
                   value={buyingSection}
                   onChange={(e) =>
                     setBuyingSection(e.target.value as SectionId)
                   }
-                  className="w-full appearance-none bg-card border border-theme rounded-lg px-4 py-2 pr-10 text-sm font-medium text-muted focus:outline-none focus:ring-2 focus:border-transparent cursor-pointer"
+                  className="w-full appearance-none bg-card border border-[var(--border)] rounded-lg px-4 py-2 pr-10 text-sm font-medium text-muted focus:outline-none focus:ring-2 focus:border-transparent cursor-pointer"
                   style={{ outline: "none" }}
                 >
                   {sections.map((section) => (
@@ -402,11 +402,11 @@ const BuyingSelling: React.FC = () => {
           </div>
 
           {/* Selling Terms Card */}
-          <div className="bg-card rounded-xl border border-theme shadow-sm overflow-hidden">
+          <div className="bg-card rounded-xl border border-[var(--border)] shadow-sm overflow-hidden">
             <div
-              className="px-4 py-2 border-b border-theme flex items-center gap-3"
+              className="px-4 py-2 border-b border-[var(--border)] flex items-center gap-3"
               style={{
-                background: "var(--primary-600)",
+                background: "var(--primary)",
                 color: "var(--table-head-text)",
               }}
             >
@@ -436,14 +436,14 @@ const BuyingSelling: React.FC = () => {
               </span>
             </div>
 
-            <div className="px-4 py-3 border-b border-theme">
+            <div className="px-4 py-3 border-b border-[var(--border)]">
               <div className="relative">
                 <select
                   value={sellingSection}
                   onChange={(e) =>
                     setSellingSection(e.target.value as SectionId)
                   }
-                  className="w-full appearance-none bg-card border border-theme rounded-lg px-4 py-2 pr-10 text-sm font-medium text-muted focus:outline-none focus:ring-2 focus:border-transparent cursor-pointer"
+                  className="w-full appearance-none bg-card border border-[var(--border)] rounded-lg px-4 py-2 pr-10 text-sm font-medium text-muted focus:outline-none focus:ring-2 focus:border-transparent cursor-pointer"
                   style={{ outline: "none" }}
                 >
                   {sections.map((section) => (
@@ -464,7 +464,7 @@ const BuyingSelling: React.FC = () => {
         <div className="flex justify-end gap-3 mt-4">
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted bg-card border border-theme rounded-lg hover:bg-card transition-all"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted bg-card border border-[var(--border)] rounded-lg hover:bg-card transition-all"
           >
             <RotateCcw className="w-4 h-4" />
             Reset

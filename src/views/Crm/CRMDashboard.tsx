@@ -328,7 +328,7 @@ const CRMDashboard: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 min-h-screen w-full pb-8">
-      <div className="max-w-[1600px] mx-auto px-6">
+      <div className="bg-app max-w-[1600px] mx-auto px-6">
         
 
         {/* Enhanced KPI Cards Grid */}

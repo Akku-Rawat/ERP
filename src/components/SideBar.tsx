@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   FaChartBar,
   FaMoneyBillWave,
@@ -34,6 +34,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     localStorage.clear();
@@ -48,7 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
       } h-screen bg-sidebar fixed shadow-xl transition-all duration-300 overflow-hidden`}
     >
       <div>
-        <div className="flex items-center justify-between p-4 border-b shadow-sm">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border)] shadow-sm">
           <div className="flex items-center space-x-3">
             {open && <h2 className="text-2xl font-bold text-primary">ERP</h2>}
           </div>
@@ -154,7 +155,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
         </nav>
       </div>
 
-      <div className="p-4 border-t">
+      <div className="p-4 border-t border-[var(--border)]">
         <button
           onClick={handleLogout}
           className="flex items-center justify-center gap-3 w-full py-3 rounded-xl btn-danger transition font-medium shadow-md"

@@ -88,7 +88,7 @@ export default function Pagination({
                 onClick={() => goto(r)}
                 className={`min-w-[36px] h-8 flex items-center justify-center px-2 rounded-md text-sm border ${
                   r === currentPage
-                    ? "bg-teal-600 text-white border-teal-600 shadow"
+                    ? "bg-primary text-white border-teal-600 shadow"
                     : "bg-white text-gray-700 hover:bg-gray-50"
                 }`}
                 aria-current={r === currentPage ? "page" : undefined}

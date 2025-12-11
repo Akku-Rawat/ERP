@@ -225,7 +225,7 @@ const BasicDetails: React.FC = () => {
             onChange={handleChange}
             placeholder={placeholder}
             required={required}
-            className={`w-full border border-theme rounded-lg ${Icon ? "pl-10" : "pl-3.5"} pr-3.5 py-2.5 text-sm focus:outline-none focus-ring transition-all hover:border-theme bg-card text-main`}
+            className={`w-full border border-[var(--border)] rounded-lg ${Icon ? "pl-10" : "pl-3.5"} pr-3.5 py-2.5 text-sm focus:outline-none focus-ring transition-all hover:border-[var(--border)] bg-card text-main`}
           />
         </div>
       </div>
@@ -254,9 +254,9 @@ const BasicDetails: React.FC = () => {
         )}
 
         {/* Main Card */}
-        <div className="bg-card rounded-xl shadow-sm border border-theme overflow-hidden">
+        <div className="bg-card rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
           {/* Tab Navigation */}
-          <div className="border-b border-theme bg-[var(--card)]">
+          <div className="border-b border-[var(--border)] bg-[var(--card)]">
             <div className="flex">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -269,7 +269,7 @@ const BasicDetails: React.FC = () => {
                     className={`flex-1 flex items-center justify-center gap-2 px-4 py-3
                        text-sm font-medium transition-all border-b-2 ${
                          isActive
-                           ? "table-head text-table-head-text"
+                           ? "bg-primary  text-table-head-text"
                            : "border-transparent text-main hover:bg-[var(--row-hover)]"
                        }`}
                   >
@@ -443,7 +443,7 @@ const BasicDetails: React.FC = () => {
           </div>
 
           {/* Action Footer */}
-          <div className="bg-card px-8 py-4 border-t border-theme flex items-center justify-between">
+          <div className="bg-card px-8 py-4 border-t border-[var(--border)] flex items-center justify-between">
             <button
               onClick={handleReset}
               className="px-5 py-2.5 rounded-lg border shadow-sm 
