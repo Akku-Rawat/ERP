@@ -3,6 +3,7 @@ import { FaEdit, FaTimes, FaCheck, FaPlus, FaTrash } from 'react-icons/fa';
 import type { TermSection, PaymentTerms, TermPhase } from '../types/termsAndCondition';
 
 interface Props {
+  title?: string,
   terms: TermSection | null;
   setTerms: (updated: TermSection) => void;
 }
@@ -46,7 +47,7 @@ const emptyTerms: TermSection = {
   liability: '',
 };
 
-const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
+const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
   const [selectedTemplate, setSelectedTemplate] = useState('General Service Terms');
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState<TermSection | null>(null);
@@ -284,7 +285,6 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
 
   return (
     <div className="bg-card rounded-xl border border-theme shadow-sm overflow-hidden">
-      {/* HEADER (MATCHES BuyingSelling HEADER) */}
       <div
         className="px-4 py-2 border-b border-theme flex items-center gap-3"
         style={{
@@ -292,7 +292,7 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
           color: 'var(--table-head-text)',
         }}
       >
-        <h2 className="font-semibold text-white text-sm">Terms & Conditions</h2>
+        <h2 className="font-semibold text-white text-sm">{title ?? "Terms & Conditions"}</h2>
 
         <select
           disabled={isEditing}

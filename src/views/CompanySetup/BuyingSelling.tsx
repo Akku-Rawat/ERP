@@ -97,6 +97,7 @@ const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
 
         <div className="bg-card rounded-xl border border-theme shadow-sm p-4">
           <TermsAndCondition
+            title="Buying Terms & Conditions"
             terms={formData.buying as TermSection}
             setTerms={(updated) =>
               setFormData((prev) => ({ ...prev, buying: updated }))
@@ -106,7 +107,8 @@ const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
 
         <div className="bg-card rounded-xl border border-theme shadow-sm p-4">
           <TermsAndCondition
-            terms={formData.selling  as TermSection}
+            title="Selling Terms & Conditions"
+            terms={formData.selling as TermSection}
             setTerms={(updated) =>
               setFormData((prev) => ({ ...prev, selling: updated }))
             }
