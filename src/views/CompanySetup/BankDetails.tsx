@@ -18,17 +18,17 @@ interface Props {
 const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAccount, setSelectedAccount] = useState<number | null>(
-    bankAccounts.length > 0 ? 0 : null
+    bankAccounts.length > 0 ? 0 : null,
   );
-  const [showAccountNumber, setShowAccountNumber] = useState<Record<number, boolean>>(
-    {}
-  );
+  const [showAccountNumber, setShowAccountNumber] = useState<
+    Record<number, boolean>
+  >({});
 
   const filteredAccounts = bankAccounts.filter(
     (acc) =>
       acc.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       acc.accountNo.includes(searchTerm) ||
-      acc.swiftCode.toLowerCase().includes(searchTerm.toLowerCase())
+      acc.swiftCode.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const toggleAccountVisibility = (index: number) => {
@@ -58,9 +58,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
         {label}
       </label>
       <div className="bg-card border border-theme rounded-lg px-4 py-3 flex justify-between items-center">
-        <p className="text-muted font-medium">
-          {value || "—"}
-        </p>
+        <p className="text-muted font-medium">{value || "—"}</p>
 
         {canToggle && (
           <button onClick={onToggle} className="text-muted">
@@ -85,7 +83,6 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
             </div>
 
             <div className="p-4 space-y-3">
-
               {/* SEARCH */}
               <div className="relative">
                 <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4" />
@@ -104,7 +101,8 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                 onClick={onAddAccount}
                 className="w-full px-4 py-2.5 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-2 shadow-sm"
                 style={{
-                  background: "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
+                  background:
+                    "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
                 }}
               >
                 <FaPlus className="w-4 h-4" />
@@ -122,13 +120,16 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                     <div
                       key={i}
                       onClick={() => setSelectedAccount(i)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-all ${selectedAccount === i
-                        ? "table-head text-table-head-text"
-                        : "border bg-card hover:row-hover text-main"
-                        }`}
+                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                        selectedAccount === i
+                          ? "table-head text-table-head-text"
+                          : "border bg-card hover:row-hover text-main"
+                      }`}
                     >
                       <div className="flex justify-between items-start mb-1">
-                        <p className="font-semibold text-main text-sm">{acc.bankName}</p>
+                        <p className="font-semibold text-main text-sm">
+                          {acc.bankName}
+                        </p>
                         <span className="text-xs badge-success px-2 py-0.5 rounded-full font-medium">
                           {acc.currency}
                         </span>
@@ -153,7 +154,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
           {/* ACCOUNT DETAILS PANEL */}
           <div className="col-span-3 bg-card rounded-lg shadow-sm overflow-hidden">
             <div className="px-4 py-2 flex justify-between items-center bg-primary">
-              <h2 className="text-lg font-semibold text-white">Account Details</h2>
+              <h2 className="text-lg font-semibold text-white">
+                Account Details
+              </h2>
 
               {selectedAccount !== null && (
                 <div className="flex gap-2">
@@ -178,38 +181,64 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                 <div className="inline-block p-6 rounded-full mb-4 bg-card">
                   <FaUniversity className="w-12 h-12 text-muted" />
                 </div>
-                <h3 className="text-lg font-semibold text-main mb-2">No Account Selected</h3>
-                <p className="text-muted">Select an account from the list to view details</p>
+                <h3 className="text-lg font-semibold text-main mb-2">
+                  No Account Selected
+                </h3>
+                <p className="text-muted">
+                  Select an account from the list to view details
+                </p>
               </div>
             ) : (
               <div className="p-6">
                 <div className="grid grid-cols-2 gap-6">
+                  <Detail
+                    label="Bank Name"
+                    value={bankAccounts[selectedAccount].bankName}
+                  />
 
-                  <Detail label="Bank Name" value={bankAccounts[selectedAccount].bankName} />
-
-                  <Detail label="Account Holder" value={bankAccounts[selectedAccount].accountHolderName} />
+                  <Detail
+                    label="Account Holder"
+                    value={bankAccounts[selectedAccount].accountHolderName}
+                  />
 
                   <Detail
                     label="Account Number"
                     value={
                       showAccountNumber[selectedAccount]
                         ? bankAccounts[selectedAccount].accountNo
-                        : maskAccountNumber(bankAccounts[selectedAccount].accountNo)
+                        : maskAccountNumber(
+                            bankAccounts[selectedAccount].accountNo,
+                          )
                     }
                     canToggle={true}
                     onToggle={() => toggleAccountVisibility(selectedAccount)}
                     reveal={showAccountNumber[selectedAccount]}
                   />
 
-                  <Detail label="Swift/BIC Code" value={bankAccounts[selectedAccount].swiftCode} />
+                  <Detail
+                    label="Swift/BIC Code"
+                    value={bankAccounts[selectedAccount].swiftCode}
+                  />
 
-                  <Detail label="Sort Code" value={bankAccounts[selectedAccount].sortCode} />
+                  <Detail
+                    label="Sort Code"
+                    value={bankAccounts[selectedAccount].sortCode}
+                  />
 
-                  <Detail label="Currency" value={bankAccounts[selectedAccount].currency} />
+                  <Detail
+                    label="Currency"
+                    value={bankAccounts[selectedAccount].currency}
+                  />
 
-                  <Detail label="Opening Balance" value={bankAccounts[selectedAccount].openingBalance} />
+                  <Detail
+                    label="Opening Balance"
+                    value={bankAccounts[selectedAccount].openingBalance}
+                  />
 
-                  <Detail label="Date Added" value={bankAccounts[selectedAccount].dateAdded} />
+                  <Detail
+                    label="Date Added"
+                    value={bankAccounts[selectedAccount].dateAdded}
+                  />
 
                   <div className="col-span-2">
                     <Detail
@@ -217,13 +246,10 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                       value={bankAccounts[selectedAccount].branchAddress}
                     />
                   </div>
-
                 </div>
               </div>
             )}
           </div>
-
-
         </div>
       </div>
     </div>

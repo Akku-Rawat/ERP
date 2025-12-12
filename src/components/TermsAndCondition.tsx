@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
-import { FaEdit, FaTimes, FaCheck, FaPlus, FaTrash } from 'react-icons/fa';
-import type { TermSection, PaymentTerms, TermPhase } from '../types/termsAndCondition';
+import React, { useState } from "react";
+import { FaEdit, FaTimes, FaCheck, FaPlus, FaTrash } from "react-icons/fa";
+import type {
+  TermSection,
+  PaymentTerms,
+  TermPhase,
+} from "../types/termsAndCondition";
 
 interface Props {
-  title?: string,
+  title?: string;
   terms: TermSection | null;
   setTerms: (updated: TermSection) => void;
 }
@@ -11,58 +15,61 @@ interface Props {
 type LocalPhase = TermPhase & { id?: string; isDelete?: number };
 
 const UI_TO_KEY: Record<string, keyof TermSection> = {
-  'General Service Terms': 'general',
-  'Payment Terms': 'payment',
-  'Service Delivery Terms': 'delivery',
-  'Cancellation / Refund Policy': 'cancellation',
-  Warranty: 'warranty',
-  'Limitations and Liability': 'liability',
+  "General Service Terms": "general",
+  "Payment Terms": "payment",
+  "Service Delivery Terms": "delivery",
+  "Cancellation / Refund Policy": "cancellation",
+  Warranty: "warranty",
+  "Limitations and Liability": "liability",
 };
 
 const TABS = Object.keys(UI_TO_KEY);
 
-
 const emptyPhase = (): TermPhase => ({
-  id: '',
-  name: '',
-  percentage: '',
-  condition: '',
+  id: "",
+  name: "",
+  percentage: "",
+  condition: "",
   isDelete: undefined,
 });
 
 const emptyPayment: PaymentTerms = {
   phases: [],
-  dueDates: '',
-  lateCharges: '',
-  tax: '',
-  notes: '',
+  dueDates: "",
+  lateCharges: "",
+  tax: "",
+  notes: "",
 };
 
 const emptyTerms: TermSection = {
-  general: '',
+  general: "",
   payment: emptyPayment,
-  delivery: '',
-  cancellation: '',
-  warranty: '',
-  liability: '',
+  delivery: "",
+  cancellation: "",
+  warranty: "",
+  liability: "",
 };
 
 const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
-  const [selectedTemplate, setSelectedTemplate] = useState('General Service Terms');
+  const [selectedTemplate, setSelectedTemplate] = useState(
+    "General Service Terms",
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState<TermSection | null>(null);
 
   const baseTerms: TermSection = terms ?? emptyTerms;
-  const currentTerms: TermSection = isEditing ? (draft ?? baseTerms) : baseTerms;
+  const currentTerms: TermSection = isEditing
+    ? (draft ?? baseTerms)
+    : baseTerms;
 
   const activeKey = UI_TO_KEY[selectedTemplate];
 
   const ensurePayment = (src: TermSection): PaymentTerms => ({
     phases: src.payment?.phases ?? [],
-    dueDates: src.payment?.dueDates ?? '',
-    lateCharges: src.payment?.lateCharges ?? '',
-    tax: src.payment?.tax ?? '',
-    notes: src.payment?.notes ?? '',
+    dueDates: src.payment?.dueDates ?? "",
+    lateCharges: src.payment?.lateCharges ?? "",
+    tax: src.payment?.tax ?? "",
+    notes: src.payment?.notes ?? "",
   });
 
   const startEditing = () => {
@@ -129,9 +136,9 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
   };
 
   const removePhase = (index: number) => {
-    console.log('removePhase index: ', index);
+    console.log("removePhase index: ", index);
     if (!isEditing) return;
-    console.log('isEditing: ', isEditing);
+    console.log("isEditing: ", isEditing);
 
     const phases = ensurePayment(currentTerms).phases as LocalPhase[];
 
@@ -150,7 +157,6 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
     updatePayment({ phases: next });
   };
 
-
   const renderPaymentTable = () => {
     const payment = ensurePayment(currentTerms);
     const rawPhases = payment.phases as LocalPhase[];
@@ -162,11 +168,21 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
           <table className="w-full text-sm">
             <thead>
               <tr className="table-head">
-                <th className="px-3 py-2 text-left font-medium text-muted">#</th>
-                <th className="px-3 py-2 text-left font-medium text-muted">Phase</th>
-                <th className="px-3 py-2 text-left font-medium text-muted">Percentage</th>
-                <th className="px-3 py-2 text-left font-medium text-muted">Condition</th>
-                <th className="px-3 py-2 text-center font-medium text-muted">Action</th>
+                <th className="px-3 py-2 text-left font-medium text-muted">
+                  #
+                </th>
+                <th className="px-3 py-2 text-left font-medium text-muted">
+                  Phase
+                </th>
+                <th className="px-3 py-2 text-left font-medium text-muted">
+                  Percentage
+                </th>
+                <th className="px-3 py-2 text-left font-medium text-muted">
+                  Condition
+                </th>
+                <th className="px-3 py-2 text-center font-medium text-muted">
+                  Action
+                </th>
               </tr>
             </thead>
 
@@ -175,7 +191,10 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
                 if (p.isDelete === 1) return null;
 
                 return (
-                  <tr key={idx} className="border-b border-theme row-hover last:border-0">
+                  <tr
+                    key={idx}
+                    className="border-b border-theme row-hover last:border-0"
+                  >
                     <td className="px-3 py-2">{idx + 1}</td>
 
                     <td className="px-3 py-2">
@@ -183,7 +202,9 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
                         <input
                           className="w-full bg-transparent text-muted outline-none"
                           value={p.name}
-                          onChange={(e) => updatePhase(idx, { name: e.target.value })}
+                          onChange={(e) =>
+                            updatePhase(idx, { name: e.target.value })
+                          }
                         />
                       ) : (
                         <span>{p.name}</span>
@@ -195,7 +216,9 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
                         <input
                           className="w-full bg-transparent text-muted outline-none"
                           value={p.percentage}
-                          onChange={(e) => updatePhase(idx, { percentage: e.target.value })}
+                          onChange={(e) =>
+                            updatePhase(idx, { percentage: e.target.value })
+                          }
                         />
                       ) : (
                         <span>{p.percentage}</span>
@@ -207,7 +230,9 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
                         <input
                           className="w-full bg-transparent text-muted outline-none"
                           value={p.condition}
-                          onChange={(e) => updatePhase(idx, { condition: e.target.value })}
+                          onChange={(e) =>
+                            updatePhase(idx, { condition: e.target.value })
+                          }
                         />
                       ) : (
                         <span>{p.condition}</span>
@@ -216,7 +241,11 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
 
                     <td className="px-3 py-2 text-center">
                       {isEditing && (
-                        <button type="button" onClick={() => removePhase(idx)} className="text-red-500 hover:text-red-700">
+                        <button
+                          type="button"
+                          onClick={() => removePhase(idx)}
+                          className="text-red-500 hover:text-red-700"
+                        >
                           <FaTrash />
                         </button>
                       )}
@@ -230,7 +259,7 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
         {isEditing && (
           <div className="flex justify-end w-full">
             <button
-            type="button"
+              type="button"
               onClick={addPhase}
               className="px-4 py-2 bg-primary text-white rounded-lg text-sm flex items-center gap-2"
             >
@@ -243,28 +272,28 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
         <div className="space-y-3 text-sm">
           <LabeledRow
             label="Due Dates:"
-            value={payment.dueDates ?? ''}
+            value={payment.dueDates ?? ""}
             disabled={!isEditing}
             onChange={(v) => updatePayment({ dueDates: v })}
           />
 
           <LabeledRow
             label="Late Payment Charges:"
-            value={payment.lateCharges ?? ''}
+            value={payment.lateCharges ?? ""}
             disabled={!isEditing}
             onChange={(v) => updatePayment({ lateCharges: v })}
           />
 
           <LabeledRow
             label="Tax / Additional Charges:"
-            value={payment.tax ?? ''}
+            value={payment.tax ?? ""}
             disabled={!isEditing}
             onChange={(v) => updatePayment({ tax: v })}
           />
 
           <LabeledRow
             label="Notes:"
-            value={payment.notes ?? ''}
+            value={payment.notes ?? ""}
             disabled={!isEditing}
             onChange={(v) => updatePayment({ notes: v })}
           />
@@ -276,7 +305,7 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
   const renderTextSection = (field: keyof TermSection) => (
     <textarea
       disabled={!isEditing}
-      value={(currentTerms[field] as string) ?? ''}
+      value={(currentTerms[field] as string) ?? ""}
       onChange={(e) => updateTopField(field, e.target.value)}
       placeholder={`Enter ${selectedTemplate.toLowerCase()}...`}
       className="w-full h-64 bg-card border border-theme rounded-lg px-4 py-3 text-sm text-main focus:ring-2 outline-none"
@@ -288,11 +317,13 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
       <div
         className="px-4 py-2 border-b border-theme flex items-center gap-3"
         style={{
-          background: 'var(--primary-600)',
-          color: 'var(--table-head-text)',
+          background: "var(--primary-600)",
+          color: "var(--table-head-text)",
         }}
       >
-        <h2 className="font-semibold text-white text-sm">{title ?? "Terms & Conditions"}</h2>
+        <h2 className="font-semibold text-white text-sm">
+          {title ?? "Terms & Conditions"}
+        </h2>
 
         <select
           disabled={isEditing}
@@ -309,13 +340,21 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
       </div>
 
       {/* CONTENT */}
-      <div className="p-4">{activeKey === 'payment' ? renderPaymentTable() : renderTextSection(activeKey)}</div>
+      <div className="p-4">
+        {activeKey === "payment"
+          ? renderPaymentTable()
+          : renderTextSection(activeKey)}
+      </div>
 
       {/* ACTION BUTTONS */}
       <div className="flex justify-end gap-3 p-4 border-t border-theme">
         {isEditing ? (
           <>
-            <button type="button" onClick={cancelEditing} className="px-4 py-2 bg-card border border-theme text-muted rounded-lg">
+            <button
+              type="button"
+              onClick={cancelEditing}
+              className="px-4 py-2 bg-card border border-theme text-muted rounded-lg"
+            >
               <FaTimes className="inline mr-2" /> Cancel
             </button>
 
@@ -324,7 +363,8 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
               onClick={saveEditing}
               className="px-5 py-2 rounded-lg text-white font-medium"
               style={{
-                background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)',
+                background:
+                  "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
               }}
             >
               <FaCheck className="inline mr-2" /> Save Terms

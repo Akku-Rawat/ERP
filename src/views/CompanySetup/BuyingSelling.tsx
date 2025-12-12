@@ -2,10 +2,7 @@ import React, { useEffect, useState } from "react";
 import TermsAndCondition from "../../components/TermsAndCondition";
 import { Check, RotateCcw, Save } from "lucide-react";
 
-import type {
-  Terms,
-  TermSection,
-} from "../../types/termsAndCondition";
+import type { Terms, TermSection } from "../../types/termsAndCondition";
 
 interface BuyingSellingProps {
   terms?: Terms | null;
@@ -84,7 +81,6 @@ const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
 
   return (
     <div className="min-h-screen bg-app">
-
       {/* SUCCESS TOAST */}
       {showSuccess && (
         <div className="fixed top-4 right-4 bg-card border border-green-200 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
@@ -94,11 +90,10 @@ const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
         <div className="bg-card rounded-xl border border-theme shadow-sm p-4">
           <TermsAndCondition
             title="Buying Terms & Conditions"
-            terms={formData.buying as TermSection}
+            terms={formData.buying}
             setTerms={(updated) =>
               setFormData((prev) => ({ ...prev, buying: updated }))
             }
@@ -108,7 +103,7 @@ const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
         <div className="bg-card rounded-xl border border-theme shadow-sm p-4">
           <TermsAndCondition
             title="Selling Terms & Conditions"
-            terms={formData.selling as TermSection}
+            terms={formData.selling}
             setTerms={(updated) =>
               setFormData((prev) => ({ ...prev, selling: updated }))
             }

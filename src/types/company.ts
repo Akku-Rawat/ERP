@@ -1,4 +1,4 @@
-import type { Terms } from './termsAndCondition';
+import type { Terms } from "./termsAndCondition";
 
 export interface RegistrationDetails {
   registerNo: string;

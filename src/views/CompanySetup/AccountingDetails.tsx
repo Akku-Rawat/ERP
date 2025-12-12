@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   FaDollarSign,
   FaChartArea,
@@ -41,15 +41,17 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
   const [lastSaved, setLastSaved] = useState<string>("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [activeTab, setActiveTab] = useState("financial");
-  const refs = useRef<Record<string, HTMLInputElement | HTMLSelectElement | null>>({});
+  const refs = useRef<
+    Record<string, HTMLInputElement | HTMLSelectElement | null>
+  >({});
   const restoring = useRef(false);
-
 
   const mergedProps = {
     chartOfAccounts: accountingSetup?.chartOfAccounts ?? "",
     defaultExpenseGL: accountingSetup?.defaultExpenseGL ?? "",
     exchangeGainLossAccount: accountingSetup?.fxGainLossAccount ?? "",
-    exchangeRateRevaluationFreq: accountingSetup?.revaluationFrequency ?? "Monthly",
+    exchangeRateRevaluationFreq:
+      accountingSetup?.revaluationFrequency ?? "Monthly",
     roundOffAccount: accountingSetup?.roundOffAccount ?? "",
     roundOffCostCenter: accountingSetup?.roundOffCostCenter ?? "",
     depreciationExpenseAccount: accountingSetup?.depreciationAccount ?? "",
@@ -61,7 +63,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
   const initialData = { ...defaultData, ...mergedProps };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const target = e.currentTarget;
     const name = target.getAttribute("name") ?? "";
@@ -70,16 +72,14 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
     setHasUnsavedChanges(true);
   };
 
-
   const buildFormDataFromRefs = () => {
     const out: Record<string, string> = {};
     (Object.keys(defaultData) as FormKeys[]).forEach((k) => {
       const el = refs.current[k];
-      out[k] = el ? el.value ?? "" : "";
+      out[k] = el ? (el.value ?? "") : "";
     });
     return out as Record<FormKeys, string>;
   };
-
 
   const handleSubmit = () => {
     const data = buildFormDataFromRefs();
@@ -88,7 +88,6 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
     setHasUnsavedChanges(false);
     setTimeout(() => setShowSuccess(false), 3000);
   };
-
 
   const handleReset = () => {
     if (!confirm("Reset all fields and clear saved data?")) return;
@@ -105,8 +104,6 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
     (name: string) => (el: HTMLInputElement | HTMLSelectElement | null) => {
       refs.current[name] = el;
     };
-
-
 
   interface InputFieldProps {
     label: string;
@@ -141,8 +138,9 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
           onChange={handleChange}
           placeholder={placeholder}
           required={required}
-          className={`w-full border bg-theme rounded-lg ${Icon ? "pl-10" : "pl-3.5"
-            } pr-3.5 py-2.5 text-sm focus:ring-2 focus:ring-[var(--primary)]`}
+          className={`w-full border bg-theme rounded-lg ${
+            Icon ? "pl-10" : "pl-3.5"
+          } pr-3.5 py-2.5 text-sm focus:ring-2 focus:ring-[var(--primary)]`}
         />
       </div>
     </div>
@@ -177,8 +175,9 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
           ref={attachRef(name)}
           onChange={handleChange}
           required={required}
-          className={`w-full border bg-theme rounded-lg ${Icon ? "pl-10" : "pl-3.5"
-            } pr-10 py-2.5 text-sm`}
+          className={`w-full border bg-theme rounded-lg ${
+            Icon ? "pl-10" : "pl-3.5"
+          } pr-10 py-2.5 text-sm`}
         >
           {options.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -190,18 +189,25 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
     </div>
   );
 
-
   return (
     <div className="">
       <div className="w-full">
         {showSuccess && (
           <div className="mb-4 rounded-lg p-4 shadow-sm flex items-center gap-3">
-            <FaCheckCircle className="w-5 h-5" style={{ color: "var(--success)" }} />
+            <FaCheckCircle
+              className="w-5 h-5"
+              style={{ color: "var(--success)" }}
+            />
             <div>
-              <p className="text-sm font-medium" style={{ color: "var(--success)" }}>
+              <p
+                className="text-sm font-medium"
+                style={{ color: "var(--success)" }}
+              >
                 Configuration saved successfully!
               </p>
-              <p className="text-xs text-success">All changes have been stored</p>
+              <p className="text-xs text-success">
+                All changes have been stored
+              </p>
             </div>
           </div>
         )}
@@ -233,7 +239,9 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
                       style={{
                         width: 16,
                         height: 16,
-                        color: active ? "var(--table-head-text)" : "var(--muted)",
+                        color: active
+                          ? "var(--table-head-text)"
+                          : "var(--muted)",
                       }}
                     />
                     {tab.label}

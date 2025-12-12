@@ -1,5 +1,5 @@
-import type { AxiosResponse } from 'axios';
-import { createAxiosInstance } from './axiosInstance';
+import type { AxiosResponse } from "axios";
+import { createAxiosInstance } from "./axiosInstance";
 
 const base_url = import.meta.env.VITE_BASE_URL as string;
 const api = createAxiosInstance(base_url);
@@ -31,9 +31,13 @@ export async function getCompanyById(id: string): Promise<any> {
 }
 
 export async function updateCompanyById(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(ENDPOINTS.updateCompanyById, payload, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const resp: AxiosResponse = await api.post(
+    ENDPOINTS.updateCompanyById,
+    payload,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    },
+  );
 
   return resp.data;
 }
@@ -46,6 +50,9 @@ export async function deleteCompanyById(payload: any): Promise<any> {
 }
 
 export async function updateAccountsCompany(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.put(ENDPOINTS.updateAccountsCompanyInfo, payload);
+  const resp: AxiosResponse = await api.put(
+    ENDPOINTS.updateAccountsCompanyInfo,
+    payload,
+  );
   return resp.data;
 }
