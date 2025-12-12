@@ -6,9 +6,9 @@ import { LayoutWithTheme } from "./layoutwiththeme";
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <LayoutWithTheme>
+      {/* <LayoutWithTheme> */}
       <AppRoutes />
-      </LayoutWithTheme>
+      {/* </LayoutWithTheme> */}
     </AuthProvider>
   );
 };

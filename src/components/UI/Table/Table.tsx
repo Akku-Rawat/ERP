@@ -75,7 +75,7 @@ function Table<T extends Record<string, any>>({
       case "center":
         return "text-center";
       case "right":
-        return "text-right";
+        return "text-center";
       default:
         return "text-left";
     }

@@ -1,8 +1,9 @@
-// src/components/ThemeSwitcher.tsx
+
 import { useEffect, useState, type ChangeEvent } from "react";
 import { initTheme, setTheme, type Theme } from "../themes"; // Corrected path
 
 const themes: { value: Theme; label: string }[] = [
+  { value: 'midnight', label: 'Midnight (Corporate)' },
   { value: "gold", label: "Gold" },
   { value: "amber", label: "Amber" },
   { value: "yellow", label: "Yellow" },
@@ -10,10 +11,23 @@ const themes: { value: Theme; label: string }[] = [
   { value: "corporate", label: "Corporate Blue" },
   { value: "forest", label: "Forest Green" },
   { value: "violet", label: "Violet Harmony" },
-  { value: "modern", label: "Modern Gray" },    // New theme
-  { value: "ocean", label: "Ocean Breeze" },   // New theme
-  { value: "regal", label: "Regal Purple" },   // New theme
+  { value: "modern", label: "Modern Gray" },
+  { value: "ocean", label: "Ocean Breeze" },
+  { value: "regal", label: "Regal Purple" },
+  { value: "rose", label: "Pastel Rose" },      // New theme
+  { value: "mint", label: "Mint Dream" },      // New theme
+  { value: "lavender", label: "Lavender Haze" }, // New theme
+
+
+   { value: 'lavender', label: 'Lavender (SaaS)' },
+  //  { value: 'sunset', label: 'Sunset (Warm)' },
+   { value: 'mint', label: 'Mint (Fresh)' },
+   { value: 'nordic', label: 'Nordic (Clean)' },
+  
+  
+  
 ];
+
 
 export function ThemeSwitcher() {
   const [theme, setThemeState] = useState<Theme>("gold");

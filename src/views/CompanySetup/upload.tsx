@@ -163,7 +163,7 @@ const Upload: React.FC = () => {
     uploadProgress?.type === selectedType ? uploadProgress.progress : 0;
 
   return (
-    <div className="">
+    <div className="w-full">
       <div className="max-w-full">
         {/* Success Alert */}
         {showSuccess && (
@@ -193,21 +193,9 @@ const Upload: React.FC = () => {
                   onClick={() => setSelectedType("logo")}
                   className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                     selectedType === "logo"
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-theme hover:row-hover bg-card"
+                      ? "border-primary-600 bg-primary-10" // Use theme primary tints
+                      : "border-theme row-hover bg-card" // Use theme-aware hover
                   }`}
-                  /* keep classes for layout; override colors via style where needed below */
-                  style={{
-                    // make selected card use full theme tint if selected
-                    background:
-                      selectedType === "logo"
-                        ? "var(--primary-600)"
-                        : undefined,
-                    color:
-                      selectedType === "logo"
-                        ? "var(--table-head-text)"
-                        : undefined,
-                  }}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
@@ -216,8 +204,8 @@ const Upload: React.FC = () => {
                         style={{
                           background:
                             selectedType === "logo"
-                              ? "rgba(255,255,255,0.12)"
-                              : "var(--primary-100)",
+                              ? "var(--primary-20)" // More subtle tint
+                              : "var(--bg)",
                         }}
                       >
                         <FaImage
@@ -225,8 +213,8 @@ const Upload: React.FC = () => {
                           style={{
                             color:
                               selectedType === "logo"
-                                ? "white"
-                                : "var(--primary-700)",
+                                ? "var(--primary)" // Use primary for active icon
+                                : "var(--muted)",
                           }}
                         />
                       </div>
@@ -235,7 +223,9 @@ const Upload: React.FC = () => {
                           className="font-semibold"
                           style={{
                             color:
-                              selectedType === "logo" ? "white" : undefined,
+                              selectedType === "logo"
+                                ? "var(--text)" // Active text
+                                : "var(--main)", // Default text
                           }}
                         >
                           Company Logo
@@ -245,8 +235,8 @@ const Upload: React.FC = () => {
                           style={{
                             color:
                               selectedType === "logo"
-                                ? "rgba(255,255,255,0.85)"
-                                : undefined,
+                                ? "var(--muted)" // Active muted text
+                                : "var(--muted)", // Default muted text
                           }}
                         >
                           PNG, JPG, SVG
@@ -266,8 +256,8 @@ const Upload: React.FC = () => {
                         style={{
                           color:
                             selectedType === "logo"
-                              ? "rgba(255,255,255,0.95)"
-                              : undefined,
+                              ? "var(--text)"
+                              : "var(--text)",
                         }}
                       >
                         {logo.file.name}
@@ -277,8 +267,8 @@ const Upload: React.FC = () => {
                         style={{
                           color:
                             selectedType === "logo"
-                              ? "rgba(255,255,255,0.85)"
-                              : undefined,
+                              ? "var(--muted)"
+                              : "var(--muted)",
                         }}
                       >
                         {logo.size}
@@ -291,19 +281,9 @@ const Upload: React.FC = () => {
                   onClick={() => setSelectedType("signature")}
                   className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                     selectedType === "signature"
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-theme hover:row-hover bg-card"
+                      ? "border-primary-600 bg-primary-10" // Use theme primary tints
+                      : "border-theme row-hover bg-card" // Use theme-aware hover
                   }`}
-                  style={{
-                    background:
-                      selectedType === "signature"
-                        ? "var(--primary-600)"
-                        : undefined,
-                    color:
-                      selectedType === "signature"
-                        ? "var(--table-head-text)"
-                        : undefined,
-                  }}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
@@ -312,8 +292,8 @@ const Upload: React.FC = () => {
                         style={{
                           background:
                             selectedType === "signature"
-                              ? "rgba(255,255,255,0.12)"
-                              : "var(--primary-100)",
+                              ? "var(--primary-20)"
+                              : "var(--bg)",
                         }}
                       >
                         <FaFileSignature
@@ -321,8 +301,8 @@ const Upload: React.FC = () => {
                           style={{
                             color:
                               selectedType === "signature"
-                                ? "white"
-                                : "var(--primary-700)",
+                                ? "var(--primary)"
+                                : "var(--muted)",
                           }}
                         />
                       </div>
@@ -332,8 +312,8 @@ const Upload: React.FC = () => {
                           style={{
                             color:
                               selectedType === "signature"
-                                ? "white"
-                                : undefined,
+                                ? "var(--text)"
+                                : "var(--main)",
                           }}
                         >
                           Authorized Signature
@@ -343,8 +323,8 @@ const Upload: React.FC = () => {
                           style={{
                             color:
                               selectedType === "signature"
-                                ? "rgba(255,255,255,0.85)"
-                                : undefined,
+                                ? "var(--muted)"
+                                : "var(--muted)",
                           }}
                         >
                           PNG, JPG, SVG
@@ -364,8 +344,8 @@ const Upload: React.FC = () => {
                         style={{
                           color:
                             selectedType === "signature"
-                              ? "rgba(255,255,255,0.95)"
-                              : undefined,
+                              ? "var(--text)"
+                              : "var(--text)",
                         }}
                       >
                         {signature.file.name}
@@ -375,8 +355,8 @@ const Upload: React.FC = () => {
                         style={{
                           color:
                             selectedType === "signature"
-                              ? "rgba(255,255,255,0.85)"
-                              : undefined,
+                              ? "var(--muted)"
+                              : "var(--muted)",
                         }}
                       >
                         {signature.size}
@@ -388,14 +368,8 @@ const Upload: React.FC = () => {
 
               {/* Upload Guidelines */}
               <div className="mt-6 pt-4 border-t border-theme">
-                <h3
-                  className="text-sm font-semibold mb-3 flex items-center gap-2"
-                  style={{ color: "var(--text)" }}
-                >
-                  <FaExclamationTriangle
-                    className="w-4 h-4"
-                    style={{ color: "var(--danger)" }}
-                  />
+                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-main">
+                  <FaExclamationTriangle className="w-4 h-4 text-danger" />
                   Guidelines
                 </h3>
                 <ul className="space-y-2">
@@ -409,7 +383,7 @@ const Upload: React.FC = () => {
                     >
                       •
                     </span>
-                    <span>Maximum file size: 5MB</span>
+                    <span className="text-muted">Maximum file size: 5MB</span>
                   </li>
                   <li className="text-xs flex items-start gap-2">
                     <span
@@ -421,7 +395,7 @@ const Upload: React.FC = () => {
                     >
                       •
                     </span>
-                    <span>Supported formats: PNG, JPG, SVG</span>
+                    <span className="text-muted">Supported formats: PNG, JPG, SVG</span>
                   </li>
                   <li className="text-xs flex items-start gap-2">
                     <span
@@ -433,7 +407,7 @@ const Upload: React.FC = () => {
                     >
                       •
                     </span>
-                    <span>Use transparent background for logos</span>
+                    <span className="text-muted">Use transparent background for logos</span>
                   </li>
                   <li className="text-xs flex items-start gap-2">
                     <span
@@ -445,7 +419,7 @@ const Upload: React.FC = () => {
                     >
                       •
                     </span>
-                    <span>Ensure signatures are clear and legible</span>
+                    <span className="text-muted">Ensure signatures are clear and legible</span>
                   </li>
                 </ul>
               </div>
@@ -454,17 +428,14 @@ const Upload: React.FC = () => {
               {(logo || signature) && (
                 <div className="mt-6 pt-4 border-t border-theme">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-main">
                       Overall Progress
                     </p>
-                    <p
-                      className="text-sm font-bold"
-                      style={{ color: "var(--primary-700)" }}
-                    >
+                    <p className="text-sm font-bold text-primary-700">
                       {(logo ? 50 : 0) + (signature ? 50 : 0)}%
                     </p>
                   </div>
-                  <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div className="bg-app rounded-full h-2 overflow-hidden">
                     <div
                       className="h-2 rounded-full transition-all duration-500"
                       style={{
@@ -480,10 +451,7 @@ const Upload: React.FC = () => {
 
           {/* Right Panel - Upload Area & Details */}
           <div className="col-span-3 bg-card rounded-lg shadow-sm border border-theme overflow-hidden">
-            <div
-              className="px-4 py-2 flex justify-between items-center"
-              style={{ background: "var(--primary-600)" }}
-            >
+            <div className="px-4 py-2 flex justify-between items-center bg-primary-600">
               <h2 className="text-lg font-semibold text-white">
                 {selectedType === "logo"
                   ? "Company Logo"
@@ -495,18 +463,14 @@ const Upload: React.FC = () => {
                     onClick={() =>
                       openPreview(selectedType, currentFile.preview)
                     }
-                    className="px-3 py-1.5 rounded-md transition-all text-sm font-medium flex items-center gap-1.5 btn-ghost text-table-head-text"
+                    className="px-3 py-1.5 rounded-md transition-all text-sm font-medium flex items-center gap-1.5 bg-card/20 hover:bg-card/10 text-white"
                   >
                     <FaEye className="w-3.5 h-3.5" />
                     Preview
                   </button>
                   <button
                     onClick={() => removeFile(selectedType)}
-                    className="px-3 py-1.5 rounded-md transition-all text-sm font-medium flex items-center gap-1.5"
-                    style={{
-                      background: "rgba(255,255,255,0.12)",
-                      color: "white",
-                    }}
+                    className="px-3 py-1.5 rounded-md transition-all text-sm font-medium flex items-center gap-1.5 bg-card/20 hover:bg-card/10 text-white"
                   >
                     <FaTrash className="w-3.5 h-3.5" />
                     Remove
@@ -520,12 +484,10 @@ const Upload: React.FC = () => {
                 // Uploading State
                 <div className="p-12 text-center">
                   <div
-                    className="inline-block p-6 rounded-full mb-4"
-                    style={{ background: "var(--primary-100)" }}
+                    className="inline-block p-6 rounded-full mb-4 bg-primary/10"
                   >
                     <FaUpload
-                      className="w-12 h-12 animate-pulse"
-                      style={{ color: "var(--primary-700)" }}
+                      className="w-12 h-12 animate-pulse text-primary-700"
                     />
                   </div>
                   <h3 className="text-lg font-semibold text-muted mb-2">
@@ -536,7 +498,7 @@ const Upload: React.FC = () => {
                   </p>
 
                   <div className="max-w-md mx-auto space-y-2">
-                    <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
+                    <div className="bg-app rounded-full h-3 overflow-hidden">
                       <div
                         className="h-3 rounded-full transition-all duration-300"
                         style={{
@@ -546,8 +508,7 @@ const Upload: React.FC = () => {
                       />
                     </div>
                     <p
-                      className="text-sm font-semibold"
-                      style={{ color: "var(--primary-700)" }}
+                      className="text-sm font-semibold text-primary-700"
                     >
                       {progress}% Complete
                     </p>
@@ -565,11 +526,11 @@ const Upload: React.FC = () => {
                     borderColor:
                       dragActive === selectedType
                         ? "var(--primary-700)"
-                        : undefined,
+                        : "var(--border)",
                     background:
                       dragActive === selectedType
                         ? "var(--row-hover)"
-                        : undefined,
+                        : "var(--card)", // Use var(--card) for default background
                     transform:
                       dragActive === selectedType ? "scale(1.02)" : undefined,
                   }}
@@ -583,17 +544,10 @@ const Upload: React.FC = () => {
                   />
                   <div className="flex flex-col items-center text-center">
                     <div
-                      className={`w-20 h-20 rounded-full flex items-center justify-center mb-4`}
-                      style={{
-                        background:
-                          selectedType === "logo"
-                            ? "var(--primary-100)"
-                            : "var(--primary-100)",
-                      }}
+                      className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-primary/10`}
                     >
                       <FaUpload
-                        className={`w-10 h-10`}
-                        style={{ color: "var(--primary-700)" }}
+                        className={`w-10 h-10 text-primary-700`}
                       />
                     </div>
                     <p className="text-lg font-semibold text-main mb-2">
@@ -627,21 +581,21 @@ const Upload: React.FC = () => {
                         <img
                           src={currentFile.preview}
                           alt={selectedType}
-                          className="max-w-full max-h-full object-contain"
+                          className="max-w-full max-h-96 object-contain"
                         />
                       </div>
-                      <div className="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                      <div className="absolute inset-0 bg-card/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                         <button
                           onClick={() =>
                             openPreview(selectedType, currentFile.preview)
                           }
-                          className="bg-card text-main p-3 rounded-lg hover:bg-gray-100 transition"
+                          className="bg-card text-main p-3 rounded-lg hover:row-hover transition"
                         >
                           <FaEye className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => downloadFile(currentFile)}
-                          className="bg-card text-main p-3 rounded-lg hover:bg-gray-100 transition"
+                          className="bg-card text-main p-3 rounded-lg hover:row-hover transition"
                         >
                           <FaDownload className="w-5 h-5" />
                         </button>
@@ -653,16 +607,14 @@ const Upload: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label
-                        className="block text-xs font-semibold mb-2 uppercase tracking-wide"
-                        style={{ color: "var(--text)" }}
+                        className="block text-xs font-semibold mb-2 uppercase tracking-wide text-main"
                       >
                         File Name
                       </label>
                       <div className="bg-card border border-theme rounded-lg px-4 py-3">
                         <p
-                          className="font-medium text-sm truncate"
+                          className="font-medium text-sm truncate text-main"
                           title={currentFile.file.name}
-                          style={{ color: "var(--text)" }}
                         >
                           {currentFile.file.name}
                         </p>
@@ -671,15 +623,13 @@ const Upload: React.FC = () => {
 
                     <div>
                       <label
-                        className="block text-xs font-semibold mb-2 uppercase tracking-wide"
-                        style={{ color: "var(--text)" }}
+                        className="block text-xs font-semibold mb-2 uppercase tracking-wide text-main"
                       >
                         File Size
                       </label>
                       <div className="bg-card border border-theme rounded-lg px-4 py-3 flex items-center justify-between">
                         <p
-                          className="font-medium text-sm"
-                          style={{ color: "var(--text)" }}
+                          className="font-medium text-sm text-main"
                         >
                           {currentFile.size}
                         </p>
@@ -689,15 +639,13 @@ const Upload: React.FC = () => {
 
                     <div>
                       <label
-                        className="block text-xs font-semibold mb-2 uppercase tracking-wide"
-                        style={{ color: "var(--text)" }}
+                        className="block text-xs font-semibold mb-2 uppercase tracking-wide text-main"
                       >
                         Format
                       </label>
                       <div className="bg-card border border-theme rounded-lg px-4 py-3">
                         <p
-                          className="font-medium text-sm uppercase"
-                          style={{ color: "var(--text)" }}
+                          className="font-medium text-sm uppercase text-main"
                         >
                           {currentFile.file.type.split("/")[1]}
                         </p>
@@ -706,19 +654,16 @@ const Upload: React.FC = () => {
 
                     <div>
                       <label
-                        className="block text-xs font-semibold mb-2 uppercase tracking-wide"
-                        style={{ color: "var(--text)" }}
+                        className="block text-xs font-semibold mb-2 uppercase tracking-wide text-main"
                       >
                         Uploaded
                       </label>
                       <div className="bg-card border border-theme rounded-lg px-4 py-3">
                         <p
-                          className="font-medium text-sm flex items-center gap-2"
-                          style={{ color: "var(--text)" }}
+                          className="font-medium text-sm flex items-center gap-2 text-main"
                         >
                           <FaClock
-                            className="w-3.5 h-3.5"
-                            style={{ color: "var(--muted)" }}
+                            className="w-3.5 h-3.5 text-muted"
                           />
                           {formatDate(currentFile.uploadedAt)}
                         </p>
@@ -730,8 +675,7 @@ const Upload: React.FC = () => {
                   <div className="pt-4 border-t border-theme text-center">
                     <label
                       htmlFor={`${selectedType}-replace`}
-                      className="inline-flex items-center gap-2 font-medium cursor-pointer text-sm"
-                      style={{ color: "var(--primary-700)" }}
+                      className="inline-flex items-center gap-2 font-medium cursor-pointer text-sm text-primary-700"
                     >
                       <FaUpload className="w-4 h-4" />
                       Upload a different file
@@ -757,7 +701,7 @@ const Upload: React.FC = () => {
               setLogo(null);
               setSignature(null);
             }}
-            className="px-6 py-2.5 border border-gray-300 text-muted text-sm font-semibold rounded-lg hover:bg-card transition"
+            className="px-6 py-2.5 border border-theme text-muted text-sm font-semibold rounded-lg hover:bg-card/20 transition"
           >
             Reset All
           </button>
@@ -766,12 +710,9 @@ const Upload: React.FC = () => {
             disabled={!logo && !signature}
             className={`px-8 py-2.5 text-white text-sm font-semibold rounded-lg transition-all ${
               logo || signature
-                ? "cursor-pointer shadow-sm"
-                : "bg-gray-300 cursor-not-allowed"
+                ? "bg-primary cursor-pointer shadow-sm"
+                : "bg-muted cursor-not-allowed" // Disabled state color changed to bg-muted
             }`}
-            style={
-              logo || signature ? { background: "var(--primary)" } : undefined
-            }
           >
             Save Documents
           </button>
@@ -781,7 +722,7 @@ const Upload: React.FC = () => {
       {/* Preview Modal */}
       {previewModal && (
         <div
-          className="fixed inset-0 bg-black/70 flex items-center justify-center p-6 z-50"
+          className="fixed inset-0 bg-black/70 backdrop flex items-center justify-center p-6 z-50" // Added backdrop class
           onClick={() => setPreviewModal(null)}
         >
           <div
@@ -797,7 +738,7 @@ const Upload: React.FC = () => {
               </h3>
               <button
                 onClick={() => setPreviewModal(null)}
-                className="text-muted hover:bg-gray-100 p-2 rounded-lg transition"
+                className="text-muted row-hover p-2 rounded-lg transition" // Theme-friendly hover
               >
                 <FaTimes className="w-5 h-5" />
               </button>

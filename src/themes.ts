@@ -1,5 +1,14 @@
 
-export type Theme = "gold" | "amber" | "yellow" | "dark" | "corporate" | "forest" | "violet" | "modern" | "ocean" | "regal";
+export type Theme = "gold" | "amber" | "yellow" | "dark" | "corporate" | "forest" | "violet" | "modern" | "ocean" | "regal" | "rose" | "mint" | "lavender"| 'ocean'
+  | 'emerald'
+  | 'royal'
+  | 'slate'
+  // Pastel / Dual-Tone
+  | 'sunset'   // New
+  | 'lavender' // New
+  | 'mint'     // New
+  | 'nordic' // New;
+  | 'midnight';
 
 const THEME_KEY = "erp-theme";
 
