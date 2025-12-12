@@ -90,7 +90,7 @@ const CompanySetup: React.FC = () => {
   const fetchCompanyDetail = async () => {
     try {
       setLoading(true);
-      const response = await getCompanyById("1");
+      const response = await getCompanyById("COMP-00003");
       setCompanyDetail(response.data as Company);
 
       // console.log("response: ", response);

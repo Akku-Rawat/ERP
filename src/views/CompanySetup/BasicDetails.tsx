@@ -22,6 +22,10 @@ import type {
   Address,
 } from "../../types/company";
 
+import { updateCompanyById } from "../../api/companySetupApi";
+import { transformBasicDetailPayload, appendFormData } from "../../utility/buildFormData";
+
+
 const defaultForm: BasicDetailsForm = {
   registration: {
     registerNo: "",
@@ -52,8 +56,6 @@ const defaultForm: BasicDetailsForm = {
     timeZone: "",
   },
 };
-
-const STORAGE_KEY = "company_setup_basicdetails_v4";
 
 interface InputFieldProps {
   label: string;
@@ -126,13 +128,29 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
     });
   };
 
+  const handleSubmit = async () => {
+    const data = {
+      id: "COMP-00003",
+      ...form,
+    };
 
-  const handleSubmit = () => {
-    console.log("[BasicDetails] Submit Payload:", form);
+    try {
+      const transformedPayload = transformBasicDetailPayload(data);
+      const formData = new FormData();
+      appendFormData(formData, transformedPayload);
+      // for (let [k, v] of formData.entries()) {
+      //   console.log(k, v);
+      // }
+      await updateCompanyById(formData);
+      setShowSuccess(true);
 
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (err) {
+      console.error("Update failed:", err);
+      alert("Failed to update company basic details.");
+    }
   };
+
 
   const handleReset = () => {
     if (!confirm("Reset all fields?")) return;
