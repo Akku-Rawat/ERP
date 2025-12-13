@@ -183,7 +183,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
           <input
             id={id}
             type={type}
-            value={form[section][name] ?? ""}
+            value={(form[section] as Record<string, string>)[name]}
             onChange={(e) => handleChange(section, name, e.target.value)}
             placeholder={placeholder}
             required={required}
