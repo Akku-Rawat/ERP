@@ -1,4 +1,4 @@
-import type { Terms } from "./termsAndCondition";
+import type { Terms } from './termsAndCondition';
 
 export interface RegistrationDetails {
   registerNo: string;
@@ -96,4 +96,12 @@ export interface BasicDetailsForm {
   registration: RegistrationDetails;
   contact: ContactInfo;
   address: Address;
+}
+
+export interface Module {
+  key: string;
+  name: string;
+  tier: string;
+  category: string;
+  description: string;
 }
