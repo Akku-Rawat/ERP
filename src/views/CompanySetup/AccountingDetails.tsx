@@ -35,6 +35,102 @@ const defaultForm = {
     financialYearStart: "April",
   },
 };
+interface InputFieldProps {
+  label: string;
+  name: string;
+  type?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  required?: boolean;
+  placeholder?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const InputField: React.FC<InputFieldProps> = ({
+  label,
+  name,
+  type = "text",
+  icon: Icon,
+  required = false,
+  placeholder = "",
+  value,
+  onChange,
+}) => (
+  <div className="relative">
+    <label className="block text-sm font-medium text-muted mb-1.5">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+
+    <div className="relative">
+      {Icon && (
+        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4 z-10" />
+      )}
+
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        className={`w-full border bg-theme rounded-lg ${
+          Icon ? "pl-10" : "pl-3.5"
+        } pr-3.5 py-2.5 text-sm`}
+      />
+    </div>
+  </div>
+);
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface SelectFieldProps {
+  label: string;
+  name: string;
+  options: SelectOption[];
+  icon?: React.ComponentType<{ className?: string }>;
+  required?: boolean;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+}
+
+const SelectField: React.FC<SelectFieldProps> = ({
+  label,
+  name,
+  options,
+  icon: Icon,
+  required = false,
+  value,
+  onChange,
+}) => (
+  <div>
+    <label className="block text-sm font-medium text-muted mb-1.5">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+
+    <div className="relative">
+      {Icon && (
+        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted z-10" />
+      )}
+
+      <select
+        value={value}
+        onChange={onChange}
+        required={required}
+        className={`w-full border bg-theme rounded-lg ${
+          Icon ? "pl-10" : "pl-3.5"
+        } pr-10 py-2.5 text-sm`}
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+);
 
 interface AccountingDetailsProps {
   financialConfig?: FinancialConfig | null;
@@ -48,9 +144,6 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
   const [showSuccess, setShowSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState("financial");
 
-  // -----------------------------------------
-  // MAIN FORM STATE (same pattern as BasicDetails)
-  // -----------------------------------------
   const [form, setForm] = useState(() => ({
     accountingSetup: {
       ...defaultForm.accountingSetup,
@@ -61,6 +154,21 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
       ...(financialConfig || {}),
     },
   }));
+
+  useEffect(() => {
+    if (accountingSetup || financialConfig) {
+      setForm((prev) => ({
+        accountingSetup: {
+          ...prev.accountingSetup,
+          ...(accountingSetup || {}),
+        },
+        financialConfig: {
+          ...prev.financialConfig,
+          ...(financialConfig || {}),
+        },
+      }));
+    }
+  }, [accountingSetup, financialConfig]);
 
   const handleChange = (
     section: "accountingSetup" | "financialConfig",
@@ -76,8 +184,6 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
     }));
   };
 
-
-
   const handleSubmit = async () => {
     const payload = {
       id: "COMP-00003",
@@ -87,7 +193,6 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
 
     try {
       const transformed = transformAccountingSetupPayload(payload);
-
       const formData = new FormData();
       appendFormData(formData, transformed);
 
@@ -101,115 +206,58 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
     }
   };
 
-  // -----------------------------------------
-  // RESET
-  // -----------------------------------------
   const handleReset = () => {
     if (!confirm("Reset all fields?")) return;
     setForm(defaultForm);
   };
 
-  interface InputFieldProps {
-    label: string;
-    name: keyof AccountingSetup | keyof FinancialConfig;
-    section: "accountingSetup" | "financialConfig";
-    type?: string;
-    icon?: React.ComponentType<{ className?: string }>;
-    required?: boolean;
-    placeholder?: string;
-  }
+  const renderInput = (
+    label: string,
+    name: string,
+    section: "accountingSetup" | "financialConfig",
+    options: Partial<InputFieldProps> = {}
+  ) => {
+    return (
+      <InputField
+        key={name}
+        label={label}
+        name={name}
+        value={(form[section] as any)[name] || ""}
+        onChange={(e) => handleChange(section, name, e.target.value)}
+        {...options}
+      />
+    );
+  };
 
-  const InputField: React.FC<InputFieldProps> = ({
-    label,
-    name,
-    section,
-    type = "text",
-    icon: Icon,
-    required = false,
-    placeholder = "",
-  }) => (
-    <div className="relative">
-      <label className="block text-sm font-medium text-muted mb-1.5">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
+  const renderSelect = (
+    label: string,
+    name: string,
+    section: "accountingSetup" | "financialConfig",
+    optionsList: SelectOption[],
+    options: Partial<SelectFieldProps> = {}
+  ) => {
+    return (
+      <SelectField
+        key={name}
+        label={label}
+        name={name}
+        options={optionsList}
+        value={(form[section] as any)[name] || ""}
+        onChange={(e) => handleChange(section, name, e.target.value)}
+        {...options}
+      />
+    );
+  };
 
-      <div className="relative">
-        {Icon && (
-          <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4 z-10" />
-        )}
-
-        <input
-          type={type}
-          value={(form[section] as Record<string, string>)[name]}
-          onChange={(e) => handleChange(section, name, e.target.value)}
-          placeholder={placeholder}
-          required={required}
-          className={`w-full border bg-theme rounded-lg ${Icon ? "pl-10" : "pl-3.5"
-            } pr-3.5 py-2.5 text-sm`}
-        />
-      </div>
-    </div>
-  );
-
-  interface SelectOption {
-    value: string;
-    label: string;
-  }
-
-  interface SelectFieldProps {
-    label: string;
-    name: keyof AccountingSetup | keyof FinancialConfig;
-    section: "accountingSetup" | "financialConfig";
-    options: SelectOption[];
-    icon?: React.ComponentType<{ className?: string }>;
-    required?: boolean;
-  }
-
-  const SelectField: React.FC<SelectFieldProps> = ({
-    label,
-    name,
-    section,
-    options,
-    icon: Icon,
-    required = false,
-  }) => (
-    <div>
-      <label className="block text-sm font-medium text-muted mb-1.5">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-
-      <div className="relative">
-        {Icon && (
-          <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted z-10" />
-        )}
-
-        <select
-          value={(form[section] as Record<string, string>)[name]}
-          onChange={(e) => handleChange(section, name, e.target.value)}
-          required={required}
-          className={`w-full border bg-theme rounded-lg ${Icon ? "pl-10" : "pl-3.5"
-            } pr-10 py-2.5 text-sm`}
-        >
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
-  );
-
-  // -----------------------------------------
-  // UI STRUCTURE (unchanged)
-  // -----------------------------------------
   return (
     <div className="w-full">
       {showSuccess && (
         <div className="mb-4 rounded-lg p-4 shadow-sm flex items-center gap-3">
           <FaCheckCircle className="w-5 h-5 text-success" />
           <div>
-            <p className="text-sm font-medium text-success">Saved successfully!</p>
+            <p className="text-sm font-medium text-success">
+              Saved successfully!
+            </p>
             <p className="text-xs text-success">All changes stored.</p>
           </div>
         </div>
@@ -225,8 +273,11 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`flex-1 py-3 flex items-center justify-center gap-2 text-sm font-medium ${activeTab === t.id ? "bg-primary-600 text-white" : "text-muted"
-                }`}
+              className={`flex-1 py-3 flex items-center justify-center gap-2 text-sm font-medium ${
+                activeTab === t.id
+                  ? "bg-primary-600 text-white"
+                  : "text-muted"
+              }`}
             >
               <t.icon />
               {t.label}
@@ -238,32 +289,30 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
         <div className="p-8">
           {activeTab === "financial" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <SelectField
-                label="Base Currency"
-                name="baseCurrency"
-                section="financialConfig"
-                icon={FaDollarSign}
-                options={[
+              {renderSelect(
+                "Base Currency",
+                "baseCurrency",
+                "financialConfig",
+                [
                   { value: "INR", label: "INR - Indian Rupee" },
                   { value: "USD", label: "USD - US Dollar" },
                   { value: "EUR", label: "EUR - Euro" },
-                ]}
-                required
-              />
+                ],
+                { icon: FaDollarSign, required: true }
+              )}
 
-              <SelectField
-                label="Financial Year"
-                name="financialYearStart"
-                section="financialConfig"
-                icon={FaCalendarAlt}
-                options={[
+              {renderSelect(
+                "Financial Year",
+                "financialYearStart",
+                "financialConfig",
+                [
                   { value: "January", label: "January" },
                   { value: "April", label: "April" },
                   { value: "July", label: "July" },
                   { value: "October", label: "October" },
-                ]}
-                required
-              />
+                ],
+                { icon: FaCalendarAlt, required: true }
+              )}
             </div>
           )}
 
@@ -276,19 +325,18 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <InputField
-                    label="Chart of Accounts"
-                    name="chartOfAccounts"
-                    section="accountingSetup"
-                    icon={FaMoneyBillWave}
-                    required
-                  />
-                  <InputField
-                    label="Default Expense GL"
-                    name="defaultExpenseGL"
-                    section="accountingSetup"
-                    icon={FaMoneyBillWave}
-                  />
+                  {renderInput(
+                    "Chart of Accounts",
+                    "chartOfAccounts",
+                    "accountingSetup",
+                    { icon: FaMoneyBillWave, required: true }
+                  )}
+                  {renderInput(
+                    "Default Expense GL",
+                    "defaultExpenseGL",
+                    "accountingSetup",
+                    { icon: FaMoneyBillWave }
+                  )}
                 </div>
               </div>
 
@@ -299,25 +347,25 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <InputField
-                    label="FX Gain/Loss Account"
-                    name="fxGainLossAccount"
-                    section="accountingSetup"
-                    icon={FaDollarSign}
-                  />
+                  {renderInput(
+                    "FX Gain/Loss Account",
+                    "fxGainLossAccount",
+                    "accountingSetup",
+                    { icon: FaDollarSign }
+                  )}
 
-                  <SelectField
-                    label="Revaluation Frequency"
-                    name="revaluationFrequency"
-                    section="accountingSetup"
-                    icon={FaCalendarAlt}
-                    options={[
+                  {renderSelect(
+                    "Revaluation Frequency",
+                    "revaluationFrequency",
+                    "accountingSetup",
+                    [
                       { value: "Daily", label: "Daily" },
                       { value: "Weekly", label: "Weekly" },
                       { value: "Monthly", label: "Monthly" },
                       { value: "Quarterly", label: "Quarterly" },
-                    ]}
-                  />
+                    ],
+                    { icon: FaCalendarAlt }
+                  )}
                 </div>
               </div>
 
@@ -328,19 +376,18 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <InputField
-                    label="Round-Off Account"
-                    name="roundOffAccount"
-                    section="accountingSetup"
-                    icon={FaBullseye}
-                  />
-
-                  <InputField
-                    label="Round-Off Cost Center"
-                    name="roundOffCostCenter"
-                    section="accountingSetup"
-                    icon={FaBullseye}
-                  />
+                  {renderInput(
+                    "Round-Off Account",
+                    "roundOffAccount",
+                    "accountingSetup",
+                    { icon: FaBullseye }
+                  )}
+                  {renderInput(
+                    "Round-Off Cost Center",
+                    "roundOffCostCenter",
+                    "accountingSetup",
+                    { icon: FaBullseye }
+                  )}
                 </div>
               </div>
 
@@ -351,19 +398,18 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <InputField
-                    label="Depreciation Account"
-                    name="depreciationAccount"
-                    section="accountingSetup"
-                    icon={FaChartArea}
-                  />
-
-                  <InputField
-                    label="Appreciation Account"
-                    name="appreciationAccount"
-                    section="accountingSetup"
-                    icon={FaChartArea}
-                  />
+                  {renderInput(
+                    "Depreciation Account",
+                    "depreciationAccount",
+                    "accountingSetup",
+                    { icon: FaChartArea }
+                  )}
+                  {renderInput(
+                    "Appreciation Account",
+                    "appreciationAccount",
+                    "accountingSetup",
+                    { icon: FaChartArea }
+                  )}
                 </div>
               </div>
             </div>
