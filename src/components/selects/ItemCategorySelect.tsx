@@ -34,10 +34,10 @@ export default function ItemCategorySelect({
         }
 
         const safeCategories = res.data
-          .filter((c: any) => c && c.custom_id && typeof c.item_group_name === "string")  
+          .filter((c: any) => c && c.id && typeof c.groupName === "string")  
           .map((c: any) => ({
-            id: String(c.custom_id),                                                     
-            name: c.item_group_name.trim() || `(Unnamed ${c.custom_id})`,               
+            id: String(c.id),                                                     
+            name: c.groupName.trim() || `(Unnamed ${c.id})`,               
           }));
 
         setCategories(safeCategories);

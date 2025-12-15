@@ -1,33 +1,28 @@
 import React, { useEffect, useState } from "react";
 import ItemsCategoryModal from "../../components/inventory/ItemsCategoryModal";
 import { Search, Plus, Edit2, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import {
   getAllItemGroups,
-  deleteItemGroupByName,
-  getItemGroupByName,
+  deleteItemGroupById,
+  getItemGroupById,
 } from "../../api/itemCategoryApi";
-import toast from "react-hot-toast";
 import Pagination from "../../components/Pagination";
-
-export interface ItemGroup {
-  name: string;
-  item_group_name: string;
-  custom_description: string | null;
-  custom_unit_of_measurement: string | null;
-  custom_selling_price: number | string | null;
-  custom_sales_account: string | null;
-}
+import DeleteModal from "../../components/actionModal/DeleteModal";
 
 const ItemsCategory: React.FC = () => {
-  const [itemGroups, setItemGroups] = useState<ItemGroup[]>([]);
+  const [itemGroups, setItemGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<ItemGroup | null>(null);
+  const [editingGroup, setEditingGroup] = useState<any | null>(null);
   const [search, setSearch] = useState("");
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+const [itemToDelete, setItemToDelete] = useState<{ id: string; name?: string } | null>(null);
+const [deleting, setDeleting] = useState(false);
 
   const loadItemGroups = async () => {
     try {
@@ -42,57 +37,123 @@ const ItemsCategory: React.FC = () => {
       setLoading(false);
     }
   };
+// const handleDeleteItemsGroup = async (id: string, e: React.MouseEvent) => {
+//   e.stopPropagation();
 
-  const handleDeleteItemsGroup = async (
-    groupName: string,
-    e: React.MouseEvent,
-  ) => {
-    e.stopPropagation();
-    if (!confirm(`Delete item group "${groupName}"?`)) return;
+//   const group = itemGroups.find(g => g.id === id);
+//   if (!confirm(`Delete item group "${group?.name || id}"?`)) return;
 
-    try {
-      setLoading(true);
-      const payload = { item_group_name: groupName };
-      const res = await deleteItemGroupByName(payload);
+//   try {
+//     setLoading(true);
+//     await deleteItemGroupById(id);   
 
-      if (res.status_code !== 200) {
-        toast.error(res.message);
-        return;
+//     setItemGroups(prev => prev.filter(g => g.id !== id));
+//     toast.success("Deleted successfully");
+//   } catch {
+//     toast.error("Delete failed");
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+const confirmDelete = async () => {
+  if (!itemToDelete) return;
+
+  try {
+    setDeleting(true);
+
+    await deleteItemGroupById(itemToDelete.id);
+
+    setItemGroups((prev) => prev.filter((g) => g.id !== itemToDelete.id));
+
+    toast.success("Item group deleted successfully!", { duration: 2000 });
+    setDeleteModalOpen(false);
+  } catch (err: any) {
+    let errorMessage = "Failed to delete item group";
+
+    if (err.response?.data?._server_messages) {
+      try {
+        const serverMsgs = JSON.parse(err.response.data._server_messages);
+        errorMessage = serverMsgs
+          .map((msg: string) => {
+            try {
+              const parsed = JSON.parse(msg);
+              return parsed.message || "";
+            } catch {
+              return msg;
+            }
+          })
+          .filter(Boolean)
+          .join("\n")
+          .replace(/<[^>]*>/g, "")      // strip HTML
+          .replace(/\\"/g, '"')         // fix escaped quotes
+          .replace(/\\\\/g, "\\")       // fix double escapes
+          .trim();
+      } catch {
+        errorMessage = err.response?.data?.message || errorMessage;
       }
-
-      setItemGroups((prev) =>
-        prev.filter((g) => g.item_group_name !== groupName),
-      );
-      toast.success("Deleted successfully");
-    } catch {
-      toast.error("Delete failed");
-    } finally {
-      setLoading(false);
+    } else if (err.response?.data?.message) {
+      errorMessage = err.response.data.message;
+    } else if (err.message) {
+      errorMessage = err.message;
     }
-  };
+
+    toast.error(errorMessage, {
+      duration: 10000,
+      style: { whiteSpace: "pre-line" }, // preserves line breaks for better readability
+    });
+  } finally {
+    setDeleting(false);
+    setItemToDelete(null);
+  }
+};
+const handleDelete = (id: string) => {
+  const group = itemGroups.find(g => g.id === id);
+  if (!group) return toast.error("Item group not found");
+
+  setItemToDelete({ id: group.id, name: group.name });
+  setDeleteModalOpen(true);
+};
 
   const handleAddItemsGroup = async () => {
     setEditingGroup(null);
     setIsModalOpen(true);
-    try {
-      await loadItemGroups();
-      toast.success(
-        editingGroup
-          ? "Item updated successfully!"
-          : "Item created successfully!",
-      );
-    } catch (err) {
-      toast.error("Failed to refresh item list");
-    }
+    // try {
+    //   await loadItemGroups();
+    //   toast.success(
+    //     editingGroup
+    //       ? "Item updated successfully!"
+    //       : "Item created successfully!",
+    //   );
+    // } catch (err) {
+    //   toast.error("Failed to refresh item list");
+    // }
   };
 
+  const handleCategorySuccess = async () => {
+  const wasEditMode = !!editingGroup;  
+  setIsModalOpen(false);
+  setEditingGroup(null);
+
+  try {
+    await loadItemGroups();   
+    toast.success(
+      wasEditMode
+        ? "Category updated successfully!"
+        : "Category created successfully!"
+    );
+  } catch (err) {
+    toast.error("Category saved but failed to refresh list");
+  }
+};
+
   const handleEditItem = async (
-    item_group_name: string,
+    id: string,
     e: React.MouseEvent,
   ) => {
     e.stopPropagation();
     try {
-      const item = await getItemGroupByName(item_group_name);
+      const item = await getItemGroupById(id);
+      console.log("id" + item);
       setEditingGroup(item.data ?? item);
       setIsModalOpen(true);
     } catch (err) {
@@ -105,14 +166,14 @@ const ItemsCategory: React.FC = () => {
     loadItemGroups();
   }, [page, pageSize]);
 
-  const filtered = itemGroups.filter((g) =>
+  const filtered = itemGroups.filter((g: any) =>
     [
-      g.name,
-      g.item_group_name,
-      g.custom_description,
-      g.custom_unit_of_measurement,
-      g.custom_selling_price,
-      g.custom_sales_account,
+      g.id,
+      g.groupName,
+      g.description,
+      g.unitOfMeasurement,
+      g.sellingPrice,
+      g.salesAccount,
     ]
       .join(" ")
       .toLowerCase()
@@ -140,8 +201,8 @@ const ItemsCategory: React.FC = () => {
         <table className="min-w-full border border-gray-200 rounded-lg">
           <thead className="bg-gray-100 text-gray-700 text-sm">
             <tr>
+              <th className="px-4 py-2 text-left">Id</th>
               <th className="px-4 py-2 text-left">Name</th>
-              <th className="px-4 py-2 text-left">Category</th>
               <th className="px-4 py-2 text-left">Description</th>
               <th className="px-4 py-2 text-left">Unit of Measurement</th>
               <th className="px-4 py-2 text-left">Selling Price</th>
@@ -150,22 +211,22 @@ const ItemsCategory: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((group) => (
+            {filtered.map((g) => (
               <tr
-                key={group.item_group_name}
+                key={g.id}
                 className="border-t hover:bg-gray-50"
               >
-                <td className="px-4 py-2">{group.name}</td>
-                <td className="px-4 py-2">{group.item_group_name}</td>
-                <td className="px-4 py-2">{group.custom_description}</td>
+                <td className="px-4 py-2">{g.id}</td>
+                <td className="px-4 py-2">{g.groupName}</td>
+                <td className="px-4 py-2">{g.description}</td>
                 <td className="px-4 py-2">
-                  {group.custom_unit_of_measurement}
+                  {g.unitOfMeasurement}
                 </td>
-                <td className="px-4 py-2">{group.custom_selling_price}</td>
-                <td className="px-4 py-2">{group.custom_sales_account}</td>
+                <td className="px-4 py-2">{g.sellingPrice}</td>
+                <td className="px-4 py-2">{g.salesAccount}</td>
                 <td className="px-4 py-2 text-center">
                   <button
-                    onClick={(e) => handleEditItem(group.item_group_name, e)}
+                    onClick={(e) => handleEditItem(g.id, e)}
                     className="text-indigo-600 hover:text-indigo-800"
                     title="Edit"
                   >
@@ -173,7 +234,7 @@ const ItemsCategory: React.FC = () => {
                   </button>
                   <button
                     onClick={(e) =>
-                      handleDeleteItemsGroup(group.item_group_name, e)
+                      handleDelete(g.id)
                     }
                     className="ml-2 text-red-600 hover:text-red-800"
                     title="Delete"
@@ -198,8 +259,23 @@ const ItemsCategory: React.FC = () => {
       <ItemsCategoryModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSubmit={(data) => console.log("New Items Category:", data)}
+        onSubmit={handleCategorySuccess}
+        initialData={editingGroup}
+        isEditMode={!!editingGroup}
       />
+      {deleteModalOpen && itemToDelete && (
+  <DeleteModal
+    entityName="Item Group"                     
+    entityId={itemToDelete.id}                   
+    entityDisplayName={itemToDelete.name}     
+    isLoading={deleting}
+    onClose={() => {
+      setDeleteModalOpen(false);
+      setItemToDelete(null);
+    }}
+    onDelete={confirmDelete}
+  />
+)}
     </div>
   );
 };

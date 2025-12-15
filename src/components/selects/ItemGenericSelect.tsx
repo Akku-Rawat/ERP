@@ -8,7 +8,8 @@ interface Props {
   label: string;
   placeholder?: string;
   className?: string;
-  displayField?: "code" | "name"; // optional: force show only code
+  displayField?: "code" | "name";  
+  displayFormatter?: (option: any) => string;
 }
 
 export default function ItemGenericSelect({
@@ -19,6 +20,7 @@ export default function ItemGenericSelect({
   placeholder = "Search...",
   className = "",
   displayField, 
+  displayFormatter,
 }: Props) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +35,6 @@ export default function ItemGenericSelect({
         setLoading(true);
         const res = await fetchData();
 
-        // Support: res.data.data, res.data, or direct array
         let data = res?.data?.data ?? res?.data ?? res;
         if (!Array.isArray(data)) data = [];
         setItems(data);
@@ -47,7 +48,6 @@ export default function ItemGenericSelect({
     load();
   }, [fetchData]);
 
-  // Click outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -56,33 +56,65 @@ export default function ItemGenericSelect({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Get the actual ID (code or itemClsCd)
-  const getId = (item: any): string => {
-    return item.code ?? item.itemClsCd ?? String(item);
-  };
+  // const getId = (item: any): string => {
+  //   return item.code ?? item.itemClsCd ?? String(item);
+  // };
 
-  const getDisplayName = (item: any): string => {
-    if (displayField === "code") {
-      return getId(item); 
-    }
+  // const getDisplayName = (item: any): string => {
+  //   if (displayFormatter) {
+  //     return displayFormatter(item); 
+  //   }
+  //   if (displayField === "code") {
+  //     return getId(item); 
+  //   }
+    
+  //   if (item.code_name) return item.code_name;
+  //   if (item.name) return item.name;
+  //   if (item.itemClsNm) return item.itemClsNm;
+  //   return getId(item);
+  // };
+const getId = (item: any): string => {
+  return item.code ?? item.itemClsCd ?? String(item);
+};
 
-    if (item.code_name) return item.code_name;
-    if (item.name) return item.name;
-    if (item.itemClsNm) return item.itemClsNm;
-    return getId(item);
-  };
+const getCodeForDisplay = (item: any): string => {
+  return item.code ?? item.itemClsCd ?? "";
+};
+
+const getNameForDisplay = (item: any): string => {
+  return item.name ?? item.code_name ?? item.itemClsNm ?? "";
+};
+
+const getDisplayName = (item: any): string => {
+  if (displayFormatter) {
+    return displayFormatter(item);
+  }
+
+  // Default format: "CODE - NAME"
+  const code = getCodeForDisplay(item);
+  const name = getNameForDisplay(item);
+
+  if (code && name) {
+    return `${code} - ${name}`;
+  }
+  if (name) return name;
+  if (code) return code;
+  return String(item);
+};
 
   const selectedItem = items.find(item => getId(item) === value);
   const displayValue = selectedItem ? getDisplayName(selectedItem) : "";
 
   // Filter with search
   const filtered = items.filter(item => {
+    const display = getDisplayName(item).toLowerCase();
     const name = getDisplayName(item).toLowerCase();
     const code = getId(item).toLowerCase();
     const query = search.toLowerCase();
     return name.includes(query) || code.includes(query);
   });
 
+  
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
       <span className="font-medium text-gray-600 text-sm">{label}</span>

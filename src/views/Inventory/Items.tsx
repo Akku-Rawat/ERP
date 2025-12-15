@@ -208,8 +208,8 @@ const confirmDelete = async () => {
       i.id,
       i.itemName,
       i.itemGroup,
-      i.custom_min_stock_level,
-      i.custom_max_stock_level,
+      i.minStockLevel,
+      i.maxStockLevel,
       i.preferredVendor,
       i.sellingPrice,
     ]
@@ -256,8 +256,8 @@ const confirmDelete = async () => {
                 <td className="px-4 py-2">{i.id}</td>
                 <td className="px-4 py-2">{i.itemName}</td>
                 <td className="px-4 py-2">{i.itemGroup}</td>
-                <td className="px-4 py-2">{i.custom_min_stock_level}</td>
-                <td className="px-4 py-2">{i.custom_max_stock_level}</td>
+                <td className="px-4 py-2">{i.minStockLevel}</td>
+                <td className="px-4 py-2">{i.maxStockLevel}</td>
                 <td className="px-4 py-2">{i.preferredVendor}</td>
                 <td className="px-4 py-2">{i.sellingPrice}</td>
                 {/* <td className="px-4 py-2 text-center">
