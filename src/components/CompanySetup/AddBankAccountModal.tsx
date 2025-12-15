@@ -17,7 +17,7 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
     branchAddress: "",
     currency: "",
     dateAdded: new Date().toISOString().split("T")[0],
-    openingBalance: 0.00
+    openingBalance: 0.0,
   });
 
   const handleChange = (
@@ -37,7 +37,7 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
       branchAddress: "",
       currency: "",
       dateAdded: new Date().toISOString().split("T")[0],
-      openingBalance: 0.00
+      openingBalance: 0.0,
     });
   };
 

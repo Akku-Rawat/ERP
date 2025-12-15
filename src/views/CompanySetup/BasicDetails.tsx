@@ -18,10 +18,6 @@ import {
 import type { BasicDetailsForm } from "../../types/company";
 
 import { updateCompanyById } from "../../api/companySetupApi";
-import {
-  transformBasicDetailPayload,
-  appendFormData,
-} from "../../utility/buildFormData";
 
 const defaultForm: BasicDetailsForm = {
   registration: {
@@ -86,8 +82,7 @@ const InputField: React.FC<InputFieldProps> = ({
         htmlFor={id}
         className="block text-sm font-medium text-main mb-1.5"
       >
-        {label}{" "}
-        {required && <span style={{ color: "var(--danger)" }}>*</span>}
+        {label} {required && <span style={{ color: "var(--danger)" }}>*</span>}
       </label>
 
       <div className="relative">
@@ -118,7 +113,7 @@ interface BasicDetailsProps {
 const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState("registration");
-  
+
   const [form, setForm] = useState<BasicDetailsForm>(() => ({
     registration: {
       ...defaultForm.registration,
@@ -170,20 +165,47 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
     });
   };
 
+  const mapFormToApiPayload = (form: BasicDetailsForm) => ({
+    registrationNumber: form.registration.registerNo,
+    tpin: form.registration.tpin,
+    companyName: form.registration.companyName,
+    companyType: form.registration.companyType,
+    companyStatus: form.registration.companyStatus,
+    dateOfIncorporation: form.registration.dateOfIncorporation,
+    industryType: form.registration.industryType,
+
+    contactInfo: {
+      companyEmail: form.contact.companyEmail,
+      companyPhone: form.contact.companyPhone,
+      alternatePhone: form.contact.alternatePhone,
+      website: form.contact.website,
+      contactPerson: form.contact.contactPerson,
+      contactEmail: form.contact.contactEmail,
+      contactPhone: form.contact.contactPhone,
+    },
+
+    address: {
+      addressLine1: form.address.addressLine1,
+      addressLine2: form.address.addressLine2,
+      city: form.address.city,
+      district: form.address.district,
+      province: form.address.province,
+      postalCode: form.address.postalCode,
+      country: form.address.country,
+      timeZone: form.address.timeZone,
+    },
+  });
+
   const handleSubmit = async () => {
-    const data = {
+    const payload = {
       id: "COMP-00003",
-      ...form,
+      ...mapFormToApiPayload(form),
     };
 
     try {
-      const transformedPayload = transformBasicDetailPayload(data);
-      const formData = new FormData();
-      appendFormData(formData, transformedPayload);
-      
-      await updateCompanyById(formData);
+      console.log("payload:", payload);
+      await updateCompanyById(payload);
       setShowSuccess(true);
-
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (err) {
       console.error("Update failed:", err);
@@ -197,10 +219,10 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
   };
 
   const renderField = (
-    label: string, 
-    name: string, 
-    section: keyof BasicDetailsForm, 
-    options: Partial<InputFieldProps> = {}
+    label: string,
+    name: string,
+    section: keyof BasicDetailsForm,
+    options: Partial<InputFieldProps> = {},
   ) => {
     return (
       <InputField
@@ -261,32 +283,66 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
         <div className="p-8">
           {activeTab === "registration" && (
             <div className="grid grid-cols-3 gap-6">
-              {renderField("Registration No", "registerNo", "registration", { icon: FaIdCard })}
-              {renderField("Tax Id / TPIN", "tpin", "registration", { icon: FaIdCard })}
-              {renderField("Company Name", "companyName", "registration", { icon: FaBuilding, required: true })}
-              {renderField("Date of Incorporation", "dateOfIncorporation", "registration", { type: "date", icon: FaCalendarAlt })}
-              {renderField("Company Type", "companyType", "registration", { icon: FaBuilding })}
+              {renderField("Registration No", "registerNo", "registration", {
+                icon: FaIdCard,
+              })}
+              {renderField("Tax Id / TPIN", "tpin", "registration", {
+                icon: FaIdCard,
+              })}
+              {renderField("Company Name", "companyName", "registration", {
+                icon: FaBuilding,
+                required: true,
+              })}
+              {renderField(
+                "Date of Incorporation",
+                "dateOfIncorporation",
+                "registration",
+                { type: "date", icon: FaCalendarAlt },
+              )}
+              {renderField("Company Type", "companyType", "registration", {
+                icon: FaBuilding,
+              })}
               {renderField("Company Status", "companyStatus", "registration")}
-              {renderField("Industry Type", "industryType", "registration", { icon: FaIndustry })}
+              {renderField("Industry Type", "industryType", "registration", {
+                icon: FaIndustry,
+              })}
             </div>
           )}
 
           {activeTab === "contact" && (
             <div className="grid grid-cols-3 gap-6">
-              {renderField("Company Email", "companyEmail", "contact", { icon: FaEnvelope, required: true })}
-              {renderField("Company Phone", "companyPhone", "contact", { icon: FaPhone })}
-              {renderField("Alternate Phone", "alternatePhone", "contact", { icon: FaPhone })}
+              {renderField("Company Email", "companyEmail", "contact", {
+                icon: FaEnvelope,
+                required: true,
+              })}
+              {renderField("Company Phone", "companyPhone", "contact", {
+                icon: FaPhone,
+              })}
+              {renderField("Alternate Phone", "alternatePhone", "contact", {
+                icon: FaPhone,
+              })}
               {renderField("Website", "website", "contact", { icon: FaGlobe })}
-              {renderField("Contact Person", "contactPerson", "contact", { icon: FaUser })}
-              {renderField("Contact Email", "contactEmail", "contact", { icon: FaEnvelope })}
-              {renderField("Contact Phone", "contactPhone", "contact", { icon: FaPhone })}
+              {renderField("Contact Person", "contactPerson", "contact", {
+                icon: FaUser,
+              })}
+              {renderField("Contact Email", "contactEmail", "contact", {
+                icon: FaEnvelope,
+              })}
+              {renderField("Contact Phone", "contactPhone", "contact", {
+                icon: FaPhone,
+              })}
             </div>
           )}
 
           {activeTab === "address" && (
             <div className="grid grid-cols-3 gap-6">
-              {renderField("Address Line 1", "addressLine1", "address", { colSpan: 2, icon: FaMapMarkerAlt })}
-              {renderField("Address Line 2", "addressLine2", "address", { colSpan: 2 })}
+              {renderField("Address Line 1", "addressLine1", "address", {
+                colSpan: 2,
+                icon: FaMapMarkerAlt,
+              })}
+              {renderField("Address Line 2", "addressLine2", "address", {
+                colSpan: 2,
+              })}
               {renderField("City", "city", "address")}
               {renderField("District", "district", "address")}
               {renderField("Province", "province", "address")}

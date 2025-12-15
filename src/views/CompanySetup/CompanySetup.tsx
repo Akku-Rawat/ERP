@@ -159,10 +159,11 @@ const CompanySetup: React.FC = () => {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-2 border-theme 
-    ${tab === t.key
-                ? "border-[var(--primary)] text-main font-semibold"
-                : "border-transparent text-muted hover:text-primary"
-              }
+    ${
+      tab === t.key
+        ? "border-[var(--primary)] text-main font-semibold"
+        : "border-transparent text-muted hover:text-primary"
+    }
   `}
             style={{ background: "transparent" }}
           >

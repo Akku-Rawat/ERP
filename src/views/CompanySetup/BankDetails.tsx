@@ -46,8 +46,9 @@ const Detail: React.FC<DetailProps> = ({
       </label>
 
       <div
-        className={`bg-card border rounded-lg px-4 py-3 flex justify-between items-center ${isEditing ? "border-primary ring-1 ring-primary/20" : "border-theme"
-          }`}
+        className={`bg-card border rounded-lg px-4 py-3 flex justify-between items-center ${
+          isEditing ? "border-primary ring-1 ring-primary/20" : "border-theme"
+        }`}
       >
         {isEditing ? (
           <input
@@ -81,7 +82,7 @@ interface Props {
 const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAccount, setSelectedAccount] = useState<number | null>(
-    bankAccounts.length > 0 ? 0 : null
+    bankAccounts.length > 0 ? 0 : null,
   );
 
   const [showBankModal, setShowBankModal] = useState(false);
@@ -100,7 +101,6 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
       setEditForm(null);
     }
   }, [selectedAccount, bankAccounts]);
-
 
   const handleAddSubmit = (newAccount: BankAccount) => {
     setBankAccounts((prev) => [...prev, newAccount]);
@@ -143,10 +143,11 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
 
     const accountName = bankAccounts[selectedAccount].bankName;
 
-    if (confirm(`Are you sure you want to delete the account for ${accountName}?`)) {
-
+    if (
+      confirm(`Are you sure you want to delete the account for ${accountName}?`)
+    ) {
       setBankAccounts((prev) =>
-        prev.filter((_, index) => index !== selectedAccount)
+        prev.filter((_, index) => index !== selectedAccount),
       );
 
       setSelectedAccount(null);
@@ -160,7 +161,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
   const filteredAccounts = bankAccounts.filter(
     (acc) =>
       acc.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      acc.accountNo.includes(searchTerm)
+      acc.accountNo.includes(searchTerm),
   );
 
   const toggleAccountVisibility = (index: number) => {
@@ -190,7 +191,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
 
             <div className="p-4 space-y-3">
               {/* Search & Add */}
-              <div className={`space-y-3 ${isEditing ? "opacity-50 pointer-events-none" : ""}`}>
+              <div
+                className={`space-y-3 ${isEditing ? "opacity-50 pointer-events-none" : ""}`}
+              >
                 <div className="relative">
                   <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4" />
                   <input
@@ -206,7 +209,8 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
                   onClick={() => setShowBankModal(true)}
                   className="w-full px-4 py-2.5 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-2 shadow-sm"
                   style={{
-                    background: "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
+                    background:
+                      "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
                   }}
                 >
                   <FaPlus className="w-4 h-4" />
@@ -225,10 +229,11 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
                     <div
                       key={i}
                       onClick={() => !isEditing && setSelectedAccount(i)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-all ${selectedAccount === i
+                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                        selectedAccount === i
                           ? "table-head text-table-head-text"
                           : "border bg-card hover:row-hover text-main"
-                        } ${isEditing ? "cursor-not-allowed opacity-60" : ""}`}
+                      } ${isEditing ? "cursor-not-allowed opacity-60" : ""}`}
                     >
                       <div className="flex justify-between items-start mb-1">
                         <p className="font-semibold text-main text-sm">
@@ -310,7 +315,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
             ) : (
               <div className="p-6">
                 {(() => {
-                  const data = isEditing ? editForm : bankAccounts[selectedAccount];
+                  const data = isEditing
+                    ? editForm
+                    : bankAccounts[selectedAccount];
                   if (!data) return null;
 
                   return (
@@ -337,7 +344,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
                         onChange={handleInputChange}
                         canToggle={true}
                         reveal={showAccountNumber[selectedAccount]}
-                        onToggle={() => toggleAccountVisibility(selectedAccount)}
+                        onToggle={() =>
+                          toggleAccountVisibility(selectedAccount)
+                        }
                       />
                       <Detail
                         label="Swift/BIC Code"

@@ -13,10 +13,6 @@ import {
 } from "react-icons/fa";
 
 import type { AccountingSetup, FinancialConfig } from "../../types/company";
-import {
-  transformAccountingSetupPayload,
-  appendFormData,
-} from "../../utility/buildFormData";
 import { updateCompanyById } from "../../api/companySetupApi";
 
 const defaultForm = {
@@ -173,7 +169,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
   const handleChange = (
     section: "accountingSetup" | "financialConfig",
     key: string,
-    value: string
+    value: string,
   ) => {
     setForm((prev) => ({
       ...prev,
@@ -192,11 +188,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
     };
 
     try {
-      const transformed = transformAccountingSetupPayload(payload);
-      const formData = new FormData();
-      appendFormData(formData, transformed);
-
-      await updateCompanyById(formData);
+      await updateCompanyById(payload);
       setShowSuccess(true);
 
       setTimeout(() => setShowSuccess(false), 3000);
@@ -215,7 +207,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
     label: string,
     name: string,
     section: "accountingSetup" | "financialConfig",
-    options: Partial<InputFieldProps> = {}
+    options: Partial<InputFieldProps> = {},
   ) => {
     return (
       <InputField
@@ -234,7 +226,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
     name: string,
     section: "accountingSetup" | "financialConfig",
     optionsList: SelectOption[],
-    options: Partial<SelectFieldProps> = {}
+    options: Partial<SelectFieldProps> = {},
   ) => {
     return (
       <SelectField
@@ -274,9 +266,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
               key={t.id}
               onClick={() => setActiveTab(t.id)}
               className={`flex-1 py-3 flex items-center justify-center gap-2 text-sm font-medium ${
-                activeTab === t.id
-                  ? "bg-primary-600 text-white"
-                  : "text-muted"
+                activeTab === t.id ? "bg-primary-600 text-white" : "text-muted"
               }`}
             >
               <t.icon />
@@ -298,7 +288,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
                   { value: "USD", label: "USD - US Dollar" },
                   { value: "EUR", label: "EUR - Euro" },
                 ],
-                { icon: FaDollarSign, required: true }
+                { icon: FaDollarSign, required: true },
               )}
 
               {renderSelect(
@@ -311,7 +301,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
                   { value: "July", label: "July" },
                   { value: "October", label: "October" },
                 ],
-                { icon: FaCalendarAlt, required: true }
+                { icon: FaCalendarAlt, required: true },
               )}
             </div>
           )}
@@ -329,13 +319,13 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
                     "Chart of Accounts",
                     "chartOfAccounts",
                     "accountingSetup",
-                    { icon: FaMoneyBillWave, required: true }
+                    { icon: FaMoneyBillWave, required: true },
                   )}
                   {renderInput(
                     "Default Expense GL",
                     "defaultExpenseGL",
                     "accountingSetup",
-                    { icon: FaMoneyBillWave }
+                    { icon: FaMoneyBillWave },
                   )}
                 </div>
               </div>
@@ -351,7 +341,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
                     "FX Gain/Loss Account",
                     "fxGainLossAccount",
                     "accountingSetup",
-                    { icon: FaDollarSign }
+                    { icon: FaDollarSign },
                   )}
 
                   {renderSelect(
@@ -364,7 +354,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
                       { value: "Monthly", label: "Monthly" },
                       { value: "Quarterly", label: "Quarterly" },
                     ],
-                    { icon: FaCalendarAlt }
+                    { icon: FaCalendarAlt },
                   )}
                 </div>
               </div>
@@ -380,13 +370,13 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
                     "Round-Off Account",
                     "roundOffAccount",
                     "accountingSetup",
-                    { icon: FaBullseye }
+                    { icon: FaBullseye },
                   )}
                   {renderInput(
                     "Round-Off Cost Center",
                     "roundOffCostCenter",
                     "accountingSetup",
-                    { icon: FaBullseye }
+                    { icon: FaBullseye },
                   )}
                 </div>
               </div>
@@ -402,13 +392,13 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
                     "Depreciation Account",
                     "depreciationAccount",
                     "accountingSetup",
-                    { icon: FaChartArea }
+                    { icon: FaChartArea },
                   )}
                   {renderInput(
                     "Appreciation Account",
                     "appreciationAccount",
                     "accountingSetup",
-                    { icon: FaChartArea }
+                    { icon: FaChartArea },
                   )}
                 </div>
               </div>

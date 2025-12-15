@@ -34,9 +34,6 @@ export async function updateCompanyById(payload: any): Promise<any> {
   const resp: AxiosResponse = await api.post(
     ENDPOINTS.updateCompanyById,
     payload,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    },
   );
 
   return resp.data;

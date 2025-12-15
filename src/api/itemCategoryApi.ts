@@ -1,6 +1,6 @@
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
-import type { ApiListResponse, ApiSingleResponse } from "../types/api";
+import type { ApiSingleResponse } from "../types/api";
 import type { ItemGroup } from "../types/itemGroup";
 
 const base_url = import.meta.env.VITE_BASE_URL as string;

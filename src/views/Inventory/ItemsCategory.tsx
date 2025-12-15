@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ItemsCategoryModal from "../../components/inventory/ItemsCategoryModal";
-import { Search, Plus, Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   getAllItemGroups,

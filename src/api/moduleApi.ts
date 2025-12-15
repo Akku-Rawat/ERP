@@ -24,10 +24,7 @@ export async function getModuleByKey(key: string): Promise<any> {
 }
 
 export async function createModule(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(
-    ENDPOINTS.createModule,
-    payload,
-  );
+  const resp: AxiosResponse = await api.post(ENDPOINTS.createModule, payload);
   return resp.data;
 }
 
