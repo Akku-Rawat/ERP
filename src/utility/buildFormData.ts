@@ -30,6 +30,25 @@ export const transformBasicDetailPayload = (payload: any) => ({
   "address[timeZone]": payload.address.timeZone,
 });
 
+export const transformAccountingSetupPayload = (payload: any) => ({
+  id: payload.id,
+
+  // FINANCIAL CONFIG
+  "financialConfig[baseCurrency]": payload.financialConfig?.baseCurrency,
+  "financialConfig[financialYearStart]": payload.financialConfig?.financialYearStart,
+
+  // ACCOUNTING SETUP
+  "accountingSetup[chartOfAccounts]": payload.accountingSetup?.chartOfAccounts,
+  "accountingSetup[defaultExpenseGL]": payload.accountingSetup?.defaultExpenseGL,
+  "accountingSetup[fxGainLossAccount]": payload.accountingSetup?.fxGainLossAccount,
+  "accountingSetup[revaluationFrequency]": payload.accountingSetup?.revaluationFrequency,
+  "accountingSetup[roundOffAccount]": payload.accountingSetup?.roundOffAccount,
+  "accountingSetup[roundOffCostCenter]": payload.accountingSetup?.roundOffCostCenter,
+  "accountingSetup[depreciationAccount]": payload.accountingSetup?.depreciationAccount,
+  "accountingSetup[appreciationAccount]": payload.accountingSetup?.appreciationAccount,
+});
+
+
 export function appendFormData(
   formData: FormData,
   data: any,

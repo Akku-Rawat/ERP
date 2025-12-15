@@ -14,7 +14,6 @@ import AccountingDetails from "./AccountingDetails";
 import BuyingSelling from "./BuyingSelling";
 import SubscribedModules from "./subscribedmodule";
 import BankDetails from "./BankDetails";
-import AddBankAccountModal from "../../components/CompanySetup/AddBankAccountModal";
 import Upload from "./upload";
 
 import type {
@@ -49,7 +48,6 @@ const CompanySetup: React.FC = () => {
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [financialConfig, setFinancialConfig] = useState<FinancialConfig>();
   const [terms, setTerms] = useState<Terms>();
-  const [showBankModal, setShowBankModal] = useState(false);
   const [companyDetail, setCompanyDetail] = useState<Company | null>(null);
   const [modules, setModules] = useState<ModuleSubscriptions | null>(null);
   const [accountingSetup, setAccountingSetup] =
@@ -90,10 +88,6 @@ const CompanySetup: React.FC = () => {
     },
   });
 
-  const handleAddBankAccount = (newAccount: BankAccount) => {
-    setBankAccounts((prev) => [...prev, newAccount]);
-    setShowBankModal(false);
-  };
   const fetchCompanyDetail = async () => {
     try {
       setLoading(true);
@@ -165,11 +159,10 @@ const CompanySetup: React.FC = () => {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-2 border-theme 
-    ${
-      tab === t.key
-        ? "border-[var(--primary)] text-main font-semibold"
-        : "border-transparent text-muted hover:text-primary"
-    }
+    ${tab === t.key
+                ? "border-[var(--primary)] text-main font-semibold"
+                : "border-transparent text-muted hover:text-primary"
+              }
   `}
             style={{ background: "transparent" }}
           >
@@ -183,7 +176,7 @@ const CompanySetup: React.FC = () => {
         {tab === "bank" && (
           <BankDetails
             bankAccounts={bankAccounts}
-            onAddAccount={() => setShowBankModal(true)}
+            setBankAccounts={setBankAccounts}
           />
         )}
         {tab === "accounting" && (
@@ -197,14 +190,6 @@ const CompanySetup: React.FC = () => {
         {tab === "Templates" && <Templates />}
         {tab === "logo" && <Upload />}
       </div>
-
-      {/* Add Bank Account Modal */}
-      {showBankModal && (
-        <AddBankAccountModal
-          onClose={() => setShowBankModal(false)}
-          onSubmit={handleAddBankAccount}
-        />
-      )}
     </div>
   );
 };

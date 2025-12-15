@@ -10,7 +10,7 @@ export interface PaymentTerms {
   phases: TermPhase[];
   dueDates?: string;
   lateCharges?: string;
-  tax?: string;
+  taxes?: string;
   notes?: string;
 }
 

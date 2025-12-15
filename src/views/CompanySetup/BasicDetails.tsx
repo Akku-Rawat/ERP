@@ -57,13 +57,59 @@ const defaultForm: BasicDetailsForm = {
 interface InputFieldProps {
   label: string;
   name: string;
-  section: keyof BasicDetailsForm;
   type?: string;
   icon?: React.ComponentType<{ className?: string }>;
   required?: boolean;
   placeholder?: string;
   colSpan?: number;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
+
+const InputField: React.FC<InputFieldProps> = ({
+  label,
+  name,
+  type = "text",
+  icon: Icon,
+  required = false,
+  placeholder = "",
+  colSpan = 1,
+  value,
+  onChange,
+}) => {
+  const colClass = colSpan >= 2 ? "md:col-span-2" : "";
+  const id = `input_${name}`;
+
+  return (
+    <div className={`relative ${colClass}`}>
+      <label
+        htmlFor={id}
+        className="block text-sm font-medium text-main mb-1.5"
+      >
+        {label}{" "}
+        {required && <span style={{ color: "var(--danger)" }}>*</span>}
+      </label>
+
+      <div className="relative">
+        {Icon && (
+          <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4 pointer-events-none z-10" />
+        )}
+
+        <input
+          id={id}
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          className={`w-full border border-theme rounded-lg ${
+            Icon ? "pl-10" : "pl-3.5"
+          } pr-3.5 py-2.5 text-sm focus:outline-none bg-card text-main`}
+        />
+      </div>
+    </div>
+  );
+};
 
 interface BasicDetailsProps {
   basic?: BasicDetailsForm | null;
@@ -72,6 +118,7 @@ interface BasicDetailsProps {
 const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState("registration");
+  
   const [form, setForm] = useState<BasicDetailsForm>(() => ({
     registration: {
       ...defaultForm.registration,
@@ -133,9 +180,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
       const transformedPayload = transformBasicDetailPayload(data);
       const formData = new FormData();
       appendFormData(formData, transformedPayload);
-      // for (let [k, v] of formData.entries()) {
-      //   console.log(k, v);
-      // }
+      
       await updateCompanyById(formData);
       setShowSuccess(true);
 
@@ -148,51 +193,24 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
 
   const handleReset = () => {
     if (!confirm("Reset all fields?")) return;
-
     setForm(defaultForm);
   };
 
-  const InputField: React.FC<InputFieldProps> = ({
-    label,
-    name,
-    section,
-    type = "text",
-    icon: Icon,
-    required = false,
-    placeholder = "",
-    colSpan = 1,
-  }) => {
-    const colClass = colSpan >= 2 ? "md:col-span-2" : "";
-    const id = `input_${name}`;
-
+  const renderField = (
+    label: string, 
+    name: string, 
+    section: keyof BasicDetailsForm, 
+    options: Partial<InputFieldProps> = {}
+  ) => {
     return (
-      <div className={`relative ${colClass}`}>
-        <label
-          htmlFor={id}
-          className="block text-sm font-medium text-main mb-1.5"
-        >
-          {label}{" "}
-          {required && <span style={{ color: "var(--danger)" }}>*</span>}
-        </label>
-
-        <div className="relative">
-          {Icon && (
-            <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4 pointer-events-none z-10" />
-          )}
-
-          <input
-            id={id}
-            type={type}
-            value={form[section][name] ?? ""}
-            onChange={(e) => handleChange(section, name, e.target.value)}
-            placeholder={placeholder}
-            required={required}
-            className={`w-full border border-theme rounded-lg ${
-              Icon ? "pl-10" : "pl-3.5"
-            } pr-3.5 py-2.5 text-sm focus:outline-none bg-card text-main`}
-          />
-        </div>
-      </div>
+      <InputField
+        key={name}
+        label={label}
+        name={name}
+        value={(form[section] as Record<string, string>)[name]}
+        onChange={(e) => handleChange(section, name, e.target.value)}
+        {...options}
+      />
     );
   };
 
@@ -243,125 +261,38 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
         <div className="p-8">
           {activeTab === "registration" && (
             <div className="grid grid-cols-3 gap-6">
-              <InputField
-                label="Registration No"
-                name="registerNo"
-                section="registration"
-                icon={FaIdCard}
-              />
-              <InputField
-                label="Tax Id / TPIN"
-                name="tpin"
-                section="registration"
-                icon={FaIdCard}
-              />
-              <InputField
-                label="Company Name"
-                name="companyName"
-                section="registration"
-                icon={FaBuilding}
-                required
-              />
-              <InputField
-                label="Date of Incorporation"
-                name="dateOfIncorporation"
-                type="date"
-                section="registration"
-                icon={FaCalendarAlt}
-              />
-              <InputField
-                label="Company Type"
-                name="companyType"
-                section="registration"
-                icon={FaBuilding}
-              />
-              <InputField
-                label="Company Status"
-                name="companyStatus"
-                section="registration"
-              />
-              <InputField
-                label="Industry Type"
-                name="industryType"
-                section="registration"
-                icon={FaIndustry}
-              />
+              {renderField("Registration No", "registerNo", "registration", { icon: FaIdCard })}
+              {renderField("Tax Id / TPIN", "tpin", "registration", { icon: FaIdCard })}
+              {renderField("Company Name", "companyName", "registration", { icon: FaBuilding, required: true })}
+              {renderField("Date of Incorporation", "dateOfIncorporation", "registration", { type: "date", icon: FaCalendarAlt })}
+              {renderField("Company Type", "companyType", "registration", { icon: FaBuilding })}
+              {renderField("Company Status", "companyStatus", "registration")}
+              {renderField("Industry Type", "industryType", "registration", { icon: FaIndustry })}
             </div>
           )}
 
           {activeTab === "contact" && (
             <div className="grid grid-cols-3 gap-6">
-              <InputField
-                label="Company Email"
-                name="companyEmail"
-                section="contact"
-                icon={FaEnvelope}
-                required
-              />
-              <InputField
-                label="Company Phone"
-                name="companyPhone"
-                section="contact"
-                icon={FaPhone}
-              />
-              <InputField
-                label="Alternate Phone"
-                name="alternatePhone"
-                section="contact"
-                icon={FaPhone}
-              />
-              <InputField
-                label="Website"
-                name="website"
-                section="contact"
-                icon={FaGlobe}
-              />
-              <InputField
-                label="Contact Person"
-                name="contactPerson"
-                section="contact"
-                icon={FaUser}
-              />
-              <InputField
-                label="Contact Email"
-                name="contactEmail"
-                section="contact"
-                icon={FaEnvelope}
-              />
-              <InputField
-                label="Contact Phone"
-                name="contactPhone"
-                section="contact"
-                icon={FaPhone}
-              />
+              {renderField("Company Email", "companyEmail", "contact", { icon: FaEnvelope, required: true })}
+              {renderField("Company Phone", "companyPhone", "contact", { icon: FaPhone })}
+              {renderField("Alternate Phone", "alternatePhone", "contact", { icon: FaPhone })}
+              {renderField("Website", "website", "contact", { icon: FaGlobe })}
+              {renderField("Contact Person", "contactPerson", "contact", { icon: FaUser })}
+              {renderField("Contact Email", "contactEmail", "contact", { icon: FaEnvelope })}
+              {renderField("Contact Phone", "contactPhone", "contact", { icon: FaPhone })}
             </div>
           )}
 
           {activeTab === "address" && (
             <div className="grid grid-cols-3 gap-6">
-              <InputField
-                label="Address Line 1"
-                name="addressLine1"
-                section="address"
-                colSpan={2}
-                icon={FaMapMarkerAlt}
-              />
-              <InputField
-                label="Address Line 2"
-                name="addressLine2"
-                section="address"
-                colSpan={2}
-              />
-              <InputField label="City" name="city" section="address" />
-              <InputField label="District" name="district" section="address" />
-              <InputField label="Province" name="province" section="address" />
-              <InputField label="Country" name="country" section="address" />
-              <InputField
-                label="Postal Code"
-                name="postalCode"
-                section="address"
-              />
-              <InputField label="Time Zone" name="timeZone" section="address" />
+              {renderField("Address Line 1", "addressLine1", "address", { colSpan: 2, icon: FaMapMarkerAlt })}
+              {renderField("Address Line 2", "addressLine2", "address", { colSpan: 2 })}
+              {renderField("City", "city", "address")}
+              {renderField("District", "district", "address")}
+              {renderField("Province", "province", "address")}
+              {renderField("Country", "country", "address")}
+              {renderField("Postal Code", "postalCode", "address")}
+              {renderField("Time Zone", "timeZone", "address")}
             </div>
           )}
         </div>
