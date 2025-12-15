@@ -289,7 +289,7 @@ const LeaveManagement: React.FC = () => {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => `${value}%`} />
+                  <Tooltip formatter={(value) => `${String(value)}%`} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="mt-6 space-y-3">

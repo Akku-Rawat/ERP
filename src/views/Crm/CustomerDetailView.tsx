@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { X, Search, Edit, FileText, Receipt, Plus } from "lucide-react";
-import CustomerModal from "../../components/crm/CustomerModal";
 import QuotationModal from "../../components/sales/QuotationModal";
 import InvoiceModal from "../../components/sales/InvoiceModal";
 import type { CustomerDetail } from "../../types/customer";

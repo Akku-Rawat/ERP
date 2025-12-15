@@ -8,15 +8,7 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
-
-interface BankAccount {
-  bankName: string;
-  accountNumber: string;
-  ifscCode: string;
-  currency: string;
-  swiftCode: string;
-  isdefault?: boolean;
-}
+import type { BankAccount } from "../../types/company";
 
 interface Props {
   bankAccounts: BankAccount[];
@@ -35,8 +27,8 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
   const filteredAccounts = bankAccounts.filter(
     (acc) =>
       acc.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      acc.accountNumber.includes(searchTerm) ||
-      acc.ifscCode.toLowerCase().includes(searchTerm.toLowerCase()),
+      acc.accountNo.includes(searchTerm) ||
+      acc.swiftCode.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const toggleAccountVisibility = (index: number) => {
@@ -48,10 +40,40 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
     return "•••• •••• " + accountNumber.slice(-4);
   };
 
+  const Detail = ({
+    label,
+    value,
+    canToggle,
+    onToggle,
+    reveal,
+  }: {
+    label: string;
+    value: string | number | undefined;
+    canToggle?: boolean;
+    onToggle?: () => void;
+    reveal?: boolean;
+  }) => (
+    <div>
+      <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
+        {label}
+      </label>
+      <div className="bg-card border border-theme rounded-lg px-4 py-3 flex justify-between items-center">
+        <p className="text-muted font-medium">{value || "—"}</p>
+
+        {canToggle && (
+          <button onClick={onToggle} className="text-muted">
+            {reveal ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="bg-card">
-      <div className=" mx-auto">
+      <div className="mx-auto">
         <div className="grid grid-cols-5 gap-6">
+          {/* LEFT LIST */}
           <div className="col-span-2 bg-card rounded-lg shadow-sm overflow-hidden">
             <div className="px-4 py-2 bg-primary">
               <h2 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -61,26 +83,23 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
             </div>
 
             <div className="p-4 space-y-3">
-              {/* Search Bar */}
+              {/* SEARCH */}
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4" />
 
                 <input
                   type="text"
                   placeholder="Find accounts..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 border rounded-md text-sm focus:outline-none focus-ring bg-card text-main"
+                  className="w-full pl-10 pr-3 py-2 border rounded-md text-sm focus:outline-none bg-card text-main"
                 />
               </div>
 
-              {/* Add New Account Button */}
+              {/* ADD ACCOUNT */}
               <button
                 onClick={onAddAccount}
-                className="w-full px-4 py-2.5 rounded-lg shadow-sm
-             text-sm font-semibold text-white
-             flex items-center justify-center gap-2
-             transition-all hover:opacity-95"
+                className="w-full px-4 py-2.5 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-2 shadow-sm"
                 style={{
                   background:
                     "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
@@ -90,6 +109,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                 Add New Account
               </button>
 
+              {/* LIST */}
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {filteredAccounts.length === 0 ? (
                   <div className="text-center py-8 text-muted text-sm">
@@ -114,13 +134,15 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
                           {acc.currency}
                         </span>
                       </div>
+
                       <p className="text-xs text-muted font-mono">
                         {showAccountNumber[i]
-                          ? acc.accountNumber
-                          : maskAccountNumber(acc.accountNumber)}
+                          ? acc.accountNo
+                          : maskAccountNumber(acc.accountNo)}
                       </p>
+
                       <p className="text-xs text-muted mt-1">
-                        IFSC: {acc.ifscCode}
+                        SWIFT: {acc.swiftCode}
                       </p>
                     </div>
                   ))
@@ -129,27 +151,26 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
             </div>
           </div>
 
-          {/* Account Details */}
+          {/* ACCOUNT DETAILS PANEL */}
           <div className="col-span-3 bg-card rounded-lg shadow-sm overflow-hidden">
             <div className="px-4 py-2 flex justify-between items-center bg-primary">
               <h2 className="text-lg font-semibold text-white">
                 Account Details
               </h2>
+
               {selectedAccount !== null && (
                 <div className="flex gap-2">
                   <button
-                    className="px-3 py-1.5 rounded-md transition-all text-white"
+                    className="px-3 py-1.5 rounded-md text-white"
                     style={{ background: "rgba(255,255,255,0.12)" }}
                   >
-                    <FaEdit className="w-3.5 h-3.5" />
-                    Edit
+                    <FaEdit className="w-3.5 h-3.5" /> Edit
                   </button>
                   <button
-                    className="px-3 py-1.5 rounded-md transition-all text-white"
+                    className="px-3 py-1.5 rounded-md text-white"
                     style={{ background: "rgba(255,255,255,0.12)" }}
                   >
-                    <FaTrash className="w-3.5 h-3.5" />
-                    Delete
+                    <FaTrash className="w-3.5 h-3.5" /> Delete
                   </button>
                 </div>
               )}
@@ -170,93 +191,60 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount }) => {
             ) : (
               <div className="p-6">
                 <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
-                      Bank Name
-                    </label>
-                    <div className="bg-card border border-theme rounded-lg px-4 py-3">
-                      <p className="text-muted font-medium">
-                        {bankAccounts[selectedAccount].bankName}
-                      </p>
-                    </div>
-                  </div>
+                  <Detail
+                    label="Bank Name"
+                    value={bankAccounts[selectedAccount].bankName}
+                  />
 
-                  <div>
-                    <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
-                      SWIFT/BIC Code
-                    </label>
-                    <div className="bg-card border border-theme rounded-lg px-4 py-3 flex items-center justify-between">
-                      <p className="text-muted font-mono">
-                        {bankAccounts[selectedAccount].swiftCode}
-                      </p>
-                      <span className="text-success">✓</span>
-                    </div>
-                  </div>
+                  <Detail
+                    label="Account Holder"
+                    value={bankAccounts[selectedAccount].accountHolderName}
+                  />
 
-                  <div>
-                    <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
-                      Account Number
-                    </label>
-                    <div className="bg-card border border-theme rounded-lg px-4 py-3 flex items-center justify-between">
-                      <p className="text-muted font-mono font-semibold">
-                        {showAccountNumber[selectedAccount]
-                          ? bankAccounts[selectedAccount].accountNumber
-                          : maskAccountNumber(
-                              bankAccounts[selectedAccount].accountNumber,
-                            )}
-                      </p>
-                      <button
-                        onClick={() => toggleAccountVisibility(selectedAccount)}
-                        className="text-muted hover:text-muted transition-colors"
-                      >
-                        {showAccountNumber[selectedAccount] ? (
-                          <FaEyeSlash className="w-4 h-4" />
-                        ) : (
-                          <FaEye className="w-4 h-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
+                  <Detail
+                    label="Account Number"
+                    value={
+                      showAccountNumber[selectedAccount]
+                        ? bankAccounts[selectedAccount].accountNo
+                        : maskAccountNumber(
+                            bankAccounts[selectedAccount].accountNo,
+                          )
+                    }
+                    canToggle={true}
+                    onToggle={() => toggleAccountVisibility(selectedAccount)}
+                    reveal={showAccountNumber[selectedAccount]}
+                  />
 
-                  <div>
-                    <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
-                      IFSC Code
-                    </label>
-                    <div className="bg-card border border-theme rounded-lg px-4 py-3 flex items-center justify-between">
-                      <p className="text-muted font-mono">
-                        {bankAccounts[selectedAccount].ifscCode}
-                      </p>
-                      <span className="text-success">✓</span>
-                    </div>
-                  </div>
+                  <Detail
+                    label="Swift/BIC Code"
+                    value={bankAccounts[selectedAccount].swiftCode}
+                  />
 
-                  <div>
-                    <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
-                      Currency
-                    </label>
-                    <div className="bg-card border border-theme rounded-lg px-4 py-3">
-                      <p className="text-muted font-semibold">
-                        {bankAccounts[selectedAccount].currency}
-                      </p>
-                    </div>
-                  </div>
+                  <Detail
+                    label="Sort Code"
+                    value={bankAccounts[selectedAccount].sortCode}
+                  />
 
-                  <div>
-                    <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
-                      Status
-                    </label>
-                    <div className="bg-card border border-theme rounded-lg px-4 py-3">
-                      <span className="inline-flex items-center gap-2 text-success font-medium">
-                        <span
-                          className="w-2 h-2"
-                          style={{
-                            background: "var(--success)",
-                            borderRadius: 4,
-                          }}
-                        ></span>
-                        Active
-                      </span>
-                    </div>
+                  <Detail
+                    label="Currency"
+                    value={bankAccounts[selectedAccount].currency}
+                  />
+
+                  <Detail
+                    label="Opening Balance"
+                    value={bankAccounts[selectedAccount].openingBalance}
+                  />
+
+                  <Detail
+                    label="Date Added"
+                    value={bankAccounts[selectedAccount].dateAdded}
+                  />
+
+                  <div className="col-span-2">
+                    <Detail
+                      label="Branch Address"
+                      value={bankAccounts[selectedAccount].branchAddress}
+                    />
                   </div>
                 </div>
               </div>

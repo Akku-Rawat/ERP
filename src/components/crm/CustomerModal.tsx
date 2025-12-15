@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TermsAndCondition from "../TermsAndCondition";
-import type {
-  TermPhase,
-  PaymentTerms,
-  TermSection,
-} from "../../types/termsAndCondition";
-import { X, Mail, Phone, CloudCog } from "lucide-react";
+import type { TermSection } from "../../types/termsAndCondition";
+import { X, Mail, Phone } from "lucide-react";
 
 import {
   createCustomer,
   updateCustomerByCustomerCode,
 } from "../../api/customerApi";
 
-import type { CustomerDetail, CustomerTerms } from "../../types/customer";
+import type { CustomerDetail } from "../../types/customer";
 
 const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   id: "",
@@ -337,7 +333,8 @@ const CustomerModal: React.FC<{
               {activeTab === "terms" && (
                 <div className="h-full w-full">
                   <TermsAndCondition
-                    terms={form.terms?.selling || ({} as TermSection)}
+                    title="Selling Terms & Conditions"
+                    terms={form.terms?.selling as TermSection}
                     setTerms={(updated) =>
                       setForm((p) => ({
                         ...p,

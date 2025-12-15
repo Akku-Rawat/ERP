@@ -1,7 +1,9 @@
 export interface TermPhase {
+  id: string;
   name: string;
   percentage: string;
   condition: string;
+  isDelete?: number;
 }
 
 export interface PaymentTerms {
@@ -14,15 +16,13 @@ export interface PaymentTerms {
 
 export interface TermSection {
   general?: string;
-  payment?: PaymentTerms;
+  payment: PaymentTerms;
   delivery?: string;
   cancellation?: string;
   warranty?: string;
   liability?: string;
 }
 export interface Terms {
-  terms: {
-    buying?: TermSection;
-    selling: TermSection;
-  };
+  buying?: TermSection;
+  selling: TermSection;
 }

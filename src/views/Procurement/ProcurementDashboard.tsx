@@ -1,7 +1,6 @@
 import React from "react";
 import {
   FaTruck,
-  FaCheckCircle,
   FaExclamationTriangle,
   FaClipboardList,
   FaMoneyCheckAlt,

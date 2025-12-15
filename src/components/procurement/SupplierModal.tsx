@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Phone, Save, Loader2 } from "lucide-react";
+import { X, Mail, Save, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 const base_url = import.meta.env.VITE_BASE_URL;

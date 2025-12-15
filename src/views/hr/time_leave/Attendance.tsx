@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Calendar,
   Clock,
-  Users,
   TrendingUp,
   ArrowRight,
   Edit2,
