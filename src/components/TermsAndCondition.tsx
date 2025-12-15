@@ -37,7 +37,7 @@ const emptyPayment: PaymentTerms = {
   phases: [],
   dueDates: "",
   lateCharges: "",
-  tax: "",
+  taxes: "",
   notes: "",
 };
 
@@ -68,7 +68,7 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
     phases: src.payment?.phases ?? [],
     dueDates: src.payment?.dueDates ?? "",
     lateCharges: src.payment?.lateCharges ?? "",
-    tax: src.payment?.tax ?? "",
+    taxes: src.payment?.taxes ?? "",
     notes: src.payment?.notes ?? "",
   });
 
@@ -136,9 +136,7 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
   };
 
   const removePhase = (index: number) => {
-    console.log("removePhase index: ", index);
     if (!isEditing) return;
-    console.log("isEditing: ", isEditing);
 
     const phases = ensurePayment(currentTerms).phases as LocalPhase[];
 
@@ -286,9 +284,9 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
 
           <LabeledRow
             label="Tax / Additional Charges:"
-            value={payment.tax ?? ""}
+            value={payment.taxes ?? ""}
             disabled={!isEditing}
-            onChange={(v) => updatePayment({ tax: v })}
+            onChange={(v) => updatePayment({ taxes: v })}
           />
 
           <LabeledRow
