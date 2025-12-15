@@ -31,7 +31,7 @@ export async function getAllItemGroups(
   page_size: number = 10,
 ): Promise<any> {
   const url = `${ENDPOINTS.getAllItemGroups}?page=${page}&page_size=${page_size}`;
-  
+
   const resp = await api.get(url);
   return resp.data;
 }
@@ -52,7 +52,6 @@ export async function getItemGroupById(
 //   return resp.data || null;
 // }
 
-
 export async function createItemGroup(
   payload: Partial<ItemGroup>,
 ): Promise<any> {
@@ -63,7 +62,8 @@ export async function createItemGroup(
   return resp.data;
 }
 
-export async function updateItemGroupById(id: String,
+export async function updateItemGroupById(
+  id: string,
   payload: Partial<ItemGroup>,
 ): Promise<any> {
   const url = `${ENDPOINTS.updateItemGroup}?id=${id}`;
@@ -71,9 +71,9 @@ export async function updateItemGroupById(id: String,
   return resp.data;
 }
 
-export async function deleteItemGroupById(id: string): Promise<any>{
+export async function deleteItemGroupById(id: string): Promise<any> {
   const resp: AxiosResponse = await api.delete(ENDPOINTS.deleteItemGroup, {
-    data: {id},
+    data: { id },
   });
   return resp.data;
 }

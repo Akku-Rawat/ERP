@@ -26,8 +26,8 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
   const [showItemsModal, setShowItemsModal] = useState(false);
   const [editItems, setEditItems] = useState<any | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
- const [itemToDelete, setItemToDelete] = useState<any | null>(null);
- const [deleting, setDeleting] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchItems = async () => {
     try {
@@ -73,88 +73,88 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
   //   }
   // };
 
-const handleDelete = (itemCode: string, e: React.MouseEvent) => {
-  e.stopPropagation();
+  const handleDelete = (itemCode: string, e: React.MouseEvent) => {
+    e.stopPropagation();
 
-  const itemToDelete = item.find((i) => i.id === itemCode);
-  console.log("itemToDelete" + itemToDelete);
-  if (itemToDelete) {
-    setItemToDelete(itemToDelete);  
-    setDeleteModalOpen(true);
-  } else {
-    toast.error("Item not found");
-  }
-};
-
-// const confirmDelete = async () => {
-//   console.log("itemToDelete" + itemToDelete);
-//   if (!itemToDelete) return;
-
-//   try {
-//     setDeleting(true);
-//     await deleteItemByItemCode(itemToDelete.item_code);
-    
-//     setItem((prev) => prev.filter((i) => i.item_code !== itemToDelete.item_code));
-    
-//     toast.success("Item deleted successfully!", { duration: 1000 });
-//     setDeleteModalOpen(false);
-//   } catch (err: any) {
-//     toast.error(err.response?.data?.message || "Failed to delete item");
-//   } finally {
-//     setDeleting(false);
-//     setItemToDelete(null);
-//   }
-// };
-
-const confirmDelete = async () => {
-  if (!itemToDelete) return;
-
-  try {
-    setDeleting(true);
-
-    await deleteItemByItemCode(itemToDelete.id);
-
-    setItem((prev) => prev.filter((i) => i.id !== itemToDelete.id));
-
-    toast.success("Item deleted successfully!", { duration: 2000 });
-    setDeleteModalOpen(false);
-  } catch (err: any) {
-    let errorMessage = "Failed to delete item";
-
-    if (err.response?.data?._server_messages) {
-      try {
-        const serverMsgs = JSON.parse(err.response.data._server_messages);
-        errorMessage = serverMsgs
-          .map((msg: string) => {
-            try {
-              const parsed = JSON.parse(msg);
-              return parsed.message || "";
-            } catch {
-              return msg;
-            }
-          })
-          .filter(Boolean)
-          .join(" ")
-          .replace(/<[^>]*>/g, "")      
-          .replace(/\\"/g, '"')         
-          .replace(/\\\\/g, "\\")       
-          .trim();
-      } catch (e) {
-        errorMessage = err.response.data.message || errorMessage;
-      }
-    } else if (err.response?.data?.message) {
-      errorMessage = err.response.data.message;
+    const itemToDelete = item.find((i) => i.id === itemCode);
+    console.log("itemToDelete" + itemToDelete);
+    if (itemToDelete) {
+      setItemToDelete(itemToDelete);
+      setDeleteModalOpen(true);
+    } else {
+      toast.error("Item not found");
     }
+  };
 
-    toast.error(errorMessage, {
-      duration: 10000, 
-      style: { whiteSpace: "pre-line" }, 
-    });
-  } finally {
-    setDeleting(false);
-    setItemToDelete(null);
-  }
-};
+  // const confirmDelete = async () => {
+  //   console.log("itemToDelete" + itemToDelete);
+  //   if (!itemToDelete) return;
+
+  //   try {
+  //     setDeleting(true);
+  //     await deleteItemByItemCode(itemToDelete.item_code);
+
+  //     setItem((prev) => prev.filter((i) => i.item_code !== itemToDelete.item_code));
+
+  //     toast.success("Item deleted successfully!", { duration: 1000 });
+  //     setDeleteModalOpen(false);
+  //   } catch (err: any) {
+  //     toast.error(err.response?.data?.message || "Failed to delete item");
+  //   } finally {
+  //     setDeleting(false);
+  //     setItemToDelete(null);
+  //   }
+  // };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      setDeleting(true);
+
+      await deleteItemByItemCode(itemToDelete.id);
+
+      setItem((prev) => prev.filter((i) => i.id !== itemToDelete.id));
+
+      toast.success("Item deleted successfully!", { duration: 2000 });
+      setDeleteModalOpen(false);
+    } catch (err: any) {
+      let errorMessage = "Failed to delete item";
+
+      if (err.response?.data?._server_messages) {
+        try {
+          const serverMsgs = JSON.parse(err.response.data._server_messages);
+          errorMessage = serverMsgs
+            .map((msg: string) => {
+              try {
+                const parsed = JSON.parse(msg);
+                return parsed.message || "";
+              } catch {
+                return msg;
+              }
+            })
+            .filter(Boolean)
+            .join(" ")
+            .replace(/<[^>]*>/g, "")
+            .replace(/\\"/g, '"')
+            .replace(/\\\\/g, "\\")
+            .trim();
+        } catch (e) {
+          errorMessage = err.response.data.message || errorMessage;
+        }
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+
+      toast.error(errorMessage, {
+        duration: 10000,
+        style: { whiteSpace: "pre-line" },
+      });
+    } finally {
+      setDeleting(false);
+      setItemToDelete(null);
+    }
+  };
 
   const handleAddItem = async () => {
     setEditItems(null);
@@ -170,21 +170,21 @@ const confirmDelete = async () => {
   };
 
   const handleItemSuccess = async () => {
-  const wasEditMode = !!editItems;
-  setShowItemsModal(false);
-  setEditItems(null);
-  
-  try {
-    await fetchItems();
-    toast.success(
-      wasEditMode
-        ? "Item updated successfully!"
-        : "Item created successfully!"
-    );
-  } catch (err) {
-    toast.error("Item saved but failed to refresh list");
-  }
-};
+    const wasEditMode = !!editItems;
+    setShowItemsModal(false);
+    setEditItems(null);
+
+    try {
+      await fetchItems();
+      toast.success(
+        wasEditMode
+          ? "Item updated successfully!"
+          : "Item created successfully!",
+      );
+    } catch (err) {
+      toast.error("Item saved but failed to refresh list");
+    }
+  };
 
   const handleEditItem = async (itemCode: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -302,7 +302,7 @@ const confirmDelete = async () => {
         initialData={editItems}
         isEditMode={!!editItems}
       />
-            {deleteModalOpen && itemToDelete && (
+      {deleteModalOpen && itemToDelete && (
         <DeleteModal
           entityName="Item"
           entityId={itemToDelete.item_code}

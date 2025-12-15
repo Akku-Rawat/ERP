@@ -1,4 +1,3 @@
-
 interface DeleteModalProps<T = unknown> {
   entityName: string;
   entityId: string | number;
@@ -45,7 +44,11 @@ function DeleteModal<T = unknown>({
         {/* Confirmation Message */}
         <div className="text-center my-6">
           <p className="text-gray-700 text-lg">
-            Are you sure you want to <span className="font-semibold text-red-600">permanently delete</span> this {entityName.toLowerCase()}?
+            Are you sure you want to{" "}
+            <span className="font-semibold text-red-600">
+              permanently delete
+            </span>{" "}
+            this {entityName.toLowerCase()}?
           </p>
           {/* <p className="mt-3 text-gray-900 font-mono text-sm bg-gray-100 px-3 py-2 rounded">
             {displayText}
@@ -75,13 +78,21 @@ function DeleteModal<T = unknown>({
             {isLoading ? (
               <>
                 <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.3" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                    opacity="0.3"
+                  />
                   <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                 </svg>
                 Deleting...
               </>
             ) : (
-              'Delete'
+              "Delete"
             )}
           </button>
         </div>

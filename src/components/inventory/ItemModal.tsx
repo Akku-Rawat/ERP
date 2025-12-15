@@ -4,9 +4,14 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import { updateItemByItemCode, createItem } from "../../api/itemApi";
 import ItemCategorySelect from "../selects/ItemCategorySelect";
-import {getItemGroupById} from "../../api/itemCategoryApi";
+import { getItemGroupById } from "../../api/itemCategoryApi";
 import ItemGenericSelect from "../selects/ItemGenericSelect";
-import { getPackagingUnits, getCountries, getUOMs, getItemClasses } from "../../api/itemZraApi";
+import {
+  getPackagingUnits,
+  getCountries,
+  getUOMs,
+  getItemClasses,
+} from "../../api/itemZraApi";
 
 type FormState = Record<string, any>;
 
@@ -63,7 +68,7 @@ const emptyForm: Record<string, any> = {
   dimensionLength: "",
   dimensionWidth: "",
   dimensionHeight: "",
-  weightUnit: ""
+  weightUnit: "",
 };
 
 const ItemModal: React.FC<{
@@ -82,7 +87,6 @@ const ItemModal: React.FC<{
   const [activeTab, setActiveTab] = useState<
     "details" | "taxDetails" | "inventoryDetails"
   >("details");
-
 
   useEffect(() => {
     if (isOpen) {
@@ -127,70 +131,70 @@ const ItemModal: React.FC<{
   // };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const payload = { ...form };
+    try {
+      const payload = { ...form };
 
-    let response;
+      let response;
 
-    if (isEditMode && initialData?.id) {
-      response = await updateItemByItemCode(initialData.id, payload);
-    } else {
-      response = await createItem(payload);
-    }
-   onSubmit?.();
-
-  } catch (err: any) {
-
-    let errorMessage = "Something went wrong while saving the item.";
-
-    if (err.response?.data) {
-      const data = err.response.data;
-
-      if (data._server_messages) {
-        try {
-          const msgs = JSON.parse(data._server_messages);
-          errorMessage = msgs
-            .map((m: string) => {
-              try { return JSON.parse(m).message || ""; }
-              catch { return m; }
-            })
-            .filter(Boolean)
-            .join("\n");
-        } catch {}
-      } else if (data.message) {
-        errorMessage = data.message;
+      if (isEditMode && initialData?.id) {
+        response = await updateItemByItemCode(initialData.id, payload);
+      } else {
+        response = await createItem(payload);
       }
-    } else if (err.message) {
-      errorMessage = err.message;
-    }
+      onSubmit?.();
+    } catch (err: any) {
+      let errorMessage = "Something went wrong while saving the item.";
 
-    toast.error(errorMessage, {
-      duration: 8000,
-      style: { whiteSpace: "pre-line" },
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+      if (err.response?.data) {
+        const data = err.response.data;
+
+        if (data._server_messages) {
+          try {
+            const msgs = JSON.parse(data._server_messages);
+            errorMessage = msgs
+              .map((m: string) => {
+                try {
+                  return JSON.parse(m).message || "";
+                } catch {
+                  return m;
+                }
+              })
+              .filter(Boolean)
+              .join("\n");
+          } catch {}
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      toast.error(errorMessage, {
+        duration: 8000,
+        style: { whiteSpace: "pre-line" },
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleClose = () => {
     setForm(emptyForm);
     onClose();
   };
 
   const loadItemCategoryDetailsById = async (id: string) => {
-  try {
-    const response = await getItemGroupById(id); 
-    if (!response || response.status_code !== 200) return;
-    setForm((p) => ({...p, item_group: response.data.name,
-    }));
-    setItemCategoryDetails(response.data);
-  } catch (err) {
-    toast.error("Error loading item category details:");
-  }
-};
+    try {
+      const response = await getItemGroupById(id);
+      if (!response || response.status_code !== 200) return;
+      setForm((p) => ({ ...p, item_group: response.data.name }));
+      setItemCategoryDetails(response.data);
+    } catch (err) {
+      toast.error("Error loading item category details:");
+    }
+  };
 
   const handleForm = (
     e: React.ChangeEvent<
@@ -296,7 +300,7 @@ const ItemModal: React.FC<{
                             <option value="Service">Service</option>
                           </select>
                         </label>
-                          {/* <Input
+                        {/* <Input
                           label="Item Group"
                           name="item_group"
                           value={form.item_group || ""}
@@ -346,12 +350,14 @@ const ItemModal: React.FC<{
     setForm(p => ({ ...p, itemClassCode: id }));
   }}
 /> */}
-<ItemGenericSelect
-  label="Item Class"
-  value={form.itemClassCode}
-  fetchData={getItemClasses}
-  onChange={({ id }) => setForm(p => ({ ...p, itemClassCode: id }))}
-/>
+                        <ItemGenericSelect
+                          label="Item Class"
+                          value={form.itemClassCode}
+                          fetchData={getItemClasses}
+                          onChange={({ id }) =>
+                            setForm((p) => ({ ...p, itemClassCode: id }))
+                          }
+                        />
                         {/* <Input
                           label="Item Packaging Code "
                           name="custom_pkgunitcd"
@@ -378,12 +384,14 @@ const ItemModal: React.FC<{
     setForm(p => ({ ...p, packagingUnitCode: id }));
   }}
 /> */}
-<ItemGenericSelect
-  label="Packaging Unit"
-  value={form.packagingUnitCode}
-  fetchData={getPackagingUnits}
-  onChange={({ id }) => setForm(p => ({ ...p, packagingUnitCode: id }))}
-/>
+                        <ItemGenericSelect
+                          label="Packaging Unit"
+                          value={form.packagingUnitCode}
+                          fetchData={getPackagingUnits}
+                          onChange={({ id }) =>
+                            setForm((p) => ({ ...p, packagingUnitCode: id }))
+                          }
+                        />
                         <Input
                           label="Item Type Code"
                           name="itemTypeCode"
@@ -408,12 +416,14 @@ const ItemModal: React.FC<{
     setForm(p => ({ ...p, originNationCode: id }));
   }}
 /> */}
-<ItemGenericSelect
-  label="Country Code"
-  value={form.originNationCode}
-  fetchData={getCountries}
-  onChange={({ id }) => setForm(p => ({ ...p, originNationCode: id }))}
-/>
+                        <ItemGenericSelect
+                          label="Country Code"
+                          value={form.originNationCode}
+                          fetchData={getCountries}
+                          onChange={({ id }) =>
+                            setForm((p) => ({ ...p, originNationCode: id }))
+                          }
+                        />
                         {/* <Input
                           label="HSN/SAC/UNSPC"
                           name="hsnSacUnspc"
@@ -438,12 +448,14 @@ const ItemModal: React.FC<{
     setForm(p => ({ ...p, unitOfMeasureCd: id }));
   }}
 /> */}
-<ItemGenericSelect
-  label="UOM"
-  value={form.unitOfMeasureCd}
-  fetchData={getUOMs}
-  onChange={({ id }) => setForm(p => ({ ...p, unitOfMeasureCd: id }))}
-/>
+                        <ItemGenericSelect
+                          label="UOM"
+                          value={form.unitOfMeasureCd}
+                          fetchData={getUOMs}
+                          onChange={({ id }) =>
+                            setForm((p) => ({ ...p, unitOfMeasureCd: id }))
+                          }
+                        />
                         <label className="flex flex-col gap-1 text-sm">
                           <span className="font-medium text-gray-600">
                             SVC Charge
@@ -598,9 +610,7 @@ const ItemModal: React.FC<{
                                 <input
                                   type="text"
                                   name="nonExportDescription"
-                                  value={
-                                    form.nonExportDescription || ""
-                                  }
+                                  value={form.nonExportDescription || ""}
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
                                   placeholder="12% VAT on non-export"
@@ -738,9 +748,7 @@ const ItemModal: React.FC<{
                                 <input
                                   type="text"
                                   name="localPurchaseOrderTax"
-                                  value={
-                                    form.localPurchaseOrderTax || ""
-                                  }
+                                  value={form.localPurchaseOrderTax || ""}
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
                                   placeholder="Local VAT"
@@ -750,9 +758,7 @@ const ItemModal: React.FC<{
                                 <input
                                   type="text"
                                   name="localPurchaseOrderCode"
-                                  value={
-                                    form.localPurchaseOrderCode || ""
-                                  }
+                                  value={form.localPurchaseOrderCode || ""}
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
                                   placeholder="LV05"
@@ -762,9 +768,7 @@ const ItemModal: React.FC<{
                                 <input
                                   type="text"
                                   name="localPurchaseOrderName"
-                                  value={
-                                    form.localPurchaseOrderName || ""
-                                  }
+                                  value={form.localPurchaseOrderName || ""}
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
                                   placeholder="Local Purchase VAT"
@@ -775,8 +779,7 @@ const ItemModal: React.FC<{
                                   type="text"
                                   name="localPurchaseOrderDescription"
                                   value={
-                                    form.localPurchaseOrderDescription ||
-                                    ""
+                                    form.localPurchaseOrderDescription || ""
                                   }
                                   onChange={handleForm}
                                   className="w-full px-2 py-1.5 border rounded text-xs"
@@ -787,9 +790,7 @@ const ItemModal: React.FC<{
                                 <input
                                   type="text"
                                   name="localPurchaseOrderPerct"
-                                  value={
-                                    form.localPurchaseOrderPerct || ""
-                                  }
+                                  value={form.localPurchaseOrderPerct || ""}
                                   onChange={handleForm}
                                   className="w-20 px-2 py-1.5 border rounded text-xs text-right"
                                   placeholder="5"
@@ -899,9 +900,9 @@ const ItemModal: React.FC<{
                           <span className="font-medium text-gray-600">
                             Valuation Method
                           </span>
-                          <select 
+                          <select
                             name="valuationMethod"
-                            value={form.valuationMethod}  
+                            value={form.valuationMethod}
                             onChange={handleForm}
                             className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full"
                           >
@@ -928,7 +929,7 @@ const ItemModal: React.FC<{
                               },
                             })
                           } */}
-                          <input
+                        <input
                           type="checkbox"
                           id="trackInventory"
                           name="trackInventory"

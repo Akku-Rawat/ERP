@@ -14,7 +14,9 @@ export default function ItemCategorySelect({
   className = "",
   label = "Item Category",
 }: ItemCategorySelectProps) {
-  const [categories, setCategories] = useState<{ name: string; id: string }[]>([]);
+  const [categories, setCategories] = useState<{ name: string; id: string }[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState(value || "");
@@ -34,10 +36,10 @@ export default function ItemCategorySelect({
         }
 
         const safeCategories = res.data
-          .filter((c: any) => c && c.id && typeof c.groupName === "string")  
+          .filter((c: any) => c && c.id && typeof c.groupName === "string")
           .map((c: any) => ({
-            id: String(c.id),                                                     
-            name: c.groupName.trim() || `(Unnamed ${c.id})`,               
+            id: String(c.id),
+            name: c.groupName.trim() || `(Unnamed ${c.id})`,
           }));
 
         setCategories(safeCategories);
@@ -64,7 +66,7 @@ export default function ItemCategorySelect({
 
   /* ---------------- Safe Filter logic ---------------- */
   const filtered = categories.filter((c) =>
-    c.name.toLowerCase().includes((search || "").toLowerCase())
+    c.name.toLowerCase().includes((search || "").toLowerCase()),
   );
 
   return (

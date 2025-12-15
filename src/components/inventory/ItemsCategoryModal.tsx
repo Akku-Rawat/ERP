@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, Phone, Save, Loader2 } from "lucide-react";
-import {updateItemGroupById, createItemGroup} from '../../api/itemCategoryApi';
+import {
+  updateItemGroupById,
+  createItemGroup,
+} from "../../api/itemCategoryApi";
 import { getUOMs } from "../../api/itemZraApi";
-import {toast} from "sonner";
+import { toast } from "sonner";
 import ItemGenericSelect from "../selects/ItemGenericSelect";
 
 const emptyForm: Record<string, any> = {
-    id: "",
-    groupName: "",
-    description: "",
-    salesAccount: "",
-    customSellingPrice: "",
-    unitOfMeasurement:""
+  id: "",
+  groupName: "",
+  description: "",
+  salesAccount: "",
+  customSellingPrice: "",
+  unitOfMeasurement: "",
 };
 
 const ItemsCategoryModal: React.FC<{
@@ -38,62 +41,61 @@ const ItemsCategoryModal: React.FC<{
   }, [initialData, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const payload = { ...form };
+    try {
+      const payload = { ...form };
 
-    let response;
+      let response;
 
-    if (isEditMode && initialData?.id) {
-      response = await updateItemGroupById(initialData.id, payload);
-    } else {
-      response = await createItemGroup(payload);
-    }
-
-    onSubmit?.(payload);  
-    handleClose();       
-
-  } catch (err: any) {
-    let errorMessage = "Something went wrong while saving the category.";
-
-    if (err.response?.data) {
-      const data = err.response.data;
-
-      if (data._server_messages) {
-        try {
-          const msgs = JSON.parse(data._server_messages);
-          errorMessage = msgs
-            .map((m: any) => {
-              try {
-                const parsed = JSON.parse(m);
-                return parsed.message || "";
-              } catch {
-                return m;
-              }
-            })
-            .filter(Boolean)
-            .join("\n");
-        } catch (parseErr) {
-          console.error("Failed to parse server messages", parseErr);
-        }
-      } else if (data.message) {
-        errorMessage = data.message;
-      } else if (typeof data === "string") {
-        errorMessage = data;
+      if (isEditMode && initialData?.id) {
+        response = await updateItemGroupById(initialData.id, payload);
+      } else {
+        response = await createItemGroup(payload);
       }
-    } else if (err.message) {
-      errorMessage = err.message;
+
+      onSubmit?.(payload);
+      handleClose();
+    } catch (err: any) {
+      let errorMessage = "Something went wrong while saving the category.";
+
+      if (err.response?.data) {
+        const data = err.response.data;
+
+        if (data._server_messages) {
+          try {
+            const msgs = JSON.parse(data._server_messages);
+            errorMessage = msgs
+              .map((m: any) => {
+                try {
+                  const parsed = JSON.parse(m);
+                  return parsed.message || "";
+                } catch {
+                  return m;
+                }
+              })
+              .filter(Boolean)
+              .join("\n");
+          } catch (parseErr) {
+            console.error("Failed to parse server messages", parseErr);
+          }
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (typeof data === "string") {
+          errorMessage = data;
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      toast.error(errorMessage, {
+        duration: 8000,
+        style: { whiteSpace: "pre-line" },
+      });
+    } finally {
+      setLoading(false);
     }
-    toast.error(errorMessage, {
-      duration: 8000,
-      style: { whiteSpace: "pre-line" },
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -129,9 +131,10 @@ const ItemsCategoryModal: React.FC<{
           exit={{ opacity: 0, scale: 0.95 }}
           className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
         >
-          <form 
-          onSubmit={handleSubmit}
-          className="flex flex-col h-full overflow-hidden">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col h-full overflow-hidden"
+          >
             {/* Header */}
             <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
               <h2 className="text-2xl font-semibold text-indigo-700">
@@ -222,7 +225,9 @@ const ItemsCategoryModal: React.FC<{
                         label="UOM"
                         value={form.unitOfMeasurement}
                         fetchData={getUOMs}
-                        onChange={({ id }) => setForm(p => ({ ...p, unitOfMeasurement: id }))}
+                        onChange={({ id }) =>
+                          setForm((p) => ({ ...p, unitOfMeasurement: id }))
+                        }
                       />
                     </div>
                   </div>
