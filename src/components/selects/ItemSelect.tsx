@@ -4,6 +4,7 @@ import { getAllItems } from "../../api/itemApi";
 interface ItemSelectProps {
   value?: string;
   onChange: (item: {
+    id: string;
     name: string;
     code: string;
     description?: string;
@@ -19,7 +20,7 @@ export default function ItemSelect({
   className = "",
 }: ItemSelectProps) {
   const [items, setItems] = useState<
-    { name: string; code: string; description?: string; price?: number }[]
+    { id: string, name: string; code: string; description?: string; price?: number }[]
   >([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -36,10 +37,11 @@ export default function ItemSelect({
 
         setItems(
           res.data.map((it: any) => ({
-            name: it.item_name,
-            code: it.item_code,
-            description: it.description ?? "",
-            price: it.standard_rate ?? 0,
+            id: it.id,
+            name: it.itemName,
+            code: it.itemClassCode,
+            // description: it.description ?? "",
+            price: it.sellingPrice ?? 0,
           })),
         );
       } finally {
@@ -89,7 +91,7 @@ export default function ItemSelect({
             <ul className="max-h-56 overflow-y-auto text-sm">
               {filtered.map((it) => (
                 <li
-                  key={it.code}
+                  key={it.id}
                   className="px-4 py-2 cursor-pointer hover:bg-blue-100"
                   onClick={() => {
                     setSearch(it.name);
@@ -99,11 +101,11 @@ export default function ItemSelect({
                 >
                   <div className="flex flex-col">
                     <span>{it.name}</span>
-                    {it.description && (
+                    {/* {it.description && (
                       <span className="text-xs text-gray-500 truncate">
                         {it.description}
                       </span>
-                    )}
+                    )} */}
                   </div>
                 </li>
               ))}

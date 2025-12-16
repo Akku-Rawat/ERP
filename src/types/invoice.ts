@@ -1,61 +1,61 @@
+import type { TermSection } from "./termsAndCondition";
+export interface InvoiceSummary {
+  invoiceNumber:     string;
+  customerName:      string;
+  receiptNumber:     string;
+  currency:          string;
+  exchangeRate:      string;
+  dueDate:           null;
+  dateOfInvoice:     Date;
+  Total:             number;
+  totalTax:          string;
+  invoiceStatus:     string;
+  invoiceTypeParent: string;
+  invoiceType:       string;
+}
+export interface Invoice {
+  invoiceNumber:string,
+  customerId: string;
+  currencyCode: string;
+  exchangeRt: string;
+  dateOfInvoice: Date;
+  dueDate: Date;
+  invoiceStatus: string;
+  invoiceType: string;
+  billingAddress: Address;
+  shippingAddress: Address;
+  paymentInformation: PaymentInformation;
+  items: InvoiceItem[];
+  terms: InvoiceTerms;
+}
+
+export interface Address {
+  line1: string;
+  line2: string;
+  postalCode: string;
+  city: string;
+  state: string;
+  country: string;
+}
 export interface InvoiceItem {
   itemCode: string;
-  itemName: string;
-  description?: string;
-  qty: number;
-  price: number;
+  quantity: number;
+  description: string;
   discount: number;
-  amount: number;
+  vatRate: string;
+  price: number;
+  vatCode: string;
+}
+export interface PaymentInformation {
+  paymentTerms: string;
+  paymentMethod: string;
+  bankName: string;
+  accountNumber: string;
+  routingNumber: string;
+  swiftCode: string;
+}
+export interface InvoiceTerms {
+  selling: TermSection;
 }
 
-export interface InvoiceSummary {
-  invoiceNumber: string;
-  customerName: string;
-  date: string;
-  currency: string;
-  total: number;
-  totalTax: number;
-  status?: string;
-  invoiceType?: string;
-}
 
-export interface InvoiceData {
-  invoiceNumber: string;
-  invoiceDate: string;
-  invoiceDueDate: string;
-  poNumber: string;
-  customerName: string;
-  postingDate: string;
-  currency: string;
-
-  billingAddressLine1?: string;
-  billingAddressLine2?: string;
-  billingPostalCode?: string;
-  billingCity?: string;
-  billingState?: string;
-  billingCountry?: string;
-
-  shippingAddressLine1?: string;
-  shippingAddressLine2?: string;
-  shippingPostalCode?: string;
-  shippingCity?: string;
-  shippingState?: string;
-  shippingCountry?: string;
-
-  paymentTerms?: string;
-  paymentMethod?: string;
-  bankName?: string;
-  accountNumber?: string;
-  routingNumber?: string;
-  swift?: string;
-
-  total: number;
-  totalTax: number;
-  totalDiscount: number;
-  adjustment?: number;
-
-  items: InvoiceItem[];
-
-  termsAndConditions?: string;
-  notes?: string;
-}
