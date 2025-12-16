@@ -1,32 +1,37 @@
 import type { TermSection } from "./termsAndCondition";
-export interface InvoiceSummary {
-  invoiceNumber:     string;
-  customerName:      string;
-  receiptNumber:     string;
-  currency:          string;
-  exchangeRate:      string;
-  dueDate:           null;
-  dateOfInvoice:     Date;
-  Total:             number;
-  totalTax:          string;
-  invoiceStatus:     string;
-  invoiceTypeParent: string;
-  invoiceType:       string;
-}
+
 export interface Invoice {
-  invoiceNumber:string,
   customerId: string;
   currencyCode: string;
   exchangeRt: string;
-  dateOfInvoice: Date;
-  dueDate: Date;
+  dateOfInvoice: string;
+  dueDate: string;
   invoiceStatus: string;
   invoiceType: string;
+  destnCountryCd?: string;
+  lpoNumber?: string;
+
   billingAddress: Address;
   shippingAddress: Address;
   paymentInformation: PaymentInformation;
+
   items: InvoiceItem[];
   terms: InvoiceTerms;
+}
+
+export interface InvoiceSummary {
+  invoiceNumber: string;
+  customerName: string;
+  receiptNumber: string;
+  currency: string;
+  exchangeRate: string;
+  dueDate: string | null;
+  dateOfInvoice: string;
+  total: number;
+  totalTax: string;
+  invoiceStatus: string;
+  invoiceTypeParent: string;
+  invoiceType: string;
 }
 
 export interface Address {
@@ -37,6 +42,7 @@ export interface Address {
   state: string;
   country: string;
 }
+
 export interface InvoiceItem {
   itemCode: string;
   quantity: number;
@@ -46,6 +52,7 @@ export interface InvoiceItem {
   price: number;
   vatCode: string;
 }
+
 export interface PaymentInformation {
   paymentTerms: string;
   paymentMethod: string;
@@ -54,8 +61,7 @@ export interface PaymentInformation {
   routingNumber: string;
   swiftCode: string;
 }
+
 export interface InvoiceTerms {
   selling: TermSection;
 }
-
-
