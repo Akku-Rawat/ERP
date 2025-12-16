@@ -4,6 +4,7 @@ import { Check, RotateCcw, Save } from "lucide-react";
 
 import type { Terms, TermSection } from "../../types/termsAndCondition";
 
+import { updateCompanyById } from "../../api/companySetupApi";
 interface BuyingSellingProps {
   terms?: Terms | null;
 }
@@ -73,10 +74,21 @@ const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
     });
   };
 
-  const handleSubmit = () => {
-    console.log("Final payload:", formData);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 2000);
+  const handleSubmit = async () => {
+    const payload = {
+      id: "COMP-00003",
+      ...formData,
+    };
+
+    try {
+      console.log("payload:", payload);
+      await updateCompanyById(payload);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (err) {
+      console.error("Update failed:", err);
+      alert("Failed to update company terms and conditions details.");
+    }
   };
 
   return (
