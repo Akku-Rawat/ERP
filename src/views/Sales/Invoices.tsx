@@ -72,7 +72,7 @@ const InvoicesTable: React.FC = () => {
 
   const handleRowStatusChange = async (
     invoiceNumber: string,
-    status: InvoiceStatus,
+    status: InvoiceStatus
   ) => {
     const res = await updateInvoiceStatus(invoiceNumber, status);
     if (!res || res.status_code !== 200) return;
@@ -81,8 +81,8 @@ const InvoicesTable: React.FC = () => {
       prev.map((inv) =>
         inv.invoiceNumber === invoiceNumber
           ? { ...inv, invoiceStatus: status }
-          : inv,
-      ),
+          : inv
+      )
     );
 
     if (selectedInvoice?.invoiceNumber === invoiceNumber) {
@@ -100,7 +100,7 @@ const InvoicesTable: React.FC = () => {
   const filteredInvoices = invoices.filter(
     (inv) =>
       inv.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inv.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
+      inv.customerName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -148,15 +148,18 @@ const InvoicesTable: React.FC = () => {
                     <td className="px-4 py-2">{inv.invoiceType}</td>
                     <td className="px-4 py-2">{inv.customerName}</td>
                     <td className="px-4 py-2">
-                      {inv.dateOfInvoice.toLocaleDateString()}
+                      {inv.dateOfInvoice
+                        ? new Date(inv.dateOfInvoice).toLocaleDateString()
+                        : "-"}
                     </td>
+
                     <td className="px-4 py-2">
                       {inv.dueDate
                         ? new Date(inv.dueDate).toLocaleDateString()
                         : "—"}
                     </td>
                     <td className="px-4 py-2">
-                      {inv.currency} {inv.Total.toLocaleString()}
+                      {inv.currency} {inv.total}
                     </td>
                     <td className="px-4 py-2">
                       <div className="flex items-center justify-center gap-3">
@@ -172,7 +175,7 @@ const InvoicesTable: React.FC = () => {
                           onChange={(e) =>
                             handleRowStatusChange(
                               inv.invoiceNumber,
-                              e.target.value as InvoiceStatus,
+                              e.target.value as InvoiceStatus
                             )
                           }
                           className="border rounded px-2 py-1 text-xs bg-white"
@@ -191,9 +194,7 @@ const InvoicesTable: React.FC = () => {
                         </button>
 
                         <button
-                          onClick={(e) =>
-                            handleDelete(inv.invoiceNumber, e)
-                          }
+                          onClick={(e) => handleDelete(inv.invoiceNumber, e)}
                           className="text-red-600 hover:text-red-800"
                         >
                           <Trash2 className="w-4 h-4" />

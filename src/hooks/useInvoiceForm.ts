@@ -2,11 +2,17 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { getCustomerByCustomerCode } from "../api/customerApi";
 import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
-import { DEFAULT_INVOICE_FORM, EMPTY_ITEM } from "../constants/invoice.constants";
+import {
+  DEFAULT_INVOICE_FORM,
+  EMPTY_ITEM,
+} from "../constants/invoice.constants";
 
 const ITEMS_PER_PAGE = 5;
 
-type NestedSection = "billingAddress" | "shippingAddress" | "paymentInformation";
+type NestedSection =
+  | "billingAddress"
+  | "shippingAddress"
+  | "paymentInformation";
 
 export const useInvoiceForm = (
   isOpen: boolean,
@@ -139,10 +145,7 @@ export const useInvoiceForm = (
     });
   };
 
-  const updateItemDirectly = (
-    index: number,
-    updated: Partial<InvoiceItem>
-  ) => {
+  const updateItemDirectly = (index: number, updated: Partial<InvoiceItem>) => {
     setFormData((prev) => {
       const items = [...prev.items];
       items[index] = { ...items[index], ...updated };
@@ -162,10 +165,7 @@ export const useInvoiceForm = (
     setFormData((prev) => {
       if (prev.items.length === 1) return prev;
       const items = prev.items.filter((_, i) => i !== idx);
-      const maxPage = Math.max(
-        0,
-        Math.ceil(items.length / ITEMS_PER_PAGE) - 1
-      );
+      const maxPage = Math.max(0, Math.ceil(items.length / ITEMS_PER_PAGE) - 1);
       if (page > maxPage) setPage(maxPage);
       return { ...prev, items };
     });
@@ -230,6 +230,8 @@ export const useInvoiceForm = (
       setIsShippingOpen,
       sameAsBilling,
       itemCount: formData.items.length,
+      isExport: formData.invoiceType === "Export",
+      isLocal: formData.invoiceType === "Local",
     },
     actions: {
       handleInputChange,

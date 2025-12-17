@@ -4,6 +4,7 @@ import { Plus, X, Trash2 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 
 import CustomerSelect from "../selects/CustomerSelect";
+import CountrySelect from "../selects/CountrySelect";
 import ItemSelect from "../selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
@@ -11,7 +12,7 @@ import {
   invoiceTypeOptions,
   currencySymbols,
   paymentMethodOptions,
-  currencyOptions
+  currencyOptions,
 } from "../../constants/invoice.constants";
 
 import Input from "../ui/Input";
@@ -158,6 +159,29 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                             options={invoiceTypeOptions}
                           />
                         </div>
+
+                        {ui.isExport && (
+                          <CountrySelect
+                            value={formData.destnCountryCd}
+                            onChange={(c) =>
+                              actions.handleInputChange({
+                                target: {
+                                  name: "destnCountryCd",
+                                  value: c.code,
+                                },
+                              } as any)
+                            }
+                          />
+                        )}
+                        {ui.isLocal && (
+                          <Input
+                            label="LPO Number"
+                            name="LPO"
+                            value={formData.lpoNumber}
+                            onChange={actions.handleInputChange}
+                            placeholder="local purchase order number"
+                          />
+                        )}
                       </div>
                     </div>
 
