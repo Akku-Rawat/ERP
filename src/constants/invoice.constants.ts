@@ -26,6 +26,16 @@ export const EMPTY_TERMS: InvoiceTerms = {
     liability: "",
   },
 };
+export const paymentMethodOptions = [
+  { value: "01", label: "CASH" },
+  { value: "02", label: "CREDIT" },
+  { value: "03", label: "CASH / CREDIT" },
+  { value: "04", label: "BANK CHECK" },
+  { value: "05", label: "DEBIT & CREDIT CARD" },
+  { value: "06", label: "MOBILE MONEY" },
+  { value: "07", label: "OTHER" },
+  { value: "08", label: "BANK TRANSFER" },
+] as const;
 
 export const DEFAULT_INVOICE_FORM = {
   customerId: "",
@@ -34,7 +44,9 @@ export const DEFAULT_INVOICE_FORM = {
   dateOfInvoice: "",
   dueDate: "",
   invoiceStatus: "Draft",
-  invoiceType: "Local",
+  invoiceType: "LPO",
+  destnCountryCd: "",
+  lpoNumber: "",
 
   billingAddress: {
     line1: "",
@@ -56,7 +68,7 @@ export const DEFAULT_INVOICE_FORM = {
 
   paymentInformation: {
     paymentTerms: "",
-    paymentMethod: "",
+    paymentMethod: paymentMethodOptions[0].value,
     bankName: "",
     accountNumber: "",
     routingNumber: "",
@@ -66,7 +78,6 @@ export const DEFAULT_INVOICE_FORM = {
   items: [{ ...EMPTY_ITEM }],
   terms: EMPTY_TERMS,
 };
-
 
 /* =========================
    INVOICE STATUS
@@ -79,13 +90,11 @@ export const invoiceStatusOptions = [
   { value: "Overdue", label: "Overdue" },
 ] as const;
 
-
 export const invoiceTypeOptions = [
-  { value: "Local", label: "Local" },
+  { value: "LPO", label: "LPO" },
   { value: "Export", label: "Export" },
   { value: "Non_Export", label: "Non Export" },
 ] as const;
-
 
 export const currencyOptions = [
   { value: "ZMW", label: "ZMW (ZK)" },
@@ -99,16 +108,5 @@ export const currencySymbols: Record<string, string> = {
   USD: "$",
 };
 
-
-export const paymentMethodOptions = [
-  { value: "01", label: "CASH" },
-  { value: "02", label: "CREDIT" },
-  { value: "03", label: "CASH / CREDIT" },
-  { value: "04", label: "BANK CHECK" },
-  { value: "05", label: "DEBIT & CREDIT CARD" },
-  { value: "06", label: "MOBILE MONEY" },
-  { value: "07", label: "OTHER" },
-  { value: "08", label: "BANK TRANSFER" },
-] as const;
 
 export const ITEMS_PER_PAGE = 5;

@@ -1,12 +1,18 @@
 import React, { useState } from "react";
+
 import QuotationsTable from "./Quotations";
 import InvoiceTable from "./Invoices";
 import ReportTable from "./Reports";
 import POS from "./POS";
+import SalesDashboard from "./SalesDashboard";
+import ProformaInvoicesTable from "./ProformaInvoice";
+
 import QuotationModal from "../../components/sales/QuotationModal";
 import InvoiceModal from "../../components/sales/InvoiceModal";
+import ProformaInvoiceModal from "../../components/sales/ProformaInvoiceModal";
 import PosModal from "../../components/sales/PosModal";
-import SalesDashboard from "./SalesDashboard";
+
+import { createSalesInvoice } from "../../api/salesApi";
 
 import {
   FaMoneyBillWave,
@@ -16,161 +22,137 @@ import {
   FaCashRegister,
   FaChartBar,
 } from "react-icons/fa";
-import ProformaInvoicesTable from "./ProformaInvoice";
-import ProformaInvoiceModal from "../../components/sales/ProformaInvoiceModal";
 
-const sales = {
-  name: "Sales",
-  icon: <FaMoneyBillWave />,
-  defaultTab: "salesdashboard",
-  tabs: [
-    { id: "salesdashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
-    { id: "quotations", name: "Quotations", icon: <FaFileInvoice /> },
-    {
-      id: "proformaInvoice",
-      name: "Profroma Invoice",
-      icon: <FaFileInvoiceDollar />,
-    },
-    { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
-    { id: "pos", name: "POS", icon: <FaCashRegister /> },
-    { id: "reports", name: "Reports", icon: <FaChartBar /> },
-  ],
-  quotations: [],
-  invoices: [],
-  pos: [],
-  reports: [],
-};
+type ModalType = null | "quotation" | "invoice" | "proforma" | "pos";
+
+const salesTabs = [
+  { id: "salesdashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
+  { id: "quotations", name: "Quotations", icon: <FaFileInvoice /> },
+  {
+    id: "proformaInvoice",
+    name: "Proforma Invoice",
+    icon: <FaFileInvoiceDollar />,
+  },
+  { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
+  { id: "pos", name: "POS", icon: <FaCashRegister /> },
+  { id: "reports", name: "Reports", icon: <FaChartBar /> },
+];
 
 const SalesModule: React.FC = () => {
-  const [activeTab, setActiveTab] = useState(sales.defaultTab);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  const [showProformaInvoiceModal, setShowProformaInvoiceModal] =
-    useState(false);
-  const [showPosModal, setShowPosModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("salesdashboard");
+  const [openModal, setOpenModal] = useState<ModalType>(null);
+
+  const TAB_CONFIG: Record<
+    string,
+    { component: React.ReactNode; onAdd?: () => void }
+  > = {
+    salesdashboard: {
+      component: <SalesDashboard />,
+    },
+    quotations: {
+      component: <QuotationsTable />,
+      onAdd: () => setOpenModal("quotation"),
+    },
+    proformaInvoice: {
+      component: <ProformaInvoicesTable />,
+      onAdd: () => setOpenModal("proforma"),
+    },
+    invoices: {
+      component: <InvoiceTable />,
+      onAdd: () => setOpenModal("invoice"),
+    },
+    pos: {
+      component: <POS />,
+      onAdd: () => setOpenModal("pos"),
+    },
+    reports: {
+      component: <ReportTable />,
+    },
+  };
+
+  const handleInvoiceSubmit = async (payload: any) => {
+    console.log("Invoice payload (stub):", payload);
+
+    try {
+      const response = await createSalesInvoice(payload);
+      console.log("Invoice response (stub):", response);
+      alert("Invoice created successfully!");
+    } catch (err) {
+      console.error("Create invoice error:", err);
+    }
+  };
+
+  const tab = TAB_CONFIG[activeTab];
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
-          <span>{sales.icon}</span> {sales.name}
+          <FaMoneyBillWave /> Sales
         </h2>
       </div>
 
+      {/* Tabs */}
       <div className="flex border-b border-gray-200 mb-4">
-        {sales.tabs.map((tab) => (
+        {salesTabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => {
-              setActiveTab(tab.id);
-              setSearchTerm("");
-            }}
+            onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
                 ? "text-teal-600 border-b-2 border-teal-600"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            <span>{tab.icon}</span> {tab.name}
+            {tab.icon}
+            {tab.name}
           </button>
         ))}
       </div>
 
+      {/* Content */}
       <div className="bg-white rounded-lg shadow-sm p-4">
-        {activeTab === "salesdashboard" && <SalesDashboard />}
-        {activeTab === "quotations" && (
-          <>
-            <div className="flex items-center justify-end gap-4 mb-4">
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                onClick={() => setShowModal(true)}
-              >
-                + Add
-              </button>
-              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
-                Export
-              </button>
-            </div>
-            <QuotationsTable />
-          </>
+        {tab?.onAdd && (
+          <div className="flex items-center justify-end gap-4 mb-4">
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+              onClick={tab.onAdd}
+            >
+              + Add
+            </button>
+            <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
+              Export
+            </button>
+          </div>
         )}
 
-        {/* Invoices */}
-        {activeTab === "invoices" && (
-          <>
-            <div className="flex items-center justify-end gap-4 mb-4">
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                onClick={() => setShowInvoiceModal(true)}
-              >
-                + Add
-              </button>
-              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
-                Export
-              </button>
-            </div>
-            <InvoiceTable />
-          </>
-        )}
-        {activeTab === "proformaInvoice" && (
-          <>
-            <div className="flex items-center justify-end gap-4 mb-4">
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                onClick={() => setShowProformaInvoiceModal(true)}
-              >
-                + Add
-              </button>
-              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
-                Export
-              </button>
-            </div>
-            <ProformaInvoicesTable />
-          </>
-        )}
-
-        {/* POS */}
-        {activeTab === "pos" && (
-          <>
-            <div className="flex items-center justify-end gap-4 mb-4">
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                onClick={() => setShowPosModal(true)}
-              >
-                + Add
-              </button>
-              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
-                Export
-              </button>
-            </div>
-            <POS />
-          </>
-        )}
-
-        {activeTab === "reports" && <ReportTable />}
+        {tab?.component}
       </div>
 
       {/* Modals */}
       <QuotationModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onSubmit={(data) => console.log("Final form", data)}
+        isOpen={openModal === "quotation"}
+        onClose={() => setOpenModal(null)}
+        onSubmit={(data) => console.log("Quotation", data)}
       />
+
       <InvoiceModal
-        isOpen={showInvoiceModal}
-        onClose={() => setShowInvoiceModal(false)}
-        onSubmit={(data) => console.log("Invoice data", data)}
+        isOpen={openModal === "invoice"}
+        onClose={() => setOpenModal(null)}
+        onSubmit={handleInvoiceSubmit}
       />
+
       <ProformaInvoiceModal
-        isOpen={showProformaInvoiceModal}
-        onClose={() => setShowProformaInvoiceModal(false)}
-        onSubmit={(data) => console.log("Invoice data", data)}
+        isOpen={openModal === "proforma"}
+        onClose={() => setOpenModal(null)}
+        onSubmit={(data) => console.log("Proforma Invoice", data)}
       />
+
       <PosModal
-        isOpen={showPosModal}
-        onClose={() => setShowPosModal(false)}
-        onSave={(data) => console.log("POS data", data)}
+        isOpen={openModal === "pos"}
+        onClose={() => setOpenModal(null)}
+        onSave={(data) => console.log("POS", data)}
       />
     </div>
   );

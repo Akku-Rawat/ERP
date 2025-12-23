@@ -1,10 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { getCountryList } from "../../api/lookupApi";
-
-interface Country {
-  code: string;
-  name: string;
-}
 
 interface CountrySelectProps {
   value?: string;
@@ -19,39 +15,31 @@ export default function CountrySelect({
   className = "",
   label = "Export To Country",
 }: CountrySelectProps) {
-  const [countries, setCountries] = useState<Country[]>([]);
+  const [countries, setCountries] = useState<
+    { sortOrder: number; code: string; name: string }[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const ref = useRef<HTMLDivElement>(null);
+  const [rect, setRect] = useState<DOMRect | null>(null);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const load = async () => {
-      try {
-        setLoading(true);
-        const res = await getCountryList();
-        setCountries(
-          (res ?? []).map((c: any) => ({
-            code: c.code,
-            name: c.name,
-          }))
-        );
-      } finally {
-        setLoading(false);
-      }
+      setLoading(true);
+      const res = await getCountryList();
+      setCountries(
+        (res ?? []).map((c: any) => ({
+          sortOrder: c.sort_order,
+          code: c.code,
+          name: c.name,
+        }))
+      );
+      setLoading(false);
     };
-
     load();
-  }, []);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   useEffect(() => {
@@ -60,40 +48,80 @@ export default function CountrySelect({
     if (match) setSearch(match.name);
   }, [value, countries]);
 
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Node;
+
+      if (
+        inputRef.current?.contains(target) ||
+        dropdownRef.current?.contains(target)
+      ) {
+        return;
+      }
+
+      setOpen(false);
+    };
+
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   const filtered = countries.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  const openDropdown = () => {
+    if (!inputRef.current) return;
+    setRect(inputRef.current.getBoundingClientRect());
+    setOpen(true);
+  };
+
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
+    <div className={`flex flex-col gap-1 w-full ${className}`}>
       <span className="font-medium text-gray-600 text-sm">{label}</span>
 
-      <div ref={ref} className="relative w-full">
-        <input
-          className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder={loading ? "Loading..." : "Search country..."}
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setOpen(true);
-          }}
-          onFocus={() => setOpen(true)}
-        />
+      <input
+        ref={inputRef}
+        className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        placeholder={loading ? "Loading..." : "Search country..."}
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          openDropdown();
+        }}
+        onFocus={openDropdown}
+      />
 
-        {open && !loading && (
-          <div className="absolute left-0 top-full mt-1 w-full bg-white border shadow-lg rounded z-30">
+      {open &&
+        rect &&
+        !loading &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            style={{
+              position: "absolute",
+              top: rect.bottom + window.scrollY,
+              left: rect.left + window.scrollX,
+              width: rect.width,
+              zIndex: 9999,
+            }}
+            className="bg-white border rounded shadow-lg"
+          >
             <ul className="max-h-56 overflow-y-auto text-sm">
               {filtered.map((c) => (
                 <li
-                  key={c.code}
+                  key={c.sortOrder}
                   className="px-4 py-2 cursor-pointer hover:bg-blue-100"
                   onClick={() => {
                     setSearch(c.name);
                     setOpen(false);
-                    onChange(c);
+                    onChange({ code: c.code, name: c.name });
                   }}
                 >
-                  {c.name}
+                  <div className="flex justify-between">
+                    <span>{c.name}</span>
+                    <span className="text-xs text-gray-500">{c.code}</span>
+                  </div>
                 </li>
               ))}
 
@@ -101,9 +129,9 @@ export default function CountrySelect({
                 <li className="px-4 py-2 text-gray-500">No match found</li>
               )}
             </ul>
-          </div>
+          </div>,
+          document.body
         )}
-      </div>
     </div>
   );
 }

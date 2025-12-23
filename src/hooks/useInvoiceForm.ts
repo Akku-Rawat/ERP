@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { getCustomerByCustomerCode } from "../api/customerApi";
+import { getCompanyById } from "../api/companySetupApi";
 import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
 import {
@@ -87,6 +88,7 @@ export const useInvoiceForm = (
 
     try {
       const response = await getCustomerByCustomerCode(id);
+      const companyDetails = await getCompanyById("COMP-00003");
       if (!response || response.status_code !== 200) return;
 
       const data = response.data;
@@ -100,6 +102,16 @@ export const useInvoiceForm = (
           city: data.billingCity ?? "",
           state: data.billingState ?? "",
           country: data.billingCountry ?? "",
+        };
+
+        const paymentInformation = {
+          paymentTerms:
+            companyDetails.data.terms.selling.payment.dueDates ?? "",
+          paymentMethod: "01",
+          bankName: companyDetails.data.bankAccounts[0].bankName ?? "",
+          accountNumber: companyDetails.data.bankAccounts[0].accountNo ?? "",
+          routingNumber: companyDetails.data.bankAccounts[0].sortCode ?? "",
+          swiftCode: companyDetails.data.bankAccounts[0].swiftCode ?? "",
         };
 
         let shipping = prev.shippingAddress;
@@ -119,6 +131,7 @@ export const useInvoiceForm = (
         return {
           ...prev,
           billingAddress: billing,
+          paymentInformation: paymentInformation,
           shippingAddress: shipping,
           terms: { selling: data.terms.selling },
         };
@@ -231,7 +244,7 @@ export const useInvoiceForm = (
       sameAsBilling,
       itemCount: formData.items.length,
       isExport: formData.invoiceType === "Export",
-      isLocal: formData.invoiceType === "Local",
+      isLocal: formData.invoiceType === "LPO",
     },
     actions: {
       handleInputChange,

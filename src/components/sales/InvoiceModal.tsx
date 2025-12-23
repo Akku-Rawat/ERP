@@ -176,7 +176,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                         {ui.isLocal && (
                           <Input
                             label="LPO Number"
-                            name="LPO"
+                            name="lpoNumber"
                             value={formData.lpoNumber}
                             onChange={actions.handleInputChange}
                             placeholder="local purchase order number"
@@ -217,9 +217,9 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       </div>
                     </div>
 
-                    <div className="overflow-x-auto rounded-lg border">
+                    <div className="overflow-x-auto rounded-lg border border-gray-300 bg-white shadow-sm">
                       <table className="w-full text-sm">
-                        <thead className="bg-gray-50 text-gray-700">
+                        <thead className="bg-gray-100 text-gray-700 text-xs uppercase tracking-wide">
                           <tr>
                             <th className="px-2 py-2 text-left">#</th>
                             <th className="px-2 py-2 text-left">Item</th>
@@ -240,26 +240,28 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                             const amount =
                               it.quantity * it.price - it.discount + taxVal;
                             return (
-                              <tr key={i} className="hover:bg-gray-50">
+                              <tr
+                                key={i}
+                                className="hover:bg-blue-50/40 odd:bg-white even:bg-gray-50"
+                              >
                                 <td className="px-3 py-2 text-center">
                                   {i + 1}
                                 </td>
-                                <td className="px-1 py-1">
+                                <td className="px-2 py-2">
                                   <ItemSelect
                                     value={it.itemCode}
                                     onChange={(item) => {
                                       actions.updateItemDirectly(i, {
-                                        itemCode: item.name,
-                                        description:
-                                          item.description ?? it.description,
-                                        price: item.price ?? it.price,
+                                        itemCode: item.id,
+                                        price: item.sellingPrice ?? it.price,
                                       });
                                     }}
                                   />
                                 </td>
-                                <td className="px-1 py-1">
+
+                                <td className="px-2 py-2">
                                   <input
-                                    className="w-full rounded border p-1 text-sm"
+                                    className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
                                     name="description"
                                     value={it.description}
                                     onChange={(e) =>
@@ -267,10 +269,10 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                                     }
                                   />
                                 </td>
-                                <td className="px-1 py-1">
+                                <td className="px-2 py-2">
                                   <input
                                     type="number"
-                                    className="w-full rounded border p-1 text-right text-sm"
+                                    className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
                                     name="quantity"
                                     value={it.quantity}
                                     onChange={(e) =>
@@ -278,10 +280,10 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                                     }
                                   />
                                 </td>
-                                <td className="px-1 py-1">
+                                <td className="px-2 py-2">
                                   <input
                                     type="number"
-                                    className="w-full rounded border p-1 text-right text-sm"
+                                    className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
                                     name="price"
                                     value={it.price}
                                     onChange={(e) =>
@@ -289,10 +291,10 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                                     }
                                   />
                                 </td>
-                                <td className="px-1 py-1">
+                                <td className="px-2 py-2">
                                   <input
                                     type="number"
-                                    className="w-full rounded border p-1 text-right text-sm"
+                                    className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
                                     name="discount"
                                     value={it.discount}
                                     onChange={(e) =>
@@ -300,10 +302,10 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                                     }
                                   />
                                 </td>
-                                <td className="px-1 py-1">
+                                <td className="px-2 py-2">
                                   <input
                                     type="number" // Assuming input is number for entry, stored as string in Type
-                                    className="w-full rounded border p-1 text-right text-sm"
+                                    className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
                                     name="vatRate"
                                     value={it.vatRate}
                                     onChange={(e) =>
@@ -311,10 +313,10 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                                     }
                                   />
                                 </td>
-                                <td className="px-1 py-1">
+                                <td className="px-2 py-2">
                                   <input
                                     type="string"
-                                    className="w-full rounded border p-1 text-right text-sm"
+                                    className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
                                     name="vatCode"
                                     value={it.vatCode}
                                     onChange={(e) =>
@@ -322,14 +324,16 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                                     }
                                   />
                                 </td>
-                                <td className="px-1 py-1 text-right font-medium">
+                                <td className="px-2 py-2 text-right font-semibold text-gray-900 whitespace-nowrap">
                                   {symbol} {amount.toFixed(2)}
                                 </td>
+
                                 <td className="px-1 py-1 text-center">
                                   <button
                                     type="button"
                                     onClick={() => actions.removeItem(i)}
-                                    className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                    className="p-1.5 rounded-full text-red-600 hover:bg-red-100 transition"
+                                    title="Remove item"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </button>
@@ -450,24 +454,6 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
                         Billing Address
                       </h3>
-                      <div className="flex items-center space-x-2">
-                        <label
-                          htmlFor="address"
-                          className="text-gray-600 font-medium"
-                        >
-                          More Address:
-                        </label>
-                        <select
-                          name="address"
-                          id="address"
-                          className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        >
-                          <option value="address1">Address 1</option>
-                          <option value="address2">Address 2</option>
-                          <option value="address3">Address 3</option>
-                          <option value="address4">Address 4</option>
-                        </select>
-                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">

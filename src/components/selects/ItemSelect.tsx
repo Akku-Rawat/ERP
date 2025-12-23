@@ -1,17 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { getAllItems } from "../../api/itemApi";
 
 interface ItemSelectProps {
   value?: string;
   onChange: (item: {
     id: string;
-    name: string;
-    code: string;
-    description?: string;
-    price?: number;
+    itemCode: string;
+    itemName: string;
+    sellingPrice?: number;
   }) => void;
   className?: string;
-  label?: string;
 }
 
 export default function ItemSelect({
@@ -20,92 +19,125 @@ export default function ItemSelect({
   className = "",
 }: ItemSelectProps) {
   const [items, setItems] = useState<
-    { id: string, name: string; code: string; description?: string; price?: number }[]
+    {
+      id: string;
+      itemCode: string;
+      itemName: string;
+      sellingPrice?: number;
+    }[]
   >([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState(value || "");
-  const ref = useRef<HTMLDivElement>(null);
+  const [search, setSearch] = useState("");
+  const [rect, setRect] = useState<DOMRect | null>(null);
 
-  /* ---------------- Fetch Items ---------------- */
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const load = async () => {
-      try {
-        setLoading(true);
-        const res = await getAllItems();
-        if (res?.status_code !== 200) return;
-
+      setLoading(true);
+      const res = await getAllItems();
+      if (res?.status_code === 200) {
         setItems(
           res.data.map((it: any) => ({
             id: it.id,
-            name: it.itemName,
-            code: it.itemClassCode,
-            // description: it.description ?? "",
-            price: it.sellingPrice ?? 0,
-          })),
+            itemCode: it.itemClassCode,
+            itemName: it.itemName,
+            sellingPrice: it.sellingPrice ?? 0,
+          }))
         );
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     };
-
     load();
   }, []);
 
-  /* ------------ Close dropdown on outside click ------------ */
+  useEffect(() => {
+    if (!value) {
+      setSearch("");
+      return;
+    }
+    const match = items.find((it) => it.itemCode === value);
+    if (match) setSearch(match.itemName);
+  }, [value, items]);
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
+      const target = e.target as Node;
+      if (
+        inputRef.current?.contains(target) ||
+        dropdownRef.current?.contains(target)
+      ) {
+        return;
       }
+      setOpen(false);
     };
 
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  /* ---------------- Filtering ---------------- */
   const filtered = items.filter((it) =>
-    it.name.toLowerCase().includes(search.toLowerCase()),
+    it.itemName.toLowerCase().includes(search.toLowerCase())
   );
 
-  return (
-    <div className={`flex flex-col gap-1 ${className}`}>
-      {/* Wrapper to control dropdown width */}
-      <div ref={ref} className="relative w-full">
-        {/* Search Input */}
-        <input
-          className="w-full rounded border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder={loading ? "Loading items..." : "Search item..."}
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setOpen(true);
-          }}
-          onFocus={() => setOpen(true)}
-        />
+  const openDropdown = () => {
+    if (!inputRef.current) return;
+    setRect(inputRef.current.getBoundingClientRect());
+    setOpen(true);
+  };
 
-        {/* Dropdown */}
-        {open && !loading && (
-          <div className="absolute left-0 top-full mt-1 w-full bg-white border shadow-lg rounded z-30">
+  return (
+    <div className={`w-full ${className}`}>
+      <input
+        ref={inputRef}
+        className="w-full rounded border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        placeholder={loading ? "Loading items..." : "Search item..."}
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          openDropdown();
+        }}
+        onFocus={openDropdown}
+      />
+
+      {open &&
+        rect &&
+        !loading &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            style={{
+              position: "absolute",
+              top: rect.bottom + window.scrollY,
+              left: rect.left + window.scrollX,
+              width: rect.width,
+              zIndex: 9999,
+            }}
+            className="bg-white border rounded shadow-lg"
+          >
             <ul className="max-h-56 overflow-y-auto text-sm">
               {filtered.map((it) => (
                 <li
                   key={it.id}
                   className="px-4 py-2 cursor-pointer hover:bg-blue-100"
                   onClick={() => {
-                    setSearch(it.name);
+                    setSearch(it.itemName);
                     setOpen(false);
-                    onChange(it);
+                    onChange({
+                      id: it.id,
+                      itemCode: it.itemCode,
+                      itemName: it.itemName,
+                      sellingPrice: it.sellingPrice,
+                    });
                   }}
                 >
-                  <div className="flex flex-col">
-                    <span>{it.name}</span>
-                    {/* {it.description && (
-                      <span className="text-xs text-gray-500 truncate">
-                        {it.description}
-                      </span>
-                    )} */}
+                  <div className="flex justify-between">
+                    <span>{it.itemName}</span>
+                    <span className="text-xs text-gray-500">
+                      {it.id}
+                    </span>
                   </div>
                 </li>
               ))}
@@ -114,9 +146,9 @@ export default function ItemSelect({
                 <li className="px-4 py-2 text-gray-500">No items found</li>
               )}
             </ul>
-          </div>
+          </div>,
+          document.body
         )}
-      </div>
     </div>
   );
 }
