@@ -5,7 +5,6 @@ import { createAxiosInstance } from "./axiosInstance";
 const base_url = import.meta.env.VITE_BASE_URL as string;
 const api = createAxiosInstance(base_url);
 
-// FULL ENDPOINT STRING FORMAT REQUIRED BY YOU
 const ENDPOINTS = {
   createSalesInvoice: `${base_url}.sales.api.create_sales_invoice`,
   getSalesInvoices: `${base_url}.sales.api.get_sales_invoice`,
