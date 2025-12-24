@@ -1,14 +1,8 @@
-
-export type Theme = "gold" | "amber" | "yellow" | "dark" | "corporate" | "forest" | "violet" | "modern" | "ocean" | "regal" | "rose" | "mint" | "lavender"| 'ocean'
-  | 'emerald'
-  | 'royal'
-  | 'slate'
-  // Pastel / Dual-Tone
-  | 'sunset'   // New
-  | 'lavender' // New
-  | 'mint'     // New
-  | 'nordic' // New;
-  | 'midnight';
+export type Theme = 
+  | 'gold' | 'amber' | 'yellow' | 'dark' 
+  | 'corporate' | 'midnight' | 'ocean' 
+  | 'sunset' | 'rose' | 'mint' | 'lavender' | 'nordic'
+  | 'cyber' | 'glass' | 'luxury';
 
 const THEME_KEY = "erp-theme";
 
@@ -20,7 +14,7 @@ export const setTheme = (theme: Theme) => {
 export const initTheme = (): Theme => {
   if (typeof window === "undefined") return "gold";
   const saved = localStorage.getItem(THEME_KEY) as Theme | null;
-  const theme: Theme = saved ?? "gold"; // Default to 'gold'
+  const theme: Theme = saved ?? "gold";
   document.documentElement.setAttribute("data-theme", theme);
   return theme;
 };

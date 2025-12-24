@@ -84,7 +84,7 @@ const CRM: React.FC = () => {
         ))}
       </div>
 
-      <div className={activeTab === "customer-managment" ? "" : "p-4"}>
+      <div className={activeTab === "customer-managment" ? "" : "p-8"}>
         <div>
           {activeTab === "dashboard" && <CRMDashboard />}
 

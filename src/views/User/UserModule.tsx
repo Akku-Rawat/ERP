@@ -214,14 +214,14 @@ const UserModule: React.FC = () => {
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
-                ? "text-table-head-text"
+                ? "text-primary"
                 : "text-muted hover:text-main"
             }`}
             style={
               activeTab === tab.id
                 ? {
                     background: "transparent",
-                    borderBottom: `3px solid var(--primary-700)`,
+                    borderBottom: `3px solid var(--primary)`,
                   }
                 : undefined
             }

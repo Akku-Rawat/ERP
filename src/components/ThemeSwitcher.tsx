@@ -1,31 +1,27 @@
 
 import { useEffect, useState, type ChangeEvent } from "react";
-import { initTheme, setTheme, type Theme } from "../themes"; // Corrected path
+import { initTheme, setTheme, type Theme } from "../themes"; 
 
 const themes: { value: Theme; label: string }[] = [
-  { value: 'midnight', label: 'Midnight (Corporate)' },
-  { value: "gold", label: "Gold" },
-  { value: "amber", label: "Amber" },
-  { value: "yellow", label: "Yellow" },
-  { value: "dark", label: "Dark" },
-  { value: "corporate", label: "Corporate Blue" },
-  { value: "forest", label: "Forest Green" },
-  { value: "violet", label: "Violet Harmony" },
-  { value: "modern", label: "Modern Gray" },
-  { value: "ocean", label: "Ocean Breeze" },
-  { value: "regal", label: "Regal Purple" },
-  { value: "rose", label: "Pastel Rose" },      // New theme
-  { value: "mint", label: "Mint Dream" },      // New theme
-  { value: "lavender", label: "Lavender Haze" }, // New theme
+ 
+  { value: 'midnight', label: '🌑 Midnight Blue' },
+  { value: 'glass', label: '✨ Frosted Glass' },
+  { value: 'luxury', label: '💎 Luxury Gold' },
+  
+  { value: 'corporate', label: '💼 Corporate' },
+  { value: 'ocean', label: '🌊 Ocean Cyan' },
+  { value: 'nordic', label: '🏔️ Nordic Slate' },
+  
+
+  { value: 'mint', label: '🍃 Fresh Mint' },
+  { value: 'rose', label: '🌸 Pastel Rose' },
+  { value: 'lavender', label: '🔮 Lavender' },
+  { value: 'sunset', label: '🌇 Sunset Warm' },
 
 
-   { value: 'lavender', label: 'Lavender (SaaS)' },
-  //  { value: 'sunset', label: 'Sunset (Warm)' },
-   { value: 'mint', label: 'Mint (Fresh)' },
-   { value: 'nordic', label: 'Nordic (Clean)' },
-  
-  
-  
+  { value: 'dark', label: '🌙 Classic Dark' },
+  { value: 'gold', label: '🏆 Classic Gold' },
+  { value: 'cyber', label: '🚀 Cyber Neon' },
 ];
 
 

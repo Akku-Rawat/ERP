@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTableLogic } from "./useTableLogic";
 import type { Column } from "../Table/type";
 import ColumnSelector from "./ColumnSelector";
 import Pagination from "../../Pagination";
-import { FaFilter } from "react-icons/fa";
-
+import { FaFilter, FaSortAmountDown, FaSortAmountUp, FaSearch } from "react-icons/fa";
 
 interface TableProps<T> {
   columns: Column<T>[];
@@ -28,12 +28,172 @@ interface TableProps<T> {
   addLabel?: string;
 }
 
+/**
+ * Filter dropdown component rendered via Portal
+ * This ensures the dropdown is not clipped by parent overflow
+ */
+interface FilterDropdownProps {
+  isOpen: boolean;
+  onClose: () => void;
+  anchorRef: React.RefObject<HTMLButtonElement>;
+  nameFilter: string;
+  setNameFilter: (value: string) => void;
+  typeFilter: string;
+  setTypeFilter: (value: string) => void;
+  onReset: () => void;
+}
+
+function FilterDropdown({
+  isOpen,
+  onClose,
+  anchorRef,
+  nameFilter,
+  setNameFilter,
+  typeFilter,
+  setTypeFilter,
+  onReset,
+}: FilterDropdownProps) {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+
+  // Calculate dropdown position based on anchor button
+  useEffect(() => {
+    if (isOpen && anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      const dropdownWidth = 320;
+
+      // Position below the button, aligned to the right
+      setPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: Math.max(rect.right + window.scrollX - dropdownWidth, 8),
+      });
+    }
+  }, [isOpen, anchorRef]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target) &&
+        anchorRef.current &&
+        !anchorRef.current.contains(target)
+      ) {
+        onClose();
+      }
+    };
+
+    // Handle escape key to close dropdown
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen, onClose, anchorRef]);
+
+  if (!isOpen) return null;
+
+  // Render dropdown via portal to avoid overflow clipping
+  return createPortal(
+    <div
+      ref={dropdownRef}
+      className="fixed w-80 bg-card border border-[var(--border)] rounded-2xl shadow-2xl z-[9999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+      style={{
+        top: position.top,
+        left: position.left,
+      }}
+    >
+      {/* Dropdown Header */}
+      <div className="px-5 py-3 border-b border-[var(--border)] bg-row-hover/30">
+        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-main">
+          Filter Records
+        </h4>
+      </div>
+
+      {/* Filter Fields */}
+      <div className="p-5 space-y-4">
+        <FilterField label="Search Keywords">
+          <input
+            type="text"
+            value={nameFilter}
+            onChange={(e) => setNameFilter(e.target.value)}
+            className="w-full px-4 py-2.5 bg-app border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+            placeholder="Enter keywords..."
+          />
+        </FilterField>
+
+        <FilterField label="Category/Type">
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="w-full px-4 py-2.5 bg-app border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
+          >
+            <option value="">All Categories</option>
+            <option value="Individual">Individual</option>
+            <option value="Company">Company</option>
+          </select>
+        </FilterField>
+      </div>
+
+      {/* Dropdown Footer */}
+      <div className="px-5 py-3 border-t border-[var(--border)] bg-row-hover/10 flex items-center justify-between">
+        <button
+          onClick={onReset}
+          className="text-[10px] font-black uppercase text-muted hover:text-danger transition-colors"
+        >
+          Reset
+        </button>
+        <button
+          onClick={onClose}
+          className="bg-primary text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-md hover:opacity-90 transition-all"
+        >
+          Apply
+        </button>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+/**
+ * Reusable filter field wrapper component
+ */
+interface FilterFieldProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+const FilterField: React.FC<FilterFieldProps> = ({ label, children }) => (
+  <div className="space-y-1.5">
+    <label className="text-[9px] font-black text-muted uppercase tracking-widest ml-1">
+      {label}
+    </label>
+    {children}
+  </div>
+);
+
+/**
+ * Main Table Component
+ * A flexible, feature-rich data table with sorting, filtering, and pagination
+ */
 function Table<T extends Record<string, any>>({
   columns,
   data,
   onRowClick,
   loading = false,
-  emptyMessage = "No data found.",
+  emptyMessage = "No records found.",
   showToolbar = false,
   enableAdd = false,
   onAdd,
@@ -61,252 +221,125 @@ function Table<T extends Record<string, any>>({
     setNameFilter,
     typeFilter,
     setTypeFilter,
-    minFilter,
     setMinFilter,
-    maxFilter,
     setMaxFilter,
     sortOrder,
     setSortOrder,
     processedData,
   } = useTableLogic<T>({ columns, data, searchValue });
 
-  const getAlignment = (align?: "left" | "center" | "right") => {
+  // Reference for the filter button (used for dropdown positioning)
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
+
+  /**
+   * Returns the appropriate text alignment class based on column configuration
+   */
+  const getAlignment = (align?: "left" | "center" | "right"): string => {
     switch (align) {
       case "center":
         return "text-center";
       case "right":
-        return "text-center";
+        return "text-right";
       default:
         return "text-left";
     }
   };
 
-  const filterRef = React.useRef<HTMLDivElement | null>(null);
+  /**
+   * Resets all filter values to their default state
+   */
+  const handleResetFilters = () => {
+    setNameFilter("");
+    setTypeFilter("");
+    setMinFilter("");
+    setMaxFilter("");
+  };
 
-  React.useEffect(() => {
-    const onDocClick = (e: MouseEvent) => {
-      if (!filtersOpen) return;
-      if (!filterRef.current) return;
-      if (!filterRef.current.contains(e.target as Node)) setFiltersOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setFiltersOpen(false);
-    };
-    document.addEventListener("click", onDocClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("click", onDocClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [filtersOpen, setFiltersOpen]);
-
+  // Display loading state
   if (loading) {
     return (
-      <div className="bg-card rounded-lg border border-[var(--border)] overflow-hidden">
-        <div className="p-12 text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
-          <p className="mt-4 text-muted font-medium">Loading data...</p>
+      <div className="bg-card rounded-2xl border border-[var(--border)] overflow-hidden">
+        <div className="p-20 text-center flex flex-col items-center">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="mt-4 text-[11px] font-black uppercase tracking-widest text-muted">
+            Loading data...
+          </p>
         </div>
       </div>
     );
   }
 
   const displayData = processedData;
-  const visibleCount = visibleKeys.length || columns.length;
 
   return (
-    <div className="bg-card rounded-lg border border-[var(--border)] flex flex-col overflow-hidden shadow-sm">
+    <div className="bg-card rounded-2xl border border-[var(--border)] flex flex-col shadow-sm transition-all relative z-10 w-full overflow-hidden">
+      
+      {/* Toolbar Section */}
       {showToolbar && (
-        <div className="px-5 py-4 border-b border-[var(--border)] bg-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          {/* Search */}
-          <div className="relative w-full sm:max-w-md">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"
-                />
-              </svg>
-            </span>
-
+        <div className="px-5 py-4 border-b border-[var(--border)] bg-card flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shrink-0">
+          
+          {/* Search Input */}
+          <div className="relative w-full lg:max-w-sm group">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs group-focus-within:text-primary transition-colors" />
             <input
               value={effectiveSearch}
-              onChange={(e) => {
-                const v = e.target.value;
-                if (typeof onSearch === "function") onSearch(v);
-                else setSearch(v);
-              }}
+              onChange={(e) =>
+                typeof onSearch === "function"
+                  ? onSearch(e.target.value)
+                  : setSearch(e.target.value)
+              }
               placeholder={toolbarPlaceholder}
-              className="w-full pl-10 pr-3 py-2 border border-[var(--border)] rounded-md 
-                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary
-                         transition text-sm bg-card text-main"
-              aria-label="Search table"
+              className="w-full pl-10 pr-4 py-2 bg-app border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
             />
           </div>
 
-          <div className="flex items-center gap-2 justify-end w-full sm:w-auto">
-            {/* Sort button */}
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 shrink-0">
+            
+            {/* Sort Toggle Button */}
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setSortOrder((p) => (p === "asc" ? "desc" : "asc"));
-              }}
-              className={`px-3 py-2 border border-[var(--border)] rounded-md text-sm bg-card row-hover flex items-center gap-2 transition ${
-                sortOrder ? "border-primary ring-1 ring-primary" : ""
-              } text-main`}
-              type="button"
-              aria-pressed={sortOrder === "asc" ? "true" : "false"}
+              onClick={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
+              className={`p-2 rounded-xl border border-[var(--border)] bg-app text-muted hover:text-primary hover:border-primary transition-all flex items-center gap-2 px-3 whitespace-nowrap ${
+                sortOrder ? "border-primary text-primary" : ""
+              }`}
+              title={`Sort ${sortOrder === "asc" ? "Descending" : "Ascending"}`}
             >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d={sortOrder === "asc" ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
-                />
-              </svg>
-              <span className="text-sm font-medium">
-                {sortOrder === "asc" ? "Cust ID ↑" : "Cust ID ↓"}
-              </span>
+              {sortOrder === "asc" ? (
+                <FaSortAmountUp size={12} />
+              ) : (
+                <FaSortAmountDown size={12} />
+              )}
+              <span className="text-[10px] font-black uppercase tracking-widest">Sort</span>
             </button>
 
-            {/* Filters */}
-            <div className="relative">
-              <button
-  onClick={(e) => {
-    e.stopPropagation();
-    setFiltersOpen((v) => !v);
-  }}
-  className="px-3 py-2 rounded-md text-sm bg-primary hover:opacity-90 
-             text-white flex items-center gap-2 font-medium transition"
-  type="button"
->
-  <FaFilter className="w-4 h-4" />
-  Filters
-</button>
+            {/* Filter Button */}
+            <button
+              ref={filterButtonRef}
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              className={`p-2 rounded-xl border border-[var(--border)] bg-app text-muted hover:text-primary hover:border-primary transition-all flex items-center gap-2 px-3 whitespace-nowrap ${
+                filtersOpen
+                  ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+                  : ""
+              }`}
+              title="Open Filters"
+            >
+              <FaFilter size={10} />
+              <span className="text-[10px] font-black uppercase tracking-widest">Filters</span>
+            </button>
 
+            {/* Filter Dropdown (rendered via Portal) */}
+            <FilterDropdown
+              isOpen={filtersOpen}
+              onClose={() => setFiltersOpen(false)}
+              anchorRef={filterButtonRef}
+              nameFilter={nameFilter}
+              setNameFilter={setNameFilter}
+              typeFilter={typeFilter}
+              setTypeFilter={setTypeFilter}
+              onReset={handleResetFilters}
+            />
 
-              {filtersOpen && (
-                <div
-                  ref={filterRef}
-                  className="absolute right-0 mt-2 w-[340px] bg-card border border-[var(--border)] rounded-lg shadow-lg z-[100] overflow-hidden"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="px-4 py-3 bg-primary text-white flex items-center justify-between rounded-t-lg">
-                    <span className="text-sm font-semibold">Filters</span>
-                    <button
-                      onClick={() => setFiltersOpen(false)}
-                      className="p-1 rounded hover:bg-white/20 transition"
-                      type="button"
-                      aria-label="Close filters"
-                    >
-                      <svg
-                        className="w-4 h-4 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-
-                  <div className="p-4 space-y-3 max-h-72 overflow-y-auto bg-card">
-                    <div>
-                      <label className="text-xs font-semibold text-muted mb-1 block">
-                        Name or Email
-                      </label>
-                      <input
-                        type="text"
-                        value={nameFilter}
-                        onChange={(e) => setNameFilter(e.target.value)}
-                        placeholder="Search name or email"
-                        className="w-full px-3 py-2 border border-[var(--border)] rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary bg-card text-main"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold text-muted mb-1 block">
-                        Type
-                      </label>
-                      <select
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-[var(--border)] rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary bg-card text-main"
-                      >
-                        <option value="">— Any —</option>
-                        <option value="Individual">Individual</option>
-                        <option value="Company">Company</option>
-                      </select>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-xs font-semibold text-muted mb-1 block">
-                          Min
-                        </label>
-                        <input
-                          type="number"
-                          value={minFilter}
-                          onChange={(e) => setMinFilter(e.target.value)}
-                          placeholder="0"
-                          className="w-full px-3 py-2 border border-[var(--border)] rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary bg-card text-main"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-semibold text-muted mb-1 block">
-                          Max
-                        </label>
-                        <input
-                          type="number"
-                          value={maxFilter}
-                          onChange={(e) => setMaxFilter(e.target.value)}
-                          placeholder="∞"
-                          className="w-full px-3 py-2 border border-[var(--border)] rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary bg-card text-main"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-[var(--border)] bg-app">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setNameFilter("");
-                        setTypeFilter("");
-                        setMinFilter("");
-                        setMaxFilter("");
-                      }}
-                      className="px-3 py-1.5 rounded-md border border-[var(--border)] text-sm font-medium row-hover transition text-main bg-card"
-                    >
-                      Reset
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFiltersOpen(false)}
-                      className="px-3 py-1.5 rounded-md bg-primary text-white text-sm font-medium hover:opacity-90 transition"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Column selector */}
+            {/* Column Selector */}
             {enableColumnSelector && (
               <ColumnSelector
                 columns={columns}
@@ -317,12 +350,11 @@ function Table<T extends Record<string, any>>({
               />
             )}
 
-            {/* Add */}
+            {/* Add Button */}
             {enableAdd && (
               <button
-                onClick={() => onAdd?.()}
-                className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md hover:opacity-90 transition text-sm font-medium"
-                type="button"
+                onClick={onAdd}
+                className="bg-primary text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:opacity-90 transition-all whitespace-nowrap ml-2"
               >
                 {addLabel}
               </button>
@@ -331,20 +363,23 @@ function Table<T extends Record<string, any>>({
         </div>
       )}
 
-      {/* TABLE */}
-      <div className="flex-1 w-full overflow-x-auto">
-        <div className="max-h-[420px] overflow-y-auto">
-          <table className="w-full border-collapse">
-            <thead>
+      {/* Scrollable Table Container */}
+      <div className="w-full overflow-x-auto custom-scrollbar">
+        <div className="max-h-[420px] overflow-y-auto min-w-[800px] relative">
+          <table className="w-full border-separate border-spacing-0">
+            
+            {/* Table Header */}
+            <thead className="sticky top-0 z-30 shadow-sm">
               <tr>
                 {columns
-                  .filter((c) => visibleKeys.includes(c.key))
+                  .filter((col) => visibleKeys.includes(col.key))
                   .map((column) => (
                     <th
                       key={column.key}
-                      className={`px-4 py-3 text-xs font-bold uppercase tracking-wider table-head sticky top-0 z-10 ${getAlignment(
+                      className={`px-5 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted border-b border-[var(--border)] bg-card whitespace-nowrap ${getAlignment(
                         column.align
                       )}`}
+                      style={{ backgroundColor: "var(--card)" }}
                     >
                       {column.header}
                     </th>
@@ -352,33 +387,39 @@ function Table<T extends Record<string, any>>({
               </tr>
             </thead>
 
-            <tbody>
+            {/* Table Body */}
+            <tbody className="relative z-10">
               {displayData.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={visibleCount || columns.length}
-                    className="px-4 py-12 text-center border-b border-[var(--border)]"
-                  >
-                    <p className="text-muted font-medium">{emptyMessage}</p>
+                  <td colSpan={columns.length} className="px-6 py-24 text-center">
+                    <p className="text-xs font-bold text-muted uppercase tracking-widest opacity-40">
+                      {emptyMessage}
+                    </p>
                   </td>
                 </tr>
               ) : (
                 displayData.map((item, idx) => (
                   <tr
-                    key={idx}
+                    key={item.id || idx}
                     onClick={() => onRowClick?.(item)}
-                    className="border-b border-[var(--border)] row-hover cursor-pointer transition"
+                    className={`group transition-all cursor-pointer ${
+                      idx % 2 === 0 ? "bg-transparent" : "bg-row-hover/10"
+                    } hover:bg-row-hover`}
                   >
                     {columns
-                      .filter((c) => visibleKeys.includes(c.key))
+                      .filter((col) => visibleKeys.includes(col.key))
                       .map((column) => (
                         <td
                           key={column.key}
-                          className={`px-4 py-3.5 text-sm text-main ${getAlignment(
+                          className={`px-5 py-3.5 text-xs font-medium text-main border-b border-[var(--border)]/20 ${getAlignment(
                             column.align
                           )}`}
                         >
-                          {column.render ? column.render(item) : item[column.key]}
+                          {column.render ? (
+                            column.render(item)
+                          ) : (
+                            <span className="opacity-90">{item[column.key]}</span>
+                          )}
                         </td>
                       ))}
                   </tr>
@@ -389,8 +430,11 @@ function Table<T extends Record<string, any>>({
         </div>
       </div>
 
-      {/* Pagination */}
-      <div className="px-5 py-3 border-t border-[var(--border)] bg-card">
+      {/* Footer with Pagination */}
+      <div className="px-5 py-3 border-t border-[var(--border)] bg-card flex items-center justify-between shrink-0">
+        <div className="text-[9px] font-black uppercase text-muted tracking-[0.2em] opacity-50">
+          Total Records: {totalItems}
+        </div>
         <Pagination
           currentPage={currentPage || 1}
           totalPages={totalPages || 1}

@@ -187,7 +187,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   ];
 
   return (
-    <div className="p-4">
+    <div className="p-8">
       {viewMode === "table" ? (
         <>
           {/* Header (agar kuch dikhाना हो to yahan bg/text classes bhi theme se laga सकते ho) */}
