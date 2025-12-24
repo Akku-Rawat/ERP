@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from "react";
 import Pagination from "../../components/Pagination";
-import {
-  getAllSalesInvoices,
-  getSalesInvoiceById,
-  updateInvoiceStatus,
-} from "../../api/salesApi";
+import { getAllSalesInvoices, updateInvoiceStatus } from "../../api/salesApi";
 import type { InvoiceSummary, Invoice } from "../../types/invoice";
-import { Trash2 } from "lucide-react";
-import InvoiceTemplate1 from "../../components/template/invoice/InvoiceTemplate1";
+import { Trash2, MoreVertical } from "lucide-react";
+import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTemplate1";
+import PdfPreviewModal from "./PdfPreviewModal";
 
-type InvoiceStatus = "Draft" | "Pending" | "Paid" | "Overdue";
+type InvoiceStatus = "Draft" | "Pending" | "Paid" | "Overdue" | "Approved";
+
+const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
+  Draft: ["Pending", "Approved"],
+  Pending: ["Paid", "Overdue"],
+  Paid: [],
+  Overdue: ["Paid"],
+  Approved: ["Pending", "Paid", "Overdue"],
+};
+
+const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
 
 const InvoicesTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,7 +29,13 @@ const InvoicesTable: React.FC = () => {
   const [totalItems, setTotalItems] = useState(0);
 
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [viewOpen, setViewOpen] = useState(false);
+
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfOpen, setPdfOpen] = useState(false);
+
+  const [openStatusMenuFor, setOpenStatusMenuFor] = useState<string | null>(
+    null
+  );
 
   const fetchInvoices = async () => {
     try {
@@ -38,7 +51,7 @@ const InvoicesTable: React.FC = () => {
         exchangeRate: inv.exchangeRate,
         dueDate: inv.dueDate,
         dateOfInvoice: new Date(inv.dateOfInvoice),
-        Total: Number(inv.Total),
+        total: Number(inv.totalAmount),
         totalTax: inv.totalTax,
         invoiceStatus: inv.invoiceStatus,
         invoiceTypeParent: inv.invoiceTypeParent,
@@ -57,23 +70,42 @@ const InvoicesTable: React.FC = () => {
     fetchInvoices();
   }, [page, pageSize]);
 
-  const handleViewClick = async (inv: InvoiceSummary) => {
-    const res = await getSalesInvoiceById(inv.invoiceNumber);
-    if (!res || res.status_code !== 200) return;
-    setSelectedInvoice(res.data);
-    setViewOpen(true);
+  const handleViewClick = (inv: InvoiceSummary) => {
+    // TEMP until you load full invoice details
+    const invoice = inv as unknown as Invoice;
+
+    setSelectedInvoice(invoice);
+
+    const url = generateInvoicePDF(invoice, "bloburl");
+    setPdfUrl(url as string);
+    setPdfOpen(true);
   };
 
-  const handleDelete = async (invoiceNumber: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!window.confirm(`Delete invoice ${invoiceNumber}?`)) return;
-    console.log("Delete invoice:", invoiceNumber);
+  const handleDownload = (inv: InvoiceSummary) => {
+    const invoice = inv as unknown as Invoice;
+    generateInvoicePDF(invoice, "save");
+  };
+
+  const handleClosePdf = () => {
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    setPdfUrl(null);
+    setSelectedInvoice(null);
+    setPdfOpen(false);
   };
 
   const handleRowStatusChange = async (
     invoiceNumber: string,
     status: InvoiceStatus
   ) => {
+    if (
+      CRITICAL_STATUSES.includes(status) &&
+      !window.confirm(
+        `Mark invoice ${invoiceNumber} as ${status}? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
     const res = await updateInvoiceStatus(invoiceNumber, status);
     if (!res || res.status_code !== 200) return;
 
@@ -85,16 +117,13 @@ const InvoicesTable: React.FC = () => {
       )
     );
 
-    if (selectedInvoice?.invoiceNumber === invoiceNumber) {
-      setSelectedInvoice({
-        ...selectedInvoice,
-        invoiceStatus: status,
-      });
-    }
+    setOpenStatusMenuFor(null);
   };
 
-  const handleDownload = (invoiceNumber: string) => {
-    console.log("Download invoice:", invoiceNumber);
+  const handleDelete = async (invoiceNumber: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm(`Delete invoice ${invoiceNumber}?`)) return;
+    console.log("Delete invoice:", invoiceNumber);
   };
 
   const filteredInvoices = invoices.filter(
@@ -127,12 +156,12 @@ const InvoicesTable: React.FC = () => {
               <thead className="bg-gray-100 text-gray-700 text-sm">
                 <tr>
                   <th className="px-4 py-2 text-left">Invoice No</th>
-                  <th className="px-4 py-2 text-left">Status</th>
                   <th className="px-4 py-2 text-left">Type</th>
                   <th className="px-4 py-2 text-left">Customer</th>
                   <th className="px-4 py-2 text-left">Date</th>
                   <th className="px-4 py-2 text-left">Due Date</th>
                   <th className="px-4 py-2 text-left">Amount</th>
+                  <th className="px-4 py-2 text-left">Status</th>
                   <th className="px-4 py-2 text-center">Action</th>
                 </tr>
               </thead>
@@ -141,18 +170,14 @@ const InvoicesTable: React.FC = () => {
                 {filteredInvoices.map((inv) => (
                   <tr
                     key={inv.invoiceNumber}
-                    className="border-t hover:bg-gray-50"
+                    className="border-t hover:bg-gray-50 relative"
                   >
                     <td className="px-4 py-2">{inv.invoiceNumber}</td>
-                    <td className="px-4 py-2">{inv.invoiceStatus}</td>
                     <td className="px-4 py-2">{inv.invoiceType}</td>
                     <td className="px-4 py-2">{inv.customerName}</td>
                     <td className="px-4 py-2">
-                      {inv.dateOfInvoice
-                        ? new Date(inv.dateOfInvoice).toLocaleDateString()
-                        : "-"}
+                      {new Date(inv.dateOfInvoice).toLocaleDateString()}
                     </td>
-
                     <td className="px-4 py-2">
                       {inv.dueDate
                         ? new Date(inv.dueDate).toLocaleDateString()
@@ -161,7 +186,78 @@ const InvoicesTable: React.FC = () => {
                     <td className="px-4 py-2">
                       {inv.currency} {inv.total}
                     </td>
-                    <td className="px-4 py-2">
+
+                    {/* STATUS + MENU (UNCHANGED) */}
+                    <td className="px-4 py-2 relative">
+                      <div className="flex items-center gap-2">
+                        <span>{inv.invoiceStatus}</span>
+
+                        <button
+                          aria-haspopup="menu"
+                          aria-expanded={
+                            openStatusMenuFor === inv.invoiceNumber
+                          }
+                          onClick={() =>
+                            setOpenStatusMenuFor(
+                              openStatusMenuFor === inv.invoiceNumber
+                                ? null
+                                : inv.invoiceNumber
+                            )
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setOpenStatusMenuFor(inv.invoiceNumber);
+                            }
+                            if (e.key === "Escape") {
+                              setOpenStatusMenuFor(null);
+                            }
+                          }}
+                          className="p-1 rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {openStatusMenuFor === inv.invoiceNumber && (
+                        <div
+                          role="menu"
+                          className="absolute left-0 mt-2 z-50 w-40 bg-white border rounded-md shadow-lg text-sm"
+                        >
+                          {STATUS_TRANSITIONS[inv.invoiceStatus].map(
+                            (status) => (
+                              <button
+                                key={status}
+                                role="menuitem"
+                                tabIndex={0}
+                                onClick={() =>
+                                  handleRowStatusChange(
+                                    inv.invoiceNumber,
+                                    status
+                                  )
+                                }
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    handleRowStatusChange(
+                                      inv.invoiceNumber,
+                                      status
+                                    );
+                                  }
+                                  if (e.key === "Escape") {
+                                    setOpenStatusMenuFor(null);
+                                  }
+                                }}
+                                className="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-100"
+                              >
+                                Mark as {status}
+                              </button>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-2 text-center">
                       <div className="flex items-center justify-center gap-3">
                         <button
                           onClick={() => handleViewClick(inv)}
@@ -169,33 +265,15 @@ const InvoicesTable: React.FC = () => {
                         >
                           View
                         </button>
-
-                        <select
-                          value={inv.invoiceStatus}
-                          onChange={(e) =>
-                            handleRowStatusChange(
-                              inv.invoiceNumber,
-                              e.target.value as InvoiceStatus
-                            )
-                          }
-                          className="border rounded px-2 py-1 text-xs bg-white"
-                        >
-                          <option value="Draft">Draft</option>
-                          <option value="Pending">Pending</option>
-                          <option value="Paid">Paid</option>
-                          <option value="Overdue">Overdue</option>
-                        </select>
-
                         <button
-                          onClick={() => handleDownload(inv.invoiceNumber)}
+                          onClick={() => handleDownload(inv)}
                           className="text-green-600 hover:underline text-sm"
                         >
                           Download
                         </button>
-
                         <button
                           onClick={(e) => handleDelete(inv.invoiceNumber, e)}
-                          className="text-red-600 hover:text-red-800"
+                          className="text-red-600"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -203,14 +281,6 @@ const InvoicesTable: React.FC = () => {
                     </td>
                   </tr>
                 ))}
-
-                {filteredInvoices.length === 0 && (
-                  <tr>
-                    <td colSpan={8} className="text-center text-gray-400 py-6">
-                      No invoices found
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
@@ -225,15 +295,15 @@ const InvoicesTable: React.FC = () => {
         </>
       )}
 
-      {viewOpen && selectedInvoice && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
-          <div className="bg-white w-[80vw] h-[95vh] rounded-lg shadow-xl overflow-auto">
-            <div className="p-6">
-              <InvoiceTemplate1 data={selectedInvoice} />
-            </div>
-          </div>
-        </div>
-      )}
+      <PdfPreviewModal
+        open={pdfOpen}
+        title="Invoice Preview"
+        pdfUrl={pdfUrl}
+        onClose={handleClosePdf}
+        onDownload={() =>
+          selectedInvoice && generateInvoicePDF(selectedInvoice, "save")
+        }
+      />
     </div>
   );
 };

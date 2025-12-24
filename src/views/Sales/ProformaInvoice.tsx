@@ -11,7 +11,7 @@ import type {
   ProformaInvoiceSummary,
 } from "../../types/proformaInvoice";
 import { Trash2 } from "lucide-react";
-import InvoiceTemplate1 from "../../components/template/invoice/InvoiceTemplate1";
+import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTemplate1";
 
 type InvoiceStatus = "Draft" | "Pending" | "Paid" | "Overdue";
 

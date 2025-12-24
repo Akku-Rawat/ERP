@@ -1,323 +1,161 @@
-import React, { useRef, useState, forwardRef } from "react";
-import { UploadCloud } from "lucide-react";
-import type { Invoice } from "../../../types/invoice";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-export interface InvoiceTemplate1Props {
-  data: Invoice;
-  companyLogoUrl?: string;
-}
+const DEV_INVOICE = {
+  invoiceNumber: "INV-2025-001",
+  currencyCode: "INR",
+  customerId: "Acme Corporation Pvt Ltd",
 
-const InvoiceTemplate1 = forwardRef<HTMLDivElement, InvoiceTemplate1Props>(
-  ({ data, companyLogoUrl }, ref) => {
-    const [logo, setLogo] = useState<string | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const [signature, setSignature] = useState<string | null>(null);
-    const signatureInputRef = useRef<HTMLInputElement>(null);
-    const [signatureText, setSignatureText] = useState<string>("");
-    const [signatureMode, setSignatureMode] = useState<"upload" | "type">(
-      "upload",
-    );
-
-    const getCurrencySymbol = () => {
-      switch (data.currencyCode) {
-        case "ZMW":
-          return "ZK";
-        case "INR":
-          return "₹";
-        case "USD":
-          return "$";
-        default:
-          return "";
-      }
-    };
-
-    const symbol = getCurrencySymbol();
-
-    const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (ev) => setLogo(ev.target?.result as string);
-        reader.readAsDataURL(e.target.files[0]);
-      }
-    };
-
-    const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (ev) => setSignature(ev.target?.result as string);
-        reader.readAsDataURL(e.target.files[0]);
-      }
-    };
-
-    const subtotal = data.items.reduce(
-      (sum, i) => sum + i.quantity * i.price - (i.discount ?? 0),
-      0,
-    );
-
-    return (
-      <div
-        ref={ref}
-        className="max-w-[260mm] bg-white p-8"
-        style={{ minHeight: "297mm" }}
-      >
-        <div className="bg-blue-600 text-white px-6 py-4 mb-8 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <div
-              className="w-16 h-16 rounded border-2 border-dashed border-white bg-blue-500 flex items-center justify-center cursor-pointer hover:bg-blue-400"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {logo || companyLogoUrl ? (
-                <img
-                  src={logo || companyLogoUrl}
-                  alt="Logo"
-                  className="w-14 h-14 object-contain rounded"
-                />
-              ) : (
-                <UploadCloud className="w-6 h-6 text-white" />
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                ref={fileInputRef}
-                onChange={handleLogoChange}
-              />
-            </div>
-
-            <h1 className="text-2xl font-bold">
-              Rolaface Software Pvt Limited
-            </h1>
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <p className="font-semibold text-gray-800">
-            Rolaface Software Pvt Limited
-          </p>
-          <p className="text-sm text-gray-600">
-            Your Trusted Technology Partner
-          </p>
-          <p className="text-sm text-gray-600">Business District, Tech Park</p>
-          <p className="text-sm text-gray-600">City, State 000000</p>
-        </div>
-
-        <div className="grid grid-cols-3 gap-8 mb-8">
-          <div>
-            <h3 className="font-bold text-gray-800 mb-2">Bill To</h3>
-            <p className="font-semibold text-gray-800">{data.customerId}</p>
-            <p className="text-sm text-gray-600">
-              {data.billingAddress.line1}
-            </p>
-            <p className="text-sm text-gray-600">
-              {data.billingAddress.city}, {data.billingAddress.state}{" "}
-              {data.billingAddress.postalCode}
-            </p>
-          </div>
-
-          <div>
-            <h3 className="font-bold text-gray-800 mb-2">Ship To</h3>
-            <p className="font-semibold text-gray-800">{data.customerId}</p>
-            <p className="text-sm text-gray-600">
-              {data.shippingAddress.line1}
-            </p>
-            <p className="text-sm text-gray-600">
-              {data.shippingAddress.city}, {data.shippingAddress.state}{" "}
-              {data.shippingAddress.postalCode}
-            </p>
-          </div>
-
-          <div className="text-right space-y-1 text-sm">
-            <div className="flex justify-between gap-4">
-              <span className="font-bold text-gray-700">Invoice #</span>
-              <span>{data.invoiceNumber}</span>
-            </div>
-
-            <div className="flex justify-between gap-4">
-              <span className="font-bold text-gray-700">Invoice Date</span>
-              <span>
-                {new Date(data.dateOfInvoice).toLocaleDateString()}
-              </span>
-            </div>
-
-            <div className="flex justify-between gap-4">
-              <span className="font-bold text-gray-700">Due Date</span>
-              <span>
-                {data.dueDate
-                  ? new Date(data.dueDate).toLocaleDateString()
-                  : "—"}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-t border-b border-gray-400">
-                <th className="px-4 py-3 text-left text-sm font-bold">QTY</th>
-                <th className="px-4 py-3 text-left text-sm font-bold">
-                  DESCRIPTION
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-bold">
-                  UNIT PRICE
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-bold">
-                  AMOUNT
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.items.map((item, index) => {
-                const amount =
-                  item.quantity * item.price - (item.discount ?? 0);
-
-                return (
-                  <tr key={index} className="border-b border-gray-300">
-                    <td className="px-4 py-3">{item.quantity}</td>
-                    <td className="px-4 py-3">{item.description}</td>
-                    <td className="px-4 py-3 text-right">
-                      {item.price.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {amount.toFixed(2)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="flex justify-end mb-8">
-          <div className="w-80 space-y-2">
-            <div className="flex justify-between text-lg font-bold border-t-2 border-gray-400 pt-3">
-              <span>TOTAL</span>
-              <span>
-                {symbol}
-                {subtotal.toFixed(2)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end mb-12">
-          <div className="w-80">
-            <h3 className="text-sm font-bold text-gray-700 mb-3">
-              Authorized Signature
-            </h3>
-
-            <div className="flex gap-2 mb-3">
-              <button
-                onClick={() => setSignatureMode("upload")}
-                className={`px-3 py-1 rounded text-xs font-medium ${
-                  signatureMode === "upload"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                Upload
-              </button>
-
-              <button
-                onClick={() => setSignatureMode("type")}
-                className={`px-3 py-1 rounded text-xs font-medium ${
-                  signatureMode === "type"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                Type
-              </button>
-            </div>
-
-            {signatureMode === "upload" && (
-              <div
-                className="w-full h-24 border-2 border-dashed border-gray-300 rounded bg-gray-50 flex items-center justify-center cursor-pointer hover:border-blue-400 mb-2"
-                onClick={() => signatureInputRef.current?.click()}
-              >
-                {signature ? (
-                  <img
-                    src={signature}
-                    alt="Signature"
-                    className="h-20 object-contain max-w-full"
-                  />
-                ) : (
-                  <div className="text-center">
-                    <UploadCloud className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-                    <span className="text-gray-500 text-xs">
-                      Click to upload
-                    </span>
-                  </div>
-                )}
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={signatureInputRef}
-                  onChange={handleSignatureChange}
-                  className="hidden"
-                />
-              </div>
-            )}
-
-            {signatureMode === "type" && (
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={signatureText}
-                  onChange={(e) => setSignatureText(e.target.value)}
-                  placeholder="Type your signature..."
-                  className="w-full px-3 py-2 border-2 border-gray-300 rounded text-sm"
-                />
-
-                {signatureText && (
-                  <div className="w-full h-24 border-2 border-gray-300 rounded bg-white flex items-center justify-center">
-                    <p
-                      className="text-3xl text-gray-800"
-                      style={{ fontFamily: "Brush Script MT, cursive" }}
-                    >
-                      {signatureText}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="text-center text-sm text-gray-600 mt-2">
-              <p className="font-semibold">Priya Chopra</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-300 pt-6 space-y-4">
-          <div>
-            <h3 className="font-bold text-gray-800 mb-2">Terms & Conditions</h3>
-            <p className="text-sm text-gray-600">
-              {data.terms?.selling?.general ??
-                "Payment is due within 15 days"}
-            </p>
-          </div>
-
-          <div>
-            <p className="font-semibold text-gray-800">
-              {data.paymentInformation.bankName}
-            </p>
-            <p className="text-sm text-gray-600">
-              Account Number: {data.paymentInformation.accountNumber}
-            </p>
-            <p className="text-sm text-gray-600">
-              Routing Number: {data.paymentInformation.routingNumber}
-            </p>
-            <p className="text-sm text-gray-600">
-              SWIFT: {data.paymentInformation.swiftCode}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+  billingAddress: {
+    line1: "4th Floor, Prestige Towers",
+    city: "Bangalore",
+    state: "Karnataka",
+    postalCode: "560001",
   },
-);
 
-InvoiceTemplate1.displayName = "InvoiceTemplate1";
-export default InvoiceTemplate1;
+  shippingAddress: {
+    line1: "4th Floor, Prestige Towers",
+    city: "Bangalore",
+    state: "Karnataka",
+    postalCode: "560001",
+  },
+
+  dateOfInvoice: new Date().toISOString(),
+  dueDate: new Date(Date.now() + 7 * 86400000).toISOString(),
+
+  items: [
+    { description: "Custom Software Development", quantity: 1, price: 75000 },
+    { description: "Cloud Infrastructure Setup", quantity: 1, price: 25000 },
+    { description: "Annual Support & Maintenance", quantity: 1, price: 15000 },
+  ],
+};
+
+export const generateInvoicePDF = (
+  resultType: "save" | "bloburl" = "save"
+) => {
+  const data = DEV_INVOICE;
+
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+  const symbol =
+    data.currencyCode === "INR" ? "Rs." : data.currencyCode === "ZMW" ? "ZK" : "$";
+
+  /* ---------- Header ---------- */
+  doc.setFillColor(37, 99, 235);
+  doc.rect(0, 0, 210, 40, "F");
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(24);
+  doc.text("INVOICE", 15, 22);
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`#${data.invoiceNumber}`, 15, 28);
+
+  doc.setFontSize(14);
+  doc.text("Rolaface Software Pvt Limited", 195, 20, { align: "right" });
+  doc.setFontSize(9);
+  doc.setTextColor(219, 234, 254);
+  doc.text("Your Trusted Technology Partner", 195, 26, { align: "right" });
+
+  /* ---------- Addresses ---------- */
+  doc.setTextColor(40, 40, 40);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.text("BILL TO", 15, 55);
+  doc.text("SHIP TO", 80, 55);
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(70, 70, 70);
+
+  doc.text(
+    [
+      data.customerId,
+      data.billingAddress.line1,
+      `${data.billingAddress.city}, ${data.billingAddress.state} ${data.billingAddress.postalCode}`,
+    ],
+    15,
+    60
+  );
+
+  doc.text(
+    [
+      data.customerId,
+      data.shippingAddress.line1,
+      `${data.shippingAddress.city}, ${data.shippingAddress.state} ${data.shippingAddress.postalCode}`,
+    ],
+    80,
+    60
+  );
+
+  /* ---------- Dates ---------- */
+  doc.setFillColor(249, 250, 251);
+  doc.rect(140, 50, 55, 20, "F");
+  doc.setFontSize(8);
+  doc.text("DATE:", 145, 58);
+  doc.text("DUE DATE:", 145, 65);
+
+  doc.setFont("helvetica", "bold");
+  doc.text(new Date(data.dateOfInvoice).toLocaleDateString(), 190, 58, {
+    align: "right",
+  });
+  doc.setTextColor(220, 38, 38);
+  doc.text(new Date(data.dueDate).toLocaleDateString(), 190, 65, {
+    align: "right",
+  });
+
+  /* ---------- Items Table ---------- */
+  autoTable(doc, {
+    startY: 85,
+    head: [["Description", "Qty", "Price", "Amount"]],
+    body: data.items.map((i) => [
+      i.description,
+      i.quantity,
+      `${symbol}${i.price.toFixed(2)}`,
+      `${symbol}${(i.quantity * i.price).toFixed(2)}`,
+    ]),
+    headStyles: {
+      fillColor: [37, 99, 235],
+      textColor: [255, 255, 255],
+      fontStyle: "bold",
+    },
+    alternateRowStyles: { fillColor: [249, 250, 251] },
+    columnStyles: {
+      1: { halign: "center" },
+      2: { halign: "right" },
+      3: { halign: "right" },
+    },
+    margin: { left: 15, right: 15 },
+  });
+
+  /* ---------- Total ---------- */
+  const finalY = (doc as any).lastAutoTable.finalY + 10;
+  const total = data.items.reduce((s, i) => s + i.quantity * i.price, 0);
+
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text("TOTAL", 140, finalY + 8);
+
+  doc.setFontSize(18);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(30, 58, 138);
+  doc.text(`${symbol}${total.toFixed(2)}`, 195, finalY + 8, {
+    align: "right",
+  });
+
+  /* ---------- Signature ---------- */
+  doc.setDrawColor(200, 200, 200);
+  doc.line(150, finalY + 35, 190, finalY + 35);
+  doc.setFontSize(8);
+  doc.setTextColor(40, 40, 40);
+  doc.text("Priya Chopra", 170, finalY + 40, { align: "center" });
+  doc.setFontSize(6);
+  doc.text("AUTHORIZED SIGNATORY", 170, finalY + 44, {
+    align: "center",
+  });
+
+  return resultType === "save"
+    ? doc.save(`Invoice_${data.invoiceNumber}.pdf`)
+    : doc.output("bloburl");
+};
