@@ -7,7 +7,8 @@ const api = createAxiosInstance(base_url);
 const ENDPOINTS = {
   getAllItems: `${base_url}.item.item.get_all_items_api`,
   getItemByCode: `${base_url}.item.item.get_item_by_id_api`,
-  deleteItem: `${base_url}.item.item.delete_item_by_code_api`,
+  // deleteItem: `${base_url}.item.item.delete_item_by_code_api`,
+  deleteItem: `${base_url}.item.item.delete_item_by_id`,
   updateItem: `${base_url}.item.item.update_item_api`,
   createItem: `${base_url}.item.item.create_item_api`,
 };
@@ -22,14 +23,14 @@ export async function getAllItems(
   return resp.data;
 }
 
-export async function getItemByItemCode(item_code: string): Promise<any> {
-  const url = `${ENDPOINTS.getItemByCode}?item_code=${item_code}`;
+export async function getItemByItemCode(itemCode: string): Promise<any> {
+  const url = `${ENDPOINTS.getItemByCode}?id=${itemCode}`;
   const resp: AxiosResponse = await api.get(url);
   return resp.data?.data || null;
 }
 
 export async function deleteItemByItemCode(id: string): Promise<any> {
-  const url = `${ENDPOINTS.deleteItem}?item_code=${id}`;
+  const url = `${ENDPOINTS.deleteItem}?id=${id}`;
   const resp: AxiosResponse = await api.delete(url);
   return resp.data;
 }

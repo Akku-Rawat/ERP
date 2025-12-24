@@ -1,9 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { getAllCustomers } from "../../api/customerApi";
 
+type Customer = {
+  id: string;
+  name: string;
+  customerCode?: string;
+};
+
 interface CustomerSelectProps {
   value?: string;
-  onChange: (cust: { name: string; id: string }) => void;
+  onChange: (customer: { id: string; name: string }) => void;
   className?: string;
   label?: string;
 }
@@ -14,17 +20,14 @@ export default function CustomerSelect({
   className = "",
   label = "Customer",
 }: CustomerSelectProps) {
-  const [customers, setCustomers] = useState<{ name: string; id: string }[]>(
-    [],
-  );
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState(value || "");
-  const ref = useRef<HTMLDivElement>(null);
+  const [search, setSearch] = useState(value);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  /* ---------------- Load Customers ---------------- */
   useEffect(() => {
-    const load = async () => {
+    const loadCustomers = async () => {
       try {
         setLoading(true);
         const res = await getAllCustomers();
@@ -32,40 +35,42 @@ export default function CustomerSelect({
 
         setCustomers(
           res.data.map((c: any) => ({
-            name: c.name,
             id: c.id,
-          })),
+            name: c.name,
+            customerCode: c.code ?? c.customerCode,
+          }))
         );
       } finally {
         setLoading(false);
       }
     };
 
-    load();
+    loadCustomers();
   }, []);
 
-  /* -------- Close dropdown when clicking outside -------- */
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /* ---------------- Filter logic ---------------- */
-  const filtered = customers.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()),
+  const filteredCustomers = customers.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
       <span className="font-medium text-gray-600 text-sm">{label}</span>
 
-      <div ref={ref} className="relative w-full">
-        {/* Search Input */}
+      <div ref={containerRef} className="relative w-full">
         <input
           className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
           placeholder={loading ? "Loading..." : "Search customer..."}
@@ -77,25 +82,31 @@ export default function CustomerSelect({
           onFocus={() => setOpen(true)}
         />
 
-        {/* Dropdown */}
         {open && !loading && (
           <div className="absolute left-0 top-full mt-1 w-full bg-white border shadow-lg rounded z-30">
             <ul className="max-h-56 overflow-y-auto text-sm">
-              {filtered.map((cust) => (
+              {filteredCustomers.map((customer) => (
                 <li
-                  key={cust.id}
+                  key={customer.id}
                   className="px-4 py-2 cursor-pointer hover:bg-blue-100"
                   onClick={() => {
-                    setSearch(cust.name);
+                    setSearch(customer.name);
                     setOpen(false);
-                    onChange(cust);
+                    onChange({ id: customer.id, name: customer.name });
                   }}
                 >
-                  {cust.name}
+                  <div className="flex justify-between items-center">
+                    <span>{customer.name}</span>
+                    {customer.customerCode && (
+                      <span className="text-xs text-gray-500">
+                        {customer.customerCode}
+                      </span>
+                    )}
+                  </div>
                 </li>
               ))}
 
-              {filtered.length === 0 && (
+              {filteredCustomers.length === 0 && (
                 <li className="px-4 py-2 text-gray-500">No match found</li>
               )}
             </ul>

@@ -1,30 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { getAllItems } from "../../api/itemApi";
+import { getCountryList } from "../../api/lookupApi";
 
-interface ItemSelectProps {
+interface CountrySelectProps {
   value?: string;
-  onChange: (item: {
-    id: string;
-    itemCode: string;
-    itemName: string;
-    sellingPrice?: number;
-  }) => void;
+  onChange: (country: { code: string; name: string }) => void;
   className?: string;
+  label?: string;
 }
 
-export default function ItemSelect({
+export default function CountrySelect({
   value = "",
   onChange,
   className = "",
-}: ItemSelectProps) {
-  const [items, setItems] = useState<
-    {
-      id: string;
-      itemCode: string;
-      itemName: string;
-      sellingPrice?: number;
-    }[]
+  label = "Export To Country",
+}: CountrySelectProps) {
+  const [countries, setCountries] = useState<
+    { sortOrder: number; code: string; name: string }[]
   >([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -37,40 +29,36 @@ export default function ItemSelect({
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const res = await getAllItems();
-      if (res?.status_code === 200) {
-        setItems(
-          res.data.map((it: any) => ({
-            id: it.id,
-            itemCode: it.itemClassCode,
-            itemName: it.itemName,
-            sellingPrice: it.sellingPrice ?? 0,
-          }))
-        );
-      }
+      const res = await getCountryList();
+      setCountries(
+        (res ?? []).map((c: any) => ({
+          sortOrder: c.sort_order,
+          code: c.code,
+          name: c.name,
+        }))
+      );
       setLoading(false);
     };
     load();
   }, []);
 
   useEffect(() => {
-    if (!value) {
-      setSearch("");
-      return;
-    }
-    const match = items.find((it) => it.itemCode === value);
-    if (match) setSearch(match.itemName);
-  }, [value, items]);
+    if (!value) return;
+    const match = countries.find((c) => c.code === value);
+    if (match) setSearch(match.name);
+  }, [value, countries]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       const target = e.target as Node;
+
       if (
         inputRef.current?.contains(target) ||
         dropdownRef.current?.contains(target)
       ) {
         return;
       }
+
       setOpen(false);
     };
 
@@ -78,8 +66,8 @@ export default function ItemSelect({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const filtered = items.filter((it) =>
-    it.itemName.toLowerCase().includes(search.toLowerCase())
+  const filtered = countries.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const openDropdown = () => {
@@ -89,11 +77,13 @@ export default function ItemSelect({
   };
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`flex flex-col gap-1 w-full ${className}`}>
+      <span className="font-medium text-gray-600 text-sm">{label}</span>
+
       <input
         ref={inputRef}
-        className="w-full rounded border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-        placeholder={loading ? "Loading items..." : "Search item..."}
+        className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        placeholder={loading ? "Loading..." : "Search country..."}
         value={search}
         onChange={(e) => {
           setSearch(e.target.value);
@@ -118,32 +108,25 @@ export default function ItemSelect({
             className="bg-white border rounded shadow-lg"
           >
             <ul className="max-h-56 overflow-y-auto text-sm">
-              {filtered.map((it) => (
+              {filtered.map((c) => (
                 <li
-                  key={it.id}
+                  key={c.sortOrder}
                   className="px-4 py-2 cursor-pointer hover:bg-blue-100"
                   onClick={() => {
-                    setSearch(it.itemName);
+                    setSearch(c.name);
                     setOpen(false);
-                    onChange({
-                      id: it.id,
-                      itemCode: it.itemCode,
-                      itemName: it.itemName,
-                      sellingPrice: it.sellingPrice,
-                    });
+                    onChange({ code: c.code, name: c.name });
                   }}
                 >
                   <div className="flex justify-between">
-                    <span>{it.itemName}</span>
-                    <span className="text-xs text-gray-500">
-                      {it.id}
-                    </span>
+                    <span>{c.name}</span>
+                    <span className="text-xs text-gray-500">{c.code}</span>
                   </div>
                 </li>
               ))}
 
               {filtered.length === 0 && (
-                <li className="px-4 py-2 text-gray-500">No items found</li>
+                <li className="px-4 py-2 text-gray-500">No match found</li>
               )}
             </ul>
           </div>,

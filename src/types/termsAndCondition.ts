@@ -10,21 +10,19 @@ export interface PaymentTerms {
   phases: TermPhase[];
   dueDates?: string;
   lateCharges?: string;
-  tax?: string;
+  taxes?: string;
   notes?: string;
 }
 
 export interface TermSection {
   general?: string;
-  payment?: PaymentTerms;
+  payment: PaymentTerms;
   delivery?: string;
   cancellation?: string;
   warranty?: string;
   liability?: string;
 }
 export interface Terms {
-  terms: {
-    buying?: TermSection;
-    selling: TermSection;
-  };
+  buying?: TermSection;
+  selling: TermSection;
 }

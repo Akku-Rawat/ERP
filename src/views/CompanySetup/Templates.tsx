@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import InvoiceDefaultTemplate from "../../components/template/invoice/InvoiceDefaultTemplate";
 import QuotationDefaultTemplate from "../../components/template/quotation/QuotationDefaultTemplate";
 import RFQDefaultTemplate from "../../components/template/rfq/RFQDefaultTemplate";
-import InvoiceUploadModal from "../../components/template/invoice/InvoiceUploadModal";
+// import InvoiceUploadModal from "../../components/template/invoice/InvoiceUploadModal";
 import QuotationUploadModal from "../../components/template/quotation/QuotationUploadModal";
 import RFQUploadModal from "../../components/template/rfq/RFQUploadModal";
-import InvoiceTemplate1 from "../../components/template/invoice/InvoiceTemplate1";
+// import InvoiceTemplate1 from "../../components/template/invoice/InvoiceTemplate1";
 import InvoiceTemplate2 from "../../components/template/invoice/InvoiceTemplate2";
 import InvoiceTemplate3 from "../../components/template/invoice/InvoiceTemplate3";
 import QuotationTemplate1 from "../../components/template/quotation/QuotationTemplate1";
@@ -224,7 +224,7 @@ const invoiceTemplateComponents: {
   [key in InvoiceTemplateType]: React.FC<{ data: InvoiceData }>;
 } = {
   default: InvoiceDefaultTemplate,
-  template1: InvoiceTemplate1,
+  // template1: InvoiceTemplate1,
   template2: InvoiceTemplate2,
   template3: InvoiceTemplate3,
 };

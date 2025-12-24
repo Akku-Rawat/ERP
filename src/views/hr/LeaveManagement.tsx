@@ -290,7 +290,6 @@ const LeaveManagement: React.FC = () => {
                     ))}
                   </Pie>
                   <Tooltip formatter={(value) => `${String(value)}%`} />
-
                 </PieChart>
               </ResponsiveContainer>
               <div className="mt-6 space-y-3">

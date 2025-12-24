@@ -1,7 +1,7 @@
 import type { TermSection } from "./termsAndCondition";
 
-export interface Invoice {
-  invoiceNumber?:string,
+export interface ProformaInvoice {
+  proformaId?:string,
   customerId: string;
   currencyCode: string;
   exchangeRt: string;
@@ -20,19 +20,15 @@ export interface Invoice {
   terms: InvoiceTerms;
 }
 
-export interface InvoiceSummary {
-  invoiceNumber: string;
+export interface ProformaInvoiceSummary {
+  proformaId: string;
   customerName: string;
-  receiptNumber: string;
   currency: string;
   exchangeRate: string;
   dueDate: string | null;
-  dateOfInvoice: string;
-  total: number;
-  totalTax: string;
-  invoiceStatus: string;
-  invoiceTypeParent: string;
-  invoiceType: string;
+  totalAmount: number;
+  status: string;
+  createdAt: string;
 }
 
 export interface Address {

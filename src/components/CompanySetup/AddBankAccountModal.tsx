@@ -1,39 +1,23 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-
-interface BankAccount {
-  accountNumber: string;
-  accountHolderName: string;
-  sortCode: string;
-  swiftCode: string;
-  bankName: string;
-  branchAddress: string;
-  currency: string;
-  dateOfAddition: string;
-  openingBalance: string;
-  isEnabled: boolean;
-  financialYearBegins: string;
-}
+import type { BankAccount } from "../../types/company";
 
 interface Props {
   onClose: () => void;
-  onSubmit: (account: BankAccount) => void;
+  onSubmit: (newAccount: BankAccount) => void;
 }
-
 const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
   const [form, setForm] = useState<BankAccount>({
-    accountNumber: "",
+    accountNo: "",
     accountHolderName: "",
     sortCode: "",
     swiftCode: "",
     bankName: "",
     branchAddress: "",
     currency: "",
-    dateOfAddition: new Date().toISOString().split("T")[0],
-    openingBalance: "",
-    isEnabled: true,
-    financialYearBegins: "April",
+    dateAdded: new Date().toISOString().split("T")[0],
+    openingBalance: 0.0,
   });
 
   const handleChange = (
@@ -45,24 +29,22 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
 
   const handleReset = () => {
     setForm({
-      accountNumber: "",
+      accountNo: "",
       accountHolderName: "",
       sortCode: "",
       swiftCode: "",
       bankName: "",
       branchAddress: "",
       currency: "",
-      dateOfAddition: new Date().toISOString().split("T")[0],
-      openingBalance: "",
-      isEnabled: true,
-      financialYearBegins: "April",
+      dateAdded: new Date().toISOString().split("T")[0],
+      openingBalance: 0.0,
     });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (
-      !form.accountNumber ||
+      !form.accountNo ||
       !form.accountHolderName ||
       !form.bankName ||
       !form.currency
@@ -110,8 +92,8 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   </span>
                   <input
                     type="text"
-                    name="accountNumber"
-                    value={form.accountNumber}
+                    name="accountNo"
+                    value={form.accountNo}
                     onChange={handleChange}
                     required
                     className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
@@ -214,8 +196,8 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   </span>
                   <input
                     type="date"
-                    name="dateOfAddition"
-                    value={form.dateOfAddition}
+                    name="dateAdded"
+                    value={form.dateAdded}
                     onChange={handleChange}
                     className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   />
