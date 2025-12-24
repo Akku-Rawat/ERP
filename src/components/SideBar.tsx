@@ -43,18 +43,18 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
 
   return (
     <div
-      className={` md:flex flex-col justify-between ${
+      className={`md:flex flex-col justify-between ${
         open ? "w-64" : "w-16"
-      } h-screen bg-gray-50 text-black fixed shadow-xl transition-all duration-300 overflow-hidden`}
+      } h-screen bg-sidebar fixed shadow-xl transition-all duration-300 overflow-hidden`}
     >
       <div>
         <div className="flex items-center justify-between p-4 border-b shadow-sm">
           <div className="flex items-center space-x-3">
-            {open && <h2 className="text-2xl font-bold text-teal-700">ERP</h2>}
+            {open && <h2 className="text-2xl font-bold text-primary">ERP</h2>}
           </div>
           <button
             onClick={() => setOpen(!open)}
-            className="text-2xl text-gray-600 hover:text-teal-700 focus:outline-none transition"
+            className="text-2xl text-muted hover:text-primary focus:outline-none transition"
             aria-label="Toggle sidebar"
           >
             <FaBars />
@@ -67,17 +67,13 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
               key={item.name}
               to={item.to}
               className={({ isActive }) =>
-                `flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-200 group ${
-                  isActive
-                    ? "bg-teal-700 text-white shadow-md"
-                    : "text-gray-700 hover:bg-gray-200"
-                }`
+                `nav-link group ${isActive ? "active" : ""}`
               }
             >
-              <span className="text-xl">{item.icon}</span>
-              {open && <span className="font-medium">{item.name}</span>}
+              <span className="text-xl nav-icon">{item.icon}</span>
+              {open && <span className="font-medium nav-text">{item.name}</span>}
               {!open && (
-                <span className="absolute left-16 bg-gray-800 text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                <span className="absolute left-16 bg-card text-main text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap shadow-md">
                   {item.name}
                 </span>
               )}
@@ -87,37 +83,37 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
           <div className="pt-2">
             <button
               onClick={() => setSettingsOpen(!settingsOpen)}
-              className={`w-full flex items-center justify-between gap-3 py-3 px-4 rounded-xl transition-all duration-200 group ${
+              className={`nav-link w-full group ${
                 settingsOpen || location.pathname.startsWith("/settings")
-                  ? "bg-teal-700 text-white shadow-md"
-                  : "text-gray-700 hover:bg-gray-200"
+                  ? "active"
+                  : ""
               }`}
             >
               <div className="flex items-center gap-3">
-                <FaCog className="text-xl" />
-                {open && <span className="font-medium">Settings</span>}
+                <FaCog className="text-xl nav-icon" />
+                {open && <span className="font-medium nav-text">Settings</span>}
               </div>
               {open && (
-                <span className="text-sm">
+                <span className="text-sm ml-auto nav-icon">
                   {settingsOpen ? <FaChevronUp /> : <FaChevronDown />}
                 </span>
               )}
               {!open && (
-                <span className="absolute left-16 bg-gray-800 text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                <span className="absolute left-16 bg-card text-main text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-md">
                   Settings
                 </span>
               )}
             </button>
 
             {open && settingsOpen && (
-              <div className="ml-9 mt-1 space-y-1  border-teal-600">
+              <div className="ml-9 mt-1 space-y-1">
                 <NavLink
                   to="/companySetup"
                   className={({ isActive }) =>
                     `flex items-center gap-3 py-2.5 pl-6 pr-4 rounded-r-xl text-sm transition-all ${
                       isActive
-                        ? "bg-teal-600 text-white font-medium"
-                        : "text-gray-600 hover:bg-teal-50 hover:text-teal-700"
+                        ? "bg-primary-600 text-white font-medium"
+                        : "text-muted hover:bg-row-hover hover:text-primary"
                     }`
                   }
                 >
@@ -130,8 +126,8 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
                   className={({ isActive }) =>
                     `flex items-center gap-3 py-2.5 pl-6 pr-4 rounded-r-xl text-sm transition-all ${
                       isActive
-                        ? "bg-teal-600 text-white font-medium"
-                        : "text-gray-600 hover:bg-teal-50 hover:text-teal-700"
+                        ? "bg-primary-600 text-white font-medium"
+                        : "text-muted hover:bg-row-hover hover:text-primary"
                     }`
                   }
                 >
@@ -144,8 +140,8 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
                   className={({ isActive }) =>
                     `flex items-center gap-3 py-2.5 pl-6 pr-4 rounded-r-xl text-sm transition-all ${
                       isActive
-                        ? "bg-teal-600 text-white font-medium"
-                        : "text-gray-600 hover:bg-teal-50 hover:text-teal-700"
+                        ? "bg-primary-600 text-white font-medium"
+                        : "text-muted hover:bg-row-hover hover:text-primary"
                     }`
                   }
                 >
@@ -161,7 +157,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
       <div className="p-4 border-t">
         <button
           onClick={handleLogout}
-          className="flex items-center justify-center gap-3 w-full py-3 rounded-xl bg-red-700 text-white hover:bg-red-800 transition font-medium shadow-md"
+          className="flex items-center justify-center gap-3 w-full py-3 rounded-xl btn-danger transition font-medium shadow-md"
         >
           <FaSignOutAlt className="text-lg" />
           {open && "Logout"}

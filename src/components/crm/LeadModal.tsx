@@ -1,10 +1,26 @@
+// src/components/modals/LeadModal.tsx
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Modal from "../../components/UI/modal/modal";
+import { Input, Card, Button, Textarea } from "../../components/UI/modal/formComponent";
+import { 
+  User, 
+  Building2, 
+  Mail, 
+  Phone, 
+  Briefcase, 
+  MapPin, 
+  FileText,
+  DollarSign,
+  Users,
+  Image as ImageIcon,
+  Check
+} from "lucide-react";
 
 export interface LeadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  lead: Lead | null;
+  lead: any | null;
   onSubmit: (data: any) => void;
 }
 
@@ -51,17 +67,11 @@ const emptyForm: LeadFormData = {
   file: null,
 };
 
+type TabType = "basic" | "company" | "address" | "notes";
+
 const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
   const [form, setForm] = useState<LeadFormData>(emptyForm);
-  const [openSections, setOpenSections] = useState({
-    core: true,
-    details: false,
-    address: false,
-    notes: false,
-  });
-
-  const toggleSection = (s: keyof typeof openSections) =>
-    setOpenSections((p) => ({ ...p, [s]: !p[s] }));
+  const [activeTab, setActiveTab] = useState<TabType>("basic");
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -91,114 +101,205 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
     onClose();
   };
 
-  if (!isOpen) return null;
+  const tabs = [
+    { id: "basic" as TabType, label: "Basic Info", icon: User },
+    { id: "company" as TabType, label: "Company", icon: Building2 },
+    { id: "address" as TabType, label: "Address", icon: MapPin },
+    { id: "notes" as TabType, label: "Notes", icon: FileText },
+  ];
+
+  // Footer content
+  const footer = (
+    <>
+      <Button variant="secondary" onClick={onClose}>
+        Cancel
+      </Button>
+      <div className="flex gap-3">
+        <Button variant="secondary" onClick={() => setForm(emptyForm)}>
+          Reset
+        </Button>
+        <Button variant="primary" onClick={handleSubmit} icon={<Check className="w-4 h-4" />}>
+          Save Lead
+        </Button>
+      </div>
+    </>
+  );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
-        >
-          <form onSubmit={handleSubmit} className="flex flex-col h-full">
-            {/* Header */}
-            <header className="flex items-center justify-between border-b bg-indigo-50 px-6 py-3">
-              <h3 className="text-xl font-semibold text-indigo-700">
-                Create Lead
-              </h3>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Create New Lead"
+      subtitle="Fill in the details to create a new lead"
+      icon={User}
+      footer={footer}
+      maxWidth="5xl"
+      height="calc(100vh - 80px)"
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Tabs */}
+        <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
               <button
+                key={tab.id}
                 type="button"
-                onClick={onClose}
-                className="rounded-full p-1 hover:bg-gray-200"
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative px-6 py-3 font-semibold text-sm transition-all duration-200 rounded-t-lg ${
+                  activeTab === tab.id
+                    ? "text-primary bg-card shadow-sm"
+                    : "text-muted hover:text-main hover:bg-card/50"
+                }`}
               >
-                ×
+                <span className="relative z-10 flex items-center gap-2">
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </span>
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="activeLeadTab"
+                    className="absolute inset-0 bg-card rounded-t-lg shadow-sm"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    style={{ zIndex: -1 }}
+                  />
+                )}
               </button>
-            </header>
+            );
+          })}
+        </div>
 
-            {/* Scrollable Content */}
-            <section className="flex-1 overflow-y-auto p-5 space-y-5">
-              {/* ==== LEAD INFORMATION – 3 COLUMNS ==== */}
-              <Section
-                title="Lead Information"
-                open={openSections.core}
-                onToggle={() => toggleSection("core")}
+        {/* Tab Content */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            {activeTab === "basic" && (
+              <Card
+                title="Basic Information"
+                subtitle="Essential lead details"
+                icon={<User className="w-5 h-5 text-primary" />}
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
                   <Input
-                    label="First Name *"
+                    label="First Name"
                     name="firstName"
                     value={form.firstName}
                     onChange={handleChange}
+                    required
+                    icon={<User className="w-4 h-4" />}
+                    placeholder="Enter first name"
                   />
                   <Input
-                    label="Last Name *"
+                    label="Last Name"
                     name="lastName"
                     value={form.lastName}
                     onChange={handleChange}
+                    required
+                    icon={<User className="w-4 h-4" />}
+                    placeholder="Enter last name"
                   />
                   <Input
-                    label="Company *"
+                    label="Company"
                     name="company"
                     value={form.company}
                     onChange={handleChange}
-                  />
-                  <Input
-                    label="Email *"
-                    type="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                  />
-                  <Input
-                    label="Phone *"
-                    name="phone"
-                    value={form.phone}
-                    onChange={handleChange}
+                    required
+                    icon={<Building2 className="w-4 h-4" />}
+                    placeholder="Company name"
                   />
                   <Input
                     label="Job Title"
                     name="title"
                     value={form.title || ""}
                     onChange={handleChange}
+                    icon={<Briefcase className="w-4 h-4" />}
+                    placeholder="Position"
                   />
-                  <Select
-                    label="Lead Source"
-                    name="leadSource"
-                    value={form.leadSource || ""}
+                  <Input
+                    label="Email"
+                    type="email"
+                    name="email"
+                    value={form.email}
                     onChange={handleChange}
-                    options={[
-                      { value: "", label: "-- None --" },
-                      { value: "Web", label: "Web" },
-                      { value: "Phone", label: "Phone Inquiry" },
-                      { value: "Partner", label: "Partner Referral" },
-                      { value: "Purchased List", label: "Purchased List" },
-                    ]}
+                    required
+                    icon={<Mail className="w-4 h-4" />}
+                    placeholder="email@example.com"
                   />
-                  <Select
-                    label="Lead Status"
-                    name="leadStatus"
-                    value={form.leadStatus || ""}
+                  <Input
+                    label="Phone"
+                    name="phone"
+                    value={form.phone}
                     onChange={handleChange}
-                    options={[
-                      { value: "", label: "-- None --" },
-                      { value: "New", label: "New" },
-                      { value: "Contacted", label: "Contacted" },
-                      { value: "Qualified", label: "Qualified" },
-                      { value: "Lost", label: "Lost" },
-                    ]}
+                    required
+                    icon={<Phone className="w-4 h-4" />}
+                    placeholder="+1234567890"
                   />
-                </div>
-              </Section>
+                  
+                  {/* Lead Source Select */}
+                  <label className="flex flex-col gap-2 text-sm w-full group">
+                    <span className="font-semibold text-muted group-focus-within:text-primary transition-colors">
+                      Lead Source
+                    </span>
+                    <select
+                      name="leadSource"
+                      value={form.leadSource || ""}
+                      onChange={handleChange}
+                      className="w-full rounded-lg border-2 border-[#e5e7eb] dark:border-[#1e293b] px-4 py-2.5 text-sm focus:outline-none focus:border-primary transition-all bg-card text-main hover:border-[#d1d5db] dark:hover:border-[#334155]"
+                      onFocus={(e) => {
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(35, 124, 169, 0.12)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.boxShadow = '';
+                      }}
+                    >
+                      <option value="">-- None --</option>
+                      <option value="Web">Web</option>
+                      <option value="Phone">Phone Inquiry</option>
+                      <option value="Partner">Partner Referral</option>
+                      <option value="Purchased List">Purchased List</option>
+                    </select>
+                  </label>
 
-              {/* ==== COMPANY DETAILS – 2 COLUMNS ==== */}
-              <Section
+                  {/* Lead Status Select */}
+                  <label className="flex flex-col gap-2 text-sm w-full group">
+                    <span className="font-semibold text-muted group-focus-within:text-primary transition-colors">
+                      Lead Status
+                    </span>
+                    <select
+                      name="leadStatus"
+                      value={form.leadStatus || ""}
+                      onChange={handleChange}
+                      className="w-full rounded-lg border-2 border-[#e5e7eb] dark:border-[#1e293b] px-4 py-2.5 text-sm focus:outline-none focus:border-primary transition-all bg-card text-main hover:border-[#d1d5db] dark:hover:border-[#334155]"
+                      onFocus={(e) => {
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(35, 124, 169, 0.12)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.boxShadow = '';
+                      }}
+                    >
+                      <option value="">-- None --</option>
+                      <option value="New">New</option>
+                      <option value="Contacted">Contacted</option>
+                      <option value="Qualified">Qualified</option>
+                      <option value="Lost">Lost</option>
+                    </select>
+                  </label>
+                </div>
+              </Card>
+            )}
+
+            {activeTab === "company" && (
+              <Card
                 title="Company Details"
-                open={openSections.details}
-                onToggle={() => toggleSection("details")}
+                subtitle="Financial and organizational information"
+                icon={<Building2 className="w-5 h-5 text-primary" />}
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <Input
                     label="Annual Revenue"
                     type="number"
@@ -206,6 +307,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
                     value={form.annualRevenue ?? ""}
                     onChange={handleNumber}
                     placeholder="e.g. 500000"
+                    icon={<DollarSign className="w-4 h-4" />}
                   />
                   <Input
                     label="No. of Employees"
@@ -213,177 +315,110 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
                     name="noOfEmployees"
                     value={form.noOfEmployees ?? ""}
                     onChange={handleNumber}
+                    placeholder="e.g. 50"
+                    icon={<Users className="w-4 h-4" />}
                   />
                 </div>
-              </Section>
+              </Card>
+            )}
 
-              {/* ==== ADDRESS – 2 COLUMNS ==== */}
-              <Section
+            {activeTab === "address" && (
+              <Card
                 title="Address Information"
-                open={openSections.address}
-                onToggle={() => toggleSection("address")}
+                subtitle="Location details"
+                icon={<MapPin className="w-5 h-5 text-primary" />}
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <Input
                     label="Street"
                     name="street"
                     value={form.street || ""}
                     onChange={handleChange}
+                    placeholder="Street address"
                   />
-                  <Input
-                    label="City"
-                    name="city"
-                    value={form.city || ""}
-                    onChange={handleChange}
-                  />
-                  <Input
-                    label="State"
-                    name="state"
-                    value={form.state || ""}
-                    onChange={handleChange}
-                  />
-                  <Input
-                    label="Zip Code"
-                    name="zipCode"
-                    value={form.zipCode || ""}
-                    onChange={handleChange}
-                  />
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <Input
+                      label="City"
+                      name="city"
+                      value={form.city || ""}
+                      onChange={handleChange}
+                      placeholder="City"
+                    />
+                    <Input
+                      label="State"
+                      name="state"
+                      value={form.state || ""}
+                      onChange={handleChange}
+                      placeholder="State"
+                    />
+                    <Input
+                      label="Zip Code"
+                      name="zipCode"
+                      value={form.zipCode || ""}
+                      onChange={handleChange}
+                      placeholder="ZIP"
+                    />
+                  </div>
                   <Input
                     label="Country"
                     name="country"
                     value={form.country || ""}
                     onChange={handleChange}
+                    placeholder="Country"
                   />
                 </div>
-              </Section>
+              </Card>
+            )}
 
-              {/* ==== NOTES ==== */}
-              <Section
-                title="Description / Notes"
-                open={openSections.notes}
-                onToggle={() => toggleSection("notes")}
+            {activeTab === "notes" && (
+              <Card
+                title="Additional Information"
+                subtitle="Notes and attachments"
+                icon={<FileText className="w-5 h-5 text-primary" />}
               >
-                <textarea
-                  className="w-full rounded border p-3 text-sm h-28 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  name="description"
-                  value={form.description || ""}
-                  onChange={handleChange}
-                  placeholder="Any additional notes about the lead..."
-                />
-              </Section>
-
-              {/* ==== IMAGE (optional) ==== */}
-              <div className="border-t pt-4">
-                <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-600">
-                  <input type="checkbox" className="w-4 h-4" />
-                  <span>Upload Lead Image (optional)</span>
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFile}
-                  className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                />
-              </div>
-            </section>
-
-            {/* Footer */}
-            <footer className="flex justify-between border-t bg-gray-50 px-6 py-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setForm(emptyForm)}
-                  className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
-                >
-                  Reset
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-full bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                >
-                  Save Lead
-                </button>
-              </div>
-            </footer>
-          </form>
-        </motion.div>
-      </AnimatePresence>
-    </div>
+                <div className="space-y-5">
+                  <Textarea
+                    label="Description / Notes"
+                    name="description"
+                    value={form.description || ""}
+                    onChange={handleChange}
+                    placeholder="Any additional notes about the lead..."
+                    icon={<FileText className="w-4 h-4" />}
+                    rows={5}
+                  />
+                  
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-semibold text-muted mb-2">
+                      <ImageIcon className="w-4 h-4" />
+                      Lead Image (Optional)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFile}
+                      className="block w-full text-sm text-muted
+                        file:mr-4 file:py-2.5 file:px-5 
+                        file:rounded-lg file:border-0 
+                        file:text-sm file:font-semibold 
+                        file:bg-primary file:text-white 
+                        hover:file:opacity-90 file:transition-all
+                        cursor-pointer border-2 border-dashed border-[#e5e7eb] dark:border-[#1e293b] rounded-lg p-3"
+                    />
+                    {form.file && (
+                      <div className="mt-3 flex items-center gap-2 text-xs text-main bg-[var(--row-hover)] px-3 py-2 rounded-lg">
+                        <Check className="w-4 h-4 text-primary" />
+                        Selected: {form.file.name}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </form>
+    </Modal>
   );
 };
-
-/* ---------- Reusable UI ---------- */
-const Section: React.FC<{
-  title: string;
-  open: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}> = ({ title, open, onToggle, children }) => (
-  <div className="rounded-lg border bg-white p-4 shadow-sm">
-    <div
-      className="flex items-center justify-between cursor-pointer select-none font-medium text-gray-700"
-      onClick={onToggle}
-    >
-      <span>{title}</span>
-      <span>{open ? "−" : "+"}</span>
-    </div>
-    {open && <div className="mt-4">{children}</div>}
-  </div>
-);
-
-const Input: React.FC<{
-  label: string;
-  name: string;
-  value: string | number | undefined;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
-  placeholder?: string;
-}> = ({ label, name, value, onChange, type = "text", placeholder }) => (
-  <label className="flex flex-col gap-1 text-sm">
-    <span className="font-medium text-gray-600">
-      {label}
-      {label.includes("*") && <span className="text-red-500 ml-1">*</span>}
-    </span>
-    <input
-      type={type}
-      name={name}
-      value={value ?? ""}
-      onChange={onChange}
-      placeholder={placeholder}
-      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-    />
-  </label>
-);
-
-const Select: React.FC<{
-  label: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: { value: string; label: string }[];
-}> = ({ label, name, value, onChange, options }) => (
-  <label className="flex flex-col gap-1 text-sm">
-    <span className="font-medium text-gray-600">{label}</span>
-    <select
-      name={name}
-      value={value}
-      onChange={onChange}
-      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
-  </label>
-);
 
 export default LeadModal;

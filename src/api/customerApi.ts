@@ -14,7 +14,7 @@ const ENDPOINTS = {
 
 export async function getAllCustomers(
   page: number = 1,
-  page_size: number = 10,
+  page_size: number = 5,
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getAllCustomers, {
     params: { page, page_size },

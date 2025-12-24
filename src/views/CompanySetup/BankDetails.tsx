@@ -81,6 +81,7 @@ interface Props {
 
 const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  // selectedAccount is the global index inside bankAccounts (or null)
   const [selectedAccount, setSelectedAccount] = useState<number | null>(
     bankAccounts.length > 0 ? 0 : null,
   );
@@ -164,8 +165,20 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
       acc.accountNo.includes(searchTerm),
   );
 
-  const toggleAccountVisibility = (index: number) => {
-    setShowAccountNumber((prev) => ({ ...prev, [index]: !prev[index] }));
+  // map filtered index -> global index
+  const getGlobalIndex = (filteredIndex: number) => {
+    const acc = filteredAccounts[filteredIndex];
+    if (!acc) return -1;
+    return bankAccounts.findIndex(
+      (a) =>
+        a.accountNumber === acc.accountNumber &&
+        a.bankName === acc.bankName &&
+        a.ifscCode === acc.ifscCode,
+    );
+  };
+
+  const toggleAccountVisibility = (accountNumber: string) => {
+    setShowAccountNumber((prev) => ({ ...prev, [accountNumber]: !prev[accountNumber] }));
   };
 
   return (
@@ -221,9 +234,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
               {/* Account List */}
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {filteredAccounts.length === 0 ? (
-                  <div className="text-center py-8 text-muted text-sm">
-                    No accounts found
-                  </div>
+                  <div className="text-center py-8 text-muted text-sm">No accounts found</div>
                 ) : (
                   filteredAccounts.map((acc, i) => (
                     <div
@@ -239,9 +250,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
                         <p className="font-semibold text-main text-sm">
                           {acc.bankName}
                         </p>
-                        <span className="text-xs badge-success px-2 py-0.5 rounded-full font-medium">
-                          {acc.currency}
-                        </span>
+                        <p className="text-xs text-muted mt-1">IFSC: {acc.ifscCode}</p>
                       </div>
                       <p className="text-xs text-muted font-mono truncate">
                         {acc.accountNo}
@@ -305,12 +314,8 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
                 <div className="inline-block p-6 rounded-full mb-4 bg-card">
                   <FaUniversity className="w-12 h-12 text-muted" />
                 </div>
-                <h3 className="text-lg font-semibold text-main mb-2">
-                  No Account Selected
-                </h3>
-                <p className="text-muted">
-                  Select an account from the list to view details
-                </p>
+                <h3 className="text-lg font-semibold text-main mb-2">No Account Selected</h3>
+                <p className="text-muted">Select an account from the list to view details</p>
               </div>
             ) : (
               <div className="p-6">

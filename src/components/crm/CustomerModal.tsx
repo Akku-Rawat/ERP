@@ -1,8 +1,20 @@
+// components/modals/CustomerModal.tsx
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import TermsAndCondition from "../TermsAndCondition";
+import Modal from "../UI/modal/modal";
+import { Input, Select, Card, Button, Checkbox } from "../UI/modal/formComponent";
+import TermsAndCondition from "../../views/termandcondition";
 import type { TermSection } from "../../types/termsAndCondition";
-import { X, Mail, Phone } from "lucide-react";
+import { 
+  Mail, 
+  Phone, 
+  User, 
+  Building2, 
+  CreditCard, 
+  DollarSign, 
+  MapPin,
+  FileText
+} from "lucide-react";
 
 import {
   createCustomer,
@@ -152,112 +164,132 @@ const CustomerModal: React.FC<{
   };
 
   const reset = () => {
-    setForm(initialData ? { ...initialData, sameAsBilling: true } : emptyForm);
+    setForm(initialData ? { ...initialData, sameAsBilling: false } : emptyForm);
   };
 
-  if (!isOpen) return null;
+  // Footer content
+  const footer = (
+    <>
+      <Button variant="secondary" onClick={handleClose}>
+        Cancel
+      </Button>
+      <div className="flex gap-3">
+        <Button variant="secondary" onClick={reset}>
+          Reset
+        </Button>
+        <Button 
+          variant="primary" 
+          onClick={handleSubmit} 
+          loading={loading}
+          type="submit"
+        >
+          {isEditMode ? "Update Customer" : "Save Customer"}
+        </Button>
+      </div>
+    </>
+  );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
-        >
-          <form onSubmit={handleSubmit} className="flex flex-col h-full">
-            {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-indigo-700">
-                {isEditMode ? "Edit Customer" : "Add New Customer"}
-              </h2>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isEditMode ? "Edit Customer" : "Add New Customer"}
+      subtitle={isEditMode ? "Update customer information" : "Fill in the details to create a new customer"}
+      icon={isEditMode ? Building2 : User}
+      footer={footer}
+      maxWidth="6xl"
+      height="90vh"
+    >
+      <div className="h-full flex flex-col">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          {/* Tabs - Sticky Header */}
+          <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
+            {(["details", "terms", "address"] as const).map((tab) => (
               <button
+                key={tab}
                 type="button"
-                onClick={handleClose}
-                className="p-1 rounded-full hover:bg-gray-200"
+                onClick={() => setActiveTab(tab)}
+                className={`relative px-6 py-3 font-semibold text-sm capitalize transition-all duration-200 rounded-t-lg ${
+                  activeTab === tab
+                    ? "text-primary bg-card shadow-sm"
+                    : "text-muted hover:text-main hover:bg-card/50"
+                }`}
               >
-                <X className="w-5 h-5 text-gray-600" />
+                <span className="relative z-10 flex items-center gap-2">
+                  {tab === "details" && <User className="w-4 h-4" />}
+                  {tab === "terms" && <FileText className="w-4 h-4" />}
+                  {tab === "address" && <MapPin className="w-4 h-4" />}
+                  {tab === "details" ? "Details" : tab === "terms" ? "Terms" : "Address"}
+                </span>
+                {activeTab === tab && (
+                  <motion.div
+                    layoutId="activeCustomerTab"
+                    className="absolute inset-0 bg-card rounded-t-lg shadow-sm"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    style={{ zIndex: -1 }}
+                  />
+                )}
               </button>
-            </header>
+            ))}
+          </div>
 
-            {/* Tabs */}
-            <div className="flex border-b bg-gray-50">
-              {(["details", "terms", "address"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 font-medium text-sm capitalize ${
-                    activeTab === tab
-                      ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {tab === "details"
-                    ? "Details"
-                    : tab === "terms"
-                      ? "Terms & Conditions"
-                      : "Address"}
-                </button>
-              ))}
-            </div>
-
-            {/* Content */}
-            <section className="flex-1 overflow-y-auto p-6 space-y-6">
-              {activeTab === "details" && (
-                <div className="space-y-6">
-                  {/* Main info */}
-                  <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                    Customer Details
-                  </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                    {/* TYPE */}
-                    <label className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-gray-600">
-                        Customer Type *
-                      </span>
-                      <select
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto px-1 py-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.2 }}
+              >
+                {activeTab === "details" && (
+                  <Card
+                    title="Basic Information"
+                    subtitle="Essential customer details"
+                    icon={<User className="w-5 h-5 text-primary" />}
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                      <Select
+                        label="Type"
                         name="type"
                         value={form.type}
                         onChange={handleChange}
-                        className="rounded border px-3 py-2 focus:ring-indigo-400"
+                        required
+                        icon={<Building2 className="w-4 h-4" />}
                       >
                         <option value="Individual">Individual</option>
                         <option value="Company">Company</option>
-                      </select>
-                    </label>
+                      </Select>
 
-                    <Input
-                      label="Customer Name"
-                      name="name"
-                      value={form.name}
-                      onChange={handleChange}
-                      required
-                    />
+                      <Input
+                        label="Customer Name"
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        required
+                        icon={<User className="w-4 h-4" />}
+                        placeholder="Enter full name"
+                      />
 
-                    <Input
-                      label="Contact Person"
-                      name="contactPerson"
-                      value={form.contactPerson}
-                      onChange={handleChange}
-                    />
+                      <Input
+                        label="Contact Person"
+                        name="contactPerson"
+                        value={form.contactPerson}
+                        onChange={handleChange}
+                        icon={<User className="w-4 h-4" />}
+                        placeholder="Primary contact"
+                      />
 
-                    {/* DISPLAY NAME */}
-                    <label className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-gray-600">
-                        Display Name *
-                      </span>
-                      <select
+                      <Select
+                        label="Display Name"
                         name="displayName"
                         value={form.displayName}
                         onChange={handleChange}
-                        className="rounded border px-3 py-2 focus:ring-indigo-400"
                         required
                       >
                         <option value="" disabled>
-                          Select Name
+                          Select Display Name
                         </option>
                         {form.name && (
                           <option value={form.name}>{form.name}</option>
@@ -267,71 +299,76 @@ const CustomerModal: React.FC<{
                             {form.contactPerson}
                           </option>
                         )}
-                      </select>
-                    </label>
+                      </Select>
 
-                    <Input
-                      label="Customer TPIN"
-                      name="tpin"
-                      value={form.tpin}
-                      onChange={handleChange}
-                      required
-                    />
+                      <Input
+                        label="TPIN"
+                        name="tpin"
+                        value={form.tpin}
+                        onChange={handleChange}
+                        required
+                        icon={<CreditCard className="w-4 h-4" />}
+                        placeholder="Tax identification"
+                      />
 
-                    <label className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-gray-600">
-                        Currency
-                      </span>
-                      <select
+                      <Select
+                        label="Currency"
                         name="currency"
                         value={form.currency}
                         onChange={handleChange}
-                        className="rounded border px-3 py-2 focus:ring-indigo-400"
+                        icon={<DollarSign className="w-4 h-4" />}
                       >
-                        <option value="">Select Currency...</option>
+                        <option value="">Select Currency</option>
                         {currencyOptions.map((c) => (
                           <option key={c} value={c}>
                             {c}
                           </option>
                         ))}
-                      </select>
-                    </label>
+                      </Select>
 
-                    <Input
-                      label="Bank Account"
-                      name="accountNumber"
-                      value={form.accountNumber}
-                      onChange={handleChange}
-                    />
+                      <Input
+                        label="Bank Account"
+                        name="accountNumber"
+                        value={form.accountNumber}
+                        onChange={handleChange}
+                        icon={<CreditCard className="w-4 h-4" />}
+                        placeholder="Account number"
+                      />
 
-                    <Input
-                      label="Onboard Balance"
-                      name="onboardingBalance"
-                      value={form.onboardingBalance}
-                      onChange={handleChange}
-                    />
+                      <Input
+                        label="Onboard Balance"
+                        name="onboardingBalance"
+                        type="number"
+                        value={form.onboardingBalance}
+                        onChange={handleChange}
+                        icon={<DollarSign className="w-4 h-4" />}
+                        placeholder="0.00"
+                      />
 
-                    <Input
-                      label="Email"
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      icon={<Mail className="w-4 h-4 text-gray-400" />}
-                    />
+                      <Input
+                        label="Email"
+                        name="email"
+                        type="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        icon={<Mail className="w-4 h-4" />}
+                        placeholder="email@example.com"
+                      />
 
-                    <Input
-                      label="Mobile No"
-                      name="mobile"
-                      value={form.mobile}
-                      onChange={handleChange}
-                      icon={<Phone className="w-4 h-4 text-gray-400" />}
-                    />
-                  </div>
-                </div>
-              )}
+                      <Input
+                        label="Mobile"
+                        name="mobile"
+                        type="tel"
+                        value={form.mobile}
+                        onChange={handleChange}
+                        icon={<Phone className="w-4 h-4" />}
+                        placeholder="+1234567890"
+                      />
+                    </div>
+                  </Card>
+                )}
 
-              {activeTab === "terms" && (
-                <div className="h-full w-full">
+                {activeTab === "terms" && (
                   <TermsAndCondition
                     title="Selling Terms & Conditions"
                     terms={form.terms?.selling as TermSection}
@@ -342,188 +379,146 @@ const CustomerModal: React.FC<{
                       }))
                     }
                   />
-                </div>
-              )}
+                )}
 
-              {activeTab === "address" && (
-                <div className="space-y-6">
+                {activeTab === "address" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Billing */}
-                    <div className="rounded-lg border bg-white shadow p-6">
-                      <h3 className="text-lg font-semibold text-gray-700 underline mb-4">
-                        Billing Address
-                      </h3>
-
-                      <div className="grid grid-cols-2 gap-4">
+                    {/* Billing Address */}
+                    <Card
+                      title="Billing Address"
+                      subtitle="Invoice and payment details"
+                      icon={<MapPin className="w-5 h-5 text-primary" />}
+                    >
+                      <div className="space-y-4">
                         <Input
-                          label="Line 1"
+                          label="Address Line 1"
                           name="billingAddressLine1"
                           value={form.billingAddressLine1}
                           onChange={handleChange}
+                          placeholder="Street address"
                         />
                         <Input
-                          label="Line 2"
+                          label="Address Line 2"
                           name="billingAddressLine2"
                           value={form.billingAddressLine2}
                           onChange={handleChange}
+                          placeholder="Apt, suite, etc."
                         />
-                        <Input
-                          label="Postal Code"
-                          name="billingPostalCode"
-                          value={form.billingPostalCode}
-                          onChange={handleChange}
-                        />
-                        <Input
-                          label="City"
-                          name="billingCity"
-                          value={form.billingCity}
-                          onChange={handleChange}
-                        />
-                        <Input
-                          label="State"
-                          name="billingState"
-                          value={form.billingState}
-                          onChange={handleChange}
-                        />
-                        <Input
-                          label="Country"
-                          name="billingCountry"
-                          value={form.billingCountry}
-                          onChange={handleChange}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Shipping */}
-                    <div className="rounded-lg border bg-white shadow p-6">
-                      <div className="flex justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-700 underline">
-                          Shipping Address
-                        </h3>
-                        <label className="flex items-center gap-2 text-sm text-gray-600">
-                          <input
-                            type="checkbox"
-                            name="sameAsBilling"
-                            checked={form.sameAsBilling}
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="Postal Code"
+                            name="billingPostalCode"
+                            value={form.billingPostalCode}
                             onChange={handleChange}
+                            placeholder="ZIP"
                           />
-                          Same as billing
-                        </label>
+                          <Input
+                            label="City"
+                            name="billingCity"
+                            value={form.billingCity}
+                            onChange={handleChange}
+                            placeholder="City"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="State"
+                            name="billingState"
+                            value={form.billingState}
+                            onChange={handleChange}
+                            placeholder="State"
+                          />
+                          <Input
+                            label="Country"
+                            name="billingCountry"
+                            value={form.billingCountry}
+                            onChange={handleChange}
+                            placeholder="Country"
+                          />
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Shipping Address */}
+                    <Card
+                      title="Shipping Address"
+                      subtitle="Delivery location"
+                      icon={<MapPin className="w-5 h-5 text-primary" />}
+                      className="relative"
+                    >
+                      <div className="absolute top-6 right-6">
+                        <Checkbox
+                          label="Same as billing"
+                          name="sameAsBilling"
+                          checked={form.sameAsBilling}
+                          onChange={handleChange}
+                        />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-4 mt-8">
                         <Input
-                          label="Line 1"
+                          label="Address Line 1"
                           name="shippingAddressLine1"
                           value={form.shippingAddressLine1}
                           onChange={handleChange}
                           disabled={form.sameAsBilling}
+                          placeholder="Street address"
                         />
                         <Input
-                          label="Line 2"
+                          label="Address Line 2"
                           name="shippingAddressLine2"
                           value={form.shippingAddressLine2}
                           onChange={handleChange}
                           disabled={form.sameAsBilling}
+                          placeholder="Apt, suite, etc."
                         />
-                        <Input
-                          label="Postal Code"
-                          name="shippingPostalCode"
-                          value={form.shippingPostalCode}
-                          onChange={handleChange}
-                          disabled={form.sameAsBilling}
-                        />
-                        <Input
-                          label="City"
-                          name="shippingCity"
-                          value={form.shippingCity}
-                          onChange={handleChange}
-                          disabled={form.sameAsBilling}
-                        />
-                        <Input
-                          label="State"
-                          name="shippingState"
-                          value={form.shippingState}
-                          onChange={handleChange}
-                          disabled={form.sameAsBilling}
-                        />
-                        <Input
-                          label="Country"
-                          name="shippingCountry"
-                          value={form.shippingCountry}
-                          onChange={handleChange}
-                          disabled={form.sameAsBilling}
-                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="Postal Code"
+                            name="shippingPostalCode"
+                            value={form.shippingPostalCode}
+                            onChange={handleChange}
+                            disabled={form.sameAsBilling}
+                            placeholder="ZIP"
+                          />
+                          <Input
+                            label="City"
+                            name="shippingCity"
+                            value={form.shippingCity}
+                            onChange={handleChange}
+                            disabled={form.sameAsBilling}
+                            placeholder="City"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="State"
+                            name="shippingState"
+                            value={form.shippingState}
+                            onChange={handleChange}
+                            disabled={form.sameAsBilling}
+                            placeholder="State"
+                          />
+                          <Input
+                            label="Country"
+                            name="shippingCountry"
+                            value={form.shippingCountry}
+                            onChange={handleChange}
+                            disabled={form.sameAsBilling}
+                            placeholder="Country"
+                          />
+                        </div>
                       </div>
-                    </div>
+                    </Card>
                   </div>
-                </div>
-              )}
-            </section>
-
-            {/* Footer */}
-            <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
-                >
-                  Reset
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600 disabled:opacity-50"
-                >
-                  {isEditMode ? "Update" : "Save"} Customer
-                </button>
-              </div>
-            </footer>
-          </form>
-        </motion.div>
-      </AnimatePresence>
-    </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </form>
+      </div>
+    </Modal>
   );
 };
-
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  icon?: React.ReactNode;
-}
-
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, icon, className = "", ...props }, ref) => (
-    <label className="flex flex-col gap-1 text-sm w-full">
-      <span className="font-medium text-gray-600">
-        {label}
-        {props.required && <span className="text-red-500 ml-1">*</span>}
-      </span>
-      <div className="relative">
-        {icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            {icon}
-          </div>
-        )}
-        <input
-          ref={ref}
-          {...props}
-          value={props.value ?? ""}
-          className={`w-full rounded border px-3 py-2 focus:ring-2 focus:ring-indigo-400 ${
-            icon ? "pl-10" : ""
-          } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
-        />
-      </div>
-    </label>
-  ),
-);
-Input.displayName = "Input";
 
 export default CustomerModal;

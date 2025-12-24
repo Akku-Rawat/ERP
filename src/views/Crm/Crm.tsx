@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import CustomerManagement from "./CustomerManagement";
 import CRMDashboard from "./CRMDashboard";
 import CRMReports from "./Reports";
@@ -21,103 +20,51 @@ const crmModule = {
   defaultTab: "dashboard",
   tabs: [
     { id: "dashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
-    {
-      id: "customer-managment",
-      name: "Customer Management",
-      icon: <FaIdBadge />,
-    },
+    { id: "customer-managment", name: "Customer Management", icon: <FaIdBadge /> },
     { id: "leads", name: "Leads", icon: <FaUser /> },
     { id: "tickets", name: "Support Tickets", icon: <FaTicketAlt /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ],
   leads: [
-    {
-      id: "LEAD-001",
-      name: "Global Enterprises",
-      contact: "Jane Wilson",
-      status: "Qualified",
-      value: 150000,
-      source: "Website",
-    },
-    {
-      id: "LEAD-002",
-      name: "StartupCo",
-      contact: "Bob Chen",
-      status: "New",
-      value: 50000,
-      source: "Referral",
-    },
-    {
-      id: "LEAD-003",
-      name: "Manufacturing Inc",
-      contact: "Alice Johnson",
-      status: "Contacted",
-      value: 80000,
-      source: "Cold Call",
-    },
+    { id: "LEAD-001", name: "Global Enterprises", contact: "Jane Wilson", status: "Qualified", value: 150000, source: "Website" },
+    { id: "LEAD-002", name: "StartupCo", contact: "Bob Chen", status: "New", value: 50000, source: "Referral" },
+    { id: "LEAD-003", name: "Manufacturing Inc", contact: "Alice Johnson", status: "Contacted", value: 80000, source: "Cold Call" },
   ],
   opportunities: [
-    {
-      id: "OPP-001",
-      name: "Enterprise Software Deal",
-      customer: "Global Enterprises",
-      value: 150000,
-      stage: "Proposal",
-      probability: 70,
-    },
-    {
-      id: "OPP-002",
-      name: "Startup Package",
-      customer: "StartupCo",
-      value: 50000,
-      stage: "Qualification",
-      probability: 30,
-    },
-    {
-      id: "OPP-003",
-      name: "Manufacturing Solution",
-      customer: "Manufacturing Inc",
-      value: 80000,
-      stage: "Needs Analysis",
-      probability: 50,
-    },
+    { id: "OPP-001", name: "Enterprise Software Deal", customer: "Global Enterprises", value: 150000, stage: "Proposal", probability: 70 },
+    { id: "OPP-002", name: "Startup Package", customer: "StartupCo", value: 50000, stage: "Qualification", probability: 30 },
+    { id: "OPP-003", name: "Manufacturing Solution", customer: "Manufacturing Inc", value: 80000, stage: "Needs Analysis", probability: 50 },
   ],
   tickets: [
-    {
-      id: "TICK-001",
-      title: "System Login Issue",
-      customer: "ABC Corporation",
-      priority: "High",
-      status: "Open",
-      created: "2025-01-18",
-    },
-    {
-      id: "TICK-002",
-      title: "Report Generation Error",
-      customer: "XYZ Industries",
-      priority: "Medium",
-      status: "In Progress",
-      created: "2025-01-17",
-    },
-    {
-      id: "TICK-003",
-      title: "Feature Request - Export",
-      customer: "Tech Solutions",
-      priority: "Low",
-      status: "Resolved",
-      created: "2025-01-16",
-    },
+    { id: "TICK-001", title: "System Login Issue", customer: "ABC Corporation", priority: "High", status: "Open", created: "2025-01-18" },
+    { id: "TICK-002", title: "Report Generation Error", customer: "XYZ Industries", priority: "Medium", status: "In Progress", created: "2025-01-17" },
+    { id: "TICK-003", title: "Feature Request - Export", customer: "Tech Solutions", priority: "Low", status: "Resolved", created: "2025-01-16" },
   ],
 };
 
 const CRM: React.FC = () => {
   const [activeTab, setActiveTab] = useState(crmModule.defaultTab);
 
+  const handleAddCustomer = () => {
+    setActiveTab("customer-managment");
+    console.log("onAdd -> Customer (parent handler called)");
+  };
+
+  const handleAddLead = () => {
+    setActiveTab("leads");
+    console.log("onAdd -> Lead (parent handler called)");
+  };
+
+  const handleAddTicket = () => {
+    setActiveTab("tickets");
+    console.log("onAdd -> Ticket (parent handler called)");
+  };
+
   return (
-    <div className="bg-gray-50 h-screen overflow-auto">
+    <div className="bg-app min-h-screen">  
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-main">
           <span>{crmModule.icon}</span> {crmModule.name}
         </h2>
       </div>
@@ -129,9 +76,7 @@ const CRM: React.FC = () => {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
-              activeTab === tab.id
-                ? "text-teal-600 border-b-2 border-teal-600"
-                : "text-gray-500 hover:text-gray-700"
+              activeTab === tab.id ? "text-primary border-b-2 border-current" : "text-muted hover:text-main"
             }`}
           >
             <span>{tab.icon}</span> {tab.name}
@@ -139,26 +84,28 @@ const CRM: React.FC = () => {
         ))}
       </div>
 
-      <div className={activeTab === "customer-managment" ? "" : "p-6"}>
-        <div
-          className={
-            activeTab === "customer-managment"
-              ? ""
-              : "bg-white rounded-lg shadow-sm p-4"
-          }
-        >
+      <div className={activeTab === "customer-managment" ? "" : "p-4"}>
+        <div>
           {activeTab === "dashboard" && <CRMDashboard />}
 
           {activeTab === "customer-managment" && (
             <CustomerManagement
-            // initialCustomers={crmModule.customers}
+              onAdd={handleAddCustomer}
             />
           )}
 
-          {activeTab === "leads" && <Leads leads={crmModule.leads} />}
+          {activeTab === "leads" && (
+            <Leads
+              leads={crmModule.leads}
+              onAdd={handleAddLead}
+            />
+          )}
 
           {activeTab === "tickets" && (
-            <SupportTickets tickets={crmModule.tickets} />
+            <SupportTickets
+              tickets={crmModule.tickets}
+              onAdd={handleAddTicket}
+            />
           )}
 
           {activeTab === "reports" && <CRMReports />}

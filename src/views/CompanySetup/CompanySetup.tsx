@@ -152,6 +152,7 @@ const CompanySetup: React.FC = () => {
       <h1 className="text-3xl font-bold mb-6 flex items-center gap-2 text-main">
         <FaBuilding /> Company Setup
       </h1>
+
       {/* Navbar */}
       <div className="flex gap-8 mb-8 border-b border-theme">
         {navTabs.map((t) => (
@@ -159,12 +160,12 @@ const CompanySetup: React.FC = () => {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-2 border-theme 
-    ${
-      tab === t.key
-        ? "border-[var(--primary)] text-main font-semibold"
-        : "border-transparent text-muted hover:text-primary"
-    }
-  `}
+              ${
+                tab === t.key
+                  ? "border-[var(--primary)] text-main font-semibold"
+                  : "border-transparent text-muted hover:text-primary"
+              }
+            `}
             style={{ background: "transparent" }}
           >
             {t.icon}
@@ -172,6 +173,8 @@ const CompanySetup: React.FC = () => {
           </button>
         ))}
       </div>
+
+      {/* Tab content */}
       <div>
         {tab === "basic" && <BasicDetails basic={basicDetail} />}
         {tab === "bank" && (

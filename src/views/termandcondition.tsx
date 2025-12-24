@@ -7,7 +7,6 @@ import type {
 } from "../types/termsAndCondition";
 
 interface Props {
-  title?: string;
   terms: TermSection | null;
   setTerms: (updated: TermSection) => void;
 }
@@ -37,7 +36,7 @@ const emptyPayment: PaymentTerms = {
   phases: [],
   dueDates: "",
   lateCharges: "",
-  taxes: "",
+  tax: "",
   notes: "",
 };
 
@@ -50,7 +49,7 @@ const emptyTerms: TermSection = {
   liability: "",
 };
 
-const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
+const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
   const [selectedTemplate, setSelectedTemplate] = useState(
     "General Service Terms",
   );
@@ -68,7 +67,7 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
     phases: src.payment?.phases ?? [],
     dueDates: src.payment?.dueDates ?? "",
     lateCharges: src.payment?.lateCharges ?? "",
-    taxes: src.payment?.taxes ?? "",
+    tax: src.payment?.tax ?? "",
     notes: src.payment?.notes ?? "",
   });
 
@@ -136,7 +135,9 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
   };
 
   const removePhase = (index: number) => {
+    console.log("removePhase index: ", index);
     if (!isEditing) return;
+    console.log("isEditing: ", isEditing);
 
     const phases = ensurePayment(currentTerms).phases as LocalPhase[];
 
@@ -161,61 +162,81 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
 
     return (
       <div className="space-y-5">
+        {/* Section Title */}
+        <div className="flex items-center justify-between pb-1 border-b">
+          <h4 className="text-lg font-semibold text-gray-800">
+            Payment Structure
+          </h4>
+
+          {isEditing && (
+            <button
+              onClick={addPhase}
+              type="button"
+              className="flex items-center gap-2 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            >
+              <FaPlus /> Add Phase
+            </button>
+          )}
+        </div>
+
         {/* Table */}
-        <div className="border border-theme rounded-lg overflow-hidden">
+        <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
           <table className="w-full text-sm">
-            <thead>
-              <tr className="table-head">
-                <th className="px-3 py-2 text-left font-medium text-muted">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">
                   #
                 </th>
-                <th className="px-3 py-2 text-left font-medium text-muted">
+                <th className="px-4 py-3 text-left font-medium text-gray-700">
                   Phase
                 </th>
-                <th className="px-3 py-2 text-left font-medium text-muted">
+                <th className="px-4 py-3 text-left font-medium text-gray-700">
                   Percentage
                 </th>
-                <th className="px-3 py-2 text-left font-medium text-muted">
+                <th className="px-4 py-3 text-left font-medium text-gray-700">
                   Condition
                 </th>
-                <th className="px-3 py-2 text-center font-medium text-muted">
+                <th className="px-4 py-3 text-center font-medium text-gray-700 w-12">
                   Action
                 </th>
               </tr>
             </thead>
 
-            <tbody>
-              {rawPhases.map((p, idx) => {
-                if (p.isDelete === 1) return null;
+            <tbody className="divide-y">
+              {rawPhases.map((p, realIndex) => {
+                if (p.isDelete === 1) return null; // hide deleted rows
 
                 return (
-                  <tr
-                    key={idx}
-                    className="border-b border-theme row-hover last:border-0"
-                  >
-                    <td className="px-3 py-2">{idx + 1}</td>
+                  <tr key={realIndex} className="hover:bg-gray-50">
+                    <td className="px-4 py-2">
+                      <span className="text-gray-800">{realIndex + 1}</span>
+                    </td>
 
-                    <td className="px-3 py-2">
+                    {/* PHASE */}
+                    <td className="px-4 py-2">
                       {isEditing ? (
                         <input
-                          className="w-full bg-transparent text-muted outline-none"
+                          className="w-full border rounded px-2 py-1 text-sm"
                           value={p.name}
                           onChange={(e) =>
-                            updatePhase(idx, { name: e.target.value })
+                            updatePhase(realIndex, { name: e.target.value })
                           }
                         />
                       ) : (
-                        <span>{p.name}</span>
+                        <span className="text-gray-800">{p.name}</span>
                       )}
                     </td>
 
-                    <td className="px-3 py-2">
+                    {/* PERCENTAGE */}
+                    <td className="px-4 py-2">
                       {isEditing ? (
                         <input
-                          className="w-full bg-transparent text-muted outline-none"
+                          className="w-full border rounded px-2 py-1 text-sm"
                           value={p.percentage}
                           onChange={(e) =>
-                            updatePhase(idx, { percentage: e.target.value })
+                            updatePhase(realIndex, {
+                              percentage: e.target.value,
+                            })
                           }
                         />
                       ) : (
@@ -223,13 +244,16 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
                       )}
                     </td>
 
-                    <td className="px-3 py-2">
+                    {/* CONDITION */}
+                    <td className="px-4 py-2">
                       {isEditing ? (
                         <input
-                          className="w-full bg-transparent text-muted outline-none"
+                          className="w-full border rounded px-2 py-1 text-sm"
                           value={p.condition}
                           onChange={(e) =>
-                            updatePhase(idx, { condition: e.target.value })
+                            updatePhase(realIndex, {
+                              condition: e.target.value,
+                            })
                           }
                         />
                       ) : (
@@ -237,11 +261,12 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
                       )}
                     </td>
 
-                    <td className="px-3 py-2 text-center">
+                    {/* DELETE */}
+                    <td className="px-4 py-2 text-center">
                       {isEditing && (
                         <button
                           type="button"
-                          onClick={() => removePhase(idx)}
+                          onClick={() => removePhase(realIndex)}
                           className="text-red-500 hover:text-red-700"
                         >
                           <FaTrash />
@@ -251,128 +276,120 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
                   </tr>
                 );
               })}
+
+              {rawPhases.filter((p) => p.isDelete !== 1).length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="py-4 text-center text-gray-500 italic"
+                  >
+                    No phases added yet.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-        {isEditing && (
-          <div className="flex justify-end w-full">
-            <button
-              type="button"
-              onClick={addPhase}
-              className="px-4 py-2 bg-primary text-white rounded-lg text-sm flex items-center gap-2"
-            >
-              <FaPlus className="w-4 h-4" /> Add Phase
-            </button>
-          </div>
-        )}
 
-        {/* Additional Payment Inputs */}
-        <div className="space-y-3 text-sm">
-          <LabeledRow
-            label="Due Dates:"
-            value={payment.dueDates ?? ""}
+        {/* EXTRA PAYMENT FIELDS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <InputField
+            label="Due Dates"
             disabled={!isEditing}
+            value={payment.dueDates ?? ""}
             onChange={(v) => updatePayment({ dueDates: v })}
           />
-
-          <LabeledRow
-            label="Late Payment Charges:"
-            value={payment.lateCharges ?? ""}
+          <InputField
+            label="Late Charges"
             disabled={!isEditing}
+            value={payment.lateCharges ?? ""}
             onChange={(v) => updatePayment({ lateCharges: v })}
           />
-
-          <LabeledRow
-            label="Tax / Additional Charges:"
-            value={payment.taxes ?? ""}
+          <InputField
+            label="Tax"
             disabled={!isEditing}
-            onChange={(v) => updatePayment({ taxes: v })}
-          />
-
-          <LabeledRow
-            label="Notes:"
-            value={payment.notes ?? ""}
-            disabled={!isEditing}
-            onChange={(v) => updatePayment({ notes: v })}
+            value={payment.tax ?? ""}
+            onChange={(v) => updatePayment({ tax: v })}
           />
         </div>
+
+        <TextareaField
+          label="Notes"
+          disabled={!isEditing}
+          value={payment.notes ?? ""}
+          onChange={(v) => updatePayment({ notes: v })}
+        />
       </div>
     );
   };
 
   const renderTextSection = (field: keyof TermSection) => (
-    <textarea
+    <TextareaField
+      label={selectedTemplate}
       disabled={!isEditing}
       value={(currentTerms[field] as string) ?? ""}
-      onChange={(e) => updateTopField(field, e.target.value)}
-      placeholder={`Enter ${selectedTemplate.toLowerCase()}...`}
-      className="w-full h-64 bg-card border border-theme rounded-lg px-4 py-3 text-sm text-main focus:ring-2 outline-none"
+      onChange={(v) => updateTopField(field, v)}
     />
   );
 
   return (
-    <div className="bg-card rounded-xl border border-theme shadow-sm overflow-hidden">
-      <div
-        className="px-4 py-2 border-b border-theme flex items-center gap-3"
-        style={{
-          background: "var(--primary-600)",
-          color: "var(--table-head-text)",
-        }}
-      >
-        <h2 className="font-semibold text-white text-sm">
-          {title ?? "Terms & Conditions"}
+    <div className="p-6 space-y-8 bg-white rounded-lg shadow-sm border">
+      {/* HEADER */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Terms & Conditions
         </h2>
 
-        <select
-          disabled={isEditing}
-          value={selectedTemplate}
-          onChange={(e) => setSelectedTemplate(e.target.value)}
-          className="ml-auto px-2 py-1 rounded bg-card border border-theme text-sm text-white"
-        >
-          {TABS.map((tab) => (
-            <option key={tab} value={tab} className="text-main">
-              {tab}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-3">
+          <label className="text-sm text-gray-600 font-medium">
+            Choose Section
+          </label>
+
+          <select
+            value={selectedTemplate}
+            onChange={(e) => setSelectedTemplate(e.target.value)}
+            disabled={isEditing}
+            className="px-3 py-1.5 border rounded-md bg-gray-50 hover:bg-gray-100 text-sm"
+          >
+            {TABS.map((tab) => (
+              <option key={tab}>{tab}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* CONTENT AREA */}
-      <div className="p-5 rounded-lg border bg-white shadow-inner min-h-[240px]">
+      <div className="p-5 rounded-lg border bg-white shadow-inner min-h-[auto]">
         {activeKey === "payment"
           ? renderPaymentTable()
           : renderTextSection(activeKey)}
       </div>
 
-      {/* ACTION BUTTONS */}
-      <div className="flex justify-end gap-3 p-4 border-t border-theme">
+      {/* BUTTONS */}
+      <div className="flex justify-end gap-3 pt-2">
         {isEditing ? (
           <>
             <button
               type="button"
+              className="px-5 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 flex items-center gap-2"
               onClick={cancelEditing}
-              className="px-4 py-2 bg-card border border-theme text-muted rounded-lg"
             >
-              <FaTimes className="inline mr-2" /> Cancel
+              <FaTimes /> Cancel
             </button>
 
             <button
               type="button"
+              className="px-5 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 flex items-center gap-2"
               onClick={saveEditing}
-              className="px-5 py-2 rounded-lg text-white font-medium"
-              style={{
-                background:
-                  "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
-              }}
             >
-              <FaCheck className="inline mr-2" /> Save Terms
+              <FaCheck /> Save
             </button>
           </>
         ) : (
           <button
             type="button"
+            className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2"
             onClick={startEditing}
-            className="px-5 py-2 bg-primary text-white rounded-lg font-medium flex items-center gap-2"
           >
             <FaEdit /> Edit
           </button>
@@ -382,7 +399,7 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
   );
 };
 
-const LabeledRow = ({
+const InputField = ({
   label,
   value,
   disabled,
@@ -393,15 +410,45 @@ const LabeledRow = ({
   disabled: boolean;
   onChange: (v: string) => void;
 }) => (
-  <div className="flex text-sm">
-    <span className="w-40 flex-shrink-0 text-muted font-medium">{label}</span>
+  <label className="space-y-1 text-sm">
+    <span className="font-medium text-gray-700">{label}</span>
     <input
       disabled={disabled}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="flex-1 bg-transparent text-muted outline-none"
+      className={`w-full px-3 py-2 rounded border text-sm ${
+        disabled
+          ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+          : "focus:ring-2 focus:ring-blue-400"
+      }`}
     />
-  </div>
+  </label>
+);
+
+const TextareaField = ({
+  label,
+  value,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  disabled: boolean;
+  onChange: (v: string) => void;
+}) => (
+  <label className="space-y-1 text-sm">
+    <span className="font-medium text-gray-700">{label}</span>
+    <textarea
+      disabled={disabled}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`w-full px-3 py-2 min-h-[140px] rounded border text-sm ${
+        disabled
+          ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+          : "focus:ring-2 focus:ring-blue-400"
+      }`}
+    />
+  </label>
 );
 
 export default TermsAndCondition;
