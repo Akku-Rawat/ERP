@@ -47,7 +47,7 @@ const Modal: React.FC<ModalProps> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 30 }}
           transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          className={`w-full ${maxWidthClasses[maxWidth]} bg-card shadow-2xl flex flex-col border border-[#e5e7eb] dark:border-[#1e293b] rounded-2xl overflow-hidden`}
+          className={`w-full ${maxWidthClasses[maxWidth]} bg-card shadow-2xl flex flex-col border border-[var(--border)] rounded-2xl overflow-hidden`}
           style={{ height }}
         >
           {/* Header with Gradient */}
@@ -79,13 +79,13 @@ const Modal: React.FC<ModalProps> = ({
           </header>
 
           {/* Content Area */}
-          <section className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-3 bg-app text-sm">
+          <section className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-3 bg-app text-sm text-main">
             {children}
           </section>
 
           {/* Footer (if provided) */}
           {footer && (
-            <footer className="flex items-center justify-between px-4 py-3 bg-app border-t border-[#e5e7eb] dark:border-[#1e293b] flex-shrink-0">
+            <footer className="flex items-center justify-between px-4 py-3 bg-app border-t border-[var(--border)] flex-shrink-0">
               {footer}
             </footer>
           )}

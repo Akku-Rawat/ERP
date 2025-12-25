@@ -1,3 +1,5 @@
+// CompanySetup.tsx
+import React, { useState } from "react";
 import React, { useEffect, useState } from "react";
 import {
   FaBuilding,
@@ -147,14 +149,14 @@ const CompanySetup: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-app min-h-screen p-8 pb-20">
+    <div className="bg-app min-h-screen p-8 pb-20 text-main">
       {/* Header */}
-      <h1 className="text-3xl font-bold mb-6 flex items-center gap-2 text-main">
-        <FaBuilding /> Company Setup
+      <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
+        <FaBuilding className="text-primary" /> Company Setup
       </h1>
 
       {/* Navbar */}
-      <div className="flex gap-8 mb-8 border-b border-theme">
+      <div className="flex gap-8 mb-8 border-b border-[var(--border)] overflow-x-auto">
         {navTabs.map((t) => (
           <button
             key={t.key}

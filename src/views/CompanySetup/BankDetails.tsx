@@ -7,6 +7,7 @@ import {
   FaTrash,
   FaEye,
   FaEyeSlash,
+  FaRegCreditCard,
   FaCheck,
   FaTimes,
 } from "react-icons/fa";
@@ -181,6 +182,8 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
     setShowAccountNumber((prev) => ({ ...prev, [accountNumber]: !prev[accountNumber] }));
   };
 
+  const defaultAccount = bankAccounts.find((a) => a.isdefault);
+
   return (
     <div className="bg-card">
       {/* ADD MODAL */}
@@ -310,9 +313,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
             </div>
 
             {selectedAccount === null || bankAccounts.length === 0 ? (
-              <div className="p-12 text-center">
-                <div className="inline-block p-6 rounded-full mb-4 bg-card">
-                  <FaUniversity className="w-12 h-12 text-muted" />
+              <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                <div className="w-24 h-24 rounded-full bg-app flex items-center justify-center mb-4 border-2 border-dashed border-[var(--border)]">
+                  <FaUniversity className="w-10 h-10 text-muted opacity-50" />
                 </div>
                 <h3 className="text-lg font-semibold text-main mb-2">No Account Selected</h3>
                 <p className="text-muted">Select an account from the list to view details</p>
@@ -408,5 +411,21 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
     </div>
   );
 };
+
+// --- Reusable Small Component for Detail Blocks ---
+const DetailBlock = ({ label, value, isMono = false }: { label: string, value: string, isMono?: boolean }) => (
+  <div className="space-y-2">
+    <label className="text-[11px] font-bold text-muted uppercase tracking-widest ml-1">{label}</label>
+    <div className="bg-app border border-[var(--border)] rounded-xl px-4 py-3.5 group hover:border-[var(--primary)]/40 transition-colors">
+      <p className={`text-main font-bold text-base ${isMono ? 'font-mono tracking-wider' : ''}`}>{value}</p>
+    </div>
+  </div>
+);
+
+const FaCheck = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+  </svg>
+);
 
 export default BankDetails;

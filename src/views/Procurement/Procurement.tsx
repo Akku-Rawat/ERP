@@ -32,11 +32,11 @@ const procurement = {
     { id: "rfqs", name: "RFQs", icon: <FaFileSignature /> },
     { id: "orders", name: "Purchase Orders", icon: <FaClipboardList /> },
     { id: "approvals", name: "Approvals", icon: <FaCheckCircle /> },
-    {
-      id: "invoicematching",
-      name: "Invoice Matching",
-      icon: <FaFileInvoiceDollar />,
-    },
+    // {
+    //   id: "invoicematching",
+    //   name: "Invoice Matching",
+    //   icon: <FaFileInvoiceDollar />,
+    // },
     { id: "purchase", name: "Purchase Invoice", icon: <FaTruckLoading /> },
   ],
 };

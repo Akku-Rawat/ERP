@@ -1,20 +1,12 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
-  X,
-  Search,
-  Edit,
-  FileText,
-  Receipt,
-  Plus,
-  MapPin,
-  Mail,
-  Phone,
-  Building2,
+  X, Search, Edit, FileText, Receipt, Plus, MapPin, Mail, Phone, Building2, FileBarChart, Globe,
 } from "lucide-react";
 import type { CustomerDetail } from "../../types/customer";
 import CustomerModal from "../../components/crm/CustomerModal";
 import QuotationModal from "../../components/sales/QuotationModal";
 import InvoiceModal from "../../components/sales/InvoiceModal";
+import CustomerStatement from "../Crm/CustomerStatement"; 
 
 interface Props {
   customer: CustomerDetail;
@@ -25,457 +17,192 @@ interface Props {
   onEdit: (id: string, e: React.MouseEvent) => void;
 }
 
-const Avatar: React.FC<{ name: string; active?: boolean }> = ({ name, active }) => (
-  <div
-    className={`w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-sm select-none ${
-      active ? "bg-primary" : "bg-slate-400"
-    }`}
-    aria-hidden
-  >
-    {name.charAt(0).toUpperCase()}
-  </div>
-);
-
 const CustomerDetailView: React.FC<Props> = ({
-  customer,
-  customers,
-  onBack,
-  onCustomerSelect,
-  onAdd,
-  onEdit,
+  customer, customers, onBack, onCustomerSelect, onAdd, onEdit,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isCustomerModalOpen, setCustomerModalOpen] = useState(false);
   const [showQuotationModal, setShowQuotationModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  
-  const handleCustomerCreated = (newCustomer: CustomerDetail) => {
-    onCustomerSelect(newCustomer);
-    try { onAdd && onAdd(); } catch (err) { /* ignore */ }
-    setCustomerModalOpen(false);
-  };
-  
-  const [activeTab, setActiveTab] = useState<"overview" | "quotations" | "invoices">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "quotations" | "invoices" | "statement">("overview");
 
   const q = searchTerm.trim().toLowerCase();
-  const filteredCustomers = (customers || []).filter((c) => {
-    const name = (c.name || "").toLowerCase();
-    const id = (c.id || "").toLowerCase();
-    return name.includes(q) || id.includes(q);
-  });
-
-  const getStatusColor = (status?: string) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200";
-      case "inactive":
-        return "bg-slate-100 text-muted border-slate-200";
-      case "prospect":
-        return "bg-primary-600 text-white border-primary-600";
-      default:
-        return "bg-slate-50 text-muted border-slate-200";
-    }
-  };
-
-  const formatAddress = (c: CustomerDetail, type: "billing" | "shipping") => {
-    const fields =
-      type === "billing"
-        ? {
-            line1: c.billingAddressLine1,
-            line2: c.billingAddressLine2,
-            city: c.billingCity,
-            state: c.billingState,
-            postal: c.billingPostalCode,
-            country: c.billingCountry,
-          }
-        : {
-            line1: c.shippingAddressLine1,
-            line2: c.shippingAddressLine2,
-            city: c.shippingCity,
-            state: c.shippingState,
-            postal: c.shippingPostalCode,
-            country: c.shippingCountry,
-          };
-
-    const parts = [
-      fields.line1,
-      fields.line2,
-      fields.city,
-      fields.state,
-      fields.postal,
-      fields.country,
-    ].filter(Boolean);
-
-    return parts.length ? parts.join(", ") : "—";
-  };
+  const filteredCustomers = (customers || []).filter((c) => 
+    c.name?.toLowerCase().includes(q) || c.id?.toLowerCase().includes(q)
+  );
 
   return (
-    <div className="flex flex-col h-screen bg-app text-main">
-      {/* Header */}
-      <div className="bg-card shadow-sm px-6 py-3 flex items-center justify-between border-b border-slate-200">
+    <div className="flex flex-col h-full bg-app text-main overflow-hidden rounded-2xl border border-[var(--border)]">
+      
+      {/* 1. COMPACT TOP HEADER */}
+      <header className="bg-card px-5 py-3 flex items-center justify-between border-b border-[var(--border)] shrink-0">
         <div className="flex items-center gap-4">
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-            aria-label="Back"
-          >
-            <X className="w-5 h-5 text-muted" />
+          <button onClick={onBack} className="p-2 hover:bg-row-hover rounded-xl transition-all border border-[var(--border)]">
+            <X size={18} className="text-muted" />
           </button>
-
-          <div>
-            <h1 className="text-lg font-semibold text-main">Customer Details</h1>
-            <p className="text-xs text-muted">Profile & transactions</p>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+                <h2 className="text-base font-black tracking-tight leading-none">{customer.name}</h2>
+                <span className="text-[9px] font-bold text-muted bg-row-hover px-1.5 py-0.5 rounded border border-[var(--border)] uppercase">{customer.id}</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
+            <p className="text-[10px] text-muted font-bold uppercase tracking-wider mt-1">Customer Insight Center</p>
           </div>
         </div>
+        <button onClick={() => setCustomerModalOpen(true)} className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md hover:opacity-90 transition text-sm font-medium">
+          <Plus size={14} /> New Customer
+        </button>
+      </header>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setCustomerModalOpen(true)}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2 text-sm font-medium shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            New Customer
-          </button>
-        </div>
-      </div>
-
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
-        <aside className="w-80 bg-sidebar border-r border-slate-200 flex flex-col">
-          <div className="p-4 border-b border-slate-200">
-            <label className="relative block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        
+        {/* 2. TIGHT SIDEBAR */}
+        <aside className="w-64 bg-card border-r border-[var(--border)] flex flex-col shrink-0">
+          <div className="p-3 border-b border-[var(--border)] bg-row-hover/10">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" />
               <input
-                type="search"
-                placeholder="Search customers, id or email"
-                value={searchTerm}
+                type="search" placeholder="Quick find..." value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-10 py-2.5 text-sm bg-card border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all"
-                aria-label="Search customers"
+                className="w-full pl-8 pr-3 py-1.5 text-[11px] bg-app border border-[var(--border)] rounded-lg focus:ring-1 focus:ring-primary outline-none transition-all"
               />
-
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-slate-100"
-                  aria-label="Clear search"
-                >
-                  ✕
-                </button>
-              )}
-            </label>
-
-            <p className="mt-3 text-xs text-muted">{filteredCustomers.length} customers</p>
+            </div>
           </div>
-
-          <div className="flex-1 overflow-y-auto">
-            {filteredCustomers.map((c) => {
-              const name = (c?.name || "");
-              const id = (c?.id || "");
-              const status = (c?.status || "N/A");
-              const isActive = id === customer?.id;
-
-              return (
-                <button
-                  key={id || Math.random().toString(36).slice(2)}
-                  onClick={() => onCustomerSelect(c)}
-                  className={`w-full text-left p-4 border-b border-slate-100 cursor-pointer transition-all flex items-center gap-3 ${
-                    isActive
-                      ? "bg-blue-50 border-l-4 border-l-primary"
-                      : "hover:bg-slate-50"
-                  }`}
-                  aria-current={isActive}
-                >
-                  <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-sm ${
-                      isActive ? "bg-primary" : "bg-slate-400"
-                    }`}
-                    aria-hidden
-                  >
-                    {(name.charAt(0) || "").toUpperCase()}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-main truncate">{name || "—"}</p>
-                    <p className="text-xs text-muted font-mono truncate">{id || "—"}</p>
-                  </div>
-
-                  <span
-                    className={`px-2 py-1 text-xs font-medium rounded border ${getStatusColor(status)}`}
-                  >
-                    {status.toUpperCase()}
-                  </span>
-                </button>
-              );
-            })}
+          
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-0.5">
+            {filteredCustomers.map((c) => (
+              <button
+                key={c.id} onClick={() => onCustomerSelect(c)}
+                className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center gap-3 border ${
+                  c.id === customer.id ? "bg-primary text-white border-primary shadow-sm" : "bg-transparent border-transparent hover:bg-row-hover"
+                }`}
+              >
+                <div className={`w-7 h-7 shrink-0 rounded-lg flex items-center justify-center font-bold text-[10px] ${c.id === customer.id ? "bg-white/20" : "bg-muted text-white"}`}>
+                  {c.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-[11px] truncate leading-tight">{c.name}</p>
+                  <p className={`text-[8px] font-mono uppercase ${c.id === customer.id ? "text-white/60" : "text-muted"}`}>{c.id}</p>
+                </div>
+              </button>
+            ))}
           </div>
         </aside>
 
-        {/* Main */}
-        <main className="flex-1 flex flex-col">
-          {/* Tabs */}
-          <div className="bg-card border-b border-slate-200 sticky top-0 z-10">
-            <div className="flex px-6">
-              <button
-                onClick={() => setActiveTab("overview")}
-                className={`px-6 py-4 font-medium text-sm border-b-2 transition-all ${
-                  activeTab === "overview"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted hover:text-main"
-                }`}
-              >
-                Overview
-              </button>
-
-              <button
-                onClick={() => setActiveTab("quotations")}
-                className={`px-6 py-4 font-medium text-sm border-b-2 transition-all flex items-center gap-2 ${
-                  activeTab === "quotations"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted hover:text-main"
-                }`}
-              >
-                <FileText className="w-4 h-4 text-muted" />
-                Quotations
-              </button>
-
-              <button
-                onClick={() => setActiveTab("invoices")}
-                className={`px-6 py-4 font-medium text-sm border-b-2 transition-all flex items-center gap-2 ${
-                  activeTab === "invoices"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted hover:text-main"
-                }`}
-              >
-                <Receipt className="w-4 h-4 text-muted" />
-                Invoices
-              </button>
-
-              <div className="ml-auto flex items-center gap-3 px-4">
-                <button className="text-sm px-3 py-2 rounded-md border border-slate-200 hover:shadow-sm text-muted transition-shadow">
-                  Export
+        {/* 3. CONTENT AREA */}
+        <main className="flex-1 flex flex-col min-w-0 bg-app/20">
+          
+          {/* COMPACT TABS */}
+          <div className="bg-card border-b border-[var(--border)] px-4 shrink-0 z-10 flex items-center justify-between">
+            <div className="flex">
+              {[
+                { id: "overview", label: "Overview", icon: <Globe /> },
+                { id: "quotations", label: "Quotations", icon: <FileText /> },
+                { id: "invoices", label: "Invoices", icon: <Receipt /> },
+                { id: "statement", label: "Statement", icon: <FileBarChart /> },
+              ].map((t) => (
+                <button
+                  key={t.id} onClick={() => setActiveTab(t.id as any)}
+                  className={`px-4 py-3.5 font-bold text-[10px] uppercase tracking-widest border-b-2 transition-all flex items-center gap-2 shrink-0 ${activeTab === t.id ? "border-primary text-primary" : "border-transparent text-muted hover:text-main"}`}
+                >
+                  {React.cloneElement(t.icon as any, { size: 14 })} {t.label}
                 </button>
-                <button className="text-sm px-3 py-2 rounded-md border border-slate-200 hover:shadow-sm text-muted transition-shadow">
-                  More
-                </button>
-              </div>
+              ))}
             </div>
+            <button onClick={(e) => onEdit(customer.id, e)} className="flex items-center gap-2 px-3 py-1.5 bg-card border border-[var(--border)] text-muted hover:text-main rounded-lg transition-all font-bold text-[10px] uppercase tracking-widest">
+                <Edit size={12} /> Edit Profile
+            </button>
           </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-8 bg-app">
+          <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
+            
             {activeTab === "overview" && (
-              <div className="max-w-6xl mx-auto">
-                {/* Single Consolidated Card */}
-                <section className="bg-card rounded-xl shadow-sm border border-slate-200 p-8">
-                  {/* Header Section */}
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-6">
-                      <Avatar name={customer.name} active />
-                      <div>
-                        <h2 className="text-3xl font-bold text-main mb-1">{customer.name}</h2>
-                        <p className="text-sm text-muted font-mono mb-3">{customer.id}</p>
-                        <span
-                          className={`inline-flex px-3 py-1.5 text-xs font-semibold rounded-full border ${getStatusColor(
-                            customer.status,
-                          )}`}
-                        >
-                          {(customer.status || "unknown").toUpperCase()}
-                        </span>
-                      </div>
+              <div className="max-w-6xl mx-auto space-y-4 animate-in fade-in duration-500 pb-10">
+                
+                {/* REFINED QUICK INFO ROW */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <InfoStrip icon={<Building2 />} label="Customer Type" value={customer.type} />
+                    <InfoStrip icon={<FileText />} label="Tax ID / TPIN" value={customer.tpin} />
+                    <InfoStrip icon={<Receipt />} label="Base Currency" value={customer.currency} />
+                </div>
+
+                {/* CONSOLIDATED DATA SECTION */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    
+                    {/* Contact Details */}
+                    <div className="bg-card rounded-2xl border border-[var(--border)] p-5 shadow-sm">
+                        <h4 className="text-[10px] font-black text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <Mail size={12} className="text-primary" /> Contact Channels
+                        </h4>
+                        <div className="space-y-3">
+                            <DataRow label="Email Address" value={customer.email} />
+                            <DataRow label="Mobile Number" value={customer.mobile} />
+                        </div>
                     </div>
 
-                    <button
-                      onClick={(e) => onEdit(customer.id, e)}
-                      className="px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-600 transition-all font-medium text-sm shadow-sm hover:shadow flex items-center gap-2"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Edit Profile
-                    </button>
-                  </div>
-
-                  <hr className="border-slate-200 mb-8" />
-
-                  {/* Quick Stats Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="flex items-center gap-4 p-5 rounded-lg bg-blue-50 border border-blue-100">
-                      <div className="p-3 rounded-lg bg-card shadow-sm">
-                        <Building2 className="w-6 h-6 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-medium text-muted uppercase tracking-wide mb-1">
-                          Customer Type
-                        </p>
-                        <p className="text-lg font-bold text-main">{customer.type || "—"}</p>
-                      </div>
+                    {/* Address Details */}
+                    <div className="bg-card rounded-2xl border border-[var(--border)] p-5 shadow-sm">
+                        <h4 className="text-[10px] font-black text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <MapPin size={12} className="text-primary" /> Physical Locations
+                        </h4>
+                        <div className="space-y-3">
+                            <DataRow label="Billing Address" value={customer.billingAddressLine1} />
+                            <DataRow label="Shipping Address" value={customer.shippingAddressLine1} />
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-4 p-5 rounded-lg bg-emerald-50 border border-emerald-100">
-                      <div className="p-3 rounded-lg bg-card shadow-sm">
-                        <FileText className="w-6 h-6 text-emerald-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-medium text-muted uppercase tracking-wide mb-1">
-                          Tax ID (TPIN)
-                        </p>
-                        <p className="text-lg font-bold text-main">{customer.tpin || "—"}</p>
-                      </div>
-                    </div>
+                </div>
 
-                    <div className="flex items-center gap-4 p-5 rounded-lg bg-amber-50 border border-amber-100">
-                      <div className="p-3 rounded-lg bg-card shadow-sm">
-                        <Receipt className="w-6 h-6 text-amber-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-medium text-muted uppercase tracking-wide mb-1">
-                          Currency
-                        </p>
-                        <p className="text-lg font-bold text-main">{customer.currency || "—"}</p>
-                      </div>
-                    </div>
-                  </div>
+                {/* BOTTOM SECTION FOR MISC INFO (Optional) */}
+                <div className="p-4 border-2 border-dashed border-[var(--border)] rounded-2xl flex items-center justify-center opacity-40">
+                   <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted text-center">Additional Ledger data will load here</p>
+                </div>
 
-                  <hr className="border-slate-200 mb-8" />
-
-                  {/* Contact & Address Section */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Contact Information */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-5">
-                        <div className="p-2 rounded-lg bg-blue-50">
-                          <Mail className="w-5 h-5 text-primary" />
-                        </div>
-                        <h3 className="text-lg font-bold text-main">Contact Information</h3>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div className="flex items-start gap-4 p-4 rounded-lg bg-slate-50 border border-slate-100">
-                          <div className="p-2 rounded-lg bg-card shadow-sm">
-                            <Mail className="w-5 h-5 text-slate-600" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-1">
-                              Email Address
-                            </p>
-                            <p className="text-sm font-medium text-main truncate">
-                              {customer.email || "—"}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start gap-4 p-4 rounded-lg bg-slate-50 border border-slate-100">
-                          <div className="p-2 rounded-lg bg-card shadow-sm">
-                            <Phone className="w-5 h-5 text-slate-600" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-1">
-                              Mobile Number
-                            </p>
-                            <p className="text-sm font-medium text-main">{customer.mobile || "—"}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Addresses */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-5">
-                        <div className="p-2 rounded-lg bg-blue-50">
-                          <MapPin className="w-5 h-5 text-primary" />
-                        </div>
-                        <h3 className="text-lg font-bold text-main">Addresses</h3>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
-                          <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
-                            Billing Address
-                          </p>
-                          <p className="text-sm text-main leading-relaxed">
-                            {formatAddress(customer, "billing")}
-                          </p>
-                        </div>
-
-                        <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
-                          <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
-                            Shipping Address
-                          </p>
-                          <p className="text-sm text-main leading-relaxed">
-                            {formatAddress(customer, "shipping")}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
               </div>
             )}
 
-            {activeTab === "quotations" && (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div className="w-24 h-24 mx-auto bg-gradient-to-b from-slate-50 to-slate-100 rounded-full flex items-center justify-center mb-4">
-                    <FileText className="w-12 h-12 text-muted" />
-                  </div>
-                  <p className="text-xl font-semibold text-main mb-2">No Quotations Yet</p>
-                  <p className="text-sm text-muted mb-6">
-                    Create your first quotation for this customer
-                  </p>
-                  <button
-                    onClick={() => setShowQuotationModal(true)}
-                    className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm inline-flex items-center gap-2 shadow-sm"
-                  >
-                    <Plus className="w-4 h-4" /> Create Quotation
-                  </button>
-                </div>
-              </div>
-            )}
+            {activeTab === "statement" && <CustomerStatement customerId={customer.id} />}
 
-            {activeTab === "invoices" && (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div className="w-24 h-24 mx-auto bg-gradient-to-b from-slate-50 to-slate-100 rounded-full flex items-center justify-center mb-4">
-                    <Receipt className="w-12 h-12 text-muted" />
-                  </div>
-                  <p className="text-xl font-semibold text-main mb-2">No Invoices Yet</p>
-                  <p className="text-sm text-muted mb-6">
-                    Create your first invoice for this customer
-                  </p>
-                  <button
-                    onClick={() => setShowInvoiceModal(true)}
-                    className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm inline-flex items-center gap-2 shadow-sm"
-                  >
-                    <Plus className="w-4 h-4" /> Create Invoice
-                  </button>
+            {/* Empty States for other tabs */}
+            {(activeTab === "quotations" || activeTab === "invoices") && (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="p-5 rounded-2xl bg-row-hover text-muted mb-4">
+                  {activeTab === "quotations" ? <FileText size={32} /> : <Receipt size={32} />}
                 </div>
+                <h3 className="text-sm font-bold text-main">No {activeTab} available</h3>
+                <p className="text-[10px] text-muted font-bold uppercase mt-1">Transaction history is empty</p>
               </div>
             )}
           </div>
         </main>
       </div>
 
-      {/* Modals */}
-      <QuotationModal
-        isOpen={showQuotationModal}
-        onClose={() => setShowQuotationModal(false)}
-        onSubmit={() => setShowQuotationModal(false)}
-      />
-
-      <InvoiceModal
-        isOpen={showInvoiceModal}
-        onClose={() => setShowInvoiceModal(false)}
-        onSubmit={() => setShowInvoiceModal(false)}
-      />
-
-      <CustomerModal
-        isOpen={isCustomerModalOpen}
-        onClose={() => setCustomerModalOpen(false)}
-        onSubmit={(created) => handleCustomerCreated(created)}
-        initialData={null}
-        isEditMode={false}
-      />
+      <QuotationModal isOpen={showQuotationModal} onClose={() => setShowQuotationModal(false)} />
+      <InvoiceModal isOpen={showInvoiceModal} onClose={() => setShowInvoiceModal(false)} />
+      <CustomerModal isOpen={isCustomerModalOpen} onClose={() => setCustomerModalOpen(false)} onSubmit={(created:any) => onCustomerSelect(created)} />
     </div>
   );
 };
+
+// --- Enterprise UI Sub-components ---
+
+const InfoStrip = ({ icon, label, value }: any) => (
+  <div className="bg-card rounded-xl border border-[var(--border)] p-3 flex items-center gap-3 shadow-sm hover:shadow-md transition-all group">
+    <div className="p-2 rounded-lg bg-row-hover text-primary border border-[var(--border)] group-hover:bg-primary group-hover:text-white transition-all">
+        {React.cloneElement(icon, { size: 16 })}
+    </div>
+    <div className="leading-tight">
+      <p className="text-[8px] font-black text-muted uppercase tracking-wider mb-0.5">{label}</p>
+      <p className="text-xs font-bold text-main">{value || "—"}</p>
+    </div>
+  </div>
+);
+
+const DataRow = ({ label, value }: any) => (
+  <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 py-1 px-3 bg-app/30 rounded-xl border border-transparent hover:border-[var(--border)] hover:bg-app/50 transition-all">
+    <span className="text-[9px] font-bold text-muted uppercase tracking-widest">{label}</span>
+    <span className="text-xs font-semibold text-main truncate max-w-[200px]">{value || "Not provided"}</span>
+  </div>
+);
 
 export default CustomerDetailView;

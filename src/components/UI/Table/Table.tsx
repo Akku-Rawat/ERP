@@ -1,12 +1,10 @@
-import React from "react";
-
-export interface Column<T> {
-  key: string;
-  header: string;
-  render?: (item: T) => React.ReactNode;
-  align?: "left" | "center" | "right";
-  sortable?: boolean;
-}
+import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useTableLogic } from "./useTableLogic";
+import type { Column } from "../Table/type";
+import ColumnSelector from "./ColumnSelector";
+import Pagination from "../../Pagination";
+import { FaFilter, FaSortAmountDown, FaSortAmountUp, FaSearch } from "react-icons/fa";
 
 interface TableProps<T> {
   columns: Column<T>[];
@@ -14,60 +12,229 @@ interface TableProps<T> {
   onRowClick?: (item: T) => void;
   loading?: boolean;
   emptyMessage?: string;
-  zebraStripes?: boolean;
-  hoverable?: boolean;
-
-  // Add button label (parent controls it)
-  addLabel?: string;
-
-  // Toolbar + column selector
   showToolbar?: boolean;
   enableAdd?: boolean;
   onAdd?: () => void;
   searchValue?: string;
   onSearch?: (q: string) => void;
   toolbarPlaceholder?: string;
-
   enableColumnSelector?: boolean;
   initialVisibleColumns?: string[];
-
-  // pagination props (optional)
   currentPage?: number;
   totalPages?: number;
   pageSize?: number;
   totalItems?: number;
   onPageChange?: (page: number) => void;
+  addLabel?: string;
 }
 
+/**
+ * Filter dropdown component rendered via Portal
+ * This ensures the dropdown is not clipped by parent overflow
+ */
+interface FilterDropdownProps {
+  isOpen: boolean;
+  onClose: () => void;
+  anchorRef: React.RefObject<HTMLButtonElement>;
+  nameFilter: string;
+  setNameFilter: (value: string) => void;
+  typeFilter: string;
+  setTypeFilter: (value: string) => void;
+  onReset: () => void;
+}
+
+function FilterDropdown({
+  isOpen,
+  onClose,
+  anchorRef,
+  nameFilter,
+  setNameFilter,
+  typeFilter,
+  setTypeFilter,
+  onReset,
+}: FilterDropdownProps) {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+
+  // Calculate dropdown position based on anchor button
+  useEffect(() => {
+    if (isOpen && anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      const dropdownWidth = 320;
+
+      // Position below the button, aligned to the right
+      setPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: Math.max(rect.right + window.scrollX - dropdownWidth, 8),
+      });
+    }
+  }, [isOpen, anchorRef]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target) &&
+        anchorRef.current &&
+        !anchorRef.current.contains(target)
+      ) {
+        onClose();
+      }
+    };
+
+    // Handle escape key to close dropdown
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen, onClose, anchorRef]);
+
+  if (!isOpen) return null;
+
+  // Render dropdown via portal to avoid overflow clipping
+  return createPortal(
+    <div
+      ref={dropdownRef}
+      className="fixed w-80 bg-card border border-[var(--border)] rounded-2xl shadow-2xl z-[9999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+      style={{
+        top: position.top,
+        left: position.left,
+      }}
+    >
+      {/* Dropdown Header */}
+      <div className="px-5 py-3 border-b border-[var(--border)] bg-row-hover/30">
+        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-main">
+          Filter Records
+        </h4>
+      </div>
+
+      {/* Filter Fields */}
+      <div className="p-5 space-y-4">
+        <FilterField label="Search Keywords">
+          <input
+            type="text"
+            value={nameFilter}
+            onChange={(e) => setNameFilter(e.target.value)}
+            className="w-full px-4 py-2.5 bg-app border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+            placeholder="Enter keywords..."
+          />
+        </FilterField>
+
+        <FilterField label="Category/Type">
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="w-full px-4 py-2.5 bg-app border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
+          >
+            <option value="">All Categories</option>
+            <option value="Individual">Individual</option>
+            <option value="Company">Company</option>
+          </select>
+        </FilterField>
+      </div>
+
+      {/* Dropdown Footer */}
+      <div className="px-5 py-3 border-t border-[var(--border)] bg-row-hover/10 flex items-center justify-between">
+        <button
+          onClick={onReset}
+          className="text-[10px] font-black uppercase text-muted hover:text-danger transition-colors"
+        >
+          Reset
+        </button>
+        <button
+          onClick={onClose}
+          className="bg-primary text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-md hover:opacity-90 transition-all"
+        >
+          Apply
+        </button>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+/**
+ * Reusable filter field wrapper component
+ */
+interface FilterFieldProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+const FilterField: React.FC<FilterFieldProps> = ({ label, children }) => (
+  <div className="space-y-1.5">
+    <label className="text-[9px] font-black text-muted uppercase tracking-widest ml-1">
+      {label}
+    </label>
+    {children}
+  </div>
+);
+
+/**
+ * Main Table Component
+ * A flexible, feature-rich data table with sorting, filtering, and pagination
+ */
 function Table<T extends Record<string, any>>({
   columns,
   data,
   onRowClick,
   loading = false,
-  emptyMessage = "No data found.",
-  zebraStripes = false,
-  hoverable = true,
-
-  addLabel = "+ Add",
-
+  emptyMessage = "No records found.",
   showToolbar = false,
   enableAdd = false,
   onAdd,
   searchValue,
-  onSearch,
   toolbarPlaceholder = "Search...",
-
   enableColumnSelector = false,
-  initialVisibleColumns,
-
-  // pagination (destructured)
+  addLabel = "+ Add",
   currentPage,
   totalPages,
   pageSize = 10,
   totalItems = 0,
   onPageChange,
+  onSearch,
 }: TableProps<T>) {
-  const getAlignment = (align?: "left" | "center" | "right") => {
+  const {
+    effectiveSearch,
+    setSearch,
+    visibleKeys,
+    setVisibleKeys,
+    allKeys,
+    toggleColumn,
+    filtersOpen,
+    setFiltersOpen,
+    nameFilter,
+    setNameFilter,
+    typeFilter,
+    setTypeFilter,
+    setMinFilter,
+    setMaxFilter,
+    sortOrder,
+    setSortOrder,
+    processedData,
+  } = useTableLogic<T>({ columns, data, searchValue });
+
+  // Reference for the filter button (used for dropdown positioning)
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
+
+  /**
+   * Returns the appropriate text alignment class based on column configuration
+   */
+  const getAlignment = (align?: "left" | "center" | "right"): string => {
     switch (align) {
       case "center":
         return "text-center";
@@ -78,249 +245,116 @@ function Table<T extends Record<string, any>>({
     }
   };
 
-  // Search state (toolbar)
-  const [internalSearch, setInternalSearch] = React.useState("");
-  const effectiveSearch = searchValue ?? internalSearch;
-  const setSearch = (val: string) => {
-    if (onSearch) onSearch(val);
-    else setInternalSearch(val);
+  /**
+   * Resets all filter values to their default state
+   */
+  const handleResetFilters = () => {
+    setNameFilter("");
+    setTypeFilter("");
+    setMinFilter("");
+    setMaxFilter("");
   };
 
-  // Column visibility state
-  const allKeys = columns.map((c) => c.key);
-  const initialKeys = initialVisibleColumns ?? allKeys;
-  const [visibleKeys, setVisibleKeys] = React.useState<string[]>(() =>
-    allKeys.filter((k) => initialKeys.includes(k)),
-  );
-
-  const isVisible = (key: string) => visibleKeys.includes(key);
-  const toggleColumn = (key: string) => {
-    setVisibleKeys((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
-    );
-  };
-
-  // Column selector menu toggle + menu search
-  const [colMenuOpen, setColMenuOpen] = React.useState(false);
-  const [menuSearch, setMenuSearch] = React.useState("");
-  const menuRef = React.useRef<HTMLDivElement | null>(null);
-
-  React.useEffect(() => {
-    const handleDocClick = (e: MouseEvent) => {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target as Node)) {
-        setColMenuOpen(false);
-        setMenuSearch("");
-      }
-    };
-    document.addEventListener("click", handleDocClick);
-    return () => document.removeEventListener("click", handleDocClick);
-  }, []);
-
-  // Loading view
+  // Display loading state
   if (loading) {
     return (
-      <div className="bg-card rounded-xl  overflow-hidden">
-        <div className="p-12 text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
-          <p className="mt-4 text-muted font-medium">Loading data...</p>
+      <div className="bg-card rounded-2xl border border-[var(--border)] overflow-hidden">
+        <div className="p-20 text-center flex flex-col items-center">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="mt-4 text-[11px] font-black uppercase tracking-widest text-muted">
+            Loading data...
+          </p>
         </div>
       </div>
     );
   }
 
-  // filtered columns for the menu search
-  const menuFilteredColumns = columns.filter((c) =>
-    c.header.toLowerCase().includes(menuSearch.trim().toLowerCase()),
-  );
-
-  // Check if pagination should be shown - show even if only 1 page for visibility
-  const showPagination = 
-    typeof currentPage === "number" &&
-    typeof totalPages === "number" &&
-    typeof onPageChange === "function" &&
-    totalItems > 0;
-
-  // Display all data as passed from parent (no slicing)
-  const displayData = data;
+  const displayData = processedData;
 
   return (
-    <div className="bg-card rounded-xl  border border-[var(--border)] flex flex-col">
-      {/* TOOLBAR */}
+    <div className="bg-card rounded-2xl border border-[var(--border)] flex flex-col shadow-sm transition-all relative z-10 w-full overflow-hidden">
+      
+      {/* Toolbar Section */}
       {showToolbar && (
-        <div className="px-6 py-4 border-b bg-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          {/* Search */}
-          <div className="flex items-center w-full sm:max-w-md">
+        <div className="px-5 py-4 border-b border-[var(--border)] bg-card flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shrink-0">
+          
+          {/* Search Input */}
+          <div className="relative w-full lg:max-w-sm group">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs group-focus-within:text-primary transition-colors" />
             <input
               value={effectiveSearch}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                typeof onSearch === "function"
+                  ? onSearch(e.target.value)
+                  : setSearch(e.target.value)
+              }
               placeholder={toolbarPlaceholder}
-              className="w-full pl-4 pr-3 py-2 border border-[var(--border)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
+              className="w-full pl-10 pr-4 py-2 bg-app border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
             />
           </div>
 
-          {/* Column Selector + Add Button */}
-          <div className="flex items-center gap-3 justify-end w-full sm:w-auto">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 shrink-0">
+            
+            {/* Sort Toggle Button */}
+            <button
+              onClick={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
+              className={`p-2 rounded-xl border border-[var(--border)] bg-app text-muted hover:text-primary hover:border-primary transition-all flex items-center gap-2 px-3 whitespace-nowrap ${
+                sortOrder ? "border-primary text-primary" : ""
+              }`}
+              title={`Sort ${sortOrder === "asc" ? "Descending" : "Ascending"}`}
+            >
+              {sortOrder === "asc" ? (
+                <FaSortAmountUp size={12} />
+              ) : (
+                <FaSortAmountDown size={12} />
+              )}
+              <span className="text-[10px] font-black uppercase tracking-widest">Sort</span>
+            </button>
+
+            {/* Filter Button */}
+            <button
+              ref={filterButtonRef}
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              className={`p-2 rounded-xl border border-[var(--border)] bg-app text-muted hover:text-primary hover:border-primary transition-all flex items-center gap-2 px-3 whitespace-nowrap ${
+                filtersOpen
+                  ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+                  : ""
+              }`}
+              title="Open Filters"
+            >
+              <FaFilter size={10} />
+              <span className="text-[10px] font-black uppercase tracking-widest">Filters</span>
+            </button>
+
+            {/* Filter Dropdown (rendered via Portal) */}
+            <FilterDropdown
+              isOpen={filtersOpen}
+              onClose={() => setFiltersOpen(false)}
+              anchorRef={filterButtonRef}
+              nameFilter={nameFilter}
+              setNameFilter={setNameFilter}
+              typeFilter={typeFilter}
+              setTypeFilter={setTypeFilter}
+              onReset={handleResetFilters}
+            />
+
+            {/* Column Selector */}
             {enableColumnSelector && (
-              <div className="relative" ref={menuRef}>
-                {/* Button shows selected count */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setColMenuOpen((v) => !v);
-                  }}
-                  className="px-3 py-2 border rounded-md text-sm bg-card hover:bg-gray-50 flex items-center gap-2"
-                  type="button"
-                  aria-haspopup="dialog"
-                  aria-expanded={colMenuOpen}
-                >
-                  <span className="whitespace-nowrap">
-                    {visibleKeys.length} Selected
-                  </span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${colMenuOpen ? "rotate-180" : "rotate-0"}`}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                  </svg>
-                </button>
-
-                {colMenuOpen && (
-                  <div
-                    className="absolute right-0 mt-2 w-72 bg-card border border-[var(--border)] rounded-lg shadow-2xl z-[100] overflow-hidden"
-                    role="dialog"
-                    aria-label="Column selector"
-                    onClick={(e) => e.stopPropagation()}
-                    style={{ position: 'absolute' }}
-                  >
-                    {/* Header with gradient */}
-                    <div className="bg-primary px-4 py-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-                        </svg>
-                        <div className="text-sm font-semibold text-white">
-                          Columns ({visibleKeys.length}/{columns.length})
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setColMenuOpen(false);
-                          setMenuSearch("");
-                        }}
-                        className="p-1 rounded hover:bg-card/20 text-white transition-colors"
-                        type="button"
-                        aria-label="Close"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Search inside menu */}
-                    <div className="p-3 bg-gray-50 border-b">
-                      <div className="relative">
-                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        <input
-                          type="search"
-                          placeholder="Search columns..."
-                          value={menuSearch}
-                          onChange={(e) => setMenuSearch(e.target.value)}
-                          className="w-full pl-9 pr-3 py-2 text-sm border border-[var(--border)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Controls */}
-                    <div className="flex items-center justify-between px-4 py-2 bg-card border-b">
-                      <button
-                        onClick={() => setVisibleKeys(allKeys)}
-                        className="text-xs font-medium bg-primary transition-colors"
-                        type="button"
-                      >
-                        ✓ Show all
-                      </button>
-                      <button
-                        onClick={() => setVisibleKeys([])}
-                        className="text-xs font-medium text-[var(--danger)] transition-colors"
-                        type="button"
-                      >
-                        ✕ Hide all
-                      </button>
-                    </div>
-
-                    {/* List */}
-                    <div className="max-h-64 overflow-y-auto bg-card">
-                      {menuFilteredColumns.length > 0 ? (
-                        <div className="p-2">
-                          {menuFilteredColumns.map((col) => (
-                            <label
-                              key={col.key}
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-blue-50 cursor-pointer select-none transition-colors group"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isVisible(col.key)}
-                                onChange={() => toggleColumn(col.key)}
-                                onClick={(e) => e.stopPropagation()}
-                                className="w-4 h-4 text-[var(--primary)] rounded border-[var(--border)] focus:ring-[var(--primary)]"
-
-                              />
-                              <div className="flex-1 text-sm text-gray-700 group-hover:text-gray-900 font-medium">{col.header}</div>
-                              {isVisible(col.key) && (
-                                <svg className="w-4 h-4 text-[var(--success)]" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              )}
-                            </label>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="px-4 py-8 text-center text-sm text-gray-500">
-                          No columns found
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Footer */}
-                    <div className="px-3 py-3 bg-gray-50 border-t flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => {
-                          setColMenuOpen(false);
-                          setMenuSearch("");
-                        }}
-                        className="text-sm px-4 py-1.5 rounded-md border border-[var(--border)] hover:bg-gray-100 transition-colors font-medium"
-                        type="button"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={() => {
-                          setColMenuOpen(false);
-                          setMenuSearch("");
-                        }}
-                        className="text-sm px-4 py-1.5 rounded-md bg-primary text-white transition-colors font-medium shadow-sm"
-                        type="button"
-                      >
-                        Done
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <ColumnSelector
+                columns={columns}
+                visibleKeys={visibleKeys}
+                toggleColumn={toggleColumn}
+                setVisibleKeys={setVisibleKeys}
+                allKeys={allKeys}
+              />
             )}
 
             {/* Add Button */}
             {enableAdd && (
               <button
-                onClick={() => onAdd?.()}
-                className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md hover:opacity-95 transition shadow-sm text-sm"
-                type="button"
+                onClick={onAdd}
+                className="bg-primary text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:opacity-90 transition-all whitespace-nowrap ml-2"
               >
                 {addLabel}
               </button>
@@ -329,88 +363,63 @@ function Table<T extends Record<string, any>>({
         </div>
       )}
 
-      {/* TABLE: fixed-height scroll body */}
-      <div className="flex-1 w-full overflow-x-auto">
-        <div className="max-h-[420px] overflow-y-auto">
-          <table className="min-w-full table-auto">
-            <thead className="table-head sticky top-0 z-10">
+      {/* Scrollable Table Container */}
+      <div className="w-full overflow-x-auto custom-scrollbar">
+        <div className="max-h-[420px] overflow-y-auto min-w-[800px] relative">
+          <table className="w-full border-separate border-spacing-0">
+            
+            {/* Table Header */}
+            <thead className="sticky top-0 z-30 shadow-sm">
               <tr>
                 {columns
-                  .filter((c) => isVisible(c.key))
+                  .filter((col) => visibleKeys.includes(col.key))
                   .map((column) => (
                     <th
                       key={column.key}
-                      className={`px-6 py-3 text-sm font-semibold uppercase tracking-wide bg-primary text-white align-middle whitespace-nowrap ${getAlignment(
-                        column.align,
+                      className={`px-5 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted border-b border-[var(--border)] bg-card whitespace-nowrap ${getAlignment(
+                        column.align
                       )}`}
+                      style={{ backgroundColor: "var(--card)" }}
                     >
-                      <div className={`flex items-center gap-2 ${column.align === 'center' ? 'justify-center' : column.align === 'right' ? 'justify-end' : 'justify-start'}`}>
-                        {column.header}
-                        {column.sortable && (
-                          <svg
-                            className="w-4 h-4 opacity-60"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
-                            />
-                          </svg>
-                        )}
-                      </div>
+                      {column.header}
                     </th>
                   ))}
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-200">
+            {/* Table Body */}
+            <tbody className="relative z-10">
               {displayData.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={visibleKeys.length || columns.length}
-                    className="px-6 py-12 text-center"
-                  >
-                    <div className="flex flex-col items-center gap-3">
-                      <svg
-                        className="w-16 h-16 text-muted opacity-30"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                        />
-                      </svg>
-                      <p className="text-muted font-medium">{emptyMessage}</p>
-                    </div>
+                  <td colSpan={columns.length} className="px-6 py-24 text-center">
+                    <p className="text-xs font-bold text-muted uppercase tracking-widest opacity-40">
+                      {emptyMessage}
+                    </p>
                   </td>
                 </tr>
               ) : (
-                displayData.map((item, index) => (
+                displayData.map((item, idx) => (
                   <tr
-                    key={index}
+                    key={item.id || idx}
                     onClick={() => onRowClick?.(item)}
-                    className={`transition-colors duration-150 ${
-                      hoverable ? "hover:bg-gray-50 cursor-pointer" : ""
-                    }`}
+                    className={`group transition-all cursor-pointer ${
+                      idx % 2 === 0 ? "bg-transparent" : "bg-row-hover/10"
+                    } hover:bg-row-hover`}
                   >
                     {columns
-                      .filter((c) => isVisible(c.key))
+                      .filter((col) => visibleKeys.includes(col.key))
                       .map((column) => (
                         <td
                           key={column.key}
-                          className={`px-6 py-3 text-sm text-main align-middle whitespace-nowrap ${getAlignment(
-                            column.align,
+                          className={`px-5 py-3.5 text-xs font-medium text-main border-b border-[var(--border)]/20 ${getAlignment(
+                            column.align
                           )}`}
                         >
-                          {column.render ? column.render(item) : item[column.key]}
+                          {column.render ? (
+                            column.render(item)
+                          ) : (
+                            <span className="opacity-90">{item[column.key]}</span>
+                          )}
                         </td>
                       ))}
                   </tr>
@@ -421,66 +430,19 @@ function Table<T extends Record<string, any>>({
         </div>
       </div>
 
-      {/* FOOTER: summary + pagination */}
-      {showPagination && (
-        <div className="px-6 py-3 border-t bg-card flex flex-col sm:flex-row items-center justify-between gap-3 mt-auto">
-          <div className="text-sm text-gray-600">
-            Showing{" "}
-            <span className="font-medium">
-              {Math.min((currentPage! - 1) * pageSize + 1, totalItems)}
-            </span>{" "}
-            –{" "}
-            <span className="font-medium">
-              {Math.min(currentPage! * pageSize, totalItems)}
-            </span>{" "}
-            of <span className="font-medium">{totalItems}</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Previous Button */}
-            <button
-              onClick={() => onPageChange!(currentPage! - 1)}
-              disabled={currentPage === 1}
-              className={`px-3 py-2 rounded-md border font-medium text-sm flex items-center gap-1 transition-colors ${
-                currentPage === 1
-                  ? "border-gray-300 text-gray-400 cursor-not-allowed bg-gray-50"
-                  : "border-gray-300 text-gray-700 hover:bg-gray-100 bg-white"
-              }`}
-              type="button"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Previous
-            </button>
-
-            {/* Page indicator */}
-            <div className="flex items-center gap-1.5 px-4 py-2 bg-white rounded-md border border-gray-300">
-              <span className="text-sm text-gray-600">Page</span>
-              <span className="font-semibold text-gray-900">{currentPage}</span>
-              <span className="text-sm text-gray-400">of</span>
-              <span className="font-semibold text-gray-900">{totalPages}</span>
-            </div>
-
-            {/* Next Button */}
-            <button
-              onClick={() => onPageChange!(currentPage! + 1)}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-2 rounded-md border font-medium text-sm flex items-center gap-1 transition-colors ${
-                currentPage === totalPages
-                  ? "border-gray-300 text-gray-400 cursor-not-allowed bg-gray-50"
-                  : "border-gray-300 text-gray-700 hover:bg-gray-100 bg-white"
-              }`}
-              type="button"
-            >
-              Next
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
+      {/* Footer with Pagination */}
+      <div className="px-5 py-3 border-t border-[var(--border)] bg-card flex items-center justify-between shrink-0">
+        <div className="text-[9px] font-black uppercase text-muted tracking-[0.2em] opacity-50">
+          Total Records: {totalItems}
         </div>
-      )}
+        <Pagination
+          currentPage={currentPage || 1}
+          totalPages={totalPages || 1}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          onPageChange={onPageChange || (() => {})}
+        />
+      </div>
     </div>
   );
 }
