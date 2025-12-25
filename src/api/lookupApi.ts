@@ -9,7 +9,7 @@ const ENDPOINTS = {
   getUnitOfMeasureList: `${base_url}/api/unit-of-measure-list`,
   getItemClassList: `${base_url}/api/item-class-list`,
   getPackagingUnitCodes: `${base_url}/api/packaging-unit-codes`,
-  getCountryList: `${base_url}/api/country-list`,
+  getCountryList: `http://41.60.191.7:4002/api/country-list/`,
 };
 
 export async function getUnitOfMeasureList(): Promise<any> {

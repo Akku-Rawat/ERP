@@ -1,5 +1,6 @@
 // CompanySetup.tsx
 import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaBuilding,
   FaIdCard,
@@ -15,9 +16,24 @@ import AccountingDetails from "./AccountingDetails";
 import BuyingSelling from "./BuyingSelling";
 import SubscribedModules from "./subscribedmodule";
 import BankDetails from "./BankDetails";
-import Templates from "./Templates";
-import AddBankAccountModal from "../../components/CompanySetup/AddBankAccountModal";
 import Upload from "./upload";
+
+import type {
+  CompanyDocuments,
+  AccountingSetup,
+  BankAccount,
+  BasicDetailsForm,
+  Company,
+  FinancialConfig,
+  ModuleSubscriptions,
+  RegistrationDetails,
+  CompanyTemplates,
+} from "../../types/company";
+
+import { getCompanyById } from "../../api/companySetupApi";
+
+import type { Terms } from "../../types/termsAndCondition";
+import Templates from "./Templates";
 
 const navTabs = [
   { key: "basic", label: "Basic Details", icon: <FaIdCard /> },
@@ -29,52 +45,108 @@ const navTabs = [
   { key: "logo", label: "Logo & Signature", icon: <FaFileUpload /> },
 ];
 
-interface BankAccount {
-  bankName: string;
-  accountNumber: string;
-  ifscCode: string;
-  currency: string;
-  swiftCode: string;
-  isdefault?: boolean;
-}
-
-// Dummy initial accounts
-const initialAccounts: BankAccount[] = [
-  {
-    bankName: "HDFC Bank",
-    accountNumber: "123456789012",
-    ifscCode: "HDFC0001234",
-    currency: "INR",
-    swiftCode: "HDFCINBB",
-    isdefault: true,
-  },
-  {
-    bankName: "Barclays UK",
-    accountNumber: "987654321000",
-    ifscCode: "BARC00UK01",
-    currency: "GBP",
-    swiftCode: "BARCGB22",
-    isdefault: false,
-  },
-];
-
 const CompanySetup: React.FC = () => {
   const [tab, setTab] = useState(navTabs[0].key);
-  const [accounts, setAccounts] = useState<BankAccount[]>(initialAccounts);
-  const [showBankModal, setShowBankModal] = useState(false);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+  const [financialConfig, setFinancialConfig] = useState<FinancialConfig>();
+  const [terms, setTerms] = useState<Terms>();
+  const [companyDetail, setCompanyDetail] = useState<Company | null>(null);
+  const [modules, setModules] = useState<ModuleSubscriptions | null>(null);
+  const [accountingSetup, setAccountingSetup] =
+    useState<AccountingSetup | null>(null);
+  const [companytemplates, setCompanyTemplates] =
+    useState<CompanyTemplates | null>(null);
+  const [companyDocuments, setCompanyDocuments] =
+    useState<CompanyDocuments | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [basicDetail, setBasicDetail] = useState<BasicDetailsForm>({
+    registration: {
+      registerNo: "",
+      tpin: "",
+      companyName: "",
+      dateOfIncorporation: "",
+      companyType: "",
+      companyStatus: "",
+      industryType: "",
+    },
+    contact: {
+      companyEmail: "",
+      companyPhone: "",
+      alternatePhone: "",
+      website: "",
+      contactPerson: "",
+      contactEmail: "",
+      contactPhone: "",
+    },
+    address: {
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      district: "",
+      province: "",
+      postalCode: "",
+      country: "",
+      timeZone: "",
+    },
+  });
 
-  const openAddModal = () => setShowBankModal(true);
+  const fetchCompanyDetail = async () => {
+    try {
+      setLoading(true);
+      const response = await getCompanyById("COMP-00003");
+      setCompanyDetail(response.data as Company);
 
-  const handleAddBankAccount = (newAccount: BankAccount) => {
-    setAccounts((prev) => [...prev, newAccount]);
-    setShowBankModal(false);
+      // console.log("response: ", response);
+      const registrationDetails: RegistrationDetails = {
+        registerNo: response.data.registrationNumber ?? "",
+        tpin: response.data.tpin ?? "",
+        companyName: response.data.companyName ?? "",
+        dateOfIncorporation: response.data.dateOfIncorporation ?? "",
+        companyType: response.data.companyType ?? "",
+        companyStatus: response.data.companyStatus ?? "",
+        industryType: response.data.industryType ?? "",
+      };
+
+      setAccountingSetup(
+        response.data.accountingSetup ?? {
+          chartOfAccounts: "Standard Chart - 2025",
+          defaultExpenseGL: "5000-EXP-GENERAL",
+          fxGainLossAccount: "4300-FX-GAIN-LOSS",
+          revaluationFrequency: "Monthly",
+          roundOffAccount: "4800-ROUND-OFF",
+          roundOffCostCenter: "CC-001-MAIN",
+          depreciationAccount: "5100-DEPRECIATION",
+          appreciationAccount: "5200-ASSET-APPRECIATION",
+        },
+      );
+
+      setBasicDetail({
+        registration: registrationDetails,
+        contact: response.data.contactInfo,
+        address: response.data.address,
+      });
+
+      setBankAccounts(response.data.bankAccounts ?? []);
+      setTerms(response.data.terms);
+      setFinancialConfig(response.data.financialConfig);
+      setModules(response.data.modules);
+      setCompanyTemplates(response.data.templates);
+      setCompanyDocuments(response.data.documents);
+
+      // console.log("accounsetup: ", response);
+      // console.log("modules: ", response.data.modules);
+      // console.log("document: ", response.data.documents);
+      // console.log("templates: ", response.data.templates);
+    } catch (err) {
+      console.error("Error loading company data:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSetDefault = (index: number) => {
-    setAccounts((prev) =>
-      prev.map((a, i) => ({ ...a, isdefault: i === index }))
-    );
-  };
+  useEffect(() => {
+    fetchCompanyDetail();
+  }, []);
 
   return (
     <div className="bg-app min-h-screen p-8 pb-20 text-main">
@@ -89,13 +161,14 @@ const CompanySetup: React.FC = () => {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex items-center gap-2 pb-3 text-base font-medium transition-colors border-b-2 whitespace-nowrap
+            className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-2 border-theme 
               ${
                 tab === t.key
-                  ? "border-primary text-primary font-semibold"
-                  : "border-transparent text-muted hover:text-main hover:border-[var(--border)]"
+                  ? "border-[var(--primary)] text-main font-semibold"
+                  : "border-transparent text-muted hover:text-primary"
               }
             `}
+            style={{ background: "transparent" }}
           >
             {t.icon}
             <span className="ml-1">{t.label}</span>
@@ -104,29 +177,25 @@ const CompanySetup: React.FC = () => {
       </div>
 
       {/* Tab content */}
-      <div className="animate-in fade-in duration-300">
-        {tab === "basic" && <BasicDetails />}
+      <div>
+        {tab === "basic" && <BasicDetails basic={basicDetail} />}
         {tab === "bank" && (
           <BankDetails
-            bankAccounts={accounts}
-            onAddAccount={openAddModal}
-            onSetDefault={handleSetDefault}
+            bankAccounts={bankAccounts}
+            setBankAccounts={setBankAccounts}
           />
         )}
-        {tab === "accounting" && <AccountingDetails />}
-        {tab === "buyingSelling" && <BuyingSelling />}
+        {tab === "accounting" && (
+          <AccountingDetails
+            financialConfig={financialConfig}
+            accountingSetup={accountingSetup}
+          />
+        )}
+        {tab === "buyingSelling" && <BuyingSelling terms={terms} />}
         {tab === "subscribed" && <SubscribedModules />}
         {tab === "Templates" && <Templates />}
         {tab === "logo" && <Upload />}
       </div>
-
-      {/* Add Bank Account Modal */}
-      {showBankModal && (
-        <AddBankAccountModal
-          onClose={() => setShowBankModal(false)}
-          onSubmit={handleAddBankAccount}
-        />
-      )}
     </div>
   );
 };

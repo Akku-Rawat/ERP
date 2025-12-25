@@ -370,7 +370,8 @@ const CustomerModal: React.FC<{
 
                 {activeTab === "terms" && (
                   <TermsAndCondition
-                    terms={form.terms?.selling || ({} as TermSection)}
+                    title="Selling Terms & Conditions"
+                    terms={form.terms?.selling as TermSection}
                     setTerms={(updated) =>
                       setForm((p) => ({
                         ...p,

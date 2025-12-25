@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaUniversity,
   FaPlus,
@@ -9,38 +8,165 @@ import {
   FaEye,
   FaEyeSlash,
   FaRegCreditCard,
+  FaCheck,
+  FaTimes,
 } from "react-icons/fa";
+import type { BankAccount } from "../../types/company";
+import AddBankAccountModal from "../../components/CompanySetup/AddBankAccountModal";
 
-interface BankAccount {
-  bankName: string;
-  accountNumber: string;
-  ifscCode: string;
-  currency: string;
-  swiftCode: string;
-  isdefault?: boolean;
+interface DetailProps {
+  label: string;
+  name: keyof BankAccount;
+  value: string | number | undefined;
+  isEditing: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  canToggle?: boolean;
+  onToggle?: () => void;
+  reveal?: boolean;
 }
+
+const Detail: React.FC<DetailProps> = ({
+  label,
+  name,
+  value,
+  isEditing,
+  onChange,
+  canToggle,
+  onToggle,
+  reveal,
+}) => {
+  const displayValue =
+    canToggle && !reveal && !isEditing
+      ? "•••• •••• " + String(value).slice(-4)
+      : value;
+
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wide">
+        {label}
+      </label>
+
+      <div
+        className={`bg-card border rounded-lg px-4 py-3 flex justify-between items-center ${
+          isEditing ? "border-primary ring-1 ring-primary/20" : "border-theme"
+        }`}
+      >
+        {isEditing ? (
+          <input
+            name={name}
+            value={value || ""}
+            onChange={onChange}
+            className="w-full bg-transparent border-none p-0 text-main focus:outline-none font-medium"
+            autoFocus={name === "bankName"}
+          />
+        ) : (
+          <p className="text-muted font-medium w-full truncate">
+            {displayValue || "—"}
+          </p>
+        )}
+
+        {canToggle && !isEditing && (
+          <button onClick={onToggle} className="text-muted ml-2">
+            {reveal ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
 
 interface Props {
   bankAccounts: BankAccount[];
-  onAddAccount: () => void;
-  onSetDefault: (index: number) => void;
+  setBankAccounts: React.Dispatch<React.SetStateAction<BankAccount[]>>;
 }
 
-const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount, onSetDefault }) => {
+const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  // selectedAccount is the global index inside bankAccounts (or null)
   const [selectedAccount, setSelectedAccount] = useState<number | null>(
     bankAccounts.length > 0 ? 0 : null,
   );
 
-  const [showAccountNumber, setShowAccountNumber] = useState<Record<string, boolean>>({});
+  const [showBankModal, setShowBankModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState<BankAccount | null>(null);
+
+  const [showAccountNumber, setShowAccountNumber] = useState<
+    Record<number, boolean>
+  >({});
+
+  useEffect(() => {
+    setIsEditing(false);
+    if (selectedAccount !== null && bankAccounts[selectedAccount]) {
+      setEditForm(bankAccounts[selectedAccount]);
+    } else {
+      setEditForm(null);
+    }
+  }, [selectedAccount, bankAccounts]);
+
+  const handleAddSubmit = (newAccount: BankAccount) => {
+    setBankAccounts((prev) => [...prev, newAccount]);
+    setShowBankModal(false);
+  };
+
+  const handleEditClick = () => {
+    if (selectedAccount !== null && bankAccounts[selectedAccount]) {
+      setEditForm(bankAccounts[selectedAccount]);
+      setIsEditing(true);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    if (selectedAccount !== null) {
+      setEditForm(bankAccounts[selectedAccount]);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (editForm && selectedAccount !== null) {
+      setBankAccounts((prev) => {
+        const updated = [...prev];
+        updated[selectedAccount] = editForm;
+        return updated;
+      });
+      setIsEditing(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (editForm) {
+      setEditForm({ ...editForm, [e.target.name]: e.target.value });
+    }
+  };
+
+  const handleDelete = () => {
+    if (selectedAccount === null) return;
+
+    const accountName = bankAccounts[selectedAccount].bankName;
+
+    if (
+      confirm(`Are you sure you want to delete the account for ${accountName}?`)
+    ) {
+      setBankAccounts((prev) =>
+        prev.filter((_, index) => index !== selectedAccount),
+      );
+
+      setSelectedAccount(null);
+      setIsEditing(false);
+      setEditForm(null);
+    }
+  };
+
+  // ----------------
 
   const filteredAccounts = bankAccounts.filter(
     (acc) =>
       acc.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      acc.accountNumber.includes(searchTerm) ||
-      acc.ifscCode.toLowerCase().includes(searchTerm.toLowerCase()),
+      acc.accountNo.includes(searchTerm),
   );
 
+  // map filtered index -> global index
   const getGlobalIndex = (filteredIndex: number) => {
     const acc = filteredAccounts[filteredIndex];
     if (!acc) return -1;
@@ -56,123 +182,132 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount, onSetDefault
     setShowAccountNumber((prev) => ({ ...prev, [accountNumber]: !prev[accountNumber] }));
   };
 
-  const maskAccountNumber = (accountNumber: string) => {
-    if (!accountNumber) return "";
-    if (accountNumber.length <= 4) return accountNumber;
-    return "•••• •••• " + accountNumber.slice(-4);
-  };
-
   const defaultAccount = bankAccounts.find((a) => a.isdefault);
 
   return (
-    <div className="bg-app transition-colors duration-300">
+    <div className="bg-card">
+      {/* ADD MODAL */}
+      {showBankModal && (
+        <AddBankAccountModal
+          onClose={() => setShowBankModal(false)}
+          onSubmit={handleAddSubmit}
+        />
+      )}
+
       <div className="mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          
-          {/* --- LEFT SIDE: Accounts List --- */}
-          <div className="lg:col-span-2 bg-card rounded-xl shadow-sm border border-[var(--border)] overflow-hidden flex flex-col h-[600px]">
-            <div className="px-5 py-4 bg-primary shrink-0">
+        <div className="grid grid-cols-5 gap-6">
+          {/* LEFT LIST */}
+          <div className="col-span-2 bg-card rounded-lg shadow-sm overflow-hidden">
+            <div className="px-4 py-2 bg-primary">
               <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                 <FaUniversity className="w-5 h-5" />
                 Bank Accounts
               </h2>
             </div>
 
-            <div className="p-4 space-y-4 flex-1 flex flex-col overflow-hidden">
-              {/* Search Bar */}
-              <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search by bank or IFSC..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2.5 border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] bg-card text-main transition-all"
-                />
-              </div>
-
-              {/* Add Button */}
-              <button
-                onClick={onAddAccount}
-                className="w-full px-4 py-3 rounded-lg shadow-md text-sm font-bold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98]"
-                style={{
-                  background: "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
-                }}
+            <div className="p-4 space-y-3">
+              {/* Search & Add */}
+              <div
+                className={`space-y-3 ${isEditing ? "opacity-50 pointer-events-none" : ""}`}
               >
-                <FaPlus className="w-4 h-4" />
-                Add New Account
-              </button>
+                <div className="relative">
+                  <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Find accounts..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-3 py-2 border rounded-md text-sm focus:outline-none bg-card text-main"
+                  />
+                </div>
 
-              {/* Default Account Pill */}
-              <div className="flex items-center justify-between px-1">
-                <span className="text-xs font-bold text-muted uppercase tracking-wider">Your Accounts</span>
-                {defaultAccount && (
-                  <div className="text-[10px] inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-row-hover border border-[var(--primary)]/20 text-primary font-bold uppercase">
-                    <FaCheck className="w-2 h-2" /> Default: {defaultAccount.bankName.split(' ')[0]}
-                  </div>
-                )}
+                <button
+                  onClick={() => setShowBankModal(true)}
+                  className="w-full px-4 py-2.5 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-2 shadow-sm"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
+                  }}
+                >
+                  <FaPlus className="w-4 h-4" />
+                  Add New Account
+                </button>
               </div>
 
-              {/* Accounts List Loop */}
-              <div className="space-y-2 overflow-y-auto pr-1 custom-scrollbar">
+              {/* Account List */}
+              <div className="space-y-2 max-h-96 overflow-y-auto">
                 {filteredAccounts.length === 0 ? (
-                  <div className="text-center py-10 text-muted text-sm italic">No accounts matching "{searchTerm}"</div>
+                  <div className="text-center py-8 text-muted text-sm">No accounts found</div>
                 ) : (
-                  filteredAccounts.map((acc, i) => {
-                    const globalIndex = getGlobalIndex(i);
-                    const isSelected = selectedAccount === globalIndex;
-
-                    return (
-                      <div
-                        key={i}
-                        onClick={() => setSelectedAccount(globalIndex !== -1 ? globalIndex : null)}
-                        className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
-                          isSelected 
-                            ? "border-[var(--primary)] bg-row-hover shadow-sm translate-x-1" 
-                            : "border-[var(--border)] bg-card hover:border-[var(--primary)]/50 hover:bg-row-hover"
-                        }`}
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <p className={`font-bold text-sm ${isSelected ? "text-primary" : "text-main"}`}>{acc.bankName}</p>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (globalIndex !== -1) onSetDefault(globalIndex);
-                              }}
-                              className="focus:outline-none"
-                            >
-                              <FaRegCreditCard className={`text-sm transition-colors ${acc.isdefault ? "text-primary scale-110" : "text-muted hover:text-primary"}`} />
-                            </button>
-                            <span className="text-[10px] badge-success px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">
-                              {acc.currency}
-                            </span>
-                          </div>
-                        </div>
-
-                        <p className="text-xs text-muted font-mono tracking-wider">
-                          {showAccountNumber[acc.accountNumber] ? acc.accountNumber : maskAccountNumber(acc.accountNumber)}
+                  filteredAccounts.map((acc, i) => (
+                    <div
+                      key={i}
+                      onClick={() => !isEditing && setSelectedAccount(i)}
+                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                        selectedAccount === i
+                          ? "table-head text-table-head-text"
+                          : "border bg-card hover:row-hover text-main"
+                      } ${isEditing ? "cursor-not-allowed opacity-60" : ""}`}
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <p className="font-semibold text-main text-sm">
+                          {acc.bankName}
                         </p>
+                        <p className="text-xs text-muted mt-1">IFSC: {acc.ifscCode}</p>
                       </div>
-                    );
-                  })
+                      <p className="text-xs text-muted font-mono truncate">
+                        {acc.accountNo}
+                      </p>
+                    </div>
+                  ))
                 )}
               </div>
             </div>
           </div>
 
-          {/* --- RIGHT SIDE: Account Details --- */}
-          <div className="lg:col-span-3 bg-card rounded-xl shadow-sm border border-[var(--border)] overflow-hidden h-[600px] flex flex-col">
-            <div className="px-5 py-4 flex justify-between items-center bg-primary shrink-0">
-              <h2 className="text-lg font-semibold text-white">Account Details</h2>
-              {selectedAccount !== null && (
+          {/* RIGHT PANEL */}
+          <div className="col-span-3 bg-card rounded-lg shadow-sm overflow-hidden">
+            <div className="px-4 py-2 flex justify-between items-center bg-primary min-h-[52px]">
+              <h2 className="text-lg font-semibold text-white">
+                {isEditing ? "Editing Account" : "Account Details"}
+              </h2>
+
+              {selectedAccount !== null && bankAccounts.length > 0 && (
                 <div className="flex gap-2">
-                  <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all shadow-inner border border-white/10" title="Edit">
-                    <FaEdit className="w-4 h-4" /> 
-                  </button>
-                  <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all shadow-inner border border-white/10" title="Delete">
-                    <FaTrash className="w-4 h-4" /> 
-                  </button>
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={handleSaveEdit}
+                        className="px-3 py-1.5 rounded-md bg-green-600 text-white hover:bg-green-500 transition-colors flex items-center gap-2 text-sm font-medium shadow-sm"
+                      >
+                        <FaCheck className="w-3.5 h-3.5" /> Save
+                      </button>
+                      <button
+                        onClick={handleCancelEdit}
+                        className="px-3 py-1.5 rounded-md bg-white/20 text-white hover:bg-white/30 transition-colors flex items-center gap-2 text-sm font-medium"
+                      >
+                        <FaTimes className="w-3.5 h-3.5" /> Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handleEditClick}
+                        className="px-3 py-1.5 rounded-md text-white hover:bg-white/20 transition-colors flex items-center gap-2 text-sm font-medium"
+                        style={{ background: "rgba(255,255,255,0.12)" }}
+                      >
+                        <FaEdit className="w-3.5 h-3.5" /> Edit
+                      </button>
+                      {/* DELETE BUTTON WIRED UP HERE */}
+                      <button
+                        onClick={handleDelete}
+                        className="px-3 py-1.5 rounded-md text-white hover:bg-white/20 transition-colors flex items-center gap-2 text-sm font-medium"
+                        style={{ background: "rgba(255,255,255,0.12)" }}
+                      >
+                        <FaTrash className="w-3.5 h-3.5" /> Delete
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -182,60 +317,92 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, onAddAccount, onSetDefault
                 <div className="w-24 h-24 rounded-full bg-app flex items-center justify-center mb-4 border-2 border-dashed border-[var(--border)]">
                   <FaUniversity className="w-10 h-10 text-muted opacity-50" />
                 </div>
-                <h3 className="text-xl font-bold text-main mb-2">No Account Selected</h3>
-                <p className="text-muted max-w-xs">Please select an account from the sidebar or add a new one to view the full details.</p>
+                <h3 className="text-lg font-semibold text-main mb-2">No Account Selected</h3>
+                <p className="text-muted">Select an account from the list to view details</p>
               </div>
             ) : (
-              <div className="flex-1 p-8 overflow-y-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  
-                  {/* Bank Name Field */}
-                  <DetailBlock label="Bank Name" value={bankAccounts[selectedAccount].bankName} />
+              <div className="p-6">
+                {(() => {
+                  const data = isEditing
+                    ? editForm
+                    : bankAccounts[selectedAccount];
+                  if (!data) return null;
 
-                  {/* SWIFT Code Field */}
-                  <DetailBlock label="SWIFT / BIC" value={bankAccounts[selectedAccount].swiftCode} isMono />
-
-                  {/* Account Number Field (with visibility toggle) */}
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-muted uppercase tracking-widest ml-1">Account Number</label>
-                    <div className="bg-app border border-[var(--border)] rounded-xl px-4 py-3.5 flex items-center justify-between group hover:border-[var(--primary)]/40 transition-colors">
-                      <p className="text-main font-mono font-bold text-base tracking-widest">
-                        {showAccountNumber[bankAccounts[selectedAccount].accountNumber]
-                          ? bankAccounts[selectedAccount].accountNumber
-                          : maskAccountNumber(bankAccounts[selectedAccount].accountNumber)}
-                      </p>
-                      <button
-                        onClick={() => toggleAccountVisibility(bankAccounts[selectedAccount].accountNumber)}
-                        className="text-muted hover:text-primary transition-all p-1.5 hover:bg-row-hover rounded-lg"
-                      >
-                        {showAccountNumber[bankAccounts[selectedAccount].accountNumber] ? <FaEyeSlash /> : <FaEye />}
-                      </button>
+                  return (
+                    <div className="grid grid-cols-2 gap-6">
+                      <Detail
+                        label="Bank Name"
+                        name="bankName"
+                        value={data.bankName}
+                        isEditing={isEditing}
+                        onChange={handleInputChange}
+                      />
+                      <Detail
+                        label="Account Holder"
+                        name="accountHolderName"
+                        value={data.accountHolderName}
+                        isEditing={isEditing}
+                        onChange={handleInputChange}
+                      />
+                      <Detail
+                        label="Account Number"
+                        name="accountNo"
+                        value={data.accountNo}
+                        isEditing={isEditing}
+                        onChange={handleInputChange}
+                        canToggle={true}
+                        reveal={showAccountNumber[selectedAccount]}
+                        onToggle={() =>
+                          toggleAccountVisibility(selectedAccount)
+                        }
+                      />
+                      <Detail
+                        label="Swift/BIC Code"
+                        name="swiftCode"
+                        value={data.swiftCode}
+                        isEditing={isEditing}
+                        onChange={handleInputChange}
+                      />
+                      <Detail
+                        label="Sort Code"
+                        name="sortCode"
+                        value={data.sortCode}
+                        isEditing={isEditing}
+                        onChange={handleInputChange}
+                      />
+                      <Detail
+                        label="Currency"
+                        name="currency"
+                        value={data.currency}
+                        isEditing={isEditing}
+                        onChange={handleInputChange}
+                      />
+                      <Detail
+                        label="Opening Balance"
+                        name="openingBalance"
+                        value={data.openingBalance}
+                        isEditing={isEditing}
+                        onChange={handleInputChange}
+                      />
+                      <Detail
+                        label="Date Added"
+                        name="dateAdded"
+                        value={data.dateAdded}
+                        isEditing={isEditing}
+                        onChange={handleInputChange}
+                      />
+                      <div className="col-span-2">
+                        <Detail
+                          label="Branch Address"
+                          name="branchAddress"
+                          value={data.branchAddress}
+                          isEditing={isEditing}
+                          onChange={handleInputChange}
+                        />
+                      </div>
                     </div>
-                  </div>
-
-                  {/* IFSC Code Field */}
-                  <DetailBlock label="IFSC Code" value={bankAccounts[selectedAccount].ifscCode} isMono />
-
-                  {/* Currency Field */}
-                  <DetailBlock label="Primary Currency" value={bankAccounts[selectedAccount].currency} />
-
-                  {/* Status Field */}
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-muted uppercase tracking-widest ml-1">Account Status</label>
-                    <div className="bg-app border border-[var(--border)] rounded-xl px-4 py-3.5 flex items-center justify-between">
-                      <span className="flex items-center gap-2 text-success font-bold text-sm">
-                        <span className="w-2 h-2 rounded-full animate-pulse bg-[var(--success)]" />
-                        ACTIVE
-                      </span>
-                      {bankAccounts[selectedAccount].isdefault && (
-                        <span className="text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 px-3 py-1 rounded-full uppercase">
-                          Primary Account
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                </div>
+                  );
+                })()}
               </div>
             )}
           </div>
