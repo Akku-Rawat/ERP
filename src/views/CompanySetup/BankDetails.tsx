@@ -8,7 +8,6 @@ import {
   FaEye,
   FaEyeSlash,
   FaRegCreditCard,
-  FaCheck,
   FaTimes,
 } from "react-icons/fa";
 import type { BankAccount } from "../../types/company";
