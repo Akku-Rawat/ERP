@@ -17,7 +17,6 @@ export interface RFQItem {
   paperType?: string;
 }
 
-
 export interface RFQData {
   rfqId?: string;
   vendorName: string;
@@ -74,7 +73,11 @@ const RFQDefaultTemplate = forwardRef<HTMLDivElement, RFQDefaultTemplateProps>(
               onClick={() => fileInputRef.current?.click()}
             >
               {logo || companyLogoUrl ? (
-                <img src={logo || companyLogoUrl} alt="Logo" className="w-18 h-18 object-contain" />
+                <img
+                  src={logo || companyLogoUrl}
+                  alt="Logo"
+                  className="w-18 h-18 object-contain"
+                />
               ) : (
                 <UploadCloud className="w-8 h-8 text-cyan-400" />
               )}
@@ -92,8 +95,12 @@ const RFQDefaultTemplate = forwardRef<HTMLDivElement, RFQDefaultTemplateProps>(
           </div>
 
           <div className="mb-4">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">REQUEST FOR QUOTE</h1>
-            <div className="text-sm text-cyan-500 italic">[Vendor Name and Address]</div>
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">
+              REQUEST FOR QUOTE
+            </h1>
+            <div className="text-sm text-cyan-500 italic">
+              [Vendor Name and Address]
+            </div>
           </div>
 
           {/* Diagonal stripe decoration */}
@@ -101,7 +108,10 @@ const RFQDefaultTemplate = forwardRef<HTMLDivElement, RFQDefaultTemplateProps>(
           <div className="mt-2 mb-4 border-t-2 border-b-2 border-cyan-400 py-1">
             <div className="flex space-x-1">
               {[...Array(50)].map((_, i) => (
-                <div key={i} className="w-2 h-3 bg-cyan-300 transform -skew-x-12"></div>
+                <div
+                  key={i}
+                  className="w-2 h-3 bg-cyan-300 transform -skew-x-12"
+                ></div>
               ))}
             </div>
           </div>
@@ -113,7 +123,9 @@ const RFQDefaultTemplate = forwardRef<HTMLDivElement, RFQDefaultTemplateProps>(
             <strong>Dear [Vendor Name],</strong>
           </p>
           <p className="text-gray-700 mb-6">
-            We are seeking proposals for <strong>plumbing services</strong> for our facility. Please provide your best quote for the services listed below:
+            We are seeking proposals for <strong>plumbing services</strong> for
+            our facility. Please provide your best quote for the services listed
+            below:
           </p>
         </div>
 
@@ -122,19 +134,38 @@ const RFQDefaultTemplate = forwardRef<HTMLDivElement, RFQDefaultTemplateProps>(
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-cyan-500 text-white">
-                <th className="px-4 py-3 text-left text-sm font-bold">Service</th>
-                <th className="px-4 py-3 text-center text-sm font-bold">Price per Hour</th>
-                <th className="px-4 py-3 text-center text-sm font-bold">Estimated Time</th>
-                <th className="px-4 py-3 text-center text-sm font-bold">Total Price</th>
+                <th className="px-4 py-3 text-left text-sm font-bold">
+                  Service
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-bold">
+                  Price per Hour
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-bold">
+                  Estimated Time
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-bold">
+                  Total Price
+                </th>
               </tr>
             </thead>
             <tbody>
               {data.items.map((item, index) => (
-                <tr key={index} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-                  <td className="px-4 py-3 text-sm text-gray-800 border-b border-gray-200">{item.service}</td>
-                  <td className="px-4 py-3 text-sm text-gray-800 text-center border-b border-gray-200">{item.pricePerHour}</td>
-                  <td className="px-4 py-3 text-sm text-gray-800 text-center border-b border-gray-200">{item.estimatedTime}</td>
-                  <td className="px-4 py-3 text-sm text-gray-800 text-center border-b border-gray-200">{item.totalPrice}</td>
+                <tr
+                  key={index}
+                  className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                >
+                  <td className="px-4 py-3 text-sm text-gray-800 border-b border-gray-200">
+                    {item.service}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-800 text-center border-b border-gray-200">
+                    {item.pricePerHour}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-800 text-center border-b border-gray-200">
+                    {item.estimatedTime}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-800 text-center border-b border-gray-200">
+                    {item.totalPrice}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -144,44 +175,62 @@ const RFQDefaultTemplate = forwardRef<HTMLDivElement, RFQDefaultTemplateProps>(
         {/* Total Cost */}
         <div className="mb-6 relative z-10">
           <p className="text-lg font-bold text-gray-800">
-            Total Cost Estimate: <span className="text-cyan-600">{data.totalCost}</span>
+            Total Cost Estimate:{" "}
+            <span className="text-cyan-600">{data.totalCost}</span>
           </p>
         </div>
 
         {/* Additional Requirements */}
         <div className="mb-6 relative z-10">
           <p className="text-gray-700 mb-3">
-            In addition to providing the above services, we require the following information in your proposal:
+            In addition to providing the above services, we require the
+            following information in your proposal:
           </p>
           <ul className="list-disc list-inside space-y-1 text-gray-700 text-sm">
-            <li>A description of your company's experience in providing plumbing services</li>
-            <li>The types of materials and equipment you will provide for each service.</li>
+            <li>
+              A description of your company's experience in providing plumbing
+              services
+            </li>
+            <li>
+              The types of materials and equipment you will provide for each
+              service.
+            </li>
             <li>Your availability to provide emergency plumbing services.</li>
             <li>Any licenses, certifications, or insurance your company has</li>
-            <li>Any references or examples of similar projects you have completed in the past.</li>
+            <li>
+              Any references or examples of similar projects you have completed
+              in the past.
+            </li>
           </ul>
         </div>
 
         {/* Evaluation Criteria */}
         <div className="mb-6 relative z-10">
           <p className="text-gray-700 text-sm">
-            We will evaluate proposals based on price, quality, and your company's ability to meet our specific needs. Please submit your proposal no later than <strong>[Deadline for Submission]</strong>. If you have any questions or require additional information, please do not hesitate to contact us.
+            We will evaluate proposals based on price, quality, and your
+            company's ability to meet our specific needs. Please submit your
+            proposal no later than <strong>[Deadline for Submission]</strong>.
+            If you have any questions or require additional information, please
+            do not hesitate to contact us.
           </p>
         </div>
 
         {/* Closing */}
         <div className="mb-8 relative z-10">
           <p className="text-gray-700 mb-6">
-            Thank you for your time and consideration. We look forward to receiving your proposal.
+            Thank you for your time and consideration. We look forward to
+            receiving your proposal.
           </p>
           <p className="text-gray-800">Sincerely,</p>
           <p className="text-gray-800 font-semibold mt-2">[Your Name]</p>
-          <p className="text-gray-600 text-sm">[Your Company] [Phone Number] [Email Address]</p>
+          <p className="text-gray-600 text-sm">
+            [Your Company] [Phone Number] [Email Address]
+          </p>
           <p className="text-gray-600 text-sm">[Website URL]</p>
         </div>
       </div>
     );
-  }
+  },
 );
 
 RFQDefaultTemplate.displayName = "RFQDefaultTemplate";

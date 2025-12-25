@@ -1,631 +1,524 @@
+// components/modals/CustomerModal.tsx
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import TermsAndCondition from "../TermsAndCondition";
-import {
-  X,
-  Mail,
-  Phone,
-  Plus,
-  Minus
+import Modal from "../UI/modal/modal";
+import { Input, Select, Card, Button, Checkbox } from "../UI/modal/formComponent";
+import TermsAndCondition from "../../views/termandcondition";
+import type { TermSection } from "../../types/termsAndCondition";
+import { 
+  Mail, 
+  Phone, 
+  User, 
+  Building2, 
+  CreditCard, 
+  DollarSign, 
+  MapPin,
+  FileText
 } from "lucide-react";
-import toast from "react-hot-toast";
 
-const base_url = import.meta.env.VITE_BASE_URL;
-const CUSTOMER_ENDPOINT = `${base_url}.customer.customer.create_customer_api`;
-const UPDATE_CUSTOMER_ENDPOINT = `${base_url}.customer.customer.update_customer_by_id`;
-console.log("CUSTOMER_ENDPOINT" + CUSTOMER_ENDPOINT);
+import {
+  createCustomer,
+  updateCustomerByCustomerCode,
+} from "../../api/customerApi";
 
-const emptyForm: Record<string, any> = {
-  customer_name: "",
-  customer_type: "Individual",
-  custom_customer_tpin: "",
-  customer_currency: "",
-  customer_onboarding_balance: 0,
-  mobile_no: "",
-  custom_contact_person: "",
-  custom_display_name: "",
-  customer_email: "",
-  customer_account_no: "",
-  custom_billing_address_line_1: "",
-  custom_billing_address_line_2: "",
-  custom_billing_postal_code: "",
-  custom_billing_city: "",
-  custom_billing_state: "",
-  custom_billing_country: "",
-  custom_shipping_address_line_1: "",
-  custom_shipping_address_line_2: "",
-  custom_shipping_postal_code: "",
-  custom_shipping_city: "",
-  custom_shipping_state: "",
-  custom_shipping_country: "",
-  sameAsBilling: true,
+import type { CustomerDetail } from "../../types/customer";
+
+const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
+  id: "",
+  name: "",
+  type: "Individual",
+  tpin: "",
+  currency: "",
+  onboardingBalance: 0,
+  mobile: "",
+  contactPerson: "",
+  displayName: "",
+  email: "",
+  accountNumber: "",
+  status: "Active",
+
+  billingAddressLine1: "",
+  billingAddressLine2: "",
+  billingPostalCode: "",
+  billingCity: "",
+  billingState: "",
+  billingCountry: "",
+
+  shippingAddressLine1: "",
+  shippingAddressLine2: "",
+  shippingPostalCode: "",
+  shippingCity: "",
+  shippingState: "",
+  shippingCountry: "",
+
+  terms: {
+    selling: {},
+  },
+  sameAsBilling: false,
 };
 
-const currencyOptions = [
-  "ZMW", "USD", "INR"
-];
+const currencyOptions = ["ZMW", "USD", "INR"];
 
 const CustomerModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (data: Record<string, any>) => void;
-  initialData?: Record<string, any> | null;
+  onSubmit?: (data: CustomerDetail) => void;
+  initialData?: CustomerDetail | null;
   isEditMode?: boolean;
-}> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  initialData,
-  isEditMode = false,
-}) => {
-    const [form, setForm] = useState<Record<string, any>>(emptyForm);
-    const [loading, setLoading] = useState(false);
-    const [showAdditionalBilling, setShowAdditionalBilling] = useState(false);
-    const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">("details");
+}> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
+  const [form, setForm] = useState<CustomerDetail & { sameAsBilling: boolean }>(
+    emptyForm,
+  );
 
-    useEffect(() => {
-      if (initialData) {
-        setForm(initialData);
-      } else {
-        setForm(emptyForm);
-      }
-      setActiveTab("details");
-    }, [initialData, isOpen]);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
+    "details",
+  );
 
-    useEffect(() => {
-      if (form.sameAsBilling) {
-        setForm((prev) => ({
-          ...prev,
-          custom_shipping_address_line_1: prev.custom_billing_address_line_1 ?? "",
-          custom_shipping_address_line_2: prev.custom_billing_address_line_2 ?? "",
-          custom_shipping_postal_code: prev.custom_billing_postal_code ?? "",
-          custom_shipping_city: prev.custom_billing_city ?? "",
-          custom_shipping_state: prev.custom_billing_state ?? "",
-          custom_shipping_country: prev.custom_billing_country ?? "",
-        }));
-      }
-    }, [
-      form.sameAsBilling,
-      form.custom_billing_address_line_1,
-      form.custom_billing_address_line_2,
-      form.custom_billing_postal_code,
-      form.custom_billing_city,
-      form.custom_billing_state,
-      form.custom_billing_country
-    ]);
-
-    const handleChange = (
-      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-    ) => {
-      const { name, type, value } = e.target;
-      if (type === "checkbox") {
-        const checked = (e.target as HTMLInputElement).checked;
-        setForm((p) => ({ ...p, [name]: checked }));
-      } else {
-        setForm((p) => ({ ...p, [name]: value }));
-      }
-    };
-
-
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-
-  try {
-    const payload = { ...form };
-    let response;
-
-    if (isEditMode && initialData?.custom_id) {
-      payload.id = initialData.custom_id;
-      console.log("payload.id " + initialData.custom_id);
-      
-      const updateUrl = `${UPDATE_CUSTOMER_ENDPOINT}?id=${initialData.custom_id}`;
-
-      response = await fetch(updateUrl, {
-        method: "PUT", 
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: import.meta.env.VITE_AUTHORIZATION,
-        },
-        body: JSON.stringify(payload),
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        ...initialData,
+        sameAsBilling: false,
       });
     } else {
-      response = await fetch(CUSTOMER_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: import.meta.env.VITE_AUTHORIZATION,
-        },
-        body: JSON.stringify(payload),
-      });
-    }
-
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.message || "Failed to save customer");
-    }
-
-    const data = await response.json();
-
-    console.log(isEditMode ? "Customer updated successfully!" : "Customer created successfully!");
-    
-    // onSubmit?.(isEditMode ? { ...initialData, ...payload } : data.data || payload);
-    onSubmit?.({} as any);
-    
-    handleClose();
-  } catch (err: any) {
-    console.error("Save customer error:", err);
-    console.log(err.message || "Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
-
-    const handleClose = () => {
       setForm(emptyForm);
-      onClose();
-    };
+    }
+    setActiveTab("details");
+  }, [initialData, isOpen]);
 
-    const reset = () => {
-      setForm(initialData ?? emptyForm);
-    };
+  useEffect(() => {
+    if (form.sameAsBilling) {
+      setForm((prev) => ({
+        ...prev,
+        shippingAddressLine1: prev.billingAddressLine1,
+        shippingAddressLine2: prev.billingAddressLine2,
+        shippingPostalCode: prev.billingPostalCode,
+        shippingCity: prev.billingCity,
+        shippingState: prev.billingState,
+        shippingCountry: prev.billingCountry,
+      }));
+    }
+  }, [
+    form.sameAsBilling,
+    form.billingAddressLine1,
+    form.billingAddressLine2,
+    form.billingPostalCode,
+    form.billingCity,
+    form.billingState,
+    form.billingCountry,
+  ]);
 
-    if (!isOpen) return null;
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, type, value } = e.target;
 
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className=" w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
-          >
-            <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
-              {/* Header */}
-              <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
-                <h2 className="text-2xl font-semibold text-indigo-700">
-                  {isEditMode ? "Edit Customer" : "Add New Customer"}
-                </h2>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="p-1 rounded-full hover:bg-gray-200"
-                >
-                  <X className="w-5 h-5 text-gray-600" />
-                </button>
-              </header>
-
-              {/* Tabs */}
-              <div className="flex border-b bg-gray-50">
-                {(["details", "terms", "address"] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${activeTab === tab
-                      ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                      : "text-gray-600 hover:text-gray-900"
-                      }`}
-                  >
-                    {tab === "details" ? "Details" : tab === "terms" ? "Terms & Conditions" : "Address"}
-                  </button>
-                ))}
-              </div>
-
-              {/* Tab Content */}
-              <section className="flex-1 overflow-y-auto p-6 space-y-6">
-                {activeTab === "details" && (
-                  <div className="space-y-6">
-                    {/* Customer Details */}
-                    <div>
-                      <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                        Customer Details
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                        <label className="flex flex-col gap-1 text-sm">
-                          <span className="font-medium text-gray-600">
-                            Customer Type *
-                          </span>
-                          <select
-                            name="customer_type"
-                            value={form.customer_type}
-                            onChange={handleChange}
-                            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                            required
-                          >
-                            <option value="Individual">Individual</option>
-                            <option value="Company">Company</option>
-                          </select>
-                        </label>
-                        <Input
-                          label="Customer Name"
-                          name="customer_name"
-                          value={form.customer_name}
-                          onChange={handleChange}
-                          placeholder="Acme Corp"
-                          required
-                        />
-                        <Input
-                              label="Contact Person"
-                              name="custom_contact_person"
-                              type="custom_contact_person"
-                              value={form.custom_contact_person}
-                              onChange={handleChange}
-                              placeholder="e.g. Timothy"
-                        />
-                        <label className="flex flex-col gap-1 text-sm">
-                        <span className="font-medium text-gray-600">Display Name *</span>
-                        <select
-                          name="custom_display_name"
-                          value={form.custom_display_name || ""}
-                          onChange={handleChange}
-                          className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                          required
-                        >
-                          <option value="" disabled>
-                            Select Name
-                          </option>
-                          {form.customer_name && (
-                            <option value={form.customer_name}>
-                              {form.customer_name} 
-                            </option>
-                          )}
-                          {form.custom_contact_person && (
-                            <option value={form.custom_contact_person}>
-                              {form.custom_contact_person} 
-                            </option>
-                          )}
-                          {!form.customer_name && !form.custom_contact_person && (
-                            <option value="" disabled>
-         
-                            </option>
-                         )}
-                        </select>
-                      </label>
-                       
-                            <Input
-                              label="Customer TPIN"
-                              name="custom_customer_tpin"
-                              value={form.custom_customer_tpin}
-                              onChange={handleChange}
-                              placeholder="TP12345678"
-                              required
-                            />
-                            {/* <Input
-                              label="ID"
-                              name="id"
-                              value={form.id}
-                              onChange={handleChange}
-                              placeholder="Identification Number"
-                            /> */}
-                         <label className="flex flex-col gap-1 text-sm">
-                          <span className="font-medium text-gray-600">Currency</span>
-                          <select
-                            name="customer_currency"
-                            value={form.customer_currency ?? ""}
-                            onChange={handleChange}
-                            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                          >
-                            <option value="">Select Currency...</option>
-                            {currencyOptions.map((c) => (
-                              <option key={c} value={c}>{c}</option>
-                            ))}
-                          </select>
-                        </label>
-                        <Input
-                          label="Bank Account"
-                          name="customer_account_no"
-                          value={form.customer_account_no}
-                          onChange={handleChange}
-                          placeholder="Bank Account"
-                        />
-                        <Input
-                              label="Onboard Balance"
-                              name="customer_onboarding_balance"
-                              type="customer_onboarding_balance"
-                              value={form.customer_onboarding_balance}
-                              onChange={handleChange}
-                              placeholder="e.g. 1000"
-                        />
-                        <Input
-                          label="Email"
-                          name="customer_email"
-                          type="customer_email"
-                          value={form.customer_email}
-                          onChange={handleChange}
-                          icon={<Mail className="w-4 h-4 text-gray-400" />}
-                        />
-                        <Input
-                          label="Mobile No"
-                          name="mobile_no"
-                          type="tel"
-                          value={form.mobile_no}
-                          onChange={handleChange}
-                          icon={<Phone className="w-4 h-4 text-gray-400" />}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="my-6  bg-gray-300" />
-                  </div>
-                )}
-
-                {/* === TAB: Terms & Conditions === */}
-              {activeTab === "terms" && (
-              <div className=" h-full w-full">
-              <TermsAndCondition/>
-              </div>
-              )}
-
-                {activeTab === "address" && (
-                  <div className="space-y-6">
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-
-                      {/* ========== BILLING ADDRESS ========== */}
-                      <div className="rounded-lg border border-gray-300 bg-white shadow p-6">
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold text-gray-700 underline">
-                            Billing Address
-                          </h3>
-                        </div>
-
-                        {/* Main Address Fields */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <Input
-                            label="Line 1"
-                            name="custom_billing_address_line_1"
-                            value={form.custom_billing_address_line_1 ?? ""}
-                            onChange={handleChange}
-                            placeholder="Street, Apartment"
-                          />
-                          <Input
-                            label="Line 2"
-                            name="custom_billing_address_line_2"
-                            value={form.custom_billing_address_line_2 ?? ""}
-                            onChange={handleChange}
-                            placeholder="Landmark, City"
-                          />
-                          <Input
-                            label="Postal Code"
-                            name="custom_billing_postal_code"
-                            value={form.custom_billing_postal_code ?? ""}
-                            onChange={handleChange}
-                            placeholder="Postal Code"
-                          />
-                          <Input
-                            label="City"
-                            name="custom_billing_city"
-                            value={form.custom_billing_city ?? ""}
-                            onChange={handleChange}
-                            placeholder="City"
-                          />
-                          <Input
-                            label="State"
-                            name="custom_billing_state"
-                            value={form.custom_billing_state ?? ""}
-                            onChange={handleChange}
-                            placeholder="State"
-                          />
-                          <Input
-                            label="Country"
-                            name="custom_billing_country"
-                            value={form.custom_billing_country ?? ""}
-                            onChange={handleChange}
-                            placeholder="Country"
-                          />
-                        </div>
-
-                        {/* Add Address Button */}
-                        {/* <div className="mt-6 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setShowAdditionalBilling(!showAdditionalBilling)}
-                              className="p-1 rounded hover:bg-gray-200 transition"
-                            >
-                              {showAdditionalBilling ? (
-                                <Minus className="w-4 h-4 text-gray-600" />
-                              ) : (
-                                <Plus className="w-4 h-4 text-gray-600" />
-                              )}
-                            </button>
-                            <span className="text-sm font-medium text-gray-700">
-                              Add Address
-                            </span>
-                          </div>
-                        </div> */}
-
-                        {/* Additional Address Fields */}
-                        {/* {showAdditionalBilling && (
-                          <div className="mt-2 pt-2">
-                            <div className="grid grid-cols-2 gap-4">
-                              <Input
-                                label="Line 1"
-                                name="custom_billing_address_line_1_2"
-                                placeholder="Street, Apartment"
-                              />
-                              <Input
-                                label="Line 2"
-                                name="custom_billing_address_line_2_2"
-                                placeholder="Landmark, City"
-                              />
-                              <Input
-                                label="Postal Code"
-                                name="custom_billing_postal_code_2"
-                                placeholder="Postal Code"
-                              />
-                              <Input
-                                label="City"
-                                name="custom_billing_city_2"
-                                placeholder="City"
-                              />
-                              <Input
-                                label="State"
-                                name="custom_billing_state_2"
-                                placeholder="State"
-                              />
-                              <Input
-                                label="Country"
-                                name="custom_billing_country_2"
-                                placeholder="Country"
-                              />
-                            </div>
-                          </div>
-                        )} */}
-                      </div>
-
-                      {/* ========== SHIPPING ADDRESS ========== */}
-                      <div className="rounded-lg border border-gray-300 bg-white shadow p-6">
-                        {/* Header with checkbox */}
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold text-gray-700 underline">
-                            Shipping Address
-                          </h3>
-
-                          {/* Same as Billing Checkbox - RIGHT SIDE */}
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              name="sameAsBilling"
-                              checked={form.sameAsBilling || false}
-                              onChange={handleChange}
-                              className="w-4 h-4 text-indigo-600"
-                            />
-                            <span className="text-sm text-gray-600 font-medium">
-                              Same as billing
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Address Fields - Always Visible */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <Input
-                            label="Line 1"
-                            name="custom_shipping_address_line_1"
-                            value={form.custom_shipping_address_line_1 ?? ""}
-                            onChange={handleChange}
-                            placeholder="Street, Apartment"
-                            disabled={form.sameAsBilling}
-                          />
-                          <Input
-                            label="Line 2"
-                            name="custom_shipping_address_line_2"
-                            value={form.custom_shipping_address_line_2 ?? ""}
-                            onChange={handleChange}
-                            placeholder="Landmark, City"
-                            disabled={form.sameAsBilling}
-                          />
-                          <Input
-                            label="Postal Code"
-                            name="custom_shipping_postal_code"
-                            value={form.custom_shipping_postal_code ?? ""}
-                            onChange={handleChange}
-                            placeholder="Postal Code"
-                            disabled={form.sameAsBilling}
-                          />
-                          <Input
-                            label="City"
-                            name="custom_shipping_city"
-                            value={form.custom_shipping_city ?? ""}
-                            onChange={handleChange}
-                            placeholder="City"
-                            disabled={form.sameAsBilling}
-                          />
-                          <Input
-                            label="State"
-                            name="custom_shipping_state"
-                            value={form.custom_shipping_state ?? ""}
-                            onChange={handleChange}
-                            placeholder="State"
-                            disabled={form.sameAsBilling}
-                          />
-                          <Input
-                            label="Country"
-                            name="custom_shipping_country"
-                            value={form.custom_shipping_country ?? ""}
-                            onChange={handleChange}
-                            placeholder="Country"
-                            disabled={form.sameAsBilling}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-
-              </section>
-
-              {/* Footer */}
-              <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={reset}
-                    className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
-                  >
-                    Reset
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex items-center gap-2 rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600 disabled:opacity-50"
-                  >
-                    {/* {loading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Save className="w-4 h-4" />
-                    )} */}
-                    {isEditMode ? "Update" : "Save"} Customer
-                  </button>
-                </div>
-              </footer>
-            </form>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    );
+    if (type === "checkbox") {
+      setForm((prev) => ({
+        ...prev,
+        [name]: (e.target as HTMLInputElement).checked,
+      }));
+    } else {
+      setForm((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
-// Reusable Input Component
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  icon?: React.ReactNode;
-}
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const payload: CustomerDetail = { ...form };
+      delete (payload as any).sameAsBilling;
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, icon, className = "", ...props }, ref) => (
-    <label className="flex flex-col gap-1 text-sm w-full">
-      <span className="font-medium text-gray-600">
-        {label}
-        {props.required && <span className="text-red-500 ml-1">*</span>}
-      </span>
-      <div className="relative">
-        {icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            {icon}
-          </div>
-        )}
-        <input
-          ref={ref}
-          className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${icon ? "pl-10" : ""
-            } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
-          {...props}
-          value={props.value ?? ""}
-        />
+      let response;
+      console.log("payload: ", payload);
+
+      if (isEditMode && initialData?.id) {
+        response = await updateCustomerByCustomerCode(initialData.id, payload);
+      } else {
+        response = await createCustomer(payload);
+      }
+
+      alert(
+        isEditMode
+          ? "Customer updated successfully!"
+          : "Customer created successfully!",
+      );
+
+      onSubmit?.(payload);
+      handleClose();
+    } catch (err) {
+      console.error("Save customer error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    setForm(emptyForm);
+    onClose();
+  };
+
+  const reset = () => {
+    setForm(initialData ? { ...initialData, sameAsBilling: false } : emptyForm);
+  };
+
+  // Footer content
+  const footer = (
+    <>
+      <Button variant="secondary" onClick={handleClose}>
+        Cancel
+      </Button>
+      <div className="flex gap-3">
+        <Button variant="secondary" onClick={reset}>
+          Reset
+        </Button>
+        <Button 
+          variant="primary" 
+          onClick={handleSubmit} 
+          loading={loading}
+          type="submit"
+        >
+          {isEditMode ? "Update Customer" : "Save Customer"}
+        </Button>
       </div>
-    </label>
-  )
-);
-Input.displayName = "Input";
+    </>
+  );
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isEditMode ? "Edit Customer" : "Add New Customer"}
+      subtitle={isEditMode ? "Update customer information" : "Fill in the details to create a new customer"}
+      icon={isEditMode ? Building2 : User}
+      footer={footer}
+      maxWidth="6xl"
+      height="90vh"
+    >
+      <div className="h-full flex flex-col">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          {/* Tabs - Sticky Header */}
+          <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
+            {(["details", "terms", "address"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={`relative px-6 py-3 font-semibold text-sm capitalize transition-all duration-200 rounded-t-lg ${
+                  activeTab === tab
+                    ? "text-primary bg-card shadow-sm"
+                    : "text-muted hover:text-main hover:bg-card/50"
+                }`}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  {tab === "details" && <User className="w-4 h-4" />}
+                  {tab === "terms" && <FileText className="w-4 h-4" />}
+                  {tab === "address" && <MapPin className="w-4 h-4" />}
+                  {tab === "details" ? "Details" : tab === "terms" ? "Terms" : "Address"}
+                </span>
+                {activeTab === tab && (
+                  <motion.div
+                    layoutId="activeCustomerTab"
+                    className="absolute inset-0 bg-card rounded-t-lg shadow-sm"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    style={{ zIndex: -1 }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto px-1 py-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.2 }}
+              >
+                {activeTab === "details" && (
+                  <Card
+                    title="Basic Information"
+                    subtitle="Essential customer details"
+                    icon={<User className="w-5 h-5 text-primary" />}
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                      <Select
+                        label="Type"
+                        name="type"
+                        value={form.type}
+                        onChange={handleChange}
+                        required
+                        icon={<Building2 className="w-4 h-4" />}
+                      >
+                        <option value="Individual">Individual</option>
+                        <option value="Company">Company</option>
+                      </Select>
+
+                      <Input
+                        label="Customer Name"
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        required
+                        icon={<User className="w-4 h-4" />}
+                        placeholder="Enter full name"
+                      />
+
+                      <Input
+                        label="Contact Person"
+                        name="contactPerson"
+                        value={form.contactPerson}
+                        onChange={handleChange}
+                        icon={<User className="w-4 h-4" />}
+                        placeholder="Primary contact"
+                      />
+
+                      <Select
+                        label="Display Name"
+                        name="displayName"
+                        value={form.displayName}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="" disabled>
+                          Select Display Name
+                        </option>
+                        {form.name && (
+                          <option value={form.name}>{form.name}</option>
+                        )}
+                        {form.contactPerson && (
+                          <option value={form.contactPerson}>
+                            {form.contactPerson}
+                          </option>
+                        )}
+                      </Select>
+
+                      <Input
+                        label="TPIN"
+                        name="tpin"
+                        value={form.tpin}
+                        onChange={handleChange}
+                        required
+                        icon={<CreditCard className="w-4 h-4" />}
+                        placeholder="Tax identification"
+                      />
+
+                      <Select
+                        label="Currency"
+                        name="currency"
+                        value={form.currency}
+                        onChange={handleChange}
+                        icon={<DollarSign className="w-4 h-4" />}
+                      >
+                        <option value="">Select Currency</option>
+                        {currencyOptions.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </Select>
+
+                      <Input
+                        label="Bank Account"
+                        name="accountNumber"
+                        value={form.accountNumber}
+                        onChange={handleChange}
+                        icon={<CreditCard className="w-4 h-4" />}
+                        placeholder="Account number"
+                      />
+
+                      <Input
+                        label="Onboard Balance"
+                        name="onboardingBalance"
+                        type="number"
+                        value={form.onboardingBalance}
+                        onChange={handleChange}
+                        icon={<DollarSign className="w-4 h-4" />}
+                        placeholder="0.00"
+                      />
+
+                      <Input
+                        label="Email"
+                        name="email"
+                        type="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        icon={<Mail className="w-4 h-4" />}
+                        placeholder="email@example.com"
+                      />
+
+                      <Input
+                        label="Mobile"
+                        name="mobile"
+                        type="tel"
+                        value={form.mobile}
+                        onChange={handleChange}
+                        icon={<Phone className="w-4 h-4" />}
+                        placeholder="+1234567890"
+                      />
+                    </div>
+                  </Card>
+                )}
+
+                {activeTab === "terms" && (
+                  <TermsAndCondition
+                    title="Selling Terms & Conditions"
+                    terms={form.terms?.selling as TermSection}
+                    setTerms={(updated) =>
+                      setForm((p) => ({
+                        ...p,
+                        terms: { ...p.terms, selling: updated },
+                      }))
+                    }
+                  />
+                )}
+
+                {activeTab === "address" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Billing Address */}
+                    <Card
+                      title="Billing Address"
+                      subtitle="Invoice and payment details"
+                      icon={<MapPin className="w-5 h-5 text-primary" />}
+                    >
+                      <div className="space-y-4">
+                        <Input
+                          label="Address Line 1"
+                          name="billingAddressLine1"
+                          value={form.billingAddressLine1}
+                          onChange={handleChange}
+                          placeholder="Street address"
+                        />
+                        <Input
+                          label="Address Line 2"
+                          name="billingAddressLine2"
+                          value={form.billingAddressLine2}
+                          onChange={handleChange}
+                          placeholder="Apt, suite, etc."
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="Postal Code"
+                            name="billingPostalCode"
+                            value={form.billingPostalCode}
+                            onChange={handleChange}
+                            placeholder="ZIP"
+                          />
+                          <Input
+                            label="City"
+                            name="billingCity"
+                            value={form.billingCity}
+                            onChange={handleChange}
+                            placeholder="City"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="State"
+                            name="billingState"
+                            value={form.billingState}
+                            onChange={handleChange}
+                            placeholder="State"
+                          />
+                          <Input
+                            label="Country"
+                            name="billingCountry"
+                            value={form.billingCountry}
+                            onChange={handleChange}
+                            placeholder="Country"
+                          />
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Shipping Address */}
+                    <Card
+                      title="Shipping Address"
+                      subtitle="Delivery location"
+                      icon={<MapPin className="w-5 h-5 text-primary" />}
+                      className="relative"
+                    >
+                      <div className="absolute top-6 right-6">
+                        <Checkbox
+                          label="Same as billing"
+                          name="sameAsBilling"
+                          checked={form.sameAsBilling}
+                          onChange={handleChange}
+                        />
+                      </div>
+
+                      <div className="space-y-4 mt-8">
+                        <Input
+                          label="Address Line 1"
+                          name="shippingAddressLine1"
+                          value={form.shippingAddressLine1}
+                          onChange={handleChange}
+                          disabled={form.sameAsBilling}
+                          placeholder="Street address"
+                        />
+                        <Input
+                          label="Address Line 2"
+                          name="shippingAddressLine2"
+                          value={form.shippingAddressLine2}
+                          onChange={handleChange}
+                          disabled={form.sameAsBilling}
+                          placeholder="Apt, suite, etc."
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="Postal Code"
+                            name="shippingPostalCode"
+                            value={form.shippingPostalCode}
+                            onChange={handleChange}
+                            disabled={form.sameAsBilling}
+                            placeholder="ZIP"
+                          />
+                          <Input
+                            label="City"
+                            name="shippingCity"
+                            value={form.shippingCity}
+                            onChange={handleChange}
+                            disabled={form.sameAsBilling}
+                            placeholder="City"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="State"
+                            name="shippingState"
+                            value={form.shippingState}
+                            onChange={handleChange}
+                            disabled={form.sameAsBilling}
+                            placeholder="State"
+                          />
+                          <Input
+                            label="Country"
+                            name="shippingCountry"
+                            value={form.shippingCountry}
+                            onChange={handleChange}
+                            disabled={form.sameAsBilling}
+                            placeholder="Country"
+                          />
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </form>
+      </div>
+    </Modal>
+  );
+};
 
 export default CustomerModal;

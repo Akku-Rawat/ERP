@@ -12,7 +12,7 @@ import {
   FaEdit,
   FaTrash,
   FaEye,
-  FaShareSquare
+  FaShareSquare,
 } from "react-icons/fa";
 
 interface AssignUserRoleForm {
@@ -22,8 +22,6 @@ interface AssignUserRoleForm {
   actionPermissions: string[];
   status: "Active" | "Inactive";
 }
-
-
 
 interface AssignUserRoleModalProps {
   isOpen: boolean;
@@ -36,18 +34,16 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  initialData
+  initialData,
 }) => {
- const [formData, setFormData] = useState<AssignUserRoleForm>({
-  roleName: "",
-  description: "",
-  modulePermissions: [],
-  actionPermissions: [],
-  status: "Active"   
-});
+  const [formData, setFormData] = useState<AssignUserRoleForm>({
+    roleName: "",
+    description: "",
+    modulePermissions: [],
+    actionPermissions: [],
+    status: "Active",
+  });
 
-
-  
   const moduleOptions = [
     { id: "inventory", name: "Inventory", icon: <FaBoxOpen /> },
     { id: "sales", name: "Sales", icon: <FaMoneyBillAlt /> },
@@ -56,15 +52,15 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
     { id: "hr", name: "HR", icon: <FaUsers /> },
     { id: "manufacturing", name: "Manufacturing", icon: <FaIndustry /> },
     { id: "crm", name: "CRM", icon: <FaPhoneVolume /> },
-    { id: "reports", name: "Reports", icon: <FaChartBar /> }
+    { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ];
 
   const actionOptions = [
-    { id: "create", name: "Create", icon: <FaPlus />, color: "text-green-600" },
-    { id: "edit", name: "Edit", icon: <FaEdit />, color: "text-blue-600" },
-    { id: "delete", name: "Delete", icon: <FaTrash />, color: "text-red-600" },
-    { id: "view", name: "View", icon: <FaEye />, color: "text-gray-600" },
-    { id: "export", name: "Export", icon: <FaShareSquare />, color: "text-purple-600" }
+    { id: "create", name: "Create", icon: <FaPlus />, color: "text-[var(--success)]" },
+    { id: "edit", name: "Edit", icon: <FaEdit />, color: "text-primary" },
+    { id: "delete", name: "Delete", icon: <FaTrash />, color: "text-[var(--danger)]" },
+    { id: "view", name: "View", icon: <FaEye />, color: "text-muted" },
+    { id: "export", name: "Export", icon: <FaShareSquare />, color: "text-primary" },
   ];
 
   useEffect(() => {
@@ -76,7 +72,7 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
         description: "",
         modulePermissions: [],
         actionPermissions: [],
-        status: "Active"
+        status: "Active",
       });
     }
   }, [initialData, isOpen]);
@@ -96,7 +92,6 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
       alert("Please select at least one action permission!");
       return;
     }
-
     onSubmit(formData);
   };
 
@@ -114,7 +109,10 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
   };
 
   const selectAllModules = () => {
-    setFormData({ ...formData, modulePermissions: moduleOptions.map(m => m.name) });
+    setFormData({
+      ...formData,
+      modulePermissions: moduleOptions.map((m) => m.name),
+    });
   };
 
   const clearAllModules = () => {
@@ -122,7 +120,10 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
   };
 
   const selectAllActions = () => {
-    setFormData({ ...formData, actionPermissions: actionOptions.map(a => a.name) });
+    setFormData({
+      ...formData,
+      actionPermissions: actionOptions.map((a) => a.name),
+    });
   };
 
   const clearAllActions = () => {
@@ -130,17 +131,19 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto custom-scrollbar border border-[var(--border)]">
+        
         {/* Header */}
-        <div className="sticky top-0 bg-indigo-50/70  border-b px-6 py-4 flex justify-between items-center">
-          <h3 className="text-xl font-bold text-indigo-700 flex items-center gap-2">
+        <div className="sticky top-0 bg-primary/10 border-b border-[var(--border)] px-6 py-4 flex justify-between items-center z-10">
+          <h3 className="text-xl font-bold text-primary flex items-center gap-3">
             <FaUsers className="text-2xl" />
             {initialData ? "Edit Role" : "Add New Role"}
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl leading-none w-8 h-8 flex items-center justify-center hover:bg-white rounded-full transition-colors"
+            className="text-muted hover:text-main text-xl leading-none w-8 h-8 flex items-center justify-center hover:bg-[var(--row-hover)] rounded-full transition-colors"
+            aria-label="Close modal"
           >
             ✕
           </button>
@@ -149,81 +152,87 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
         {/* Form Content */}
         <div className="p-6">
           <div className="space-y-6">
+            
             {/* Role Name */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Role Name <span className="text-red-500">*</span>
+              <label className="block text-sm font-semibold text-main mb-2">
+                Role Name <span className="text-[var(--danger)]">*</span>
               </label>
               <input
                 type="text"
                 value={formData.roleName}
                 onChange={(e) => handleChange("roleName", e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all"
+                className="w-full px-4 py-2.5 bg-app border border-[var(--border)] rounded-xl text-main placeholder:text-muted focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                 placeholder="e.g. Admin, HR Manager, Sales Executive"
               />
             </div>
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-main mb-2">
                 Description
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => handleChange("description", e.target.value)}
                 rows={3}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none resize-none transition-all"
+                className="w-full px-4 py-2.5 bg-app border border-[var(--border)] rounded-xl text-main placeholder:text-muted focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none transition-all"
                 placeholder="Role summary and responsibilities..."
               />
             </div>
 
             {/* Module Permissions */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-lg border border-blue-200">
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-bold text-gray-800 flex items-center gap-2">
-                  <FaBoxOpen className="text-lg" />
-                  Module Permissions <span className="text-red-500">*</span>
+            <div className="bg-primary/5 p-5 rounded-2xl border border-primary/20">
+              <div className="flex items-center justify-between mb-4">
+                <label className="text-sm font-bold text-main flex items-center gap-2">
+                  <FaBoxOpen className="text-lg text-primary" />
+                  Module Permissions <span className="text-[var(--danger)]">*</span>
                 </label>
                 <div className="flex gap-2">
                   <button
+                    type="button"
                     onClick={selectAllModules}
-                    className="text-xs text-teal-600 hover:text-teal-700 font-semibold px-3 py-1 bg-white rounded-md hover:bg-teal-50 transition-colors"
+                    className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-[var(--primary-600)] px-3 py-1.5 bg-card rounded-lg hover:bg-primary/10 transition-colors border border-[var(--border)]"
                   >
                     Select All
                   </button>
-                  <span className="text-gray-300">|</span>
                   <button
+                    type="button"
                     onClick={clearAllModules}
-                    className="text-xs text-gray-600 hover:text-gray-700 font-semibold px-3 py-1 bg-white rounded-md hover:bg-gray-50 transition-colors"
+                    className="text-[10px] font-black uppercase tracking-widest text-muted hover:text-[var(--danger)] px-3 py-1.5 bg-card rounded-lg hover:bg-[var(--danger)]/10 transition-colors border border-[var(--border)]"
                   >
                     Clear All
                   </button>
                 </div>
               </div>
+              
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {moduleOptions.map((module) => (
                   <label
                     key={module.id}
-                    className={`flex items-center gap-2 p-3 bg-white border-2 rounded-lg cursor-pointer transition-all ${
+                    className={`flex items-center gap-2 p-3 bg-card border-2 rounded-xl cursor-pointer transition-all ${
                       formData.modulePermissions.includes(module.name)
-                        ? "border-teal-500 bg-teal-50 shadow-md"
-                        : "border-gray-200 hover:border-teal-300 hover:bg-teal-50"
+                        ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
+                        : "border-[var(--border)] hover:border-primary/50 hover:bg-primary/5"
                     }`}
                   >
                     <input
                       type="checkbox"
                       checked={formData.modulePermissions.includes(module.name)}
                       onChange={() => togglePermission("module", module.name)}
-                      className="rounded text-teal-600 focus:ring-teal-500"
+                      className="w-4 h-4 rounded accent-[var(--primary)] cursor-pointer"
                     />
-                    <span className="text-lg">{module.icon}</span>
-                    <span className="text-sm font-semibold text-gray-700">{module.name}</span>
+                    <span className="text-lg text-primary">{module.icon}</span>
+                    <span className="text-xs font-semibold text-main">
+                      {module.name}
+                    </span>
                   </label>
                 ))}
               </div>
+              
               {formData.modulePermissions.length > 0 && (
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="text-xs font-semibold text-teal-700 bg-teal-100 px-3 py-1 rounded-full">
+                <div className="mt-4 flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/10 px-3 py-1.5 rounded-full">
                     ✓ {formData.modulePermissions.length} module(s) selected
                   </span>
                 </div>
@@ -231,52 +240,57 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
             </div>
 
             {/* Action Permissions */}
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-lg border border-purple-200">
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-bold text-gray-800 flex items-center gap-2">
-                  <FaEye className="text-lg" />
-                  Action Permissions <span className="text-red-500">*</span>
+            <div className="bg-[var(--success)]/5 p-5 rounded-2xl border border-[var(--success)]/20">
+              <div className="flex items-center justify-between mb-4">
+                <label className="text-sm font-bold text-main flex items-center gap-2">
+                  <FaEye className="text-lg text-[var(--success)]" />
+                  Action Permissions <span className="text-[var(--danger)]">*</span>
                 </label>
                 <div className="flex gap-2">
                   <button
+                    type="button"
                     onClick={selectAllActions}
-                    className="text-xs text-purple-600 hover:text-purple-700 font-semibold px-3 py-1 bg-white rounded-md hover:bg-purple-50 transition-colors"
+                    className="text-[10px] font-black uppercase tracking-widest text-[var(--success)] hover:opacity-80 px-3 py-1.5 bg-card rounded-lg hover:bg-[var(--success)]/10 transition-colors border border-[var(--border)]"
                   >
                     Select All
                   </button>
-                  <span className="text-gray-300">|</span>
                   <button
+                    type="button"
                     onClick={clearAllActions}
-                    className="text-xs text-gray-600 hover:text-gray-700 font-semibold px-3 py-1 bg-white rounded-md hover:bg-gray-50 transition-colors"
+                    className="text-[10px] font-black uppercase tracking-widest text-muted hover:text-[var(--danger)] px-3 py-1.5 bg-card rounded-lg hover:bg-[var(--danger)]/10 transition-colors border border-[var(--border)]"
                   >
                     Clear All
                   </button>
                 </div>
               </div>
+              
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 {actionOptions.map((action) => (
                   <label
                     key={action.id}
-                    className={`flex items-center gap-2 p-3 bg-white border-2 rounded-lg cursor-pointer transition-all ${
+                    className={`flex items-center gap-2 p-3 bg-card border-2 rounded-xl cursor-pointer transition-all ${
                       formData.actionPermissions.includes(action.name)
-                        ? "border-purple-500 bg-purple-50 shadow-md"
-                        : "border-gray-200 hover:border-purple-300 hover:bg-purple-50"
+                        ? "border-[var(--success)] bg-[var(--success)]/5 shadow-md shadow-[var(--success)]/10"
+                        : "border-[var(--border)] hover:border-[var(--success)]/50 hover:bg-[var(--success)]/5"
                     }`}
                   >
                     <input
                       type="checkbox"
                       checked={formData.actionPermissions.includes(action.name)}
                       onChange={() => togglePermission("action", action.name)}
-                      className="rounded text-purple-600 focus:ring-purple-500"
+                      className="w-4 h-4 rounded accent-[var(--success)] cursor-pointer"
                     />
-                    <span className="text-lg">{action.icon}</span>
-                    <span className={`text-sm font-semibold ${action.color}`}>{action.name}</span>
+                    <span className={`text-lg ${action.color}`}>{action.icon}</span>
+                    <span className={`text-xs font-semibold ${action.color}`}>
+                      {action.name}
+                    </span>
                   </label>
                 ))}
               </div>
+              
               {formData.actionPermissions.length > 0 && (
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="text-xs font-semibold text-purple-700 bg-purple-100 px-3 py-1 rounded-full">
+                <div className="mt-4 flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[var(--success)] bg-[var(--success)]/10 px-3 py-1.5 rounded-full">
                     ✓ {formData.actionPermissions.length} action(s) selected
                   </span>
                 </div>
@@ -285,7 +299,7 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
 
             {/* Status */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
+              <label className="block text-sm font-semibold text-main mb-3">
                 Status
               </label>
               <div className="flex items-center gap-6">
@@ -296,11 +310,16 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
                     value="Active"
                     checked={formData.status === "Active"}
                     onChange={(e) => handleChange("status", e.target.value)}
-                    className="w-4 h-4 text-teal-600 focus:ring-teal-500"
+                    className="w-4 h-4 accent-[var(--success)] cursor-pointer"
                   />
-                  <span className="text-sm font-medium text-gray-700 group-hover:text-teal-600">
+                  <span className="text-sm font-medium text-main group-hover:text-[var(--success)] transition-colors">
                     Active
                   </span>
+                  {formData.status === "Active" && (
+                    <span className="text-[9px] font-black uppercase bg-[var(--success)]/10 text-[var(--success)] px-2 py-0.5 rounded-full">
+                      Selected
+                    </span>
+                  )}
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer group">
                   <input
@@ -309,27 +328,34 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
                     value="Inactive"
                     checked={formData.status === "Inactive"}
                     onChange={(e) => handleChange("status", e.target.value)}
-                    className="w-4 h-4 text-teal-600 focus:ring-teal-500"
+                    className="w-4 h-4 accent-[var(--danger)] cursor-pointer"
                   />
-                  <span className="text-sm font-medium text-gray-700 group-hover:text-teal-600">
+                  <span className="text-sm font-medium text-main group-hover:text-[var(--danger)] transition-colors">
                     Inactive
                   </span>
+                  {formData.status === "Inactive" && (
+                    <span className="text-[9px] font-black uppercase bg-[var(--danger)]/10 text-[var(--danger)] px-2 py-0.5 rounded-full">
+                      Selected
+                    </span>
+                  )}
                 </label>
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-3 mt-8 pt-5 border-t">
+          <div className="flex justify-end gap-3 mt-8 pt-5 border-t border-[var(--border)]">
             <button
+              type="button"
               onClick={onClose}
-              className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+              className="px-6 py-2.5 border border-[var(--border)] rounded-xl text-main font-semibold hover:bg-[var(--row-hover)] transition-colors"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleSubmit}
-              className="px-6 py-2.5 bg-teal-600 text-white font-medium rounded-lg hover:bg-teal-700 transition-colors shadow-sm"
+              className="px-6 py-2.5 bg-primary text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20"
             >
               {initialData ? "Update Role" : "Create Role"}
             </button>

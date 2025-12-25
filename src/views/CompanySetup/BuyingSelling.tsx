@@ -1,123 +1,147 @@
-import React, { useState } from 'react';
-import {
-  FaShoppingCart,
-  FaChartLine,
-  FaCheckCircle
-} from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import TermsAndCondition from "../../components/TermsAndCondition";
+import { Check, RotateCcw, Save } from "lucide-react";
 
+import type { Terms, TermSection } from "../../types/termsAndCondition";
 
-const BuyingSelling: React.FC = () => {
-  const [formData, setFormData] = useState({
-    defaultBuyingTerms: '',
-    defaultSellingTerms: '',
-  });
+import { updateCompanyById } from "../../api/companySetupApi";
+interface BuyingSellingProps {
+  terms?: Terms | null;
+}
 
+const emptySection = (): TermSection => ({
+  general: "",
+  delivery: "",
+  cancellation: "",
+  warranty: "",
+  liability: "",
+  payment: {
+    phases: [],
+    dueDates: "",
+    lateCharges: "",
+    taxes: "",
+    notes: "",
+  },
+});
+
+const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const [formData, setFormData] = useState({
+    buying: emptySection(),
+    selling: emptySection(),
+  });
+
+  useEffect(() => {
+    if (!terms) return;
+
+    setFormData({
+      buying: {
+        general: terms.buying?.general ?? "",
+        delivery: terms.buying?.delivery ?? "",
+        cancellation: terms.buying?.cancellation ?? "",
+        warranty: terms.buying?.warranty ?? "",
+        liability: terms.buying?.liability ?? "",
+        payment: {
+          phases: terms.buying?.payment?.phases ?? [],
+          dueDates: terms.buying?.payment?.dueDates ?? "",
+          lateCharges: terms.buying?.payment?.lateCharges ?? "",
+          taxes: terms.buying?.payment?.taxes ?? "",
+          notes: terms.buying?.payment?.notes ?? "",
+        },
+      },
+      selling: {
+        general: terms.selling?.general ?? "",
+        delivery: terms.selling?.delivery ?? "",
+        cancellation: terms.selling?.cancellation ?? "",
+        warranty: terms.selling?.warranty ?? "",
+        liability: terms.selling?.liability ?? "",
+        payment: {
+          phases: terms.selling?.payment?.phases ?? [],
+          dueDates: terms.selling?.payment?.dueDates ?? "",
+          lateCharges: terms.selling?.payment?.lateCharges ?? "",
+          taxes: terms.selling?.payment?.taxes ?? "",
+          notes: terms.selling?.payment?.notes ?? "",
+        },
+      },
+    });
+  }, [terms]);
+
+  const handleReset = () => {
+    setFormData({
+      buying: emptySection(),
+      selling: emptySection(),
+    });
   };
 
-  const handleSubmit = () => {
-    console.log(formData);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+  const handleSubmit = async () => {
+    const payload = {
+      id: "COMP-00003",
+      ...formData,
+    };
+
+    try {
+      console.log("payload:", payload);
+      await updateCompanyById(payload);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (err) {
+      console.error("Update failed:", err);
+      alert("Failed to update company terms and conditions details.");
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6 flex  justify-center">
-      <div className="w-full max-w-4xl">
-        {/* Success Message */}
-        {showSuccess && (
-          <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-3">
-            <FaCheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <p className="text-green-800 font-medium text-sm">Terms saved successfully!</p>
-          </div>
-        )}
+    <div className="min-h-screen bg-app">
+      {/* SUCCESS TOAST */}
+      {showSuccess && (
+        <div className="fixed top-4 right-4 bg-card border border-green-200 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
+          <Check className="text-success" />
+          <span>Terms saved successfully!</span>
+        </div>
+      )}
 
-
-        {/* Main Content - Two Column Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          {/* Buying Terms */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <FaShoppingCart className="w-4 h-4 text-blue-600" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-slate-900">Default Buying Terms</h2>
-                <p className="text-xs text-slate-500">Terms for purchase orders</p>
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-xs font-medium text-slate-700 mb-2">
-                Terms & Conditions <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                name="defaultBuyingTerms"
-                value={formData.defaultBuyingTerms}
-                onChange={handleChange}
-                placeholder="e.g., Payment within 30 days, FOB shipping point, 2% discount if paid within 10 days..."
-                rows={6}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-              />
-              <p className="text-xs text-slate-500 mt-2">These terms will be applied to all purchase orders by default</p>
-            </div>
-          </div>
-
-          {/* Selling Terms */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200">
-              <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <FaChartLine className="w-4 h-4 text-emerald-600" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-slate-900">Default Selling Terms</h2>
-                <p className="text-xs text-slate-500">Terms for sales orders</p>
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-xs font-medium text-slate-700 mb-2">
-                Terms & Conditions <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                name="defaultSellingTerms"
-                value={formData.defaultSellingTerms}
-                onChange={handleChange}
-                placeholder="e.g., Net 30 days, goods remain property of seller until payment received, late payments subject to 1.5% monthly interest..."
-                rows={6}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all resize-none"
-              />
-              <p className="text-xs text-slate-500 mt-2">These terms will be applied to all sales orders by default</p>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-card rounded-xl border border-theme shadow-sm p-4">
+          <TermsAndCondition
+            title="Buying Terms & Conditions"
+            terms={formData.buying}
+            setTerms={(updated) =>
+              setFormData((prev) => ({ ...prev, buying: updated }))
+            }
+          />
         </div>
 
-        {/* Action Buttons */}
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => setFormData({
-                defaultBuyingTerms: '',
-                defaultSellingTerms: '',
-              })}
-              className="px-5 py-2 border border-slate-300 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors"
-            >
-              Reset
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="px-5 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 shadow-sm hover:shadow transition-all"
-            >
-              Save Terms
-            </button>
-          </div>
+        <div className="bg-card rounded-xl border border-theme shadow-sm p-4">
+          <TermsAndCondition
+            title="Selling Terms & Conditions"
+            terms={formData.selling}
+            setTerms={(updated) =>
+              setFormData((prev) => ({ ...prev, selling: updated }))
+            }
+          />
         </div>
       </div>
+
+      {/* ACTION BUTTONS */}
+      <div className="flex justify-end gap-3 mt-6">
+        <button
+          onClick={handleReset}
+          className="px-4 py-2 border border-theme rounded bg-card"
+        >
+          <RotateCcw className="inline-block mr-2" />
+          Reset
+        </button>
+
+        <button
+          onClick={handleSubmit}
+          className="px-5 py-2 rounded bg-primary text-white"
+        >
+          <Save className="inline-block mr-2" />
+          Save Terms
+        </button>
+      </div>
+    </div>
   );
 };
 

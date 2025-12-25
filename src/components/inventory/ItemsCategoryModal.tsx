@@ -1,47 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { X, Save, Loader2 } from "lucide-react";
 import {
-  X,
-  Mail,
-  Phone,
-  Save,
-  Loader2,
-} from "lucide-react";
+  updateItemGroupById,
+  createItemGroup,
+} from "../../api/itemCategoryApi";
+import { getUOMs } from "../../api/itemZraApi";
+import { toast } from "sonner";
+import ItemGenericSelect from "../selects/ItemGenericSelect";
 
 const emptyForm: Record<string, any> = {
-  // Supplier Details
-  tpin: "",
-  supplierName: "",
-  supplierCode: "",
-  paymentTerms: "",
-  currency: "",
-  bankAccount: "",
-
-  // Contact Details
-  contactPerson: "",
-  phoneNo: "",
-  alternateNo: "",
-  emailId: "",
-
-  // Payment Details
-  dateOfAddition: "",
-  openingBalance: "",
-
-  // Bank Details
-  accountNumber: "",
-  accountHolder: "",
-  sortCode: "",
-  swiftCode: "",
-  branchAddress: "",
-
-  // Address
-  billingAddressLine1: "",
-  billingAddressLine2: "",
-  billingCity: "",
-  district: "",
-  province: "",
-  billingCountry: "",
-  billingPostalCode: "",
+  id: "",
+  groupName: "",
+  description: "",
+  salesAccount: "",
+  customSellingPrice: "",
+  unitOfMeasurement: "",
 };
 
 const ItemsCategoryModal: React.FC<{
@@ -50,13 +24,7 @@ const ItemsCategoryModal: React.FC<{
   onSubmit?: (data: Record<string, any>) => void;
   initialData?: Record<string, any> | null;
   isEditMode?: boolean;
-}> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  initialData,
-  isEditMode = false,
-}) => {
+}> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
   const [form, setForm] = useState<Record<string, any>>(emptyForm);
   const [loading, setLoading] = useState(false);
 
@@ -72,8 +40,67 @@ const ItemsCategoryModal: React.FC<{
     setActiveTab("type");
   }, [initialData, isOpen]);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const payload = { ...form };
+
+      let response;
+
+      if (isEditMode && initialData?.id) {
+        response = await updateItemGroupById(initialData.id, payload);
+      } else {
+        response = await createItemGroup(payload);
+      }
+
+      onSubmit?.(payload);
+      handleClose();
+    } catch (err: any) {
+      let errorMessage = "Something went wrong while saving the category.";
+
+      if (err.response?.data) {
+        const data = err.response.data;
+
+        if (data._server_messages) {
+          try {
+            const msgs = JSON.parse(data._server_messages);
+            errorMessage = msgs
+              .map((m: any) => {
+                try {
+                  const parsed = JSON.parse(m);
+                  return parsed.message || "";
+                } catch {
+                  return m;
+                }
+              })
+              .filter(Boolean)
+              .join("\n");
+          } catch (parseErr) {
+            console.error("Failed to parse server messages", parseErr);
+          }
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (typeof data === "string") {
+          errorMessage = data;
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      toast.error(errorMessage, {
+        duration: 8000,
+        style: { whiteSpace: "pre-line" },
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, type, value } = e.target;
     if (type === "checkbox") {
@@ -104,11 +131,14 @@ const ItemsCategoryModal: React.FC<{
           exit={{ opacity: 0, scale: 0.95 }}
           className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
         >
-          <form  className="flex flex-col h-full overflow-hidden">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col h-full overflow-hidden"
+          >
             {/* Header */}
             <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
               <h2 className="text-2xl font-semibold text-indigo-700">
-                {isEditMode ? "Edit Supplier" : "Add New Category"}
+                {isEditMode ? "Edit Items Category" : "Add New Category"}
               </h2>
               <button
                 type="button"
@@ -130,7 +160,7 @@ const ItemsCategoryModal: React.FC<{
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
-                Supplier Details
+                Category Details
               </button>
               <button
                 type="button"
@@ -147,58 +177,83 @@ const ItemsCategoryModal: React.FC<{
 
             {/* Tab Content */}
             <section className="flex-1 overflow-y-auto p-6 space-y-8">
-              {/* Supplier Details Tab */}
+              {/* Items Category Details Tab */}
               {activeTab === "type" && (
                 <>
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-700 underline">
-                    Category Type
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                    <Input label="Type" name="tpin" value={form.type || ""} onChange={handleChange} required />
-                    <Input label="Category Id" name="categoryId" value={form.categoryId || ""} onChange={handleChange} required />
-                    <Input label="Category Description" name="categoryDesc" value={form.categoryDesc || ""} onChange={handleChange} />
-                    <Input label="Unit of Measurement" name="uom" value={form.uom || ""} onChange={handleChange} />
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-700 underline">
+                      Category Type
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                      <Input
+                        label="Id"
+                        name="id"
+                        value={form.id}
+                        onChange={handleChange}
+                        required
+                      />
+                      <Input
+                        label="Category Name"
+                        name="groupName"
+                        value={form.groupName}
+                        onChange={handleChange}
+                        // required
+                      />
+                      <Input
+                        label="Category Description"
+                        name="description"
+                        value={form.description}
+                        onChange={handleChange}
+                      />
+                      {/* <Input
+                        label="Unit of Measurement"
+                        name="unitOfMeasurement"
+                        value={form.unitOfMeasurement}
+                        onChange={handleChange}
+                      /> */}
+                      {/* <ItemGenericSelect
+                        label="UOM"
+                        value={form.unitOfMeasurement}
+                        fetchData={getUOMs}
+                        // displayField="code"
+                        displayFormatter={(item) => `${item.code} - ${item.name}`}
+                        onChange={({ id }) => {
+                          setForm(p => ({ ...p, unitOfMeasurement: id }));
+                        }}
+                      /> */}
+                      <ItemGenericSelect
+                        label="UOM"
+                        value={form.unitOfMeasurement}
+                        fetchData={getUOMs}
+                        onChange={({ id }) =>
+                          setForm((p) => ({ ...p, unitOfMeasurement: id }))
+                        }
+                      />
+                    </div>
                   </div>
-                </div>
-                {/* <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-700 underline">
-                    Contact Details
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                    <Input label="Contact Person Name" name="contactPerson" value={form.contactPerson || ""} onChange={handleChange} required />
-                    <Input label="Phone No" name="phoneNo" value={form.phoneNo || ""} onChange={handleChange} />
-                    <Input label="Alternate No" name="alternateNo" value={form.alternateNo || ""} onChange={handleChange} />
-                    <Input label="Email Id" name="emailId" value={form.emailId || ""} onChange={handleChange} icon={<Mail className="w-4 h-4 text-gray-400" />} />
-                  </div>
-                </div> */}
-                {/* <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-700 underline">
-                    Address Details
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                    <Input label="Address Line 1" name="billingAddressLine1" value={form.billingAddressLine1 || ""} onChange={handleChange} />
-                    <Input label="Address Line 2" name="billingAddressLine2" value={form.billingAddressLine2 || ""} onChange={handleChange} />
-                    <Input label="City" name="billingCity" value={form.billingCity || ""} onChange={handleChange} />
-                    <Input label="District" name="district" value={form.district || ""} onChange={handleChange} />
-                    <Input label="Province" name="province" value={form.province || ""} onChange={handleChange} />
-                    <Input label="Country" name="billingCountry" value={form.billingCountry || ""} onChange={handleChange} />
-                    <Input label="Postal Code" name="billingPostalCode" value={form.billingPostalCode || ""} onChange={handleChange} />
-                  </div>
-                </div> */}
                 </>
               )}
 
-              {/* Payment & Bank Details Tab */}
+              {/* Payment Details Tab */}
               {activeTab === "tax" && (
                 <div className="space-y-8">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-700 underline mb-4">
-                      Sales and Tax
+                      Payment Details
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input label="Selling Price" name="sellingPrice" value={form.sellingPrice || ""} onChange={handleChange} />
-                      <Input label="Sales Account" name="dateOfAddition" value={form.dateOfAddition || ""} onChange={handleChange} />
+                      <Input
+                        label="Selling Price"
+                        name="sellingPrice"
+                        value={form.sellingPrice || ""}
+                        onChange={handleChange}
+                      />
+                      <Input
+                        label="Sales Account"
+                        name="salesAccount"
+                        value={form.salesAccount || ""}
+                        onChange={handleChange}
+                      />
                     </div>
                   </div>
                 </div>
@@ -271,7 +326,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         />
       </div>
     </label>
-  )
+  ),
 );
 Input.displayName = "Input";
 

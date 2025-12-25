@@ -1,372 +1,309 @@
-import React, { useState, useRef } from "react";
-import { X, Printer } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useReactToPrint } from "react-to-print";
-import InvoiceTemplate1 from "../../components/template/invoice/InvoiceTemplate1";
-import InvoiceTemplate2 from "../../components/template/invoice/InvoiceTemplate2";
-import InvoiceTemplate3 from "../../components/template/invoice/InvoiceTemplate3";
+import React, { useEffect, useState } from "react";
+import Pagination from "../../components/Pagination";
+import { getAllSalesInvoices, updateInvoiceStatus } from "../../api/salesApi";
+import type { InvoiceSummary, Invoice } from "../../types/invoice";
+import { Trash2, MoreVertical } from "lucide-react";
+import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTemplate1";
+import PdfPreviewModal from "./PdfPreviewModal";
 
-interface InvoiceItem {
-  productName: string;
-  description: string;
-  quantity: number;
-  listPrice: number;
-  discount: number;
-  tax: number;
-}
+type InvoiceStatus = "Draft" | "Pending" | "Paid" | "Overdue" | "Approved";
 
-interface InvoiceData {
-  invoiceId?: string;
-  invoiceNumber?: string;
-  CutomerName: string;
-  dateOfInvoice: string;
-  dueDate: string;
-  currency: string;
-  billingAddressLine1?: string;
-  billingCity?: string;
-  billingState?: string;
-  billingPostalCode?: string;
-  items: InvoiceItem[];
-  subTotal: number;
-  totalDiscount: number;
-  totalTax: number;
-  adjustment: number;
-  grandTotal: number;
-  paymentTerms?: string;
-  notes?: string;
-}
-
-type TemplateType = "template1" | "template2" | "template3";
-
-const templates = [
-  {
-    id: "template1" as TemplateType,
-    name: "Invoice Template1",
-    description: "Traditional invoice with orange accents",
-    color: "bg-[#748B75]",
-  },
-  {
-    id: "template2" as TemplateType,
-    name: "Invoice Template2",
-    description: "Contemporary design with soft colors",
-    color: "bg-[#D4B5A0]",
-  },
-  {
-    id: "template3" as TemplateType,
-    name: "Invoice Template3",
-    description: "Professional clean blue style",
-    color: "bg-[#B2B1CF]",
-  },
-];
-
-const previewDummyInvoice: InvoiceData = {
-  invoiceId: "PREVIEW-001",
-  invoiceNumber: "PREVIEW-001",
-  CutomerName: "Preview Corp",
-  dateOfInvoice: "2025-11-01",
-  dueDate: "2025-11-10",
-  currency: "INR",
-  billingAddressLine1: "456, Sample Street",
-  billingCity: "Demo City",
-  billingState: "Demo State",
-  billingPostalCode: "123456",
-  subTotal: 33500,
-  totalDiscount: 2000,
-  totalTax: 1800,
-  adjustment: 0,
-  grandTotal: 33300,
-  items: [
-    { productName: "Preview Product", description: "Demo item", quantity: 1, listPrice: 30000, discount: 2000, tax: 1500 },
-    { productName: "Preview Service", description: "Demo service", quantity: 1, listPrice: 5000, discount: 0, tax: 300 },
-  ],
-  paymentTerms: "Net 10",
-  notes: "This is a preview invoice.",
+const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
+  Draft: ["Pending", "Approved"],
+  Pending: ["Paid", "Overdue"],
+  Paid: [],
+  Overdue: ["Paid"],
+  Approved: ["Pending", "Paid", "Overdue"],
 };
 
-const sampleInvoices: InvoiceData[] = [
-  {
-    invoiceId: "INV-001",
-    invoiceNumber: "INV-001",
-    CutomerName: "Acme Corp",
-    dateOfInvoice: "2025-10-01",
-    dueDate: "2025-10-10",
-    currency: "INR",
-    billingAddressLine1: "123, Queen Street",
-    billingCity: "Delhi",
-    billingState: "Delhi",
-    billingPostalCode: "110001",
-    subTotal: 22000,
-    totalDiscount: 0,
-    totalTax: 3000,
-    adjustment: 0,
-    grandTotal: 25000,
-    items: [
-      { productName: "ERP Setup", description: "Full company license", quantity: 1, listPrice: 20000, discount: 0, tax: 2500 },
-      { productName: "Support", description: "Annual maintenance", quantity: 1, listPrice: 2000, discount: 0, tax: 500 },
-    ],
-    paymentTerms: "Net 10",
-    notes: "Thank you for your business!",
-  },
-  {
-    invoiceId: "INV-002",
-    invoiceNumber: "INV-002",
-    CutomerName: "Globex Ltd",
-    dateOfInvoice: "2025-10-03",
-    dueDate: "2025-10-12",
-    currency: "INR",
-    billingAddressLine1: "456, Park Lane",
-    billingCity: "Mumbai",
-    billingState: "Maharashtra",
-    billingPostalCode: "400001",
-    subTotal: 32000,
-    totalDiscount: 0,
-    totalTax: 3000,
-    adjustment: 0,
-    grandTotal: 35000,
-    items: [
-      { productName: "Data Import", description: "All branch migration", quantity: 1, listPrice: 30000, discount: 0, tax: 2400 },
-      { productName: "Consulting", description: "Site visit x2", quantity: 2, listPrice: 1000, discount: 0, tax: 600 },
-    ],
-    paymentTerms: "Net 10",
-    notes: "",
-  },
-  {
-    invoiceId: "INV-003",
-    invoiceNumber: "INV-003",
-    CutomerName: "Initech",
-    dateOfInvoice: "2025-10-05",
-    dueDate: "2025-10-18",
-    currency: "INR",
-    billingAddressLine1: "789, Elm Street",
-    billingCity: "Bangalore",
-    billingState: "Karnataka",
-    billingPostalCode: "560001",
-    subTotal: 41000,
-    totalDiscount: 0,
-    totalTax: 4000,
-    adjustment: 0,
-    grandTotal: 45000,
-    items: [
-      { productName: "Server License", description: "Annual fee", quantity: 1, listPrice: 40000, discount: 0, tax: 3000 },
-      { productName: "Training", description: "3-day onsite", quantity: 1, listPrice: 1000, discount: 0, tax: 1000 },
-    ],
-    paymentTerms: "Due end of month",
-    notes: "Late fee after due date.",
-  },
-];
+const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
 
 const InvoicesTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(null);
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateType | null>(null);
-  const componentRef = useRef<HTMLDivElement>(null);
+  const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Print and download use react-to-print (browser dialog handles both)
-  const handlePrint = useReactToPrint({
-    contentRef: componentRef,
-    documentTitle: `Invoice-${selectedInvoice?.CutomerName}-${selectedInvoice?.invoiceNumber}`,
-  });
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const filteredInvoices = sampleInvoices.filter(
-    (inv) =>
-      inv.invoiceId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inv.CutomerName.toLowerCase().includes(searchTerm.toLowerCase())
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfOpen, setPdfOpen] = useState(false);
+
+  const [openStatusMenuFor, setOpenStatusMenuFor] = useState<string | null>(
+    null
   );
 
-  const handleViewClick = (inv: InvoiceData) => {
-    setSelectedInvoice(inv);
-    setShowTemplateSelector(true);
-    setSelectedTemplate(null);
-  };
+  const fetchInvoices = async () => {
+    try {
+      setLoading(true);
+      const res = await getAllSalesInvoices(page, pageSize);
+      if (!res || res.status_code !== 200) return;
 
-  const handleTemplateSelect = (templateId: TemplateType) => {
-    setSelectedTemplate(templateId);
-    setShowTemplateSelector(false);
-  };
+      const mapped: InvoiceSummary[] = res.data.map((inv: any) => ({
+        invoiceNumber: inv.invoiceNumber,
+        customerName: inv.customerName,
+        receiptNumber: inv.receiptNumber,
+        currency: inv.currency,
+        exchangeRate: inv.exchangeRate,
+        dueDate: inv.dueDate,
+        dateOfInvoice: new Date(inv.dateOfInvoice),
+        total: Number(inv.totalAmount),
+        totalTax: inv.totalTax,
+        invoiceStatus: inv.invoiceStatus,
+        invoiceTypeParent: inv.invoiceTypeParent,
+        invoiceType: inv.invoiceType,
+      }));
 
-  const handleCloseAll = () => {
-    setSelectedInvoice(null);
-    setSelectedTemplate(null);
-    setShowTemplateSelector(false);
-  };
-
-  const renderTemplate = (templateId: TemplateType, usePreviewData = false) => {
-    const data = usePreviewData ? previewDummyInvoice : selectedInvoice;
-    if (!data) return null;
-    switch (templateId) {
-      case "template1":
-        return <InvoiceTemplate1 data={data} companyLogoUrl={undefined} />;
-      case "template2":
-        return <InvoiceTemplate2 data={data} companyLogoUrl={undefined} />;
-      case "template3":
-        return <InvoiceTemplate3 data={data} companyLogoUrl={undefined} />;
-      default:
-        return null;
+      setInvoices(mapped);
+      setTotalPages(res.pagination?.total_pages || 1);
+      setTotalItems(res.pagination?.total || mapped.length);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchInvoices();
+  }, [page, pageSize]);
+
+  const handleViewClick = (inv: InvoiceSummary) => {
+    // TEMP until you load full invoice details
+    const invoice = inv as unknown as Invoice;
+
+    setSelectedInvoice(invoice);
+
+    const url = generateInvoicePDF(invoice, "bloburl");
+    setPdfUrl(url as string);
+    setPdfOpen(true);
+  };
+
+  const handleDownload = (inv: InvoiceSummary) => {
+    const invoice = inv as unknown as Invoice;
+    generateInvoicePDF(invoice, "save");
+  };
+
+  const handleClosePdf = () => {
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    setPdfUrl(null);
+    setSelectedInvoice(null);
+    setPdfOpen(false);
+  };
+
+  const handleRowStatusChange = async (
+    invoiceNumber: string,
+    status: InvoiceStatus
+  ) => {
+    if (
+      CRITICAL_STATUSES.includes(status) &&
+      !window.confirm(
+        `Mark invoice ${invoiceNumber} as ${status}? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    const res = await updateInvoiceStatus(invoiceNumber, status);
+    if (!res || res.status_code !== 200) return;
+
+    setInvoices((prev) =>
+      prev.map((inv) =>
+        inv.invoiceNumber === invoiceNumber
+          ? { ...inv, invoiceStatus: status }
+          : inv
+      )
+    );
+
+    setOpenStatusMenuFor(null);
+  };
+
+  const handleDelete = async (invoiceNumber: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm(`Delete invoice ${invoiceNumber}?`)) return;
+    console.log("Delete invoice:", invoiceNumber);
+  };
+
+  const filteredInvoices = invoices.filter(
+    (inv) =>
+      inv.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      inv.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="p-4">
-      {/* Search */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4">
         <input
           type="search"
-          placeholder="Search Invoices..."
+          placeholder="Search invoices..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="border border-gray-300 rounded-md px-3 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200 rounded-lg bg-white">
-          <thead className="bg-gray-100 text-gray-700 text-sm">
-            <tr>
-              <th className="px-4 py-2 text-left">Invoice ID</th>
-              <th className="px-4 py-2 text-left">Customer</th>
-              <th className="px-4 py-2 text-left">Issue Date</th>
-              <th className="px-4 py-2 text-left">Due Date</th>
-              <th className="px-4 py-2 text-left">Amount</th>
-              <th className="px-4 py-2 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredInvoices.map((inv) => (
-              <tr key={inv.invoiceId || inv.invoiceNumber} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-2">{inv.invoiceId}</td>
-                <td className="px-4 py-2">{inv.CutomerName}</td>
-                <td className="px-4 py-2">{inv.dateOfInvoice}</td>
-                <td className="px-4 py-2">{inv.dueDate}</td>
-                <td className="px-4 py-2">₹{inv.grandTotal.toLocaleString("en-IN")}</td>
-                <td className="px-4 py-2 text-center">
-                  <button
-                    onClick={() => handleViewClick(inv)}
-                    className="text-blue-600 hover:underline font-medium"
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+          <p className="mt-2 text-gray-600">Loading invoices...</p>
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <table className="min-w-full border border-gray-200 rounded-lg bg-white">
+              <thead className="bg-gray-100 text-gray-700 text-sm">
+                <tr>
+                  <th className="px-4 py-2 text-left">Invoice No</th>
+                  <th className="px-4 py-2 text-left">Type</th>
+                  <th className="px-4 py-2 text-left">Customer</th>
+                  <th className="px-4 py-2 text-left">Date</th>
+                  <th className="px-4 py-2 text-left">Due Date</th>
+                  <th className="px-4 py-2 text-left">Amount</th>
+                  <th className="px-4 py-2 text-left">Status</th>
+                  <th className="px-4 py-2 text-center">Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredInvoices.map((inv) => (
+                  <tr
+                    key={inv.invoiceNumber}
+                    className="border-t hover:bg-gray-50 relative"
                   >
-                    View
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {filteredInvoices.length === 0 && (
-              <tr>
-                <td colSpan={6} className="text-center text-gray-400 py-6">
-                  No invoices found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                    <td className="px-4 py-2">{inv.invoiceNumber}</td>
+                    <td className="px-4 py-2">{inv.invoiceType}</td>
+                    <td className="px-4 py-2">{inv.customerName}</td>
+                    <td className="px-4 py-2">
+                      {new Date(inv.dateOfInvoice).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-2">
+                      {inv.dueDate
+                        ? new Date(inv.dueDate).toLocaleDateString()
+                        : "—"}
+                    </td>
+                    <td className="px-4 py-2">
+                      {inv.currency} {inv.total}
+                    </td>
 
+                    {/* STATUS + MENU (UNCHANGED) */}
+                    <td className="px-4 py-2 relative">
+                      <div className="flex items-center gap-2">
+                        <span>{inv.invoiceStatus}</span>
 
-{showTemplateSelector && selectedInvoice && !selectedTemplate && (
-  <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 flex justify-center items-center p-4">
-    <div className="bg-white rounded-lg shadow-xl p-6 max-w-[62.5vw] w-full relative"> {/* 1200px ≈ 62.5vw */}
-      {/* Close Button */}
-      <button
-        onClick={handleCloseAll}
-        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
-      >
-        ×
-      </button>
+                        <button
+                          aria-haspopup="menu"
+                          aria-expanded={
+                            openStatusMenuFor === inv.invoiceNumber
+                          }
+                          onClick={() =>
+                            setOpenStatusMenuFor(
+                              openStatusMenuFor === inv.invoiceNumber
+                                ? null
+                                : inv.invoiceNumber
+                            )
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setOpenStatusMenuFor(inv.invoiceNumber);
+                            }
+                            if (e.key === "Escape") {
+                              setOpenStatusMenuFor(null);
+                            }
+                          }}
+                          className="p-1 rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                      </div>
 
-      {/* Modal Content */}
-      <h2 className="text-2xl font-bold mb-2">Choose Invoice Template</h2>
-      <p className="text-sm text-gray-600 mb-6">
-        Invoice for {selectedInvoice.CutomerName}
-      </p>
+                      {openStatusMenuFor === inv.invoiceNumber && (
+                        <div
+                          role="menu"
+                          className="absolute left-0 mt-2 z-50 w-40 bg-white border rounded-md shadow-lg text-sm"
+                        >
+                          {STATUS_TRANSITIONS[inv.invoiceStatus].map(
+                            (status) => (
+                              <button
+                                key={status}
+                                role="menuitem"
+                                tabIndex={0}
+                                onClick={() =>
+                                  handleRowStatusChange(
+                                    inv.invoiceNumber,
+                                    status
+                                  )
+                                }
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    handleRowStatusChange(
+                                      inv.invoiceNumber,
+                                      status
+                                    );
+                                  }
+                                  if (e.key === "Escape") {
+                                    setOpenStatusMenuFor(null);
+                                  }
+                                }}
+                                className="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-100"
+                              >
+                                Mark as {status}
+                              </button>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </td>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 justify-items-center">
-        {templates.map((template) => (
-          <div
-            key={template.id}
-            onClick={() => handleTemplateSelect(template.id)}
-            className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-transparent hover:border-blue-400 flex flex-col items-center w-[20vw] min-w-[280px] h-[65vh] max-h-[510px]"
-          >
-            {/* Preview Frame */}
-            <div className="w-[45vw] max-w-[900px] flex justify-center items-start p-2 overflow-hidden h-[60vh] max-h-[450px]">
-              <div className="w-[41vw] h-[105vh] flex justify-center items-start scale-[0.45] origin-top">
-                {renderTemplate(template.id, true)}
-              </div>
-            </div>
-
-            {/* Template Name */}
-            <div
-              className={`text-white text-center w-full py-2 font-semibold text-sm ${template.color}`}
-            >
-              {template.name}
-            </div>
+                    <td className="px-4 py-2 text-center">
+                      <div className="flex items-center justify-center gap-3">
+                        <button
+                          onClick={() => handleViewClick(inv)}
+                          className="text-blue-600 hover:underline text-sm"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleDownload(inv)}
+                          className="text-green-600 hover:underline text-sm"
+                        >
+                          Download
+                        </button>
+                        <button
+                          onClick={(e) => handleDelete(inv.invoiceNumber, e)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ))}
-      </div>
-    </div>
-  </div>
-)}
 
-{/* Full Screen Invoice Preview */}
-{selectedInvoice && selectedTemplate && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        className="w-[70vw] h-[95vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-      >
-        {/* Header with Buttons */}
-        <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Invoice Preview</h2>
-            <p className="text-sm text-gray-600 mt-1">Preview and download your invoice</p>
-          </div>
-          <div className="flex items-center gap-3">
-            {/* Back Button */}
-            <button
-              onClick={() => {
-                setSelectedTemplate(null);
-                setShowTemplateSelector(true);
-              }}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
-            >
-              ← Back to Templates
-            </button>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            onPageChange={setPage}
+          />
+        </>
+      )}
 
-            {/* Print Button */}
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            >
-              <Printer className="w-4 h-4" />
-              Print/Download
-            </button>
-
-            {/* Close button */}
-            <button
-              onClick={handleCloseAll}
-              className="p-2 rounded-full hover:bg-gray-200 transition"
-            >
-              <X className="w-5 h-5 text-gray-600" />
-            </button>
-          </div>
-        </div>
-
-        {/* Invoice Content */}
-        <div className="flex-1 overflow-auto bg-gray-100 p-4">
-          <div className="flex justify-center">
-            <div className="bg-gray-100 p-8 rounded-lg" ref={componentRef}>
-              {renderTemplate(selectedTemplate, false)}
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </AnimatePresence>
-  </div>
-)}
-
-
+      <PdfPreviewModal
+        open={pdfOpen}
+        title="Invoice Preview"
+        pdfUrl={pdfUrl}
+        onClose={handleClosePdf}
+        onDownload={() =>
+          selectedInvoice && generateInvoicePDF(selectedInvoice, "save")
+        }
+      />
     </div>
   );
 };

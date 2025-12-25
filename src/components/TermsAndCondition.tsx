@@ -1,343 +1,378 @@
-import { useState, useEffect, useRef } from "react";
-import { FaEdit, FaTimes, FaCheck } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaEdit, FaTimes, FaCheck, FaPlus, FaTrash } from "react-icons/fa";
+import type {
+  TermSection,
+  PaymentTerms,
+  TermPhase,
+} from "../types/termsAndCondition";
 
-const TermsAndCondition = () => {
-  const [selectedTemplate, setSelectedTemplate] = useState("General Service Terms");
-  const [content, setContent] = useState("");
-  const [originalContent, setOriginalContent] = useState("");
+interface Props {
+  title?: string;
+  terms: TermSection | null;
+  setTerms: (updated: TermSection) => void;
+}
+
+type LocalPhase = TermPhase & { id?: string; isDelete?: number };
+
+const UI_TO_KEY: Record<string, keyof TermSection> = {
+  "General Service Terms": "general",
+  "Payment Terms": "payment",
+  "Service Delivery Terms": "delivery",
+  "Cancellation / Refund Policy": "cancellation",
+  Warranty: "warranty",
+  "Limitations and Liability": "liability",
+};
+
+const TABS = Object.keys(UI_TO_KEY);
+
+const emptyPhase = (): TermPhase => ({
+  id: "",
+  name: "",
+  percentage: "",
+  condition: "",
+  isDelete: undefined,
+});
+
+const emptyPayment: PaymentTerms = {
+  phases: [],
+  dueDates: "",
+  lateCharges: "",
+  taxes: "",
+  notes: "",
+};
+
+const emptyTerms: TermSection = {
+  general: "",
+  payment: emptyPayment,
+  delivery: "",
+  cancellation: "",
+  warranty: "",
+  liability: "",
+};
+
+const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
+  const [selectedTemplate, setSelectedTemplate] = useState(
+    "General Service Terms",
+  );
   const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState<TermSection | null>(null);
 
-   const [localPhases, setLocalPhases] = useState<
-    { phase: string; percent: string; when: string }[]
-  >([]);
-  const [localBullets, setLocalBullets] = useState<
-    { title: string; value: string }[]
-  >([]);
+  const baseTerms: TermSection = terms ?? emptyTerms;
+  const currentTerms: TermSection = isEditing
+    ? (draft ?? baseTerms)
+    : baseTerms;
 
-  const templates: Record<string, string> = {
-    "General Service Terms": `1.This Quotation is subject to the following terms and conditions. By accepting this quotation, {{CustomerName}} agrees to be bound by these terms. This quotation, identified by number {{QuotationNumber}}, was issued on {{QuotationDate}} and is valid until {{ValidUntil}}.
-2.The services to be provided are: {{ServiceName}}. The total amount payable for these services is {{TotalAmount}}.
-3.Payment is due upon receipt of the invoice. Any disputes must be raised within 14 days of the invoice date.`,
+  const activeKey = UI_TO_KEY[selectedTemplate];
 
-    "Payment Terms": `1.Payment Structure:
-  a)Advance Payment 20%, Upon quotation acceptance.
-  b)Phase 1 Completion 30%, After Phase 1 delivery
-  c)Final Completion 50%, On project sign-off 
-2.Due Dates:Payment due within 30 days from invoice. 
-3. Late Payment Charges:  12% p.a. on overdue payments. 
-4. Taxes / Additional Charges: Tax applicable @ 18%. 
-5. Special Notes / Conditions:  Advance payment is non-refundable.`,
+  const ensurePayment = (src: TermSection): PaymentTerms => ({
+    phases: src.payment?.phases ?? [],
+    dueDates: src.payment?.dueDates ?? "",
+    lateCharges: src.payment?.lateCharges ?? "",
+    taxes: src.payment?.taxes ?? "",
+    notes: src.payment?.notes ?? "",
+  });
 
-    "Service Delivery Terms": `1. Estimated delivery timelines are as follows: Phase 1 – 2 weeks, Phase 2 – 3 weeks, with a total project duration of 5 weeks.`,
-
-    "Cancellation / Refund Policy": `1. Cancellation Conditions: Client may cancel anytime with written notice.
-2. Refund Rules: Advance payment is non-refundable, milestone payments refundable only for uninitiated work.`,
-
-    "Warranty": `1.The Company warrants that the service will be performed professionally and function as intended for 30 days after completion.`,
-
-    "Limitations and Liability": `1.The Company is not liable for delays caused by the client.
-2.The client is responsible for providing accurate information and resources.
-3.In no event shall the Company’s total liability, whether in contract or otherwise, exceed the total amount paid by the client for the service.`,
-  };
-
-  
-  useEffect(() => {
-    const txt = templates[selectedTemplate] || "";
-    setContent(txt);
-    setOriginalContent(txt);
-    // reset table editing state when template changes
-    setLocalPhases([]);
-    setLocalBullets([]);
-  }, [selectedTemplate]);
-
-  
-  interface PhaseRow {
-    phase: string;
-    percent: string;
-    when: string;
-  }
-  interface Bullet {
-    title: string;
-    value: string;
-  }
-
-  const parsePaymentTable = (raw: string): { phases: PhaseRow[]; bullets: Bullet[] } => {
-    const lines = raw.split("\n").map((l) => l.trim()).filter(Boolean);
-    const phases: PhaseRow[] = [];
-    const bullets: Bullet[] = [];
-
-    lines.forEach((line) => {
-      
-      const phaseMatch = line.match(/^[abc]\)\s*(.+)$/);
-      if (phaseMatch) {
-        const clean = phaseMatch[1];
-        const [percent, ...whenParts] = clean.split(",");
-        const phaseMap: Record<string, string> = {
-          a: "Advance",
-          b: "Phase 1",
-          c: "Final",
-        };
-        const key = line.charAt(0);
-        phases.push({
-          phase: phaseMap[key] || "",
-          percent: percent.trim(),
-          when: whenParts.join(",").trim(),
-        });
-        return;
-      }
-
-      
-      const bulletMatch = line.match(/^\d+\.\s*(.+?):\s*(.+)$/);
-      if (bulletMatch) {
-        bullets.push({ title: bulletMatch[1], value: bulletMatch[2] });
-      }
-    });
-
-    return { phases, bullets };
-  };
-
-  
-  useEffect(() => {
-    if (selectedTemplate !== "Payment Terms") return;
-    const { phases, bullets } = parsePaymentTable(content);
-    setLocalPhases(phases);
-    setLocalBullets(bullets);
-  }, [content, selectedTemplate]);
-
-  
-  const startEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setOriginalContent(content);
+  const startEditing = () => {
+    setDraft(terms ?? emptyTerms);
     setIsEditing(true);
   };
 
-  const cancelEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setContent(originalContent);
+  const cancelEditing = () => {
+    setDraft(null);
     setIsEditing(false);
   };
 
-  const saveEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const saveEditing = () => {
+    if (!draft) {
+      setIsEditing(false);
+      return;
+    }
+    setTerms(draft);
+    setDraft(null);
+    setIsEditing(false);
+  };
 
-    
-    const phaseLines = localPhases.map((p, i) => {
-      const prefix = String.fromCharCode(97 + i) + ")";
-      return `  ${prefix}${p.percent}, ${p.when}`;
+  const updateDraft = (updater: (prev: TermSection) => TermSection) => {
+    if (!isEditing) return;
+    setDraft((prev) => {
+      const base = prev ?? baseTerms;
+      return updater(base);
     });
-
-    const bulletLines = localBullets.map((b, i) => `${i + 2}. ${b.title}: ${b.value}`);
-
-    const newRaw = [
-      "1.Payment Structure:",
-      ...phaseLines,
-      ...bulletLines,
-    ].join("\n");
-
-    setContent(newRaw);
-    setOriginalContent(newRaw);
-    alert("Terms saved successfully!");
-    setIsEditing(false);
   };
 
-  
-  const EditableCell = ({
-    value,
-    onChange,
-  }: {
-    value: string;
-    onChange: (v: string) => void;
-  }) => {
-    const ref = useRef<HTMLDivElement>(null);
-
-    return (
-      <div
-        ref={ref}
-        contentEditable={isEditing}
-        suppressContentEditableWarning
-        onBlur={() => onChange(ref.current?.innerText || "")}
-        className="px-1 outline-none min-h-[1.5em]"
-        dangerouslySetInnerHTML={{ __html: value }}
-      />
-    );
+  const updateTopField = (key: keyof TermSection, value: string) => {
+    updateDraft((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
   };
 
-  
+  const updatePayment = (patch: Partial<PaymentTerms>) => {
+    updateDraft((prev) => {
+      const current = ensurePayment(prev);
+      return {
+        ...prev,
+        payment: {
+          ...current,
+          ...patch,
+        },
+      };
+    });
+  };
+
+  const addPhase = () => {
+    if (!isEditing) return;
+    const phases = ensurePayment(currentTerms).phases;
+    updatePayment({
+      phases: [...phases, emptyPhase()],
+    });
+  };
+
+  const updatePhase = (index: number, patch: Partial<TermPhase>) => {
+    if (!isEditing) return;
+    const phases = ensurePayment(currentTerms).phases;
+    const next = phases.map((p, i) => (i === index ? { ...p, ...patch } : p));
+    updatePayment({ phases: next });
+  };
+
+  const removePhase = (index: number) => {
+    if (!isEditing) return;
+
+    const phases = ensurePayment(currentTerms).phases as LocalPhase[];
+
+    const next = phases
+      .map((p, i) => {
+        if (i !== index) return p;
+
+        if (p.id) {
+          return { ...p, isDelete: 1 };
+        }
+
+        return null;
+      })
+      .filter(Boolean) as LocalPhase[];
+
+    updatePayment({ phases: next });
+  };
+
   const renderPaymentTable = () => {
-    const updatePhase = (idx: number, field: keyof PhaseRow, val: string) => {
-      const copy = [...localPhases];
-      copy[idx] = { ...copy[idx], [field]: val };
-      setLocalPhases(copy);
-    };
-
-    const updateBullet = (idx: number, field: "title" | "value", val: string) => {
-      const copy = [...localBullets];
-      copy[idx] = { ...copy[idx], [field]: val };
-      setLocalBullets(copy);
-    };
+    const payment = ensurePayment(currentTerms);
+    const rawPhases = payment.phases as LocalPhase[];
 
     return (
-      <div className="space-y-6">
-        {/* Phases table */}
-        <table className="w-full table-auto border-collapse">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">
-                Phase
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">
-                Percentage
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">
-                When
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {localPhases.map((row, idx) => (
-              <tr
-                key={idx}
-                className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
-              >
-                <td className="border border-gray-300 px-4 py-2 text-sm">
-                  {isEditing ? (
-                    <EditableCell
-                      value={row.phase}
-                      onChange={(v) => updatePhase(idx, "phase", v)}
-                    />
-                  ) : (
-                    row.phase
-                  )}
-                </td>
-                <td className="border border-gray-300 px-4 py-2 text-sm">
-                  {isEditing ? (
-                    <EditableCell
-                      value={row.percent}
-                      onChange={(v) => updatePhase(idx, "percent", v)}
-                    />
-                  ) : (
-                    row.percent
-                  )}
-                </td>
-                <td className="border border-gray-300 px-4 py-2 text-sm">
-                  {isEditing ? (
-                    <EditableCell
-                      value={row.when}
-                      onChange={(v) => updatePhase(idx, "when", v)}
-                    />
-                  ) : (
-                    row.when
-                  )}
-                </td>
+      <div className="space-y-5">
+        {/* Table */}
+        <div className="border border-theme rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="table-head">
+                <th className="px-3 py-2 text-left font-medium text-muted">
+                  #
+                </th>
+                <th className="px-3 py-2 text-left font-medium text-muted">
+                  Phase
+                </th>
+                <th className="px-3 py-2 text-left font-medium text-muted">
+                  Percentage
+                </th>
+                <th className="px-3 py-2 text-left font-medium text-muted">
+                  Condition
+                </th>
+                <th className="px-3 py-2 text-center font-medium text-muted">
+                  Action
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
 
-        {/* Other bullets */}
-        {localBullets.length > 0 && (
-          <dl className="grid grid-cols-1 gap-3 text-sm">
-            {localBullets.map((b, i) => (
-              <div key={i} className="flex">
-                <dt className="font-medium text-gray-700 w-48">
-                  {isEditing ? (
-                    <EditableCell
-                      value={b.title}
-                      onChange={(v) => updateBullet(i, "title", v)}
-                    />
-                  ) : (
-                    b.title + ":"
-                  )}
-                </dt>
-                <dd className="text-gray-600 flex-1">
-                  {isEditing ? (
-                    <EditableCell
-                      value={b.value}
-                      onChange={(v) => updateBullet(i, "value", v)}
-                    />
-                  ) : (
-                    b.value
-                  )}
-                </dd>
-              </div>
-            ))}
-          </dl>
+            <tbody>
+              {rawPhases.map((p, idx) => {
+                if (p.isDelete === 1) return null;
+
+                return (
+                  <tr
+                    key={idx}
+                    className="border-b border-theme row-hover last:border-0"
+                  >
+                    <td className="px-3 py-2">{idx + 1}</td>
+
+                    <td className="px-3 py-2">
+                      {isEditing ? (
+                        <input
+                          className="w-full bg-transparent text-muted outline-none"
+                          value={p.name}
+                          onChange={(e) =>
+                            updatePhase(idx, { name: e.target.value })
+                          }
+                        />
+                      ) : (
+                        <span>{p.name}</span>
+                      )}
+                    </td>
+
+                    <td className="px-3 py-2">
+                      {isEditing ? (
+                        <input
+                          className="w-full bg-transparent text-muted outline-none"
+                          value={p.percentage}
+                          onChange={(e) =>
+                            updatePhase(idx, { percentage: e.target.value })
+                          }
+                        />
+                      ) : (
+                        <span>{p.percentage}</span>
+                      )}
+                    </td>
+
+                    <td className="px-3 py-2">
+                      {isEditing ? (
+                        <input
+                          className="w-full bg-transparent text-muted outline-none"
+                          value={p.condition}
+                          onChange={(e) =>
+                            updatePhase(idx, { condition: e.target.value })
+                          }
+                        />
+                      ) : (
+                        <span>{p.condition}</span>
+                      )}
+                    </td>
+
+                    <td className="px-3 py-2 text-center">
+                      {isEditing && (
+                        <button
+                          type="button"
+                          onClick={() => removePhase(idx)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        {isEditing && (
+          <div className="flex justify-end w-full">
+            <button
+              type="button"
+              onClick={addPhase}
+              className="px-4 py-2 bg-primary text-white rounded-lg text-sm flex items-center gap-2"
+            >
+              <FaPlus className="w-4 h-4" /> Add Phase
+            </button>
+          </div>
         )}
-      </div>
-    );
-  };
 
-  
-  const renderNormalContent = () => (
-    <pre className="whitespace-pre-wrap font-mono text-sm text-gray-700">
-      {content}
-    </pre>
-  );
+        {/* Additional Payment Inputs */}
+        <div className="space-y-3 text-sm">
+          <LabeledRow
+            label="Due Dates:"
+            value={payment.dueDates ?? ""}
+            disabled={!isEditing}
+            onChange={(v) => updatePayment({ dueDates: v })}
+          />
 
-  
-  return (
-    <div className="p-6 space-y-6">
-      {/* Header + Template selector */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-700 underline">
-          Terms and Conditions
-        </h3>
+          <LabeledRow
+            label="Late Payment Charges:"
+            value={payment.lateCharges ?? ""}
+            disabled={!isEditing}
+            onChange={(v) => updatePayment({ lateCharges: v })}
+          />
 
-        <div className="flex items-center space-x-2">
-          <label className="text-sm text-gray-600">Select a template</label>
-          <select
-            className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={selectedTemplate}
-            onChange={(e) => setSelectedTemplate(e.target.value)}
-            disabled={isEditing}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {Object.keys(templates).map((key) => (
-              <option key={key} value={key}>
-                {key}
-              </option>
-            ))}
-          </select>
+          <LabeledRow
+            label="Tax / Additional Charges:"
+            value={payment.taxes ?? ""}
+            disabled={!isEditing}
+            onChange={(v) => updatePayment({ taxes: v })}
+          />
+
+          <LabeledRow
+            label="Notes:"
+            value={payment.notes ?? ""}
+            disabled={!isEditing}
+            onChange={(v) => updatePayment({ notes: v })}
+          />
         </div>
       </div>
+    );
+  };
 
-      {/* Content area */}
+  const renderTextSection = (field: keyof TermSection) => (
+    <textarea
+      disabled={!isEditing}
+      value={(currentTerms[field] as string) ?? ""}
+      onChange={(e) => updateTopField(field, e.target.value)}
+      placeholder={`Enter ${selectedTemplate.toLowerCase()}...`}
+      className="w-full h-64 bg-card border border-theme rounded-lg px-4 py-3 text-sm text-main focus:ring-2 outline-none"
+    />
+  );
+
+  return (
+    <div className="bg-card rounded-xl border border-theme shadow-sm overflow-hidden">
       <div
-        className={`
-          w-full min-h-64 p-4 border border-gray-300 rounded-md text-sm font-mono
-          ${!isEditing ? "bg-gray-50" : "bg-white"}
-        `}
-        style={{ whiteSpace: "pre-wrap" }}
+        className="px-4 py-2 border-b border-theme flex items-center gap-3"
+        style={{
+          background: "var(--primary-600)",
+          color: "var(--table-head-text)",
+        }}
       >
-        {selectedTemplate === "Payment Terms"
-          ? renderPaymentTable()
-          : renderNormalContent()}
+        <h2 className="font-semibold text-white text-sm">
+          {title ?? "Terms & Conditions"}
+        </h2>
+
+        <select
+          disabled={isEditing}
+          value={selectedTemplate}
+          onChange={(e) => setSelectedTemplate(e.target.value)}
+          className="ml-auto px-2 py-1 rounded bg-card border border-theme text-sm text-white"
+        >
+          {TABS.map((tab) => (
+            <option key={tab} value={tab} className="text-main">
+              {tab}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex justify-end space-x-3">
+      {/* CONTENT AREA */}
+      <div className="p-5 rounded-lg border bg-white shadow-inner min-h-[240px]">
+        {activeKey === "payment"
+          ? renderPaymentTable()
+          : renderTextSection(activeKey)}
+      </div>
+
+      {/* ACTION BUTTONS */}
+      <div className="flex justify-end gap-3 p-4 border-t border-theme">
         {isEditing ? (
           <>
             <button
               type="button"
-              onClick={cancelEdit}
-              className="flex items-center gap-2 px-5 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              onClick={cancelEditing}
+              className="px-4 py-2 bg-card border border-theme text-muted rounded-lg"
             >
-              <FaTimes /> Cancel
+              <FaTimes className="inline mr-2" /> Cancel
             </button>
+
             <button
               type="button"
-              onClick={saveEdit}
-              className="flex items-center gap-2 px-5 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              onClick={saveEditing}
+              className="px-5 py-2 rounded-lg text-white font-medium"
+              style={{
+                background:
+                  "linear-gradient(90deg, var(--primary) 0%, var(--primary-600) 100%)",
+              }}
             >
-              <FaCheck /> Save
+              <FaCheck className="inline mr-2" /> Save Terms
             </button>
           </>
         ) : (
           <button
             type="button"
-            onClick={startEdit}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onClick={startEditing}
+            className="px-5 py-2 bg-primary text-white rounded-lg font-medium flex items-center gap-2"
           >
             <FaEdit /> Edit
           </button>
@@ -346,5 +381,27 @@ const TermsAndCondition = () => {
     </div>
   );
 };
+
+const LabeledRow = ({
+  label,
+  value,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  disabled: boolean;
+  onChange: (v: string) => void;
+}) => (
+  <div className="flex text-sm">
+    <span className="w-40 flex-shrink-0 text-muted font-medium">{label}</span>
+    <input
+      disabled={disabled}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="flex-1 bg-transparent text-muted outline-none"
+    />
+  </div>
+);
 
 export default TermsAndCondition;

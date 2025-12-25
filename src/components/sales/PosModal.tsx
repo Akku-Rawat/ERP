@@ -2,21 +2,30 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Modern Section for card-style headers
-const Block: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
+const Block: React.FC<{ title: string; children?: React.ReactNode }> = ({
+  title,
+  children,
+}) => (
   <div className="border rounded-md bg-white mb-4">
-    <div className="px-4 pt-3 pb-2 text-gray-800 font-bold text-sm border-b bg-gray-50">{title}</div>
+    <div className="px-4 pt-3 pb-2 text-gray-800 font-bold text-sm border-b bg-gray-50">
+      {title}
+    </div>
     <div className="p-4 grid gap-4">{children}</div>
   </div>
 );
 
-const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => (
+const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (
+  props,
+) => (
   <input
     {...props}
     className="border border-gray-300 rounded-md bg-white px-3 py-2 text-sm w-full"
   />
 );
 
-const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (props) => (
+const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (
+  props,
+) => (
   <select
     {...props}
     className="border border-gray-300 rounded-md bg-white px-3 py-2 text-sm w-full"
@@ -42,15 +51,11 @@ export interface ModalProps {
   onSave?: (data: any) => void;
 }
 
-const demoCustomers = [
-  "Cash Customer",
-  "Acme Ventures",
-  "Sample Walkin"
-];
+const demoCustomers = ["Cash Customer", "Acme Ventures", "Sample Walkin"];
 const demoProducts = [
   { product: "C001 - Choco Bar", price: 40, available: 16 },
   { product: "C002 - Milk Shake", price: 60, available: 9 },
-  { product: "S005 - Veg Sandwich", price: 50, available: 20 }
+  { product: "S005 - Veg Sandwich", price: 50, available: 20 },
 ];
 
 const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
@@ -68,14 +73,11 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
 
   // Add demo item to cart for simplicity
   const addToCart = () => {
-    const found = demoProducts.find(
-      prod => prod.product.startsWith(scanCode)
+    const found = demoProducts.find((prod) =>
+      prod.product.startsWith(scanCode),
     );
     if (found) {
-      setCart([
-        ...cart,
-        { ...found, qty: 1, amount: found.price }
-      ]);
+      setCart([...cart, { ...found, qty: 1, amount: found.price }]);
       setScanCode("");
     }
   };
@@ -109,7 +111,7 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
         discount: discountVal,
         note,
         remarks,
-        grandTotal
+        grandTotal,
       });
     }
     handleReset();
@@ -139,9 +141,13 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
           exit={{ opacity: 0, y: 40 }}
           className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
-          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave} autoComplete="off">
-            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
-              <h3 className="text-2xl w-full font-semibold text-blue-600">
+          <form
+            className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden"
+            onSubmit={handleSave}
+            autoComplete="off"
+          >
+            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-indigo-100/30 shrink-0">
+              <h3 className="text-2xl w-full font-semibold text-indigo-600">
                 New POS Sale
               </h3>
               <button
@@ -156,12 +162,23 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
             <div className="flex-1 overflow-y-auto border-b px-4">
               {/* Document Header */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">DOCUMENT HEADER</div>
+                <div className="font-semibold text-gray-600 mb-4">
+                  DOCUMENT HEADER
+                </div>
                 <div className="grid grid-cols-4 gap-4 mb-6">
                   <Input value={number} readOnly placeholder="Bill No." />
                   <Input value={cashier} readOnly placeholder="Cashier" />
-                  <Input type="date" value={date} onChange={e => setDate(e.target.value)} placeholder="Date" />
-                  <Input value={remarks} onChange={e => setRemarks(e.target.value)} placeholder="Any remarks" />
+                  <Input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    placeholder="Date"
+                  />
+                  <Input
+                    value={remarks}
+                    onChange={(e) => setRemarks(e.target.value)}
+                    placeholder="Any remarks"
+                  />
                 </div>
               </div>
 
@@ -169,29 +186,38 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
               <div className="border m-4 p-6 flex flex-col gap-y-2">
                 <div className="font-semibold text-gray-600 mb-4">CUSTOMER</div>
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                  <Select value={customer} onChange={e => setCustomer(e.target.value)}>
+                  <Select
+                    value={customer}
+                    onChange={(e) => setCustomer(e.target.value)}
+                  >
                     <option value="">Select customer</option>
-                    {demoCustomers.map(cust => (
+                    {demoCustomers.map((cust) => (
                       <option key={cust}>{cust}</option>
                     ))}
                   </Select>
-                  <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone (optional)" />
+                  <Input
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Phone (optional)"
+                  />
                 </div>
               </div>
 
               {/* Add/scan product */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">ADD/SCAN PRODUCT</div>
+                <div className="font-semibold text-gray-600 mb-4">
+                  ADD/SCAN PRODUCT
+                </div>
                 <div className="flex gap-3 items-center mb-6">
                   <Input
                     placeholder="Scan code or enter (e.g., C001)"
                     value={scanCode}
-                    onChange={e => setScanCode(e.target.value)}
+                    onChange={(e) => setScanCode(e.target.value)}
                   />
                   <button
                     type="button"
                     onClick={addToCart}
-                    className="bg-blue-600 text-white rounded px-5 py-2 font-bold"
+                    className="bg-indigo-600 text-white rounded px-5 py-2 font-bold"
                   >
                     Add Item
                   </button>
@@ -200,7 +226,9 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
 
               {/* Product Table */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">CART ITEMS</div>
+                <div className="font-semibold text-gray-600 mb-2">
+                  CART ITEMS
+                </div>
                 <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2 py-4 px-2">
                   <table className="min-w-full text-xs table-fixed">
                     <thead>
@@ -216,7 +244,12 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
                     <tbody>
                       {cart.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="text-center py-2 text-gray-400">No items added.</td>
+                          <td
+                            colSpan={6}
+                            className="text-center py-2 text-gray-400"
+                          >
+                            No items added.
+                          </td>
                         </tr>
                       ) : (
                         cart.map((item, idx) => (
@@ -229,7 +262,9 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
                                 min={1}
                                 max={item.available}
                                 value={item.qty}
-                                onChange={e => updateItemQty(idx, Number(e.target.value))}
+                                onChange={(e) =>
+                                  updateItemQty(idx, Number(e.target.value))
+                                }
                                 style={{ width: "60px" }}
                               />
                             </td>
@@ -254,11 +289,18 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
 
               {/* Payment & Note */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">PAYMENT & NOTES</div>
+                <div className="font-semibold text-gray-600 mb-4">
+                  PAYMENT & NOTES
+                </div>
                 <div className="grid grid-cols-3 gap-4 mb-6">
                   <div>
-                    <label className="block text-gray-600 text-xs mb-1 font-semibold">Payment Method</label>
-                    <Select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
+                    <label className="block text-gray-600 text-xs mb-1 font-semibold">
+                      Payment Method
+                    </label>
+                    <Select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                    >
                       <option value="">Select method</option>
                       <option>Cash</option>
                       <option>Card</option>
@@ -266,20 +308,24 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-gray-600 text-xs mb-1 font-semibold">Discount</label>
+                    <label className="block text-gray-600 text-xs mb-1 font-semibold">
+                      Discount
+                    </label>
                     <Input
                       type="number"
                       min={0}
                       value={discount}
-                      onChange={e => setDiscount(Number(e.target.value))}
+                      onChange={(e) => setDiscount(Number(e.target.value))}
                       placeholder="Discount (₹)"
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-600 text-xs mb-1 font-semibold">Note</label>
+                    <label className="block text-gray-600 text-xs mb-1 font-semibold">
+                      Note
+                    </label>
                     <Input
                       value={note}
-                      onChange={e => setNote(e.target.value)}
+                      onChange={(e) => setNote(e.target.value)}
                       placeholder="Any note"
                     />
                   </div>
@@ -297,7 +343,7 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
                     <span>Discount:</span>
                     <span>₹{discountVal}</span>
                   </div>
-                  <div className="flex justify-between text-blue-800 font-bold border-t pt-2 mt-2 text-xl">
+                  <div className="flex justify-between text-indigo-800 font-bold border-t pt-2 mt-2 text-xl">
                     <span>Grand Total:</span>
                     <span>₹{grandTotal}</span>
                   </div>
@@ -317,7 +363,7 @@ const POSModal: React.FC<ModalProps> = ({ isOpen, onClose, onSave }) => {
               <div className="flex gap-x-2">
                 <button
                   type="submit"
-                  className="w-24 rounded-3xl bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+                  className="w-24 rounded-3xl bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
                 >
                   Save
                 </button>

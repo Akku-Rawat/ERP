@@ -1,21 +1,17 @@
 import React, { useState } from "react";
-import LeadModal from '../../components/crm/LeadModal';
-import TicketModal from '../../components/crm/TicketModal';
-import CustomerModal from '../../components/crm/CustomerModal';  
-import CustomerManagement from "./CustomerManagement";        
+import CustomerManagement from "./CustomerManagement";
 import CRMDashboard from "./CRMDashboard";
 import CRMReports from "./Reports";
 import Leads from "./Leads";
 import SupportTickets from "./Support-tickets";
 
-import { 
-  FaUsers, 
-  FaUser,
-  FaTicketAlt, 
-  FaCog, 
-  FaChartBar, 
+import {
+  FaUsers,
+  // FaUser,
+  // FaTicketAlt,
+  FaChartBar,
   FaCalendarAlt,
-  FaIdBadge
+  FaIdBadge,
 } from "react-icons/fa";
 
 const crmModule = {
@@ -25,8 +21,8 @@ const crmModule = {
   tabs: [
     { id: "dashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
     { id: "customer-managment", name: "Customer Management", icon: <FaIdBadge /> },
-    { id: "leads", name: "Leads", icon: <FaUser /> },
-    { id: "tickets", name: "Support Tickets", icon: <FaTicketAlt /> },
+    // { id: "leads", name: "Leads", icon: <FaUser /> },
+    // { id: "tickets", name: "Support Tickets", icon: <FaTicketAlt /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ],
   leads: [
@@ -44,23 +40,31 @@ const crmModule = {
     { id: "TICK-002", title: "Report Generation Error", customer: "XYZ Industries", priority: "Medium", status: "In Progress", created: "2025-01-17" },
     { id: "TICK-003", title: "Feature Request - Export", customer: "Tech Solutions", priority: "Low", status: "Resolved", created: "2025-01-16" },
   ],
-
 };
 
 const CRM: React.FC = () => {
   const [activeTab, setActiveTab] = useState(crmModule.defaultTab);
-  const [showLeadModal, setShowLeadModal] = useState(false);
-  const [showTicketModal, setShowTicketModal] = useState(false);
-  const handleAdd = () => {
-    if (activeTab === "leads") setShowLeadModal(true);
-    else if (activeTab === "tickets") setShowTicketModal(true);
+
+  const handleAddCustomer = () => {
+    setActiveTab("customer-managment");
+    console.log("onAdd -> Customer (parent handler called)");
+  };
+
+  const handleAddLead = () => {
+    setActiveTab("leads");
+    console.log("onAdd -> Lead (parent handler called)");
+  };
+
+  const handleAddTicket = () => {
+    setActiveTab("tickets");
+    console.log("onAdd -> Ticket (parent handler called)");
   };
 
   return (
-      <div className="bg-gray-50 h-screen overflow-auto">
+    <div className="bg-app min-h-screen">  
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-main">
           <span>{crmModule.icon}</span> {crmModule.name}
         </h2>
       </div>
@@ -72,9 +76,7 @@ const CRM: React.FC = () => {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
-              activeTab === tab.id
-                ? "text-teal-600 border-b-2 border-teal-600"
-                : "text-gray-500 hover:text-gray-700"
+              activeTab === tab.id ? "text-primary border-b-2 border-current" : "text-muted hover:text-main"
             }`}
           >
             <span>{tab.icon}</span> {tab.name}
@@ -82,53 +84,33 @@ const CRM: React.FC = () => {
         ))}
       </div>
 
-       <div className={activeTab === "customer-managment" ? "" : "p-6"}>
-        <div className={activeTab === "customer-managment" ? "" : "bg-white rounded-lg shadow-sm p-4"}>
+      <div className={activeTab === "customer-managment" ? "" : "p-8"}>
+        <div>
           {activeTab === "dashboard" && <CRMDashboard />}
 
           {activeTab === "customer-managment" && (
             <CustomerManagement
-              // initialCustomers={crmModule.customers}
-              onAdd={handleAdd}
+              onAdd={handleAddCustomer}
             />
           )}
 
           {activeTab === "leads" && (
             <Leads
               leads={crmModule.leads}
-              onAdd={handleAdd}
+              onAdd={handleAddLead}
             />
           )}
 
           {activeTab === "tickets" && (
             <SupportTickets
               tickets={crmModule.tickets}
-              onAdd={handleAdd}
+              onAdd={handleAddTicket}
             />
           )}
 
           {activeTab === "reports" && <CRMReports />}
         </div>
       </div>
-
-      {/* Modals */}
-      <LeadModal
-        isOpen={showLeadModal}
-        onClose={() => setShowLeadModal(false)}
-        onSubmit={(data) => {
-          console.log("New Lead:", data);
-          setShowLeadModal(false);
-        }}
-      />
-
-      <TicketModal
-        isOpen={showTicketModal}
-        onClose={() => setShowTicketModal(false)}
-        onSubmit={(data) => {
-          console.log("New Ticket:", data);
-          setShowTicketModal(false);
-        }}
-      />
     </div>
   );
 };

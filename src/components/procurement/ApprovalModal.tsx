@@ -38,19 +38,23 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     priority: "",
   });
 
-  const [items, setItems] = useState<ApprovalItem[]>([{ ...emptyApprovalItem }]);
+  const [items, setItems] = useState<ApprovalItem[]>([
+    { ...emptyApprovalItem },
+  ]);
 
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleItemChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
-    idx: number
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+    idx: number,
   ) => {
     const rows = [...items];
     rows[idx] = { ...rows[idx], [e.target.name]: e.target.value };
@@ -95,7 +99,10 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
           exit={{ opacity: 0, y: 40 }}
           className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
         >
-          <form className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden" onSubmit={handleSave}>
+          <form
+            className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden"
+            onSubmit={handleSave}
+          >
             <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
               <h3 className="text-2xl w-full font-semibold text-blue-600">
                 Approval Request
@@ -112,7 +119,9 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             <div className="flex-1 overflow-y-auto border-b px-4">
               {/* APPROVAL HEADER */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">APPROVAL DETAILS</div>
+                <div className="font-semibold text-gray-600 mb-4">
+                  APPROVAL DETAILS
+                </div>
                 <div className="grid grid-cols-6 gap-4 mb-6">
                   <input
                     className="col-span-1 border rounded p-2"
@@ -168,7 +177,9 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
 
               {/* APPROVAL ITEMS */}
               <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">APPROVAL STEPS</div>
+                <div className="font-semibold text-gray-600 mb-2">
+                  APPROVAL STEPS
+                </div>
                 <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2 py-4 px-2">
                   <table className="min-w-full text-xs table-fixed">
                     <thead>
@@ -248,7 +259,11 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                   </table>
                 </div>
                 <div>
-                  <button type="button" className="bg-blue-100 border border-blue-300 rounded px-2 py-1" onClick={addItem}>
+                  <button
+                    type="button"
+                    className="bg-blue-100 border border-blue-300 rounded px-2 py-1"
+                    onClick={addItem}
+                  >
                     Add
                   </button>
                 </div>

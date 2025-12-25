@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import { FaSearch, FaPlus, FaUser, FaEllipsisV, FaChevronDown } from 'react-icons/fa';
+import React, { useState } from "react";
+import {
+  FaSearch,
+  FaPlus,
+  FaUser,
+  FaEllipsisV,
+  FaChevronDown,
+} from "react-icons/fa";
 
 type Employee = {
   id: string;
@@ -7,55 +13,143 @@ type Employee = {
   jobTitle: string;
   department: string;
   location: string;
-  status: 'Active' | 'On Leave' | 'Inactive';
+  status: "Active" | "On Leave" | "Inactive";
 };
 
 const demoEmployees: Employee[] = [
-  { id: 'E001', name: 'June Ner', jobTitle: 'Senior Developer', department: 'Engineering', location: 'New York', status: 'Active' },
-  { id: 'E002', name: 'Cesh Spalq', jobTitle: 'Product Manager', department: 'Product', location: 'San Francisco', status: 'Active' },
-  { id: 'E003', name: 'Nash Fosh', jobTitle: 'UI Designer', department: 'Design', location: 'Los Angeles', status: 'Active' },
-  { id: 'E004', name: 'Atn Knowling', jobTitle: 'Backend Developer', department: 'Engineering', location: 'New York', status: 'Active' },
-  { id: 'E005', name: 'Uad Sunefing', jobTitle: 'QA Engineer', department: 'QA', location: 'Chicago', status: 'On Leave' },
-  { id: 'E006', name: 'Wowe Maled Ahly', jobTitle: 'Frontend Developer', department: 'Engineering', location: 'Austin', status: 'Active' },
-  { id: 'E007', name: 'Jane Doe', jobTitle: 'HR Manager', department: 'HR', location: 'New York', status: 'Active' },
-  { id: 'E008', name: 'Yaint Smith', jobTitle: 'Sales Manager', department: 'Sales', location: 'Boston', status: 'Active' },
-  { id: 'E009', name: 'Super Din', jobTitle: 'DevOps Engineer', department: 'Engineering', location: 'Seattle', status: 'Inactive' },
-  { id: 'E010', name: 'John Miller', jobTitle: 'Data Analyst', department: 'Analytics', location: 'Denver', status: 'Active' },
-  { id: 'E011', name: 'Sarah Wilson', jobTitle: 'Marketing Lead', department: 'Marketing', location: 'Miami', status: 'Active' },
-  { id: 'E012', name: 'Mike Johnson', jobTitle: 'Accountant', department: 'Finance', location: 'New York', status: 'Active' },
+  {
+    id: "E001",
+    name: "June Ner",
+    jobTitle: "Senior Developer",
+    department: "Engineering",
+    location: "New York",
+    status: "Active",
+  },
+  {
+    id: "E002",
+    name: "Cesh Spalq",
+    jobTitle: "Product Manager",
+    department: "Product",
+    location: "San Francisco",
+    status: "Active",
+  },
+  {
+    id: "E003",
+    name: "Nash Fosh",
+    jobTitle: "UI Designer",
+    department: "Design",
+    location: "Los Angeles",
+    status: "Active",
+  },
+  {
+    id: "E004",
+    name: "Atn Knowling",
+    jobTitle: "Backend Developer",
+    department: "Engineering",
+    location: "New York",
+    status: "Active",
+  },
+  {
+    id: "E005",
+    name: "Uad Sunefing",
+    jobTitle: "QA Engineer",
+    department: "QA",
+    location: "Chicago",
+    status: "On Leave",
+  },
+  {
+    id: "E006",
+    name: "Wowe Maled Ahly",
+    jobTitle: "Frontend Developer",
+    department: "Engineering",
+    location: "Austin",
+    status: "Active",
+  },
+  {
+    id: "E007",
+    name: "Jane Doe",
+    jobTitle: "HR Manager",
+    department: "HR",
+    location: "New York",
+    status: "Active",
+  },
+  {
+    id: "E008",
+    name: "Yaint Smith",
+    jobTitle: "Sales Manager",
+    department: "Sales",
+    location: "Boston",
+    status: "Active",
+  },
+  {
+    id: "E009",
+    name: "Super Din",
+    jobTitle: "DevOps Engineer",
+    department: "Engineering",
+    location: "Seattle",
+    status: "Inactive",
+  },
+  {
+    id: "E010",
+    name: "John Miller",
+    jobTitle: "Data Analyst",
+    department: "Analytics",
+    location: "Denver",
+    status: "Active",
+  },
+  {
+    id: "E011",
+    name: "Sarah Wilson",
+    jobTitle: "Marketing Lead",
+    department: "Marketing",
+    location: "Miami",
+    status: "Active",
+  },
+  {
+    id: "E012",
+    name: "Mike Johnson",
+    jobTitle: "Accountant",
+    department: "Finance",
+    location: "New York",
+    status: "Active",
+  },
 ];
 
 // Unique filter values
-const uniqueDepartments = [...new Set(demoEmployees.map(e => e.department))];
-const uniqueLocations = [...new Set(demoEmployees.map(e => e.location))];
-const statusOptions = ['Active', 'On Leave', 'Inactive'];
+const uniqueDepartments = [...new Set(demoEmployees.map((e) => e.department))];
+const uniqueLocations = [...new Set(demoEmployees.map((e) => e.location))];
+const statusOptions = ["Active", "On Leave", "Inactive"];
 
 const EmployeeDirectory: React.FC = () => {
-  const [search, setSearch] = useState('');
-  const [department, setDepartment] = useState('');
-  const [location, setLocation] = useState('');
-  const [status, setStatus] = useState('');
+  const [search, setSearch] = useState("");
+  const [department, setDepartment] = useState("");
+  const [location, setLocation] = useState("");
+  const [status, setStatus] = useState("");
   const [itemsToShow, setItemsToShow] = useState(5);
 
   // Filtering
-  const filteredEmployees = demoEmployees.filter(emp =>
-    (search.trim() === '' ||
-      emp.name.toLowerCase().includes(search.toLowerCase()) ||
-      emp.jobTitle.toLowerCase().includes(search.toLowerCase())
-    ) &&
-    (department === '' || emp.department === department) &&
-    (location === '' || emp.location === location) &&
-    (status === '' || emp.status === status)
+  const filteredEmployees = demoEmployees.filter(
+    (emp) =>
+      (search.trim() === "" ||
+        emp.name.toLowerCase().includes(search.toLowerCase()) ||
+        emp.jobTitle.toLowerCase().includes(search.toLowerCase())) &&
+      (department === "" || emp.department === department) &&
+      (location === "" || emp.location === location) &&
+      (status === "" || emp.status === status),
   );
 
   const displayedEmployees = filteredEmployees.slice(0, itemsToShow);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Active': return 'bg-green-100 text-green-700';
-      case 'On Leave': return 'bg-yellow-100 text-yellow-700';
-      case 'Inactive': return 'bg-gray-100 text-gray-700';
-      default: return 'bg-teal-100 text-teal-700';
+      case "Active":
+        return "bg-green-100 text-green-700";
+      case "On Leave":
+        return "bg-yellow-100 text-yellow-700";
+      case "Inactive":
+        return "bg-gray-100 text-gray-700";
+      default:
+        return "bg-teal-100 text-teal-700";
     }
   };
 
@@ -70,7 +164,7 @@ const EmployeeDirectory: React.FC = () => {
             <input
               type="text"
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Search name/job title"
               className="pl-8 pr-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 w-full"
               style={{ minWidth: 100 }}
@@ -80,12 +174,14 @@ const EmployeeDirectory: React.FC = () => {
           <div className="relative w-40">
             <select
               value={department}
-              onChange={e => setDepartment(e.target.value)}
+              onChange={(e) => setDepartment(e.target.value)}
               className="block w-full px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-600 text-sm focus:ring-2 focus:ring-teal-500 appearance-none"
             >
               <option value="">Department</option>
-              {uniqueDepartments.map(d => (
-                <option key={d} value={d}>{d}</option>
+              {uniqueDepartments.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
               ))}
             </select>
             <FaChevronDown className="absolute right-3 top-2.5 text-gray-400 pointer-events-none text-xs" />
@@ -94,12 +190,14 @@ const EmployeeDirectory: React.FC = () => {
           <div className="relative w-36">
             <select
               value={location}
-              onChange={e => setLocation(e.target.value)}
+              onChange={(e) => setLocation(e.target.value)}
               className="block w-full px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-600 text-sm focus:ring-2 focus:ring-teal-500 appearance-none"
             >
               <option value="">Location</option>
-              {uniqueLocations.map(l => (
-                <option key={l} value={l}>{l}</option>
+              {uniqueLocations.map((l) => (
+                <option key={l} value={l}>
+                  {l}
+                </option>
               ))}
             </select>
             <FaChevronDown className="absolute right-3 top-2.5 text-gray-400 pointer-events-none text-xs" />
@@ -108,12 +206,14 @@ const EmployeeDirectory: React.FC = () => {
           <div className="relative w-28">
             <select
               value={status}
-              onChange={e => setStatus(e.target.value)}
+              onChange={(e) => setStatus(e.target.value)}
               className="block w-full px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-600 text-sm focus:ring-2 focus:ring-teal-500 appearance-none"
             >
               <option value="">Status</option>
-              {statusOptions.map(stat => (
-                <option key={stat} value={stat}>{stat}</option>
+              {statusOptions.map((stat) => (
+                <option key={stat} value={stat}>
+                  {stat}
+                </option>
               ))}
             </select>
             <FaChevronDown className="absolute right-3 top-2.5 text-gray-400 pointer-events-none text-xs" />
@@ -140,21 +240,28 @@ const EmployeeDirectory: React.FC = () => {
           </thead>
           <tbody>
             {displayedEmployees.map((emp) => (
-              <tr key={emp.id} className="border-b border-gray-200 hover:bg-gray-50">
+              <tr
+                key={emp.id}
+                className="border-b border-gray-200 hover:bg-gray-50"
+              >
                 <td className="py-3 px-6">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full flex items-center justify-center">
                       <FaUser className="text-white text-base" />
                     </div>
-                    <span className="font-medium text-gray-800">{emp.name}</span>
+                    <span className="font-medium text-gray-800">
+                      {emp.name}
+                    </span>
                   </div>
                 </td>
                 <td className="py-3 px-6 text-gray-700">{emp.jobTitle}</td>
                 <td className="py-3 px-6 text-gray-700">{emp.department}</td>
                 <td className="py-3 px-6 text-gray-700">{emp.location}</td>
                 <td className="py-3 px-6">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(emp.status)}`}>
-                      {emp.status}
+                  <span
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(emp.status)}`}
+                  >
+                    {emp.status}
                   </span>
                 </td>
                 <td className="py-3 px-6">
@@ -175,7 +282,9 @@ const EmployeeDirectory: React.FC = () => {
                     onClick={() => setItemsToShow(itemsToShow + 5)}
                     className="w-full py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 text-sm font-semibold rounded-b"
                   >
-                    See More ({filteredEmployees.length - displayedEmployees.length} remaining)
+                    See More (
+                    {filteredEmployees.length - displayedEmployees.length}{" "}
+                    remaining)
                   </button>
                 </td>
               </tr>
@@ -185,7 +294,8 @@ const EmployeeDirectory: React.FC = () => {
       </div>
       {/* Results Info */}
       <div className="text-center text-xs text-gray-500 mt-1">
-        Showing {displayedEmployees.length} of {filteredEmployees.length} employees
+        Showing {displayedEmployees.length} of {filteredEmployees.length}{" "}
+        employees
       </div>
     </div>
   );

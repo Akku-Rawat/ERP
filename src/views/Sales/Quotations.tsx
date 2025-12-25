@@ -1,69 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { X, Printer } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useReactToPrint } from "react-to-print";
-import Template1 from '../../components/template/quotation/QuotationTemplate1';
-import Template2 from '../../components/template/quotation/QuotationTemplate2';
-import Template3 from '../../components/template/quotation/QuotationTemplate3';
-
-
-// === Types ===
-export interface QuotationItem {
-  productName: string;
-  description: string;
-  quantity: number;
-  listPrice: number;
-  discount: number;
-  tax: number;
-}
-
-export interface QuotationData {
-  id?: string; // Added for table
-  quotationId?: string;
-  quotationNumber?: string;
-  customerName: string;
-  quotationDate: string;
-  validUntil: string;
-  currency: string;
-
-  billingAddressLine1?: string;
-  billingAddressLine2?: string;
-  billingCity?: string;
-  billingState?: string;
-  billingPostalCode?: string;
-  billingCountry?: string;
-
-  shippingAddressLine1?: string;
-  shippingAddressLine2?: string;
-  shippingCity?: string;
-  shippingState?: string;
-  shippingPostalCode?: string;
-  shippingCountry?: string;
-
-  items: QuotationItem[];
-
-  subTotal: number;
-  totalDiscount: number;
-  totalTax: number;
-  adjustment: number;
-  grandTotal: number;
-
-  amount?: number; // Added for table
-  opportunityStage?: string; // Added for table
-
-  subject?: string;
-  poNumber?: string;
-  poDate?: string;
-  paymentTerms?: string;
-  termsAndConditions?: string;
-  notes?: string;
-
-  bankName?: string;
-  accountNumber?: string;
-  routingNumber?: string;
-  iban?: string;
-  swiftCode?: string;
-}
+import Template1 from "../../components/template/quotation/QuotationTemplate1";
+import Template2 from "../../components/template/quotation/QuotationTemplate2";
+import Template3 from "../../components/template/quotation/QuotationTemplate3";
+import { getAllQuotations } from "../../api/quotationApi";
+import type { QuotationSummary, QuotationData } from "../../types/quotation";
+import Pagination from "../../components/Pagination";
 
 type TemplateType = "template1" | "template2" | "template3";
 
@@ -226,25 +170,73 @@ const sampleQuotations: QuotationData[] = [
 // === Component ===
 const QuotationsTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedQuotation, setSelectedQuotation] = useState<QuotationData | null>(null);
+  const [selectedQuotation, setSelectedQuotation] =
+    useState<QuotationData | null>(null);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateType | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateType | null>(
+    null,
+  );
+  const [quotations, setQuotations] = useState<QuotationSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const componentRef = useRef<HTMLDivElement>(null);
 
-  const filteredQuotations = sampleQuotations.filter(
-    (q) =>
-      (q.id ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      q.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+  const fetchQuotations = async () => {
+    try {
+      setLoading(true);
+
+      const res = await getAllQuotations(page, pageSize);
+      if (!res || res.status_code !== 200) {
+        console.error("Failed to load quotations");
+        return;
+      }
+      console.log("res: ", res);
+
+      const mapped: QuotationSummary[] = res.data.map((quote: any) => ({
+        quotationNumber: quote.name,
+        customerName: quote.customer_name,
+        industryBases: quote.custom_industry_bases,
+        transactionDate: quote.transaction_date,
+        validTill: quote.valid_till,
+        grandTotal: Number(quote.grand_total ?? 0),
+        currency: quote.currency,
+      }));
+
+      setTotalPages(res.pagination?.total_pages || 1);
+      setTotalItems(res.pagination?.total || 1);
+      setQuotations(mapped);
+    } catch (err) {
+      console.error("Error fetching quotations:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuotations();
+  }, [page, pageSize]);
+
+  const filteredQuotations = quotations.filter(
+    (quote) =>
+      (quote.quotationNumber ?? "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      quote.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handlePrint = useReactToPrint({
-      contentRef: componentRef,
-      documentTitle: `Quotation-${selectedQuotation?.customerName}-${selectedQuotation?.quotationId}`,
-    });
+    contentRef: componentRef,
+    documentTitle: `Quotation-${selectedQuotation?.customerName}-${selectedQuotation?.quotationId}`,
+  });
 
-  const handleViewClick = (quotation: QuotationData) => {
-    setSelectedQuotation(quotation);
+  const handleViewClick = (quote: QuotationSummary) => {
+    // setSelectedQuotation(quote);
+    setSelectedQuotation(previewDummyQuotation);
     setShowTemplateSelector(true);
+    setSelectedTemplate(null);
   };
 
   const handleTemplateSelect = (templateId: TemplateType) => {
@@ -264,11 +256,29 @@ const QuotationsTable: React.FC = () => {
 
     switch (templateId) {
       case "template1":
-        return <Template1 ref={componentRef} data={data} companyLogoUrl={undefined} />;
+        return (
+          <Template1
+            ref={componentRef}
+            data={data}
+            companyLogoUrl={undefined}
+          />
+        );
       case "template2":
-        return <Template2 ref={componentRef} data={data} companyLogoUrl={undefined} />;
+        return (
+          <Template2
+            ref={componentRef}
+            data={data}
+            companyLogoUrl={undefined}
+          />
+        );
       case "template3":
-        return <Template3 ref={componentRef} data={data} companyLogoUrl={undefined} />;
+        return (
+          <Template3
+            ref={componentRef}
+            data={data}
+            companyLogoUrl={undefined}
+          />
+        );
       default:
         return null;
     }
@@ -292,37 +302,42 @@ const QuotationsTable: React.FC = () => {
         <table className="min-w-full border border-gray-200 rounded-lg bg-white">
           <thead className="bg-gray-100 text-gray-700 text-sm">
             <tr>
-              <th className="px-4 py-2 text-left">Quotation ID</th>
+              <th className="px-4 py-2 text-left">Quotation No</th>
               <th className="px-4 py-2 text-left">Customer</th>
-              <th className="px-4 py-2 text-left">Follow-Up Date</th>
+              <th className="px-4 py-2 text-left">Customer Industry Bases</th>
+              <th className="px-4 py-2 text-left">Transaction Date</th>
+              <th className="px-4 py-2 text-left">Valid Till</th>
+              <th className="px-4 py-2 text-left">Currency</th>
               <th className="px-4 py-2 text-left">Amount</th>
-              <th className="px-4 py-2 text-left">Opportunity Stage</th>
               <th className="px-4 py-2 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredQuotations.map((q) => (
-              <tr key={q.id} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-2">{q.id}</td>
+              <tr key={q.quotationNumber} className="border-t hover:bg-gray-50">
+                <td className="px-4 py-2">{q.quotationNumber}</td>
                 <td className="px-4 py-2">{q.customerName}</td>
-                <td className="px-4 py-2">{q.validUntil}</td>
+                <td className="px-4 py-2">{q.industryBases}</td>
+                <td className="px-4 py-2">{q.transactionDate}</td>
+                <td className="px-4 py-2">{q.validTill}</td>
+                <td className="px-4 py-2">{q.currency}</td>
                 <td className="px-4 py-2">
                   {q.currency === "INR" ? "₹" : "$"}
-                  {q.amount?.toLocaleString() ?? q.grandTotal.toLocaleString()}
+                  {q.grandTotal?.toLocaleString() ??
+                    q.grandTotal.toLocaleString()}
                 </td>
-                <td className="px-4 py-2">
+                {/* <td className="px-4 py-2">
                   <span
-                    className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                      q.opportunityStage === "Approved"
-                        ? "bg-green-100 text-green-800"
-                        : q.opportunityStage === "Rejected"
+                    className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${q.opportunityStage === "Approved"
+                      ? "bg-green-100 text-green-800"
+                      : q.opportunityStage === "Rejected"
                         ? "bg-red-100 text-red-800"
                         : "bg-yellow-100 text-yellow-800"
-                    }`}
+                      }`}
                   >
                     {q.opportunityStage || "Pending"}
                   </span>
-                </td>
+                </td> */}
                 <td className="px-4 py-2 text-center">
                   <button
                     onClick={() => handleViewClick(q)}
@@ -345,110 +360,127 @@ const QuotationsTable: React.FC = () => {
         </table>
       </div>
 
-{showTemplateSelector && selectedQuotation && !selectedTemplate && (
-  <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 flex justify-center items-center p-4">
-    <div className="bg-white rounded-lg shadow-xl p-6 max-w-[62.5vw] w-full relative"> {/* 1200px ≈ 62.5vw */}
-      {/* Close Button */}
-      <button
-        onClick={handleCloseAll}
-        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
-      >
-        ×
-      </button>
-
-      {/* Modal Content */}
-      <h2 className="text-2xl font-bold mb-2">Choose Quotation Template</h2>
-      <p className="text-sm text-gray-600 mb-6">
-        Quotation for {selectedQuotation.customerName}
-      </p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-        {templates.map((template) => (
-          <div
-            key={template.id}
-            onClick={() => handleTemplateSelect(template.id)}
-            className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-transparent hover:border-blue-400 flex flex-col items-center w-[20vw] min-w-[280px] h-[65vh] max-h-[510px]"
-          >
-            {/* Preview Frame */}
-            <div className="w-[45vw] max-w-[900px] flex justify-center items-start p-2 overflow-hidden h-[60vh] max-h-[450px]">
-              <div className="w-[41vw] h-[105vh] flex justify-center items-start scale-[0.45] origin-top">
-                {renderTemplate(template.id, true)}
-              </div>
-            </div>
-
-            {/* Template Name */}
-            <div
-              className={`text-white text-center w-full py-2 font-semibold text-sm ${template.color}`}
-            >
-              {template.name}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-)}
-
-{/* Full Screen Quotation Preview */}
-{selectedQuotation && selectedTemplate && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        className="w-[70vw] h-[95vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-      >
-        {/* Header with Buttons */}
-        <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Quotation Preview</h2>
-            <p className="text-sm text-gray-600 mt-1">Preview and download your Quotation</p>
-          </div>
-          <div className="flex items-center gap-3">
-            {/* Back Button */}
-            <button
-              onClick={() => {
-                setSelectedTemplate(null);
-                setShowTemplateSelector(true);
-              }}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
-            >
-              ← Back to Templates
-            </button>
-
-            {/* Print Button */}
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            >
-              <Printer className="w-4 h-4" />
-              Download/Print
-            </button>
-
-            {/* Close button */}
+      {showTemplateSelector && selectedQuotation && !selectedTemplate && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 flex justify-center items-center p-4">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-[62.5vw] w-full relative">
+            {" "}
+            {/* 1200px ≈ 62.5vw */}
+            {/* Close Button */}
             <button
               onClick={handleCloseAll}
-              className="p-2 rounded-full hover:bg-gray-200 transition"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
             >
-              <X className="w-5 h-5 text-gray-600" />
+              ×
             </button>
-          </div>
-        </div>
+            {/* Modal Content */}
+            <h2 className="text-2xl font-bold mb-2">
+              Choose Quotation Template
+            </h2>
+            <p className="text-sm text-gray-600 mb-6">
+              Quotation for {selectedQuotation.customerName}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+              {templates.map((template) => (
+                <div
+                  key={template.id}
+                  onClick={() => handleTemplateSelect(template.id)}
+                  className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-transparent hover:border-blue-400 flex flex-col items-center w-[20vw] min-w-[280px] h-[65vh] max-h-[510px]"
+                >
+                  {/* Preview Frame */}
+                  <div className="w-[45vw] max-w-[900px] flex justify-center items-start p-2 overflow-hidden h-[60vh] max-h-[450px]">
+                    <div className="w-[41vw] h-[105vh] flex justify-center items-start scale-[0.45] origin-top">
+                      {renderTemplate(template.id, true)}
+                    </div>
+                  </div>
 
-        {/* Quotation Content */}
-        <div className="flex-1 overflow-auto bg-gray-100 p-4">
-          <div className="flex justify-center">
-            <div className="bg-gray-100 p-8 rounded-lg" ref={componentRef}>
-              {renderTemplate(selectedTemplate, false)}
+                  {/* Template Name */}
+                  <div
+                    className={`text-white text-center w-full py-2 font-semibold text-sm ${template.color}`}
+                  >
+                    {template.name}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </motion.div>
-    </AnimatePresence>
-  </div>
-)}
+      )}
 
+      {/* Full Screen Quotation Preview */}
+      {selectedQuotation && selectedTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="w-[70vw] h-[95vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            >
+              {/* Header with Buttons */}
+              <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    Quotation Preview
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Preview and download your Quotation
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {/* Back Button */}
+                  <button
+                    onClick={() => {
+                      setSelectedTemplate(null);
+                      setShowTemplateSelector(true);
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
+                  >
+                    ← Back to Templates
+                  </button>
+
+                  {/* Print Button */}
+                  <button
+                    onClick={handlePrint}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  >
+                    <Printer className="w-4 h-4" />
+                    Download/Print
+                  </button>
+
+                  {/* Close button */}
+                  <button
+                    onClick={handleCloseAll}
+                    className="p-2 rounded-full hover:bg-gray-200 transition"
+                  >
+                    <X className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Quotation Content */}
+              <div className="flex-1 overflow-auto bg-gray-100 p-4">
+                <div className="flex justify-center">
+                  <div
+                    className="bg-gray-100 p-8 rounded-lg"
+                    ref={componentRef}
+                  >
+                    {renderTemplate(selectedTemplate, false)}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Pagination */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        onPageChange={setPage}
+      />
     </div>
   );
 };

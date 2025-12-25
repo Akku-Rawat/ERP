@@ -1,73 +1,50 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-
-interface BankAccount {
-  accountNumber: string;
-  accountHolderName: string;
-  sortCode: string;
-  swiftCode: string;
-  bankName: string;
-  branchAddress: string;
-  currency: string;
-  dateOfAddition: string;
-  openingBalance: string;
-  isEnabled: boolean;
-  financialYearBegins: string;
-}
+import type { BankAccount } from "../../types/company";
 
 interface Props {
   onClose: () => void;
-  onSubmit: (account: BankAccount) => void;
+  onSubmit: (newAccount: BankAccount) => void;
 }
-
 const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
   const [form, setForm] = useState<BankAccount>({
-    accountNumber: "",
+    accountNo: "",
     accountHolderName: "",
     sortCode: "",
     swiftCode: "",
     bankName: "",
     branchAddress: "",
     currency: "",
-    dateOfAddition: new Date().toISOString().split("T")[0],
-    openingBalance: "",
-    isEnabled: true,
-    financialYearBegins: "April",
+    dateAdded: new Date().toISOString().split("T")[0],
+    openingBalance: 0.0,
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleToggle = () => {
-    setForm((prev) => ({ ...prev, isEnabled: !prev.isEnabled }));
-  };
-
   const handleReset = () => {
     setForm({
-      accountNumber: "",
+      accountNo: "",
       accountHolderName: "",
       sortCode: "",
       swiftCode: "",
       bankName: "",
       branchAddress: "",
       currency: "",
-      dateOfAddition: new Date().toISOString().split("T")[0],
-      openingBalance: "",
-      isEnabled: true,
-      financialYearBegins: "April",
+      dateAdded: new Date().toISOString().split("T")[0],
+      openingBalance: 0.0,
     });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (
-      !form.accountNumber ||
+      !form.accountNo ||
       !form.accountHolderName ||
       !form.bankName ||
       !form.currency
@@ -75,7 +52,6 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
       alert("Please fill in all required fields.");
       return;
     }
-
     onSubmit(form);
     handleReset();
     onClose();
@@ -107,17 +83,17 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
 
             {/* Scrollable Content */}
             <section className="flex-1 overflow-y-auto p-6 space-y-8">
-              {/* Main Fields - 4 Columns */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Account Number */}
+              {/* Fields - 3 Columns */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* First Row */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">
                     Account No <span className="text-red-500">*</span>
                   </span>
                   <input
                     type="text"
-                    name="accountNumber"
-                    value={form.accountNumber}
+                    name="accountNo"
+                    value={form.accountNo}
                     onChange={handleChange}
                     required
                     className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
@@ -125,7 +101,6 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   />
                 </label>
 
-                {/* Account Holder Name */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">
                     Account Holder Name <span className="text-red-500">*</span>
@@ -141,7 +116,6 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   />
                 </label>
 
-                {/* Bank Name */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">
                     Bank Name <span className="text-red-500">*</span>
@@ -156,8 +130,7 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                     placeholder="HDFC Bank"
                   />
                 </label>
-
-                {/* Sort Code */}
+                {/* Second Row */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">Sort Code</span>
                   <input
@@ -170,7 +143,6 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   />
                 </label>
 
-                {/* SWIFT Code */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">SWIFT Code</span>
                   <input
@@ -183,7 +155,20 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   />
                 </label>
 
-                {/* Currency */}
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="font-medium text-gray-600">
+                    Branch Address
+                  </span>
+                  <input
+                    type="text"
+                    name="branchAddress"
+                    value={form.branchAddress}
+                    onChange={handleChange}
+                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    placeholder="123 MG Road, Mumbai"
+                  />
+                </label>
+                {/* Third Row */}
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-gray-600">
                     Currency <span className="text-red-500">*</span>
@@ -205,34 +190,23 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
                   </select>
                 </label>
 
-                {/* Branch Address */}
                 <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">Branch Address</span>
-                  <input
-                    type="text"
-                    name="branchAddress"
-                    value={form.branchAddress}
-                    onChange={handleChange}
-                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="123 MG Road, Mumbai"
-                  />
-                </label>
-
-                {/* Date of Addition */}
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">Date of Addition</span>
+                  <span className="font-medium text-gray-600">
+                    Date of Addition
+                  </span>
                   <input
                     type="date"
-                    name="dateOfAddition"
-                    value={form.dateOfAddition}
+                    name="dateAdded"
+                    value={form.dateAdded}
                     onChange={handleChange}
                     className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   />
                 </label>
 
-                {/* Opening Balance */}
                 <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">Opening Balance</span>
+                  <span className="font-medium text-gray-600">
+                    Opening Balance
+                  </span>
                   <input
                     type="number"
                     name="openingBalance"

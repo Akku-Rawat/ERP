@@ -69,15 +69,23 @@ const RFQTemplate1 = forwardRef<HTMLDivElement, RFQTemplate1Props>(
         <div className="bg-yellow-400 px-8 py-6 mb-8 relative z-10">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">REQUEST FOR QUOTE</h1>
-              <div className="text-sm text-gray-700 italic mt-1">[Vendor Name and Address]</div>
+              <h1 className="text-3xl font-bold text-gray-800">
+                REQUEST FOR QUOTE
+              </h1>
+              <div className="text-sm text-gray-700 italic mt-1">
+                [Vendor Name and Address]
+              </div>
             </div>
             <div
               className="w-20 h-20 cursor-pointer border-2 border-dashed border-gray-700 flex items-center justify-center bg-white rounded"
               onClick={() => fileInputRef.current?.click()}
             >
               {logo || companyLogoUrl ? (
-                <img src={logo || companyLogoUrl} alt="Logo" className="w-18 h-18 object-contain" />
+                <img
+                  src={logo || companyLogoUrl}
+                  alt="Logo"
+                  className="w-18 h-18 object-contain"
+                />
               ) : (
                 <UploadCloud className="w-8 h-8 text-gray-400" />
               )}
@@ -103,7 +111,9 @@ const RFQTemplate1 = forwardRef<HTMLDivElement, RFQTemplate1Props>(
             <strong>Dear [Vendor Name],</strong>
           </p>
           <p className="text-gray-700 mb-6">
-            We are currently seeking proposals for <strong>catering services</strong> for an upcoming event. Please provide your best quote for the following services:
+            We are currently seeking proposals for{" "}
+            <strong>catering services</strong> for an upcoming event. Please
+            provide your best quote for the following services:
           </p>
         </div>
 
@@ -112,21 +122,41 @@ const RFQTemplate1 = forwardRef<HTMLDivElement, RFQTemplate1Props>(
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-800 text-white">
-                <th className="px-4 py-3 text-left text-sm font-bold">Service</th>
-                <th className="px-4 py-3 text-left text-sm font-bold">Description</th>
-                <th className="px-4 py-3 text-center text-sm font-bold">Quantity</th>
-                <th className="px-4 py-3 text-center text-sm font-bold">Price/Unit</th>
-                <th className="px-4 py-3 text-center text-sm font-bold">Total Price</th>
+                <th className="px-4 py-3 text-left text-sm font-bold">
+                  Service
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-bold">
+                  Description
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-bold">
+                  Quantity
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-bold">
+                  Price/Unit
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-bold">
+                  Total Price
+                </th>
               </tr>
             </thead>
             <tbody>
               {data.items.map((item, index) => (
                 <tr key={index} className="border-b border-gray-300">
-                  <td className="px-4 py-3 text-sm text-gray-800 font-semibold">{item.service}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{item.description}</td>
-                  <td className="px-4 py-3 text-sm text-gray-800 text-center">{item.quantity}</td>
-                  <td className="px-4 py-3 text-sm text-gray-800 text-center">{item.pricePerUnit}</td>
-                  <td className="px-4 py-3 text-sm text-gray-800 text-center">{item.totalPrice}</td>
+                  <td className="px-4 py-3 text-sm text-gray-800 font-semibold">
+                    {item.service}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    {item.description}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-800 text-center">
+                    {item.quantity}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-800 text-center">
+                    {item.pricePerUnit}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-800 text-center">
+                    {item.totalPrice}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -145,24 +175,37 @@ const RFQTemplate1 = forwardRef<HTMLDivElement, RFQTemplate1Props>(
           {/* Left Column - Requirements */}
           <div>
             <p className="text-gray-700 mb-3 text-sm">
-              <strong>In addition to providing the above services, we require the following information in your proposal:</strong>
+              <strong>
+                In addition to providing the above services, we require the
+                following information in your proposal:
+              </strong>
             </p>
             <ul className="list-disc list-inside space-y-1 text-gray-700 text-sm">
-              <li>A description of your company's catering experience and qualifications</li>
+              <li>
+                A description of your company's catering experience and
+                qualifications
+              </li>
               <li>Menu options and customization available for our event</li>
               <li>Serving and setup arrangements for the event</li>
               <li>Staffing requirements and costs for the event</li>
-              <li>Any references or examples of similar events you have catered in the past.</li>
+              <li>
+                Any references or examples of similar events you have catered in
+                the past.
+              </li>
             </ul>
           </div>
 
           {/* Right Column - Evaluation Box */}
           <div className="bg-yellow-400 p-4 rounded">
             <p className="text-gray-800 text-sm font-semibold mb-2">
-              We will evaluate proposals based on price, quality, and your company's ability to meet our specific needs.
+              We will evaluate proposals based on price, quality, and your
+              company's ability to meet our specific needs.
             </p>
             <p className="text-gray-800 text-sm">
-              Please submit your proposal no later than <strong>[Deadline for Submission]</strong>. If you have any questions or require additional information, please do not hesitate to contact us.
+              Please submit your proposal no later than{" "}
+              <strong>[Deadline for Submission]</strong>. If you have any
+              questions or require additional information, please do not
+              hesitate to contact us.
             </p>
           </div>
         </div>
@@ -170,11 +213,14 @@ const RFQTemplate1 = forwardRef<HTMLDivElement, RFQTemplate1Props>(
         {/* Closing */}
         <div className="px-8 mb-8 relative z-10">
           <p className="text-gray-700 mb-6">
-            Thank you for your time and consideration. We look forward to receiving your proposal.
+            Thank you for your time and consideration. We look forward to
+            receiving your proposal.
           </p>
           <p className="text-gray-800">Sincerely,</p>
           <p className="text-gray-800 font-semibold mt-2">[Your Name]</p>
-          <p className="text-gray-600 text-sm">[Your Company] [Phone] [Email Address]</p>
+          <p className="text-gray-600 text-sm">
+            [Your Company] [Phone] [Email Address]
+          </p>
           <p className="text-gray-600 text-sm">[Website Address]</p>
         </div>
 
@@ -184,7 +230,7 @@ const RFQTemplate1 = forwardRef<HTMLDivElement, RFQTemplate1Props>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 RFQTemplate1.displayName = "RFQTemplate1";

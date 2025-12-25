@@ -1,37 +1,53 @@
-import React, { useState, useEffect} from "react";
-import { Search, Plus, Edit2, Trash2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import CustomerDetailView from "./CustomerDetailView";
-import axios from "axios"; 
-import CustomerModal from "../../components/crm/CustomerModal";
 import toast from "react-hot-toast";
 
-const base_url = import.meta.env.VITE_BASE_URL;
-const GET_CUSTOMER_ENDPOINT = `${base_url}.customer.customer.get_all_customers_api`;
-const DELETE_CUSTOMER_ENDPOINT = `${base_url}.customer.customer.delete_customer_by_id`;
-const UPDATE_CUSTOMER_ENDPOINT = `${base_url}.customer.customer.update_customer_by_id`;
+import {
+  getAllCustomers,
+  deleteCustomerById,
+  getCustomerByCustomerCode,
+} from "../../api/customerApi";
+
+import CustomerModal from "../../components/crm/CustomerModal";
+
+import type { CustomerSummary, CustomerDetail } from "../../types/customer";
+
+import Table from "../../components/UI/Table/Table";
+import StatusBadge from "../../components/UI/Table/StatusBadge";
+import ActionButton, {
+  ActionGroup,
+  ActionMenu,
+} from "../../components/UI/Table/ActionButton";
+
+import type { Column } from "../../components/UI/Table/Table";
 
 interface Props {
-  onAdd: () => void;  
+  onAdd: () => void;
 }
 
-const CustomerManagement: React.FC<Props> = ({onAdd}) => {
-  const [customers, setCustomers] = useState<any[]>([]);
+const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
+  const [customers, setCustomers] = useState<CustomerSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "detail">("table");
-  const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<CustomerDetail | null>(null);
   const [custLoading, setCustLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [editCustomer, setEditCustomer] = useState<any | null>(null);
+  const [editCustomer, setEditCustomer] =
+    useState<CustomerDetail | null>(null);
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const fetchCustomers = async () => {
     try {
       setCustLoading(true);
-      const response = await fetch(GET_CUSTOMER_ENDPOINT, {
-        headers: { Authorization: import.meta.env.VITE_AUTHORIZATION },
-      });
-      if (!response.ok) throw new Error("Failed to load customers");
-      const result = await response.json();
-      setCustomers(result.data || []);
+      const response = await getAllCustomers(page, pageSize);
+      setCustomers(response.data);
+      setTotalPages(response.pagination?.total_pages || 1);
+      setTotalItems(response.pagination?.total || 1);
     } catch (err) {
       console.error("Error loading customers:", err);
     } finally {
@@ -39,80 +55,76 @@ const CustomerManagement: React.FC<Props> = ({onAdd}) => {
     }
   };
 
-  const handleDelete = async (custid: string, e: React.MouseEvent) => {
-  e.stopPropagation();
-
-  const customerToDelete = customers.find((c) => c.custom_id === custid);
-  if (!customerToDelete) return;
-
-  const id = customerToDelete.custom_id;
-  console.log("cust id " + custid);
-  if (!custid) {
-    alert("Cannot delete — custid not found for this customer.");
-    return;
-  }
-
-  if (!window.confirm(`Are you sure you want to delete customer with custid ${id}?`)) return;
-
-  try {
-    setCustLoading(true);
-
-    await axios.delete(`${DELETE_CUSTOMER_ENDPOINT}?id=${id}`, {
-      headers: { Authorization: import.meta.env.VITE_AUTHORIZATION },
-    });
-
-    setCustomers((prev) => prev.filter((c) => c.custom_id !== id));
-    alert("Customer deleted successfully.");
-  } catch (err: any) {
-    console.error("Error deleting customer:", err);
-    const errorMsg = err.response?.data?.message || "Failed to delete customer.";
-    alert(errorMsg);
-  } finally {
-    setCustLoading(false);
-  }
-};
-
   useEffect(() => {
     fetchCustomers();
-  }, []);
+  }, [page, pageSize]);
+
+  const handleDelete = async (
+    customerId: string,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+
+    if (!window.confirm(`Delete customer ${customerId}?`)) return;
+
+    try {
+      setCustLoading(true);
+      await deleteCustomerById(customerId);
+      setCustomers((prev) => prev.filter((c) => c.id !== customerId));
+      toast.success("Customer deleted successfully.");
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      toast.error(
+        err.response?.data?.message || "Failed to delete customer."
+      );
+    } finally {
+      setCustLoading(false);
+    }
+  };
 
   const handleAddCustomer = () => {
     setEditCustomer(null);
     setShowModal(true);
   };
 
-  const handleEditCustomer = (customer: any, e: React.MouseEvent) => {
+  const handleEditCustomer = async (
+    id: string,
+    e: React.MouseEvent
+  ) => {
     e.stopPropagation();
-    setEditCustomer(customer);
-    console.log("customer" + customer);
-    setShowModal(true);
+    try {
+      const customer = await getCustomerByCustomerCode(id);
+      setEditCustomer(customer.data ?? customer);
+      setShowModal(true);
+    } catch (err) {
+      console.error("Failed to fetch customer:", err);
+      alert("Unable to fetch full customer details.");
+    }
   };
 
-const handleCustomerSaved = async () => {
-  setShowModal(false);
-  setEditCustomer(null);
-
-  try {
+  const handleCustomerSaved = async () => {
+    setShowModal(false);
+    setEditCustomer(null);
     await fetchCustomers();
-    toast.success(
-      editCustomer 
-        ? "Customer updated successfully!" 
-        : "Customer created successfully!"
-    );
-  } catch (err) {
-    toast.error("Failed to refresh customer list");
-  }
-};
+    toast.success(editCustomer ? "Customer updated!" : "Customer created!");
+  };
 
-  const filtered = customers.filter((c: any) =>
-    [c.custom_id, c.customer_name, c.customer_currency, c.customer_onboarding_balance, c.custom_customer_tpin,
-       c.custom_billing_adress_line_1]
+  const filtered = customers.filter((c) =>
+    [
+      c.id,
+      c.name,
+      c.type,
+      c.currency,
+      c.onboardingBalance,
+      c.tpin,
+      c.displayName,
+    ]
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
   );
 
-  const handleRowClick = (customer: any) => {
+  const handleRowClick = (customer: CustomerDetail) => {
     setSelectedCustomer(customer);
     setViewMode("detail");
   };
@@ -122,130 +134,101 @@ const handleCustomerSaved = async () => {
     setSelectedCustomer(null);
   };
 
+  // columns definition for Table component
+  const columns: Column<CustomerSummary>[] = [
+    { key: "id", header: "Customer ID", align: "left" },
+    { key: "name", header: "Name", align: "left" },
+    {
+      key: "type",
+      header: "Type",
+      align: "left",
+      render: (c: CustomerSummary) => <StatusBadge status={c.type} />,
+    },
+    {
+      key: "currency",
+      header: "Currency",
+      align: "left",
+      render: (c: CustomerSummary) => (
+        <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
+          {c.currency}
+        </code>
+      ),
+    },
+    {
+      key: "onboardingBalance",
+      header: "Onboard Balance",
+      align: "right",
+      render: (c: CustomerSummary) => (
+        <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
+          {c.onboardingBalance}
+        </code>
+      ),
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      align: "center",
+      render: (c: CustomerSummary) => (
+        <ActionGroup>
+          <ActionButton
+            type="view"
+            onClick={() =>
+              handleRowClick(c as unknown as CustomerDetail)
+            }
+            iconOnly={false}
+          />
+          <ActionMenu
+            onEdit={(e) => handleEditCustomer(c.id, e as any)}
+            onDelete={(e) => handleDelete(c.id, e as any)}
+          />
+        </ActionGroup>
+      ),
+    },
+  ];
+
   return (
-    <div className="p-4">
+    <div className="p-8">
       {viewMode === "table" ? (
         <>
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="relative w-1/3">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="search"
-                placeholder="Search customers..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <button
-              onClick={handleAddCustomer}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
-            >
-              <Plus className="w-5 h-5" /> Add Customer
-            </button>
-          </div>
+          {/* Header (agar kuch dikhाना हो to yahan bg/text classes bhi theme se laga सकते ho) */}
+          <div className="flex items-center justify-between mb-6" />
 
-           {custLoading ? (
+          {custLoading ? (
             <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-              <p className="mt-2 text-gray-600">Loading customers…</p>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="mt-2 text-muted">Loading customers…</p>
             </div>
           ) : (
             <>
-              {/* Table */}
-              <div className="overflow-x-auto rounded-lg border border-gray-200">
-                <table className="min-w-full">
-                  <thead className="bg-gray-100 text-gray-700 text-sm">
-                    <tr>
-                      <th className="px-4 py-3 text-left">Cust Id</th>
-                      <th className="px-4 py-3 text-left">Customer Name</th>
-                      <th className="px-4 py-3 text-left">Address</th>
-                      <th className="px-4 py-3 text-left">Type</th>
-                      <th className="px-4 py-3 text-left">Currency</th>
-                      <th className="px-4 py-3 text-left">Onboard Balance</th>
-                      <th className="px-4 py-3 text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {filtered.map((c) => (
-                      <tr
-                        key={c.custom_id}
-                        onClick={() => handleRowClick(c)}
-                        className="hover:bg-gray-50 cursor-pointer transition"
-                      >
-                        <td className="px-4 py-2 font-medium">{c.custom_id}</td>
-                        <td className="px-4 py-2 font-semibold">{c.customer_name}</td>
-                        <td className="px-4 py-2 font-medium">{c.custom_shipping_address_line_1}</td>
-                        <td className="px-4 py-2">
-                          <span
-                            className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                              c.customer_type === "Company"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-purple-100 text-purple-800"
-                            }`}
-                          >
-                            {c.customer_type}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2">
-                          {c.customer_currency ? (
-                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                              {c.customer_currency}
-                            </code>
-                          ) : (
-                            <span className="text-gray-400 text-xs">—</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-2">
-                          {c.customer_onboarding_balance ? (
-                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                              {c.customer_onboarding_balance}
-                            </code>
-                          ) : (
-                            <span className="text-gray-400 text-xs">—</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-2 text-center">
-                          <button
-                            onClick={(e) => handleEditCustomer(c, e)}
-                            className="text-indigo-600 hover:text-indigo-800"
-                            title="Edit"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={(e) => handleDelete(c.custom_id, e)}
-                            className="ml-2 text-red-600 hover:text-red-800"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {filtered.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    {searchTerm ? "No matches." : "No customers yet."}
-                  </div>
-                )}
-              </div>
+              <Table
+                columns={columns}
+                data={filtered}
+                showToolbar
+                searchValue={searchTerm}
+                onSearch={setSearchTerm}
+                enableAdd
+                addLabel="Add Customer"
+                onAdd={handleAddCustomer}
+                enableColumnSelector
+                currentPage={page}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setPage}
+              />
             </>
           )}
         </>
-      ) : (
+      ) : selectedCustomer ? (
         <CustomerDetailView
-  customer={selectedCustomer!}
-  customers={customers}
-  onBack={handleBack}
-  onCustomerSelect={handleRowClick}
-  onAdd={onAdd}
-  onEdit={handleEditCustomer}  
-/>
-      )}
+          customer={selectedCustomer}
+          customers={customers}
+          onBack={handleBack}
+          onCustomerSelect={handleRowClick}
+          onAdd={onAdd}
+          onEdit={handleEditCustomer}
+        />
+      ) : null}
 
       <CustomerModal
         isOpen={showModal}
@@ -253,9 +236,7 @@ const handleCustomerSaved = async () => {
           setShowModal(false);
           setEditCustomer(null);
         }}
-        // onSubmit={handleSaveCustomer}
-        // initialData={editCustomer} 
-        onSubmit={handleCustomerSaved}  
+        onSubmit={handleCustomerSaved}
         initialData={editCustomer}
         isEditMode={!!editCustomer}
       />
