@@ -1,44 +1,21 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { CloudCog } from "lucide-react";
 
-const DEV_INVOICE = {
-  invoiceNumber: "INV-2025-001",
-  currencyCode: "INR",
-  customerId: "Acme Corporation Pvt Ltd",
 
-  billingAddress: {
-    line1: "4th Floor, Prestige Towers",
-    city: "Bangalore",
-    state: "Karnataka",
-    postalCode: "560001",
-  },
 
-  shippingAddress: {
-    line1: "4th Floor, Prestige Towers",
-    city: "Bangalore",
-    state: "Karnataka",
-    postalCode: "560001",
-  },
-
-  dateOfInvoice: new Date().toISOString(),
-  dueDate: new Date(Date.now() + 7 * 86400000).toISOString(),
-
-  items: [
-    { description: "Custom Software Development", quantity: 1, price: 75000 },
-    { description: "Cloud Infrastructure Setup", quantity: 1, price: 25000 },
-    { description: "Annual Support & Maintenance", quantity: 1, price: 15000 },
-  ],
-};
 
 export const generateInvoicePDF = (
+  invoice: any,  
   resultType: "save" | "bloburl" = "save"
 ) => {
-  const data = DEV_INVOICE;
+  const data = invoice; 
+  console.log("Generating PDF for invoice:", data);
 
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
-  const symbol =
-    data.currencyCode === "INR" ? "Rs." : data.currencyCode === "ZMW" ? "ZK" : "$";
+ const symbol = data.currency === "INR" ? "₹" : 
+               data.currency === "ZMW" ? "ZK" : "$";
 
   /* ---------- Header ---------- */
   doc.setFillColor(37, 99, 235);
@@ -59,36 +36,37 @@ export const generateInvoicePDF = (
   doc.setTextColor(219, 234, 254);
   doc.text("Your Trusted Technology Partner", 195, 26, { align: "right" });
 
-  /* ---------- Addresses ---------- */
-  doc.setTextColor(40, 40, 40);
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "bold");
-  doc.text("BILL TO", 15, 55);
-  doc.text("SHIP TO", 80, 55);
+ /* ---------- Addresses ---------- */
+doc.setTextColor(40, 40, 40);
+doc.setFontSize(8);
+doc.setFont("helvetica", "bold");
+doc.text("BILL TO", 15, 55);
+doc.text("SHIP TO", 80, 55);
 
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(70, 70, 70);
+doc.setFont("helvetica", "normal");
+doc.setTextColor(70, 70, 70);
 
-  doc.text(
-    [
-      data.customerId,
-      data.billingAddress.line1,
-      `${data.billingAddress.city}, ${data.billingAddress.state} ${data.billingAddress.postalCode}`,
-    ],
-    15,
-    60
-  );
+//  Billing Address
+doc.text(
+  [
+    data.customerName || "",
+    data.billingAddressLine1 || "",
+    `${data.billingCity || ""}, ${data.billingState || ""} ${data.billingPostalCode || ""}`,
+  ].filter(Boolean),
+  15,
+  60
+);
 
-  doc.text(
-    [
-      data.customerId,
-      data.shippingAddress.line1,
-      `${data.shippingAddress.city}, ${data.shippingAddress.state} ${data.shippingAddress.postalCode}`,
-    ],
-    80,
-    60
-  );
-
+//  Shipping Address - Same pattern
+doc.text(
+  [
+    data.customerName || "",
+    data.shippingAddressLine1 || "",  //  Flat field
+    `${data.shippingCity || ""}, ${data.shippingState || ""} ${data.shippingPostalCode || ""}`,  // ✅ Flat fields
+  ].filter(Boolean),
+  80,
+  60
+);
   /* ---------- Dates ---------- */
   doc.setFillColor(249, 250, 251);
   doc.rect(140, 50, 55, 20, "F");
@@ -109,12 +87,12 @@ export const generateInvoicePDF = (
   autoTable(doc, {
     startY: 85,
     head: [["Description", "Qty", "Price", "Amount"]],
-    body: data.items.map((i) => [
-      i.description,
-      i.quantity,
-      `${symbol}${i.price.toFixed(2)}`,
-      `${symbol}${(i.quantity * i.price).toFixed(2)}`,
-    ]),
+body: data.items.map((i: any) => [
+  i.description || i.productName || "",
+  i.quantity || 0,
+  `${symbol}${((i.listPrice || i.price) || 0).toFixed(2)}`,
+  `${symbol}${((i.quantity * (i.listPrice || i.price)) || 0).toFixed(2)}`,
+]),
     headStyles: {
       fillColor: [37, 99, 235],
       textColor: [255, 255, 255],
@@ -131,7 +109,9 @@ export const generateInvoicePDF = (
 
   /* ---------- Total ---------- */
   const finalY = (doc as any).lastAutoTable.finalY + 10;
-  const total = data.items.reduce((s, i) => s + i.quantity * i.price, 0);
+const total = data.items.reduce((s: number, i: any) => 
+  s + (i.quantity || 0) * (i.listPrice || i.price || 0), 0
+);
 
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);

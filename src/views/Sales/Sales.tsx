@@ -34,7 +34,7 @@ const salesTabs = [
     icon: <FaFileInvoiceDollar />,
   },
   { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
-  { id: "pos", name: "POS", icon: <FaCashRegister /> },
+  // { id: "pos", name: "POS", icon: <FaCashRegister /> },
   { id: "reports", name: "Reports", icon: <FaChartBar /> },
 ];
 
@@ -85,7 +85,7 @@ const SalesModule: React.FC = () => {
   const tab = TAB_CONFIG[activeTab];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
@@ -112,7 +112,7 @@ const SalesModule: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="">
         {tab?.onAdd && (
           <div className="flex items-center justify-end gap-4 mb-4">
             <button

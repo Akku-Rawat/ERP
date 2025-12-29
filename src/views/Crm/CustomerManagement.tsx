@@ -12,12 +12,12 @@ import CustomerModal from "../../components/crm/CustomerModal";
 
 import type { CustomerSummary, CustomerDetail } from "../../types/customer";
 
-import Table from "../../components/UI/Table/Table";
-import StatusBadge from "../../components/UI/Table/StatusBadge";
+import Table from "../../components/ui/Table/Table";
+import StatusBadge from "../../components/ui/Table/StatusBadge";
 import ActionButton, {
   ActionGroup,
   ActionMenu,
-} from "../../components/UI/Table/ActionButton";
+} from "../../components/ui/Table/ActionButton";
 
 import type { Column } from "../../components/UI/Table/Table";
 
@@ -190,7 +190,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     <div className="p-8">
       {viewMode === "table" ? (
         <>
-          {/* Header (agar kuch dikhाना हो to yahan bg/text classes bhi theme se laga सकते ho) */}
+          
           <div className="flex items-center justify-between mb-6" />
 
           {custLoading ? (

@@ -1,6 +1,10 @@
 import React from "react";
 import { Eye, Edit, Trash2, Download, MoreVertical } from "lucide-react";
 
+/* ======================================================
+   ACTION BUTTON
+====================================================== */
+
 type ActionType = "view" | "edit" | "delete" | "download" | "custom";
 
 interface ActionButtonProps {
@@ -82,6 +86,10 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   );
 };
 
+/* ======================================================
+   ACTION GROUP
+====================================================== */
+
 interface ActionGroupProps {
   children: React.ReactNode;
 }
@@ -90,15 +98,27 @@ export const ActionGroup: React.FC<ActionGroupProps> = ({ children }) => {
   return <div className="flex items-center gap-1 justify-center">{children}</div>;
 };
 
+/* ======================================================
+   ACTION MENU (THREE DOT)
+====================================================== */
+
 interface ActionMenuProps {
   onEdit?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
   onDelete?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
   onDownload?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
+
   editLabel?: string;
   deleteLabel?: string;
   downloadLabel?: string;
+
   deleteVariant?: "danger" | "primary" | "secondary";
   showDownload?: boolean;
+
+  customActions?: {
+    label: string;
+    onClick: () => void;
+    danger?: boolean;
+  }[];
 }
 
 export const ActionMenu: React.FC<ActionMenuProps> = ({
@@ -110,6 +130,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
   downloadLabel,
   deleteVariant = "danger",
   showDownload = false,
+  customActions,
 }) => {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement | null>(null);
@@ -132,6 +153,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
 
   return (
     <div ref={ref} className="relative inline-block">
+      {/* Trigger */}
       <button
         type="button"
         aria-haspopup="menu"
@@ -149,50 +171,76 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
         <div
           role="menu"
           aria-label="Actions"
-          className="absolute right-0 mt-2 w-40 bg-card border border-[var(--border)] rounded-md shadow-lg z-[200] py-2"
+          className="absolute right-0 mt-2 w-44 bg-card border border-[var(--border)] rounded-md shadow-lg z-[200] py-2"
           onClick={(e) => e.stopPropagation()}
         >
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen(false);
-              onEdit?.(e);
-            }}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-row-hover flex items-center gap-2 text-main"
-            role="menuitem"
-          >
-            <Edit className="w-4 h-4 text-muted" />
-            <span>{editLabel ?? "Edit"}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen(false);
-              onDelete?.(e);
-            }}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-row-hover flex items-center gap-2"
-            role="menuitem"
-          >
-            <Trash2 className="w-4 h-4 text-red-500" />
-            <span
-              className={
-                deleteVariant === "danger" ? "text-red-500" : "text-main"
-              }
+          {/* ===== CUSTOM ACTIONS (STATUS etc.) ===== */}
+          {customActions?.map((action) => (
+            <button
+              key={action.label}
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                action.onClick();
+              }}
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-row-hover ${
+                action.danger ? "text-red-500" : "text-main"
+              }`}
+              role="menuitem"
             >
-              {deleteLabel ?? "Delete"}
-            </span>
-          </button>
+              {action.label}
+            </button>
+          ))}
 
-          {showDownload && (
+          {customActions && customActions.length > 0 && (
+            <div className="my-1 border-t border-[var(--border)]" />
+          )}
+
+          {/* ===== EDIT ===== */}
+          {onEdit && (
             <button
               type="button"
               onClick={(e) => {
-                e.stopPropagation();
                 setOpen(false);
-                onDownload?.(e);
+                onEdit(e);
+              }}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-row-hover flex items-center gap-2 text-main"
+              role="menuitem"
+            >
+              <Edit className="w-4 h-4 text-muted" />
+              <span>{editLabel ?? "Edit"}</span>
+            </button>
+          )}
+
+          {/* ===== DELETE ===== */}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={(e) => {
+                setOpen(false);
+                onDelete(e);
+              }}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-row-hover flex items-center gap-2"
+              role="menuitem"
+            >
+              <Trash2 className="w-4 h-4 text-red-500" />
+              <span
+                className={
+                  deleteVariant === "danger" ? "text-red-500" : "text-main"
+                }
+              >
+                {deleteLabel ?? "Delete"}
+              </span>
+            </button>
+          )}
+
+          {/* ===== DOWNLOAD ===== */}
+          {showDownload && onDownload && (
+            <button
+              type="button"
+              onClick={(e) => {
+                setOpen(false);
+                onDownload(e);
               }}
               className="w-full text-left px-3 py-2 text-sm hover:bg-row-hover flex items-center gap-2 text-main"
               role="menuitem"

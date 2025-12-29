@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Column } from "./types";
+import { useLayoutEffect } from "react";
 
 interface ColumnSelectorProps {
   columns: Column<any>[];
@@ -19,7 +20,7 @@ interface ColumnSelectorProps {
 interface DropdownContentProps {
   isOpen: boolean;
   onClose: () => void;
-  anchorRef: React.RefObject<HTMLButtonElement>;
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
   columns: Column<any>[];
   visibleKeys: string[];
   toggleColumn: (key: string) => void;
@@ -39,58 +40,23 @@ function DropdownContent({
 }: DropdownContentProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [menuSearch, setMenuSearch] = useState("");
-  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [position, setPosition] =
+  useState<{ top: number; left: number } | null>(null);
 
-  // Calculate dropdown position based on anchor button
-  useEffect(() => {
-    if (isOpen && anchorRef.current) {
-      const updatePosition = () => {
-        const rect = anchorRef.current!.getBoundingClientRect();
-        const dropdownWidth = 288; // w-72 = 18rem = 288px
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
 
-        // Calculate left position (align to right edge of button)
-        let left = rect.right + window.scrollX - dropdownWidth;
-        
-        // Ensure dropdown doesn't go off-screen on the left
-        if (left < 8) {
-          left = 8;
-        }
-        
-        // Ensure dropdown doesn't go off-screen on the right
-        if (left + dropdownWidth > viewportWidth - 8) {
-          left = viewportWidth - dropdownWidth - 8;
-        }
+useLayoutEffect(() => {
+  if (!isOpen || !anchorRef.current) return;
 
-        // Calculate top position (below the button)
-        let top = rect.bottom + window.scrollY + 8;
-        
-        // Check if dropdown would go below viewport
-        const dropdownHeight = 400; // Approximate max height
-        if (rect.bottom + dropdownHeight > viewportHeight) {
-          // Position above the button instead
-          top = rect.top + window.scrollY - dropdownHeight - 8;
-          if (top < 8) {
-            top = 8;
-          }
-        }
+  const rect = anchorRef.current.getBoundingClientRect();
+  const dropdownWidth = 288;
 
-        setPosition({ top, left });
-      };
+  let left = rect.right + window.scrollX - dropdownWidth;
+  if (left < 8) left = 8;
 
-      updatePosition();
+  let top = rect.bottom + window.scrollY + 8;
 
-      // Update position on scroll or resize
-      window.addEventListener("scroll", updatePosition, true);
-      window.addEventListener("resize", updatePosition);
-
-      return () => {
-        window.removeEventListener("scroll", updatePosition, true);
-        window.removeEventListener("resize", updatePosition);
-      };
-    }
-  }, [isOpen, anchorRef]);
+  setPosition({ top, left });
+}, [isOpen]);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -139,13 +105,13 @@ function DropdownContent({
     col.header.toLowerCase().includes(menuSearch.trim().toLowerCase())
   );
 
-  if (!isOpen) return null;
+ if (!isOpen || !position) return null;
 
   // Render dropdown via portal to avoid overflow clipping
   return createPortal(
     <div
       ref={dropdownRef}
-      className="fixed w-72 bg-card border border-[var(--border)] rounded-lg shadow-2xl z-[9999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+      className="fixed w-72 bg-card border border-[var(--border)] rounded-lg shadow-2xl z-[9999] overflow-hidden"
       style={{
         top: position.top,
         left: position.left,
@@ -194,7 +160,8 @@ function DropdownContent({
             placeholder="Search columns..."
             value={menuSearch}
             onChange={(e) => setMenuSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-[var(--border)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-card text-main placeholder:text-muted transition-all"
+            className="w-full pl-9 pr-3 py-2 text-sm border border-[var(--border)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-card text-main placeholder:text-muted transition-none
+"
           />
         </div>
       </div>
@@ -314,7 +281,7 @@ export default function ColumnSelector({
           e.stopPropagation();
           setOpen((prev) => !prev);
         }}
-        className={`px-3 py-2 rounded-xl text-sm border transition-all flex items-center gap-2 ${
+        className={`px-3 py-2 rounded-xl text-sm border transaction-none flex items-center gap-2 ${
           open
             ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
             : "bg-app text-muted border-[var(--border)] hover:text-primary hover:border-primary"
@@ -340,14 +307,9 @@ export default function ColumnSelector({
         <span className="whitespace-nowrap text-[10px] font-black uppercase tracking-widest">
           {buttonLabel ?? `Columns (${visibleKeys.length})`}
         </span>
-        <svg
-          className={`w-3 h-3 transition-transform duration-200 ${
-            open ? "rotate-180" : "rotate-0"
-          }`}
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-        >
+       <svg
+  className="w-3 h-3"
+>
           <path
             fillRule="evenodd"
             d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"

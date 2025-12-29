@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTableLogic } from "./useTableLogic";
 import type { Column } from "../Table/type";
@@ -26,6 +27,7 @@ interface TableProps<T> {
   totalItems?: number;
   onPageChange?: (page: number) => void;
   addLabel?: string;
+  rowKey?: (row: T) => string;
 }
 
 /**
@@ -54,10 +56,11 @@ function FilterDropdown({
   onReset,
 }: FilterDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
+
 
   // Calculate dropdown position based on anchor button
-  useEffect(() => {
+ useLayoutEffect(() => {
     if (isOpen && anchorRef.current) {
       const rect = anchorRef.current.getBoundingClientRect();
       const dropdownWidth = 320;
@@ -103,18 +106,16 @@ function FilterDropdown({
     };
   }, [isOpen, onClose, anchorRef]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !position) return null;
+
 
   // Render dropdown via portal to avoid overflow clipping
   return createPortal(
     <div
-      ref={dropdownRef}
-      className="fixed w-80 bg-card border border-[var(--border)] rounded-2xl shadow-2xl z-[9999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
-      style={{
-        top: position.top,
-        left: position.left,
-      }}
-    >
+  ref={dropdownRef}
+  className="fixed w-80 bg-card border border-[var(--border)] rounded-2xl shadow-2xl z-[9999] overflow-hidden"
+  style={{ top: position.top, left: position.left }}
+>
       {/* Dropdown Header */}
       <div className="px-5 py-3 border-b border-[var(--border)] bg-row-hover/30">
         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-main">
@@ -192,6 +193,7 @@ function Table<T extends Record<string, any>>({
   columns,
   data,
   onRowClick,
+  rowKey,
   loading = false,
   emptyMessage = "No records found.",
   showToolbar = false,
@@ -269,7 +271,8 @@ function Table<T extends Record<string, any>>({
     );
   }
 
-  const displayData = processedData;
+ const displayData = processedData ?? [];
+
 
   return (
     <div className="bg-card rounded-2xl border border-[var(--border)] flex flex-col shadow-sm transition-all relative z-10 w-full overflow-hidden">
@@ -400,9 +403,9 @@ function Table<T extends Record<string, any>>({
               ) : (
                 displayData.map((item, idx) => (
                   <tr
-                    key={item.id || idx}
-                    onClick={() => onRowClick?.(item)}
-                    className={`group transition-all cursor-pointer ${
+                 key={rowKey ? rowKey(item) : JSON.stringify(item)}
+  onClick={() => onRowClick?.(item)}
+                    className={`group transition-none cursor-pointer ${
                       idx % 2 === 0 ? "bg-transparent" : "bg-row-hover/10"
                     } hover:bg-row-hover`}
                   >

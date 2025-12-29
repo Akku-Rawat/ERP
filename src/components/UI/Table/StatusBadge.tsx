@@ -3,37 +3,40 @@ import React from "react";
 type BadgeVariant = "success" | "warning" | "danger" | "info" | "default";
 
 interface StatusBadgeProps {
-  status: string;
+  status?: string | null;
   variant?: BadgeVariant;
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, variant }) => {
+  const safeStatus = (status ?? "unknown").toLowerCase();
+
   const getVariant = (): BadgeVariant => {
     if (variant) return variant;
 
-    const lowerStatus = status.toLowerCase();
-
     if (
-      lowerStatus.includes("paid") ||
-      lowerStatus.includes("completed") ||
-      lowerStatus.includes("active")
+      safeStatus.includes("paid") ||
+      safeStatus.includes("completed") ||
+      safeStatus.includes("active")
     ) {
       return "success";
     }
+
     if (
-      lowerStatus.includes("pending") ||
-      lowerStatus.includes("processing")
+      safeStatus.includes("pending") ||
+      safeStatus.includes("processing")
     ) {
       return "warning";
     }
+
     if (
-      lowerStatus.includes("overdue") ||
-      lowerStatus.includes("cancelled") ||
-      lowerStatus.includes("failed")
+      safeStatus.includes("overdue") ||
+      safeStatus.includes("cancelled") ||
+      safeStatus.includes("failed")
     ) {
       return "danger";
     }
-    if (lowerStatus.includes("draft") || lowerStatus.includes("new")) {
+
+    if (safeStatus.includes("draft") || safeStatus.includes("new")) {
       return "info";
     }
 
@@ -42,13 +45,13 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, variant }) => {
 
   const variantStyles: Record<BadgeVariant, string> = {
     success:
-      "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-700",
+      "bg-emerald-50 text-emerald-700 border-emerald-200",
     warning:
-      "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-700",
+      "bg-amber-50 text-amber-700 border-amber-200",
     danger:
-      "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-700",
+      "bg-red-50 text-red-700 border-red-200",
     info:
-      "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-700",
+      "bg-blue-50 text-blue-700 border-blue-200",
     default:
       "bg-row-hover text-muted border-[var(--border)]",
   };
@@ -57,14 +60,10 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, variant }) => {
 
   return (
     <span
-      className={`
-        inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-        border transition-all
-        ${variantStyles[currentVariant]}
-      `}
+      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${variantStyles[currentVariant]}`}
     >
       <span className="w-1.5 h-1.5 rounded-full mr-2 bg-current opacity-60" />
-      {status}
+      {status ?? "Unknown"}
     </span>
   );
 };
