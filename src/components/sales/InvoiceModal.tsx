@@ -150,7 +150,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                           />
                         </div>
 
-                        <div className="flex flex-col gap-1">
+                        {/* <div className="flex flex-col gap-1">
                           <Select
                             label="Invoice Type"
                             name="invoiceType"
@@ -158,20 +158,44 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                             onChange={actions.handleInputChange}
                             options={invoiceTypeOptions}
                           />
+                        </div> */}
+
+                        <div className="flex flex-col gap-1">
+                          <Input
+                            label="Invoice Type"
+                            name="invoiceType"
+                            type="text"
+                            disabled
+                            value={formData.invoiceType}
+                            onChange={actions.handleInputChange}
+                            className="w-full col-span-3"
+                          />
                         </div>
 
                         {ui.isExport && (
-                          <CountrySelect
-                            value={formData.destnCountryCd}
-                            onChange={(c) =>
-                              actions.handleInputChange({
-                                target: {
-                                  name: "destnCountryCd",
-                                  value: c.code,
-                                },
-                              } as any)
-                            }
-                          />
+                          // <CountrySelect
+                          //   value={formData.destnCountryCd}
+                          //   onChange={(c) =>
+                          //     actions.handleInputChange({
+                          //       target: {
+                          //         name: "destnCountryCd",
+                          //         value: c.code,
+                          //       },
+                          //     } as any)
+                          //   }
+                          // />
+
+                          <div className="flex flex-col gap-1">
+                            <Input
+                              label="Export To Country"
+                              name="destnCountryCd"
+                              type="text"
+                              disabled
+                              value={formData.destnCountryCd}
+                              onChange={actions.handleInputChange}
+                              className="w-full col-span-3"
+                            />
+                          </div>
                         )}
                         {ui.isLocal && (
                           <Input

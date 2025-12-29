@@ -58,6 +58,7 @@ const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
 };
 
 const currencyOptions = ["ZMW", "USD", "INR"];
+const customerTaxCategoryOptions = ["export", "non-export", "lpo"];
 
 const CustomerModal: React.FC<{
   isOpen: boolean;
@@ -311,6 +312,20 @@ const CustomerModal: React.FC<{
                         placeholder="Tax identification"
                       />
 
+                      <Select
+                        label="Tax Category"
+                        name="customerTaxCategory"
+                        value={form.customerTaxCategory}
+                        onChange={handleChange}
+                        icon={<DollarSign className="w-4 h-4" />}
+                      >
+                        <option value="">Select Tax Category</option>
+                        {customerTaxCategoryOptions.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </Select>
                       <Select
                         label="Currency"
                         name="currency"

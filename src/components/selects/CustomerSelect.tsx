@@ -30,7 +30,7 @@ export default function CustomerSelect({
     const loadCustomers = async () => {
       try {
         setLoading(true);
-        const res = await getAllCustomers();
+        const res = await getAllCustomers(1,100);
         if (res?.status_code !== 200) return;
 
         setCustomers(

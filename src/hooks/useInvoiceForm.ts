@@ -3,6 +3,8 @@ import { getCustomerByCustomerCode } from "../api/customerApi";
 import { getCompanyById } from "../api/companySetupApi";
 import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
+import { getCountryList } from "../api/lookupApi";
+
 import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
@@ -76,6 +78,21 @@ export const useInvoiceForm = (
     }
   };
 
+  const getCountryCode = (
+    countries: { code: string; name: string }[],
+    countryName?: string
+  ): string => {
+    if (!countryName) return "";
+
+    const normalized = countryName.trim().toUpperCase();
+
+    return (
+      countries.find((c) => c.name === normalized)?.code ??
+      countries.find((c) => normalized.includes(c.name))?.code ??
+      ""
+    );
+  };
+
   const handleCustomerSelect = async ({
     name,
     id,
@@ -87,57 +104,73 @@ export const useInvoiceForm = (
     setFormData((p) => ({ ...p, customerId: id }));
 
     try {
-      const response = await getCustomerByCustomerCode(id);
-      const companyDetails = await getCompanyById("COMP-00003");
-      if (!response || response.status_code !== 200) return;
+      const [customerRes, companyRes] = await Promise.all([
+        getCustomerByCustomerCode(id),
+        getCompanyById("COMP-00003"),
+      ]);
 
-      const data = response.data;
+      if (!customerRes || customerRes.status_code !== 200) return;
+
+      const data = customerRes.data;
+      const company = companyRes?.data;
+
+      const countryLookupList = await getCountryList();
+
+      const countryCode = getCountryCode(
+        countryLookupList,
+        data.billingCountry
+      );
+
       setCustomerDetails(data);
 
+      const billing = {
+        line1: data.billingAddressLine1 ?? "",
+        line2: data.billingAddressLine2 ?? "",
+        postalCode: data.billingPostalCode ?? "",
+        city: data.billingCity ?? "",
+        state: data.billingState ?? "",
+        country: data.billingCountry ?? "",
+      };
+
+      const shippingFromCustomer = {
+        line1: data.shippingAddressLine1 ?? "",
+        line2: data.shippingAddressLine2 ?? "",
+        postalCode: data.shippingPostalCode ?? "",
+        city: data.shippingCity ?? "",
+        state: data.shippingState ?? "",
+        country: data.shippingCountry ?? "",
+      };
+
+      const paymentInformation = {
+        paymentTerms: company?.terms?.selling?.payment?.dueDates ?? "",
+        paymentMethod: "01",
+        bankName: company?.bankAccounts?.[0]?.bankName ?? "",
+        accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
+        routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
+        swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
+      };
+
       setFormData((prev) => {
-        const billing = {
-          line1: data.billingAddressLine1 ?? "",
-          line2: data.billingAddressLine2 ?? "",
-          postalCode: data.billingPostalCode ?? "",
-          city: data.billingCity ?? "",
-          state: data.billingState ?? "",
-          country: data.billingCountry ?? "",
-        };
-
-        const paymentInformation = {
-          paymentTerms:
-            companyDetails.data.terms.selling.payment.dueDates ?? "",
-          paymentMethod: "01",
-          bankName: companyDetails.data.bankAccounts[0].bankName ?? "",
-          accountNumber: companyDetails.data.bankAccounts[0].accountNo ?? "",
-          routingNumber: companyDetails.data.bankAccounts[0].sortCode ?? "",
-          swiftCode: companyDetails.data.bankAccounts[0].swiftCode ?? "",
-        };
-
         let shipping = prev.shippingAddress;
+
         if (sameAsBilling) {
           shipping = { ...billing };
         } else if (!shippingEditedRef.current) {
-          shipping = {
-            line1: data.shippingAddressLine1 ?? "",
-            line2: data.shippingAddressLine2 ?? "",
-            postalCode: data.shippingPostalCode ?? "",
-            city: data.shippingCity ?? "",
-            state: data.shippingState ?? "",
-            country: data.shippingCountry ?? "",
-          };
+          shipping = shippingFromCustomer;
         }
 
         return {
           ...prev,
+          destnCountryCd: countryCode,
+          invoiceType: data.customerTaxCategory,
           billingAddress: billing,
-          paymentInformation: paymentInformation,
           shippingAddress: shipping,
-          terms: { selling: data.terms.selling },
+          paymentInformation,
+          terms: { selling: data.terms?.selling },
         };
       });
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load customer data", err);
     }
   };
 
@@ -243,8 +276,8 @@ export const useInvoiceForm = (
       setIsShippingOpen,
       sameAsBilling,
       itemCount: formData.items.length,
-      isExport: formData.invoiceType === "Export",
-      isLocal: formData.invoiceType === "LPO",
+      isExport: formData.invoiceType === "export",
+      isLocal: formData.invoiceType === "lpo",
     },
     actions: {
       handleInputChange,
