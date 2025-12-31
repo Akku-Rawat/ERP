@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { X, Upload, User } from "lucide-react";
+import SSNSearchStep from "./SSNSearch";
+import { useEffect } from "react";
+
+
 
 type AddEmployeeModalProps = {
   isOpen: boolean;
@@ -12,6 +16,20 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   onClose,
   departments,
 }) => {
+
+  useEffect(() => {
+  if (isOpen) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [isOpen]);
+
+   const [step, setStep] = useState<"search" | "form">("search");
   const [activeTab, setActiveTab] = useState("Work");
   const [formData, setFormData] = useState({
     name: "",
@@ -176,6 +194,8 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
         </div>
 
         {/* Content Area */}
+
+
         <div className="flex-1 overflow-y-auto bg-gray-50">
           {activeTab === "Work" && (
             <div className="px-8 py-6">
@@ -901,16 +921,59 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
             </div>
           )}
 
-          {!["Work", "Payroll", "Salary Adjustments", "Personal"].includes(
-            activeTab,
-          ) && (
-            <div className="px-8 py-16 text-center">
-              <p className="text-gray-500">
-                {activeTab} content will appear here
-              </p>
-            </div>
-          )}
+                   {activeTab === "Resume" && (
+  <div className="px-8 py-6">
+    <div className="bg-white rounded-sm border border-gray-200 p-8 text-center">
+      <div className="mb-6">
+        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Upload className="w-8 h-8 text-gray-400" />
         </div>
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">
+          Upload Resume
+        </h3>
+        <p className="text-xs text-gray-500 mb-4">
+          Upload employee resume or CV (PDF, DOC, DOCX)
+        </p>
+        <button className="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 transition">
+          Choose File
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{activeTab === "Certifications" && (
+  <div className="px-8 py-6">
+    <div className="bg-white rounded-sm border border-gray-200 overflow-hidden">
+      <div className="grid grid-cols-4 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600">
+        <div>Certification Name</div>
+        <div>Issuing Organization</div>
+        <div>Issue Date</div>
+        <div>Expiry Date</div>
+      </div>
+      <div className="p-12 text-center">
+        <p className="text-gray-400 text-sm mb-4">
+          No certifications added yet
+        </p>
+        <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 mx-auto">
+          <Upload className="w-4 h-4" />
+          Add Certification
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{activeTab === "Settings" && (
+  <div className="px-8 py-16 text-center">
+    <p className="text-gray-500">
+      Settings content will appear here
+    </p>
+  </div>
+)}
+  </div>
+         
+
 
         {/* Bottom Action Bar */}
         <div className="border-t border-gray-200 bg-white px-8 py-4 flex justify-between items-center">
@@ -930,8 +993,28 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
           </div>
         </div>
       </div>
+      
+  {step === "search" && (
+      <SSNSearchStep
+        onSSNFound={(employeeData) => {
+          setFormData({
+            ...formData,
+            name: employeeData.name || "",
+            email: employeeData.email || "",
+            phone: employeeData.phone || "",
+            mobile: employeeData.mobile || "",
+            department: employeeData.department || "",
+            jobPosition: employeeData.jobPosition || "",
+            jobTitle: employeeData.jobTitle || "",
+            workAddress: employeeData.workAddress || "",
+          });
+          setStep("form");
+        }}
+        onCreateManually={() => setStep("form")}
+      />
+    )}
     </div>
-  );
+);
 };
 
 export default AddEmployeeModal;
