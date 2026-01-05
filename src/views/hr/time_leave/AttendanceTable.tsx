@@ -1,6 +1,6 @@
 // src/components/Hr/Attendance/AttendanceTable.tsx
 import React, { useState, useEffect } from "react";
-import { Table } from "../../../components/UI/Table/Table";
+import { Table } from "../../../components/ui/Table/Table";
 import { format } from "date-fns";
 import { StatusBadge } from "../../ui/StatusBadge";
 import { ActionButton } from "../../ui/FormComponents";

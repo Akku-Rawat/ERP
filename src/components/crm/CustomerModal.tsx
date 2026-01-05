@@ -1,8 +1,8 @@
 // components/modals/CustomerModal.tsx
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Modal from "../UI/modal/modal";
-import { Input, Select, Card, Button, Checkbox } from "../UI/modal/formComponent";
+import Modal from "../ui/modal/modal";
+import { Input, Select, Card, Button, Checkbox } from "../ui/modal/formComponent";
 import TermsAndCondition from "../../views/termandcondition";
 import type { TermSection } from "../../types/termsAndCondition";
 import { 

@@ -1,7 +1,7 @@
 // components/modals/TicketModal.tsx
 import React, { useEffect, useState } from "react";
-import Modal from "../UI/modal/modal";
-import { Input, Select, Textarea, Card, Button } from "../UI/modal/formComponent";
+import Modal from "../ui/modal/modal";
+import { Input, Select, Textarea, Card, Button } from "../ui/modal/formComponent";
 import { Ticket as TicketIcon, FileText, Check } from "lucide-react";
 
 export interface TicketModalProps {

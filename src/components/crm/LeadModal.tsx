@@ -1,8 +1,8 @@
 // src/components/modals/LeadModal.tsx
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Modal from "../../components/UI/modal/modal";
-import { Input, Card, Button, Textarea } from "../../components/UI/modal/formComponent";
+import Modal from "../../components/ui/modal/modal";
+import { Input, Card, Button, Textarea } from "../../components/ui/modal/formComponent";
 import { 
   User, 
   Building2, 

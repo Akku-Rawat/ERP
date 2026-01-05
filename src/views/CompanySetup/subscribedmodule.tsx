@@ -20,8 +20,8 @@ import {
 } from "react-icons/fa";
 
 // Import your reusable Table component
-import Table from "../../components/UI/Table/Table";
-import type { Column } from "../UI/Table/type"; // Adjust path
+import Table from "../../components/ui/Table/Table";
+import type { Column } from "../ui/Table/type"; // Adjust path
 
 // ---------- Types ----------
 type Tier = "Free" | "Pro" | "Enterprise";

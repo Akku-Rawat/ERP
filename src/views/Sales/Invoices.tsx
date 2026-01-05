@@ -9,15 +9,15 @@ import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTem
 import PdfPreviewModal from "./PdfPreviewModal";
 import toast from "react-hot-toast";
 
-import Table from "../../components/UI/Table/Table";
+import Table from "../../components/ui/Table/Table";
 
 import ActionButton, {
   ActionGroup,
   ActionMenu,
-} from "../../components/UI/Table/ActionButton";
+} from "../../components/ui/Table/ActionButton";
 
-import type { Column } from "../../components/UI/Table/type";
-import StatusBadge from "../../components/UI/Table/StatusBadge";
+import type { Column } from "../../components/ui/Table/type";
+import StatusBadge from "../../components/ui/Table/StatusBadge";
 import { Row } from "jspdf-autotable";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { Company } from "../../types/company";

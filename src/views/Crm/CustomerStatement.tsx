@@ -3,7 +3,7 @@ import {
   Calendar, Search, Download, Printer, 
   ArrowUpRight, ArrowDownLeft, Wallet, FileText
 } from "lucide-react";
-import Table from "../../components/UI/Table/Table";
+import Table from "../../components/ui/Table/Table";
 
 const CustomerStatement = () => {
   const statementData = useMemo(() => [

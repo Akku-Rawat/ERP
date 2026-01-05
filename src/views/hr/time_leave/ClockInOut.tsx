@@ -1,7 +1,7 @@
 // src/components/Hr/Attendance/ClockInOut.tsx
 import React, { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
-import { Button } from "../../../components/UI/modal/formComponent";
+import { Button } from "../../../components/ui/modal/formComponent";
 // import { useToast } from "../../hooks/use-toast"; // if you have a toast hook
 
 interface ClockInOutProps {
