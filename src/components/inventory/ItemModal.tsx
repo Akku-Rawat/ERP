@@ -6,6 +6,7 @@ import { updateItemByItemCode, createItem } from "../../api/itemApi";
 import ItemCategorySelect from "../selects/ItemCategorySelect";
 import { getItemGroupById } from "../../api/itemCategoryApi";
 import ItemGenericSelect from "../selects/ItemGenericSelect";
+import ItemTreeSelect from "../selects/ItemTreeSelect";
 import {
   getPackagingUnits,
   getCountries,
@@ -28,6 +29,7 @@ const emptyForm: Record<string, any> = {
   ins: "Y",
   sellingPrice: 0,
   buyingPrice: 0,
+  taxCategory: "non-export", // default value
 
   unitOfMeasureCd: "Nos",
   hsnSacUnspc: "",
@@ -199,7 +201,7 @@ const ItemModal: React.FC<{
   const handleForm = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    >
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -296,8 +298,14 @@ const ItemModal: React.FC<{
                             className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                             required
                           >
-                            <option value="Goods">Goods</option>
-                            <option value="Service">Service</option>
+                            <option value="Raw Material">Raw Material</option>
+
+                            <option value="Finished Product">
+                              Finished Product
+                            </option>
+                            <option value="Service">
+                              Service without stock{" "}
+                            </option>
                           </select>
                         </label>
                         {/* <Input
@@ -332,6 +340,14 @@ const ItemModal: React.FC<{
                           onChange={handleForm}
                           className="w-full col-span-3"
                         />
+                        <ItemTreeSelect
+                          label="Item Class"
+                          value={form.itemClassCode}
+                          fetchData={getItemClasses}
+                          onChange={({ id }) =>
+                            setForm((p) => ({ ...p, itemClassCode: id }))
+                          }
+                        />
 
                         {/* <Input
                           label="Item Class Code"
@@ -350,14 +366,14 @@ const ItemModal: React.FC<{
     setForm(p => ({ ...p, itemClassCode: id }));
   }}
 /> */}
-                        <ItemGenericSelect
+                        {/* <ItemGenericSelect
                           label="Item Class"
                           value={form.itemClassCode}
                           fetchData={getItemClasses}
                           onChange={({ id }) =>
                             setForm((p) => ({ ...p, itemClassCode: id }))
                           }
-                        />
+                        /> */}
                         {/* <Input
                           label="Item Packaging Code "
                           name="custom_pkgunitcd"
@@ -392,13 +408,13 @@ const ItemModal: React.FC<{
                             setForm((p) => ({ ...p, packagingUnitCode: id }))
                           }
                         />
-                        <Input
+                        {/* <Input
                           label="Item Type Code"
                           name="itemTypeCode"
                           value={form.itemTypeCode || ""}
                           onChange={handleForm}
                           className="w-full col-span-3"
-                        />
+                        /> */}
                         {/* <Input
                           label="Country Code"
                           name="custom_orgnnatcd"
@@ -449,16 +465,17 @@ const ItemModal: React.FC<{
   }}
 /> */}
                         <ItemGenericSelect
-                          label="UOM"
+                          label="Unit of Measurement  "
                           value={form.unitOfMeasureCd}
                           fetchData={getUOMs}
                           onChange={({ id }) =>
                             setForm((p) => ({ ...p, unitOfMeasureCd: id }))
                           }
                         />
+
                         <label className="flex flex-col gap-1 text-sm">
                           <span className="font-medium text-gray-600">
-                            SVC Charge
+                            Service Charge
                           </span>
                           <select
                             name="svcCharge"
@@ -472,7 +489,7 @@ const ItemModal: React.FC<{
                           </select>
                         </label>
                         <label className="flex flex-col gap-1 text-sm">
-                          <span className="font-medium text-gray-600">INS</span>
+                          <span className="font-medium text-gray-600">INSURANCE</span>
                           <select
                             name="ins"
                             value={form.ins || ""}
@@ -548,257 +565,236 @@ const ItemModal: React.FC<{
 
                 {activeTab === "taxDetails" && (
                   <>
-                    {/* Non-Export Table */}
-                    <div className="mb-10">
-                      <h4 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                        Non-Export
-                      </h4>
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full border border-gray-300 text-sm">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              <th className="border px-4 py-2 text-center">
-                                Tax
-                              </th>
-                              <th className="border px-4 py-2 text-center">
-                                Code
-                              </th>
-                              <th className="border px-4 py-2 text-center">
-                                Name
-                              </th>
-                              <th className="border px-6 py-2 text-center">
-                                Description
-                              </th>
-                              <th className="border px-4 py-2 text-center">
-                                Tax %
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="nonExportTax"
-                                  value={form.nonExportTax || ""}
-                                  onChange={handleForm}
-                                  className="w-full px-2 py-1.5 border rounded text-xs"
-                                  placeholder="e.g. VAT"
-                                />
-                              </td>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="nonExportCode"
-                                  value={form.nonExportCode || ""}
-                                  onChange={handleForm}
-                                  className="w-full px-2 py-1.5 border rounded text-xs"
-                                  placeholder="V001"
-                                />
-                              </td>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="nonExportName"
-                                  value={form.nonExportName || ""}
-                                  onChange={handleForm}
-                                  className="w-full px-2 py-1.5 border rounded text-xs"
-                                  placeholder="Standard VAT"
-                                />
-                              </td>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="nonExportDescription"
-                                  value={form.nonExportDescription || ""}
-                                  onChange={handleForm}
-                                  className="w-full px-2 py-1.5 border rounded text-xs"
-                                  placeholder="12% VAT on non-export"
-                                />
-                              </td>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="nonExportTaxPerct"
-                                  value={form.nonExportTaxPerct || ""}
-                                  onChange={handleForm}
-                                  className="w-20 px-2 py-1.5 border rounded text-xs text-right"
-                                  placeholder="12"
-                                />
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
+                    {/* Tax Category Selector */}
+                    <div className="mb-8">
+                      <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Tax Category
+                      </label>
+                      <select
+                        name="taxCategory"
+                        value={form.taxCategory || "non-export"}
+                        onChange={handleForm}
+                        className="w-full md:w-96 px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      >
+                        <option value="non-export">Non-Export (Default)</option>
+                        <option value="export">Export</option>
+                        <option value="local-purchase">
+                          Local Purchase Order
+                        </option>
+                      </select>
+
+                      <p className="mt-2 text-sm text-gray-600">
+                        {form.taxCategory === "non-export" &&
+                          "Standard tax rates for domestic sales"}
+                        {form.taxCategory === "export" &&
+                          "Zero-rated or exempt tax for international sales"}
+                        {form.taxCategory === "local-purchase" &&
+                          "Tax rates applicable to local purchases"}
+                      </p>
                     </div>
 
-                    {/* Export Table */}
-                    <div className="mb-10">
-                      <h4 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                        Export
-                      </h4>
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full border border-gray-300 text-sm">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              <th className="border px-4 py-2 text-center">
-                                Tax
-                              </th>
-                              <th className="border px-4 py-2 text-center">
-                                Code
-                              </th>
-                              <th className="border px-4 py-2 text-center">
-                                Name
-                              </th>
-                              <th className="border px-6 py-2 text-center">
-                                Description
-                              </th>
-                              <th className="border px-4 py-2 text-center">
-                                Tax %
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="exportTax"
-                                  value={form.exportTax || ""}
-                                  onChange={handleForm}
-                                  className="w-full px-2 py-1.5 border rounded text-xs"
-                                  placeholder="Zero Rated"
-                                />
-                              </td>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="exportCode"
-                                  value={form.exportCode || ""}
-                                  onChange={handleForm}
-                                  className="w-full px-2 py-1.5 border rounded text-xs"
-                                  placeholder="ZR01"
-                                />
-                              </td>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="exportName"
-                                  value={form.exportName || ""}
-                                  onChange={handleForm}
-                                  className="w-full px-2 py-1.5 border rounded text-xs"
-                                  placeholder="Zero Rated Export"
-                                />
-                              </td>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="exportDescription"
-                                  value={form.exportDescription || ""}
-                                  onChange={handleForm}
-                                  className="w-full px-2 py-1.5 border rounded text-xs"
-                                  placeholder="0% on exports"
-                                />
-                              </td>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="exportTaxPerct"
-                                  value={form.exportTaxPerct || ""}
-                                  onChange={handleForm}
-                                  className="w-20 px-2 py-1.5 border rounded text-xs text-right"
-                                  placeholder="0"
-                                />
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
+                    {/* Dynamic Tax Form based on selected category */}
+                    <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                        <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
+                        {form.taxCategory === "non-export" &&
+                          "Non-Export Tax Details"}
+                        {form.taxCategory === "export" && "Export Tax Details"}
+                        {form.taxCategory === "local-purchase" &&
+                          "Local Purchase Order Tax Details"}
+                      </h3>
+
+                      {/* Non-Export Fields */}
+                      {form.taxCategory === "non-export" && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          <Input
+                            label="Tax Type"
+                            name="nonExportTax"
+                            value={form.nonExportTax || ""}
+                            onChange={handleForm}
+                            placeholder="e.g. VAT"
+                            className="w-full"
+                          />
+                          <Input
+                            label="Tax Code"
+                            name="nonExportCode"
+                            value={form.nonExportCode || ""}
+                            onChange={handleForm}
+                            placeholder="V001"
+                            className="w-full"
+                          />
+                          <Input
+                            label="Tax Name"
+                            name="nonExportName"
+                            value={form.nonExportName || ""}
+                            onChange={handleForm}
+                            placeholder="Standard VAT"
+                            className="w-full"
+                          />
+                          <div className="md:col-span-2">
+                            <Input
+                              label="Description"
+                              name="nonExportDescription"
+                              value={form.nonExportDescription || ""}
+                              onChange={handleForm}
+                              placeholder="12% VAT on non-export"
+                              className="w-full"
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <label className="text-sm font-medium text-gray-600">
+                              Tax Percentage (%)
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="number"
+                                step="0.01"
+                                name="nonExportTaxPerct"
+                                value={form.nonExportTaxPerct || ""}
+                                onChange={handleForm}
+                                placeholder="12"
+                                className="w-full px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                              />
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                                %
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Export Fields */}
+                      {form.taxCategory === "export" && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          <Input
+                            label="Tax Type"
+                            name="exportTax"
+                            value={form.exportTax || ""}
+                            onChange={handleForm}
+                            placeholder="Zero Rated"
+                            className="w-full"
+                          />
+                          <Input
+                            label="Tax Code"
+                            name="exportCode"
+                            value={form.exportCode || ""}
+                            onChange={handleForm}
+                            placeholder="ZR01"
+                            className="w-full"
+                          />
+                          <Input
+                            label="Tax Name"
+                            name="exportName"
+                            value={form.exportName || ""}
+                            onChange={handleForm}
+                            placeholder="Zero Rated Export"
+                            className="w-full"
+                          />
+                          <div className="md:col-span-2">
+                            <Input
+                              label="Description"
+                              name="exportDescription"
+                              value={form.exportDescription || ""}
+                              onChange={handleForm}
+                              placeholder="0% on exports"
+                              className="w-full"
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <label className="text-sm font-medium text-gray-600">
+                              Tax Percentage (%)
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="number"
+                                step="0.01"
+                                name="exportTaxPerct"
+                                value={form.exportTaxPerct || ""}
+                                onChange={handleForm}
+                                placeholder="0"
+                                className="w-full px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                              />
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                                %
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Local Purchase Fields */}
+                      {form.taxCategory === "local-purchase" && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          <Input
+                            label="Tax Type"
+                            name="localPurchaseOrderTax"
+                            value={form.localPurchaseOrderTax || ""}
+                            onChange={handleForm}
+                            placeholder="Local VAT"
+                            className="w-full"
+                          />
+                          <Input
+                            label="Tax Code"
+                            name="localPurchaseOrderCode"
+                            value={form.localPurchaseOrderCode || ""}
+                            onChange={handleForm}
+                            placeholder="LV05"
+                            className="w-full"
+                          />
+                          <Input
+                            label="Tax Name"
+                            name="localPurchaseOrderName"
+                            value={form.localPurchaseOrderName || ""}
+                            onChange={handleForm}
+                            placeholder="Local Purchase VAT"
+                            className="w-full"
+                          />
+                          <div className="md:col-span-2">
+                            <Input
+                              label="Description"
+                              name="localPurchaseOrderDescription"
+                              value={form.localPurchaseOrderDescription || ""}
+                              onChange={handleForm}
+                              placeholder="5% on local purchases"
+                              className="w-full"
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <label className="text-sm font-medium text-gray-600">
+                              Tax Percentage (%)
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="number"
+                                step="0.01"
+                                name="localPurchaseOrderPerct"
+                                value={form.localPurchaseOrderPerct || ""}
+                                onChange={handleForm}
+                                placeholder="5"
+                                className="w-full px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                              />
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                                %
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Local Purchase Order Table */}
-                    <div className="mb-6">
-                      <h4 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                        Local Purchase Order
+                    {/* Summary Card */}
+                    <div className="mt-6 bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                      <h4 className="text-sm font-semibold text-indigo-900 mb-2">
+                        Current Configuration
                       </h4>
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full border border-gray-300 text-sm">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              <th className="border px-4 py-2 text-center">
-                                Tax
-                              </th>
-                              <th className="border px-4 py-2 text-center">
-                                Code
-                              </th>
-                              <th className="border px-4 py-2 text-center">
-                                Name
-                              </th>
-                              <th className="border px-6 py-2 text-center">
-                                Description
-                              </th>
-                              <th className="border px-4 py-2 text-center">
-                                Tax %
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="localPurchaseOrderTax"
-                                  value={form.localPurchaseOrderTax || ""}
-                                  onChange={handleForm}
-                                  className="w-full px-2 py-1.5 border rounded text-xs"
-                                  placeholder="Local VAT"
-                                />
-                              </td>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="localPurchaseOrderCode"
-                                  value={form.localPurchaseOrderCode || ""}
-                                  onChange={handleForm}
-                                  className="w-full px-2 py-1.5 border rounded text-xs"
-                                  placeholder="LV05"
-                                />
-                              </td>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="localPurchaseOrderName"
-                                  value={form.localPurchaseOrderName || ""}
-                                  onChange={handleForm}
-                                  className="w-full px-2 py-1.5 border rounded text-xs"
-                                  placeholder="Local Purchase VAT"
-                                />
-                              </td>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="localPurchaseOrderDescription"
-                                  value={
-                                    form.localPurchaseOrderDescription || ""
-                                  }
-                                  onChange={handleForm}
-                                  className="w-full px-2 py-1.5 border rounded text-xs"
-                                  placeholder="5% on local purchases"
-                                />
-                              </td>
-                              <td className="border px-2 py-1">
-                                <input
-                                  type="text"
-                                  name="localPurchaseOrderPerct"
-                                  value={form.localPurchaseOrderPerct || ""}
-                                  onChange={handleForm}
-                                  className="w-20 px-2 py-1.5 border rounded text-xs text-right"
-                                  placeholder="5"
-                                />
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                      <div className="text-sm text-indigo-800">
+                        <p>
+                          <span className="font-medium">Category:</span>{" "}
+                          {form.taxCategory === "non-export" && "Non-Export"}
+                          {form.taxCategory === "export" && "Export"}
+                          {form.taxCategory === "local-purchase" &&
+                            "Local Purchase Order"}
+                        </p>
                       </div>
                     </div>
                   </>

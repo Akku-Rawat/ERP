@@ -1,10 +1,15 @@
 import React, { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Trash2 } from "lucide-react";
+import { FileText, Package, MapPin } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 
 import CustomerSelect from "../selects/CustomerSelect";
 import CountrySelect from "../selects/CountrySelect";
+import Modal from "../ui/modal/modal";
+import { Input as FormInput, Select as FormSelect, Button, Card } from "../ui/modal/formComponent";
+
+
 import ItemSelect from "../selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
@@ -29,6 +34,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   onClose,
   onSubmit,
 }) => {
+  if (!isOpen) return null;
   const {
     formData,
     customerDetails,
@@ -39,9 +45,29 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     actions,
   } = useInvoiceForm(isOpen, onClose, onSubmit);
 
-  if (!isOpen) return null;
+  
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
+  const handleFormSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  actions.handleSubmit(e);
+};
+
+const footerContent = (
+  <>
+    <Button variant="secondary" onClick={onClose} type="button">
+      Cancel
+    </Button>
+    <div className="flex gap-2">
+      <Button variant="ghost" onClick={actions.handleReset} type="button">
+        Reset
+      </Button>
+      <Button variant="primary" onClick={handleFormSubmit}>
+        Save Invoice
+      </Button>
+    </div>
+  </>
+);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
@@ -68,7 +94,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               >
                 <X className="w-5 h-5 text-gray-600" />
               </button>
-            </header>
+            </header> 
 
             {/* Tabs */}
             <div className="flex border-b bg-gray-50">
@@ -692,7 +718,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               )}
             </section>
 
-            <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
+            {/* <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
               <button
                 type="button"
                 onClick={onClose}
@@ -715,7 +741,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   Save Invoice
                 </button>
               </div>
-            </footer>
+            </footer> */}
           </form>
         </motion.div>
       </AnimatePresence>
