@@ -4,12 +4,14 @@ type EmploymentTabProps = {
   formData: any;
   handleInputChange: (field: string, value: string | boolean) => void;
   departments: string[];
+  Level:string[];
 };
 
 const EmploymentTab: React.FC<EmploymentTabProps> = ({
   formData,
   handleInputChange,
   departments,
+  Level,
 }) => {
   return (
     <div className="w-full max-w-5xl mx-auto space-y-5">
@@ -47,6 +49,24 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               ))}
             </select>
           </div>
+           <div>
+  <label className="block text-xs text-gray-600 mb-1 font-medium">
+    Level *
+  </label>
+  <select
+    value={formData.level}
+    onChange={(e) => handleInputChange("level", e.target.value)}
+    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+  >
+    <option value="">Select Level</option>
+    {Level.map((lvl) => (
+      <option key={lvl} value={lvl}>
+        {lvl}
+      </option>
+    ))}
+  </select>
+</div>
+
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
               Job Title *

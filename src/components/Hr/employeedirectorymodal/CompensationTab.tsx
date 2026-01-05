@@ -1,51 +1,29 @@
-// CompensationTab.tsx - UPDATED TO USE HR SETTINGS
+// CompensationTab.tsx - SYNCED VERSION
 import React, { useState, useEffect } from "react";
-import { DollarSign, Info } from "lucide-react";
+import { Info, AlertTriangle } from "lucide-react";
+import { getActiveSalaryStructures, calculateSalaryBreakdown } from "../../../views/hr/tabs/salarystructure";
 
 type CompensationTabProps = {
   formData: any;
   handleInputChange: (field: string, value: string | boolean | any) => void;
 };
 
-// Mock data - Replace with API call
-const SALARY_STRUCTURES = [
-  { 
-    id: "exec", 
-    name: "Executive Level",
-    components: [
-      { name: "Basic Salary", type: "percentage", value: 60 },
-      { name: "House Allowance", type: "percentage", value: 20 },
-      { name: "Transport", type: "percentage", value: 15 },
-      { name: "Medical", type: "fixed", value: 500 }
-    ]
-  },
-  { 
-    id: "mid", 
-    name: "Mid-Level Staff",
-    components: [
-      { name: "Basic Salary", type: "percentage", value: 65 },
-      { name: "House Allowance", type: "percentage", value: 18 },
-      { name: "Medical", type: "fixed", value: 300 }
-    ]
-  },
-  { 
-    id: "entry", 
-    name: "Entry Level",
-    components: [
-      { name: "Basic Salary", type: "percentage", value: 70 },
-      { name: "House Allowance", type: "percentage", value: 15 },
-      { name: "Transport", type: "fixed", value: 200 }
-    ]
-  }
-];
-
 const CompensationTab: React.FC<CompensationTabProps> = ({
+  
   formData,
   handleInputChange,
 }) => {
   const [selectedStructure, setSelectedStructure] = useState(formData.salaryStructure || "");
   const [grossSalary, setGrossSalary] = useState(formData.grossSalaryStarting || "");
   const [breakdown, setBreakdown] = useState<any[]>([]);
+  const [structures, setStructures] = useState(getActiveSalaryStructures());
+  // 🔁 SYNC selectedStructure with formData.salaryStructure
+useEffect(() => {
+  if (formData.salaryStructure && formData.salaryStructure !== selectedStructure) {
+    setSelectedStructure(formData.salaryStructure);
+  }
+}, [formData.salaryStructure]);
+
 
   // Calculate breakdown when structure or gross changes
   useEffect(() => {
@@ -54,18 +32,9 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
       return;
     }
 
-    const structure = SALARY_STRUCTURES.find(s => s.id === selectedStructure);
-    if (!structure) return;
-
     const gross = parseFloat(grossSalary) || 0;
-    const calculated = structure.components.map(comp => {
-      if (comp.type === "percentage") {
-        return { ...comp, amount: (gross * comp.value) / 100 };
-      } else {
-        return { ...comp, amount: comp.value };
-      }
-    });
-
+    const calculated = calculateSalaryBreakdown(selectedStructure, gross);
+    
     setBreakdown(calculated);
     
     // Update formData
@@ -75,6 +44,12 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
   }, [selectedStructure, grossSalary]);
 
   const totalCalculated = breakdown.reduce((sum, item) => sum + item.amount, 0);
+  const selectedStructureData = structures.find(s => s.id === selectedStructure);
+  useEffect(() => {
+  if (formData.salaryStructure && formData.salaryStructure !== selectedStructure) {
+    setSelectedStructure(formData.salaryStructure);
+  }
+}, [formData.salaryStructure]);
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-5">
@@ -89,67 +64,107 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               <Info className="w-4 h-4 text-gray-400" />
             </div>
 
-            <div>
-              <label className="block text-xs text-gray-600 mb-2 font-medium">
-                Select Structure *
-              </label>
-              <select
-                value={selectedStructure}
-                onChange={(e) => setSelectedStructure(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              >
-                <option value="">Choose salary structure...</option>
-                {SALARY_STRUCTURES.map(struct => (
-                  <option key={struct.id} value={struct.id}>
-                    {struct.name}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">
-                ⚙️ Managed in HR Settings → Salary Structure
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-xs text-gray-600 mb-2 font-medium">
-                Annual Gross Salary (ZMW) *
-              </label>
-              <input
-                type="number"
-                value={grossSalary}
-                onChange={(e) => setGrossSalary(e.target.value)}
-                placeholder="e.g., 120000"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Monthly: ZMW {(parseFloat(grossSalary || "0") / 12).toLocaleString()}
-              </p>
-            </div>
-
-            {/* Preview */}
-            {breakdown.length > 0 && (
-              <div className="border-t pt-4 mt-4">
-                <p className="text-xs font-semibold text-gray-700 mb-3">Component Breakdown:</p>
-                <div className="space-y-2">
-                  {breakdown.map((item, idx) => (
-                    <div key={idx} className="flex justify-between text-xs">
-                      <span className="text-gray-600">
-                        {item.name} 
-                        {item.type === "percentage" && ` (${item.value}%)`}
-                      </span>
-                      <span className="font-medium">
-                        ZMW {item.amount.toLocaleString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-between text-sm font-semibold pt-2 mt-2 border-t">
-                  <span>Total</span>
-                  <span className="text-purple-600">
-                    ZMW {totalCalculated.toLocaleString()}
-                  </span>
+            {structures.length === 0 ? (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-800">No Active Structures</p>
+                    <p className="text-xs text-amber-700 mt-1">
+                      Please create salary structures in HR Settings first.
+                    </p>
+                  </div>
                 </div>
               </div>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-2 font-medium">
+                    Select Structure *
+                  </label>
+                  <select
+                    value={selectedStructure}
+                   onChange={(e) => {
+  setSelectedStructure(e.target.value);
+  handleInputChange("salaryStructure", e.target.value);
+  handleInputChange("salaryStructureSource", "MANUAL");
+}}
+
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    <option value="">Choose salary structure...</option>
+                    {structures.map(struct => (
+                      <option key={struct.id} value={struct.id}>
+                        {struct.name}
+                      </option>
+                    ))}
+                  </select>
+                
+                </div>
+
+                {selectedStructureData && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs text-blue-800 mb-1">
+                      <strong>{selectedStructureData.name}</strong>
+                    </p>
+                    <p className="text-xs text-blue-700">
+                      {selectedStructureData.description}
+                    </p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      {selectedStructureData.components.length} components • 
+                      Used by {selectedStructureData.usedBy} employees
+                    </p>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs text-gray-600 mb-2 font-medium">
+                    Annual Gross Salary (ZMW) *
+                  </label>
+                  <input
+                    type="number"
+                    value={grossSalary}
+                    onChange={(e) => setGrossSalary(e.target.value)}
+                    placeholder="e.g., 120000"
+                    disabled={!selectedStructure}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Monthly: ZMW {(parseFloat(grossSalary || "0") / 12).toLocaleString()}
+                  </p>
+                </div>
+
+                {/* Preview */}
+                {breakdown.length > 0 && (
+                  <div className="border-t pt-4 mt-4">
+                    <p className="text-xs font-semibold text-gray-700 mb-3">Component Breakdown:</p>
+                    <div className="space-y-2">
+                      {breakdown.map((item, idx) => (
+                        <div key={idx} className="flex justify-between text-xs">
+                          <span className="text-gray-600">
+                            {item.component.name}
+                            {item.component.valueType === "percentage" && 
+                              ` (${item.component.value}%)`
+                            }
+                          </span>
+                          <span className={`font-medium ${
+                            item.component.category === "Deduction" ? "text-red-600" : ""
+                          }`}>
+                            {item.component.category === "Deduction" ? "-" : ""}
+                            ZMW {item.amount.toLocaleString()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-between text-sm font-semibold pt-2 mt-2 border-t">
+                      <span>Total Calculated</span>
+                      <span className="text-purple-600">
+                        ZMW {totalCalculated.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

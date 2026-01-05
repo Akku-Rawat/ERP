@@ -14,12 +14,18 @@ import EmploymentTab from "./EmploymentTab";
 import CompensationTab from "./CompensationTab";
 import { LeaveSetupTab } from "./LeaveSetupTab";
 import { WorkScheduleTab } from "./WorkScheduletab";
+import { getSalaryStructureByDesignation} from "../../../views/hr/tabs/salarystructure";
+import { getSalaryStructureByLevel } from "../../../views/hr/tabs/salarystructure";
+import { getLevelsFromHrSettings } from "../../../views/hr/tabs/salarystructure";
+
+
 
 type AddEmployeeModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
   departments: string[];
+  level : string[];
   verifiedData?: any;
 };
 
@@ -49,6 +55,8 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   const [activeTab, setActiveTab] = useState("Personal");
   const [isPreFilled, setIsPreFilled] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
+  const levelsFromHrSettings = getLevelsFromHrSettings();
+
 const addCustomDocument = (payload: { name: string; category: string; file: File }) => {
   const { name, category, file } = payload;
   setDocuments((prev) => ({
@@ -78,6 +86,12 @@ const [customDoc, setCustomDoc] = useState<{
 
 
   const [formData, setFormData] = useState({
+
+  level: "", 
+    salaryStructure: "",
+  salaryStructureSource: "",
+
+
     // Personal
     firstName: "",
     otherNames: "",
@@ -153,7 +167,51 @@ const [customDoc, setCustomDoc] = useState<{
     sunday: "Off",
 
     notes: "",
+    
   });
+
+useEffect(() => {
+  if (!formData.level) return;
+
+  const structureId = getSalaryStructureByLevel(formData.level);
+  if (!structureId) return;
+
+  setFormData((prev) => ({
+    ...prev,
+    salaryStructure: structureId,
+    salaryStructureSource: "AUTO",
+
+    // 👇 IMPORTANT
+    grossSalaryStarting: prev.grossSalaryStarting || "120000"
+  }));
+}, [formData.level]);
+useEffect(() => {
+  if (!formData.jobTitle) return;
+
+  const structureId = getSalaryStructureByDesignation(formData.jobTitle);
+
+  if (!structureId) return;
+
+  setFormData((prev) => ({
+    ...prev,
+    salaryStructure: structureId,        // ✅ string
+    salaryStructureSource: "AUTO",        // ✅ string literal
+  }));
+}, [formData.jobTitle]);
+
+useEffect(() => {
+  if (!formData.level) return;
+
+  const structureId = getSalaryStructureByLevel(formData.level);
+  if (!structureId) return;
+
+  setFormData(prev => ({
+    ...prev,
+    salaryStructure: structureId,
+    salaryStructureSource: "AUTO",
+  }));
+}, [formData.level]);
+
 
   const [salaryComponents, setSalaryComponents] = useState<SalaryComponent[]>([
     { name: "Basic Salary", type: "amount", value: "" },
@@ -266,6 +324,7 @@ const [customDoc, setCustomDoc] = useState<{
     PhoneNumber: formData.phoneNumber,
     JobTitle: formData.jobTitle,
     Department: formData.department,
+    level:formData.level,
     EmployeeType: formData.employeeType,
     EmploymentStatus: formData.employmentStatus,
     AccountType: formData.accountType,
@@ -508,10 +567,11 @@ const [customDoc, setCustomDoc] = useState<{
 
           {activeTab === "Employment" && (
             <EmploymentTab
-              formData={formData}
-              handleInputChange={handleInputChange}
-              departments={departments}
-            />
+  formData={formData}
+  handleInputChange={handleInputChange}
+  departments={departments}
+  Level={levelsFromHrSettings} 
+/>
           )}
 
           {activeTab === "Leave-Setup" && (
@@ -523,14 +583,15 @@ const [customDoc, setCustomDoc] = useState<{
 
           {activeTab === "Compensation & Payroll" && (
             <CompensationTab
-              formData={formData}
-              handleInputChange={handleInputChange}
-              salaryComponents={salaryComponents}
-              setSalaryComponents={setSalaryComponents}
-              addSalaryComponent={addSalaryComponent}
-              removeSalaryComponent={removeSalaryComponent}
-              updateSalaryComponent={updateSalaryComponent}
-            />
+  formData={formData}
+  handleInputChange={handleInputChange}
+  salaryComponents={salaryComponents}
+  setSalaryComponents={setSalaryComponents}
+  addSalaryComponent={addSalaryComponent}
+  removeSalaryComponent={removeSalaryComponent}
+  updateSalaryComponent={updateSalaryComponent}
+/>
+
           )}
 
           {activeTab === "Work Schedule" && (
@@ -540,7 +601,7 @@ const [customDoc, setCustomDoc] = useState<{
             />
           )}
 
-          {activeTab === "Documents" && (
+          {/* {activeTab === "Documents" && (
 <DocumentsTab
   formData={formData}
   handleInputChange={handleInputChange}
@@ -549,7 +610,7 @@ const [customDoc, setCustomDoc] = useState<{
   removeDocument={removeDocument}
   addCustomDocument={addCustomDocument}
 />
-          )}
+          )} */}
         </div>
 
         {/* Footer */}
