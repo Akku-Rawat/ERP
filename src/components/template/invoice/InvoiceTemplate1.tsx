@@ -1,141 +1,176 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { CloudCog } from "lucide-react";
+import { getPaymentMethodLabel } from "../../../constants/invoice.constants";
+import logoImage from '../../../assets/logoipsum.png';
+
+const loadImageFromUrl = async (url: string): Promise<string> => {
+  console.log("Url: ", url);
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Image fetch failed");
+
+  const blob = await res.blob();
+
+  return await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
+};
 
 
-
-
-export const generateInvoicePDF = (
-  invoice: any,  
+export const generateInvoicePDF = async (
+  invoice: any,
+  company: any,
   resultType: "save" | "bloburl" = "save"
 ) => {
-  const data = invoice; 
-  console.log("Generating PDF for invoice:", data);
+  const doc = new jsPDF("p", "mm", "a4");
+  const currency = invoice.currencyCode === "ZMW" ? "ZMW" : "USD";
 
-  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-
- const symbol = data.currency === "INR" ? "₹" : 
-               data.currency === "ZMW" ? "ZK" : "$";
-
-  /* ---------- Header ---------- */
-  doc.setFillColor(37, 99, 235);
-  doc.rect(0, 0, 210, 40, "F");
-
-  doc.setTextColor(255, 255, 255);
+  /* ================= HEADER ================= */
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(24);
-  doc.text("INVOICE", 15, 22);
+  doc.setFontSize(12);
+  doc.text(company.companyName, 15, 15);
 
-  doc.setFontSize(10);
+  doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text(`#${data.invoiceNumber}`, 15, 28);
+  doc.text(`TPIN: ${company.tpin}`, 15, 20);
+  doc.text(`Phone: ${company.contactInfo.companyPhone}`, 15, 24);
+  doc.text(`Email: ${company.contactInfo.companyEmail}`, 15, 28);
+
+  /* ================= LOGO ================= */
+if (company.documents.companyLogoUrl) {
+  try {
+    console.log("company.documents.companyLogoUrl",company.documents.companyLogoUrl);
+    const logoBase64 = await loadImageFromUrl(company.documents.companyLogoUrl);
+    doc.addImage(logoBase64, "JPEG", 150, 10, 30, 10);
+  } catch (e) {
+    console.warn("Logo load failed", e);
+  }
+}
+
+  // doc.addImage(logoImage, "PNG", 150, 10, 30, 10);
 
   doc.setFontSize(14);
-  doc.text("Rolaface Software Pvt Limited", 195, 20, { align: "right" });
+  doc.text("TAX INVOICE", 105, 42, { align: "center" });
+
+  /* ================= BILL TO ================= */
   doc.setFontSize(9);
-  doc.setTextColor(219, 234, 254);
-  doc.text("Your Trusted Technology Partner", 195, 26, { align: "right" });
+  doc.setFont("helvetica", "bold");
+  doc.text("Bill To:", 15, 52);
 
- /* ---------- Addresses ---------- */
-doc.setTextColor(40, 40, 40);
-doc.setFontSize(8);
-doc.setFont("helvetica", "bold");
-doc.text("BILL TO", 15, 55);
-doc.text("SHIP TO", 80, 55);
-
-doc.setFont("helvetica", "normal");
-doc.setTextColor(70, 70, 70);
-
-//  Billing Address
-doc.text(
-  [
-    data.customerName || "",
-    data.billingAddressLine1 || "",
-    `${data.billingCity || ""}, ${data.billingState || ""} ${data.billingPostalCode || ""}`,
-  ].filter(Boolean),
-  15,
-  60
-);
-
-//  Shipping Address - Same pattern
-doc.text(
-  [
-    data.customerName || "",
-    data.shippingAddressLine1 || "",  //  Flat field
-    `${data.shippingCity || ""}, ${data.shippingState || ""} ${data.shippingPostalCode || ""}`,  // ✅ Flat fields
-  ].filter(Boolean),
-  80,
-  60
-);
-  /* ---------- Dates ---------- */
-  doc.setFillColor(249, 250, 251);
-  doc.rect(140, 50, 55, 20, "F");
-  doc.setFontSize(8);
-  doc.text("DATE:", 145, 58);
-  doc.text("DUE DATE:", 145, 65);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    [
+      invoice.customerName,
+      `TPIN: 2484778086`,
+      invoice.billingAddress.line1,
+      invoice.billingAddress.line2,
+    ].filter(Boolean),
+    15,
+    56
+  );
 
   doc.setFont("helvetica", "bold");
-  doc.text(new Date(data.dateOfInvoice).toLocaleDateString(), 190, 58, {
-    align: "right",
-  });
-  doc.setTextColor(220, 38, 38);
-  doc.text(new Date(data.dueDate).toLocaleDateString(), 190, 65, {
-    align: "right",
-  });
+  doc.text(`Invoice No: ${invoice.invoiceNumber}`, 150, 52);
+  doc.text(`Date: ${invoice.dateOfInvoice}`, 150, 56);
+  doc.text(`Due Date: ${invoice.dueDate}`, 150, 60);
 
-  /* ---------- Items Table ---------- */
+  /* ================= ITEMS TABLE ================= */
   autoTable(doc, {
-    startY: 85,
-    head: [["Description", "Qty", "Price", "Amount"]],
-body: data.items.map((i: any) => [
-  i.description || i.productName || "",
-  i.quantity || 0,
-  `${symbol}${((i.listPrice || i.price) || 0).toFixed(2)}`,
-  `${symbol}${((i.quantity * (i.listPrice || i.price)) || 0).toFixed(2)}`,
-]),
+    startY: 80,
+    head: [["#", "Name", "Qty", "Unit Price", "Total (ZMW)", "Tax Cat"]],
+    body: invoice.items.map((i: any, idx: number) => [
+      idx + 1,
+      i.description,
+      i.quantity.toFixed(1),
+      i.price.toFixed(2),
+      (i.quantity * i.price).toFixed(2),
+      i.vatCode,
+    ]),
+    styles: {
+      fontSize: 8,
+      halign: "center",
+    },
     headStyles: {
-      fillColor: [37, 99, 235],
-      textColor: [255, 255, 255],
+      fillColor: [44, 62, 80],
+      textColor: 255,
       fontStyle: "bold",
     },
-    alternateRowStyles: { fillColor: [249, 250, 251] },
     columnStyles: {
-      1: { halign: "center" },
-      2: { halign: "right" },
+      1: { halign: "left" },
       3: { halign: "right" },
+      4: { halign: "right" },
     },
     margin: { left: 15, right: 15 },
   });
 
-  /* ---------- Total ---------- */
-  const finalY = (doc as any).lastAutoTable.finalY + 10;
-const total = data.items.reduce((s: number, i: any) => 
-  s + (i.quantity || 0) * (i.listPrice || i.price || 0), 0
-);
+  const y = (doc as any).lastAutoTable.finalY + 6;
 
-  doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  doc.text("TOTAL", 140, finalY + 8);
+  /* ================= TAX SUMMARY ================= */
+  const total = invoice.items.reduce(
+    (s: number, i: any) => s + i.quantity * i.price,
+    0
+  );
 
-  doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(30, 58, 138);
-  doc.text(`${symbol}${total.toFixed(2)}`, 195, finalY + 8, {
-    align: "right",
-  });
+  doc.text(`Taxable (0%)`, 120, y);
+  doc.text(`${total.toFixed(2)} ZMW`, 195, y, { align: "right" });
 
-  /* ---------- Signature ---------- */
-  doc.setDrawColor(200, 200, 200);
-  doc.line(150, finalY + 35, 190, finalY + 35);
-  doc.setFontSize(8);
-  doc.setTextColor(40, 40, 40);
-  doc.text("Priya Chopra", 170, finalY + 40, { align: "center" });
-  doc.setFontSize(6);
-  doc.text("AUTHORIZED SIGNATORY", 170, finalY + 44, {
+  doc.text("Sub-total", 120, y + 6);
+  doc.text(`${total.toFixed(2)} ZMW`, 195, y + 6, { align: "right" });
+
+  doc.text("VAT Total", 120, y + 12);
+  doc.text(`0.00 ZMW`, 195, y + 12, { align: "right" });
+
+  doc.text("Total Amount", 120, y + 18);
+  doc.text(`${total.toFixed(2)} ZMW`, 195, y + 18, { align: "right" });
+
+  /* ================= SDC INFO ================= */
+  doc.setFont("helvetica", "bold");
+  doc.text("SDC Information", 15, y + 32);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    [
+      `Invoice Date: ${invoice.dateOfInvoice}`,
+      `SDC ID: SDC0010002709`,
+      `Invoice Number: ${invoice.invoiceNumber}`,
+      `Invoice Type: ${invoice.invoiceType}`,
+      `Payment Type: ${getPaymentMethodLabel(
+        invoice.paymentInformation.paymentMethod
+      )}`,
+    ],
+    15,
+    y + 38
+  );
+
+  /* ================= BANK DETAILS ================= */
+  doc.setFont("helvetica", "bold");
+  doc.text("Banking Details", 110, y + 32);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    [
+      `${company.financialConfig.baseCurrency}`,
+      `ACC NO ${invoice.paymentInformation.accountNumber}`,
+      `BANK ${invoice.paymentInformation.bankName}`,
+      `BRANCH CROSSROADS`,
+      `SWIFTCODE ${invoice.paymentInformation.swiftCode}`,
+    ],
+    110,
+    y + 38
+  );
+
+  /* ================= FOOTER ================= */
+  doc.setFontSize(7);
+  doc.setTextColor(120);
+  doc.text("Powered by LoremIpsum Smart Invoice!", 105, 287, {
     align: "center",
   });
+  doc.text("Created By: Lorem Ipsum", 105, 292, { align: "center" });
 
   return resultType === "save"
-    ? doc.save(`Invoice_${data.invoiceNumber}.pdf`)
+    ? doc.save(`Invoice_${invoice.invoiceNumber}.pdf`)
     : doc.output("bloburl");
 };

@@ -1,20 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { getAllSalesInvoices, updateInvoiceStatus, getSalesInvoiceById } from "../../api/salesApi";
+import {
+  getAllSalesInvoices,
+  updateInvoiceStatus,
+  getSalesInvoiceById,
+} from "../../api/salesApi";
 import type { InvoiceSummary, Invoice } from "../../types/invoice";
 import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTemplate1";
 import PdfPreviewModal from "./PdfPreviewModal";
 import toast from "react-hot-toast";
 
-import Table from "../../components/ui/Table/Table";
+import Table from "../../components/UI/Table/Table";
 
 import ActionButton, {
   ActionGroup,
   ActionMenu,
-} from "../../components/ui/Table/ActionButton";
+} from "../../components/UI/Table/ActionButton";
 
-import type { Column } from "../../components/ui/Table/type";
-import StatusBadge from "../../components/ui/Table/StatusBadge";
+import type { Column } from "../../components/UI/Table/type";
+import StatusBadge from "../../components/UI/Table/StatusBadge";
 import { Row } from "jspdf-autotable";
+import { getCompanyById } from "../../api/companySetupApi";
+import type { Company } from "../../types/company";
 
 type InvoiceStatus = "Draft" | "Pending" | "Paid" | "Overdue" | "Approved";
 
@@ -42,7 +48,9 @@ const InvoicesTable: React.FC = () => {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
 
-  const [openStatusMenuFor, setOpenStatusMenuFor] = useState<string | null>(null);
+  const [openStatusMenuFor, setOpenStatusMenuFor] = useState<string | null>(
+    null
+  );
 
   const fetchInvoices = async () => {
     try {
@@ -78,21 +86,46 @@ const InvoicesTable: React.FC = () => {
     fetchInvoices();
   }, [page, pageSize]);
 
-  const handleViewClick = async (invoiceNumber: string, e?: React.MouseEvent) => {
+  const handleViewClick = async (
+    invoiceNumber: string,
+    e?: React.MouseEvent
+  ) => {
     e?.stopPropagation();
-    const res = await getSalesInvoiceById(invoiceNumber);
-    const invoice = res.data as unknown as Invoice;
+
+    const [invoiceRes, companyRes] = await Promise.all([
+      getSalesInvoiceById(invoiceNumber),
+      getCompanyById("COMP-00003"),
+    ]);
+
+    const invoice = invoiceRes.data as Invoice;
+    const company = companyRes.data as Company;
+
     setSelectedInvoice(invoice);
-    const url = generateInvoicePDF(invoice, "bloburl");
+
+    const url = await generateInvoicePDF(invoice, company, "bloburl");
     setPdfUrl(url as string);
     setPdfOpen(true);
   };
 
-  const handleDownload = (inv: InvoiceSummary, e?: React.MouseEvent) => {
+  const handleDownload = async (inv: InvoiceSummary, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    const invoice = inv as unknown as Invoice;
-    generateInvoicePDF(invoice, "save");
-    toast.success("Invoice downloaded successfully!");
+
+    try {
+      const [invoiceRes, companyRes] = await Promise.all([
+        getSalesInvoiceById(inv.invoiceNumber),
+        getCompanyById("COMP-00003"),
+      ]);
+
+      const invoice = invoiceRes.data as Invoice;
+      const company = companyRes.data as Company;
+
+      await generateInvoicePDF(invoice, company, "save");
+
+      toast.success("Invoice downloaded successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to download invoice");
+    }
   };
 
   const handleClosePdf = () => {
@@ -136,7 +169,7 @@ const InvoicesTable: React.FC = () => {
   const handleDelete = async (invoiceNumber: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (!window.confirm(`Delete invoice ${invoiceNumber}?`)) return;
-    
+
     // Add your delete API call here
     toast.success("Invoice deleted successfully");
     console.log("Delete invoice:", invoiceNumber);
@@ -150,31 +183,31 @@ const InvoicesTable: React.FC = () => {
 
   // Table columns definition
   const columns: Column<InvoiceSummary>[] = [
-    { 
-      key: "invoiceNumber", 
-      header: "Invoice No", 
+    {
+      key: "invoiceNumber",
+      header: "Invoice No",
       align: "left",
       render: (inv: InvoiceSummary) => (
         <span className="font-semibold text-main">{inv.invoiceNumber}</span>
-      )
+      ),
     },
-    { 
-      key: "invoiceType", 
-      header: "Type", 
+    {
+      key: "invoiceType",
+      header: "Type",
       align: "left",
       render: (inv: InvoiceSummary) => (
         <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
           {inv.invoiceType}
         </code>
-      )
+      ),
     },
-    { 
-      key: "customerName", 
-      header: "Customer", 
+    {
+      key: "customerName",
+      header: "Customer",
       align: "left",
       render: (inv: InvoiceSummary) => (
         <span className="text-sm text-main">{inv.customerName}</span>
-      )
+      ),
     },
     {
       key: "dateOfInvoice",
@@ -206,13 +239,12 @@ const InvoicesTable: React.FC = () => {
         </code>
       ),
     },
-  {
-  key: "invoiceStatus",
-  header: "Status",
-  align: "left",
-  render: (inv) => <StatusBadge status={inv.invoiceStatus} />,
-},
-
+    {
+      key: "invoiceStatus",
+      header: "Status",
+      align: "left",
+      render: (inv) => <StatusBadge status={inv.invoiceStatus} />,
+    },
 
     {
       key: "actions",
@@ -230,21 +262,18 @@ const InvoicesTable: React.FC = () => {
             onClick={(e) => handleDownload(inv, e)}
             iconOnly={false}
           /> */}
-<ActionMenu
-  onDelete={(e) => handleDelete(inv.invoiceNumber, e)}
-  showDownload
-  onDownload={(e) => handleDownload(inv, e)}
-  customActions={(STATUS_TRANSITIONS[inv.invoiceStatus as InvoiceStatus] ?? []).map(
-    (status) => ({
-      label: `Mark as ${status}`,
-      danger: status === "Paid",
-      onClick: () =>
-        handleRowStatusChange(inv.invoiceNumber, status),
-    })
-  )}
-/>
-
-
+          <ActionMenu
+            onDelete={(e) => handleDelete(inv.invoiceNumber, e)}
+            showDownload
+            onDownload={(e) => handleDownload(inv, e)}
+            customActions={(
+              STATUS_TRANSITIONS[inv.invoiceStatus as InvoiceStatus] ?? []
+            ).map((status) => ({
+              label: `Mark as ${status}`,
+              danger: status === "Paid",
+              onClick: () => handleRowStatusChange(inv.invoiceNumber, status),
+            }))}
+          />
         </ActionGroup>
       ),
     },
@@ -261,7 +290,7 @@ const InvoicesTable: React.FC = () => {
         <Table
           columns={columns}
           data={filteredInvoices}
-          rowKey={(row)=>row.invoiceNumber}
+          rowKey={(row) => row.invoiceNumber}
           showToolbar
           searchValue={searchTerm}
           onSearch={setSearchTerm}

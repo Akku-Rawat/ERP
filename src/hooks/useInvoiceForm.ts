@@ -8,6 +8,7 @@ import { getCountryList } from "../api/lookupApi";
 import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
+  getPaymentMethodLabel
 } from "../constants/invoice.constants";
 
 const ITEMS_PER_PAGE = 5;
