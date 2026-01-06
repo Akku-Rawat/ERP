@@ -728,7 +728,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               )}
             </section>
 
-            {/* <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
+            <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
               <button
                 type="button"
                 onClick={onClose}
@@ -751,7 +751,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   Save Invoice
                 </button>
               </div>
-            </footer> */}
+            </footer>
           </form>
         </motion.div>
       </AnimatePresence>

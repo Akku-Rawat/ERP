@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { getAllItems } from "../../api/itemApi";
 
 interface ItemSelectProps {
-  taxCategory?: string|undefined
+  taxCategory?: string | undefined;
   value?: string;
   onChange: (item: {
     id: string;
@@ -43,17 +43,13 @@ export default function ItemSelect({
       setLoading(true);
 
       try {
-        const res = await getAllItems(
-          1,
-          1000,
-          taxCategory || undefined
-        );
+        const res = await getAllItems(1, 1000, taxCategory || undefined);
 
         if (!cancelled && res?.status_code === 200) {
           setItems(
             res.data.map((it: any) => ({
               id: it.id,
-              itemCode: it.itemClassCode,
+              itemCode: it.id,
               itemName: it.itemName,
               sellingPrice: it.sellingPrice ?? 0,
             }))
@@ -77,9 +73,11 @@ export default function ItemSelect({
   }, [taxCategory]);
 
   useEffect(() => {
-    setSearch("");
+    if (!value) {
+      setSearch("");
+    }
     setOpen(false);
-  }, [taxCategory]);
+  }, [taxCategory, value]);
 
   useEffect(() => {
     if (!value) {
@@ -167,17 +165,13 @@ export default function ItemSelect({
                 >
                   <div className="flex justify-between">
                     <span>{it.itemName}</span>
-                    <span className="text-xs text-gray-500">
-                      {it.itemCode}
-                    </span>
+                    <span className="text-xs text-gray-500">{it.itemCode}</span>
                   </div>
                 </li>
               ))}
 
               {filtered.length === 0 && (
-                <li className="px-4 py-2 text-gray-500">
-                  No items found
-                </li>
+                <li className="px-4 py-2 text-gray-500">No items found</li>
               )}
             </ul>
           </div>,
