@@ -1,5 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState} from "react";
 import { FaPlus, FaSearch } from "react-icons/fa";
+import { useEffect } from "react";
+
 
 // Reusable Components
 import Table from "../../components/ui/Table/Table"; 
@@ -10,31 +12,22 @@ import ActionButton, { ActionGroup, ActionMenu } from "../../components/ui/Table
 // Modals
 import IdentityVerificationModal from "../../components/Hr/employeedirectorymodal/IdentityVerificationModal";
 import AddEmployeeModal from "../../components/Hr/employeedirectorymodal/AddEmployeeModal";
+import { getAllEmployees } from "../../api/employeeapi";
+
+
+
 
 // Types
 type Employee = {
-  id: string;
+  id: string | null;
   name: string;
-  jobTitle: string;
+  jobTitle: string | null;
   department: string;
-  location: string;
-  status: "Active" | "On Leave" | "Inactive";
+  workLocation: string | null;
+  status: "Active" | "Inactive" | "On Leave";
 };
 
-const demoEmployees: Employee[] = [
-  { id: "E001", name: "June Ner", jobTitle: "Senior Developer", department: "Engineering", location: "New York", status: "Active" },
-  { id: "E002", name: "Cesh Spalq", jobTitle: "Product Manager", department: "Product", location: "San Francisco", status: "Active" },
-  { id: "E003", name: "Nash Fosh", jobTitle: "UI Designer", department: "Design", location: "Los Angeles", status: "Active" },
-  { id: "E004", name: "Atn Knowling", jobTitle: "Backend Developer", department: "Engineering", location: "New York", status: "Active" },
-  { id: "E005", name: "Uad Sunefing", jobTitle: "QA Engineer", department: "QA", location: "Chicago", status: "On Leave" },
-  { id: "E006", name: "Wowe Maled Ahly", jobTitle: "Frontend Developer", department: "Engineering", location: "Austin", status: "Active" },
-  { id: "E007", name: "Jane Doe", jobTitle: "HR Manager", department: "HR", location: "New York", status: "Active" },
-  { id: "E008", name: "Yaint Smith", jobTitle: "Sales Manager", department: "Sales", location: "Boston", status: "Active" },
-  { id: "E009", name: "Super Din", jobTitle: "DevOps Engineer", department: "Engineering", location: "Seattle", status: "Inactive" },
-  { id: "E010", name: "John Miller", jobTitle: "Data Analyst", department: "Analytics", location: "Denver", status: "Active" },
-  { id: "E011", name: "Sarah Wilson", jobTitle: "Marketing Lead", department: "Marketing", location: "Miami", status: "Active" },
-  { id: "E012", name: "Mike Johnson", jobTitle: "Accountant", department: "Finance", location: "New York", status: "Active" },
-];
+
 
 const EmployeeDirectory: React.FC = () => {
   // Modal States
@@ -47,31 +40,58 @@ const EmployeeDirectory: React.FC = () => {
   const [department, setDepartment] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState("");
+  
 
   // Pagination States 
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  // Unique values for dropdowns
-  const uniqueDepartments = [...new Set(demoEmployees.map((e) => e.department))];
-  const uniqueLocations = [...new Set(demoEmployees.map((e) => e.location))];
+  const [employees, setEmployees] = useState<Employee[]>([]);
+const [loading, setLoading] = useState(false);
+const [totalItems, setTotalItems] = useState(0);
+const fetchEmployees = async () => {
+  try {
+    setLoading(true);
 
-  // --- FILTER LOGIC ---
-  const filteredEmployees = useMemo(() => {
-    return demoEmployees.filter((emp) => {
-      const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            emp.jobTitle.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesDept = !department || emp.department === department;
-      const matchesLoc = !location || emp.location === location;
-      const matchesStatus = !status || emp.status === status;
-      return matchesSearch && matchesDept && matchesLoc && matchesStatus;
+    const res = await getAllEmployees({
+      page: currentPage,
+      page_size: pageSize,
+      status,
+      department,
+      jobTitle: searchTerm,
+      workLocation: location,
     });
-  }, [searchTerm, department, location, status]);
 
-  // Pagination Calculations
-  const totalItems = filteredEmployees.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
-  const paginatedData = filteredEmployees.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+    setEmployees(res.data.employees || []);
+    setTotalItems(res.data.pagination?.total || 0);
+  } catch (err) {
+    console.error("Failed to fetch employees", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+useEffect(() => {
+  fetchEmployees();
+}, [currentPage, pageSize, status, department, location, searchTerm]);
+
+const uniqueDepartments = Array.from(
+  new Set(
+    employees
+      .map(e => e.department)
+      .filter((d): d is string => Boolean(d))
+  )
+);
+
+
+const uniqueLocations = Array.from(
+  new Set(
+    employees
+      .map(e => e.workLocation)
+      .filter((l): l is string => Boolean(l))
+  )
+);
 
   // --- HANDLERS ---
   const handleVerified = (data: any) => {
@@ -128,7 +148,8 @@ const EmployeeDirectory: React.FC = () => {
     },
     { key: "jobTitle", header: "Job Title", align: "left" },
     { key: "department", header: "Department", align: "left" },
-    { key: "location", header: "Location", align: "left" },
+    { key: "workLocation", header: "Location", align: "left" },
+
     { 
       key: "status", 
       header: "Status", 
@@ -146,14 +167,15 @@ const EmployeeDirectory: React.FC = () => {
             iconOnly
             onClick={() => handleRowClick(emp)}
           />
-          <ActionMenu
-            onEdit={(e) => handleEdit(emp.id, e)}
-            onDelete={(e) => handleDelete(emp.id, e)}
-          />
+        <ActionMenu
+  onEdit={emp.id ? (e) => handleEdit(emp.id!, e) : undefined}
+  onDelete={emp.id ? (e) => handleDelete(emp.id!, e) : undefined}
+/>
         </ActionGroup>
       ),
     },
   ];
+const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
     <div className="space-y-6">
@@ -220,30 +242,25 @@ const EmployeeDirectory: React.FC = () => {
           </button>
         </div>
       </div>
-
+{loading && (
+  <div className="text-center py-4 text-gray-500">
+    Loading employees...
+  </div>
+)}
       {/* --- REUSABLE TABLE WRAPPED IN WHITE BG --- */}
      
       <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
-        <Table
-          columns={columns}
-          data={paginatedData} // Filtered data yahan pass ho raha hai
-          showToolbar
-          searchValue={searchTerm}
-          onSearch={setSearchTerm}
-          toolbarPlaceholder="Search name or job title..."
-          enableColumnSelector
-          
-          // Pagination Props
-          currentPage={currentPage}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={totalItems}
-          onPageChange={setCurrentPage}
-          
-          
-          className="shadow-none border-none"
-          cardClassName="bg-transparent"
-        />
+       
+     <Table
+  columns={columns}
+  data={employees}
+  currentPage={currentPage}
+  totalPages={totalPages}
+  pageSize={pageSize}
+  totalItems={totalItems}
+  onPageChange={setCurrentPage}
+/>
+
       </div>
 
       {/* Modals */}
@@ -265,4 +282,4 @@ const EmployeeDirectory: React.FC = () => {
   );
 };
 
-export default EmployeeDirectory;33333333333
+export default EmployeeDirectory;

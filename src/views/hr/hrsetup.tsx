@@ -6,13 +6,17 @@ import { LeavePolicy } from "../../components/Hr/leavemanagemnetmodal/LeavePolic
 import  LeaveSetupTab  from "./tabs/LeavePolicyTab";
 import WorkScheduleTab  from "./tabs/WorkScheduleTab";
 import CompanyMappingTab from "./tabs/MappingTab";
+import SalarySlipSetup from "./tabs/Salaryslipsetup";
 
 const TABS = [
   "General Settings",
   "Salary Structure",
   "Leave Policy",
   "Work Schedule",
+  "salaryslip setup",
+  
   "Company Mapping",
+  ""
 ];
 
 export default function HRSettings() {
@@ -34,6 +38,7 @@ export default function HRSettings() {
         {activeTab === "Leave Policy" && <LeaveSetupTab />}
         {activeTab === "Work Schedule" && <WorkScheduleTab />}
         {activeTab === "Company Mapping" && <CompanyMappingTab />}
+        {activeTab === "salaryslip setup" && <SalarySlipSetup/>}
       </div>
     </div>
   );

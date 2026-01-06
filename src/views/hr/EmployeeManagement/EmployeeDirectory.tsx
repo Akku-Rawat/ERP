@@ -124,6 +124,7 @@ const uniqueLocations = [...new Set(demoEmployees.map((e) => e.location))];
 const statusOptions = ["Active", "On Leave", "Inactive"];
 
 
+
 // ============================================
 // EMPLOYEE DIRECTORY (PARENT COMPONENT)
 // ============================================
@@ -134,8 +135,14 @@ const EmployeeDirectory: React.FC = () => {
   const [status, setStatus] = useState("");
   const [itemsToShow, setItemsToShow] = useState(5);
   const [showModal, setShowModal] = useState(false);
+  const [employees, setEmployees] = useState<Employee[]>(demoEmployees);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  
 
-  const filteredEmployees = demoEmployees.filter(
+
+ const filteredEmployees = employees.filter(
+  
+
     (emp) =>
       (search.trim() === "" ||
         emp.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -153,6 +160,18 @@ const EmployeeDirectory: React.FC = () => {
       alert("Delete functionality ready — connect to API later");
     }
   };
+const handleEmployeeAdded = (payload: any) => {
+  const newEmployee: Employee = {
+    id: "EMP-" + Date.now(),
+    name: `${payload.FirstName} ${payload.LastName}`,
+    jobTitle: payload.JobTitle,
+    department: payload.Department,
+    location: payload.workLocation || "N/A",
+    status: payload.EmploymentStatus || "Active",
+  };
+
+  setEmployees(prev => [newEmployee, ...prev]);
+};
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -225,12 +244,15 @@ const EmployeeDirectory: React.FC = () => {
           </div>
 
           {/* Add Button - This opens the modal */}
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm"
-          >
-            <Plus className="w-5 h-5" /> Add New Employee
-          </button>
+<button
+  onClick={() => {
+   setEditingEmployee(null);
+setShowModal(true);
+  }}
+  className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm"
+>
+  <Plus className="w-5 h-5" /> Add New Employee
+</button>
         </div>
 
         {/* Table */}
@@ -288,13 +310,13 @@ const EmployeeDirectory: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex items-center justify-center gap-3">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                        className="text-indigo-600 hover:text-indigo-800 transition"
-                        title="Edit"
-                      >
+                    <button
+  onClick={(e) => {
+    e.stopPropagation();
+    setEditingEmployee(emp);  
+    setShowModal(true);        
+  }}
+>
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
@@ -343,11 +365,18 @@ const EmployeeDirectory: React.FC = () => {
       </div>
 
       {/* MODAL IS CALLED HERE */}
-      <AddEmployeeModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        departments={uniqueDepartments}
-      />
+<AddEmployeeModal
+  isOpen={showModal}
+  onClose={() => {
+    setShowModal(false);
+    setEditingEmployee(null); 
+  }}
+  onSuccess={handleEmployeeAdded}
+  departments={uniqueDepartments}
+  level={[]}
+  editData={editingEmployee} 
+/>
+
     </div>
   );
 };
