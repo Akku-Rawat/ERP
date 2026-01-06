@@ -136,6 +136,14 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
       render: (c: CustomerSummary) => <StatusBadge status={c.type} />,
     },
     {
+      key: "customerTaxCategory",
+      header: "TaxCategory",
+      align: "left",
+      render: (c: CustomerSummary) => (
+        <StatusBadge status={c.customerTaxCategory} />
+      ),
+    },
+    {
       key: "currency",
       header: "Currency",
       align: "left",

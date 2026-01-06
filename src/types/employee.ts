@@ -1,4 +1,4 @@
-export interface employeeSummary {
+export interface EmployeeSummary {
   id: string;
   name: string;
   jobTitle: string;
@@ -6,7 +6,7 @@ export interface employeeSummary {
   workLocation: string;
   status: string;
 }
-export interface employee {
+export interface Employee {
   id: string;
   status: string;
   identityInfo: IdentityInfo;

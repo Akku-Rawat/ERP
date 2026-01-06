@@ -5,12 +5,12 @@ const base_url = import.meta.env.VITE_BASE_URL as string;
 const api = createAxiosInstance(base_url);
 
 const ENDPOINTS = {
-  getAllEmployees: `${base_url}.hrms.napsa_client.employee.api.get_all_employees`,
-  getEmployeeById: `${base_url}.hrms.napsa_client.employee.api.get_employee`,
-  createEmployee: `${base_url}.hrms.napsa_client.employee.api.create_employee`,
-  deleteEmployee: `${base_url}.hrms.napsa_client.employee.api.delete_employee`,
-  updateEmployee: `${base_url}.hrms.napsa_client.employee.api.update_employee`,
-  updateEmployeeDocuments: `${base_url}.hrms.napsa_client.employee.api.manage_employee_documents`,
+  getAllEmployees: `http://41.60.191.7:8081/api/method/hrms.napsa_client.employee.api.get_all_employees`,
+  getEmployeeById: `http://41.60.191.7:8081/api/method/hrms.napsa_client.employee.api.get_employee`,
+  createEmployee: `http://41.60.191.7:8081/api/method/hrms.napsa_client.employee.api.create_employee`,
+  deleteEmployee: `http://41.60.191.7:8081/api/method/hrms.napsa_client.employee.api.delete_employee`,
+  updateEmployee: `http://41.60.191.7:8081/api/method/hrms.napsa_client.employee.api.update_employee`,
+  updateEmployeeDocuments: `http://41.60.191.7:8081/api/method/hrms.napsa_client.employee.api.manage_employee_documents`,
 };
 
 export async function getAllEmployees(
