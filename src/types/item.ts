@@ -1,4 +1,4 @@
-export interface item {
+export interface Item {
   id: string;
   itemName: string;
   itemGroup: string;
@@ -37,7 +37,7 @@ export interface item {
   taxCategory: string;
 }
 
-export interface itemSummary {
+export interface ItemSummary {
   id: string;
   itemName: string;
   itemGroup: string;
