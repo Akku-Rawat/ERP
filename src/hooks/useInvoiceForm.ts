@@ -216,7 +216,6 @@ export const useInvoiceForm = (
   ) => {
     const { name, value } = e.target;
     const isNum = ["quantity", "price", "discount", "vatRate"].includes(name);
-
     setFormData((prev) => {
       const items = [...prev.items];
       items[idx] = {
@@ -250,49 +249,6 @@ export const useInvoiceForm = (
       return { ...prev, items };
     });
   };
-
-  // const handleItemChange = (
-  //   idx: number,
-  //   e: React.ChangeEvent<HTMLInputElement>
-  // ) => {
-  //   const { name, value } = e.target;
-  //   const isNum = ["quantity", "price", "discount"].includes(name);
-
-  //   setFormData((prev) => {
-  //     const items = [...prev.items];
-  //     items[idx] = {
-  //       ...items[idx],
-  //       [name]: isNum ? Number(value) : value,
-  //     };
-  //     return { ...prev, items };
-  //   });
-  // };
-
-  // const updateItemDirectly = (index: number, updated: Partial<InvoiceItem>) => {
-  //   setFormData((prev) => {
-  //     const items = [...prev.items];
-  //     items[index] = { ...items[index], ...updated };
-  //     return { ...prev, items };
-  //   });
-  // };
-
-  // const addItem = () => {
-  //   setFormData((prev) => {
-  //     const items = [...prev.items, { ...EMPTY_ITEM }];
-  //     setPage(Math.floor((items.length - 1) / ITEMS_PER_PAGE));
-  //     return { ...prev, items };
-  //   });
-  // };
-
-  // const removeItem = (idx: number) => {
-  //   setFormData((prev) => {
-  //     if (prev.items.length === 1) return prev;
-  //     const items = prev.items.filter((_, i) => i !== idx);
-  //     const maxPage = Math.max(0, Math.ceil(items.length / ITEMS_PER_PAGE) - 1);
-  //     if (page > maxPage) setPage(maxPage);
-  //     return { ...prev, items };
-  //   });
-  // };
 
   const setTerms = (selling: TermSection) => {
     setFormData((prev) => ({ ...prev, terms: { selling } }));
