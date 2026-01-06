@@ -7,8 +7,12 @@ import TermsAndCondition from "../TermsAndCondition";
 import CustomerSelect from "../selects/CustomerSelect";
 import CountrySelect from "../selects/CountrySelect";
 import Modal from "../ui/modal/modal";
-import { Input as FormInput, Select as FormSelect, Button, Card } from "../ui/modal/formComponent";
-
+import {
+  Input as FormInput,
+  Select as FormSelect,
+  Button,
+  Card,
+} from "../ui/modal/formComponent";
 
 import ItemSelect from "../selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
@@ -45,29 +49,27 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     actions,
   } = useInvoiceForm(isOpen, onClose, onSubmit);
 
-  
-
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
   const handleFormSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-  actions.handleSubmit(e);
-};
+    e.preventDefault();
+    actions.handleSubmit(e);
+  };
 
-const footerContent = (
-  <>
-    <Button variant="secondary" onClick={onClose} type="button">
-      Cancel
-    </Button>
-    <div className="flex gap-2">
-      <Button variant="ghost" onClick={actions.handleReset} type="button">
-        Reset
+  const footerContent = (
+    <>
+      <Button variant="secondary" onClick={onClose} type="button">
+        Cancel
       </Button>
-      <Button variant="primary" onClick={handleFormSubmit}>
-        Save Invoice
-      </Button>
-    </div>
-  </>
-);
+      <div className="flex gap-2">
+        <Button variant="ghost" onClick={actions.handleReset} type="button">
+          Reset
+        </Button>
+        <Button variant="primary" onClick={handleFormSubmit}>
+          Save Invoice
+        </Button>
+      </div>
+    </>
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
@@ -94,7 +96,7 @@ const footerContent = (
               >
                 <X className="w-5 h-5 text-gray-600" />
               </button>
-            </header> 
+            </header>
 
             {/* Tabs */}
             <div className="flex border-b bg-gray-50">
@@ -298,13 +300,21 @@ const footerContent = (
                                   {i + 1}
                                 </td>
                                 <td className="px-2 py-2">
-                                  <ItemSelect
+                                  {/* <ItemSelect
+                                    taxCategory={ui.taxCategory}
                                     value={it.itemCode}
                                     onChange={(item) => {
                                       actions.updateItemDirectly(i, {
                                         itemCode: item.id,
                                         price: item.sellingPrice ?? it.price,
                                       });
+                                    }}
+                                  /> */}
+                                  <ItemSelect
+                                    taxCategory={ui.taxCategory}
+                                    value={it.itemCode}
+                                    onChange={(item) => {
+                                      actions.handleItemSelect(i, item.id);
                                     }}
                                   />
                                 </td>

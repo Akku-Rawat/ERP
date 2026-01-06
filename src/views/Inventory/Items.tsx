@@ -42,36 +42,6 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
     }
   };
 
-  // const handleDelete = async (itemCode: string, e: React.MouseEvent) => {
-  //   e.stopPropagation();
-
-  //   const itemToDelete = item.find((i) => i.item_code === itemCode);
-  //   if (!itemToDelete) return;
-
-  //   const code = itemToDelete.item_code;
-  //   console.log("item code " + itemCode);
-
-  //   if (
-  //     !window.confirm(
-  //       `Are you sure you want to delete item with itemCode ${itemCode}?`,
-  //     )
-  //   )
-  //     return;
-
-  //   try {
-  //     setLoading(true);
-  //     await deleteItemByItemCode(code);
-  //     setItem((prev) => prev.filter((c) => c.item_code !== code));
-  //     alert("Item deleted successfully.");
-  //   } catch (err: any) {
-  //     console.error("Error deleting item:", err);
-  //     const errorMsg = err.response?.data?.message || "Failed to delete item.";
-  //     alert(errorMsg);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleDelete = (itemCode: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -84,26 +54,6 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
       toast.error("Item not found");
     }
   };
-
-  // const confirmDelete = async () => {
-  //   console.log("itemToDelete" + itemToDelete);
-  //   if (!itemToDelete) return;
-
-  //   try {
-  //     setDeleting(true);
-  //     await deleteItemByItemCode(itemToDelete.item_code);
-
-  //     setItem((prev) => prev.filter((i) => i.item_code !== itemToDelete.item_code));
-
-  //     toast.success("Item deleted successfully!", { duration: 1000 });
-  //     setDeleteModalOpen(false);
-  //   } catch (err: any) {
-  //     toast.error(err.response?.data?.message || "Failed to delete item");
-  //   } finally {
-  //     setDeleting(false);
-  //     setItemToDelete(null);
-  //   }
-  // };
 
   const confirmDelete = async () => {
     if (!itemToDelete) return;
@@ -158,14 +108,6 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
   const handleAddItem = async () => {
     setEditItems(null);
     setShowItemsModal(true);
-    // try {
-    //   await fetchItems();
-    //   toast.success(
-    //     editItems ? "Item updated successfully!" : "Item created successfully!",
-    //   );
-    // } catch (err) {
-    //   toast.error("Failed to refresh item list");
-    // }
   };
 
   const handleItemSuccess = async () => {
@@ -241,6 +183,7 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
               <th className="px-4 py-2 text-left">Item Code</th>
               <th className="px-4 py-2 text-left">Name</th>
               <th className="px-4 py-2 text-left">Category</th>
+              <th className="px-4 py-2 text-left">Tax Category</th>
               <th className="px-4 py-2 text-left">Min Stock</th>
               <th className="px-4 py-2 text-left">Max Stock</th>
               <th className="px-4 py-2 text-left">Supplier</th>
@@ -255,6 +198,7 @@ const Items: React.FC<ItemsProps> = ({ onAdd }) => {
                 <td className="px-4 py-2">{i.id}</td>
                 <td className="px-4 py-2">{i.itemName}</td>
                 <td className="px-4 py-2">{i.itemGroup}</td>
+                <td className="px-4 py-2">{i.taxCategory}</td>
                 <td className="px-4 py-2">{i.minStockLevel}</td>
                 <td className="px-4 py-2">{i.maxStockLevel}</td>
                 <td className="px-4 py-2">{i.preferredVendor}</td>

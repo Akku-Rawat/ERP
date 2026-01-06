@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { getAllItems } from "../../api/itemApi";
 
 interface ItemSelectProps {
+  taxCategory?: string|undefined
   value?: string;
   onChange: (item: {
     id: string;
@@ -14,6 +15,7 @@ interface ItemSelectProps {
 }
 
 export default function ItemSelect({
+  taxCategory = "",
   value = "",
   onChange,
   className = "",
@@ -26,7 +28,7 @@ export default function ItemSelect({
       sellingPrice?: number;
     }[]
   >([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [rect, setRect] = useState<DOMRect | null>(null);
@@ -35,29 +37,56 @@ export default function ItemSelect({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const load = async () => {
       setLoading(true);
-      const res = await getAllItems();
-      if (res?.status_code === 200) {
-        setItems(
-          res.data.map((it: any) => ({
-            id: it.id,
-            itemCode: it.itemClassCode,
-            itemName: it.itemName,
-            sellingPrice: it.sellingPrice ?? 0,
-          }))
+
+      try {
+        const res = await getAllItems(
+          1,
+          1000,
+          taxCategory || undefined
         );
+
+        if (!cancelled && res?.status_code === 200) {
+          setItems(
+            res.data.map((it: any) => ({
+              id: it.id,
+              itemCode: it.itemClassCode,
+              itemName: it.itemName,
+              sellingPrice: it.sellingPrice ?? 0,
+            }))
+          );
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Failed to load items", err);
+          setItems([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     };
+
     load();
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [taxCategory]);
+
+  useEffect(() => {
+    setSearch("");
+    setOpen(false);
+  }, [taxCategory]);
 
   useEffect(() => {
     if (!value) {
       setSearch("");
       return;
     }
+
     const match = items.find((it) => it.itemCode === value);
     if (match) setSearch(match.itemName);
   }, [value, items]);
@@ -65,12 +94,14 @@ export default function ItemSelect({
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       const target = e.target as Node;
+
       if (
         inputRef.current?.contains(target) ||
         dropdownRef.current?.contains(target)
       ) {
         return;
       }
+
       setOpen(false);
     };
 
@@ -84,6 +115,7 @@ export default function ItemSelect({
 
   const openDropdown = () => {
     if (!inputRef.current) return;
+
     setRect(inputRef.current.getBoundingClientRect());
     setOpen(true);
   };
@@ -93,7 +125,7 @@ export default function ItemSelect({
       <input
         ref={inputRef}
         className="w-full rounded border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-        placeholder={loading ? "Loading items..." : "Search item..."}
+        placeholder={loading ? "Loading items..." : "Search item"}
         value={search}
         onChange={(e) => {
           setSearch(e.target.value);
@@ -109,9 +141,9 @@ export default function ItemSelect({
           <div
             ref={dropdownRef}
             style={{
-              position: "absolute",
-              top: rect.bottom + window.scrollY,
-              left: rect.left + window.scrollX,
+              position: "fixed",
+              top: rect.bottom,
+              left: rect.left,
               width: rect.width,
               zIndex: 9999,
             }}
@@ -136,14 +168,16 @@ export default function ItemSelect({
                   <div className="flex justify-between">
                     <span>{it.itemName}</span>
                     <span className="text-xs text-gray-500">
-                      {it.id}
+                      {it.itemCode}
                     </span>
                   </div>
                 </li>
               ))}
 
               {filtered.length === 0 && (
-                <li className="px-4 py-2 text-gray-500">No items found</li>
+                <li className="px-4 py-2 text-gray-500">
+                  No items found
+                </li>
               )}
             </ul>
           </div>,

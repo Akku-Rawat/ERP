@@ -16,9 +16,10 @@ const ENDPOINTS = {
 export async function getAllItems(
   page: number = 1,
   page_size: number = 10,
+  taxCategory: string | undefined = undefined
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getAllItems, {
-    params: { page, page_size },
+    params: { page, page_size, taxCategory },
   });
   return resp.data;
 }
@@ -26,7 +27,7 @@ export async function getAllItems(
 export async function getItemByItemCode(itemCode: string): Promise<any> {
   const url = `${ENDPOINTS.getItemByCode}?id=${itemCode}`;
   const resp: AxiosResponse = await api.get(url);
-  return resp.data?.data || null;
+  return resp.data || null;
 }
 
 export async function deleteItemByItemCode(id: string): Promise<any> {
@@ -42,7 +43,7 @@ export async function createItem(payload: any): Promise<any> {
 
 export async function updateItemByItemCode(
   item_code: string,
-  payload: any,
+  payload: any
 ): Promise<any> {
   const url = `${ENDPOINTS.updateItem}?item_code=${item_code}`;
   const resp: AxiosResponse = await api.put(url, payload);

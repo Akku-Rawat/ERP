@@ -4,11 +4,12 @@ import { getCompanyById } from "../api/companySetupApi";
 import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
 import { getCountryList } from "../api/lookupApi";
+import { getItemByItemCode } from "../api/itemApi";
 
 import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
-  getPaymentMethodLabel
+  getPaymentMethodLabel,
 } from "../constants/invoice.constants";
 
 const ITEMS_PER_PAGE = 5;
@@ -30,6 +31,7 @@ export const useInvoiceForm = (
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
     "details"
   );
+  const [taxCategory, setTaxCategory] = useState<string | undefined>("");
   const [isShippingOpen, setIsShippingOpen] = useState(false);
   const [sameAsBilling, setSameAsBilling] = useState(true);
 
@@ -114,6 +116,12 @@ export const useInvoiceForm = (
 
       const data = customerRes.data;
       const company = companyRes?.data;
+      const invoiceType = data.customerTaxCategory as
+        | "export"
+        | "non-export"
+        | "lpo";
+
+      setTaxCategory(invoiceType);
 
       const countryLookupList = await getCountryList();
 
@@ -162,8 +170,8 @@ export const useInvoiceForm = (
 
         return {
           ...prev,
-          destnCountryCd: countryCode,
-          invoiceType: data.customerTaxCategory,
+          destnCountryCd: invoiceType === "export" ? countryCode : "",
+          invoiceType,
           billingAddress: billing,
           shippingAddress: shipping,
           paymentInformation,
@@ -175,12 +183,39 @@ export const useInvoiceForm = (
     }
   };
 
+  const handleItemSelect = async (index: number, itemId: string) => {
+    try {
+      const res = await getItemByItemCode(itemId);
+      if (!res || res.status_code !== 200) return;
+
+      const data = res.data;
+      setFormData((prev) => {
+        const items = [...prev.items];
+
+        items[index] = {
+          ...items[index],
+          itemCode: data.id,
+          description: data.itemDescription ?? data.itemName ?? "",
+          price: data.sellingPrice ?? items[index].price,
+          vatRate: data.taxPerct ?? 0,
+          vatCode: data.taxCode ?? "",
+        };
+
+        return { ...prev, items };
+      });
+    } catch (err) {
+      console.error("Failed to fetch item details", err);
+    }
+  };
+
+  /* ---------------- ITEMS ---------------- */
+
   const handleItemChange = (
     idx: number,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = e.target;
-    const isNum = ["quantity", "price", "discount"].includes(name);
+    const isNum = ["quantity", "price", "discount", "vatRate"].includes(name);
 
     setFormData((prev) => {
       const items = [...prev.items];
@@ -212,11 +247,52 @@ export const useInvoiceForm = (
     setFormData((prev) => {
       if (prev.items.length === 1) return prev;
       const items = prev.items.filter((_, i) => i !== idx);
-      const maxPage = Math.max(0, Math.ceil(items.length / ITEMS_PER_PAGE) - 1);
-      if (page > maxPage) setPage(maxPage);
       return { ...prev, items };
     });
   };
+
+  // const handleItemChange = (
+  //   idx: number,
+  //   e: React.ChangeEvent<HTMLInputElement>
+  // ) => {
+  //   const { name, value } = e.target;
+  //   const isNum = ["quantity", "price", "discount"].includes(name);
+
+  //   setFormData((prev) => {
+  //     const items = [...prev.items];
+  //     items[idx] = {
+  //       ...items[idx],
+  //       [name]: isNum ? Number(value) : value,
+  //     };
+  //     return { ...prev, items };
+  //   });
+  // };
+
+  // const updateItemDirectly = (index: number, updated: Partial<InvoiceItem>) => {
+  //   setFormData((prev) => {
+  //     const items = [...prev.items];
+  //     items[index] = { ...items[index], ...updated };
+  //     return { ...prev, items };
+  //   });
+  // };
+
+  // const addItem = () => {
+  //   setFormData((prev) => {
+  //     const items = [...prev.items, { ...EMPTY_ITEM }];
+  //     setPage(Math.floor((items.length - 1) / ITEMS_PER_PAGE));
+  //     return { ...prev, items };
+  //   });
+  // };
+
+  // const removeItem = (idx: number) => {
+  //   setFormData((prev) => {
+  //     if (prev.items.length === 1) return prev;
+  //     const items = prev.items.filter((_, i) => i !== idx);
+  //     const maxPage = Math.max(0, Math.ceil(items.length / ITEMS_PER_PAGE) - 1);
+  //     if (page > maxPage) setPage(maxPage);
+  //     return { ...prev, items };
+  //   });
+  // };
 
   const setTerms = (selling: TermSection) => {
     setFormData((prev) => ({ ...prev, terms: { selling } }));
@@ -273,16 +349,20 @@ export const useInvoiceForm = (
       setPage,
       activeTab,
       setActiveTab,
+      taxCategory,
+      setTaxCategory,
       isShippingOpen,
       setIsShippingOpen,
       sameAsBilling,
       itemCount: formData.items.length,
       isExport: formData.invoiceType === "export",
       isLocal: formData.invoiceType === "lpo",
+      isNonExport: formData.invoiceType === "non-export",
     },
     actions: {
       handleInputChange,
       handleCustomerSelect,
+      handleItemSelect,
       handleItemChange,
       updateItemDirectly,
       addItem,
