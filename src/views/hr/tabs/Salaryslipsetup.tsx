@@ -828,8 +828,8 @@ const SalarySlipSetup = () => {
                 {visibleSections.signature && (
                   <div className="grid grid-cols-2 gap-8 mb-6 mt-8">
                     <div className="text-center">
-                      <div className="border-t-2 border-gray-300 pt-2">
-                        <p className="text-sm font-semibold text-gray-700">Employee Signature</p>
+                      <div className="">
+                    
                         <p className="text-xs text-gray-500 mt-1">Date: ___________</p>
                       </div>
                     </div>
