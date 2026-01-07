@@ -30,12 +30,12 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Work Email
+             Company Email
             </label>
             <input
               type="email"
-              value={formData.workEmail}
-              onChange={(e) => handleInputChange("workEmail", e.target.value)}
+              value={formData.CompanyEmail}
+              onChange={(e) => handleInputChange("CompanyEmail", e.target.value)}
               placeholder="@company.co.zm"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             />

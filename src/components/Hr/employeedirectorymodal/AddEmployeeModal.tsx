@@ -21,6 +21,8 @@ import {
   getDefaultGrossSalary
 } from "../../../views/hr/tabs/salarystructure";
 import DocumentsTab from "./DocumentsTab";
+import { createEmployee } from "../../../api/employeeapi";
+
 
 const DEFAULT_FORM_DATA = {
   level: "",
@@ -36,7 +38,7 @@ const DEFAULT_FORM_DATA = {
   maritalStatus: "",
 
   email: "",
-  workEmail: "",
+  CompanyEmail: "",
   phoneNumber: "",
   alternatePhone: "",
   street: "",
@@ -112,11 +114,12 @@ type TabKey = typeof TAB_ORDER[number];
 type AddEmployeeModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: (payload: any) => void;
+  onSuccess?: () => void;
   departments: string[];
   level?: string[];
   verifiedData?: any;
   editData?: any;
+  mode?: "add" | "edit";
 };
 
 type DocumentUpload = {
@@ -134,6 +137,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   departments,
   editData,
   level,
+  mode = "add",
 }) => {
   const [step, setStep] = useState<"verification" | "form">("verification");
   const [verifiedData, setVerifiedData] = useState<any>(null);
@@ -142,6 +146,8 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   const isLastTab = currentTabIndex === TAB_ORDER.length - 1;
   const [isPreFilled, setIsPreFilled] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
+  const [verifiedFields, setVerifiedFields] = useState<Record<string, boolean>>({});
+
   const [customDoc, setCustomDoc] = useState<{
     name: string;
     category: string;
@@ -181,7 +187,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     }));
   }, [formData.level]);
 
-  // ✅ Auto-set salary structure when job title changes
+  // Auto-set salary structure when job title changes
   useEffect(() => {
     if (!formData.jobTitle) return;
 
@@ -213,41 +219,92 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     }
   }, [isOpen, editData]);
 
-  useEffect(() => {
-    if (!editData) return;
+ useEffect(() => {
+  if (!editData) return;
 
-    setFormData((prev) => ({
-      ...prev,
-      firstName: editData.firstName || editData.name?.split(" ")[0] || "",
-      lastName: editData.lastName || editData.name?.split(" ").slice(1).join(" ") || "",
-      jobTitle: editData.jobTitle || "",
-      department: editData.department || "",
-      employmentStatus: editData.status || "Active",
-      workLocation: editData.location || "",
-      employeeId: editData.id || prev.employeeId,
-    }));
-  }, [editData]);
+  setStep("form");
+  setIsPreFilled(true);
 
-  useEffect(() => {
-    if (!verifiedData) return;
+  setFormData(prev => ({
+    ...prev,
 
-    setFormData((prev) => ({
-      ...prev,
-      nrcId: verifiedData.identityInfo.nrc,
-      socialSecurityNapsa: verifiedData.identityInfo.ssn,
-      firstName: verifiedData.personalInfo.firstName,
-      lastName: verifiedData.personalInfo.lastName,
-      dateOfBirth: verifiedData.personalInfo.dateOfBirth,
-      gender: verifiedData.personalInfo.gender,
-      email: verifiedData.contactInfo.email,
-      phoneNumber: verifiedData.contactInfo.phone,
-      street: verifiedData.contactInfo.address.street,
-      city: verifiedData.contactInfo.address.city,
-      province: verifiedData.contactInfo.address.province,
-      postalCode: verifiedData.contactInfo.address.postalCode,
-      country: verifiedData.contactInfo.address.country,
-    }));
-  }, [verifiedData]);
+    // PERSONAL
+    firstName: editData.personalInfo?.FirstName || "",
+    otherNames: editData.personalInfo?.OtherNames || "",
+    lastName: editData.personalInfo?.LastName || "",
+    dateOfBirth: editData.personalInfo?.Dob || "",
+    gender: editData.personalInfo?.Gender || "",
+    nationality: editData.personalInfo?.Nationality || "",
+    maritalStatus: editData.personalInfo?.maritalStatus || "",
+
+    // CONTACT
+    email: editData.contactInfo?.Email || "",
+    CompanyEmail: editData.contactInfo?.workEmail || "",
+    phoneNumber: editData.contactInfo?.phoneNumber || "",
+    alternatePhone: editData.contactInfo?.alternatePhone || "",
+    street: editData.contactInfo?.address?.street || "",
+    city: editData.contactInfo?.address?.city || "",
+    province: editData.contactInfo?.address?.province || "",
+    postalCode: editData.contactInfo?.address?.postalCode || "",
+    country: editData.contactInfo?.address?.country || "Zambia",
+
+    emergencyContactName: editData.contactInfo?.emergencyContact?.name || "",
+    emergencyContactPhone: editData.contactInfo?.emergencyContact?.phone || "",
+    emergencyContactRelationship: editData.contactInfo?.emergencyContact?.relationship || "",
+
+    // EMPLOYMENT
+    employeeId: editData.employmentInfo?.employeeId || "",
+    department: editData.employmentInfo?.Department || "",
+    jobTitle: editData.employmentInfo?.JobTitle || "",
+    employeeType: editData.employmentInfo?.EmployeeType || "",
+    engagementDate: editData.employmentInfo?.joiningDate || "",
+    probationPeriod: editData.employmentInfo?.probationPeriod || "",
+    contractEndDate: editData.employmentInfo?.contractEndDate || "",
+    workLocation: editData.employmentInfo?.workLocation || "",
+    workAddress: editData.employmentInfo?.workAddress || "",
+    shift: editData.employmentInfo?.shift || "",
+
+    // STATUS
+    employmentStatus: editData.status || "Active",
+
+    // PAYROLL (basic safe fill)
+    grossSalaryStarting: editData.payrollInfo?.grossSalary || "",
+    currency: editData.payrollInfo?.currency || "ZMW",
+    paymentFrequency: editData.payrollInfo?.paymentFrequency || "",
+    paymentMethod: editData.payrollInfo?.paymentMethod || "BANK",
+
+    accountNumber: editData.payrollInfo?.bankAccount?.AccountNumber || "",
+    accountName: editData.payrollInfo?.bankAccount?.AccountName || "",
+    bankName: editData.payrollInfo?.bankAccount?.BankName || "",
+    branchCode: editData.payrollInfo?.bankAccount?.branchCode || "",
+    accountType: editData.payrollInfo?.bankAccount?.AccountType || "Savings",
+  }));
+}, [editData]);
+
+useEffect(() => {
+  if (!verifiedData) return;
+
+  setFormData((prev) => ({
+    ...prev,
+    nrcId: verifiedData.identityInfo?.nrc || "",
+    socialSecurityNapsa: verifiedData.identityInfo?.ssn || "",
+    firstName: verifiedData.personalInfo?.firstName || "",
+    lastName: verifiedData.personalInfo?.lastName || "",
+    gender: verifiedData.personalInfo?.gender || "",
+  }));
+
+  setVerifiedFields({
+    nrcId: !!verifiedData.identityInfo?.nrc,
+    socialSecurityNapsa: !!verifiedData.identityInfo?.ssn,
+    firstName: true,
+    lastName: true,
+    gender: true,
+  });
+
+  setIsPreFilled(true);
+}, [verifiedData]);
+
+
 
   useEffect(() => {
     if (isOpen) {
@@ -351,8 +408,10 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     Dob: formData.dateOfBirth,
     Gender: formData.gender,
     Email: formData.email,
+     CompanyEmail: formData.CompanyEmail,
     MaritalStatus: formData.maritalStatus,
     PhoneNumber: formData.phoneNumber,
+    AlternatePhone: formData.alternatePhone,
     JobTitle: formData.jobTitle,
     Department: formData.department,
     Level: formData.level,
@@ -370,6 +429,16 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     NhimaHealthInsurance: formData.nhimaHealthInsurance,
     TpinId: formData.tpinId,
     NrcId: formData.nrcId,
+    weeklySchedule: {
+  Monday: formData.monday,
+  Tuesday: formData.tuesday,
+  Wednesday: formData.wednesday,
+  Thursday: formData.thursday,
+  Friday: formData.friday,
+  Saturday: formData.saturday,
+  Sunday: formData.sunday,
+},
+
     OpeningLeaveBalance: formData.openingLeaveBalance,
     InitialLeaveRateMonthly: Number(formData.initialLeaveRateMonthly),
     CeilingYear: Number(formData.ceilingYear),
@@ -385,22 +454,24 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
       }),
       {}
     ),
+
   });
 
-  const handleSave = async () => {
-    setLoading(true);
-    setError(null);
+ const handleSave = async () => {
+  setLoading(true);
+  setError(null);
 
-    try {
-      const payload = buildPayload();
-      console.log("Payload:", payload);
-      onSuccess?.(payload);
-    } catch (e: any) {
-      setError(e.message || "Failed to create employee");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const payload = buildPayload();
+    await createEmployee(payload);  
+    onSuccess?.();                   
+    onClose();                      
+  } catch (e: any) {
+    setError(e.message || "Failed to create employee");
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (!isOpen) return null;
 
@@ -413,10 +484,12 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
           setStep("form");
         }}
         onManualEntry={() => {
-          setIsPreFilled(false);
-          setStep("form");
-        }}
-        onClose={onClose}
+    setVerifiedData(null);       
+    setIsPreFilled(false);
+    setVerifiedFields({});      
+    setStep("form");
+  }}
+  onClose={onClose}
       />
     );
   }
@@ -510,7 +583,9 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
         {/* Tabs */}
         <div className="flex border-b border-gray-200 bg-white px-6 overflow-x-auto">
           {TAB_ORDER.map((tab, index) => {
-            const isClickable = index <= currentTabIndex;
+            const isClickable =
+  mode === "edit" ? true : index <= currentTabIndex;
+
 
             return (
               <button
@@ -538,7 +613,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
             <PersonalInfoTab
               formData={formData}
               handleInputChange={handleInputChange}
-              isPreFilled={isPreFilled}
+                verifiedFields={verifiedFields}
             />
           )}
 
@@ -676,7 +751,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
           </div>
         )}
 
-        {/* ✅ Custom Document Upload Modal */}
+        {/*  Custom Document Upload Modal */}
         {uploadingDoc === "CUSTOM" && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70]">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">

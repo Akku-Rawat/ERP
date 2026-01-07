@@ -308,7 +308,7 @@ export default function ColumnSelector({
           {buttonLabel ?? `Columns (${visibleKeys.length})`}
         </span>
        <svg
-  className="w-3 h-3"
+  className="w-5 h-5"
 >
           <path
             fillRule="evenodd"

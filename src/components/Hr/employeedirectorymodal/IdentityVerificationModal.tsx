@@ -7,120 +7,9 @@ type IdentityVerificationModalProps = {
   onManualEntry: () => void;
   onClose: () => void;
 };
+import { verifyEmployeeIdentity } from "../../../api/employeeapi";
 
-// DEMO DATA - Mock employee records
-const DEMO_EMPLOYEES = {
-  // NRC Records
-  "123456/78/9": {
-    identityInfo: {
-      nrc: "123456/78/9",
-      ssn: "SS2024001234",
-      verifiedFromSource: true,
-    },
-    personalInfo: {
-      firstName: "Dixant",
-      middleName: "",
-      lastName: "Negi",
-      dateOfBirth: "1990-05-15",
-      gender: "Male",
-      nationality: "indian",
-    },
-    contactInfo: {
-      email: "dixant.negi@gmail.com",
-      phone: "9988776655",
-      alternatePhone: "+260966789012",
-      address: {
-        street: "Plot 1234, ghnatagahr",
-        city: "deharadun",
-        province: "Lusaka Province",
-        postalCode: "548001",
-        country: "india",
-      },
-    },
-  },
-  "987654/32/1": {
-    identityInfo: {
-      nrc: "987654/32/1",
-      ssn: "SS2024005678",
-      verifiedFromSource: true,
-    },
-    personalInfo: {
-      firstName: "Mary",
-      middleName: "Chitalu",
-      lastName: "Mwape",
-      dateOfBirth: "1988-08-22",
-      gender: "Female",
-      nationality: "Zambian",
-    },
-    contactInfo: {
-      email: "mary.mwape@yahoo.com",
-      phone: "+260966555777",
-      alternatePhone: "",
-      address: {
-        street: "House 567, Kabulonga",
-        city: "Lusaka",
-        province: "Lusaka Province",
-        postalCode: "10101",
-        country: "Zambia",
-      },
-    },
-  },
-  // SSN Records
-  "SS2024001234": {
-    identityInfo: {
-      nrc: "123456/78/9",
-      ssn: "SS2024001234",
-      verifiedFromSource: true,
-    },
-    personalInfo: {
-      firstName: "John",
-      middleName: "Mwansa",
-      lastName: "Banda",
-      dateOfBirth: "1990-05-15",
-      gender: "Male",
-      nationality: "Zambian",
-    },
-    contactInfo: {
-      email: "john.banda@gmail.com",
-      phone: "+260977123456",
-      alternatePhone: "+260966789012",
-      address: {
-        street: "Plot 1234, Independence Ave",
-        city: "Lusaka",
-        province: "Lusaka Province",
-        postalCode: "10101",
-        country: "Zambia",
-      },
-    },
-  },
-  "SS2024009999": {
-    identityInfo: {
-      nrc: "555555/55/5",
-      ssn: "SS2024009999",
-      verifiedFromSource: true,
-    },
-    personalInfo: {
-      firstName: "Peter",
-      middleName: "Chilufya",
-      lastName: "Mulenga",
-      dateOfBirth: "1995-03-10",
-      gender: "Male",
-      nationality: "Zambian",
-    },
-    contactInfo: {
-      email: "peter.mulenga@gmail.com",
-      phone: "+260955444333",
-      alternatePhone: "",
-      address: {
-        street: "Plot 789, Cairo Road",
-        city: "Kitwe",
-        province: "Copperbelt Province",
-        postalCode: "50101",
-        country: "Zambia",
-      },
-    },
-  },
-};
+
 
 const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
   onVerified,
@@ -132,35 +21,47 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleVerify = async () => {
-    setError(null);
-    
-    if (!identityValue.trim()) {
-      setError("Please enter an NRC or SSN number");
-      return;
+const handleVerify = async () => {
+  setError(null);
+
+  if (!identityValue.trim()) {
+    setError("Please enter an NRC or SSN number");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const result = await verifyEmployeeIdentity(
+      identityType,
+      identityValue.trim()
+    );
+
+    if (result.status !== "success") {
+      throw new Error(result.message || "Verification failed");
     }
+const mappedData = {
+  identityInfo: {
+    nrc: identityType === "NRC" ? identityValue : "",
+     ssn: result.data.ssn || "",
+  },
+  personalInfo: {
+    firstName: result.data.firstName,
+    lastName: result.data.lastName,
+    gender: result.data.gender === "F" ? "Female" : "Male",
+  },
+};
 
-    setLoading(true);
 
-    // Simulate API delay
-    setTimeout(() => {
-      // Search in demo data
-      const employeeData = DEMO_EMPLOYEES[identityValue as keyof typeof DEMO_EMPLOYEES];
 
-      if (employeeData) {
-        // Found in demo database
-        onVerified(employeeData);
-      } else {
-        // Not found
-        setError(`No employee found with ${identityType}: ${identityValue}. Try these demo values:
-        
-NRC: 123456/78/9 or 987654/32/1
-SSN: SS2024001234 or SS2024009999`);
-      }
-      
-      setLoading(false);
-    }, 1000);
-  };
+    onVerified(mappedData);
+  } catch (err: any) {
+    setError(err.message || "Unable to verify identity");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -253,13 +154,7 @@ SSN: SS2024001234 or SS2024009999`);
             </div>
           )}
 
-          {/* Demo Data Info */}
-          <div className="mb-5 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs text-blue-800 font-medium mb-1">📋 Demo Mode Active</p>
-            <p className="text-xs text-blue-700">
-              Try: <span className="font-mono font-semibold">123456/78/9</span> (NRC) or <span className="font-mono font-semibold">SS2024001234</span> (SSN)
-            </p>
-          </div>
+        
 
           {/* Verify Button */}
           <button

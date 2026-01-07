@@ -11,6 +11,7 @@ const ENDPOINTS = {
   deleteEmployee: `http://41.60.191.7:8081/api/method/hrms.napsa_client.employee.api.delete_employee`,
   updateEmployee: `http://41.60.191.7:8081/api/method/hrms.napsa_client.employee.api.update_employee`,
   updateEmployeeDocuments: `http://41.60.191.7:8081/api/method/hrms.napsa_client.employee.api.manage_employee_documents`,
+  fetchEmployeeByNrc: `http://41.60.191.7:8081/api/method/hrms.napsa_client.member.api.get_napsa_member?nrc=445362/67/1`
 };
 
 export async function getAllEmployees(
@@ -70,6 +71,23 @@ export async function updateEmployeeDocuments(
         "Content-Type": "multipart/form-data",
       },
     }
+  );
+
+  return resp.data;
+}
+//verification of employee identity via NRC or SSN
+export async function verifyEmployeeIdentity(
+  type: "NRC" | "SSN",
+  value: string
+): Promise<any> {
+  const payload =
+    type === "NRC"
+      ? { nrc: value }
+      : { ssn: value };
+
+  const resp: AxiosResponse = await api.post(
+    ENDPOINTS.fetchEmployeeByNrc,
+    payload
   );
 
   return resp.data;

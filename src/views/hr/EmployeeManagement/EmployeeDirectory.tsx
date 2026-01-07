@@ -37,6 +37,10 @@ const EmployeeDirectory: React.FC = () => {
   const [viewMode, setViewMode] = useState<"table" | "detail">("table");
 const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
+
+
+
+
 //function to handle view employee details
 const handleViewEmployee = async (id: string) => {
   try {
@@ -221,6 +225,7 @@ const handleViewEmployee = async (id: string) => {
       departments={uniqueDepartments}
       level={[]}
       editData={editEmployee}
+       mode={editEmployee ? "edit" : "add"} 
     />
   </div>
 );

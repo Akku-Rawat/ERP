@@ -4,14 +4,19 @@ import React from "react";
 type PersonalInfoTabProps = {
   formData: any;
   handleInputChange: (field: string, value: string | boolean) => void;
-  isPreFilled: boolean;
+  verifiedFields: Record<string, boolean>;
 };
+
 
 const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
   formData,
   handleInputChange,
-  isPreFilled,
+  verifiedFields,
+  
 }) => {
+  const verifiedInputStyle =
+  "bg-gray-100 text-gray-600 cursor-not-allowed border-gray-300";
+
   return (
     <div className="max-w-3xl mx-auto space-y-5">
       {/* Identity & Statutory Information - TOP */}
@@ -24,28 +29,39 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             <label className="block text-xs text-gray-600 mb-1 font-medium">
               NRC Number *
             </label>
-            <input
-              type="text"
-              value={formData.nrcId}
-              onChange={(e) => handleInputChange("nrcId", e.target.value)}
-              placeholder="e.g., 559181/61/1"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
+           <input
+  type="text"
+  value={formData.nrcId}
+  disabled={verifiedFields.nrcId}
+  onChange={(e) => handleInputChange("nrcId", e.target.value)}
+  className={`w-full px-3 py-2 text-sm rounded-lg border focus:outline-none
+    ${verifiedFields.nrcId
+      ? verifiedInputStyle
+      : "border-gray-300 focus:ring-2 focus:ring-purple-500"}`}
+/>
+{verifiedFields.nrcId && (
+  <p className="text-[10px] text-green-600 mt-1 font-medium">
+    ✓ Verified from NAPSA
+  </p>
+)}
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
               SSN
             </label>
-            <input
-              type="text"
-              disabled={isPreFilled}
-              value={formData.socialSecurityNapsa}
-              onChange={(e) =>
-                handleInputChange("socialSecurityNapsa", e.target.value)
-              }
-              placeholder="e.g., 888882222"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
+           <input
+  type="text"
+  value={formData.socialSecurityNapsa}
+  disabled={verifiedFields.socialSecurityNapsa}
+  onChange={(e) =>
+    handleInputChange("socialSecurityNapsa", e.target.value)
+  }
+  className={`w-full px-3 py-2 text-sm rounded-lg border
+    ${verifiedFields.socialSecurityNapsa
+      ? verifiedInputStyle
+      : "border-gray-300 focus:ring-2 focus:ring-purple-500"}`}
+/>
+
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
@@ -86,12 +102,16 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             <label className="block text-xs text-gray-600 mb-1 font-medium">
               First Name *
             </label>
-            <input
-              type="text"
-              value={formData.firstName}
-              onChange={(e) => handleInputChange("firstName", e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
+           <input
+  value={formData.firstName}
+  disabled={verifiedFields.firstName}
+  onChange={(e) => handleInputChange("firstName", e.target.value)}
+  className={`w-full px-3 py-2 text-sm rounded-lg border
+    ${verifiedFields.firstName
+      ? verifiedInputStyle
+      : "border-gray-300 focus:ring-2 focus:ring-purple-500"}`}
+/>
+
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
@@ -108,12 +128,16 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             <label className="block text-xs text-gray-600 mb-1 font-medium">
               Last Name *
             </label>
-            <input
-              type="text"
-              value={formData.lastName}
-              onChange={(e) => handleInputChange("lastName", e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
+          <input
+  value={formData.lastName}
+  disabled={verifiedFields.lastName}
+  onChange={(e) => handleInputChange("lastName", e.target.value)}
+  className={`w-full px-3 py-2 text-sm rounded-lg border
+    ${verifiedFields.lastName
+      ? verifiedInputStyle
+      : "border-gray-300 focus:ring-2 focus:ring-purple-500"}`}
+/>
+
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
@@ -130,11 +154,16 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             <label className="block text-xs text-gray-600 mb-1 font-medium">
               Gender *
             </label>
-            <select
-              value={formData.gender}
-              onChange={(e) => handleInputChange("gender", e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
+          <select
+  value={formData.gender}
+  disabled={verifiedFields.gender}
+  onChange={(e) => handleInputChange("gender", e.target.value)}
+  className={`w-full px-3 py-2 text-sm rounded-lg border
+    ${verifiedFields.gender
+      ? verifiedInputStyle
+      : "border-gray-300 focus:ring-2 focus:ring-purple-500"}`}
+>
+
               <option value="">Select</option>
               <option>Male</option>
               <option>Female</option>

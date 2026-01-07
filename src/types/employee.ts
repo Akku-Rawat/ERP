@@ -115,3 +115,59 @@ export interface PersonalInfo {
   Nationality: string;
   maritalStatus: string;
 }
+
+// ===============================
+// UPDATE / WRITE MODEL
+// ===============================
+
+export interface UpdateEmployeePayload {
+  id: string;
+
+  // ===== Personal =====
+  Email?: string;
+  CompanyEmail?: string;
+  MaritalStatus?: string;
+  Nationality?: string;
+
+  // ===== Contact =====
+  PhoneNumber?: string;
+  AlternatePhone?: string;
+
+  // ===== Employment =====
+  JobTitle?: string;
+  EmployeeType?: string;
+  Department?: string;
+  reportingManager?: string;
+  probationPeriod?: number;
+  contractEndDate?: string;
+  workLocation?: string;
+  workAddress?: string;
+  shift?: string;
+
+  // ===== Bank =====
+  AccountName?: string;
+  AccountNumber?: string;
+  BankName?: string;
+  BranchCode?: string;
+  AccountType?: string;
+
+  // ===== Compliance =====
+  NrcId?: string;
+  TpinId?: string;
+  SocialSecurityNapsa?: string;
+  NhimaHealthInsurance?: string;
+  verifiedFromSource?: number;
+
+  // ===== Payroll =====
+  currency?: string;
+  PaymentFrequency?: string;
+  GrossSalary?: number;
+  BasicSalary?: number;
+  HousingAllowance?: number;
+  MealAllowance?: number;
+  TransportAllowance?: number;
+  otherAllowances?: number;
+
+  // ===== Status =====
+  status?: string;
+}
