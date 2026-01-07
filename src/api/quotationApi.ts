@@ -6,7 +6,7 @@ const api = createAxiosInstance(base_url);
 
 const ENDPOINTS = {
   getAllQuotations: `http://41.60.191.7:8081/api/method/erpnext.quotation.api.get_all_quotations`,
-  getQuotationDetails: `${base_url}.quotation.api.get_quotation_details`,
+  getQuotationDetails: `http://41.60.191.7:8081/api/method/erpnext.quotation.api.get_quotation_details`,
   createQuotation: `${base_url}.quotation.api.create_quotation`,
   deleteQuotation: `${base_url}.quotation.api.delete_quotation`,
   updateQuotationTerms: `${base_url}.quotation.api.update_quotation_terms_and_conditions_by_id`,
