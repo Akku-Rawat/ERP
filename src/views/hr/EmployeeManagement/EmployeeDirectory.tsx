@@ -18,6 +18,8 @@ import ActionButton, {
 
 import type { Column } from "../../../components/ui/Table/type";
 import type { EmployeeSummary, Employee } from "../../../types/employee";
+import EmployeeDetailView from "../EmployeeManagement/mployeeDetailView";
+
 
 const EmployeeDirectory: React.FC = () => {
   const [employees, setEmployees] = useState<EmployeeSummary[]>([]);
@@ -31,6 +33,22 @@ const EmployeeDirectory: React.FC = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [editEmployee, setEditEmployee] = useState<Employee | null>(null);
+  //state for detail view
+  const [viewMode, setViewMode] = useState<"table" | "detail">("table");
+const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+
+//function to handle view employee details
+const handleViewEmployee = async (id: string) => {
+  try {
+    const res = await getEmployeeById(id);
+    setSelectedEmployee(res.data ?? res);
+    setViewMode("detail");
+  } catch {
+    toast.error("Unable to load employee details");
+  }
+};
+
+
 
   const fetchEmployees = async () => {
     try {
@@ -138,10 +156,11 @@ const EmployeeDirectory: React.FC = () => {
       align: "center",
       render: (e) => (
         <ActionGroup>
-          <ActionButton
-            type="view"
-            onClick={() => handleEdit(e.id, {} as any)}
-          />
+       <ActionButton
+  type="view"
+  onClick={() => handleViewEmployee(e.id)}
+/>
+
           <ActionMenu
             onEdit={(ev) => handleEdit(e.id, ev as any)}
             onDelete={(ev) => handleDelete(e.id, ev as any)}
@@ -156,8 +175,9 @@ const EmployeeDirectory: React.FC = () => {
   ================================ */
 
   return (
-    <div className="p-8">
-      {loading ? (
+  <div className="p-8">
+    {viewMode === "table" ? (
+      loading ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           <p className="mt-2 text-muted">Loading employees…</p>
@@ -179,21 +199,32 @@ const EmployeeDirectory: React.FC = () => {
           totalItems={totalItems}
           onPageChange={setPage}
         />
-      )}
-
-      <AddEmployeeModal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setEditEmployee(null);
+      )
+    ) : selectedEmployee ? (
+      <EmployeeDetailView
+        employee={selectedEmployee}
+        onBack={() => {
+          setViewMode("table");
+          setSelectedEmployee(null);
         }}
-        onSuccess={handleSaved}
-        departments={uniqueDepartments}
-        level={[]}
-        editData={editEmployee}
       />
-    </div>
-  );
+    ) : null}
+
+    {/* Add / Edit Modal */}
+    <AddEmployeeModal
+      isOpen={showModal}
+      onClose={() => {
+        setShowModal(false);
+        setEditEmployee(null);
+      }}
+      onSuccess={handleSaved}
+      departments={uniqueDepartments}
+      level={[]}
+      editData={editEmployee}
+    />
+  </div>
+);
+
 };
 
 export default EmployeeDirectory;
