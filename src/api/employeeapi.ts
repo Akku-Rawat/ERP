@@ -43,14 +43,14 @@ export async function createEmployee(payload: any): Promise<any> {
   return resp.data;
 }
 
-export async function updateEmployeeById(
-  id: string,
-  payload: any
-): Promise<any> {
-  const url = `${ENDPOINTS.updateEmployee}?id=${id}`;
-  const resp: AxiosResponse = await api.patch(url, payload);
+export async function updateEmployeeById(payload: any): Promise<any> {
+  const resp = await api.patch(
+    ENDPOINTS.updateEmployee,
+    payload
+  );
   return resp.data;
 }
+
 
 export async function deleteEmployeeById(id: string): Promise<any> {
   const url = `${ENDPOINTS.deleteEmployee}?id=${id}`;
@@ -59,14 +59,12 @@ export async function deleteEmployeeById(id: string): Promise<any> {
 }
 
 export async function updateEmployeeDocuments(
-  employee_id: string,
-  payload: any
+  payload: FormData
 ): Promise<any> {
-  const resp: AxiosResponse = await api.post(
+  const resp: AxiosResponse = await api.put(
     ENDPOINTS.updateEmployeeDocuments,
     payload,
     {
-      params: { employee_id },
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -75,6 +73,7 @@ export async function updateEmployeeDocuments(
 
   return resp.data;
 }
+
 //verification of employee identity via NRC or SSN
 export async function verifyEmployeeIdentity(
   type: "NRC" | "SSN",

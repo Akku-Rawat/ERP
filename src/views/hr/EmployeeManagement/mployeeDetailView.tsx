@@ -7,6 +7,8 @@ import {
   Download,
 
 } from "lucide-react";
+import DocumentUploadModal from "../../../components/Hr/employeedirectorymodal/DocumentModal";
+import { updateEmployeeDocuments } from "../../../api/employeeapi";
 
 type Props = {
   employee: Employee;
@@ -21,6 +23,7 @@ const getFileUrl = (file?: string | null) => {
 
 const EmployeeDetailView: React.FC<Props> = ({ employee, onBack }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'documents'>('overview');
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     personal: true,
     employment: true,
@@ -45,9 +48,10 @@ const EmployeeDetailView: React.FC<Props> = ({ employee, onBack }) => {
 
 
 
-  const handleUploadDocument = () => {
-    console.log("Upload new document");
-  };
+const handleUploadDocument = () => {
+  setShowUploadModal(true);
+};
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -395,8 +399,31 @@ const EmployeeDetailView: React.FC<Props> = ({ employee, onBack }) => {
           </div>
         )}
       </div>
+{showUploadModal && (
+  <DocumentUploadModal
+    onClose={() => setShowUploadModal(false)}
+    onUpload={async ({ description, file }) => {
+  const formData = new FormData();
+
+formData.append("employeeId", employee.id);    
+formData.append("name[0]", description);       
+formData.append("description[0]", description);
+formData.append("file[0]", file);
+formData.append("isUpdate", "1");
+formData.append("isDelete", "0");
+
+
+await updateEmployeeDocuments(formData);
+
+}}    
+  />)}
+    
     </div>
+    
+  
   );
+  
+  
 };
 
 /* Collapsible Section Component */
@@ -448,5 +475,6 @@ const DeductionRow = ({ label, value }: any) => (
     <span className="text-sm font-bold text-red-600 dark:text-red-400">{value}</span>
   </div>
 );
+
 
 export default EmployeeDetailView;

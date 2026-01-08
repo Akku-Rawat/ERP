@@ -28,6 +28,8 @@ interface TableProps<T> {
   onPageChange?: (page: number) => void;
   addLabel?: string;
   rowKey?: (row: T) => string;
+
+  serverSide?: boolean;
 }
 
 /**
@@ -209,6 +211,8 @@ function Table<T extends Record<string, any>>({
   totalItems = 0,
   onPageChange,
   onSearch,
+   serverSide = false,
+  
 }: TableProps<T>) {
   const {
     effectiveSearch,
@@ -228,6 +232,7 @@ function Table<T extends Record<string, any>>({
     sortOrder,
     setSortOrder,
     processedData,
+    
   } = useTableLogic<T>({ columns, data, searchValue });
 
   // Reference for the filter button (used for dropdown positioning)
@@ -271,7 +276,8 @@ function Table<T extends Record<string, any>>({
     );
   }
 
- const displayData = processedData ?? [];
+ const displayData = serverSide ? data : processedData ?? [];
+
 
 
   return (

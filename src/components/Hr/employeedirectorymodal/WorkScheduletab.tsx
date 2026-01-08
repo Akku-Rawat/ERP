@@ -73,12 +73,8 @@ export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({
     if (schedule) {
       setScheduleDetails(schedule);
       
-      // Apply schedule pattern to form
-      Object.entries(schedule.pattern).forEach(([day, value]) => {
-        handleInputChange(day, value);
-      });
-      
-      handleInputChange("workSchedule", selectedSchedule);
+handleInputChange("workSchedule", selectedSchedule);
+
       handleInputChange("workScheduleDetails", schedule);
     }
   }, [selectedSchedule]);

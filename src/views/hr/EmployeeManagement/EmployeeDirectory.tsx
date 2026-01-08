@@ -57,7 +57,7 @@ const handleViewEmployee = async (id: string) => {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const res = await getAllEmployees(page, pageSize);
+     const res = await getAllEmployees(page, pageSize, searchTerm);
       console.log(res);
       setEmployees(res.data.employees);
       setTotalPages(res.data.pagination?.total_pages || 1);
@@ -70,10 +70,9 @@ const handleViewEmployee = async (id: string) => {
     }
   };
 
-  useEffect(() => {
-    fetchEmployees();
-  }, [page]);
-
+useEffect(() => {
+  fetchEmployees();
+}, [page]);
   /* ===============================
      ACTION HANDLERS
   ================================ */
@@ -114,16 +113,7 @@ const handleViewEmployee = async (id: string) => {
     toast.success(editEmployee ? "Employee updated" : "Employee added");
   };
 
-  /* ===============================
-     FILTERING
-  ================================ */
 
-  const filteredEmployees = employees.filter((e) =>
-    [e.id, e.name, e.jobTitle, e.department, e.workLocation, e.status]
-      .join(" ")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
 
   const uniqueDepartments = Array.from(
     new Set(employees.map((e) => e.department))
@@ -134,7 +124,7 @@ const handleViewEmployee = async (id: string) => {
   ================================ */
 
   const columns: Column<EmployeeSummary>[] = [
-    { key: "id", header: "Employee ID", align: "left" },
+    { key: "employeeId", header: "Employee ID", align: "left" },
     { key: "name", header: "Name", align: "left" },
     { key: "jobTitle", header: "Job Title", align: "left" },
     {
@@ -189,7 +179,8 @@ const handleViewEmployee = async (id: string) => {
       ) : (
         <Table
           columns={columns}
-          data={filteredEmployees}
+          data={employees}
+          serverSide  
           showToolbar
           searchValue={searchTerm}
           onSearch={setSearchTerm}

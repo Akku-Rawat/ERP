@@ -20,8 +20,12 @@ import {
   getLevelsFromHrSettings,
   getDefaultGrossSalary
 } from "../../../views/hr/tabs/salarystructure";
-import DocumentsTab from "./DocumentsTab";
-import { createEmployee } from "../../../api/employeeapi";
+
+import { createEmployee, updateEmployeeById } from "../../../api/employeeapi";
+
+
+
+
 
 
 const DEFAULT_FORM_DATA = {
@@ -46,21 +50,24 @@ const DEFAULT_FORM_DATA = {
   province: "",
   postalCode: "",
   country: "Zambia",
+emergencyContactName: "",
+emergencyContactPhone: "",
+emergencyContactRelationship: "",
 
-  emergencyContactName: "",
-  emergencyContactPhone: "",
-  emergencyContactRelationship: "",
+
 
   employeeId: "",
   department: "",
   jobTitle: "",
   employmentStatus: "Active",
-  reportingManager: "",
+ reportingManager: "",
   employeeType: "Permanent",
   engagementDate: "",
-  probationPeriod: "3",
-  contractEndDate: "",
-  workLocation: "",
+
+ contractEndDate: "",
+workLocation: "",
+ workAddress: "",
+ probationPeriod: "",
   shift: "Day Shift",
 
   nrcId: "",
@@ -85,13 +92,7 @@ const DEFAULT_FORM_DATA = {
   ceilingYear: "2025",
   ceilingAmount: "",
 
-  monday: "Office",
-  tuesday: "Office",
-  wednesday: "Office",
-  thursday: "Office",
-  friday: "Office",
-  saturday: "Off",
-  sunday: "Off",
+workSchedule: "",
 
   notes: "",
   
@@ -106,10 +107,10 @@ const TAB_ORDER = [
   "Leave-Setup",
   "Compensation & Payroll",
   "Work Schedule",
-  "Documents",
+ 
 ] as const;
 
-type TabKey = typeof TAB_ORDER[number];
+
 
 type AddEmployeeModalProps = {
   isOpen: boolean;
@@ -122,13 +123,7 @@ type AddEmployeeModalProps = {
   mode?: "add" | "edit";
 };
 
-type DocumentUpload = {
-  uploaded: boolean;
-  fileName?: string;
-  fileUrl?: string;
-  file?: File;
-  category?: string;
-};
+
 
 const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   isOpen,
@@ -145,28 +140,16 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   const activeTab = TAB_ORDER[currentTabIndex];
   const isLastTab = currentTabIndex === TAB_ORDER.length - 1;
   const [isPreFilled, setIsPreFilled] = useState(false);
-  const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
+  
   const [verifiedFields, setVerifiedFields] = useState<Record<string, boolean>>({});
 
-  const [customDoc, setCustomDoc] = useState<{
-    name: string;
-    category: string;
-    file: File | null;
-  }>({
-    name: "",
-    category: "",
-    file: null,
-  });
+
+
   
   const levelsFromHrSettings = getLevelsFromHrSettings();
 
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
-  const [documents, setDocuments] = useState<Record<string, DocumentUpload>>({
-    NRC: { uploaded: false },
-    CV: { uploaded: false },
-    EducationCertificates: { uploaded: false },
-    PoliceReport: { uploaded: false },
-  });
+ 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -248,9 +231,13 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     postalCode: editData.contactInfo?.address?.postalCode || "",
     country: editData.contactInfo?.address?.country || "Zambia",
 
-    emergencyContactName: editData.contactInfo?.emergencyContact?.name || "",
-    emergencyContactPhone: editData.contactInfo?.emergencyContact?.phone || "",
-    emergencyContactRelationship: editData.contactInfo?.emergencyContact?.relationship || "",
+
+    emergencyContactName: editData.contactInfo?.emergencyContact?.name ?? "",
+
+   emergencyContactPhone: editData.contactInfo?.emergencyContact?.phone ?? "",
+
+emergencyContactRelationship:
+  editData.contactInfo?.emergencyContact?.relationship ?? "",
 
     // EMPLOYMENT
     employeeId: editData.employmentInfo?.employeeId || "",
@@ -365,39 +352,12 @@ useEffect(() => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const addCustomDocument = (payload: { name: string; category: string; file: File }) => {
-    const { name, category, file } = payload;
-    setDocuments((prev) => ({
-      ...prev,
-      [name]: {
-        uploaded: true,
-        fileName: file.name,
-        fileUrl: URL.createObjectURL(file),
-        file,
-        category,
-      },
-    }));
-  };
+ 
 
-  const handleFileUpload = (docType: string, file: File) => {
-    setDocuments((prev) => ({
-      ...prev,
-      [docType]: {
-        uploaded: true,
-        fileName: file.name,
-        fileUrl: URL.createObjectURL(file),
-        file: file,
-      },
-    }));
-    setUploadingDoc(null);
-  };
 
-  const removeDocument = (docType: string) => {
-    setDocuments((prev) => ({
-      ...prev,
-      [docType]: { uploaded: false },
-    }));
-  };
+
+
+
 
   const buildPayload = () => ({
     FirstName: formData.firstName,
@@ -405,15 +365,34 @@ useEffect(() => {
     OtherNames: formData.otherNames,
     EmployeeId: formData.employeeId,
     EngagementDate: formData.engagementDate,
+    contractEndDate: formData.contractEndDate,
     Dob: formData.dateOfBirth,
     Gender: formData.gender,
     Email: formData.email,
+    workLocation: formData.workLocation, 
+   workAddress: formData.workAddress,
      CompanyEmail: formData.CompanyEmail,
     MaritalStatus: formData.maritalStatus,
+    ReportingManager: formData.reportingManager,
     PhoneNumber: formData.phoneNumber,
     AlternatePhone: formData.alternatePhone,
     JobTitle: formData.jobTitle,
+    reportingManager: formData.reportingManager,
+    probationPeriod: formData.probationPeriod,
+    //ADRESSS
+    addressStreet: formData.street,
+    addressCity: formData.city,
+    addressProvince: formData.province,
+    addressPostalCode: formData.postalCode,
+    addressCountry: formData.country,
+    DepartmentId: formData.department,
+    //EMERGENCY CONTACT
+    emergencyContactName: formData.emergencyContactName,
+    emergencyContactPhone: formData.emergencyContactPhone,
+    emergencyContactRelationship: formData.emergencyContactRelationship,
+
     Department: formData.department,
+  
     Level: formData.level,
     EmployeeType: formData.employeeType,
     EmploymentStatus: formData.employmentStatus,
@@ -429,49 +408,46 @@ useEffect(() => {
     NhimaHealthInsurance: formData.nhimaHealthInsurance,
     TpinId: formData.tpinId,
     NrcId: formData.nrcId,
-    weeklySchedule: {
-  Monday: formData.monday,
-  Tuesday: formData.tuesday,
-  Wednesday: formData.wednesday,
-  Thursday: formData.thursday,
-  Friday: formData.friday,
-  Saturday: formData.saturday,
-  Sunday: formData.sunday,
-},
+
+ WorkScheduleId: formData.workSchedule,
 
     OpeningLeaveBalance: formData.openingLeaveBalance,
     InitialLeaveRateMonthly: Number(formData.initialLeaveRateMonthly),
     CeilingYear: Number(formData.ceilingYear),
     CeilingAmount: Number(formData.ceilingAmount),
-    Documents: Object.entries(documents).reduce(
-      (acc, [key, doc]) => ({
-        ...acc,
-        [key]: {
-          uploaded: doc.uploaded,
-          fileName: doc.fileName,
-          fileUrl: doc.fileUrl,
-        },
-      }),
-      {}
-    ),
+   
 
   });
 
- const handleSave = async () => {
+const handleSave = async () => {
   setLoading(true);
   setError(null);
 
   try {
-    const payload = buildPayload();
-    await createEmployee(payload);  
-    onSuccess?.();                   
-    onClose();                      
+    if (editData?.id) {
+      // ✅ EDIT FLOW
+      const payload = {
+        id: String(editData.id), // backend expects this
+        ...buildPayload(),
+      };
+
+      await updateEmployeeById(payload);
+    } else {
+      // ✅ CREATE FLOW
+      await createEmployee(buildPayload());
+    }
+
+    onSuccess?.();
+    onClose();
   } catch (e: any) {
-    setError(e.message || "Failed to create employee");
+    setError(e.message || "Failed to save employee");
   } finally {
     setLoading(false);
   }
 };
+
+
+
 
   if (!isOpen) return null;
 
@@ -654,13 +630,7 @@ useEffect(() => {
             />
           )}
 
-          {activeTab === "Documents" && (
-            <DocumentsTab
-              documents={documents}
-              setUploadingDoc={setUploadingDoc}
-              removeDocument={removeDocument}
-            />
-          )}
+         
         </div>
 
         {/* Footer */}
@@ -701,188 +671,8 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Document Upload Modal */}
-        {uploadingDoc && uploadingDoc !== "CUSTOM" && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
-            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-sm font-semibold text-gray-800">
-                  Upload Document
-                </h3>
-                <button
-                  onClick={() => setUploadingDoc(null)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-sm text-gray-600 mb-2">
-                  Upload {uploadingDoc === "NRC" && "National Registration Card"}
-                  {uploadingDoc === "CV" && "Curriculum Vitae"}
-                  {uploadingDoc === "EducationCertificates" &&
-                    "Education Certificates"}
-                  {uploadingDoc === "PoliceReport" && "Police Clearance Report"}
-                </p>
-                <p className="text-xs text-gray-500 mb-4">
-                  PDF, JPG, PNG up to 10MB
-                </p>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleFileUpload(uploadingDoc, file);
-                    }
-                  }}
-                  className="hidden"
-                  id="file-upload"
-                />
-                <label
-                  htmlFor="file-upload"
-                  className="inline-block px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 cursor-pointer transition"
-                >
-                  Browse Files
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/*  Custom Document Upload Modal */}
-        {uploadingDoc === "CUSTOM" && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70]">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-              {/* Header */}
-              <div className="flex justify-between items-center px-5 py-4 border-b">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-800">Add Other Document</h3>
-                  <p className="text-xs text-gray-500">Upload additional employee documents</p>
-                </div>
-                <button onClick={() => setUploadingDoc(null)}>
-                  <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="p-5 space-y-4">
-                {/* Document Name */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Document Name
-                  </label>
-                  <input
-                    value={customDoc.name}
-                    onChange={(e) =>
-                      setCustomDoc((p) => ({ ...p, name: e.target.value }))
-                    }
-                    placeholder="e.g. Bank Statement"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  />
-                </div>
-
-                {/* Document Category */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Document Category
-                  </label>
-                  <select
-                    value={customDoc.category}
-                    onChange={(e) =>
-                      setCustomDoc((p) => ({ ...p, category: e.target.value }))
-                    }
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  >
-                    <option value="">Select category</option>
-                    <option value="Identity">Identity</option>
-                    <option value="Employment">Employment</option>
-                    <option value="Financial">Financial</option>
-                    <option value="Medical">Medical</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                {/* Upload Box */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                    Upload Document
-                  </label>
-
-                  <label
-                    htmlFor="custom-doc-upload"
-                    className="flex flex-col items-center justify-center gap-2 p-5 border-2 border-dashed rounded-lg cursor-pointer transition
-                      border-gray-300 hover:border-purple-500 bg-gray-50 hover:bg-purple-50"
-                  >
-                    <Upload className="w-8 h-8 text-purple-500" />
-
-                    {customDoc.file ? (
-                      <>
-                        <p className="text-sm font-medium text-gray-700">
-                          {customDoc.file.name}
-                        </p>
-                        <p className="text-xs text-green-600">File selected</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm text-gray-600">
-                          Click to upload or drag & drop
-                        </p>
-                        <p className="text-xs text-gray-400">PDF, JPG, PNG (Max 10MB)</p>
-                      </>
-                    )}
-
-                    <input
-                      id="custom-doc-upload"
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      className="hidden"
-                      onChange={(e) =>
-                        setCustomDoc((p) => ({
-                          ...p,
-                          file: e.target.files?.[0] || null,
-                        }))
-                      }
-                    />
-                  </label>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="px-5 py-4 border-t flex justify-end gap-3 bg-gray-50">
-                <button
-                  onClick={() => {
-                    setUploadingDoc(null);
-                    setCustomDoc({ name: "", category: "", file: null });
-                  }}
-                  className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    if (!customDoc.name || !customDoc.category || !customDoc.file) {
-                      alert("Please fill all fields");
-                      return;
-                    }
-                    addCustomDocument({
-                      name: customDoc.name,
-                      category: customDoc.category,
-                      file: customDoc.file,
-                    });
-                    setUploadingDoc(null);
-                    setCustomDoc({ name: "", category: "", file: null });
-                  }}
-                  disabled={!customDoc.name || !customDoc.category || !customDoc.file}
-                  className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Save Document
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+      
+        
       </div>
     </div>
   );
