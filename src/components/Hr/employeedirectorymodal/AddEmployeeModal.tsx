@@ -28,11 +28,9 @@ import { createEmployee, updateEmployeeById } from "../../../api/employeeapi";
 
 
 
-const DEFAULT_FORM_DATA = {
-  level: "",
-  salaryStructure: "",
-  salaryStructureSource: "",
 
+const DEFAULT_FORM_DATA = {
+  // Personal
   firstName: "",
   otherNames: "",
   lastName: "",
@@ -41,6 +39,7 @@ const DEFAULT_FORM_DATA = {
   nationality: "Zambian",
   maritalStatus: "",
 
+  // Contact
   email: "",
   CompanyEmail: "",
   phoneNumber: "",
@@ -50,54 +49,73 @@ const DEFAULT_FORM_DATA = {
   province: "",
   postalCode: "",
   country: "Zambia",
-emergencyContactName: "",
-emergencyContactPhone: "",
-emergencyContactRelationship: "",
+  emergencyContactName: "",
+  emergencyContactPhone: "",
+  emergencyContactRelationship: "",
 
-
-
+  // Employment
   employeeId: "",
   department: "",
   jobTitle: "",
   employmentStatus: "Active",
- reportingManager: "",
+  reportingManager: "",
   employeeType: "Permanent",
   engagementDate: "",
+  contractEndDate: "",
+  workLocation: "",
+  workAddress: "",
+  probationPeriod: "",
+  shift: "Day",
 
- contractEndDate: "",
-workLocation: "",
- workAddress: "",
- probationPeriod: "",
-  shift: "Day Shift",
-
+  // IDs
   nrcId: "",
   socialSecurityNapsa: "",
   nhimaHealthInsurance: "",
   tpinId: "",
 
-  grossSalaryStarting: "",
+  // ✅ NEW: Salary Components (matching backend)
+  basicSalary: "",
+  housingAllowance: "",
+  mealAllowance: "",
+  transportAllowance: "",
+  otherAllowances: "",
+  grossSalary: "",
+  
+  // Payroll
   currency: "ZMW",
   paymentFrequency: "Monthly",
-  paymentMethod: "BANK",
+  paymentMethod: "Bank Transfer",
 
+  // Bank
   accountName: "",
   accountNumber: "",
   bankName: "",
   branchCode: "",
   accountType: "Savings",
 
+  // Leave
   openingLeaveBalance: "Incremental two (2) days per month of service",
   initialLeaveRateMonthly: "2",
-
   ceilingYear: "2025",
   ceilingAmount: "",
 
-workSchedule: "",
+  // Work Schedule
+  weeklyScheduleMonday: "",
+  weeklyScheduleTuesday: "",
+  weeklyScheduleWednesday: "",
+  weeklyScheduleThursday: "",
+  weeklyScheduleFriday: "",
+  weeklyScheduleSaturday: "",
+  weeklyScheduleSunday: "",
 
   notes: "",
   
-  // ✅ Custom salary components
-  customSalaryComponents: [],
+  
+  // level: "",
+  // salaryStructure: "",
+  // salaryStructureSource: "",
+  // grossSalaryStarting: "",
+  // customSalaryComponents: [],
 };
 
 const TAB_ORDER = [
@@ -153,39 +171,10 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ Auto-set salary structure and gross when level changes
-  useEffect(() => {
-    if (!formData.level) return;
 
-    const structureId = getSalaryStructureByLevel(formData.level);
-    if (!structureId) return;
-
-    const defaultGross = getDefaultGrossSalary(structureId);
-
-    setFormData(prev => ({
-      ...prev,
-      salaryStructure: structureId,
-      salaryStructureSource: "AUTO",
-      grossSalaryStarting: defaultGross ? defaultGross.toString() : prev.grossSalaryStarting,
-    }));
-  }, [formData.level]);
 
   // Auto-set salary structure when job title changes
-  useEffect(() => {
-    if (!formData.jobTitle) return;
-
-    const structureId = getSalaryStructureByDesignation(formData.jobTitle);
-    if (!structureId) return;
-
-    const defaultGross = getDefaultGrossSalary(structureId);
-
-    setFormData(prev => ({
-      ...prev,
-      salaryStructure: structureId,
-      salaryStructureSource: "AUTO",
-      grossSalaryStarting: defaultGross ? defaultGross.toString() : prev.grossSalaryStarting,
-    }));
-  }, [formData.jobTitle]);
+  
 
   useEffect(() => {
     if (!editData) return;
@@ -202,7 +191,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     }
   }, [isOpen, editData]);
 
- useEffect(() => {
+useEffect(() => {
   if (!editData) return;
 
   setStep("form");
@@ -211,60 +200,92 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   setFormData(prev => ({
     ...prev,
 
-    // PERSONAL
+    // ===== PERSONAL INFO =====
     firstName: editData.personalInfo?.FirstName || "",
-    otherNames: editData.personalInfo?.OtherNames || "",
+    OtherNames: editData.personalInfo?.OtherNames || "",
     lastName: editData.personalInfo?.LastName || "",
     dateOfBirth: editData.personalInfo?.Dob || "",
     gender: editData.personalInfo?.Gender || "",
-    nationality: editData.personalInfo?.Nationality || "",
+    nationality: editData.personalInfo?.Nationality || "Zambian",
     maritalStatus: editData.personalInfo?.maritalStatus || "",
 
-    // CONTACT
+    // ===== CONTACT INFO =====
     email: editData.contactInfo?.Email || "",
     CompanyEmail: editData.contactInfo?.workEmail || "",
     phoneNumber: editData.contactInfo?.phoneNumber || "",
     alternatePhone: editData.contactInfo?.alternatePhone || "",
+    
+    // Address
     street: editData.contactInfo?.address?.street || "",
     city: editData.contactInfo?.address?.city || "",
     province: editData.contactInfo?.address?.province || "",
     postalCode: editData.contactInfo?.address?.postalCode || "",
     country: editData.contactInfo?.address?.country || "Zambia",
 
+    // Emergency Contact
+    emergencyContactName: editData.contactInfo?.emergencyContact?.name || "",
+    emergencyContactPhone: editData.contactInfo?.emergencyContact?.phone || "",
+    emergencyContactRelationship: editData.contactInfo?.emergencyContact?.relationship || "",
 
-    emergencyContactName: editData.contactInfo?.emergencyContact?.name ?? "",
-
-   emergencyContactPhone: editData.contactInfo?.emergencyContact?.phone ?? "",
-
-emergencyContactRelationship:
-  editData.contactInfo?.emergencyContact?.relationship ?? "",
-
-    // EMPLOYMENT
+    // ===== EMPLOYMENT INFO =====
     employeeId: editData.employmentInfo?.employeeId || "",
     department: editData.employmentInfo?.Department || "",
     jobTitle: editData.employmentInfo?.JobTitle || "",
-    employeeType: editData.employmentInfo?.EmployeeType || "",
+    employeeType: editData.employmentInfo?.EmployeeType || "Permanent",
+    employmentStatus: editData.status || "Active",
     engagementDate: editData.employmentInfo?.joiningDate || "",
     probationPeriod: editData.employmentInfo?.probationPeriod || "",
     contractEndDate: editData.employmentInfo?.contractEndDate || "",
     workLocation: editData.employmentInfo?.workLocation || "",
     workAddress: editData.employmentInfo?.workAddress || "",
-    shift: editData.employmentInfo?.shift || "",
+    shift: editData.employmentInfo?.shift || "Day",
+    reportingManager: editData.employmentInfo?.reportingManager || "",
 
-    // STATUS
-    employmentStatus: editData.status || "Active",
+    // ===== IDs =====
+    NrcId: editData.identityInfo?.nrc || "",
+    SocialSecurityNapsa: editData.identityInfo?.napsa || "",
+    nhimaHealthInsurance: editData.identityInfo?.nhima || "",
+    TpinId: editData.identityInfo?.tpin || "",
 
-    // PAYROLL (basic safe fill)
-    grossSalaryStarting: editData.payrollInfo?.grossSalary || "",
+ // ===== SALARY COMPONENTS =====
+basicSalary: editData.payrollInfo?.salaryBreakdown?.BasicSalary || "",
+housingAllowance: editData.payrollInfo?.salaryBreakdown?.HousingAllowance || "",
+mealAllowance: editData.payrollInfo?.salaryBreakdown?.MealAllowance || "",
+transportAllowance: editData.payrollInfo?.salaryBreakdown?.TransportAllowance || "",
+otherAllowances: editData.payrollInfo?.salaryBreakdown?.otherAllowances || "",
+grossSalary: editData.payrollInfo?.grossSalary || "",
+
+
+    // ===== PAYROLL CONFIG =====
     currency: editData.payrollInfo?.currency || "ZMW",
-    paymentFrequency: editData.payrollInfo?.paymentFrequency || "",
-    paymentMethod: editData.payrollInfo?.paymentMethod || "BANK",
+    paymentFrequency: editData.payrollInfo?.paymentFrequency || "Monthly",
+    paymentMethod: editData.payrollInfo?.paymentMethod || "Bank Transfer",
 
+    // ===== BANK DETAILS =====
     accountNumber: editData.payrollInfo?.bankAccount?.AccountNumber || "",
     accountName: editData.payrollInfo?.bankAccount?.AccountName || "",
     bankName: editData.payrollInfo?.bankAccount?.BankName || "",
     branchCode: editData.payrollInfo?.bankAccount?.branchCode || "",
     accountType: editData.payrollInfo?.bankAccount?.AccountType || "Savings",
+
+    // ===== LEAVE SETUP =====
+    openingLeaveBalance: editData.leaveInfo?.openingLeaveBalance || "Incremental two (2) days per month of service",
+    initialLeaveRateMonthly: editData.leaveInfo?.initialLeaveRateMonthly?.toString() || "2",
+    ceilingYear: editData.leaveInfo?.ceilingYear?.toString() || "2025",
+    ceilingAmount: editData.leaveInfo?.ceilingAmount?.toString() || "",
+
+    // ===== WORK SCHEDULE =====
+
+weeklyScheduleMonday: editData.employmentInfo?.weeklySchedule?.monday || "",
+weeklyScheduleTuesday: editData.employmentInfo?.weeklySchedule?.tuesday || "",
+weeklyScheduleWednesday: editData.employmentInfo?.weeklySchedule?.wednesday || "",
+weeklyScheduleThursday: editData.employmentInfo?.weeklySchedule?.thursday || "",
+weeklyScheduleFriday: editData.employmentInfo?.weeklySchedule?.friday || "",
+weeklyScheduleSaturday: editData.employmentInfo?.weeklySchedule?.saturday || "",
+weeklyScheduleSunday: editData.employmentInfo?.weeklySchedule?.sunday || "",
+
+    // ===== NOTES =====
+    notes: editData.notes || "",
   }));
 }, [editData]);
 
@@ -304,34 +325,35 @@ useEffect(() => {
     };
   }, [isOpen]);
 
-  const validateCurrentTab = (): string | null => {
-    switch (activeTab) {
-      case "Personal":
-        if (!formData.firstName || !formData.lastName)
-          return "First name and last name are required";
-        if (!formData.dateOfBirth || !formData.gender)
-          return "Date of birth and gender are required";
-        return null;
+const validateCurrentTab = (): string | null => {
+  switch (activeTab) {
+    case "Personal":
+      if (!formData.firstName || !formData.lastName)
+        return "First name and last name are required";
+      if (!formData.dateOfBirth || !formData.gender)
+        return "Date of birth and gender are required";
+      return null;
 
-      case "Contact":
-        if (!formData.email || !formData.phoneNumber)
-          return "Email and phone number are required";
-        return null;
+    case "Contact":
+      if (!formData.email || !formData.phoneNumber)
+        return "Email and phone number are required";
+      return null;
 
-      case "Employment":
-        if (!formData.department || !formData.jobTitle || !formData.engagementDate)
-          return "Department, job title and engagement date are required";
-        return null;
+    case "Employment":
+      if (!formData.department || !formData.jobTitle || !formData.engagementDate)
+        return "Department, job title and engagement date are required";
+      return null;
 
-      case "Compensation & Payroll":
-        if (!formData.salaryStructure || !formData.grossSalaryStarting)
-          return "Salary structure and gross salary are required";
-        return null;
+    case "Compensation & Payroll":
+    
+      if (!formData.basicSalary)
+        return "Basic salary is required";
+      return null;
 
-      default:
-        return null;
-    }
-  };
+    default:
+      return null;
+  }
+};
 
   const handleNext = () => {
     const error = validateCurrentTab();
@@ -359,7 +381,17 @@ useEffect(() => {
 
 
 
-  const buildPayload = () => ({
+
+const buildPayload = () => {
+  const basicSalaryNum = Number(formData.basicSalary) || 0;
+  
+  // ✅ Calculate actual amounts (convert percentage to amount if needed)
+  const housingAmount = Number(formData.housingAllowance) || 0;
+  const mealAmount = Number(formData.mealAllowance) || 0;
+  const transportAmount = Number(formData.transportAllowance) || 0;
+  const otherAmount = Number(formData.otherAllowances) || 0;
+
+  const payload: any = {
     FirstName: formData.firstName,
     LastName: formData.lastName,
     OtherNames: formData.otherNames,
@@ -369,56 +401,81 @@ useEffect(() => {
     Dob: formData.dateOfBirth,
     Gender: formData.gender,
     Email: formData.email,
-    workLocation: formData.workLocation, 
-   workAddress: formData.workAddress,
-     CompanyEmail: formData.CompanyEmail,
+    CompanyEmail: formData.CompanyEmail,
     MaritalStatus: formData.maritalStatus,
-    ReportingManager: formData.reportingManager,
+    Nationality: formData.nationality,
     PhoneNumber: formData.phoneNumber,
     AlternatePhone: formData.alternatePhone,
-    JobTitle: formData.jobTitle,
-    reportingManager: formData.reportingManager,
-    probationPeriod: formData.probationPeriod,
-    //ADRESSS
+    
+    // Address
     addressStreet: formData.street,
     addressCity: formData.city,
     addressProvince: formData.province,
     addressPostalCode: formData.postalCode,
     addressCountry: formData.country,
-    DepartmentId: formData.department,
-    //EMERGENCY CONTACT
+    
+    // Emergency Contact
     emergencyContactName: formData.emergencyContactName,
     emergencyContactPhone: formData.emergencyContactPhone,
     emergencyContactRelationship: formData.emergencyContactRelationship,
-
+    
+    // Employment
     Department: formData.department,
-  
-    Level: formData.level,
+    JobTitle: formData.jobTitle,
     EmployeeType: formData.employeeType,
-    EmploymentStatus: formData.employmentStatus,
+    status: formData.employmentStatus,
+    ReportingManager: formData.reportingManager,
+    probationPeriod: formData.probationPeriod,
+    workLocation: formData.workLocation,
+    workAddress: formData.workAddress,
+    shift: formData.shift,
+    
+    // IDs
+    NrcId: formData.nrcId,
+    SocialSecurityNapsa: formData.socialSecurityNapsa,
+    NhimaHealthInsurance: formData.nhimaHealthInsurance,
+    TpinId: formData.tpinId,
+    
+    // ✅ Salary Components - ALWAYS send final amounts
+    BasicSalary: basicSalaryNum,
+    HousingAllowance: housingAmount,
+    MealAllowance: mealAmount,
+    TransportAllowance: transportAmount,
+    otherAllowances: otherAmount,
+    GrossSalary: Number(formData.grossSalary) || 0,
+    
+    // Payroll
+    currency: formData.currency,
+    PaymentFrequency: formData.paymentFrequency,
+    PaymentMethod: formData.paymentMethod,
+    
+    // Bank
     AccountType: formData.accountType,
     BankName: formData.bankName,
     AccountName: formData.accountName,
     AccountNumber: formData.accountNumber,
-    PaymentMethod: formData.paymentMethod,
-    GrossSalaryStarting: Number(formData.grossSalaryStarting),
-    SalaryStructure: formData.salaryStructure,
-    CustomSalaryComponents: formData.customSalaryComponents,
-    SocialSecurityNapsa: formData.socialSecurityNapsa,
-    NhimaHealthInsurance: formData.nhimaHealthInsurance,
-    TpinId: formData.tpinId,
-    NrcId: formData.nrcId,
-
- WorkScheduleId: formData.workSchedule,
-
+    BranchCode: formData.branchCode,
+    
+    // Work Schedule - ✅ Send as empty string instead of undefined/null
+    weeklyScheduleMonday: formData.weeklyScheduleMonday || "",
+    weeklyScheduleTuesday: formData.weeklyScheduleTuesday || "",
+    weeklyScheduleWednesday: formData.weeklyScheduleWednesday || "",
+    weeklyScheduleThursday: formData.weeklyScheduleThursday || "",
+    weeklyScheduleFriday: formData.weeklyScheduleFriday || "",
+    weeklyScheduleSaturday: formData.weeklyScheduleSaturday || "",
+    weeklyScheduleSunday: formData.weeklyScheduleSunday || "",
+    
+    // Leave
     OpeningLeaveBalance: formData.openingLeaveBalance,
-    InitialLeaveRateMonthly: Number(formData.initialLeaveRateMonthly),
-    CeilingYear: Number(formData.ceilingYear),
-    CeilingAmount: Number(formData.ceilingAmount),
-   
+    InitialLeaveRateMonthly: Number(formData.initialLeaveRateMonthly) || 0,
+    CeilingYear: Number(formData.ceilingYear) || 0,
+    CeilingAmount: Number(formData.ceilingAmount) || 0,
+    
+    verifiedFromSource: !!verifiedData,
+  };
 
-  });
-
+  return payload;
+};
 const handleSave = async () => {
   setLoading(true);
   setError(null);

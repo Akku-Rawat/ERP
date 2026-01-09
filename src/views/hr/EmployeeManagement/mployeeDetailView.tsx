@@ -13,6 +13,7 @@ import { updateEmployeeDocuments } from "../../../api/employeeapi";
 type Props = {
   employee: Employee;
   onBack: () => void;
+    onDocumentUploaded: () => Promise<void>;
 };
 const FILE_BASE_URL = "http://41.60.191.7:8081";
 const getFileUrl = (file?: string | null) => {
@@ -21,7 +22,7 @@ const getFileUrl = (file?: string | null) => {
 };
 
 
-const EmployeeDetailView: React.FC<Props> = ({ employee, onBack }) => {
+const EmployeeDetailView: React.FC<Props> = ({ employee, onBack,onDocumentUploaded, }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'documents'>('overview');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
@@ -403,20 +404,25 @@ const handleUploadDocument = () => {
   <DocumentUploadModal
     onClose={() => setShowUploadModal(false)}
     onUpload={async ({ description, file }) => {
-  const formData = new FormData();
+      const formData = new FormData();
 
-formData.append("employeeId", employee.id);    
-formData.append("name[0]", description);       
-formData.append("description[0]", description);
-formData.append("file[0]", file);
-formData.append("isUpdate", "1");
-formData.append("isDelete", "0");
+      formData.append("employeeId", employee.id);
+      formData.append("name[0]", description);
+      formData.append("description[0]", description);
+      formData.append("file[0]", file);
+      formData.append("isUpdate", "1");
+      formData.append("isDelete", "0");
 
+      await updateEmployeeDocuments(formData);
 
-await updateEmployeeDocuments(formData);
+      // 🔥 THIS WAS MISSING
+      await onDocumentUploaded();  
 
-}}    
-  />)}
+      setShowUploadModal(false);
+    }}
+  />
+)}
+
     
     </div>
     

@@ -52,6 +52,13 @@ const handleViewEmployee = async (id: string) => {
   }
 };
 
+const refreshSelectedEmployee = async () => {
+  if (!selectedEmployee?.id) return;
+
+  const res = await getEmployeeById(selectedEmployee.id);
+  setSelectedEmployee(res.data ?? res);
+};
+
 
 
   const fetchEmployees = async () => {
@@ -196,13 +203,15 @@ useEffect(() => {
         />
       )
     ) : selectedEmployee ? (
-      <EmployeeDetailView
-        employee={selectedEmployee}
-        onBack={() => {
-          setViewMode("table");
-          setSelectedEmployee(null);
-        }}
-      />
+     <EmployeeDetailView
+  employee={selectedEmployee}
+  onBack={() => {
+    setViewMode("table");
+    setSelectedEmployee(null);
+  }}
+  onDocumentUploaded={refreshSelectedEmployee}
+/>
+
     ) : null}
 
     {/* Add / Edit Modal */}

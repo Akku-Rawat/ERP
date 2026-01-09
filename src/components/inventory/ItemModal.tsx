@@ -74,6 +74,8 @@ const ItemModal: React.FC<{
   const [loading, setLoading] = useState(false);
   const [fetchingItem, setFetchingItem] = useState(false);
   const [itemCategoryDetails, setItemCategoryDetails] = useState<any>(null);
+  const isServiceItem = Number(form.itemTypeCode) === 3;
+
 
   const [activeTab, setActiveTab] = useState<
     "details" | "taxDetails" | "inventoryDetails"
@@ -218,17 +220,22 @@ const ItemModal: React.FC<{
               >
                 Tax Details
               </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("inventoryDetails")}
-                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "inventoryDetails"
-                    ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                Inventory Details
-              </button>
+             <button
+  type="button"
+  disabled={isServiceItem}
+  onClick={() => !isServiceItem && setActiveTab("inventoryDetails")}
+  className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors
+    ${
+      activeTab === "inventoryDetails" && !isServiceItem
+        ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
+        : "text-gray-600 hover:text-gray-900"
+    }
+    ${isServiceItem ? "opacity-50 cursor-not-allowed" : ""}
+  `}
+>
+  Inventory Details
+</button>
+
             </div>
 
             {/* Tab Content */}
@@ -523,13 +530,16 @@ const ItemModal: React.FC<{
                       Inventory Details
                     </h3>
                     <div className="flex flex-col gap-4">
+                    
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <Input
+                        
                           label="Brand"
                           name="brand"
                           value={form.brand}
                           onChange={handleForm}
                           className="w-full"
+                          disabled={isServiceItem}
                         />
 
                         <div className="flex flex-col gap-1">

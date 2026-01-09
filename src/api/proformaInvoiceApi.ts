@@ -3,11 +3,12 @@ import { createAxiosInstance } from "./axiosInstance";
 
 const base_url = import.meta.env.VITE_BASE_URL as string;
 const api = createAxiosInstance(base_url);
+const vite_proforma_api_url = import.meta.env.VITE_PROFORMA_API_URL as string;
 
 const ENDPOINTS = {
   createProformaInvoice: `${base_url}.proforma.api.create_proforma_api`,
-  getProformaInvoiceById: `http://41.60.191.7:8081/api/method/erpnext.proforma.api.get_proforma_by_id`,
-  getAllProformaInvoices: `http://41.60.191.7:8081/api/method/erpnext.proforma.api.get_proforma_api`,
+  getProformaInvoiceById: `${vite_proforma_api_url}.get_proforma_by_id`,
+  getAllProformaInvoices: `${vite_proforma_api_url}.get_proforma_api`,
   updateProformaInvoiceStatus: `${base_url}.proforma.api.update_proforma_status`,
   deleteProformaInvoiceById: `${base_url}.proforma.api.delete_proforma`,
 };

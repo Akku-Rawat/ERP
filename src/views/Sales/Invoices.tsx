@@ -33,8 +33,8 @@ const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
 };
 
 const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
+const InvoicesTable: React.FC<{ onAdd?: () => void }> = ({ onAdd }) => {
 
-const InvoicesTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -295,6 +295,8 @@ const InvoicesTable: React.FC = () => {
           searchValue={searchTerm}
           onSearch={setSearchTerm}
           enableColumnSelector
+          addLabel="New Invoice"
+          onAdd={onAdd}
           currentPage={page}
           totalPages={totalPages}
           pageSize={pageSize}
