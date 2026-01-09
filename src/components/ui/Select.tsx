@@ -1,7 +1,7 @@
 import React from "react";
 
 export type SelectOption = {
-  value: string;
+  value: any;
   label: string;
 };
 
