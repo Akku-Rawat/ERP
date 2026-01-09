@@ -110,6 +110,21 @@ const CustomerModal: React.FC<{
     form.billingCountry,
   ]);
 
+
+  // for next button
+  const tabs: Array<"details" | "terms" | "address"> = [
+  "details",
+  "terms",
+  "address",
+];
+
+const handleNext = () => {
+  const currentIndex = tabs.indexOf(activeTab);
+  if (currentIndex < tabs.length - 1) {
+    setActiveTab(tabs[currentIndex + 1]);
+  }
+};
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -178,6 +193,16 @@ const CustomerModal: React.FC<{
         <Button variant="secondary" onClick={reset}>
           Reset
         </Button>
+        
+      {/* NEXT BUTTON */}
+      <Button
+        variant="secondary"
+        onClick={handleNext}
+        disabled={activeTab === "address"}
+        type="button"
+      >
+        Next →
+      </Button>
         <Button 
           variant="primary" 
           onClick={handleSubmit} 

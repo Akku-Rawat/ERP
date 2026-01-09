@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Save, Loader2 } from "lucide-react";
+import { X, Mail,Building2,  DollarSign, MapPin} from "lucide-react";
 import toast from "react-hot-toast";
+import Modal from "../ui/modal/modal";
+import { Input, Select, Card, Button } from "../ui/modal/formComponent";
+
 
 const base_url = import.meta.env.VITE_BASE_URL;
 const CUSTOMER_ENDPOINT = `${base_url}/resource/Customer`;
@@ -56,7 +59,7 @@ const SupplierModal: React.FC<{
 
   // Tab state
   const [activeTab, setActiveTab] = useState<
-    "supplier" | "contact" | "payment" | "address"
+    "supplier" |  "payment" 
   >("supplier");
 
   useEffect(() => {
@@ -125,368 +128,386 @@ const SupplierModal: React.FC<{
     }
   };
 
-  const handleClose = () => {
-    setForm(emptyForm);
-    onClose();
-  };
 
-  const reset = () => {
+  const handleClose = () => {
+  setForm(emptyForm);
+  onClose();
+};
+ const reset = () => {
     setForm(initialData ?? emptyForm);
   };
 
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
-        >
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col h-full overflow-hidden"
-          >
-            {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-indigo-700">
-                {isEditMode ? "Edit Supplier" : "Add New Supplier"}
-              </h2>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="p-1 rounded-full hover:bg-gray-200"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-            </header>
-
-            {/* Tabs */}
-            <div className="flex border-b bg-gray-50">
-              <button
-                type="button"
-                onClick={() => setActiveTab("supplier")}
-                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "supplier"
-                    ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                Supplier Details
-              </button>
-              {/* <button
-                type="button"
-                onClick={() => setActiveTab("contact")}
-                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "contact"
-                    ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                Contact Details
-              </button> */}
-              <button
-                type="button"
-                onClick={() => setActiveTab("payment")}
-                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "payment"
-                    ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                Payment & Bank
-              </button>
-              {/* <button
-                type="button"
-                onClick={() => setActiveTab("address")}
-                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "address"
-                    ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                Address
-              </button> */}
-            </div>
-
-            {/* Tab Content */}
-            <section className="flex-1 overflow-y-auto p-6 space-y-8">
-              {/* Supplier Details Tab */}
-              {activeTab === "supplier" && (
-                <>
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700 underline">
-                      Supplier Details
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Tax Id/ TPIN"
-                        name="tpin"
-                        value={form.tpin || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Supplier Name"
-                        name="supplierName"
-                        value={form.supplierName || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Supplier Code"
-                        name="supplierCode"
-                        value={form.supplierCode || ""}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700 underline">
-                      Contact Details
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Contact Person Name"
-                        name="contactPerson"
-                        value={form.contactPerson || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Phone No"
-                        name="phoneNo"
-                        value={form.phoneNo || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Alternate No"
-                        name="alternateNo"
-                        value={form.alternateNo || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Email Id"
-                        name="emailId"
-                        value={form.emailId || ""}
-                        onChange={handleChange}
-                        icon={<Mail className="w-4 h-4 text-gray-400" />}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-6">
-                    <h3 className="text-lg font-semibold text-gray-700 underline">
-                      Address Details
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Address Line 1"
-                        name="billingAddressLine1"
-                        value={form.billingAddressLine1 || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Address Line 2"
-                        name="billingAddressLine2"
-                        value={form.billingAddressLine2 || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="City"
-                        name="billingCity"
-                        value={form.billingCity || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="District"
-                        name="district"
-                        value={form.district || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Province"
-                        name="province"
-                        value={form.province || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Country"
-                        name="billingCountry"
-                        value={form.billingCountry || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Postal Code"
-                        name="billingPostalCode"
-                        value={form.billingPostalCode || ""}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Payment & Bank Details Tab */}
-              {activeTab === "payment" && (
-                <motion.div className="space-y-8">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-700 underline mb-4">
-                      Payment Details
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <label className="flex flex-col gap-1 text-sm">
-                        <span className="font-medium text-gray-600">
-                          Currency
-                        </span>
-                        <select
-                          name="currency"
-                          value={form.currency || ""}
-                          onChange={handleChange}
-                          className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                        >
-                          <option value="">Select currency...</option>
-                          {currencyOptions.map((c) => (
-                            <option key={c} value={c}>
-                              {c}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <Input
-                        label="Payment Terms (Days)"
-                        name="paymentTerms"
-                        value={form.paymentTerms || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Date of Addition"
-                        name="dateOfAddition"
-                        type="date"
-                        value={form.dateOfAddition || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Opening Balance"
-                        name="openingBalance"
-                        value={form.openingBalance || ""}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-700 underline mb-4">
-                      Bank Details
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Account No"
-                        name="accountNumber"
-                        value={form.accountNumber || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Account Holder Name"
-                        name="accountHolder"
-                        value={form.accountHolder || ""}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Sort Code"
-                        name="sortCode"
-                        value={form.sortCode || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="SWIFT Code"
-                        name="swiftCode"
-                        value={form.swiftCode || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Branch Address"
-                        name="branchAddress"
-                        value={form.branchAddress || ""}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </section>
-
-            {/* Footer */}
-            <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
-                >
-                  Reset
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex items-center gap-2 rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600 disabled:opacity-50"
-                >
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  {isEditMode ? "Update" : "Save"} Vendor
-                </button>
-              </div>
-            </footer>
-          </form>
-        </motion.div>
-      </AnimatePresence>
+// Footer
+const footer = (
+  <>
+    <Button variant="secondary" onClick={handleClose}>
+      Cancel
+    </Button>
+    <div className="flex gap-3">
+      <Button variant="secondary" onClick={reset}>
+        Reset
+      </Button>
+      <Button
+        variant="secondary"
+        onClick={() => {
+          const tabs: Array<"supplier" | "payment"> = ["supplier", "payment"];
+          const currentIndex = tabs.indexOf(activeTab);
+          if (currentIndex < tabs.length - 1) {
+            setActiveTab(tabs[currentIndex + 1]);
+          }
+        }}
+        disabled={activeTab === "payment"}
+        type="button"
+      >
+        Next →
+      </Button>
+      <Button 
+        variant="primary" 
+        onClick={handleSubmit} 
+        loading={loading}
+        type="submit"
+      >
+        {isEditMode ? "Update Supplier" : "Save Supplier"}
+      </Button>
     </div>
-  );
+  </>
+);
+
+
+
+return (
+  <Modal
+    isOpen={isOpen}
+    onClose={handleClose}
+    title={isEditMode ? "Edit Supplier" : "Add New Supplier"}
+    subtitle={isEditMode ? "Update supplier information" : "Fill in the details to create a new supplier"}
+    icon={Building2}
+    footer={footer}
+    maxWidth="6xl"
+    height="90vh"
+  >
+    <div className="h-full flex flex-col">
+      <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+        {/* Tabs - EXACT CustomerModal */}
+        <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
+          {(["supplier", "payment"] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className={`relative px-6 py-3 font-semibold text-sm capitalize transition-all duration-200 rounded-t-lg ${
+                activeTab === tab
+                  ? "text-primary bg-card shadow-sm"
+                  : "text-muted hover:text-main hover:bg-card/50"
+              }`}
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                {tab === "supplier" && <Building2 className="w-4 h-4" />}
+                {tab === "payment" && <DollarSign className="w-4 h-4" />}
+                {tab}
+              </span>
+              {activeTab === tab && (
+                <motion.div
+                  layoutId="activeSupplierTab"
+                  className="absolute inset-0 bg-card rounded-t-lg shadow-sm"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  style={{ zIndex: -1 }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-1 py-6">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+            {activeTab === "supplier" && (
+  <Card
+    title="Supplier Information"
+    subtitle="Supplier, contact and address details"
+    icon={<Building2 className="w-5 h-5 text-primary" />}
+  >
+    <div className="space-y-6">
+
+      {/* ================= SUPPLIER DETAILS ================= */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-gray-700">
+          Supplier Details
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+          <Input
+            label="Tax Id / TPIN"
+            name="tpin"
+            value={form.tpin || ""}
+            onChange={handleChange}
+            required
+          />
+          <Input
+            label="Supplier Name"
+            name="supplierName"
+            value={form.supplierName || ""}
+            onChange={handleChange}
+            required
+          />
+          <Input
+            label="Supplier Code"
+            name="supplierCode"
+            value={form.supplierCode || ""}
+            onChange={handleChange}
+          />
+        </div>
+      </div>
+
+      {/* ================= DIVIDER ================= */}
+      <div className="border-t border-gray-200" />
+
+      {/* ================= CONTACT DETAILS ================= */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-gray-700">
+          Contact Details
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+          <Input
+            label="Contact Person Name"
+            name="contactPerson"
+            value={form.contactPerson || ""}
+            onChange={handleChange}
+            required
+          />
+          <Input
+            label="Phone No"
+            name="phoneNo"
+            value={form.phoneNo || ""}
+            onChange={handleChange}
+          />
+          <Input
+            label="Alternate No"
+            name="alternateNo"
+            value={form.alternateNo || ""}
+            onChange={handleChange}
+          />
+          <Input
+            label="Email Id"
+            name="emailId"
+            value={form.emailId || ""}
+            onChange={handleChange}
+            icon={<Mail className="w-4 h-4" />}
+          />
+        </div>
+      </div>
+
+      {/* ================= DIVIDER ================= */}
+      <div className="border-t border-gray-200" />
+
+      {/* ================= ADDRESS DETAILS ================= */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-gray-700">
+          Address Details
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+          <Input
+            label="Address Line 1"
+            name="billingAddressLine1"
+            value={form.billingAddressLine1 || ""}
+            onChange={handleChange}
+          />
+          <Input
+            label="Address Line 2"
+            name="billingAddressLine2"
+            value={form.billingAddressLine2 || ""}
+            onChange={handleChange}
+          />
+          <Input
+            label="City"
+            name="billingCity"
+            value={form.billingCity || ""}
+            onChange={handleChange}
+          />
+          <Input
+            label="District"
+            name="district"
+            value={form.district || ""}
+            onChange={handleChange}
+          />
+          <Input
+            label="Province"
+            name="province"
+            value={form.province || ""}
+            onChange={handleChange}
+          />
+          <Input
+            label="Country"
+            name="billingCountry"
+            value={form.billingCountry || ""}
+            onChange={handleChange}
+          />
+          <Input
+            label="Postal Code"
+            name="billingPostalCode"
+            value={form.billingPostalCode || ""}
+            onChange={handleChange}
+          />
+        </div>
+      </div>
+
+    </div>
+  </Card>
+)}
+
+
+           {activeTab === "payment" && (
+  <Card
+    title="Payment & Bank Details"
+    subtitle="Payment terms and bank information"
+    icon={<DollarSign className="w-5 h-5 text-primary" />}
+  >
+    {/* ================= PAYMENT DETAILS ================= */}
+    <div className="space-y-4">
+      <h3 className="text-sm font-semibold text-gray-700">
+        Payment Details
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+        {/* Currency */}
+        <Select
+          label="Currency"
+          name="currency"
+          value={form.currency || ""}
+          onChange={handleChange}
+        >
+          <option value="">Select currency...</option>
+          {currencyOptions.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </Select>
+
+        {/* Payment Terms */}
+        <Input
+          label="Payment Terms (Days)"
+          name="paymentTerms"
+          value={form.paymentTerms || ""}
+          onChange={handleChange}
+        />
+
+        {/* Date of Addition */}
+        <Input
+          label="Date of Addition"
+          name="dateOfAddition"
+          type="date"
+          value={form.dateOfAddition || ""}
+          onChange={handleChange}
+        />
+
+        {/* Opening Balance */}
+        <Input
+          label="Opening Balance"
+          name="openingBalance"
+          type="number"
+          value={form.openingBalance || ""}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
+
+    {/* ================= DIVIDER ================= */}
+    <div className="my-6 border-t border-gray-200" />
+
+    {/* ================= BANK DETAILS ================= */}
+    <div className="space-y-4">
+      <h3 className="text-sm font-semibold text-gray-700">
+        Bank Details
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+        <Input
+          label="Account No"
+          name="accountNumber"
+          value={form.accountNumber || ""}
+          onChange={handleChange}
+          required
+        />
+        <Input
+          label="Account Holder Name"
+          name="accountHolder"
+          value={form.accountHolder || ""}
+          onChange={handleChange}
+          required
+        />
+        <Input
+          label="Sort Code"
+          name="sortCode"
+          value={form.sortCode || ""}
+          onChange={handleChange}
+        />
+        <Input
+          label="SWIFT Code"
+          name="swiftCode"
+          value={form.swiftCode || ""}
+          onChange={handleChange}
+        />
+        <Input
+          label="Branch Address"
+          name="branchAddress"
+          value={form.branchAddress || ""}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
+  </Card>
+)}
+
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </form>
+    </div>
+  </Modal>
+);
+
 };
 
 // Input Component (unchanged)
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  icon?: React.ReactNode;
-}
+// interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+//   label: string;
+//   icon?: React.ReactNode;
+// }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, icon, className = "", ...props }, ref) => (
-    <label className="flex flex-col gap-1 text-sm w-full">
-      <span className="font-medium text-gray-600">
-        {label}
-        {props.required && <span className="text-red-500 ml-1">*</span>}
-      </span>
-      <div className="relative">
-        {icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            {icon}
-          </div>
-        )}
-        <input
-          ref={ref}
-          className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
-            icon ? "pl-10" : ""
-          } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
-          {...props}
-        />
-      </div>
-    </label>
-  ),
-);
-Input.displayName = "Input";
+// const Input = React.forwardRef<HTMLInputElement, InputProps>(
+//   ({ label, icon, className = "", ...props }, ref) => (
+//     <label className="flex flex-col gap-1 text-sm w-full">
+//       <span className="font-medium text-gray-600">
+//         {label}
+//         {props.required && <span className="text-red-500 ml-1">*</span>}
+//       </span>
+//       <div className="relative">
+//         {icon && (
+//           <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+//             {icon}
+//           </div>
+//         )}
+//         <input
+//           ref={ref}
+//           className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
+//             icon ? "pl-10" : ""
+//           } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
+//           {...props}
+//         />
+//       </div>
+//     </label>
+//   ),
+// );
+// Input.displayName = "Input";
 
 export default SupplierModal;

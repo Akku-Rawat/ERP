@@ -54,14 +54,21 @@ Input.displayName = "Input";
 // ============================================================
 // Select Component
 // ============================================================
+interface SelectOption {
+  label: string;
+  value: string | number;
+}
+
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
   icon?: React.ReactNode;
-  children: React.ReactNode;
+  options?: SelectOption[];
+  children?: React.ReactNode;
 }
 
+
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, icon, children, className = "", ...props }, ref) => (
+  ({ label, icon, options, children, className = "", ...props }, ref) => (
     <label className="flex flex-col gap-2 text-sm w-full group">
       <span className="font-semibold text-muted flex items-center gap-2 group-focus-within:text-primary transition-colors">
         {icon && (
@@ -72,6 +79,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         {label}
         {props.required && <span className="text-red-500">*</span>}
       </span>
+
       <select
         ref={ref}
         {...props}
@@ -84,21 +92,22 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             : "border-[var(--border)] hover:border-primary/40",
           className,
         ].join(" ")}
-        onFocus={(e) => {
-          e.currentTarget.style.boxShadow =
-            "0 0 0 3px rgba(37, 99, 235, 0.16)";
-          props.onFocus?.(e);
-        }}
-        onBlur={(e) => {
-          e.currentTarget.style.boxShadow = "";
-          props.onBlur?.(e);
-        }}
       >
+        {/* 🔹 options prop support */}
+        {options?.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+
+        {/* 🔹 children fallback */}
         {children}
       </select>
     </label>
   )
 );
+Select.displayName = "Select";
+
 Select.displayName = "Select";
 
 // ============================================================
@@ -206,7 +215,7 @@ export const Card: React.FC<CardProps> = ({
 }) => (
   <div
     className={[
-      "bg-card/80 backdrop-blur-sm border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow",
+      "bg-card/80 backdrop-blur-sm border rounded-xl p-6 mt-8 shadow-sm hover:shadow-md transition-shadow",
       "border-[var(--border)]",
       className,
     ].join(" ")}

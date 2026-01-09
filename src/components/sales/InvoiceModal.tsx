@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef , useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Trash2 } from "lucide-react";
 import { FileText, Package, MapPin } from "lucide-react";
@@ -6,13 +6,12 @@ import TermsAndCondition from "../TermsAndCondition";
 
 import CustomerSelect from "../selects/CustomerSelect";
 import CountrySelect from "../selects/CountrySelect";
-import Modal from "../ui/modal/modal";
+import Modal from "../../components/UI/modal/modal";
 import {
-  Input as FormInput,
-  Select as FormSelect,
+  Input ,
+  Select ,
   Button,
-  Card,
-} from "../ui/modal/formComponent";
+} from "../../components/UI/modal/formComponent";
 
 import ItemSelect from "../selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
@@ -24,8 +23,8 @@ import {
   currencyOptions,
 } from "../../constants/invoice.constants";
 
-import Input from "../ui/Input";
-import Select from "../ui/Select";
+// import Input from "../ui/Input";
+// import Select from "../ui/Select";
 
 interface InvoiceModalProps {
   isOpen: boolean;
@@ -55,6 +54,9 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     actions.handleSubmit(e);
   };
 
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+
+
   const footerContent = (
     <>
       <Button variant="secondary" onClick={onClose} type="button">
@@ -72,108 +74,97 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className=" w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
-        >
-          <form
-            onSubmit={actions.handleSubmit}
-            className="flex flex-col h-full overflow-hidden"
-          >
-            {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-blue-700">
-                Create Invoice
-              </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-1 rounded-full hover:bg-gray-200"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-            </header>
-
+    
+        
+         
+          <Modal
+    isOpen={isOpen}
+    onClose={onClose}
+    title="Create Invoice"
+    subtitle="Create and manage invoice details"
+    icon={FileText}
+    footer={footerContent}
+    maxWidth="6xl"
+    height="90vh"
+  >
+    <form onSubmit={actions.handleSubmit} className="h-full flex flex-col">
+          
             {/* Tabs */}
-            <div className="flex border-b bg-gray-50">
-              {(["details", "terms", "address"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => ui.setActiveTab(tab)}
-                  className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${
-                    ui.activeTab === tab
-                      ? "text-blue-600 border-b-2 border-blue-600 bg-white"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {tab === "details"
-                    ? "Details"
-                    : tab === "terms"
-                      ? "Terms & Conditions"
-                      : "Additional Details"}
-                </button>
-              ))}
-            </div>
+          <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
+  {(["details", "terms", "address"] as const).map((tab) => (
+    <button
+      key={tab}
+      type="button"
+      onClick={() => ui.setActiveTab(tab)}
+      className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${
+        ui.activeTab === tab
+          ? "text-primary bg-card shadow-sm"
+          : "text-muted hover:bg-card/50"
+      }`}
+    >
+      {tab === "details" && "Details"}
+      {tab === "terms" && "Terms & Conditions"}
+      {tab === "address" && "Additional Details"}
+    </button>
+  ))}
+</div>
+
 
             {/* Tab Content */}
             <section className="flex-1 overflow-y-auto p-4 space-y-6">
               {/* DETAILS */}
               {ui.activeTab === "details" && (
-                <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4">
+                <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4 mt-8">
                   <div className="col-span-2">
                     <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
                       Invoice Information
                     </h3>
 
-                    <div className="flex flex-col gap-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <CustomerSelect
-                          value={customerNameDisplay}
-                          onChange={actions.handleCustomerSelect}
-                          className="w-full"
-                        />
+               <div className="flex flex-col gap-4">
+  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
-                        <Input
-                          label="Date of Invoice"
-                          name="dateOfInvoice"
-                          type="date"
-                          value={formData.dateOfInvoice}
-                          onChange={actions.handleInputChange}
+    <CustomerSelect
+      value={customerNameDisplay}
+      onChange={actions.handleCustomerSelect}
+      className="w-full"
+    />
+
+    <Input
+      label="Date of Invoice"
+      name="dateOfInvoice"
+      type="date"
+      value={formData.dateOfInvoice}
+      onChange={actions.handleInputChange}
                           className="w-full"
-                        />
+    />
 
                         <div className="flex flex-col gap-1">
-                          <Input
-                            label="Due Date"
-                            name="dueDate"
-                            type="date"
-                            value={formData.dueDate}
-                            onChange={actions.handleInputChange}
+    <Input
+      label="Due Date"
+      name="dueDate"
+      type="date"
+      value={formData.dueDate}
+      onChange={actions.handleInputChange}
                             className="w-full col-span-3"
-                          />
+    />
                         </div>
 
                         <div className="flex flex-col gap-1">
-                          <Select
-                            label="Currency"
-                            name="currencyCode"
-                            value={formData.currencyCode}
-                            onChange={actions.handleInputChange}
+    <Select
+      label="Currency"
+      name="currencyCode"
+      value={formData.currencyCode}
+      onChange={actions.handleInputChange}
                             options={currencyOptions}
                           />
                         </div>
 
                         <div className="flex flex-col gap-1">
-                          <Select
-                            label="Invoice Status"
-                            name="invoiceStatus"
-                            value={formData.invoiceStatus}
-                            onChange={actions.handleInputChange}
+    <Select
+      label="Invoice Status"
+      name="invoiceStatus"
+      value={formData.invoiceStatus}
+      onChange={actions.handleInputChange}
                             options={invoiceStatusOptions}
                           />
                         </div>
@@ -189,18 +180,18 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                         </div> */}
 
                         <div className="flex flex-col gap-1">
-                          <Input
-                            label="Invoice Type"
-                            name="invoiceType"
-                            type="text"
-                            disabled
-                            value={formData.invoiceType}
-                            onChange={actions.handleInputChange}
+    <Input
+      label="Invoice Type"
+      name="invoiceType"
+      type="text"
+      disabled
+      value={formData.invoiceType}
+      onChange={actions.handleInputChange}
                             className="w-full col-span-3"
-                          />
+    />
                         </div>
 
-                        {ui.isExport && (
+    {ui.isExport && (
                           // <CountrySelect
                           //   value={formData.destnCountryCd}
                           //   onChange={(c) =>
@@ -214,28 +205,30 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                           // />
 
                           <div className="flex flex-col gap-1">
-                            <Input
-                              label="Export To Country"
-                              name="destnCountryCd"
-                              type="text"
-                              disabled
-                              value={formData.destnCountryCd}
-                              onChange={actions.handleInputChange}
+      <Input
+        label="Export To Country"
+        name="destnCountryCd"
+        type="text"
+        disabled
+        value={formData.destnCountryCd}
+        onChange={actions.handleInputChange}
                               className="w-full col-span-3"
-                            />
+      />
                           </div>
-                        )}
-                        {ui.isLocal && (
-                          <Input
-                            label="LPO Number"
-                            name="lpoNumber"
-                            value={formData.lpoNumber}
-                            onChange={actions.handleInputChange}
+    )}
+
+    {ui.isLocal && (
+      <Input
+        label="LPO Number"
+        name="lpoNumber"
+        value={formData.lpoNumber}
+        onChange={actions.handleInputChange}
                             placeholder="local purchase order number"
-                          />
-                        )}
-                      </div>
-                    </div>
+      />
+    )}
+  </div>
+</div>
+
 
                     <div className="my-6 h-px bg-gray-600" />
 
@@ -498,7 +491,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
               {/* TERMS */}
               {ui.activeTab === "terms" && (
-                <div className="h-full w-full">
+                <div className="h-full w-full mt-10">
                   <TermsAndCondition
                     terms={formData.terms.selling}
                     setTerms={actions.setTerms}
@@ -508,7 +501,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
               {/* ADDRESS */}
               {ui.activeTab === "address" && (
-                <div className="grid grid-cols-2 gap-10">
+                <div className="grid grid-cols-2 gap-10 mt-10">
                   <div className="col-span-1 shadow px-4 rounded-lg border border-gray-300 bg-white py-6">
                     <div className="flex justify-between">
                       <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
@@ -681,12 +674,12 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                         placeholder="e.g., Net 30, Due on Receipt"
                       />
                       <Select
-                        label="Payment Method"
-                        name="paymentMethod"
-                        value={formData.paymentInformation.paymentMethod}
-                        onChange={(e) =>
-                          actions.handleInputChange(e, "paymentInformation")
-                        }
+  label="Payment Method"
+  name="paymentMethod"
+  value={formData.paymentInformation.paymentMethod}
+  onChange={(e) =>
+    actions.handleInputChange(e, "paymentInformation")
+  }
                         options={paymentMethodOptions}
                       />
 
@@ -728,35 +721,11 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               )}
             </section>
 
-            <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={actions.handleReset}
-                  className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
-                >
-                  Reset
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
-                >
-                  Save Invoice
-                </button>
-              </div>
-            </footer>
+        
           </form>
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
+  </Modal>
+);
+    
 };
 
 export default InvoiceModal;

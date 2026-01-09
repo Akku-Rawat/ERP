@@ -1,5 +1,10 @@
 import React, { useState, useRef } from "react";
-import { X, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Building2 } from "lucide-react";
+import Modal from "../ui/modal/modal";
+import { Input, Select, Card, Button } from "../ui/modal/formComponent";
+import { motion } from "framer-motion";
+
+
 
 interface RfqTabsModalProps {
   isOpen: boolean;
@@ -136,7 +141,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
     });
   };
 
-  if (!isOpen) return null;
+
 
   // Helper styles for tab buttons (matches invoice modal)
   const tabClass = (active: boolean) =>
@@ -230,423 +235,305 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
     setSendAttachedFiles(true);
     setSendPrint(false);
   };
+  
+  
+const footer = (
+  <>
+    <Button variant="secondary" onClick={onClose}>
+      Cancel
+    </Button>
+    <div className="flex gap-2">
+      <Button variant="secondary">
+        Reset
+      </Button>
+      <Button variant="primary">
+        Save RFQ
+      </Button>
+    </div>
+  </>
+);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col">
-        {/* Header */}
-        <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
-          <h2 className="text-2xl font-semibold text-indigo-700">
-            New Request For Quotation
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 rounded-full hover:bg-gray-200"
-          >
-            <X className="w-5 h-5 text-gray-600" />
-          </button>
-        </header>
 
-        {/* Tabs */}
-        <div className="flex border-b bg-gray-50">
-          <button
-            type="button"
-            onClick={() => setActiveTab("details")}
-            className={tabClass(activeTab === "details")}
-          >
-            Details
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("emailTemplates")}
-            className={tabClass(activeTab === "emailTemplates")}
-          >
-            Email Templates
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("terms")}
-            className={tabClass(activeTab === "terms")}
-          >
-            Terms & Conditions
-          </button>
-        </div>
+return (
+  <Modal
+    isOpen={isOpen}
+    onClose={onClose}
+    title="New Request For Quotation"
+    subtitle="Create and send RFQ to suppliers"
+    icon={Building2}
+    footer={footer}
+    maxWidth="6xl"
+    height="90vh"
+  >
+    <div className="h-full flex flex-col">
 
-        {/* Tab Content */}
-        <section className="flex-1 overflow-y-auto p-4 space-y-6">
-          {activeTab === "details" && (
-            <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4">
-              {/* Main form (left, col-span-2) */}
-              <div className="col-span-2">
-                <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <label className="flex flex-col gap-1 text-sm w-full">
-                      <span className="font-medium text-gray-600">
-                        RFQ Number
-                      </span>
-                      <input
-                        type="text"
-                        value={rfqNumber}
-                        onChange={(e) => setRfqNumber(e.target.value)}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                      />
-                    </label>
-                    <label className="flex flex-col gap-1 text-sm w-full">
-                      <span className="font-medium text-gray-600">
-                        Request Date
-                      </span>
-                      <input
-                        type="date"
-                        value={requestDate}
-                        onChange={(e) => setRequestDate(e.target.value)}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                      />
-                    </label>
-                    <label className="flex flex-col gap-1 text-sm w-full">
-                      <span className="font-medium text-gray-600">
-                        Quote Deadline
-                      </span>
-                      <input
-                        type="date"
-                        value={quoteDeadline}
-                        onChange={(e) => setQuoteDeadline(e.target.value)}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                      />
-                    </label>
-                    <label className="flex flex-col gap-1 text-sm w-full">
-                      <span className="font-medium text-gray-600">Status</span>
-                      <select
-                        value={status}
-                        onChange={(e) => setStatus(e.target.value)}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                      >
-                        <option>Draft</option>
-                        <option>Sent</option>
-                        <option>Received</option>
-                      </select>
-                    </label>
-                  </div>
+      {/* ================= TABS ================= */}
+      <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
+        {(["details", "emailTemplates", "terms"] as const).map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab)}
+            className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${
+              activeTab === tab
+                ? "text-primary bg-card shadow-sm"
+                : "text-muted hover:bg-card/50"
+            }`}
+          >
+            {tab === "details" && "Details"}
+            {tab === "emailTemplates" && "Email Templates"}
+            {tab === "terms" && "Terms"}
+
+            {activeTab === tab && (
+              <motion.div
+                layoutId="activeRfqTab"
+                className="absolute inset-0 bg-card rounded-t-lg shadow-sm"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                style={{ zIndex: -1 }}
+              />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* ================= CONTENT ================= */}
+      <section className="flex-1 overflow-y-auto p-4 space-y-6">
+
+        {/* ========== DETAILS TAB ========== */}
+        {activeTab === "details" && (
+          <div className="grid grid-cols-3 gap-6 p-4">
+
+            {/* LEFT SIDE */}
+            <div className="col-span-2 space-y-6">
+
+              {/* BASIC INFO */}
+              <Card title="RFQ Details">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <Input
+                    label="RFQ Number"
+                    value={rfqNumber}
+                    onChange={(e) => setRfqNumber(e.target.value)}
+                  />
+                  <Input
+                    type="date"
+                    label="Request Date"
+                    value={requestDate}
+                    onChange={(e) => setRequestDate(e.target.value)}
+                  />
+                  <Input
+                    type="date"
+                    label="Quote Deadline"
+                    value={quoteDeadline}
+                    onChange={(e) => setQuoteDeadline(e.target.value)}
+                  />
+                  <Select
+                    label="Status"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                  >
+                    <option>Draft</option>
+                    <option>Sent</option>
+                    <option>Received</option>
+                  </Select>
                 </div>
+              </Card>
 
-                <div className="my-6 h-px bg-gray-600" />
-
-                {/* SUPPLIERS TABLE */}
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  Suppliers
-                </h3>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-gray-600">
-                    Showing {suppliersPage * suppliersPerPage + 1}–
-                    {Math.min(
-                      (suppliersPage + 1) * suppliersPerPage,
-                      suppliers.length,
-                    )}{" "}
-                    of {suppliers.length}
-                  </span>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setSuppliersPage(Math.max(0, suppliersPage - 1))
-                      }
-                      disabled={suppliersPage === 0}
-                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ← Prev
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSuppliersPage(suppliersPage + 1)}
-                      disabled={
-                        (suppliersPage + 1) * suppliersPerPage >=
-                        suppliers.length
-                      }
-                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next →
-                    </button>
-                  </div>
-                </div>
-                <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow mb-4">
+              {/* SUPPLIERS */}
+              <Card title="Suppliers">
+                <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-gray-700">
+                    <thead className="bg-row-hover">
                       <tr>
-                        <th className="py-2 px-2 text-center">#</th>
-                        <th className="py-2 px-2 text-left">Supplier</th>
-                        <th className="py-2 px-2 text-left">Contact</th>
-                        <th className="py-2 px-2 text-left">Email Id</th>
-                        <th className="py-2 px-2 text-center">Send Email</th>
-                        <th className="py-2 px-2"></th>
+                        <th>#</th>
+                        <th>Supplier</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                        <th>Send</th>
+                        <th></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y">
-                      {paginatedSuppliers.map((sup, idx) => {
-                        const i = suppliersPage * suppliersPerPage + idx;
-                        const removeSupplier = (idx: number) => {
-                          if (suppliers.length === 1) return;
-                          setSuppliers(suppliers.filter((_, i) => i !== idx));
-                        };
-
-                        return (
-                          <tr key={i} className="hover:bg-gray-50">
-                            <td className="py-2 px-2 text-center">{i + 1}</td>
-                            <td className="py-1 px-1">
-                              <input
-                                type="text"
-                                value={sup.supplier}
-                                onChange={(e) =>
-                                  handleSupplier(e, i, "supplier")
-                                }
-                                className="w-full rounded border p-1 text-sm"
-                              />
-                            </td>
-                            <td className="py-1 px-1">
-                              <input
-                                type="text"
-                                value={sup.contact}
-                                onChange={(e) =>
-                                  handleSupplier(e, i, "contact")
-                                }
-                                className="w-full rounded border p-1 text-sm"
-                              />
-                            </td>
-                            <td className="py-1 px-1">
-                              <input
-                                type="text"
-                                value={sup.email}
-                                onChange={(e) => handleSupplier(e, i, "email")}
-                                className="w-full rounded border p-1 text-sm"
-                              />
-                            </td>
-                            <td className="py-2 px-2 text-center">
-                              <input
-                                type="checkbox"
-                                checked={sup.sendEmail}
-                                onChange={(e) =>
-                                  handleSupplier(e, i, "sendEmail")
-                                }
-                              />
-                            </td>
-                            <td className="py-2 px-2 text-center">
-                              <button
-                                type="button"
-                                onClick={() => removeSupplier(i)}
-                                className="p-1 text-red-600 hover:bg-red-50 rounded"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                    <tbody>
+                      {suppliers.map((sup, i) => (
+                        <tr key={i}>
+                          <td>{i + 1}</td>
+                          <td>
+                            <Input
+                              label=""
+                              value={sup.supplier}
+                              onChange={(e) =>
+                                handleSupplier(e, i, "supplier")
+                              }
+                            />
+                          </td>
+                          <td>
+                            <Input
+                              label=""
+                              value={sup.contact}
+                              onChange={(e) =>
+                                handleSupplier(e, i, "contact")
+                              }
+                            />
+                          </td>
+                          <td>
+                            <Input
+                              label=""
+                              value={sup.email}
+                              onChange={(e) =>
+                                handleSupplier(e, i, "email")
+                              }
+                            />
+                          </td>
+                          <td className="text-center">
+                            <input
+                              type="checkbox"
+                              checked={sup.sendEmail}
+                              onChange={(e) =>
+                                handleSupplier(e, i, "sendEmail")
+                              }
+                            />
+                          </td>
+                          <td>
+                            <Button
+                              variant="ghost"
+                              onClick={() => removeSupplier(i)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
-                <div className="flex justify-between mt-3">
-                  <button
-                    type="button"
-                    onClick={addSupplier}
-                    className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200"
-                  >
-                    <Plus className="w-4 h-4" /> Add Supplier
-                  </button>
-                </div>
 
-                {/* ITEMS TABLE */}
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  Items
-                </h3>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-gray-600">
-                    Showing {itemsPage * itemsPerPage + 1}–
-                    {Math.min((itemsPage + 1) * itemsPerPage, items.length)} of{" "}
-                    {items.length}
-                  </span>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setItemsPage(Math.max(0, itemsPage - 1))}
-                      disabled={itemsPage === 0}
-                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ← Prev
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setItemsPage(itemsPage + 1)}
-                      disabled={(itemsPage + 1) * itemsPerPage >= items.length}
-                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next →
-                    </button>
-                  </div>
-                </div>
-                <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow mb-4">
+                <Button
+                  variant="secondary"
+                  className="mt-3"
+                  onClick={addSupplier}
+                >
+                  <Plus className="w-4 h-4" /> Add Supplier
+                </Button>
+              </Card>
+
+              {/* ITEMS */}
+              <Card title="Items">
+                <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-gray-700">
+                    <thead className="bg-row-hover">
                       <tr>
-                        <th className="py-2 px-2 text-center">No.</th>
-                        <th className="py-2 px-2 text-left">Item Code</th>
-                        <th className="py-2 px-2 text-left">Required Date</th>
-                        <th className="py-2 px-2 text-right">Quantity</th>
-                        <th className="py-2 px-2 text-left">UOM</th>
-                        <th className="py-2 px-2 text-left">Warehouse</th>
-                        <th className="py-2 px-2"></th>
+                        <th>No</th>
+                        <th>Item Code</th>
+                        <th>Date</th>
+                        <th>Qty</th>
+                        <th>UOM</th>
+                        <th>Warehouse</th>
+                        <th></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y">
-                      {paginatedItems.map((item, idx) => {
-                        const i = itemsPage * itemsPerPage + idx;
-                        return (
-                          <tr key={i} className="hover:bg-gray-50">
-                            <td className="py-2 px-2 text-center">{i + 1}</td>
-                            <td className="py-1 px-1">
-                              <input
-                                type="text"
-                                value={item.itemCode}
-                                onChange={(e) => handleItem(e, i, "itemCode")}
-                                className="w-full rounded border p-1 text-sm"
-                              />
-                            </td>
-                            <td className="py-1 px-1">
-                              <input
-                                type="date"
-                                value={item.requiredDate}
-                                onChange={(e) =>
-                                  handleItem(e, i, "requiredDate")
-                                }
-                                className="w-full rounded border p-1 text-sm"
-                              />
-                            </td>
-                            <td className="py-1 px-1">
-                              <input
-                                type="number"
-                                value={item.quantity}
-                                onChange={(e) => handleItem(e, i, "quantity")}
-                                className="w-full rounded border p-1 text-right text-sm"
-                              />
-                            </td>
-                            <td className="py-1 px-1">
-                              <input
-                                type="text"
-                                value={item.uom}
-                                onChange={(e) => handleItem(e, i, "uom")}
-                                className="w-full rounded border p-1 text-sm"
-                              />
-                            </td>
-                            <td className="py-1 px-1">
-                              <input
-                                type="text"
-                                value={item.warehouse}
-                                onChange={(e) => handleItem(e, i, "warehouse")}
-                                className="w-full rounded border p-1 text-sm"
-                              />
-                            </td>
-                            <td className="py-2 px-2 text-center">
-                              <button
-                                type="button"
-                                onClick={() => removeItem(i)}
-                                className="p-1 text-red-600 hover:bg-red-50 rounded"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                    <tbody>
+                      {items.map((it, i) => (
+                        <tr key={i}>
+                          <td>{i + 1}</td>
+                          <td>
+                            <Input
+                              label=""
+                              value={it.itemCode}
+                              onChange={(e) =>
+                                handleItem(e, i, "itemCode")
+                              }
+                            />
+                          </td>
+                          <td>
+                            <Input
+                              type="date"
+                              label=""
+                              value={it.requiredDate}
+                              onChange={(e) =>
+                                handleItem(e, i, "requiredDate")
+                              }
+                            />
+                          </td>
+                          <td>
+                            <Input
+                              type="number"
+                              label=""
+                              value={it.quantity}
+                              onChange={(e) =>
+                                handleItem(e, i, "quantity")
+                              }
+                            />
+                          </td>
+                          <td>
+                            <Input
+                              label=""
+                              value={it.uom}
+                              onChange={(e) =>
+                                handleItem(e, i, "uom")
+                              }
+                            />
+                          </td>
+                          <td>
+                            <Input
+                              label=""
+                              value={it.warehouse}
+                              onChange={(e) =>
+                                handleItem(e, i, "warehouse")
+                              }
+                            />
+                          </td>
+                          <td>
+                            <Button
+                              variant="ghost"
+                              onClick={() => removeItem(i)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
-                <div className="flex justify-between mt-3">
-                  <button
-                    type="button"
-                    onClick={addItem}
-                    className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200"
-                  >
-                    <Plus className="w-4 h-4" /> Add Item
-                  </button>
-                </div>
-              </div>
 
-              {/* Sidebar summary (col-span-1) */}
-              <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
-                <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
-                    Supplier Details
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">
-                        Total Suppliers
-                      </span>
-                      <span className="font-medium text-gray-800">
-                        {suppliers.length}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">
-                        Emails to Send
-                      </span>
-                      <span className="font-medium text-gray-800">
-                        {suppliers.filter((s) => s.sendEmail).length}
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-t pt-2 mt-2">
-                      <span className="text-base font-semibold text-gray-700">
-                        Status
-                      </span>
-                      <span className="text-base font-bold text-indigo-600">
-                        {status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
-                    Items Summary
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">
-                        Total Items
-                      </span>
-                      <span className="font-medium text-gray-800">
-                        {items.length}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">
-                        Total Quantity
-                      </span>
-                      <span className="font-medium text-gray-800">
-                        {items.reduce((s, it) => s + it.quantity, 0)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-t pt-2 mt-2">
-                      <span className="text-base font-semibold text-gray-700">
-                        Quote Deadline
-                      </span>
-                      <span className="text-base font-bold text-indigo-600">
-                        {quoteDeadline || "Not set"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                <Button
+                  variant="secondary"
+                  className="mt-3"
+                  onClick={addItem}
+                >
+                  <Plus className="w-4 h-4" /> Add Item
+                </Button>
+              </Card>
             </div>
-          )}
-          {/* Email Templates Tab */}
-          {activeTab === "emailTemplates" && (
-            <div className=" mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
+
+            {/* RIGHT SUMMARY */}
+            <div className="col-span-1 space-y-6">
+              <Card title="Supplier Summary">
+                <p>Total Suppliers: {suppliers.length}</p>
+                <p>
+                  Emails to Send:{" "}
+                  {suppliers.filter((s) => s.sendEmail).length}
+                </p>
+              </Card>
+
+              <Card title="Items Summary">
+                <p>Total Items: {items.length}</p>
+                <p>
+                  Total Qty:{" "}
+                  {items.reduce((s, it) => s + it.quantity, 0)}
+                </p>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* ========== EMAIL TAB ========== */}
+        {activeTab === "emailTemplates" && (
+          <Card title="Email Template">
+         <div className=" mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-800">
                   Email Template
                 </h3>
-                <div className="text-sm text-gray-500">
-                  Create professional email templates for supplier
-                  communication.
-                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <label className="flex flex-col gap-1 text-sm">
@@ -840,10 +727,14 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                 </div>
               )}
             </div>
-          )}
-          {/* TERMS TAB */}
-          {activeTab === "terms" && (
-            <div className="space-y-8 mx-auto bg-white rounded-lg p-6  ">
+
+          </Card>
+        )}
+
+        {/* ========== TERMS TAB ========== */}
+        {activeTab === "terms" && (
+          <Card title="Terms & Conditions">
+              <div className="space-y-8 mx-auto bg-white rounded-lg p-6  ">
               <div>
                 <h3 className="mb-2 text-lg font-semibold text-gray-800">
                   Payment Terms
@@ -1190,35 +1081,14 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
                 </div>
               </div>
             </div>
-          )}
-        </section>
-        {/* Footer */}
-        <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-          >
-            Cancel
-          </button>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
-            >
-              Reset
-            </button>
-            <button
-              type="button"
-              className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600"
-            >
-              Save RFQ
-            </button>
-          </div>
-        </footer>
-      </div>
+
+          </Card>
+        )}
+      </section>
     </div>
-  );
+  </Modal>
+);
+
 };
 
 export default RfqTabsModal;

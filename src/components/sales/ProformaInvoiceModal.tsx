@@ -9,6 +9,11 @@ interface ProformaInvoiceModalProps {
   onSubmit?: (data: any) => void;
 }
 
+import Modal from "../../components/UI/modal/modal";
+import {
+  Button,
+} from "../../components/UI/modal/formComponent";
+
 import {
   getAllCustomers,
   getCustomerByCustomerCode,
@@ -305,60 +310,61 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className=" w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
-        >
-          <form
-            onSubmit={submit}
-            className="flex flex-col h-full overflow-hidden"
-          >
-            {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-blue-700">
-                Create Proforma Invoice
-              </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-1 rounded-full hover:bg-gray-200"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-            </header>
+   
+    <Modal
+  isOpen={isOpen}
+  onClose={onClose}
+  title="Create Proforma Invoice"
+  subtitle="Create and manage proforma invoice details"
+  footer={
+    <>
+      <Button variant="secondary" onClick={onClose}>
+        Cancel
+      </Button>
+      <div className="flex gap-2">
+        <Button variant="ghost" onClick={reset}>
+          Reset
+        </Button>
+        <Button variant="primary" type="submit">
+          Save Invoice
+        </Button>
+      </div>
+    </>
+  }
+  maxWidth="6xl"
+  height="90vh"
+>
+  <form onSubmit={submit} className="h-full flex flex-col"> 
 
+            
+
+          
             {/* Tabs */}
-            {/* Tabs */}
-            <div className="flex border-b bg-gray-50">
-              {(["details", "terms", "address"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${
-                    activeTab === tab
-                      ? "text-blue-600 border-b-2 border-blue-600 bg-white"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {tab === "details"
-                    ? "Details"
-                    : tab === "terms"
-                      ? "Terms & Conditions"
-                      : "Additional Details"}
-                </button>
-              ))}
-            </div>
+          <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
+  {(["details", "terms", "address"] as const).map((tab) => (
+    <button
+      key={tab}
+      type="button"
+      onClick={() => setActiveTab(tab)}
+      className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${
+        activeTab === tab
+          ? "text-primary bg-card shadow-sm"
+          : "text-muted hover:bg-card/50"
+      }`}
+    >
+      {tab === "details" && "Details"}
+      {tab === "terms" && "Terms & Conditions"}
+      {tab === "address" && "Additional Details"}
+    </button>
+  ))}
+</div>
+
 
             {/* Tab Content */}
             <section className="flex-1 overflow-y-auto p-4 space-y-6">
               {/* ====================== DETAILS ====================== */}
               {activeTab === "details" && (
-                <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4">
+                <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4 mt-10" >
                   <div className=" col-span-2">
                     {/* Invoice Information */}
                     <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
@@ -409,11 +415,11 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                           </select>
                         </div>
                         <div className=" flex flex-col gap-1">
-                          <Select
-                            label="Invoice Status"
-                            name="status"
-                            value={form.status}
-                            onChange={handleForm}
+                       <Select
+  label="Invoice Status"
+  name="status"
+  value={form.status}
+  onChange={handleForm}
                             options={[
                               { value: "Draft", label: "Draft" },
                               { value: "Sent", label: "Sent" },
@@ -666,14 +672,14 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
 
               {/* === TAB: Terms & Conditions === */}
               {activeTab === "terms" && (
-                <div className=" h-full w-full">
+                <div className=" h-full w-full mt-10">
                   <TermsAndCondition />
                 </div>
               )}
 
               {/* === TAB: ADDRESS & TERMS === */}
               {activeTab === "address" && (
-                <div className=" grid grid-cols-2 gap-10">
+                <div className=" grid grid-cols-2 gap-10 mt-10">
                   <div className=" col-span-1 shadow px-4 rounded-lg border border-gray-300 bg-white py-6">
                     <div className=" flex justify-between">
                       <h3 className=" mb-4 text-lg font-semibold text-gray-700 underline ">
@@ -899,35 +905,9 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
               )}
             </section>
 
-            {/* Footer */}
-            <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
-                >
-                  Reset
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
-                >
-                  Save Invoice
-                </button>
-              </div>
-            </footer>
-          </form>
-        </motion.div>
-      </AnimatePresence>
-    </div>
+          
+         </form>
+</Modal>
   );
 };
 
