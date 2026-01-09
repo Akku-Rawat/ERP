@@ -1,7 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { getPaymentMethodLabel } from "../../../constants/invoice.constants";
-import logoImage from '../../../assets/logoipsum.png';
 
 const loadImageFromUrl = async (url: string): Promise<string> => {
   console.log("Url: ", url);
@@ -18,11 +17,10 @@ const loadImageFromUrl = async (url: string): Promise<string> => {
   });
 };
 
-
 export const generateInvoicePDF = async (
   invoice: any,
   company: any,
-  resultType: "save" | "bloburl" = "save"
+  resultType: "save" | "bloburl" = "save",
 ) => {
   const doc = new jsPDF("p", "mm", "a4");
   const currency = invoice.currencyCode === "ZMW" ? "ZMW" : "USD";
@@ -39,15 +37,20 @@ export const generateInvoicePDF = async (
   doc.text(`Email: ${company.contactInfo.companyEmail}`, 15, 28);
 
   /* ================= LOGO ================= */
-if (company.documents.companyLogoUrl) {
-  try {
-    console.log("company.documents.companyLogoUrl",company.documents.companyLogoUrl);
-    const logoBase64 = await loadImageFromUrl(company.documents.companyLogoUrl);
-    doc.addImage(logoBase64, "JPEG", 150, 10, 30, 10);
-  } catch (e) {
-    console.warn("Logo load failed", e);
+  if (company.documents.companyLogoUrl) {
+    try {
+      console.log(
+        "company.documents.companyLogoUrl",
+        company.documents.companyLogoUrl,
+      );
+      const logoBase64 = await loadImageFromUrl(
+        company.documents.companyLogoUrl,
+      );
+      doc.addImage(logoBase64, "JPEG", 150, 10, 30, 10);
+    } catch (e) {
+      console.warn("Logo load failed", e);
+    }
   }
-}
 
   // doc.addImage(logoImage, "PNG", 150, 10, 30, 10);
 
@@ -68,7 +71,7 @@ if (company.documents.companyLogoUrl) {
       invoice.billingAddress.line2,
     ].filter(Boolean),
     15,
-    56
+    56,
   );
 
   doc.setFont("helvetica", "bold");
@@ -110,7 +113,7 @@ if (company.documents.companyLogoUrl) {
   /* ================= TAX SUMMARY ================= */
   const total = invoice.items.reduce(
     (s: number, i: any) => s + i.quantity * i.price,
-    0
+    0,
   );
 
   doc.setFont("helvetica", "bold");
@@ -138,11 +141,11 @@ if (company.documents.companyLogoUrl) {
       `Invoice Number: ${invoice.invoiceNumber}`,
       `Invoice Type: ${invoice.invoiceType}`,
       `Payment Type: ${getPaymentMethodLabel(
-        invoice.paymentInformation.paymentMethod
+        invoice.paymentInformation.paymentMethod,
       )}`,
     ],
     15,
-    y + 38
+    y + 38,
   );
 
   /* ================= BANK DETAILS ================= */
@@ -159,7 +162,7 @@ if (company.documents.companyLogoUrl) {
       `SWIFTCODE ${invoice.paymentInformation.swiftCode}`,
     ],
     110,
-    y + 38
+    y + 38,
   );
 
   /* ================= FOOTER ================= */

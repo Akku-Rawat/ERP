@@ -30,7 +30,7 @@ export default function CustomerSelect({
     const loadCustomers = async () => {
       try {
         setLoading(true);
-        const res = await getAllCustomers(1,100);
+        const res = await getAllCustomers(1, 100);
         if (res?.status_code !== 200) return;
 
         setCustomers(
@@ -38,7 +38,7 @@ export default function CustomerSelect({
             id: c.id,
             name: c.name,
             customerCode: c.code ?? c.customerCode,
-          }))
+          })),
         );
       } finally {
         setLoading(false);
@@ -63,7 +63,7 @@ export default function CustomerSelect({
   }, []);
 
   const filteredCustomers = customers.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
+    c.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (

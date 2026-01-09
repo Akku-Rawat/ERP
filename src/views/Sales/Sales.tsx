@@ -19,7 +19,6 @@ import {
   FaCalendarAlt,
   FaFileInvoice,
   FaFileInvoiceDollar,
-  FaCashRegister,
   FaChartBar,
 } from "react-icons/fa";
 
@@ -50,35 +49,35 @@ const SalesModule: React.FC = () => {
       component: <SalesDashboard />,
     },
     quotations: {
-         component: (
-    <QuotationsTable
-      onAddQuotation={() => setOpenModal("quotation")}
-       onExportQuotation={() => {
-        console.log("Export invoices");
-      }}
-    />
-     ),
-},
+      component: (
+        <QuotationsTable
+          onAddQuotation={() => setOpenModal("quotation")}
+          onExportQuotation={() => {
+            console.log("Export invoices");
+          }}
+        />
+      ),
+    },
     proformaInvoice: {
       component: (
-    <ProformaInvoicesTable
-      onAddProformaInvoice={() => setOpenModal("proforma")}
-       onExportProformaInvoice={() => {
-        console.log("Export proformainvoices");
-      }}
-    />
-     ),
-},
-   invoices: {
-  component: (
-    <InvoiceTable
-      onAddInvoice={() => setOpenModal("invoice")}
-       onExportInvoice={() => {
-        console.log("Export invoices");
-      }}
-    />
-  ),
-},
+        <ProformaInvoicesTable
+          onAddProformaInvoice={() => setOpenModal("proforma")}
+          onExportProformaInvoice={() => {
+            console.log("Export proformainvoices");
+          }}
+        />
+      ),
+    },
+    invoices: {
+      component: (
+        <InvoiceTable
+          onAddInvoice={() => setOpenModal("invoice")}
+          onExportInvoice={() => {
+            console.log("Export invoices");
+          }}
+        />
+      ),
+    },
 
     pos: {
       component: <POS />,

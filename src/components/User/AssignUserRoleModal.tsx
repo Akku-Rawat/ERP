@@ -56,11 +56,26 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
   ];
 
   const actionOptions = [
-    { id: "create", name: "Create", icon: <FaPlus />, color: "text-[var(--success)]" },
+    {
+      id: "create",
+      name: "Create",
+      icon: <FaPlus />,
+      color: "text-[var(--success)]",
+    },
     { id: "edit", name: "Edit", icon: <FaEdit />, color: "text-primary" },
-    { id: "delete", name: "Delete", icon: <FaTrash />, color: "text-[var(--danger)]" },
+    {
+      id: "delete",
+      name: "Delete",
+      icon: <FaTrash />,
+      color: "text-[var(--danger)]",
+    },
     { id: "view", name: "View", icon: <FaEye />, color: "text-muted" },
-    { id: "export", name: "Export", icon: <FaShareSquare />, color: "text-primary" },
+    {
+      id: "export",
+      name: "Export",
+      icon: <FaShareSquare />,
+      color: "text-primary",
+    },
   ];
 
   useEffect(() => {
@@ -133,7 +148,6 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-card rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto custom-scrollbar border border-[var(--border)]">
-        
         {/* Header */}
         <div className="sticky top-0 bg-primary/10 border-b border-[var(--border)] px-6 py-4 flex justify-between items-center z-10">
           <h3 className="text-xl font-bold text-primary flex items-center gap-3">
@@ -152,7 +166,6 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
         {/* Form Content */}
         <div className="p-6">
           <div className="space-y-6">
-            
             {/* Role Name */}
             <div>
               <label className="block text-sm font-semibold text-main mb-2">
@@ -186,7 +199,8 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
               <div className="flex items-center justify-between mb-4">
                 <label className="text-sm font-bold text-main flex items-center gap-2">
                   <FaBoxOpen className="text-lg text-primary" />
-                  Module Permissions <span className="text-[var(--danger)]">*</span>
+                  Module Permissions{" "}
+                  <span className="text-[var(--danger)]">*</span>
                 </label>
                 <div className="flex gap-2">
                   <button
@@ -205,7 +219,7 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
                   </button>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {moduleOptions.map((module) => (
                   <label
@@ -229,7 +243,7 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
                   </label>
                 ))}
               </div>
-              
+
               {formData.modulePermissions.length > 0 && (
                 <div className="mt-4 flex items-center gap-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/10 px-3 py-1.5 rounded-full">
@@ -244,7 +258,8 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
               <div className="flex items-center justify-between mb-4">
                 <label className="text-sm font-bold text-main flex items-center gap-2">
                   <FaEye className="text-lg text-[var(--success)]" />
-                  Action Permissions <span className="text-[var(--danger)]">*</span>
+                  Action Permissions{" "}
+                  <span className="text-[var(--danger)]">*</span>
                 </label>
                 <div className="flex gap-2">
                   <button
@@ -263,7 +278,7 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
                   </button>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 {actionOptions.map((action) => (
                   <label
@@ -280,14 +295,16 @@ const AssignUserRoleModal: React.FC<AssignUserRoleModalProps> = ({
                       onChange={() => togglePermission("action", action.name)}
                       className="w-4 h-4 rounded accent-[var(--success)] cursor-pointer"
                     />
-                    <span className={`text-lg ${action.color}`}>{action.icon}</span>
+                    <span className={`text-lg ${action.color}`}>
+                      {action.icon}
+                    </span>
                     <span className={`text-xs font-semibold ${action.color}`}>
                       {action.name}
                     </span>
                   </label>
                 ))}
               </div>
-              
+
               {formData.actionPermissions.length > 0 && (
                 <div className="mt-4 flex items-center gap-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-[var(--success)] bg-[var(--success)]/10 px-3 py-1.5 rounded-full">

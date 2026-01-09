@@ -125,14 +125,15 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   const activeRoles = availableRoles.filter((role) => role.status === "Active");
 
   // Common input class for reusability
-  const inputClass = "w-full px-4 py-2.5 bg-app border border-[var(--border)] rounded-xl text-main placeholder:text-muted focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all";
-  
-  const selectClass = "w-full px-4 py-2.5 bg-app border border-[var(--border)] rounded-xl text-main focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer";
+  const inputClass =
+    "w-full px-4 py-2.5 bg-app border border-[var(--border)] rounded-xl text-main placeholder:text-muted focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all";
+
+  const selectClass =
+    "w-full px-4 py-2.5 bg-app border border-[var(--border)] rounded-xl text-main focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer";
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-card rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto custom-scrollbar border border-[var(--border)]">
-        
         {/* Header */}
         <div className="sticky top-0 bg-primary/10 border-b border-[var(--border)] px-6 py-4 flex justify-between items-center z-10">
           <h3 className="text-xl font-bold text-primary flex items-center gap-3">
@@ -151,7 +152,6 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
         {/* Form Content */}
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            
             {/* First Name */}
             <div>
               <label className="block text-sm font-semibold text-main mb-2">
@@ -285,7 +285,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </select>
               {activeRoles.length === 0 && (
                 <p className="text-[10px] font-semibold text-[var(--danger)] mt-1.5 flex items-center gap-1">
-                  <span>⚠️</span> No active roles available. Please create roles first.
+                  <span>⚠️</span> No active roles available. Please create roles
+                  first.
                 </p>
               )}
             </div>
@@ -319,14 +320,26 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 onChange={(e) => handleChange("timezone", e.target.value)}
                 className={selectClass}
               >
-                <option value="Asia/Kolkata">🇮🇳 Asia/Kolkata (IST +5:30)</option>
-                <option value="America/New_York">🇺🇸 America/New_York (EST -5:00)</option>
-                <option value="Europe/London">🇬🇧 Europe/London (GMT +0:00)</option>
+                <option value="Asia/Kolkata">
+                  🇮🇳 Asia/Kolkata (IST +5:30)
+                </option>
+                <option value="America/New_York">
+                  🇺🇸 America/New_York (EST -5:00)
+                </option>
+                <option value="Europe/London">
+                  🇬🇧 Europe/London (GMT +0:00)
+                </option>
                 <option value="Asia/Dubai">🇦🇪 Asia/Dubai (GST +4:00)</option>
                 <option value="Asia/Tokyo">🇯🇵 Asia/Tokyo (JST +9:00)</option>
-                <option value="Australia/Sydney">🇦🇺 Australia/Sydney (AEDT +11:00)</option>
-                <option value="Asia/Shanghai">🇨🇳 Asia/Shanghai (CST +8:00)</option>
-                <option value="Europe/Paris">🇫🇷 Europe/Paris (CET +1:00)</option>
+                <option value="Australia/Sydney">
+                  🇦🇺 Australia/Sydney (AEDT +11:00)
+                </option>
+                <option value="Asia/Shanghai">
+                  🇨🇳 Asia/Shanghai (CST +8:00)
+                </option>
+                <option value="Europe/Paris">
+                  🇫🇷 Europe/Paris (CET +1:00)
+                </option>
               </select>
             </div>
 

@@ -20,7 +20,6 @@ import type { Column } from "../../components/ui/Table/type";
 
 import type { ItemSummary, Item } from "../../types/item";
 
-
 const Items: React.FC = () => {
   const [items, setItems] = useState<ItemSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,7 +36,6 @@ const Items: React.FC = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<ItemSummary | null>(null);
   const [deleting, setDeleting] = useState(false);
-
 
   const fetchItems = async () => {
     try {
@@ -94,10 +92,9 @@ const Items: React.FC = () => {
       toast.success("Item deleted successfully");
       setDeleteModalOpen(false);
     } catch (err: any) {
-      toast.error(
-        err.response?.data?.message || "Failed to delete item",
-        { duration: 6000 },
-      );
+      toast.error(err.response?.data?.message || "Failed to delete item", {
+        duration: 6000,
+      });
     } finally {
       setDeleting(false);
       setItemToDelete(null);
@@ -166,10 +163,7 @@ const Items: React.FC = () => {
       align: "center",
       render: (i) => (
         <ActionGroup>
-          <ActionButton
-            type="view"
-            onClick={(e) => handleEdit(i.id, e)}
-          />
+          <ActionButton type="view" onClick={(e) => handleEdit(i.id, e)} />
           <ActionMenu
             onEdit={(e) => handleEdit(i.id, e as any)}
             onDelete={(e) => handleDeleteClick(i, e as any)}

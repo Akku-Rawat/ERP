@@ -112,7 +112,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     ]
       .join(" ")
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+      .includes(searchTerm.toLowerCase()),
   );
 
   const handleRowClick = (customer: CustomerDetail) => {

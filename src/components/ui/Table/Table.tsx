@@ -5,7 +5,12 @@ import { useTableLogic } from "./useTableLogic";
 import type { Column } from "../Table/type";
 import ColumnSelector from "./ColumnSelector";
 import Pagination from "../../Pagination";
-import { FaFilter, FaSortAmountDown, FaSortAmountUp, FaSearch } from "react-icons/fa";
+import {
+  FaFilter,
+  FaSortAmountDown,
+  FaSortAmountUp,
+  FaSearch,
+} from "react-icons/fa";
 
 interface TableProps<T> {
   columns: Column<T>[];
@@ -15,8 +20,8 @@ interface TableProps<T> {
   emptyMessage?: string;
   showToolbar?: boolean;
   enableAdd?: boolean;
-      enableExport?: boolean;        
-  onExport?: () => void;  
+  enableExport?: boolean;
+  onExport?: () => void;
   onAdd?: () => void;
   searchValue?: string;
   onSearch?: (q: string) => void;
@@ -30,7 +35,6 @@ interface TableProps<T> {
   onPageChange?: (page: number) => void;
   addLabel?: string;
   rowKey?: (row: T) => string;
-
 
   serverSide?: boolean;
 }
@@ -61,11 +65,13 @@ function FilterDropdown({
   onReset,
 }: FilterDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
-
+  const [position, setPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   // Calculate dropdown position based on anchor button
- useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (isOpen && anchorRef.current) {
       const rect = anchorRef.current.getBoundingClientRect();
       const dropdownWidth = 320;
@@ -84,7 +90,7 @@ function FilterDropdown({
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      
+
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(target) &&
@@ -113,14 +119,13 @@ function FilterDropdown({
 
   if (!isOpen || !position) return null;
 
-
   // Render dropdown via portal to avoid overflow clipping
   return createPortal(
     <div
-  ref={dropdownRef}
-  className="fixed w-80 bg-card border border-[var(--border)] rounded-2xl shadow-2xl z-[9999] overflow-hidden"
-  style={{ top: position.top, left: position.left }}
->
+      ref={dropdownRef}
+      className="fixed w-80 bg-card border border-[var(--border)] rounded-2xl shadow-2xl z-[9999] overflow-hidden"
+      style={{ top: position.top, left: position.left }}
+    >
       {/* Dropdown Header */}
       <div className="px-5 py-3 border-b border-[var(--border)] bg-row-hover/30">
         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-main">
@@ -169,7 +174,7 @@ function FilterDropdown({
         </button>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 
@@ -204,8 +209,8 @@ function Table<T extends Record<string, any>>({
   showToolbar = false,
   enableAdd = false,
   onAdd,
-  enableExport = false,   
-  onExport,  
+  enableExport = false,
+  onExport,
   searchValue,
   toolbarPlaceholder = "Search...",
   enableColumnSelector = false,
@@ -216,8 +221,7 @@ function Table<T extends Record<string, any>>({
   totalItems = 0,
   onPageChange,
   onSearch,
-   serverSide = false,
-  
+  serverSide = false,
 }: TableProps<T>) {
   const {
     effectiveSearch,
@@ -237,7 +241,6 @@ function Table<T extends Record<string, any>>({
     sortOrder,
     setSortOrder,
     processedData,
-    
   } = useTableLogic<T>({ columns, data, searchValue });
 
   // Reference for the filter button (used for dropdown positioning)
@@ -281,17 +284,13 @@ function Table<T extends Record<string, any>>({
     );
   }
 
- const displayData = serverSide ? data : processedData ?? [];
-
-
+  const displayData = serverSide ? data : (processedData ?? []);
 
   return (
     <div className="bg-card rounded-2xl border border-[var(--border)] flex flex-col shadow-sm transition-all relative z-10 w-full overflow-hidden">
-      
       {/* Toolbar Section */}
       {showToolbar && (
         <div className="px-5 py-4 border-b border-[var(--border)] bg-card flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shrink-0">
-          
           {/* Search Input */}
           <div className="relative w-full lg:max-w-sm group">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs group-focus-within:text-primary transition-colors" />
@@ -309,10 +308,11 @@ function Table<T extends Record<string, any>>({
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2 shrink-0">
-            
             {/* Sort Toggle Button */}
             <button
-              onClick={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
+              onClick={() =>
+                setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+              }
               className={`p-2 rounded-xl border border-[var(--border)] bg-app text-muted hover:text-primary hover:border-primary transition-all flex items-center gap-2 px-3 whitespace-nowrap ${
                 sortOrder ? "border-primary text-primary" : ""
               }`}
@@ -323,7 +323,9 @@ function Table<T extends Record<string, any>>({
               ) : (
                 <FaSortAmountDown size={12} />
               )}
-              <span className="text-[10px] font-black uppercase tracking-widest">Sort</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">
+                Sort
+              </span>
             </button>
 
             {/* Filter Button */}
@@ -338,7 +340,9 @@ function Table<T extends Record<string, any>>({
               title="Open Filters"
             >
               <FaFilter size={10} />
-              <span className="text-[10px] font-black uppercase tracking-widest">Filters</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">
+                Filters
+              </span>
             </button>
 
             {/* Filter Dropdown (rendered via Portal) */}
@@ -374,14 +378,14 @@ function Table<T extends Record<string, any>>({
               </button>
             )}
             {/* Export Button */}
-{enableExport && (
-  <button
-    onClick={onExport}
-    className="bg-primary text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:opacity-90 transition-all"
-  >
-    Export
-  </button>
-)}
+            {enableExport && (
+              <button
+                onClick={onExport}
+                className="bg-primary text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:opacity-90 transition-all"
+              >
+                Export
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -390,7 +394,6 @@ function Table<T extends Record<string, any>>({
       <div className="w-full overflow-x-auto custom-scrollbar">
         <div className="max-h-[420px] overflow-y-auto min-w-[800px] relative">
           <table className="w-full border-separate border-spacing-0">
-            
             {/* Table Header */}
             <thead className="sticky top-0 z-30 shadow-sm">
               <tr>
@@ -400,7 +403,7 @@ function Table<T extends Record<string, any>>({
                     <th
                       key={column.key}
                       className={`px-5 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted border-b border-[var(--border)] bg-card whitespace-nowrap ${getAlignment(
-                        column.align
+                        column.align,
                       )}`}
                       style={{ backgroundColor: "var(--card)" }}
                     >
@@ -414,7 +417,10 @@ function Table<T extends Record<string, any>>({
             <tbody className="relative z-10">
               {displayData.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-6 py-24 text-center">
+                  <td
+                    colSpan={columns.length}
+                    className="px-6 py-24 text-center"
+                  >
                     <p className="text-xs font-bold text-muted uppercase tracking-widest opacity-40">
                       {emptyMessage}
                     </p>
@@ -423,8 +429,8 @@ function Table<T extends Record<string, any>>({
               ) : (
                 displayData.map((item, idx) => (
                   <tr
-                 key={rowKey ? rowKey(item) : JSON.stringify(item)}
-  onClick={() => onRowClick?.(item)}
+                    key={rowKey ? rowKey(item) : JSON.stringify(item)}
+                    onClick={() => onRowClick?.(item)}
                     className={`group transition-none cursor-pointer ${
                       idx % 2 === 0 ? "bg-transparent" : "bg-row-hover/10"
                     } hover:bg-row-hover`}
@@ -435,13 +441,15 @@ function Table<T extends Record<string, any>>({
                         <td
                           key={column.key}
                           className={`px-5 py-3.5 text-xs font-medium text-main border-b border-[var(--border)]/20 ${getAlignment(
-                            column.align
+                            column.align,
                           )}`}
                         >
                           {column.render ? (
                             column.render(item)
                           ) : (
-                            <span className="opacity-90">{item[column.key]}</span>
+                            <span className="opacity-90">
+                              {item[column.key]}
+                            </span>
                           )}
                         </td>
                       ))}

@@ -18,14 +18,14 @@ const ENDPOINTS = {
 export async function createSalesInvoice(payload: any): Promise<any> {
   const resp: AxiosResponse = await api.post(
     ENDPOINTS.createSalesInvoice,
-    payload
+    payload,
   );
   return resp.data;
 }
 
 export async function updateInvoiceStatus(
   invoiceNumber: string,
-  status: string
+  status: string,
 ) {
   const url = `${ENDPOINTS.updateInvoiceStatus}?id=${encodeURIComponent(invoiceNumber)}`;
   const resp: AxiosResponse = await api.patch(url, {
@@ -37,7 +37,7 @@ export async function updateInvoiceStatus(
 
 export async function getAllSalesInvoices(
   page: number = 1,
-  page_size: number = 10
+  page_size: number = 10,
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getSalesInvoices, {
     params: { page, page_size },
@@ -63,7 +63,7 @@ export async function createCreditNoteFromInvoice(payload: {
 }): Promise<any> {
   const resp: AxiosResponse = await api.post(
     ENDPOINTS.createCreditNote,
-    payload
+    payload,
   );
   return resp.data;
 }
@@ -74,7 +74,7 @@ export async function createDebitNoteFromInvoice(payload: {
 }): Promise<any> {
   const resp: AxiosResponse = await api.post(
     ENDPOINTS.createDebitNote,
-    payload
+    payload,
   );
   return resp.data;
 }

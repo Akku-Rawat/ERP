@@ -4,7 +4,8 @@ import { createAxiosInstance } from "./axiosInstance";
 const base_url =
   import.meta.env.VITE_LOOKUP_BASE_URL || import.meta.env.VITE_BASE_URL;
 const api = createAxiosInstance(base_url);
-const vite_country_list_api_url = import.meta.env.VITE_COUNTRY_LIST_API_URL as string;
+const vite_country_list_api_url = import.meta.env
+  .VITE_COUNTRY_LIST_API_URL as string;
 
 const ENDPOINTS = {
   getUnitOfMeasureList: `${base_url}/api/unit-of-measure-list`,

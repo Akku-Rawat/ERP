@@ -9,7 +9,6 @@ import { getItemByItemCode } from "../api/itemApi";
 import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
-  getPaymentMethodLabel,
 } from "../constants/invoice.constants";
 
 const ITEMS_PER_PAGE = 5;
@@ -22,14 +21,14 @@ type NestedSection =
 export const useInvoiceForm = (
   isOpen: boolean,
   onClose: () => void,
-  onSubmit?: (data: any) => void
+  onSubmit?: (data: any) => void,
 ) => {
   const [formData, setFormData] = useState<Invoice>(DEFAULT_INVOICE_FORM);
   const [customerDetails, setCustomerDetails] = useState<any>(null);
   const [customerNameDisplay, setCustomerNameDisplay] = useState("");
   const [page, setPage] = useState(0);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details"
+    "details",
   );
   const [taxCategory, setTaxCategory] = useState<string | undefined>("");
   const [isShippingOpen, setIsShippingOpen] = useState(false);
@@ -60,7 +59,7 @@ export const useInvoiceForm = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
-    section?: NestedSection
+    section?: NestedSection,
   ) => {
     const { name, value } = e.target;
 
@@ -83,7 +82,7 @@ export const useInvoiceForm = (
 
   const getCountryCode = (
     countries: { code: string; name: string }[],
-    countryName?: string
+    countryName?: string,
   ): string => {
     if (!countryName) return "";
 
@@ -127,7 +126,7 @@ export const useInvoiceForm = (
 
       const countryCode = getCountryCode(
         countryLookupList,
-        data.billingCountry
+        data.billingCountry,
       );
 
       setCustomerDetails(data);
@@ -212,7 +211,7 @@ export const useInvoiceForm = (
 
   const handleItemChange = (
     idx: number,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
     const isNum = ["quantity", "price", "discount", "vatRate"].includes(name);
@@ -283,7 +282,7 @@ export const useInvoiceForm = (
 
     const tax = formData.items.reduce(
       (sum, item) => sum + parseFloat(item.vatRate || "0"),
-      0
+      0,
     );
 
     return { subTotal: sub, totalTax: tax, grandTotal: sub };
@@ -291,7 +290,7 @@ export const useInvoiceForm = (
 
   const paginatedItems = formData.items.slice(
     page * ITEMS_PER_PAGE,
-    (page + 1) * ITEMS_PER_PAGE
+    (page + 1) * ITEMS_PER_PAGE,
   );
 
   return {

@@ -52,7 +52,7 @@ export default function ItemSelect({
               itemCode: it.id,
               itemName: it.itemName,
               sellingPrice: it.sellingPrice ?? 0,
-            }))
+            })),
           );
         }
       } catch (err) {
@@ -108,7 +108,7 @@ export default function ItemSelect({
   }, []);
 
   const filtered = items.filter((it) =>
-    it.itemName.toLowerCase().includes(search.toLowerCase())
+    it.itemName.toLowerCase().includes(search.toLowerCase()),
   );
 
   const openDropdown = () => {
@@ -175,7 +175,7 @@ export default function ItemSelect({
               )}
             </ul>
           </div>,
-          document.body
+          document.body,
         )}
     </div>
   );

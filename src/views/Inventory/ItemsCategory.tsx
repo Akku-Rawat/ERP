@@ -38,7 +38,7 @@ const ItemsCategory: React.FC = () => {
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState<ItemGroupSummary | null>(
-    null
+    null,
   );
   const [deleting, setDeleting] = useState(false);
 
@@ -103,7 +103,7 @@ const ItemsCategory: React.FC = () => {
     } catch (err: any) {
       toast.error(
         err.response?.data?.message || "Failed to delete item category",
-        { duration: 8000 }
+        { duration: 8000 },
       );
     } finally {
       setDeleting(false);
@@ -127,7 +127,7 @@ const ItemsCategory: React.FC = () => {
     [g.id, g.groupName, g.description, g.unitOfMeasurement, g.salesAccount]
       .join(" ")
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+      .includes(searchTerm.toLowerCase()),
   );
 
   /* ===============================

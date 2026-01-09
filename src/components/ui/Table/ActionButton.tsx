@@ -95,7 +95,9 @@ interface ActionGroupProps {
 }
 
 export const ActionGroup: React.FC<ActionGroupProps> = ({ children }) => {
-  return <div className="flex items-center gap-1 justify-center">{children}</div>;
+  return (
+    <div className="flex items-center gap-1 justify-center">{children}</div>
+  );
 };
 
 /* ======================================================

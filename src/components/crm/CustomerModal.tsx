@@ -2,18 +2,24 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Modal from "../ui/modal/modal";
-import { Input, Select, Card, Button, Checkbox } from "../ui/modal/formComponent";
+import {
+  Input,
+  Select,
+  Card,
+  Button,
+  Checkbox,
+} from "../ui/modal/formComponent";
 import TermsAndCondition from "../../views/termandcondition";
 import type { TermSection } from "../../types/termsAndCondition";
-import { 
-  Mail, 
-  Phone, 
-  User, 
-  Building2, 
-  CreditCard, 
-  DollarSign, 
+import {
+  Mail,
+  Phone,
+  User,
+  Building2,
+  CreditCard,
+  DollarSign,
   MapPin,
-  FileText
+  FileText,
 } from "lucide-react";
 
 import {
@@ -110,20 +116,19 @@ const CustomerModal: React.FC<{
     form.billingCountry,
   ]);
 
-
   // for next button
   const tabs: Array<"details" | "terms" | "address"> = [
-  "details",
-  "terms",
-  "address",
-];
+    "details",
+    "terms",
+    "address",
+  ];
 
-const handleNext = () => {
-  const currentIndex = tabs.indexOf(activeTab);
-  if (currentIndex < tabs.length - 1) {
-    setActiveTab(tabs[currentIndex + 1]);
-  }
-};
+  const handleNext = () => {
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1]);
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -193,19 +198,19 @@ const handleNext = () => {
         <Button variant="secondary" onClick={reset}>
           Reset
         </Button>
-        
-      {/* NEXT BUTTON */}
-      <Button
-        variant="secondary"
-        onClick={handleNext}
-        disabled={activeTab === "address"}
-        type="button"
-      >
-        Next →
-      </Button>
-        <Button 
-          variant="primary" 
-          onClick={handleSubmit} 
+
+        {/* NEXT BUTTON */}
+        <Button
+          variant="secondary"
+          onClick={handleNext}
+          disabled={activeTab === "address"}
+          type="button"
+        >
+          Next →
+        </Button>
+        <Button
+          variant="primary"
+          onClick={handleSubmit}
           loading={loading}
           type="submit"
         >
@@ -220,7 +225,11 @@ const handleNext = () => {
       isOpen={isOpen}
       onClose={handleClose}
       title={isEditMode ? "Edit Customer" : "Add New Customer"}
-      subtitle={isEditMode ? "Update customer information" : "Fill in the details to create a new customer"}
+      subtitle={
+        isEditMode
+          ? "Update customer information"
+          : "Fill in the details to create a new customer"
+      }
       icon={isEditMode ? Building2 : User}
       footer={footer}
       maxWidth="6xl"
@@ -245,7 +254,11 @@ const handleNext = () => {
                   {tab === "details" && <User className="w-4 h-4" />}
                   {tab === "terms" && <FileText className="w-4 h-4" />}
                   {tab === "address" && <MapPin className="w-4 h-4" />}
-                  {tab === "details" ? "Details" : tab === "terms" ? "Terms" : "Address"}
+                  {tab === "details"
+                    ? "Details"
+                    : tab === "terms"
+                      ? "Terms"
+                      : "Address"}
                 </span>
                 {activeTab === tab && (
                   <motion.div

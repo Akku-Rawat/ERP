@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { Table } from "../../../components/ui/Table/Table";
 import { format } from "date-fns";
 import { StatusBadge } from "../../ui/StatusBadge";
-import { ActionButton } from "../../ui/FormComponents";
 import type { Column } from "../../ui/Table/type";
 
 interface AttendanceRecord {

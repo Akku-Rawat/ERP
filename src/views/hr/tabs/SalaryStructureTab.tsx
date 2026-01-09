@@ -1,20 +1,33 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, Save, X, DollarSign, Check, AlertTriangle } from "lucide-react";
-import { 
-  getSalaryStructures, 
-  createSalaryStructure, 
-  updateSalaryStructure, 
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Save,
+  X,
+  DollarSign,
+  Check,
+  AlertTriangle,
+} from "lucide-react";
+import {
+  getSalaryStructures,
+  createSalaryStructure,
+  updateSalaryStructure,
   deleteSalaryStructure,
-  
 } from "../../../views/hr/tabs/salarystructure";
 import type { SalaryStructure } from "../../../views/hr/tabs/salarystructure";
 import type { SalaryComponent } from "../../../views/hr/tabs/salarystructure";
 
 export default function SalaryStructureTab() {
-  const [structures, setStructures] = useState<SalaryStructure[]>(getSalaryStructures());
+  const [structures, setStructures] = useState<SalaryStructure[]>(
+    getSalaryStructures(),
+  );
   const [showModal, setShowModal] = useState(false);
-  const [editingStructure, setEditingStructure] = useState<SalaryStructure | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [editingStructure, setEditingStructure] =
+    useState<SalaryStructure | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(
+    null,
+  );
 
   const refreshStructures = () => {
     setStructures(getSalaryStructures());
@@ -25,12 +38,20 @@ export default function SalaryStructureTab() {
       id: `struct_${Date.now()}`,
       name: "",
       description: "",
-      effectiveFrom: new Date().toISOString().split('T')[0],
+      effectiveFrom: new Date().toISOString().split("T")[0],
       status: "Draft",
       usedBy: 0,
       components: [
-        { id: `c_${Date.now()}`, name: "Basic Salary", category: "Earning", valueType: "percentage", value: 60, taxable: true, statutory: "NAPSA Base" }
-      ]
+        {
+          id: `c_${Date.now()}`,
+          name: "Basic Salary",
+          category: "Earning",
+          valueType: "percentage",
+          value: 60,
+          taxable: true,
+          statutory: "NAPSA Base",
+        },
+      ],
     });
     setShowModal(true);
   };
@@ -41,9 +62,11 @@ export default function SalaryStructureTab() {
   };
 
   const handleDelete = (id: string) => {
-    const structure = structures.find(s => s.id === id);
+    const structure = structures.find((s) => s.id === id);
     if (structure && structure.usedBy > 0) {
-      alert(`Cannot delete! This structure is used by ${structure.usedBy} employees.`);
+      alert(
+        `Cannot delete! This structure is used by ${structure.usedBy} employees.`,
+      );
       return;
     }
     deleteSalaryStructure(id);
@@ -52,7 +75,7 @@ export default function SalaryStructureTab() {
   };
 
   const handleSave = (structure: SalaryStructure) => {
-    const existingIndex = structures.findIndex(s => s.id === structure.id);
+    const existingIndex = structures.findIndex((s) => s.id === structure.id);
     if (existingIndex >= 0) {
       updateSalaryStructure(structure.id, structure);
     } else {
@@ -67,8 +90,12 @@ export default function SalaryStructureTab() {
     <div className="max-w-7xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900">Salary Structures</h2>
-          <p className="text-sm text-gray-600 mt-1">Manage reusable salary templates</p>
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Salary Structures
+          </h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Manage reusable salary templates
+          </p>
         </div>
         <button
           onClick={handleCreateNew}
@@ -119,7 +146,7 @@ export default function SalaryStructureTab() {
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
         <DeleteConfirmModal
-          structure={structures.find(s => s.id === showDeleteConfirm)!}
+          structure={structures.find((s) => s.id === showDeleteConfirm)!}
           onConfirm={() => handleDelete(showDeleteConfirm)}
           onCancel={() => setShowDeleteConfirm(null)}
         />
@@ -129,26 +156,34 @@ export default function SalaryStructureTab() {
 }
 
 // Structure Card Component
-function StructureCard({ structure, onEdit, onDelete }: { 
-  structure: SalaryStructure; 
-  onEdit: (s: SalaryStructure) => void; 
+function StructureCard({
+  structure,
+  onEdit,
+  onDelete,
+}: {
+  structure: SalaryStructure;
+  onEdit: (s: SalaryStructure) => void;
   onDelete: () => void;
 }) {
   const totalPercentage = structure.components
-    .filter(c => c.category === "Earning" && c.valueType === "percentage")
-    .reduce((sum, c) => sum + (typeof c.value === 'number' ? c.value : 0), 0);
+    .filter((c) => c.category === "Earning" && c.valueType === "percentage")
+    .reduce((sum, c) => sum + (typeof c.value === "number" ? c.value : 0), 0);
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <h3 className="text-lg font-semibold text-gray-900">{structure.name}</h3>
-            <span className={`px-2 py-0.5 text-xs font-medium rounded ${
-              structure.status === "Active" 
-                ? "bg-green-100 text-green-700" 
-                : "bg-gray-100 text-gray-600"
-            }`}>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {structure.name}
+            </h3>
+            <span
+              className={`px-2 py-0.5 text-xs font-medium rounded ${
+                structure.status === "Active"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
               {structure.status}
             </span>
           </div>
@@ -156,7 +191,10 @@ function StructureCard({ structure, onEdit, onDelete }: {
           <div className="flex items-center gap-4 text-xs text-gray-500">
             <span>📊 {structure.components.length} components</span>
             <span>👥 Used by {structure.usedBy} employees</span>
-            <span>📅 Effective: {new Date(structure.effectiveFrom).toLocaleDateString()}</span>
+            <span>
+              📅 Effective:{" "}
+              {new Date(structure.effectiveFrom).toLocaleDateString()}
+            </span>
           </div>
         </div>
         <div className="flex gap-2">
@@ -180,38 +218,55 @@ function StructureCard({ structure, onEdit, onDelete }: {
       <div className="border-t pt-4">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-xs font-semibold text-gray-700 mb-2">Earnings ({totalPercentage}%)</p>
+            <p className="text-xs font-semibold text-gray-700 mb-2">
+              Earnings ({totalPercentage}%)
+            </p>
             <div className="space-y-1">
-              {structure.components.filter(c => c.category === "Earning").slice(0, 3).map(c => (
-                <div key={c.id} className="flex justify-between text-xs">
-                  <span className="text-gray-600">{c.name}</span>
-                  <span className="font-medium">
-                    {typeof c.value === 'number' 
-                      ? c.valueType === 'percentage' ? `${c.value}%` : `ZMW ${c.value}`
-                      : c.value
-                    }
-                  </span>
-                </div>
-              ))}
-              {structure.components.filter(c => c.category === "Earning").length > 3 && (
-                <p className="text-xs text-gray-500">+{structure.components.filter(c => c.category === "Earning").length - 3} more...</p>
+              {structure.components
+                .filter((c) => c.category === "Earning")
+                .slice(0, 3)
+                .map((c) => (
+                  <div key={c.id} className="flex justify-between text-xs">
+                    <span className="text-gray-600">{c.name}</span>
+                    <span className="font-medium">
+                      {typeof c.value === "number"
+                        ? c.valueType === "percentage"
+                          ? `${c.value}%`
+                          : `ZMW ${c.value}`
+                        : c.value}
+                    </span>
+                  </div>
+                ))}
+              {structure.components.filter((c) => c.category === "Earning")
+                .length > 3 && (
+                <p className="text-xs text-gray-500">
+                  +
+                  {structure.components.filter((c) => c.category === "Earning")
+                    .length - 3}{" "}
+                  more...
+                </p>
               )}
             </div>
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-700 mb-2">Deductions</p>
+            <p className="text-xs font-semibold text-gray-700 mb-2">
+              Deductions
+            </p>
             <div className="space-y-1">
-              {structure.components.filter(c => c.category === "Deduction").map(c => (
-                <div key={c.id} className="flex justify-between text-xs">
-                  <span className="text-gray-600">{c.name}</span>
-                  <span className="font-medium text-red-600">
-                    {typeof c.value === 'number' 
-                      ? c.valueType === 'percentage' ? `${c.value}%` : `ZMW ${c.value}`
-                      : c.value
-                    }
-                  </span>
-                </div>
-              ))}
+              {structure.components
+                .filter((c) => c.category === "Deduction")
+                .map((c) => (
+                  <div key={c.id} className="flex justify-between text-xs">
+                    <span className="text-gray-600">{c.name}</span>
+                    <span className="font-medium text-red-600">
+                      {typeof c.value === "number"
+                        ? c.valueType === "percentage"
+                          ? `${c.value}%`
+                          : `ZMW ${c.value}`
+                        : c.value}
+                    </span>
+                  </div>
+                ))}
             </div>
           </div>
         </div>
@@ -221,14 +276,19 @@ function StructureCard({ structure, onEdit, onDelete }: {
 }
 
 // Structure Modal Component
-function StructureModal({ structure, onSave, onClose }: {
+function StructureModal({
+  structure,
+  onSave,
+  onClose,
+}: {
   structure: SalaryStructure;
   onSave: (s: SalaryStructure) => void;
   onClose: () => void;
 }) {
   const [formData, setFormData] = useState<SalaryStructure>(structure);
   const [showComponentModal, setShowComponentModal] = useState(false);
-  const [editingComponent, setEditingComponent] = useState<SalaryComponent | null>(null);
+  const [editingComponent, setEditingComponent] =
+    useState<SalaryComponent | null>(null);
 
   const handleAddComponent = () => {
     setEditingComponent({
@@ -237,7 +297,7 @@ function StructureModal({ structure, onSave, onClose }: {
       category: "Earning",
       valueType: "percentage",
       value: 0,
-      taxable: true
+      taxable: true,
     });
     setShowComponentModal(true);
   };
@@ -248,13 +308,18 @@ function StructureModal({ structure, onSave, onClose }: {
   };
 
   const handleSaveComponent = (component: SalaryComponent) => {
-    const existingIndex = formData.components.findIndex(c => c.id === component.id);
+    const existingIndex = formData.components.findIndex(
+      (c) => c.id === component.id,
+    );
     if (existingIndex >= 0) {
       const updated = [...formData.components];
       updated[existingIndex] = component;
       setFormData({ ...formData, components: updated });
     } else {
-      setFormData({ ...formData, components: [...formData.components, component] });
+      setFormData({
+        ...formData,
+        components: [...formData.components, component],
+      });
     }
     setShowComponentModal(false);
     setEditingComponent(null);
@@ -262,9 +327,9 @@ function StructureModal({ structure, onSave, onClose }: {
 
   const handleDeleteComponent = (id: string) => {
     if (confirm("Delete this component?")) {
-      setFormData({ 
-        ...formData, 
-        components: formData.components.filter(c => c.id !== id) 
+      setFormData({
+        ...formData,
+        components: formData.components.filter((c) => c.id !== id),
       });
     }
   };
@@ -283,8 +348,8 @@ function StructureModal({ structure, onSave, onClose }: {
 
   const grossExample = 10000;
   const totalPercentage = formData.components
-    .filter(c => c.category === "Earning" && c.valueType === "percentage")
-    .reduce((sum, c) => sum + (typeof c.value === 'number' ? c.value : 0), 0);
+    .filter((c) => c.category === "Earning" && c.valueType === "percentage")
+    .reduce((sum, c) => sum + (typeof c.value === "number" ? c.value : 0), 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
@@ -293,11 +358,17 @@ function StructureModal({ structure, onSave, onClose }: {
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">
-              {structure.id.startsWith('struct_') ? 'Create' : 'Edit'} Salary Structure
+              {structure.id.startsWith("struct_") ? "Create" : "Edit"} Salary
+              Structure
             </h3>
-            <p className="text-xs text-gray-500 mt-0.5">Define components and calculations</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Define components and calculations
+            </p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -309,7 +380,9 @@ function StructureModal({ structure, onSave, onClose }: {
             <div className="col-span-2 space-y-6">
               {/* Basic Info */}
               <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                <h4 className="text-sm font-semibold text-gray-900">Basic Information</h4>
+                <h4 className="text-sm font-semibold text-gray-900">
+                  Basic Information
+                </h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -318,7 +391,9 @@ function StructureModal({ structure, onSave, onClose }: {
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       placeholder="e.g., Executive Level, Mid-Level Staff"
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                     />
@@ -329,7 +404,12 @@ function StructureModal({ structure, onSave, onClose }: {
                     </label>
                     <textarea
                       value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
                       placeholder="Brief description"
                       rows={2}
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -342,15 +422,27 @@ function StructureModal({ structure, onSave, onClose }: {
                     <input
                       type="date"
                       value={formData.effectiveFrom}
-                      onChange={(e) => setFormData({ ...formData, effectiveFrom: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          effectiveFrom: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Status
+                    </label>
                     <select
                       value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value as "Active" | "Draft" })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          status: e.target.value as "Active" | "Draft",
+                        })
+                      }
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                     >
                       <option value="Draft">Draft</option>
@@ -363,7 +455,8 @@ function StructureModal({ structure, onSave, onClose }: {
                   <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
                     <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
                     <p className="text-xs text-red-700">
-                      Warning: Total percentage earnings ({totalPercentage}%) exceeds 100%
+                      Warning: Total percentage earnings ({totalPercentage}%)
+                      exceeds 100%
                     </p>
                   </div>
                 )}
@@ -372,7 +465,9 @@ function StructureModal({ structure, onSave, onClose }: {
               {/* Components */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-900">Salary Components</h4>
+                  <h4 className="text-sm font-semibold text-gray-900">
+                    Salary Components
+                  </h4>
                   <button
                     onClick={handleAddComponent}
                     className="text-xs text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1"
@@ -390,12 +485,16 @@ function StructureModal({ structure, onSave, onClose }: {
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-medium text-gray-900">{component.name}</span>
-                          <span className={`px-2 py-0.5 text-xs font-medium rounded ${
-                            component.category === "Earning" 
-                              ? "bg-green-100 text-green-700" 
-                              : "bg-red-100 text-red-700"
-                          }`}>
+                          <span className="text-sm font-medium text-gray-900">
+                            {component.name}
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 text-xs font-medium rounded ${
+                              component.category === "Earning"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
                             {component.category}
                           </span>
                           {component.statutory && (
@@ -405,16 +504,21 @@ function StructureModal({ structure, onSave, onClose }: {
                           )}
                         </div>
                         <div className="flex items-center gap-3 text-xs text-gray-600">
-                          <span className="capitalize">{component.valueType}</span>
-                          <span>•</span>
-                          <span className="font-medium">
-                            {typeof component.value === 'number'
-                              ? component.valueType === 'percentage' ? `${component.value}%` : `ZMW ${component.value}`
-                              : component.value
-                            }
+                          <span className="capitalize">
+                            {component.valueType}
                           </span>
                           <span>•</span>
-                          <span>{component.taxable ? "Taxable" : "Non-taxable"}</span>
+                          <span className="font-medium">
+                            {typeof component.value === "number"
+                              ? component.valueType === "percentage"
+                                ? `${component.value}%`
+                                : `ZMW ${component.value}`
+                              : component.value}
+                          </span>
+                          <span>•</span>
+                          <span>
+                            {component.taxable ? "Taxable" : "Non-taxable"}
+                          </span>
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -448,40 +552,62 @@ function StructureModal({ structure, onSave, onClose }: {
                 <div className="bg-white rounded-lg p-4 text-sm space-y-3">
                   <div className="text-center pb-3 border-b">
                     <p className="text-xs text-gray-600">Example for</p>
-                    <p className="text-xl font-bold text-gray-900">ZMW {grossExample.toLocaleString()}</p>
+                    <p className="text-xl font-bold text-gray-900">
+                      ZMW {grossExample.toLocaleString()}
+                    </p>
                   </div>
 
                   {/* Earnings */}
                   <div>
-                    <p className="text-xs font-semibold text-gray-700 mb-2">EARNINGS:</p>
+                    <p className="text-xs font-semibold text-gray-700 mb-2">
+                      EARNINGS:
+                    </p>
                     <div className="space-y-1 pl-2">
-                      {formData.components.filter(c => c.category === "Earning").map(c => {
-                        const amount = typeof c.value === 'number'
-                          ? c.valueType === 'percentage' 
-                            ? (grossExample * c.value) / 100
-                            : c.value
-                          : 0;
-                        return (
-                          <div key={c.id} className="flex justify-between text-xs">
-                            <span className="text-gray-600">{c.name}</span>
-                            <span className="font-medium">{amount.toLocaleString()}</span>
-                          </div>
-                        );
-                      })}
+                      {formData.components
+                        .filter((c) => c.category === "Earning")
+                        .map((c) => {
+                          const amount =
+                            typeof c.value === "number"
+                              ? c.valueType === "percentage"
+                                ? (grossExample * c.value) / 100
+                                : c.value
+                              : 0;
+                          return (
+                            <div
+                              key={c.id}
+                              className="flex justify-between text-xs"
+                            >
+                              <span className="text-gray-600">{c.name}</span>
+                              <span className="font-medium">
+                                {amount.toLocaleString()}
+                              </span>
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
 
                   {/* Deductions */}
-                  {formData.components.filter(c => c.category === "Deduction").length > 0 && (
+                  {formData.components.filter((c) => c.category === "Deduction")
+                    .length > 0 && (
                     <div className="border-t pt-2">
-                      <p className="text-xs font-semibold text-gray-700 mb-2">DEDUCTIONS:</p>
+                      <p className="text-xs font-semibold text-gray-700 mb-2">
+                        DEDUCTIONS:
+                      </p>
                       <div className="space-y-1 pl-2">
-                        {formData.components.filter(c => c.category === "Deduction").map(c => (
-                          <div key={c.id} className="flex justify-between text-xs">
-                            <span className="text-gray-600">{c.name}</span>
-                            <span className="font-medium text-red-600">Auto-calc</span>
-                          </div>
-                        ))}
+                        {formData.components
+                          .filter((c) => c.category === "Deduction")
+                          .map((c) => (
+                            <div
+                              key={c.id}
+                              className="flex justify-between text-xs"
+                            >
+                              <span className="text-gray-600">{c.name}</span>
+                              <span className="font-medium text-red-600">
+                                Auto-calc
+                              </span>
+                            </div>
+                          ))}
                       </div>
                     </div>
                   )}
@@ -525,7 +651,11 @@ function StructureModal({ structure, onSave, onClose }: {
 }
 
 // Component Modal
-function ComponentModal({ component, onSave, onClose }: {
+function ComponentModal({
+  component,
+  onSave,
+  onClose,
+}: {
   component: SalaryComponent;
   onSave: (c: SalaryComponent) => void;
   onClose: () => void;
@@ -549,20 +679,27 @@ function ComponentModal({ component, onSave, onClose }: {
       <div className="bg-white rounded-lg max-w-md w-full p-6">
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-lg font-semibold text-gray-900">
-            {component.id.startsWith('c_') ? 'Add' : 'Edit'} Component
+            {component.id.startsWith("c_") ? "Add" : "Edit"} Component
           </h4>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Component Name *</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Component Name *
+            </label>
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               placeholder="e.g., Basic Salary, Transport Allowance"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
             />
@@ -570,10 +707,17 @@ function ComponentModal({ component, onSave, onClose }: {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Category *</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Category *
+              </label>
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as "Earning" | "Deduction" })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    category: e.target.value as "Earning" | "Deduction",
+                  })
+                }
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
               >
                 <option value="Earning">Earning</option>
@@ -581,10 +725,14 @@ function ComponentModal({ component, onSave, onClose }: {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Value Type *</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Value Type *
+              </label>
               <select
                 value={formData.valueType}
-                onChange={(e) => setFormData({ ...formData, valueType: e.target.value as any })}
+                onChange={(e) =>
+                  setFormData({ ...formData, valueType: e.target.value as any })
+                }
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
               >
                 <option value="percentage">Percentage</option>
@@ -597,14 +745,21 @@ function ComponentModal({ component, onSave, onClose }: {
           {formData.valueType !== "auto" && (
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
-                Value * {formData.valueType === 'percentage' ? '(%)' : '(ZMW)'}
+                Value * {formData.valueType === "percentage" ? "(%)" : "(ZMW)"}
               </label>
               <input
                 type="number"
                 value={formData.value}
-                onChange={(e) => setFormData({ ...formData, value: parseFloat(e.target.value) || 0 })}
-                placeholder={formData.valueType === 'percentage' ? '0-100' : 'Amount'}
-                step={formData.valueType === 'percentage' ? '0.1' : '1'}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    value: parseFloat(e.target.value) || 0,
+                  })
+                }
+                placeholder={
+                  formData.valueType === "percentage" ? "0-100" : "Amount"
+                }
+                step={formData.valueType === "percentage" ? "0.1" : "1"}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
               />
             </div>
@@ -612,11 +767,15 @@ function ComponentModal({ component, onSave, onClose }: {
 
           {formData.valueType === "auto" && (
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Formula/Description</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Formula/Description
+              </label>
               <input
                 type="text"
                 value={formData.value as string}
-                onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, value: e.target.value })
+                }
                 placeholder="e.g., 5% of Basic, Tax Slab"
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
               />
@@ -624,10 +783,17 @@ function ComponentModal({ component, onSave, onClose }: {
           )}
 
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Statutory (Optional)</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Statutory (Optional)
+            </label>
             <select
               value={formData.statutory || ""}
-              onChange={(e) => setFormData({ ...formData, statutory: e.target.value || undefined })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  statutory: e.target.value || undefined,
+                })
+              }
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
             >
               <option value="">None</option>
@@ -643,10 +809,14 @@ function ComponentModal({ component, onSave, onClose }: {
               type="checkbox"
               id="taxable"
               checked={formData.taxable}
-              onChange={(e) => setFormData({ ...formData, taxable: e.target.checked })}
+              onChange={(e) =>
+                setFormData({ ...formData, taxable: e.target.checked })
+              }
               className="mr-2"
             />
-            <label htmlFor="taxable" className="text-sm text-gray-700">Taxable</label>
+            <label htmlFor="taxable" className="text-sm text-gray-700">
+              Taxable
+            </label>
           </div>
         </div>
 
@@ -671,23 +841,32 @@ function ComponentModal({ component, onSave, onClose }: {
 }
 
 // Delete Confirmation Modal
-function DeleteConfirmModal({ structure, onConfirm, onCancel }: {
+function DeleteConfirmModal({
+  structure,
+  onConfirm,
+  onCancel,
+}: {
   structure: SalaryStructure;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30
-">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30
+"
+    >
       <div className="bg-white rounded-lg max-w-md w-full p-6">
         <div className="flex items-start gap-3 mb-4">
           <div className="p-2 bg-red-100 rounded-lg">
             <AlertTriangle className="w-5 h-5 text-red-600" />
           </div>
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-1">Delete Salary Structure?</h4>
+            <h4 className="text-lg font-semibold text-gray-900 mb-1">
+              Delete Salary Structure?
+            </h4>
             <p className="text-sm text-gray-600">
-              Are you sure you want to delete <strong>"{structure.name}"</strong>?
+              Are you sure you want to delete{" "}
+              <strong>"{structure.name}"</strong>?
             </p>
           </div>
         </div>
@@ -695,14 +874,16 @@ function DeleteConfirmModal({ structure, onConfirm, onCancel }: {
         {structure.usedBy > 0 ? (
           <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
             <p className="text-sm text-red-700">
-              ⚠️ Cannot delete! This structure is used by <strong>{structure.usedBy} employees</strong>. 
-              Please reassign them first.
+              ⚠️ Cannot delete! This structure is used by{" "}
+              <strong>{structure.usedBy} employees</strong>. Please reassign
+              them first.
             </p>
           </div>
         ) : (
           <div className="p-3 bg-gray-50 rounded-lg mb-4">
             <p className="text-sm text-gray-700">
-              This action cannot be undone. The structure will be permanently deleted.
+              This action cannot be undone. The structure will be permanently
+              deleted.
             </p>
           </div>
         )}

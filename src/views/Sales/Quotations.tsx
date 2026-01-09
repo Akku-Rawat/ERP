@@ -14,17 +14,18 @@ import type { Column } from "../../components/ui/Table/type";
 import PdfPreviewModal from "./PdfPreviewModal";
 import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTemplate1";
 
-
 /* ===============================
    COMPONENT
 ================================ */
 
 interface QuotationTableProps {
   onAddQuotation?: () => void;
-   onExportQuotation?: () => void;  
+  onExportQuotation?: () => void;
 }
-const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation,onExportQuotation, }) => {
-
+const QuotationsTable: React.FC<QuotationTableProps> = ({
+  onAddQuotation,
+  onExportQuotation,
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [quotations, setQuotations] = useState<QuotationSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,10 +76,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation,onExpor
      ACTIONS
   ================================ */
 
-  const handleView = async (
-    quotationNumber: string,
-    e?: React.MouseEvent,
-  ) => {
+  const handleView = async (quotationNumber: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
 
     try {
@@ -126,12 +124,8 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation,onExpor
 
   const filteredQuotations = quotations.filter(
     (q) =>
-      q.quotationNumber
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      q.customerName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()),
+      q.quotationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      q.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   /* ===============================
@@ -144,9 +138,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation,onExpor
       header: "Quotation No",
       align: "left",
       render: (q) => (
-        <span className="font-semibold text-main">
-          {q.quotationNumber}
-        </span>
+        <span className="font-semibold text-main">{q.quotationNumber}</span>
       ),
     },
     { key: "customerName", header: "Customer", align: "left" },
@@ -177,9 +169,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation,onExpor
           />
           <ActionMenu
             showDownload
-            onDownload={(e) =>
-              handleDownload(q.quotationNumber, e)
-            }
+            onDownload={(e) => handleDownload(q.quotationNumber, e)}
           />
         </ActionGroup>
       ),
@@ -206,17 +196,16 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation,onExpor
           searchValue={searchTerm}
           onSearch={setSearchTerm}
           enableColumnSelector
-            enableAdd
-  addLabel="Add Quotation"
-  onAdd={onAddQuotation}   
-    enableExport              
-  onExport={onExportQuotation}
+          enableAdd
+          addLabel="Add Quotation"
+          onAdd={onAddQuotation}
+          enableExport
+          onExport={onExportQuotation}
           currentPage={page}
           totalPages={totalPages}
           pageSize={pageSize}
           totalItems={totalItems}
           onPageChange={setPage}
-          
         />
       )}
 
@@ -226,8 +215,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation,onExpor
         pdfUrl={pdfUrl}
         onClose={handleClosePdf}
         onDownload={() =>
-          selectedQuotation &&
-          generateInvoicePDF(selectedQuotation, "save")
+          selectedQuotation && generateInvoicePDF(selectedQuotation, "save")
         }
       />
     </div>

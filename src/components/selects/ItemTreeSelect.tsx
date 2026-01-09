@@ -28,53 +28,230 @@ interface Props {
 const getDummyData = () => ({
   data: {
     itemClsList: [
-      { itemClsCd: "10000000", itemClsNm: "Live Plant and Animal Material and Accessories and Supplies", itemClsLvl: 1, useYn: "Y" },
-      { itemClsCd: "11000000", itemClsNm: "Mineral and Textile and Inedible Plant and Animal Materials", itemClsLvl: 1, useYn: "Y" },
-      { itemClsCd: "12000000", itemClsNm: "Chemicals including Bio Chemicals and Gas Materials", itemClsLvl: 1, useYn: "Y" },
-      { itemClsCd: "10100000", itemClsNm: "Live animals", itemClsLvl: 2, useYn: "Y" },
-      { itemClsCd: "10110000", itemClsNm: "Domestic pet food and supplies and accessories", itemClsLvl: 2, useYn: "Y" },
-      { itemClsCd: "10120000", itemClsNm: "Horticulture", itemClsLvl: 2, useYn: "Y" },
-      { itemClsCd: "11100000", itemClsNm: "Mineral ores", itemClsLvl: 2, useYn: "Y" },
-      { itemClsCd: "11110000", itemClsNm: "Leather and fur and textile materials", itemClsLvl: 2, useYn: "Y" },
+      {
+        itemClsCd: "10000000",
+        itemClsNm:
+          "Live Plant and Animal Material and Accessories and Supplies",
+        itemClsLvl: 1,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "11000000",
+        itemClsNm:
+          "Mineral and Textile and Inedible Plant and Animal Materials",
+        itemClsLvl: 1,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "12000000",
+        itemClsNm: "Chemicals including Bio Chemicals and Gas Materials",
+        itemClsLvl: 1,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "10100000",
+        itemClsNm: "Live animals",
+        itemClsLvl: 2,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "10110000",
+        itemClsNm: "Domestic pet food and supplies and accessories",
+        itemClsLvl: 2,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "10120000",
+        itemClsNm: "Horticulture",
+        itemClsLvl: 2,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "11100000",
+        itemClsNm: "Mineral ores",
+        itemClsLvl: 2,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "11110000",
+        itemClsNm: "Leather and fur and textile materials",
+        itemClsLvl: 2,
+        useYn: "Y",
+      },
       { itemClsCd: "12100000", itemClsNm: "Gases", itemClsLvl: 2, useYn: "Y" },
-      { itemClsCd: "12110000", itemClsNm: "Organic chemicals", itemClsLvl: 2, useYn: "Y" },
-      { itemClsCd: "10101000", itemClsNm: "Livestock", itemClsLvl: 3, useYn: "Y" },
+      {
+        itemClsCd: "12110000",
+        itemClsNm: "Organic chemicals",
+        itemClsLvl: 2,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "10101000",
+        itemClsNm: "Livestock",
+        itemClsLvl: 3,
+        useYn: "Y",
+      },
       { itemClsCd: "10101500", itemClsNm: "Birds", itemClsLvl: 3, useYn: "Y" },
-      { itemClsCd: "10102000", itemClsNm: "Fish and aquatic invertebrates", itemClsLvl: 3, useYn: "Y" },
-      { itemClsCd: "10111000", itemClsNm: "Domestic pet food", itemClsLvl: 3, useYn: "Y" },
-      { itemClsCd: "10111500", itemClsNm: "Domestic animal accessories", itemClsLvl: 3, useYn: "Y" },
-      { itemClsCd: "11101000", itemClsNm: "Iron ores", itemClsLvl: 3, useYn: "Y" },
-      { itemClsCd: "11101500", itemClsNm: "Copper ores", itemClsLvl: 3, useYn: "Y" },
-      { itemClsCd: "12101000", itemClsNm: "Industrial gases", itemClsLvl: 3, useYn: "Y" },
-      { itemClsCd: "12101500", itemClsNm: "Medical gases", itemClsLvl: 3, useYn: "Y" },
+      {
+        itemClsCd: "10102000",
+        itemClsNm: "Fish and aquatic invertebrates",
+        itemClsLvl: 3,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "10111000",
+        itemClsNm: "Domestic pet food",
+        itemClsLvl: 3,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "10111500",
+        itemClsNm: "Domestic animal accessories",
+        itemClsLvl: 3,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "11101000",
+        itemClsNm: "Iron ores",
+        itemClsLvl: 3,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "11101500",
+        itemClsNm: "Copper ores",
+        itemClsLvl: 3,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "12101000",
+        itemClsNm: "Industrial gases",
+        itemClsLvl: 3,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "12101500",
+        itemClsNm: "Medical gases",
+        itemClsLvl: 3,
+        useYn: "Y",
+      },
       { itemClsCd: "10101501", itemClsNm: "Cattle", itemClsLvl: 4, useYn: "Y" },
       { itemClsCd: "10101502", itemClsNm: "Horses", itemClsLvl: 4, useYn: "Y" },
       { itemClsCd: "10101503", itemClsNm: "Sheep", itemClsLvl: 4, useYn: "Y" },
       { itemClsCd: "10101504", itemClsNm: "Goats", itemClsLvl: 4, useYn: "Y" },
       { itemClsCd: "10101505", itemClsNm: "Swine", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "10101601", itemClsNm: "Chickens", itemClsLvl: 4, useYn: "Y" },
+      {
+        itemClsCd: "10101601",
+        itemClsNm: "Chickens",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
       { itemClsCd: "10101602", itemClsNm: "Ducks", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "10101603", itemClsNm: "Turkeys", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "10102001", itemClsNm: "Live ornamental fish", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "10102002", itemClsNm: "Live food fish", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "10102003", itemClsNm: "Shellfish", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "10111001", itemClsNm: "Dog food", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "10111002", itemClsNm: "Cat food", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "10111003", itemClsNm: "Bird food", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "11101001", itemClsNm: "Hematite", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "11101002", itemClsNm: "Magnetite", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "11101003", itemClsNm: "Limonite", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "11101501", itemClsNm: "Chalcopyrite", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "11101502", itemClsNm: "Bornite", itemClsLvl: 4, useYn: "Y" },
+      {
+        itemClsCd: "10101603",
+        itemClsNm: "Turkeys",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "10102001",
+        itemClsNm: "Live ornamental fish",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "10102002",
+        itemClsNm: "Live food fish",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "10102003",
+        itemClsNm: "Shellfish",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "10111001",
+        itemClsNm: "Dog food",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "10111002",
+        itemClsNm: "Cat food",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "10111003",
+        itemClsNm: "Bird food",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "11101001",
+        itemClsNm: "Hematite",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "11101002",
+        itemClsNm: "Magnetite",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "11101003",
+        itemClsNm: "Limonite",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "11101501",
+        itemClsNm: "Chalcopyrite",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "11101502",
+        itemClsNm: "Bornite",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
       { itemClsCd: "12101001", itemClsNm: "Oxygen", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "12101002", itemClsNm: "Nitrogen", itemClsLvl: 4, useYn: "Y" },
+      {
+        itemClsCd: "12101002",
+        itemClsNm: "Nitrogen",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
       { itemClsCd: "12101003", itemClsNm: "Argon", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "12101004", itemClsNm: "Carbon dioxide", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "12101501", itemClsNm: "Medical oxygen", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "12101502", itemClsNm: "Nitrous oxide", itemClsLvl: 4, useYn: "Y" },
-      { itemClsCd: "12101503", itemClsNm: "Medical air", itemClsLvl: 4, useYn: "Y" },
-    ]
-  }
+      {
+        itemClsCd: "12101004",
+        itemClsNm: "Carbon dioxide",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "12101501",
+        itemClsNm: "Medical oxygen",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "12101502",
+        itemClsNm: "Nitrous oxide",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+      {
+        itemClsCd: "12101503",
+        itemClsNm: "Medical air",
+        itemClsLvl: 4,
+        useYn: "Y",
+      },
+    ],
+  },
 });
 
 export default function ItemTreeSelect({
@@ -94,10 +271,12 @@ export default function ItemTreeSelect({
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const ref = useRef<HTMLDivElement>(null);
 
-  const getId = (item: any): string => item.itemClsCd ?? item.code ?? String(item);
-  const getName = (item: any): string => item.itemClsNm ?? item.name ?? item.code_name ?? "";
+  const getId = (item: any): string =>
+    item.itemClsCd ?? item.code ?? String(item);
+  const getName = (item: any): string =>
+    item.itemClsNm ?? item.name ?? item.code_name ?? "";
   const getLevel = (item: any): number =>
-  Number(item.itemClsLvl ?? item.level ?? 1);
+    Number(item.itemClsLvl ?? item.level ?? 1);
 
   const getDisplayName = (item: any): string => {
     if (displayFormatter) return displayFormatter(item);
@@ -115,7 +294,13 @@ export default function ItemTreeSelect({
       .forEach((item) => {
         const code = getId(item);
         const level = getLevel(item);
-        map[code] = { code, name: getDisplayName(item), level, children: [], originalData: item };
+        map[code] = {
+          code,
+          name: getDisplayName(item),
+          level,
+          children: [],
+          originalData: item,
+        };
       });
 
     Object.values(map).forEach((node) => {
@@ -131,7 +316,9 @@ export default function ItemTreeSelect({
     });
 
     const sortTree = (nodes: TreeItem[]): TreeItem[] =>
-      nodes.sort((a, b) => a.code.localeCompare(b.code)).map((n) => ({ ...n, children: sortTree(n.children) }));
+      nodes
+        .sort((a, b) => a.code.localeCompare(b.code))
+        .map((n) => ({ ...n, children: sortTree(n.children) }));
 
     return sortTree(roots);
   };
@@ -141,7 +328,9 @@ export default function ItemTreeSelect({
     const lower = term.toLowerCase();
     return nodes
       .map((node) => {
-        const match = node.code.toLowerCase().includes(lower) || node.name.toLowerCase().includes(lower);
+        const match =
+          node.code.toLowerCase().includes(lower) ||
+          node.name.toLowerCase().includes(lower);
         if (match) return { ...node };
         const children = searchTree(node.children, term);
         return children.length ? { ...node, children } : null;
@@ -155,25 +344,24 @@ export default function ItemTreeSelect({
         setLoading(true);
         let res;
         if (USE_DUMMY_DATA) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 500));
           res = getDummyData();
         } else {
           res = await fetchData();
         }
- let data =
-  res?.data?.itemClsList ??
-  res?.data?.data?.itemClsList ??
-  res?.data?.data?.list ??
-  res?.data?.data?.items ??
-  res?.data?.data ??
-  res?.data ??
-  res;
+        let data =
+          res?.data?.itemClsList ??
+          res?.data?.data?.itemClsList ??
+          res?.data?.data?.list ??
+          res?.data?.data?.items ??
+          res?.data?.data ??
+          res?.data ??
+          res;
 
-if (!Array.isArray(data)) {
-  console.error("Invalid ItemClass response shape", res);
-  data = [];
-}
-
+        if (!Array.isArray(data)) {
+          console.error("Invalid ItemClass response shape", res);
+          data = [];
+        }
 
         const tree = buildTree(data);
         setTreeData(tree);
@@ -194,7 +382,8 @@ if (!Array.isArray(data)) {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -218,7 +407,8 @@ if (!Array.isArray(data)) {
     setExpanded((prev) => ({ ...prev, ...exp }));
   }, [search, treeData]);
 
-  const toggleNode = (code: string) => setExpanded((prev) => ({ ...prev, [code]: !prev[code] }));
+  const toggleNode = (code: string) =>
+    setExpanded((prev) => ({ ...prev, [code]: !prev[code] }));
 
   const findSelectedItem = (code: string): TreeItem | null => {
     const findInTree = (nodes: TreeItem[]): TreeItem | null => {
@@ -242,7 +432,10 @@ if (!Array.isArray(data)) {
     "bg-amber-50 text-amber-700 border-amber-200",
   ];
 
-  const renderTreeNode = (node: TreeItem, depth: number = 0): React.JSX.Element => {
+  const renderTreeNode = (
+    node: TreeItem,
+    depth: number = 0,
+  ): React.JSX.Element => {
     const isExpanded = expanded[node.code];
     const hasChildren = node.children.length > 0;
     const isSelected = node.code === value;
@@ -252,7 +445,9 @@ if (!Array.isArray(data)) {
       <div key={node.code} style={{ marginLeft: `${depth * 16}px` }}>
         <div
           className={`flex items-center gap-2 px-3 py-2.5 cursor-pointer hover:bg-blue-50 rounded transition-colors ${
-            isSelected ? "bg-blue-100 font-medium border-l-2 border-blue-500" : ""
+            isSelected
+              ? "bg-blue-100 font-medium border-l-2 border-blue-500"
+              : ""
           }`}
           onClick={() => {
             if (isLeaf) {
@@ -271,7 +466,12 @@ if (!Array.isArray(data)) {
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           ) : (
             <div className="w-4"></div>
@@ -284,10 +484,16 @@ if (!Array.isArray(data)) {
             {node.level}
           </div>
           <span className="text-sm flex-1 truncate">{node.name}</span>
-          {hasChildren && <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{node.children.length}</span>}
+          {hasChildren && (
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+              {node.children.length}
+            </span>
+          )}
         </div>
         {isExpanded && hasChildren && (
-          <div className="mt-1 border-l-2 border-gray-200 ml-2">{node.children.map((child) => renderTreeNode(child, depth + 1))}</div>
+          <div className="mt-1 border-l-2 border-gray-200 ml-2">
+            {node.children.map((child) => renderTreeNode(child, depth + 1))}
+          </div>
         )}
       </div>
     );
@@ -297,7 +503,11 @@ if (!Array.isArray(data)) {
     <div className={`flex flex-col gap-1 ${className}`}>
       <span className="font-medium text-gray-600 text-sm">
         {label}
-        {USE_DUMMY_DATA && <span className="ml-2 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">DEMO</span>}
+        {USE_DUMMY_DATA && (
+          <span className="ml-2 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">
+            DEMO
+          </span>
+        )}
       </span>
       <div ref={ref} className="relative w-full">
         <input
@@ -318,10 +528,22 @@ if (!Array.isArray(data)) {
                 filteredTree.map((node) => renderTreeNode(node, 0))
               ) : (
                 <div className="px-4 py-8 text-center">
-                  <svg className="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg
+                    className="w-12 h-12 text-gray-300 mx-auto mb-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
-                  <p className="text-gray-500 text-sm">{search ? "No matching items found" : "No items available"}</p>
+                  <p className="text-gray-500 text-sm">
+                    {search ? "No matching items found" : "No items available"}
+                  </p>
                 </div>
               )}
             </div>

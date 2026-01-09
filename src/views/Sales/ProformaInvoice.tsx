@@ -36,9 +36,12 @@ const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
 
 interface ProformaInvoiceTableProps {
   onAddProformaInvoice?: () => void;
-   onExportProformaInvoice?: () => void;  
+  onExportProformaInvoice?: () => void;
 }
-  const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({ onAddProformaInvoice,onExportProformaInvoice, }) => {
+const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
+  onAddProformaInvoice,
+  onExportProformaInvoice,
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [invoices, setInvoices] = useState<ProformaInvoiceSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,10 +93,7 @@ interface ProformaInvoiceTableProps {
      ACTIONS
   ================================ */
 
-  const handleView = async (
-    proformaId: string,
-    e?: React.MouseEvent,
-  ) => {
+  const handleView = async (proformaId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
 
     const res = await getProformaInvoiceById(proformaId);
@@ -106,10 +106,7 @@ interface ProformaInvoiceTableProps {
     setPdfOpen(true);
   };
 
-  const handleDownload = async (
-    proformaId: string,
-    e?: React.MouseEvent,
-  ) => {
+  const handleDownload = async (proformaId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
 
     try {
@@ -129,9 +126,7 @@ interface ProformaInvoiceTableProps {
   ) => {
     if (
       CRITICAL_STATUSES.includes(status) &&
-      !window.confirm(
-        `Mark proforma invoice ${proformaId} as ${status}?`,
-      )
+      !window.confirm(`Mark proforma invoice ${proformaId} as ${status}?`)
     ) {
       return;
     }
@@ -144,19 +139,14 @@ interface ProformaInvoiceTableProps {
 
     setInvoices((prev) =>
       prev.map((inv) =>
-        inv.proformaId === proformaId
-          ? { ...inv, status }
-          : inv,
+        inv.proformaId === proformaId ? { ...inv, status } : inv,
       ),
     );
 
     toast.success(`Marked as ${status}`);
   };
 
-  const handleDelete = async (
-    proformaId: string,
-    e?: React.MouseEvent,
-  ) => {
+  const handleDelete = async (proformaId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (!window.confirm(`Delete proforma invoice ${proformaId}?`)) return;
 
@@ -191,9 +181,7 @@ interface ProformaInvoiceTableProps {
       header: "Proforma No",
       align: "left",
       render: (inv) => (
-        <span className="font-semibold text-main">
-          {inv.proformaId}
-        </span>
+        <span className="font-semibold text-main">{inv.proformaId}</span>
       ),
     },
     {
@@ -217,9 +205,7 @@ interface ProformaInvoiceTableProps {
       align: "left",
       render: (inv) => (
         <span className="text-xs text-muted">
-          {inv.dueDate
-            ? new Date(inv.dueDate).toLocaleDateString()
-            : "—"}
+          {inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "—"}
         </span>
       ),
     },
@@ -252,20 +238,15 @@ interface ProformaInvoiceTableProps {
           />
           <ActionMenu
             showDownload
-            onDownload={(e) =>
-              handleDownload(inv.proformaId, e)
-            }
-            onDelete={(e) =>
-              handleDelete(inv.proformaId, e)
-            }
-            customActions={(
-              STATUS_TRANSITIONS[inv.status] ?? []
-            ).map((status) => ({
-              label: `Mark as ${status}`,
-              danger: status === "Paid",
-              onClick: () =>
-                handleStatusChange(inv.proformaId, status),
-            }))}
+            onDownload={(e) => handleDownload(inv.proformaId, e)}
+            onDelete={(e) => handleDelete(inv.proformaId, e)}
+            customActions={(STATUS_TRANSITIONS[inv.status] ?? []).map(
+              (status) => ({
+                label: `Mark as ${status}`,
+                danger: status === "Paid",
+                onClick: () => handleStatusChange(inv.proformaId, status),
+              }),
+            )}
           />
         </ActionGroup>
       ),
@@ -281,9 +262,7 @@ interface ProformaInvoiceTableProps {
       {loading ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          <p className="mt-2 text-muted">
-            Loading proforma invoices…
-          </p>
+          <p className="mt-2 text-muted">Loading proforma invoices…</p>
         </div>
       ) : (
         <Table
@@ -293,12 +272,11 @@ interface ProformaInvoiceTableProps {
           showToolbar
           searchValue={searchTerm}
           onSearch={setSearchTerm}
-           enableAdd
-  addLabel=" Add Proforma Invoice"
-  onAdd={onAddProformaInvoice}   
-  
-    enableExport              
-  onExport={onExportProformaInvoice} 
+          enableAdd
+          addLabel=" Add Proforma Invoice"
+          onAdd={onAddProformaInvoice}
+          enableExport
+          onExport={onExportProformaInvoice}
           enableColumnSelector
           currentPage={page}
           totalPages={totalPages}
@@ -314,8 +292,7 @@ interface ProformaInvoiceTableProps {
         pdfUrl={pdfUrl}
         onClose={handleClosePdf}
         onDownload={() =>
-          selectedInvoice &&
-          generateInvoicePDF(selectedInvoice, "save")
+          selectedInvoice && generateInvoicePDF(selectedInvoice, "save")
         }
       />
     </div>

@@ -1,7 +1,13 @@
 // components/modals/TicketModal.tsx
 import React, { useEffect, useState } from "react";
 import Modal from "../ui/modal/modal";
-import { Input, Select, Textarea, Card, Button } from "../ui/modal/formComponent";
+import {
+  Input,
+  Select,
+  Textarea,
+  Card,
+  Button,
+} from "../ui/modal/formComponent";
 import { Ticket as TicketIcon, FileText, Check } from "lucide-react";
 
 export interface TicketModalProps {
@@ -34,7 +40,12 @@ const emptyForm = {
   description: "",
 };
 
-const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, ticket = null, onSubmit }) => {
+const TicketModal: React.FC<TicketModalProps> = ({
+  isOpen,
+  onClose,
+  ticket = null,
+  onSubmit,
+}) => {
   const [form, setForm] = useState({ ...emptyForm });
 
   useEffect(() => {
@@ -43,7 +54,9 @@ const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, ticket = nul
   }, [ticket, isOpen]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value, type } = e.target as HTMLInputElement;
     setForm((p) => ({ ...p, [name]: value }));
@@ -56,7 +69,11 @@ const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, ticket = nul
   const handleSave = (e?: React.FormEvent) => {
     e?.preventDefault();
     // minimal required-field check (optional)
-    if (!form.title.trim() || !form.customer.trim() || !form.description.trim()) {
+    if (
+      !form.title.trim() ||
+      !form.customer.trim() ||
+      !form.description.trim()
+    ) {
       alert("Please fill Title, Customer and Description.");
       return;
     }
@@ -69,7 +86,13 @@ const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, ticket = nul
 
   const footer = (
     <>
-      <Button variant="secondary" onClick={() => { setForm({ ...emptyForm }); onClose(); }}>
+      <Button
+        variant="secondary"
+        onClick={() => {
+          setForm({ ...emptyForm });
+          onClose();
+        }}
+      >
         Cancel
       </Button>
 
@@ -77,7 +100,12 @@ const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, ticket = nul
         <Button variant="secondary" onClick={handleReset}>
           Reset
         </Button>
-        <Button variant="primary" onClick={handleSave} type="button" icon={<Check className="w-4 h-4" />}>
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          type="button"
+          icon={<Check className="w-4 h-4" />}
+        >
           {ticket ? "Update Ticket" : "Save Ticket"}
         </Button>
       </div>
@@ -89,15 +117,26 @@ const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, ticket = nul
   return (
     <Modal
       isOpen={isOpen}
-      onClose={() => { setForm({ ...emptyForm }); onClose(); }}
+      onClose={() => {
+        setForm({ ...emptyForm });
+        onClose();
+      }}
       title={ticket ? "Edit Ticket" : "Add Support Ticket"}
-      subtitle={ticket ? "Update ticket details" : "Create a new support ticket"}
+      subtitle={
+        ticket ? "Update ticket details" : "Create a new support ticket"
+      }
       icon={TicketIcon}
       footer={footer}
       maxWidth="4xl"
       height="85vh"
     >
-      <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-6">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSave();
+        }}
+        className="space-y-6"
+      >
         <Card
           title="Ticket Details"
           subtitle="Essential ticket information"

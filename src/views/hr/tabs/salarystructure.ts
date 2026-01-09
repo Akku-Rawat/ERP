@@ -34,14 +34,73 @@ let salaryStructures: SalaryStructure[] = [
     usedBy: 12,
     defaultGrossSalary: 240000, // ✅ Default: ZMW 240,000/year (20K/month)
     components: [
-      { id: "c1", name: "Basic Salary", category: "Earning", valueType: "percentage", value: 60, taxable: true, statutory: "NAPSA Base", editable: false },
-      { id: "c2", name: "House Allowance", category: "Earning", valueType: "percentage", value: 20, taxable: true, editable: true },
-      { id: "c3", name: "Transport", category: "Earning", valueType: "percentage", value: 15, taxable: true, editable: true },
-      { id: "c4", name: "Medical", category: "Earning", valueType: "fixed", value: 500, taxable: false, editable: true },
-      { id: "c7", name: "Reward", category: "Earning", valueType: "fixed", value: 0, taxable: true, editable: true }, // ✅ OPTIONAL REWARD
-      { id: "c5", name: "NAPSA (5%)", category: "Deduction", valueType: "auto", value: "5% of Basic", taxable: false, statutory: "NAPSA", editable: false },
-      { id: "c6", name: "PAYE", category: "Deduction", valueType: "auto", value: "Tax Slab", taxable: false, statutory: "PAYE", editable: false },
-    ]
+      {
+        id: "c1",
+        name: "Basic Salary",
+        category: "Earning",
+        valueType: "percentage",
+        value: 60,
+        taxable: true,
+        statutory: "NAPSA Base",
+        editable: false,
+      },
+      {
+        id: "c2",
+        name: "House Allowance",
+        category: "Earning",
+        valueType: "percentage",
+        value: 20,
+        taxable: true,
+        editable: true,
+      },
+      {
+        id: "c3",
+        name: "Transport",
+        category: "Earning",
+        valueType: "percentage",
+        value: 15,
+        taxable: true,
+        editable: true,
+      },
+      {
+        id: "c4",
+        name: "Medical",
+        category: "Earning",
+        valueType: "fixed",
+        value: 500,
+        taxable: false,
+        editable: true,
+      },
+      {
+        id: "c7",
+        name: "Reward",
+        category: "Earning",
+        valueType: "fixed",
+        value: 0,
+        taxable: true,
+        editable: true,
+      }, // ✅ OPTIONAL REWARD
+      {
+        id: "c5",
+        name: "NAPSA (5%)",
+        category: "Deduction",
+        valueType: "auto",
+        value: "5% of Basic",
+        taxable: false,
+        statutory: "NAPSA",
+        editable: false,
+      },
+      {
+        id: "c6",
+        name: "PAYE",
+        category: "Deduction",
+        valueType: "auto",
+        value: "Tax Slab",
+        taxable: false,
+        statutory: "PAYE",
+        editable: false,
+      },
+    ],
   },
   {
     id: "mid",
@@ -53,13 +112,64 @@ let salaryStructures: SalaryStructure[] = [
     usedBy: 45,
     defaultGrossSalary: 120000, // ✅ Default: ZMW 120,000/year (10K/month)
     components: [
-      { id: "c1", name: "Basic Salary", category: "Earning", valueType: "percentage", value: 65, taxable: true, statutory: "NAPSA Base", editable: false },
-      { id: "c2", name: "House Allowance", category: "Earning", valueType: "percentage", value: 18, taxable: true, editable: true },
-      { id: "c3", name: "Medical", category: "Earning", valueType: "fixed", value: 300, taxable: false, editable: true },
-      { id: "c7", name: "Reward", category: "Earning", valueType: "fixed", value: 0, taxable: true, editable: true }, // ✅ OPTIONAL REWARD
-      { id: "c4", name: "NAPSA (5%)", category: "Deduction", valueType: "auto", value: "5% of Basic", taxable: false, statutory: "NAPSA", editable: false },
-      { id: "c5", name: "PAYE", category: "Deduction", valueType: "auto", value: "Tax Slab", taxable: false, statutory: "PAYE", editable: false },
-    ]
+      {
+        id: "c1",
+        name: "Basic Salary",
+        category: "Earning",
+        valueType: "percentage",
+        value: 65,
+        taxable: true,
+        statutory: "NAPSA Base",
+        editable: false,
+      },
+      {
+        id: "c2",
+        name: "House Allowance",
+        category: "Earning",
+        valueType: "percentage",
+        value: 18,
+        taxable: true,
+        editable: true,
+      },
+      {
+        id: "c3",
+        name: "Medical",
+        category: "Earning",
+        valueType: "fixed",
+        value: 300,
+        taxable: false,
+        editable: true,
+      },
+      {
+        id: "c7",
+        name: "Reward",
+        category: "Earning",
+        valueType: "fixed",
+        value: 0,
+        taxable: true,
+        editable: true,
+      }, // ✅ OPTIONAL REWARD
+      {
+        id: "c4",
+        name: "NAPSA (5%)",
+        category: "Deduction",
+        valueType: "auto",
+        value: "5% of Basic",
+        taxable: false,
+        statutory: "NAPSA",
+        editable: false,
+      },
+      {
+        id: "c5",
+        name: "PAYE",
+        category: "Deduction",
+        valueType: "auto",
+        value: "Tax Slab",
+        taxable: false,
+        statutory: "PAYE",
+        editable: false,
+      },
+    ],
   },
   {
     id: "entry",
@@ -71,14 +181,65 @@ let salaryStructures: SalaryStructure[] = [
     usedBy: 78,
     defaultGrossSalary: 60000, // ✅ Default: ZMW 60,000/year (5K/month)
     components: [
-      { id: "c1", name: "Basic Salary", category: "Earning", valueType: "percentage", value: 70, taxable: true, statutory: "NAPSA Base", editable: false },
-      { id: "c2", name: "House Allowance", category: "Earning", valueType: "percentage", value: 15, taxable: true, editable: true },
-      { id: "c3", name: "Transport", category: "Earning", valueType: "fixed", value: 200, taxable: true, editable: true },
-      { id: "c7", name: "Reward", category: "Earning", valueType: "fixed", value: 0, taxable: true, editable: true }, // ✅ OPTIONAL REWARD
-      { id: "c4", name: "NAPSA (5%)", category: "Deduction", valueType: "auto", value: "5% of Basic", taxable: false, statutory: "NAPSA", editable: false },
-      { id: "c5", name: "PAYE", category: "Deduction", valueType: "auto", value: "Tax Slab", taxable: false, statutory: "PAYE", editable: false },
-    ]
-  }
+      {
+        id: "c1",
+        name: "Basic Salary",
+        category: "Earning",
+        valueType: "percentage",
+        value: 70,
+        taxable: true,
+        statutory: "NAPSA Base",
+        editable: false,
+      },
+      {
+        id: "c2",
+        name: "House Allowance",
+        category: "Earning",
+        valueType: "percentage",
+        value: 15,
+        taxable: true,
+        editable: true,
+      },
+      {
+        id: "c3",
+        name: "Transport",
+        category: "Earning",
+        valueType: "fixed",
+        value: 200,
+        taxable: true,
+        editable: true,
+      },
+      {
+        id: "c7",
+        name: "Reward",
+        category: "Earning",
+        valueType: "fixed",
+        value: 0,
+        taxable: true,
+        editable: true,
+      }, // ✅ OPTIONAL REWARD
+      {
+        id: "c4",
+        name: "NAPSA (5%)",
+        category: "Deduction",
+        valueType: "auto",
+        value: "5% of Basic",
+        taxable: false,
+        statutory: "NAPSA",
+        editable: false,
+      },
+      {
+        id: "c5",
+        name: "PAYE",
+        category: "Deduction",
+        valueType: "auto",
+        value: "Tax Slab",
+        taxable: false,
+        statutory: "PAYE",
+        editable: false,
+      },
+    ],
+  },
 ];
 
 // API Functions
@@ -87,33 +248,38 @@ export const getSalaryStructures = (): SalaryStructure[] => {
 };
 
 export const getActiveSalaryStructures = (): SalaryStructure[] => {
-  return salaryStructures.filter(s => s.status === "Active");
+  return salaryStructures.filter((s) => s.status === "Active");
 };
 
-export const getSalaryStructureById = (id: string): SalaryStructure | undefined => {
-  return salaryStructures.find(s => s.id === id);
+export const getSalaryStructureById = (
+  id: string,
+): SalaryStructure | undefined => {
+  return salaryStructures.find((s) => s.id === id);
 };
 
 export const createSalaryStructure = (structure: SalaryStructure): void => {
   salaryStructures.push(structure);
 };
 
-export const updateSalaryStructure = (id: string, structure: SalaryStructure): void => {
-  const index = salaryStructures.findIndex(s => s.id === id);
+export const updateSalaryStructure = (
+  id: string,
+  structure: SalaryStructure,
+): void => {
+  const index = salaryStructures.findIndex((s) => s.id === id);
   if (index >= 0) {
     salaryStructures[index] = structure;
   }
 };
 
 export const deleteSalaryStructure = (id: string): void => {
-  salaryStructures = salaryStructures.filter(s => s.id !== id);
+  salaryStructures = salaryStructures.filter((s) => s.id !== id);
 };
 
 // ✅ Calculate salary breakdown with proper handling
 export const calculateSalaryBreakdown = (
   structureId: string,
   grossSalary: number,
-  customComponents?: SalaryComponent[]
+  customComponents?: SalaryComponent[],
 ): { component: SalaryComponent; amount: number }[] => {
   const structure = getSalaryStructureById(structureId);
   if (!structure) return [];
@@ -121,7 +287,7 @@ export const calculateSalaryBreakdown = (
   // Use custom components if provided, otherwise use structure's default
   const components = customComponents || structure.components;
 
-  return components.map(comp => {
+  return components.map((comp) => {
     let amount = 0;
     if (comp.valueType === "percentage") {
       amount = (grossSalary * (comp.value as number)) / 100;
@@ -132,14 +298,16 @@ export const calculateSalaryBreakdown = (
   });
 };
 
-export function getSalaryStructureByDesignation(designation: string): string | null {
+export function getSalaryStructureByDesignation(
+  designation: string,
+): string | null {
   const map: Record<string, string> = {
     "Software Developer": "exec",
     "Senior Developer": "exec",
     "Product Manager": "exec",
-    "Manager": "mid",
-    "Accountant": "mid",
-    "Intern": "entry",
+    Manager: "mid",
+    Accountant: "mid",
+    Intern: "entry",
     "Junior Developer": "entry",
   };
 
@@ -147,13 +315,12 @@ export function getSalaryStructureByDesignation(designation: string): string | n
 }
 
 export const getSalaryStructureByLevel = (level: string) => {
-  return getActiveSalaryStructures()
-    .find(s => s.level === level)?.id || null;
+  return getActiveSalaryStructures().find((s) => s.level === level)?.id || null;
 };
 
 export const getLevelsFromHrSettings = () => {
   const active = getActiveSalaryStructures();
-  return Array.from(new Set(active.map(s => s.level)));
+  return Array.from(new Set(active.map((s) => s.level)));
 };
 
 // ✅ Get default gross salary for a structure

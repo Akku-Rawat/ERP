@@ -1,4 +1,3 @@
-
 export interface Column<T> {
   key: string;
   header: string;

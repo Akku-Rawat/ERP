@@ -20,7 +20,7 @@ export async function getAllEmployees(
   page: number = 1,
   page_size: number = 10,
   status?: string,
-  department?: string
+  department?: string,
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getAllEmployees, {
     params: {
@@ -46,13 +46,9 @@ export async function createEmployee(payload: any): Promise<any> {
 }
 
 export async function updateEmployeeById(payload: any): Promise<any> {
-  const resp = await api.patch(
-    ENDPOINTS.updateEmployee,
-    payload
-  );
+  const resp = await api.patch(ENDPOINTS.updateEmployee, payload);
   return resp.data;
 }
-
 
 export async function deleteEmployeeById(id: string): Promise<any> {
   const url = `${ENDPOINTS.deleteEmployee}?id=${id}`;
@@ -60,9 +56,7 @@ export async function deleteEmployeeById(id: string): Promise<any> {
   return resp.data;
 }
 
-export async function updateEmployeeDocuments(
-  payload: FormData
-): Promise<any> {
+export async function updateEmployeeDocuments(payload: FormData): Promise<any> {
   const resp: AxiosResponse = await api.put(
     ENDPOINTS.updateEmployeeDocuments,
     payload,
@@ -70,7 +64,7 @@ export async function updateEmployeeDocuments(
       headers: {
         "Content-Type": "multipart/form-data",
       },
-    }
+    },
   );
 
   return resp.data;
@@ -79,16 +73,13 @@ export async function updateEmployeeDocuments(
 //verification of employee identity via NRC or SSN
 export async function verifyEmployeeIdentity(
   type: "NRC" | "SSN",
-  value: string
+  value: string,
 ): Promise<any> {
-  const payload =
-    type === "NRC"
-      ? { nrc: value }
-      : { ssn: value };
+  const payload = type === "NRC" ? { nrc: value } : { ssn: value };
 
   const resp: AxiosResponse = await api.post(
     ENDPOINTS.fetchEmployeeByNrc,
-    payload
+    payload,
   );
 
   return resp.data;

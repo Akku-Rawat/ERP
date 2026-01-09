@@ -40,23 +40,24 @@ function DropdownContent({
 }: DropdownContentProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [menuSearch, setMenuSearch] = useState("");
-  const [position, setPosition] =
-  useState<{ top: number; left: number } | null>(null);
+  const [position, setPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
+  useLayoutEffect(() => {
+    if (!isOpen || !anchorRef.current) return;
 
-useLayoutEffect(() => {
-  if (!isOpen || !anchorRef.current) return;
+    const rect = anchorRef.current.getBoundingClientRect();
+    const dropdownWidth = 288;
 
-  const rect = anchorRef.current.getBoundingClientRect();
-  const dropdownWidth = 288;
+    let left = rect.right + window.scrollX - dropdownWidth;
+    if (left < 8) left = 8;
 
-  let left = rect.right + window.scrollX - dropdownWidth;
-  if (left < 8) left = 8;
+    const top = rect.bottom + window.scrollY + 8;
 
-  let top = rect.bottom + window.scrollY + 8;
-
-  setPosition({ top, left });
-}, [isOpen]);
+    setPosition({ top, left });
+  }, [isOpen]);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -102,10 +103,10 @@ useLayoutEffect(() => {
 
   // Filter columns based on search input
   const filteredColumns = columns.filter((col) =>
-    col.header.toLowerCase().includes(menuSearch.trim().toLowerCase())
+    col.header.toLowerCase().includes(menuSearch.trim().toLowerCase()),
   );
 
- if (!isOpen || !position) return null;
+  if (!isOpen || !position) return null;
 
   // Render dropdown via portal to avoid overflow clipping
   return createPortal(
@@ -251,7 +252,7 @@ useLayoutEffect(() => {
         </button>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 
@@ -307,9 +308,7 @@ export default function ColumnSelector({
         <span className="whitespace-nowrap text-[10px] font-black uppercase tracking-widest">
           {buttonLabel ?? `Columns (${visibleKeys.length})`}
         </span>
-       <svg
-  className="w-5 h-5"
->
+        <svg className="w-5 h-5">
           <path
             fillRule="evenodd"
             d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"

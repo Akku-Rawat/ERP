@@ -29,14 +29,13 @@ const navTabs = [
   // { key: 'attendance', label: 'Attendance', icon: <FaClipboardList /> },
   // { key: 'leave', label: 'Leave Management', icon: <FaCalendarDay /> },
   { key: "payroll", label: "Payroll", icon: <FaMoneyCheckAlt /> },
-  
+
   {
     key: `compliance`,
     label: `Compliance Management`,
     icon: <FaClipboardList />,
   },
-  {key:"settings", label:"Settings", icon:<FaSlidersH />},
-
+  { key: "settings", label: "Settings", icon: <FaSlidersH /> },
 ];
 
 const HrPayrollModule: React.FC = () => {
