@@ -389,10 +389,10 @@ const AccountingModule: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app ">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-main">
           <span>{accountingModule.icon}</span> {accountingModule.name}
         </h2>
         {/* Optionally add summary counts here */}
@@ -416,7 +416,7 @@ const AccountingModule: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-lg shadow-sm p-4 min-h-[400px]">
+      <div className="bg-app rounded-lg shadow-sm p-4 min-h-[400px]">
         {activeTab === "gl" && (
           <GeneralLedger
             glSubTab={glSubTab}

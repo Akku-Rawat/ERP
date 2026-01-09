@@ -130,7 +130,7 @@ const PerformanceReviews: React.FC = () => {
     demoReviews.length;
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app">
       <div className="space-y-6">
         {/* Header + Filters */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

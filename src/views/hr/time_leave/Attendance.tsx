@@ -1177,7 +1177,7 @@ const WorkforceManagementSystem: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+    <div className="min-h-screen bg-app">
       <div className="p-6 max-w-7xl mx-auto">
         {currentView === "dashboard" && renderDashboard()}
         {currentView === "attendance" && renderAttendance()}

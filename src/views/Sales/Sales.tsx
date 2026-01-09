@@ -107,7 +107,7 @@ const SalesModule: React.FC = () => {
     <div className="p-6 bg-app min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-main">
           <FaMoneyBillWave /> Sales
         </h2>
       </div>

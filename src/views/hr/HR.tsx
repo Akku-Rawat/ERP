@@ -43,9 +43,9 @@ const HrPayrollModule: React.FC = () => {
   const [tab, setTab] = useState(navTabs[0].key);
 
   return (
-    <div className="bg-gray-50 min-h-screen p-8 pb-20">
+    <div className="bg-app  p-8 pb-20">
       {/* Header */}
-      <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
+      <h1 className="text-main -3xl font-bold mb-6 flex items-center gap-2">
         <FaUserTie /> Human Resources
       </h1>
 

@@ -41,7 +41,7 @@ const TrialBalance: React.FC<Props> = ({
   const balanced = totalDebit === totalCredit;
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app">
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

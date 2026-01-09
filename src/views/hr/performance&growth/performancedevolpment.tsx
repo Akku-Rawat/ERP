@@ -21,7 +21,7 @@ const PerformanceDevelopment: React.FC = () => {
   }, [tab]);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app">
       <div className="space-y-6">
         {/* top tabs */}
         <div className="flex gap-8 border-b border-gray-300 pb-4 overflow-x-auto">

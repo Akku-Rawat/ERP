@@ -78,10 +78,10 @@ const Inventory: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-main">
           <span>{inventory.icon}</span> {inventory.name}
         </h2>
       </div>
@@ -107,7 +107,7 @@ const Inventory: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="">
         {activeTab === "items" && (
           <Items
             products={inventory.products}
