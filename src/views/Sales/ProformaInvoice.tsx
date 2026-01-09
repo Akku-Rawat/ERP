@@ -34,7 +34,11 @@ const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
 
 const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
 
-const ProformaInvoicesTable: React.FC = () => {
+interface ProformaInvoiceTableProps {
+  onAddProformaInvoice?: () => void;
+   onExportProformaInvoice?: () => void;  
+}
+  const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({ onAddProformaInvoice,onExportProformaInvoice, }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [invoices, setInvoices] = useState<ProformaInvoiceSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -289,6 +293,12 @@ const ProformaInvoicesTable: React.FC = () => {
           showToolbar
           searchValue={searchTerm}
           onSearch={setSearchTerm}
+           enableAdd
+  addLabel=" Add Proforma Invoice"
+  onAdd={onAddProformaInvoice}   
+  
+    enableExport              
+  onExport={onExportProformaInvoice} 
           enableColumnSelector
           currentPage={page}
           totalPages={totalPages}

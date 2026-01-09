@@ -32,9 +32,14 @@ const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
   Approved: ["Pending", "Paid", "Overdue"],
 };
 
-const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
-const InvoicesTable: React.FC<{ onAdd?: () => void }> = ({ onAdd }) => {
+ const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
+// const InvoicesTable: React.FC<{ onAdd?: () => void }> = ({ onAdd }) => {
 
+interface InvoiceTableProps {
+  onAddInvoice?: () => void;
+   onExportInvoice?: () => void;  
+}
+const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice,onExportInvoice, }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -233,11 +238,12 @@ const InvoicesTable: React.FC<{ onAdd?: () => void }> = ({ onAdd }) => {
       key: "total",
       header: "Amount",
       align: "right",
-      render: (inv: InvoiceSummary) => (
-        <code className="text-xs px-2 py-1 rounded bg-row-hover text-main font-semibold">
-          {inv.currency} {inv.total.toLocaleString()}
-        </code>
-      ),
+     render: (inv: InvoiceSummary) => (
+  <code className="text-xs px-2 py-1 rounded bg-row-hover text-main font-semibold whitespace-nowrap">
+    {inv.total.toLocaleString()} {inv.currency}
+  </code>
+)
+
     },
     {
       key: "invoiceStatus",
@@ -292,17 +298,25 @@ const InvoicesTable: React.FC<{ onAdd?: () => void }> = ({ onAdd }) => {
           data={filteredInvoices}
           rowKey={(row) => row.invoiceNumber}
           showToolbar
+        
+  enableAdd
+  addLabel="Add Invoice"
+  onAdd={onAddInvoice}   
+  enableColumnSelector
+    enableExport              
+  onExport={onExportInvoice} 
+  currentPage={page}
           searchValue={searchTerm}
           onSearch={setSearchTerm}
-          enableColumnSelector
-          addLabel="New Invoice"
-          onAdd={onAdd}
-          currentPage={page}
+        
+         
           totalPages={totalPages}
           pageSize={pageSize}
           totalItems={totalItems}
           onPageChange={setPage}
         />
+  
+
       )}
 
       <PdfPreviewModal
@@ -318,4 +332,4 @@ const InvoicesTable: React.FC<{ onAdd?: () => void }> = ({ onAdd }) => {
   );
 };
 
-export default InvoicesTable;
+export default InvoiceTable;

@@ -13,7 +13,11 @@ import {
   getUOMs,
   getItemClasses,
 } from "../../api/itemZraApi";
-import Select from "../ui/Select";
+import Select from "../../components/ui/Select";
+import Modal from "../UI/modal/modal";
+import {
+  Button,
+} from "../../components/UI/modal/formComponent";
 
 type FormState = Record<string, any>;
 
@@ -170,32 +174,34 @@ const ItemModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
-        >
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col h-full overflow-hidden"
-          >
-            {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-blue-700">
-                Add Items
-              </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-1 rounded-full hover:bg-gray-200"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-            </header>
+   <Modal
+  isOpen={isOpen}
+  onClose={handleClose}
+  title={isEditMode ? "Edit Item" : "Add Item"}
+  subtitle="Create and manage item details"
+  maxWidth="6xl"
+  height="90vh"
+ footer={
+  <>
+    <Button variant="secondary" onClick={handleClose}>
+      Cancel
+    </Button>
 
+    <div className="flex gap-2">
+      <Button variant="ghost" onClick={reset}>
+        Reset
+      </Button>
+      <Button variant="primary" loading={loading} type="submit">
+        Save Item
+      </Button>
+    </div>
+  </>
+}
+
+>
+  <form onSubmit={handleSubmit} className="h-full flex flex-col">
+   
+           
             {/* Tabs */}
             <div className="flex border-b bg-gray-50">
               <button
@@ -413,7 +419,7 @@ const ItemModal: React.FC<{
                 {activeTab === "taxDetails" && (
                   <>
                     {/* Tax Category Selector */}
-                    <div className="mb-8">
+                    <div className="mb-8 ">
                       <label className="block text-sm font-semibold text-gray-700 mb-3">
                         Tax Category
                       </label>
@@ -717,36 +723,11 @@ const ItemModal: React.FC<{
               </div>
             </section>
 
-            {/* Footer */}
-            <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
-                >
-                  Reset
-                </button>
-                <button
-                  type="submit"
-                  // onClick={submit}
-                  className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
-                >
-                  Save Item
-                </button>
-              </div>
-            </footer>
-          </form>
-        </motion.div>
-      </AnimatePresence>
-    </div>
+        
+          
+         </form>
+</Modal>
+
   );
 };
 

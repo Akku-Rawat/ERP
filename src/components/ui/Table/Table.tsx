@@ -15,6 +15,8 @@ interface TableProps<T> {
   emptyMessage?: string;
   showToolbar?: boolean;
   enableAdd?: boolean;
+      enableExport?: boolean;        
+  onExport?: () => void;  
   onAdd?: () => void;
   searchValue?: string;
   onSearch?: (q: string) => void;
@@ -28,6 +30,7 @@ interface TableProps<T> {
   onPageChange?: (page: number) => void;
   addLabel?: string;
   rowKey?: (row: T) => string;
+
 
   serverSide?: boolean;
 }
@@ -201,6 +204,8 @@ function Table<T extends Record<string, any>>({
   showToolbar = false,
   enableAdd = false,
   onAdd,
+  enableExport = false,   
+  onExport,  
   searchValue,
   toolbarPlaceholder = "Search...",
   enableColumnSelector = false,
@@ -368,6 +373,15 @@ function Table<T extends Record<string, any>>({
                 {addLabel}
               </button>
             )}
+            {/* Export Button */}
+{enableExport && (
+  <button
+    onClick={onExport}
+    className="bg-primary text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:opacity-90 transition-all"
+  >
+    Export
+  </button>
+)}
           </div>
         </div>
       )}

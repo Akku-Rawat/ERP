@@ -19,7 +19,12 @@ import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTem
    COMPONENT
 ================================ */
 
-const QuotationsTable: React.FC = () => {
+interface QuotationTableProps {
+  onAddQuotation?: () => void;
+   onExportQuotation?: () => void;  
+}
+const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation,onExportQuotation, }) => {
+
   const [searchTerm, setSearchTerm] = useState("");
   const [quotations, setQuotations] = useState<QuotationSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -201,11 +206,17 @@ const QuotationsTable: React.FC = () => {
           searchValue={searchTerm}
           onSearch={setSearchTerm}
           enableColumnSelector
+            enableAdd
+  addLabel="Add Quotation"
+  onAdd={onAddQuotation}   
+    enableExport              
+  onExport={onExportQuotation}
           currentPage={page}
           totalPages={totalPages}
           pageSize={pageSize}
           totalItems={totalItems}
           onPageChange={setPage}
+          
         />
       )}
 

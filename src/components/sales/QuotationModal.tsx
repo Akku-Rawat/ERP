@@ -10,6 +10,11 @@ import {
 import CustomerSelect from "../selects/CustomerSelect";
 import ItemSelect from "../selects/ItemSelect";
 
+import Modal from "../../components/UI/modal/modal";
+import {
+  Button,
+} from "../../components/UI/modal/formComponent";
+
 interface ItemRow {
   productName: string;
   description: string;
@@ -77,7 +82,7 @@ const emptyForm: FormData = {
   descriptionInformation: "",
   subTotal: 0,
   grandTotal: 0,
-  currency: "ZMK",
+  currency: "ZMW",
   industry: "",
   notes: "",
   billingAddressLine1: "",
@@ -284,58 +289,54 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
-        >
-          <form
-            onSubmit={submit}
-            className="flex flex-col h-full overflow-hidden"
-          >
-            {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-blue-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-blue-700">
-                Create Quotation
-              </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-1 rounded-full hover:bg-gray-200"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-            </header>
+   <Modal
+  isOpen={isOpen}
+  onClose={onClose}
+  title="Create Quotation"
+  subtitle="Create and manage quotation details"
+  maxWidth="6xl"
+  height="90vh"
+  footer={
+    <>
+      <Button variant="secondary" onClick={onClose}>Cancel</Button>
+      <Button variant="ghost" onClick={reset}>Reset</Button>
+      <Button variant="primary" type="submit">Save Quote</Button>
+    </>
+  }
+>
+  <form onSubmit={submit} className="h-full flex flex-col">
+ 
+            
+         
 
-            {/* Tabs */}
-            <div className="flex border-b bg-gray-50">
-              {(["details", "terms", "address"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${
-                    activeTab === tab
-                      ? "text-blue-600 border-b-2 border-blue-600 bg-white"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {tab === "details"
-                    ? "Details"
-                    : tab === "terms"
-                      ? "Terms & Conditions"
-                      : "Additional Details"}
-                </button>
-              ))}
-            </div>
+           {/* Tabs */}
+<div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
+  {(["details", "terms", "address"] as const).map((tab) => (
+    <button
+      key={tab}
+      type="button"
+      onClick={() => setActiveTab(tab)}
+      className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${
+        activeTab === tab
+          ? "text-primary bg-card shadow-sm"
+          : "text-muted hover:bg-card/50"
+      }`}
+    >
+      {tab === "details" && "Details"}
+      {tab === "terms" && "Terms & Conditions"}
+      {tab === "address" && "Additional Details"}
+    </button>
+  ))}
+</div>
+
+
+             
+  
 
             <section className="flex-1 overflow-y-auto p-4 space-y-6">
               {activeTab === "details" && (
                 // <div className=" grid grid-cols-3">
-                <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4">
+                <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4 mt-8">
                   <div className=" col-span-2">
                     {/* Quote Information */}
                     <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
@@ -642,14 +643,14 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 
               {/* === TAB: Terms & Conditions === */}
               {activeTab === "terms" && (
-                <div className=" h-full w-full">
+                <div className=" h-full w-full mt-8">
                   <TermsAndCondition />
                 </div>
               )}
 
               {/* === TAB: ADDRESS & TERMS === */}
               {activeTab === "address" && (
-                <div className=" grid grid-cols-2 gap-10">
+                <div className=" grid grid-cols-2 gap-10 mt-8">
                   <div className=" col-span-1 shadow px-4 rounded-lg border border-gray-300 bg-white py-6">
                     <div className=" flex justify-between">
                       <h3 className=" mb-4 text-lg font-semibold text-gray-700 underline ">
@@ -768,35 +769,10 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
               )}
             </section>
 
-            {/* Footer */}
-            <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
-                >
-                  Reset
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-full bg-blue-500 px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
-                >
-                  Save Quote
-                </button>
-              </div>
-            </footer>
-          </form>
-        </motion.div>
-      </AnimatePresence>
-    </div>
+          
+           
+  </form>
+</Modal>
   );
 };
 

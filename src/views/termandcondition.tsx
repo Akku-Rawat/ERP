@@ -333,7 +333,7 @@ const TermsAndCondition: React.FC<Props> = ({ terms, setTerms }) => {
   );
 
   return (
-    <div className="p-6 space-y-8 bg-white rounded-lg shadow-sm border">
+    <div className="p-6 space-y-8 bg-white rounded-lg shadow-sm border mt-8">
       {/* HEADER */}
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-gray-800">

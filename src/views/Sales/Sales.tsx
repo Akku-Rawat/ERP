@@ -50,17 +50,36 @@ const SalesModule: React.FC = () => {
       component: <SalesDashboard />,
     },
     quotations: {
-      component: <QuotationsTable />,
-      onAdd: () => setOpenModal("quotation"),
-    },
+         component: (
+    <QuotationsTable
+      onAddQuotation={() => setOpenModal("quotation")}
+       onExportQuotation={() => {
+        console.log("Export invoices");
+      }}
+    />
+     ),
+},
     proformaInvoice: {
-      component: <ProformaInvoicesTable />,
-      onAdd: () => setOpenModal("proforma"),
-    },
-    invoices: {
-      component: <InvoiceTable />,
-      onAdd: () => setOpenModal("invoice"),
-    },
+      component: (
+    <ProformaInvoicesTable
+      onAddProformaInvoice={() => setOpenModal("proforma")}
+       onExportProformaInvoice={() => {
+        console.log("Export proformainvoices");
+      }}
+    />
+     ),
+},
+   invoices: {
+  component: (
+    <InvoiceTable
+      onAddInvoice={() => setOpenModal("invoice")}
+       onExportInvoice={() => {
+        console.log("Export invoices");
+      }}
+    />
+  ),
+},
+
     pos: {
       component: <POS />,
       onAdd: () => setOpenModal("pos"),
@@ -115,15 +134,15 @@ const SalesModule: React.FC = () => {
       <div className="">
         {tab?.onAdd && (
           <div className="flex items-center justify-end gap-4 mb-4">
-            <button
+            {/* <button
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
               onClick={tab.onAdd}
             >
               + Add
-            </button>
-            <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
+            </button> */}
+            {/* <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
               Export
-            </button>
+            </button> */}
           </div>
         )}
 
