@@ -37,6 +37,9 @@ export const paymentMethodOptions = [
   { value: "08", label: "BANK TRANSFER" },
 ] as const;
 
+export const getPaymentMethodLabel = (code?: string) =>
+  paymentMethodOptions.find((p) => p.value === code)?.label ?? "UNKNOWN";
+
 export const DEFAULT_INVOICE_FORM = {
   customerId: "",
   currencyCode: "ZMW",
@@ -44,7 +47,7 @@ export const DEFAULT_INVOICE_FORM = {
   dateOfInvoice: "",
   dueDate: "",
   invoiceStatus: "Draft",
-  invoiceType: "LPO",
+  invoiceType: "lpo",
   destnCountryCd: "",
   lpoNumber: "",
 
@@ -107,6 +110,5 @@ export const currencySymbols: Record<string, string> = {
   INR: "₹",
   USD: "$",
 };
-
 
 export const ITEMS_PER_PAGE = 5;

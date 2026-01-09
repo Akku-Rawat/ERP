@@ -12,14 +12,14 @@ import CustomerModal from "../../components/crm/CustomerModal";
 
 import type { CustomerSummary, CustomerDetail } from "../../types/customer";
 
-import Table from "../../components/UI/Table/Table";
-import StatusBadge from "../../components/UI/Table/StatusBadge";
+import Table from "../../components/ui/Table/Table";
+import StatusBadge from "../../components/ui/Table/StatusBadge";
 import ActionButton, {
   ActionGroup,
   ActionMenu,
-} from "../../components/UI/Table/ActionButton";
+} from "../../components/ui/Table/ActionButton";
 
-import type { Column } from "../../components/UI/Table/Table";
+import type { Column } from "../../components/ui/Table/type";
 
 interface Props {
   onAdd: () => void;
@@ -33,8 +33,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     useState<CustomerDetail | null>(null);
   const [custLoading, setCustLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [editCustomer, setEditCustomer] =
-    useState<CustomerDetail | null>(null);
+  const [editCustomer, setEditCustomer] = useState<CustomerDetail | null>(null);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -59,10 +58,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     fetchCustomers();
   }, [page, pageSize]);
 
-  const handleDelete = async (
-    customerId: string,
-    e: React.MouseEvent
-  ) => {
+  const handleDelete = async (customerId: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
     if (!window.confirm(`Delete customer ${customerId}?`)) return;
@@ -74,9 +70,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
       toast.success("Customer deleted successfully.");
     } catch (err: any) {
       console.error("Delete error:", err);
-      toast.error(
-        err.response?.data?.message || "Failed to delete customer."
-      );
+      toast.error(err.response?.data?.message || "Failed to delete customer.");
     } finally {
       setCustLoading(false);
     }
@@ -87,10 +81,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     setShowModal(true);
   };
 
-  const handleEditCustomer = async (
-    id: string,
-    e: React.MouseEvent
-  ) => {
+  const handleEditCustomer = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       const customer = await getCustomerByCustomerCode(id);
@@ -121,7 +112,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     ]
       .join(" ")
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+      .includes(searchTerm.toLowerCase()),
   );
 
   const handleRowClick = (customer: CustomerDetail) => {
@@ -143,6 +134,14 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
       header: "Type",
       align: "left",
       render: (c: CustomerSummary) => <StatusBadge status={c.type} />,
+    },
+    {
+      key: "customerTaxCategory",
+      header: "TaxCategory",
+      align: "left",
+      render: (c: CustomerSummary) => (
+        <StatusBadge status={c.customerTaxCategory} />
+      ),
     },
     {
       key: "currency",
@@ -172,9 +171,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
         <ActionGroup>
           <ActionButton
             type="view"
-            onClick={() =>
-              handleRowClick(c as unknown as CustomerDetail)
-            }
+            onClick={() => handleRowClick(c as unknown as CustomerDetail)}
             iconOnly={false}
           />
           <ActionMenu
@@ -190,7 +187,6 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     <div className="p-8">
       {viewMode === "table" ? (
         <>
-          {/* Header (agar kuch dikhाना हो to yahan bg/text classes bhi theme se laga सकते ho) */}
           <div className="flex items-center justify-between mb-6" />
 
           {custLoading ? (

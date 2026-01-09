@@ -6,6 +6,7 @@ import {
   FaCalendarDay,
   FaMoneyCheckAlt,
   FaChartLine,
+  FaSlidersH,
 } from "react-icons/fa";
 import HrDashboard from "./HrDashboard";
 import EmployeeManagement from "./EmployeeManagement/EmployeeManagement";
@@ -15,6 +16,7 @@ import ComplianceManagement from "./compiliance/ComplianceManagement";
 // import LeaveManagement from './time_leave/LeaveManagement';
 import TimeAttendance from "./time_leave/TimeAttendance";
 import Payroll from "./Payroll";
+import HRSettingsPage from "./hrsetup";
 // import Recruitment from './EmployeeManagement/Recruitment';
 
 const navTabs = [
@@ -33,6 +35,7 @@ const navTabs = [
     label: `Compliance Management`,
     icon: <FaClipboardList />,
   },
+  { key: "settings", label: "Settings", icon: <FaSlidersH /> },
 ];
 
 const HrPayrollModule: React.FC = () => {
@@ -74,6 +77,7 @@ const HrPayrollModule: React.FC = () => {
         {/* {tab === 'recruitment' && <Recruitment />} */}
         {tab === "performance" && <PerformanceDevelopment />}
         {tab === "compliance" && <ComplianceManagement />}
+        {tab === "settings" && <HRSettingsPage />}
       </div>
     </div>
   );

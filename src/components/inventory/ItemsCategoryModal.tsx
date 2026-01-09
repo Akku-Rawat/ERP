@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Save, Loader2 } from "lucide-react";
 import {
   updateItemGroupById,
   createItemGroup,
@@ -8,6 +6,8 @@ import {
 import { getUOMs } from "../../api/itemZraApi";
 import { toast } from "sonner";
 import ItemGenericSelect from "../selects/ItemGenericSelect";
+import Modal from "../UI/modal/modal";
+import { Button } from "../UI/modal/formComponent";
 
 const emptyForm: Record<string, any> = {
   id: "",
@@ -123,95 +123,87 @@ const ItemsCategoryModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
-        >
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col h-full overflow-hidden"
-          >
-            {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-indigo-700">
-                {isEditMode ? "Edit Items Category" : "Add New Category"}
-              </h2>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="p-1 rounded-full hover:bg-gray-200"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-            </header>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isEditMode ? "Edit Item Category" : "Add Item Category"}
+      subtitle="Manage item category details"
+      maxWidth="4xl"
+      height="80vh"
+      footer={
+        <>
+          <Button variant="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
 
-            {/* Tabs */}
-            <div className="flex border-b bg-gray-50">
-              <button
-                type="button"
-                onClick={() => setActiveTab("type")}
-                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "type"
-                    ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                Category Details
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("tax")}
-                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "tax"
-                    ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                Payment & Bank
-              </button>
-            </div>
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={reset}>
+              Reset
+            </Button>
+            <Button variant="primary" loading={loading} type="submit">
+              {isEditMode ? "Update" : "Save"} Category
+            </Button>
+          </div>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="h-full flex flex-col">
+        {/* Tabs */}
+        <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10">
+          {(["type", "tax"] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className={`relative px-6 py-3 font-semibold text-sm rounded-t-lg ${
+                activeTab === tab
+                  ? "text-primary bg-card shadow-sm"
+                  : "text-muted hover:bg-card/50"
+              }`}
+            >
+              {tab === "type" && "Category Details"}
+              {tab === "tax" && "Payment & Pricing"}
+            </button>
+          ))}
+        </div>
 
-            {/* Tab Content */}
-            <section className="flex-1 overflow-y-auto p-6 space-y-8">
-              {/* Items Category Details Tab */}
-              {activeTab === "type" && (
-                <>
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700 underline">
-                      Category Type
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Id"
-                        name="id"
-                        value={form.id}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Category Name"
-                        name="groupName"
-                        value={form.groupName}
-                        onChange={handleChange}
-                        // required
-                      />
-                      <Input
-                        label="Category Description"
-                        name="description"
-                        value={form.description}
-                        onChange={handleChange}
-                      />
-                      {/* <Input
+        {/* Tab Content */}
+        <section className="flex-1 overflow-y-auto p-6 space-y-8">
+          {/* Items Category Details Tab */}
+          {activeTab === "type" && (
+            <>
+              <div className="space-y-4 mt-8">
+                <h3 className="text-lg font-semibold text-gray-700 underline">
+                  Category Type
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                  <Input
+                    label="Id"
+                    name="id"
+                    value={form.id}
+                    onChange={handleChange}
+                    required
+                  />
+                  <Input
+                    label="Category Name"
+                    name="groupName"
+                    value={form.groupName}
+                    onChange={handleChange}
+                    // required
+                  />
+                  <Input
+                    label="Category Description"
+                    name="description"
+                    value={form.description}
+                    onChange={handleChange}
+                  />
+                  {/* <Input
                         label="Unit of Measurement"
                         name="unitOfMeasurement"
                         value={form.unitOfMeasurement}
                         onChange={handleChange}
                       /> */}
-                      {/* <ItemGenericSelect
+                  {/* <ItemGenericSelect
                         label="UOM"
                         value={form.unitOfMeasurement}
                         fetchData={getUOMs}
@@ -221,80 +213,46 @@ const ItemsCategoryModal: React.FC<{
                           setForm(p => ({ ...p, unitOfMeasurement: id }));
                         }}
                       /> */}
-                      <ItemGenericSelect
-                        label="UOM"
-                        value={form.unitOfMeasurement}
-                        fetchData={getUOMs}
-                        onChange={({ id }) =>
-                          setForm((p) => ({ ...p, unitOfMeasurement: id }))
-                        }
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Payment Details Tab */}
-              {activeTab === "tax" && (
-                <div className="space-y-8">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-700 underline mb-4">
-                      Payment Details
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Selling Price"
-                        name="sellingPrice"
-                        value={form.sellingPrice || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Sales Account"
-                        name="salesAccount"
-                        value={form.salesAccount || ""}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
+                  <ItemGenericSelect
+                    label="UOM"
+                    value={form.unitOfMeasurement}
+                    fetchData={getUOMs}
+                    onChange={({ id }) =>
+                      setForm((p) => ({ ...p, unitOfMeasurement: id }))
+                    }
+                  />
                 </div>
-              )}
-            </section>
-
-            {/* Footer */}
-            <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
-                >
-                  Reset
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex items-center gap-2 rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600 disabled:opacity-50"
-                >
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  {isEditMode ? "Update" : "Save"} Category
-                </button>
               </div>
-            </footer>
-          </form>
-        </motion.div>
-      </AnimatePresence>
-    </div>
+            </>
+          )}
+
+          {/* Payment Details Tab */}
+          {activeTab === "tax" && (
+            <div className="space-y-8 mt-8">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 underline mb-4">
+                  Payment Details
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                  <Input
+                    label="Selling Price"
+                    name="sellingPrice"
+                    value={form.sellingPrice || ""}
+                    onChange={handleChange}
+                  />
+                  <Input
+                    label="Sales Account"
+                    name="salesAccount"
+                    value={form.salesAccount || ""}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+      </form>
+    </Modal>
   );
 };
 

@@ -1,78 +1,528 @@
-import React, { useState } from "react";
-import { X, Upload, User } from "lucide-react";
+// AddEmployeeModal.tsx - FIXED VERSION WITH AUTO-POPULATION
+import React, { useState, useEffect } from "react";
+import { X, Upload, User, CheckCircle2, AlertCircle } from "lucide-react";
+import IdentityVerificationModal from "./IdentityVerificationModal";
+import PersonalInfoTab from "./PersonalInfoTab";
+import ContactInfoTab from "./ContactInfoTabs";
+import EmploymentTab from "./EmploymentTab";
+import CompensationTab from "./CompensationTab";
+import { LeaveSetupTab } from "./LeaveSetupTab";
+import { WorkScheduleTab } from "./WorkScheduletab";
+import { getLevelsFromHrSettings } from "../../../views/hr/tabs/salarystructure";
+
+import { createEmployee, updateEmployeeById } from "../../../api/employeeapi";
+
+const DEFAULT_FORM_DATA = {
+  // Personal
+  firstName: "",
+  otherNames: "",
+  lastName: "",
+  dateOfBirth: "",
+  gender: "",
+  nationality: "Zambian",
+  maritalStatus: "",
+
+  // Contact
+  email: "",
+  CompanyEmail: "",
+  phoneNumber: "",
+  alternatePhone: "",
+  street: "",
+  city: "",
+  province: "",
+  postalCode: "",
+  country: "Zambia",
+  emergencyContactName: "",
+  emergencyContactPhone: "",
+  emergencyContactRelationship: "",
+
+  // Employment
+  employeeId: "",
+  department: "",
+  jobTitle: "",
+  employmentStatus: "Active",
+  reportingManager: "",
+  employeeType: "Permanent",
+  engagementDate: "",
+  contractEndDate: "",
+  workLocation: "",
+  workAddress: "",
+  probationPeriod: "",
+  shift: "Day",
+
+  // IDs
+  nrcId: "",
+  socialSecurityNapsa: "",
+  nhimaHealthInsurance: "",
+  tpinId: "",
+
+  // ✅ NEW: Salary Components (matching backend)
+  basicSalary: "",
+  housingAllowance: "",
+  mealAllowance: "",
+  transportAllowance: "",
+  otherAllowances: "",
+  grossSalary: "",
+
+  // Payroll
+  currency: "ZMW",
+  paymentFrequency: "Monthly",
+  paymentMethod: "Bank Transfer",
+
+  // Bank
+  accountName: "",
+  accountNumber: "",
+  bankName: "",
+  branchCode: "",
+  accountType: "Savings",
+
+  // Leave
+  openingLeaveBalance: "Incremental two (2) days per month of service",
+  initialLeaveRateMonthly: "2",
+  ceilingYear: "2025",
+  ceilingAmount: "",
+
+  // Work Schedule
+  weeklyScheduleMonday: "",
+  weeklyScheduleTuesday: "",
+  weeklyScheduleWednesday: "",
+  weeklyScheduleThursday: "",
+  weeklyScheduleFriday: "",
+  weeklyScheduleSaturday: "",
+  weeklyScheduleSunday: "",
+
+  notes: "",
+
+  // level: "",
+  // salaryStructure: "",
+  // salaryStructureSource: "",
+  // grossSalaryStarting: "",
+  // customSalaryComponents: [],
+};
+
+const TAB_ORDER = [
+  "Personal",
+  "Contact",
+  "Employment",
+  "Leave-Setup",
+  "Compensation & Payroll",
+  "Work Schedule",
+] as const;
 
 type AddEmployeeModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
   departments: string[];
+  level?: string[];
+  verifiedData?: any;
+  editData?: any;
+  mode?: "add" | "edit";
 };
 
 const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   isOpen,
   onClose,
+  onSuccess,
   departments,
+  editData,
+  level,
+  mode = "add",
 }) => {
-  const [activeTab, setActiveTab] = useState("Work");
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    mobile: "",
-    tags: "",
-    department: "",
-    jobPosition: "",
-    jobTitle: "",
-    manager: "",
-    workAddress: "",
-    workLocation: "",
-    monday: "Unspecified",
-    tuesday: "Unspecified",
-    wednesday: "Unspecified",
-    thursday: "Unspecified",
-    friday: "Unspecified",
-    saturday: "Unspecified",
-    sunday: "Unspecified",
-    notes: "",
-  });
+  const [step, setStep] = useState<"verification" | "form">("verification");
+  const [verifiedData, setVerifiedData] = useState<any>(null);
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const activeTab = TAB_ORDER[currentTabIndex];
+  const isLastTab = currentTabIndex === TAB_ORDER.length - 1;
+  const [isPreFilled, setIsPreFilled] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
+  const [verifiedFields, setVerifiedFields] = useState<Record<string, boolean>>(
+    {},
+  );
+
+  const levelsFromHrSettings = getLevelsFromHrSettings();
+
+  const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Auto-set salary structure when job title changes
+
+  useEffect(() => {
+    if (!editData) return;
+    setStep("form");
+    setIsPreFilled(true);
+  }, [editData]);
+
+  useEffect(() => {
+    if (isOpen && !editData) {
+      setFormData(DEFAULT_FORM_DATA);
+      setStep("verification");
+      setIsPreFilled(false);
+      setCurrentTabIndex(0);
+    }
+  }, [isOpen, editData]);
+
+  useEffect(() => {
+    if (!editData) return;
+
+    setStep("form");
+    setIsPreFilled(true);
+
+    setFormData((prev) => ({
+      ...prev,
+
+      // ===== PERSONAL INFO =====
+      firstName: editData.personalInfo?.FirstName || "",
+      OtherNames: editData.personalInfo?.OtherNames || "",
+      lastName: editData.personalInfo?.LastName || "",
+      dateOfBirth: editData.personalInfo?.Dob || "",
+      gender: editData.personalInfo?.Gender || "",
+      nationality: editData.personalInfo?.Nationality || "Zambian",
+      maritalStatus: editData.personalInfo?.maritalStatus || "",
+
+      // ===== CONTACT INFO =====
+      email: editData.contactInfo?.Email || "",
+      CompanyEmail: editData.contactInfo?.workEmail || "",
+      phoneNumber: editData.contactInfo?.phoneNumber || "",
+      alternatePhone: editData.contactInfo?.alternatePhone || "",
+
+      // Address
+      street: editData.contactInfo?.address?.street || "",
+      city: editData.contactInfo?.address?.city || "",
+      province: editData.contactInfo?.address?.province || "",
+      postalCode: editData.contactInfo?.address?.postalCode || "",
+      country: editData.contactInfo?.address?.country || "Zambia",
+
+      // Emergency Contact
+      emergencyContactName: editData.contactInfo?.emergencyContact?.name || "",
+      emergencyContactPhone:
+        editData.contactInfo?.emergencyContact?.phone || "",
+      emergencyContactRelationship:
+        editData.contactInfo?.emergencyContact?.relationship || "",
+
+      // ===== EMPLOYMENT INFO =====
+      employeeId: editData.employmentInfo?.employeeId || "",
+      department: editData.employmentInfo?.Department || "",
+      jobTitle: editData.employmentInfo?.JobTitle || "",
+      employeeType: editData.employmentInfo?.EmployeeType || "Permanent",
+      employmentStatus: editData.status || "Active",
+      engagementDate: editData.employmentInfo?.joiningDate || "",
+      probationPeriod: editData.employmentInfo?.probationPeriod || "",
+      contractEndDate: editData.employmentInfo?.contractEndDate || "",
+      workLocation: editData.employmentInfo?.workLocation || "",
+      workAddress: editData.employmentInfo?.workAddress || "",
+      shift: editData.employmentInfo?.shift || "Day",
+      reportingManager: editData.employmentInfo?.reportingManager || "",
+
+      // ===== IDs =====
+      NrcId: editData.identityInfo?.nrc || "",
+      SocialSecurityNapsa: editData.identityInfo?.napsa || "",
+      nhimaHealthInsurance: editData.identityInfo?.nhima || "",
+      TpinId: editData.identityInfo?.tpin || "",
+
+      // ===== SALARY COMPONENTS =====
+      basicSalary: editData.payrollInfo?.salaryBreakdown?.BasicSalary || "",
+      housingAllowance:
+        editData.payrollInfo?.salaryBreakdown?.HousingAllowance || "",
+      mealAllowance: editData.payrollInfo?.salaryBreakdown?.MealAllowance || "",
+      transportAllowance:
+        editData.payrollInfo?.salaryBreakdown?.TransportAllowance || "",
+      otherAllowances:
+        editData.payrollInfo?.salaryBreakdown?.otherAllowances || "",
+      grossSalary: editData.payrollInfo?.grossSalary || "",
+
+      // ===== PAYROLL CONFIG =====
+      currency: editData.payrollInfo?.currency || "ZMW",
+      paymentFrequency: editData.payrollInfo?.paymentFrequency || "Monthly",
+      paymentMethod: editData.payrollInfo?.paymentMethod || "Bank Transfer",
+
+      // ===== BANK DETAILS =====
+      accountNumber: editData.payrollInfo?.bankAccount?.AccountNumber || "",
+      accountName: editData.payrollInfo?.bankAccount?.AccountName || "",
+      bankName: editData.payrollInfo?.bankAccount?.BankName || "",
+      branchCode: editData.payrollInfo?.bankAccount?.branchCode || "",
+      accountType: editData.payrollInfo?.bankAccount?.AccountType || "Savings",
+
+      // ===== LEAVE SETUP =====
+      openingLeaveBalance:
+        editData.leaveInfo?.openingLeaveBalance ||
+        "Incremental two (2) days per month of service",
+      initialLeaveRateMonthly:
+        editData.leaveInfo?.initialLeaveRateMonthly?.toString() || "2",
+      ceilingYear: editData.leaveInfo?.ceilingYear?.toString() || "2025",
+      ceilingAmount: editData.leaveInfo?.ceilingAmount?.toString() || "",
+
+      // ===== WORK SCHEDULE =====
+
+      weeklyScheduleMonday:
+        editData.employmentInfo?.weeklySchedule?.monday || "",
+      weeklyScheduleTuesday:
+        editData.employmentInfo?.weeklySchedule?.tuesday || "",
+      weeklyScheduleWednesday:
+        editData.employmentInfo?.weeklySchedule?.wednesday || "",
+      weeklyScheduleThursday:
+        editData.employmentInfo?.weeklySchedule?.thursday || "",
+      weeklyScheduleFriday:
+        editData.employmentInfo?.weeklySchedule?.friday || "",
+      weeklyScheduleSaturday:
+        editData.employmentInfo?.weeklySchedule?.saturday || "",
+      weeklyScheduleSunday:
+        editData.employmentInfo?.weeklySchedule?.sunday || "",
+
+      // ===== NOTES =====
+      notes: editData.notes || "",
+    }));
+  }, [editData]);
+
+  useEffect(() => {
+    if (!verifiedData) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      nrcId: verifiedData.identityInfo?.nrc || "",
+      socialSecurityNapsa: verifiedData.identityInfo?.ssn || "",
+      firstName: verifiedData.personalInfo?.firstName || "",
+      lastName: verifiedData.personalInfo?.lastName || "",
+      gender: verifiedData.personalInfo?.gender || "",
+    }));
+
+    setVerifiedFields({
+      nrcId: !!verifiedData.identityInfo?.nrc,
+      socialSecurityNapsa: !!verifiedData.identityInfo?.ssn,
+      firstName: true,
+      lastName: true,
+      gender: true,
+    });
+
+    setIsPreFilled(true);
+  }, [verifiedData]);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  const validateCurrentTab = (): string | null => {
+    switch (activeTab) {
+      case "Personal":
+        if (!formData.firstName || !formData.lastName)
+          return "First name and last name are required";
+        if (!formData.dateOfBirth || !formData.gender)
+          return "Date of birth and gender are required";
+        return null;
+
+      case "Contact":
+        if (!formData.email || !formData.phoneNumber)
+          return "Email and phone number are required";
+        return null;
+
+      case "Employment":
+        if (
+          !formData.department ||
+          !formData.jobTitle ||
+          !formData.engagementDate
+        )
+          return "Department, job title and engagement date are required";
+        return null;
+
+      case "Compensation & Payroll":
+        if (!formData.basicSalary) return "Basic salary is required";
+        return null;
+
+      default:
+        return null;
+    }
+  };
+
+  const handleNext = () => {
+    const error = validateCurrentTab();
+    if (error) {
+      setError(error);
+      return;
+    }
+    setError(null);
+    setCurrentTabIndex((prev) => prev + 1);
+  };
+
+  const handlePrevious = () => {
+    setError(null);
+    setCurrentTabIndex((prev) => prev - 1);
+  };
+
+  const handleInputChange = (field: string, value: string | boolean | any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    if (!formData.name || !formData.email) {
-      alert("Please fill in required fields (Name and Email)");
-      return;
+  const buildPayload = () => {
+    const basicSalaryNum = Number(formData.basicSalary) || 0;
+
+    // ✅ Calculate actual amounts (convert percentage to amount if needed)
+    const housingAmount = Number(formData.housingAllowance) || 0;
+    const mealAmount = Number(formData.mealAllowance) || 0;
+    const transportAmount = Number(formData.transportAllowance) || 0;
+    const otherAmount = Number(formData.otherAllowances) || 0;
+
+    const payload: any = {
+      FirstName: formData.firstName,
+      LastName: formData.lastName,
+      OtherNames: formData.otherNames,
+      EmployeeId: formData.employeeId,
+      EngagementDate: formData.engagementDate,
+      contractEndDate: formData.contractEndDate,
+      Dob: formData.dateOfBirth,
+      Gender: formData.gender,
+      Email: formData.email,
+      CompanyEmail: formData.CompanyEmail,
+      MaritalStatus: formData.maritalStatus,
+      Nationality: formData.nationality,
+      PhoneNumber: formData.phoneNumber,
+      AlternatePhone: formData.alternatePhone,
+
+      // Address
+      addressStreet: formData.street,
+      addressCity: formData.city,
+      addressProvince: formData.province,
+      addressPostalCode: formData.postalCode,
+      addressCountry: formData.country,
+
+      // Emergency Contact
+      emergencyContactName: formData.emergencyContactName,
+      emergencyContactPhone: formData.emergencyContactPhone,
+      emergencyContactRelationship: formData.emergencyContactRelationship,
+
+      // Employment
+      Department: formData.department,
+      JobTitle: formData.jobTitle,
+      EmployeeType: formData.employeeType,
+      status: formData.employmentStatus,
+      ReportingManager: formData.reportingManager,
+      probationPeriod: formData.probationPeriod,
+      workLocation: formData.workLocation,
+      workAddress: formData.workAddress,
+      shift: formData.shift,
+
+      // IDs
+      NrcId: formData.nrcId,
+      SocialSecurityNapsa: formData.socialSecurityNapsa,
+      NhimaHealthInsurance: formData.nhimaHealthInsurance,
+      TpinId: formData.tpinId,
+
+      // ✅ Salary Components - ALWAYS send final amounts
+      BasicSalary: basicSalaryNum,
+      HousingAllowance: housingAmount,
+      MealAllowance: mealAmount,
+      TransportAllowance: transportAmount,
+      otherAllowances: otherAmount,
+      GrossSalary: Number(formData.grossSalary) || 0,
+
+      // Payroll
+      currency: formData.currency,
+      PaymentFrequency: formData.paymentFrequency,
+      PaymentMethod: formData.paymentMethod,
+
+      // Bank
+      AccountType: formData.accountType,
+      BankName: formData.bankName,
+      AccountName: formData.accountName,
+      AccountNumber: formData.accountNumber,
+      BranchCode: formData.branchCode,
+
+      // Work Schedule - ✅ Send as empty string instead of undefined/null
+      weeklyScheduleMonday: formData.weeklyScheduleMonday || "",
+      weeklyScheduleTuesday: formData.weeklyScheduleTuesday || "",
+      weeklyScheduleWednesday: formData.weeklyScheduleWednesday || "",
+      weeklyScheduleThursday: formData.weeklyScheduleThursday || "",
+      weeklyScheduleFriday: formData.weeklyScheduleFriday || "",
+      weeklyScheduleSaturday: formData.weeklyScheduleSaturday || "",
+      weeklyScheduleSunday: formData.weeklyScheduleSunday || "",
+
+      // Leave
+      OpeningLeaveBalance: formData.openingLeaveBalance,
+      InitialLeaveRateMonthly: Number(formData.initialLeaveRateMonthly) || 0,
+      CeilingYear: Number(formData.ceilingYear) || 0,
+      CeilingAmount: Number(formData.ceilingAmount) || 0,
+
+      verifiedFromSource: !!verifiedData,
+    };
+
+    return payload;
+  };
+  const handleSave = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (editData?.id) {
+        // ✅ EDIT FLOW
+        const payload = {
+          id: String(editData.id), // backend expects this
+          ...buildPayload(),
+        };
+
+        await updateEmployeeById(payload);
+      } else {
+        // ✅ CREATE FLOW
+        await createEmployee(buildPayload());
+      }
+
+      onSuccess?.();
+      onClose();
+    } catch (e: any) {
+      setError(e.message || "Failed to save employee");
+    } finally {
+      setLoading(false);
     }
-    console.log("Saving employee:", formData);
-    alert("Employee created successfully!");
-    onClose();
   };
 
   if (!isOpen) return null;
 
-  const tabs = [
-    "Work",
-    "Resume",
-    "Certifications",
-    "Personal",
-    "Payroll",
-    "Salary Adjustments",
-    "Settings",
-  ];
+  if (step === "verification") {
+    return (
+      <IdentityVerificationModal
+        onVerified={(data) => {
+          setVerifiedData(data);
+          setIsPreFilled(true);
+          setStep("form");
+        }}
+        onManualEntry={() => {
+          setVerifiedData(null);
+          setIsPreFilled(false);
+          setVerifiedFields({});
+          setStep("form");
+        }}
+        onClose={onClose}
+      />
+    );
+  }
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-start justify-center z-50 overflow-y-auto pt-8 pb-8">
-      <div className="bg-white rounded-none shadow-2xl w-full max-w-5xl mx-4 min-h-[600px] flex flex-col">
-        {/* Top Bar with Close Button */}
-        <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span className="bg-purple-600 text-white px-2 py-1 rounded text-xs font-semibold">
-              A
-            </span>
-            <span className="font-medium">MNSIS</span>
-            <span className="text-gray-400">11:11 AM</span>
-            <span className="ml-4">Creating a new record...</span>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-start justify-center z-50 overflow-y-auto pt-4 pb-4">
+      <div
+        className="bg-white rounded-lg shadow-2xl w-full max-w-6xl mx-4 flex flex-col"
+        style={{ maxHeight: "95vh" }}
+      >
+        {/* Top Bar */}
+        <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-white flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🇿🇲</span>
+            <div>
+              <div className="font-semibold text-gray-800">
+                {editData ? "Edit Employee" : "Employee Onboarding"}
+              </div>
+              <div className="text-xs text-gray-500">
+                {isPreFilled
+                  ? "✓ Verified from NAPSA"
+                  : "Complete employee information"}
+              </div>
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -82,851 +532,174 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
           </button>
         </div>
 
-        {/* Profile Section */}
-        <div className="px-8 py-6 border-b border-gray-200 bg-white">
-          <div className="flex gap-6">
-            {/* Profile Picture */}
+        {/* Employee Header */}
+        <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
+          <div className="flex gap-4">
             <div className="flex-shrink-0">
               <div className="relative">
-                <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-gray-200">
-                  <User className="w-12 h-12 text-gray-300" />
+                <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-gray-200">
+                  <User className="w-8 h-8 text-gray-300" />
                 </div>
-                <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full border-2 border-gray-300 flex items-center justify-center hover:bg-gray-50 transition shadow-sm">
-                  <Upload className="w-4 h-4 text-gray-600" />
+                <button className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full border-2 border-gray-300 flex items-center justify-center hover:bg-gray-50 transition shadow-sm">
+                  <Upload className="w-2.5 h-2.5 text-gray-600" />
                 </button>
               </div>
             </div>
 
-            {/* Name and Contact Info */}
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Employee's Name"
-                value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
-                className="text-2xl font-normal text-gray-400 bg-transparent border-b-2 border-gray-300 outline-none w-full mb-4 pb-1 focus:border-gray-500 transition"
-              />
-
-              <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <span>📧</span>
-                  <input
-                    type="email"
-                    placeholder="e.g. johndoe@example.com"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="bg-transparent outline-none flex-1 placeholder-gray-400"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2 text-gray-600">
-                  <span>☎️</span>
-                  <input
-                    type="tel"
-                    placeholder="Work Phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    className="bg-transparent outline-none flex-1 placeholder-gray-400"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2 text-gray-600">
-                  <span>📱</span>
-                  <input
-                    type="tel"
-                    placeholder="Work Mobile"
-                    value={formData.mobile}
-                    onChange={(e) =>
-                      handleInputChange("mobile", e.target.value)
-                    }
-                    className="bg-transparent outline-none flex-1 placeholder-gray-400"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2 text-gray-600">
-                  <span>🏷️</span>
-                  <input
-                    type="text"
-                    placeholder="e.g. Founder, Motorhead..."
-                    value={formData.tags}
-                    onChange={(e) => handleInputChange("tags", e.target.value)}
-                    className="bg-transparent outline-none flex-1 placeholder-gray-400"
-                  />
-                </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-base font-semibold text-gray-800 truncate">
+                  {formData.firstName || formData.lastName
+                    ? `${formData.firstName} ${formData.lastName}`.trim()
+                    : "New Employee"}
+                </h3>
+                {isPreFilled && (
+                  <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded flex-shrink-0">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Verified
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+                {formData.nrcId && (
+                  <div>
+                    <span className="font-medium">NRC:</span> {formData.nrcId}
+                  </div>
+                )}
+                {formData.employeeId && (
+                  <div>
+                    <span className="font-medium">ID:</span>{" "}
+                    {formData.employeeId}
+                  </div>
+                )}
+                {formData.department && (
+                  <div>
+                    <span className="font-medium">Dept:</span>{" "}
+                    {formData.department}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mx-6 mt-3 p-2.5 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs flex items-center gap-2 flex-shrink-0">
+            <AlertCircle className="w-4 h-4" />
+            {error}
+          </div>
+        )}
+
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 bg-white px-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 text-sm font-medium transition relative ${
-                activeTab === tab
-                  ? "text-gray-900 border-b-2 border-gray-900"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+        <div className="flex border-b border-gray-200 bg-white px-6 overflow-x-auto">
+          {TAB_ORDER.map((tab, index) => {
+            const isClickable =
+              mode === "edit" ? true : index <= currentTabIndex;
+
+            return (
+              <button
+                key={tab}
+                disabled={!isClickable}
+                onClick={() => isClickable && setCurrentTabIndex(index)}
+                className={`px-3 py-2.5 text-xs font-medium whitespace-nowrap transition
+                  ${
+                    index === currentTabIndex
+                      ? "text-purple-600 border-b-2 border-purple-600"
+                      : isClickable
+                        ? "text-gray-700 hover:text-purple-600"
+                        : "text-gray-400 cursor-not-allowed"
+                  }`}
+              >
+                {tab}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Content Area */}
-        <div className="flex-1 overflow-y-auto bg-gray-50">
-          {activeTab === "Work" && (
-            <div className="px-8 py-6">
-              <div className="grid grid-cols-2 gap-8">
-                {/* Left Column */}
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      WORK
-                    </h3>
-
-                    <div className="space-y-4 bg-white p-4 rounded-sm border border-gray-200">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Department
-                        </label>
-                        <select
-                          value={formData.department}
-                          onChange={(e) =>
-                            handleInputChange("department", e.target.value)
-                          }
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        >
-                          <option value=""></option>
-                          {departments.map((d) => (
-                            <option key={d} value={d}>
-                              {d}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Job Position
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Sales Manager"
-                          value={formData.jobPosition}
-                          onChange={(e) =>
-                            handleInputChange("jobPosition", e.target.value)
-                          }
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Job Title
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Manager"
-                          value={formData.jobTitle}
-                          onChange={(e) =>
-                            handleInputChange("jobTitle", e.target.value)
-                          }
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Location */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      LOCATION
-                    </h3>
-                    <div className="space-y-4 bg-white p-4 rounded-sm border border-gray-200">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Work Address
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Indore, India"
-                          value={formData.workAddress}
-                          onChange={(e) =>
-                            handleInputChange("workAddress", e.target.value)
-                          }
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Work Location
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Building 2, Remote, etc."
-                          value={formData.workLocation}
-                          onChange={(e) =>
-                            handleInputChange("workLocation", e.target.value)
-                          }
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Usual Work Location */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      USUAL WORK LOCATION
-                    </h3>
-                    <div className="space-y-3 bg-white p-4 rounded-sm border border-gray-200">
-                      {[
-                        "monday",
-                        "tuesday",
-                        "wednesday",
-                        "thursday",
-                        "friday",
-                        "saturday",
-                        "sunday",
-                      ].map((day) => (
-                        <div
-                          key={day}
-                          className="flex items-center justify-between"
-                        >
-                          <label className="text-xs text-gray-700 font-medium capitalize w-24">
-                            {day}
-                          </label>
-                          <select
-                            value={formData[day as keyof typeof formData]}
-                            onChange={(e) =>
-                              handleInputChange(day, e.target.value)
-                            }
-                            className="flex-1 px-2 py-1 text-xs border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                          >
-                            <option value="Unspecified">Unspecified</option>
-                            <option value="Office">Office</option>
-                            <option value="Remote">Remote</option>
-                            <option value="Hybrid">Hybrid</option>
-                          </select>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Notes */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      NOTE
-                    </h3>
-                    <div className="bg-white p-4 rounded-sm border border-gray-200">
-                      <textarea
-                        placeholder="Provide additional information about this person..."
-                        value={formData.notes}
-                        onChange={(e) =>
-                          handleInputChange("notes", e.target.value)
-                        }
-                        rows={4}
-                        className="w-full text-sm outline-none resize-none placeholder-gray-400"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column - Organization Chart */}
-                <div>
-                  <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                    ORGANIZATION CHART
-                  </h3>
-                  <div className="bg-white p-6 rounded-sm border border-gray-200">
-                    <p className="text-xs text-gray-500 mb-6">
-                      Set a manager for reports to show in org chart
-                    </p>
-                    <div className="space-y-4">
-                      <div className="bg-gray-100 rounded p-4">
-                        <div className="h-3 bg-gray-300 rounded w-3/4"></div>
-                      </div>
-                      <div className="ml-8 bg-gray-50 rounded p-4 border border-gray-200">
-                        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                      </div>
-                      <div className="ml-8 bg-gray-50 rounded p-4 border border-gray-200">
-                        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "Payroll" && (
-            <div className="px-8 py-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Left Column */}
-                <div className="space-y-6">
-                  {/* Contract Overview */}
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xs font-semibold text-gray-600 tracking-wider">
-                        CONTRACT OVERVIEW
-                      </h3>
-                      <div className="flex gap-2">
-                        <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-                          Load a Template
-                        </button>
-                        <span className="text-gray-300">|</span>
-                        <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-                          New Contract
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">
-                            Contract
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="20 Nov"
-                            className="w-20 px-2 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                          />
-                          <span className="text-xs text-gray-500 mx-2">to</span>
-                          <input
-                            type="text"
-                            placeholder="Indefinite"
-                            className="w-24 px-2 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">
-                            Wage Type
-                          </label>
-                          <select className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent">
-                            <option>Fixed Wage</option>
-                            <option>Hourly</option>
-                            <option>Commission</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">
-                            Wage
-                          </label>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm">₹</span>
-                            <input
-                              type="text"
-                              placeholder="0.00"
-                              className="w-24 px-2 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                            />
-                            <span className="text-xs text-gray-500">
-                              / month
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">
-                            Employee Type
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Employee"
-                            className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">
-                            Contract Type
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Contract Type"
-                            className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent text-gray-400"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">
-                            Pay Category
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Employee"
-                            className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Schedule */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      SCHEDULE
-                    </h3>
-                    <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Work Entry Source
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Working Schedule"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Working Hours
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Standard 40 hours/week"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-
-                      <button className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium mt-4">
-                        <Upload className="w-3 h-3" />
-                        Add Inputs
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column */}
-                <div className="bg-gray-50 rounded p-6 flex items-center justify-center text-gray-400 text-sm">
-                  Additional payroll details
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "Salary Adjustments" && (
-            <div className="px-8 py-6">
-              <div className="bg-white rounded-sm border border-gray-200 overflow-hidden">
-                {/* Table Header */}
-                <div className="grid grid-cols-5 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600">
-                  <div>Type</div>
-                  <div>Start Date</div>
-                  <div>Note</div>
-                  <div>Amount</div>
-                  <div>Until</div>
-                </div>
-
-                {/* Empty State */}
-                <div className="p-12 text-center">
-                  <p className="text-gray-400 text-sm mb-4">
-                    No salary adjustments yet
-                  </p>
-                  <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 mx-auto">
-                    <Upload className="w-4 h-4" />
-                    Add a salary adjustment
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
+        {/* Form Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
           {activeTab === "Personal" && (
-            <div className="px-8 py-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8">
-                {/* Left Column */}
-                <div className="space-y-8">
-                  {/* Private Contact */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      PRIVATE CONTACT
-                    </h3>
-                    <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Email
-                        </label>
-                        <input
-                          type="email"
-                          placeholder="e.g. myprivateemail@example.com"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Phone
-                        </label>
-                        <input
-                          type="tel"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Bank Accounts
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Emergency Contact */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      EMERGENCY CONTACT
-                    </h3>
-                    <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Contact
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Phone
-                        </label>
-                        <input
-                          type="tel"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Citizenship */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      CITIZENSHIP
-                    </h3>
-                    <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Nationality (Country)
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" className="w-4 h-4" />
-                        <label className="text-xs text-gray-700 font-medium">
-                          Non-resident
-                        </label>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Identification No
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          SSN No
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Passport No
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Family */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      FAMILY
-                    </h3>
-                    <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" className="w-4 h-4" />
-                        <label className="text-xs text-gray-700 font-medium">
-                          Disabled
-                        </label>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Marital Status
-                        </label>
-                        <select className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent">
-                          <option>Single</option>
-                          <option>Married</option>
-                          <option>Divorced</option>
-                          <option>Widowed</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Dependent Children
-                        </label>
-                        <input
-                          type="number"
-                          placeholder="0"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column */}
-                <div className="space-y-8">
-                  {/* Personal Information */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      PERSONAL INFORMATION
-                    </h3>
-                    <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Legal Name
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Birthday
-                        </label>
-                        <input
-                          type="date"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">
-                            Place of Birth - City
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="City"
-                            className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1 font-medium">
-                            Country
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Country"
-                            className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Gender
-                        </label>
-                        <select className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent">
-                          <option value="">Select</option>
-                          <option>Male</option>
-                          <option>Female</option>
-                          <option>Other</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Payslip Language
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="User Language"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Visa & Work Permit */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      VISA & WORK PERMIT
-                    </h3>
-                    <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Visa No
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Work Permit No
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Document
-                        </label>
-                        <button className="px-4 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50 transition">
-                          Upload your file
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Location */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      LOCATION
-                    </h3>
-                    <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Private Address
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Street..."
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400 mb-2"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Street 2..."
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400 mb-2"
-                        />
-                        <div className="grid grid-cols-3 gap-2">
-                          <input
-                            type="text"
-                            placeholder="City"
-                            className="px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
-                          />
-                          <input
-                            type="text"
-                            placeholder="State"
-                            className="px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
-                          />
-                          <input
-                            type="text"
-                            placeholder="ZIP"
-                            className="px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400"
-                          />
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Country"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent placeholder-gray-400 mt-2"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Home-Work Distance
-                        </label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            placeholder="0"
-                            className="w-20 px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                          />
-                          <span className="text-xs text-gray-500">km</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Education */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-600 mb-4 tracking-wider">
-                      EDUCATION
-                    </h3>
-                    <div className="bg-white p-5 rounded-sm border border-gray-200 space-y-4">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Certificate Level
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1 font-medium">
-                          Field of Study
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full px-3 py-1.5 text-sm border-b border-gray-300 focus:border-gray-500 outline-none bg-transparent"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <PersonalInfoTab
+              formData={formData}
+              handleInputChange={handleInputChange}
+              verifiedFields={verifiedFields}
+            />
           )}
 
-          {!["Work", "Payroll", "Salary Adjustments", "Personal"].includes(
-            activeTab,
-          ) && (
-            <div className="px-8 py-16 text-center">
-              <p className="text-gray-500">
-                {activeTab} content will appear here
-              </p>
-            </div>
+          {activeTab === "Contact" && (
+            <ContactInfoTab
+              formData={formData}
+              handleInputChange={handleInputChange}
+            />
+          )}
+
+          {activeTab === "Employment" && (
+            <EmploymentTab
+              formData={formData}
+              handleInputChange={handleInputChange}
+              departments={departments}
+              Level={levelsFromHrSettings}
+            />
+          )}
+
+          {activeTab === "Leave-Setup" && (
+            <LeaveSetupTab
+              formData={formData}
+              handleInputChange={handleInputChange}
+            />
+          )}
+
+          {activeTab === "Compensation & Payroll" && (
+            <CompensationTab
+              formData={formData}
+              handleInputChange={handleInputChange}
+            />
+          )}
+
+          {activeTab === "Work Schedule" && (
+            <WorkScheduleTab
+              formData={formData}
+              handleInputChange={handleInputChange}
+            />
           )}
         </div>
 
-        {/* Bottom Action Bar */}
-        <div className="border-t border-gray-200 bg-white px-8 py-4 flex justify-between items-center">
+        {/* Footer */}
+        <div className="flex justify-between items-center px-6 py-4 border-t bg-gray-50 flex-shrink-0">
           <button
             onClick={onClose}
-            className="px-6 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition"
+            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-lg"
           >
-            Discard
+            Cancel
           </button>
-          <div className="flex gap-3">
-            <button
-              onClick={handleSave}
-              className="px-6 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition font-medium"
-            >
-              Save
-            </button>
+
+          <div className="flex gap-2">
+            {currentTabIndex > 0 && (
+              <button
+                onClick={handlePrevious}
+                className="px-5 py-2 text-sm border rounded-lg hover:bg-gray-100"
+              >
+                Previous
+              </button>
+            )}
+
+            {!isLastTab ? (
+              <button
+                onClick={handleNext}
+                className="px-6 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                onClick={handleSave}
+                disabled={loading}
+                className="px-6 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              >
+                {loading ? "Saving..." : "Save Employee"}
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from "react";
 import type { JSX } from "react";
 import {
@@ -20,8 +19,8 @@ import {
 } from "react-icons/fa";
 
 // Import your reusable Table component
-import Table from "../../components/UI/Table/Table";
-import type { Column } from "../UI/Table/type"; // Adjust path
+import Table from "../../components/ui/Table/Table";
+import type { Column } from "../ui/Table/type"; // Adjust path
 
 // ---------- Types ----------
 type Tier = "Free" | "Pro" | "Enterprise";
@@ -153,7 +152,7 @@ export default function SubscribedModules(): JSX.Element {
 
   function toggleActive(id: string) {
     setModules((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, active: !m.active } : m))
+      prev.map((m) => (m.id === id ? { ...m, active: !m.active } : m)),
     );
   }
 
@@ -184,7 +183,10 @@ export default function SubscribedModules(): JSX.Element {
         header: "Description",
         align: "left",
         render: (m) => (
-          <div className="text-sm text-muted max-w-xs truncate" title={m.description}>
+          <div
+            className="text-sm text-muted max-w-xs truncate"
+            title={m.description}
+          >
             {m.description}
           </div>
         ),
@@ -212,7 +214,10 @@ export default function SubscribedModules(): JSX.Element {
         align: "left",
         render: (m) => (
           <div className="flex items-center gap-1.5 text-sm text-muted">
-            <FaUsers className="w-3.5 h-3.5" style={{ color: "var(--muted)" }} />
+            <FaUsers
+              className="w-3.5 h-3.5"
+              style={{ color: "var(--muted)" }}
+            />
             {m.users}
           </div>
         ),
@@ -277,7 +282,7 @@ export default function SubscribedModules(): JSX.Element {
         ),
       },
     ],
-    []
+    [],
   );
 
   return (

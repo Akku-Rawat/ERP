@@ -3,6 +3,9 @@ import { getCustomerByCustomerCode } from "../api/customerApi";
 import { getCompanyById } from "../api/companySetupApi";
 import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
+import { getCountryList } from "../api/lookupApi";
+import { getItemByItemCode } from "../api/itemApi";
+
 import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
@@ -18,15 +21,16 @@ type NestedSection =
 export const useInvoiceForm = (
   isOpen: boolean,
   onClose: () => void,
-  onSubmit?: (data: any) => void
+  onSubmit?: (data: any) => void,
 ) => {
   const [formData, setFormData] = useState<Invoice>(DEFAULT_INVOICE_FORM);
   const [customerDetails, setCustomerDetails] = useState<any>(null);
   const [customerNameDisplay, setCustomerNameDisplay] = useState("");
   const [page, setPage] = useState(0);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details"
+    "details",
   );
+  const [taxCategory, setTaxCategory] = useState<string | undefined>("");
   const [isShippingOpen, setIsShippingOpen] = useState(false);
   const [sameAsBilling, setSameAsBilling] = useState(true);
 
@@ -55,7 +59,7 @@ export const useInvoiceForm = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
-    section?: NestedSection
+    section?: NestedSection,
   ) => {
     const { name, value } = e.target;
 
@@ -76,6 +80,21 @@ export const useInvoiceForm = (
     }
   };
 
+  const getCountryCode = (
+    countries: { code: string; name: string }[],
+    countryName?: string,
+  ): string => {
+    if (!countryName) return "";
+
+    const normalized = countryName.trim().toUpperCase();
+
+    return (
+      countries.find((c) => c.name === normalized)?.code ??
+      countries.find((c) => normalized.includes(c.name))?.code ??
+      ""
+    );
+  };
+
   const handleCustomerSelect = async ({
     name,
     id,
@@ -87,67 +106,115 @@ export const useInvoiceForm = (
     setFormData((p) => ({ ...p, customerId: id }));
 
     try {
-      const response = await getCustomerByCustomerCode(id);
-      const companyDetails = await getCompanyById("COMP-00003");
-      if (!response || response.status_code !== 200) return;
+      const [customerRes, companyRes] = await Promise.all([
+        getCustomerByCustomerCode(id),
+        getCompanyById("COMP-00003"),
+      ]);
 
-      const data = response.data;
+      if (!customerRes || customerRes.status_code !== 200) return;
+
+      const data = customerRes.data;
+      const company = companyRes?.data;
+      const invoiceType = data.customerTaxCategory as
+        | "export"
+        | "non-export"
+        | "lpo";
+
+      setTaxCategory(invoiceType);
+
+      const countryLookupList = await getCountryList();
+
+      const countryCode = getCountryCode(
+        countryLookupList,
+        data.billingCountry,
+      );
+
       setCustomerDetails(data);
 
+      const billing = {
+        line1: data.billingAddressLine1 ?? "",
+        line2: data.billingAddressLine2 ?? "",
+        postalCode: data.billingPostalCode ?? "",
+        city: data.billingCity ?? "",
+        state: data.billingState ?? "",
+        country: data.billingCountry ?? "",
+      };
+
+      const shippingFromCustomer = {
+        line1: data.shippingAddressLine1 ?? "",
+        line2: data.shippingAddressLine2 ?? "",
+        postalCode: data.shippingPostalCode ?? "",
+        city: data.shippingCity ?? "",
+        state: data.shippingState ?? "",
+        country: data.shippingCountry ?? "",
+      };
+
+      const paymentInformation = {
+        paymentTerms: company?.terms?.selling?.payment?.dueDates ?? "",
+        paymentMethod: "01",
+        bankName: company?.bankAccounts?.[0]?.bankName ?? "",
+        accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
+        routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
+        swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
+      };
+
       setFormData((prev) => {
-        const billing = {
-          line1: data.billingAddressLine1 ?? "",
-          line2: data.billingAddressLine2 ?? "",
-          postalCode: data.billingPostalCode ?? "",
-          city: data.billingCity ?? "",
-          state: data.billingState ?? "",
-          country: data.billingCountry ?? "",
-        };
-
-        const paymentInformation = {
-          paymentTerms:
-            companyDetails.data.terms.selling.payment.dueDates ?? "",
-          paymentMethod: "01",
-          bankName: companyDetails.data.bankAccounts[0].bankName ?? "",
-          accountNumber: companyDetails.data.bankAccounts[0].accountNo ?? "",
-          routingNumber: companyDetails.data.bankAccounts[0].sortCode ?? "",
-          swiftCode: companyDetails.data.bankAccounts[0].swiftCode ?? "",
-        };
-
         let shipping = prev.shippingAddress;
+
         if (sameAsBilling) {
           shipping = { ...billing };
         } else if (!shippingEditedRef.current) {
-          shipping = {
-            line1: data.shippingAddressLine1 ?? "",
-            line2: data.shippingAddressLine2 ?? "",
-            postalCode: data.shippingPostalCode ?? "",
-            city: data.shippingCity ?? "",
-            state: data.shippingState ?? "",
-            country: data.shippingCountry ?? "",
-          };
+          shipping = shippingFromCustomer;
         }
 
         return {
           ...prev,
+          destnCountryCd: invoiceType === "export" ? countryCode : "",
+          invoiceType,
           billingAddress: billing,
-          paymentInformation: paymentInformation,
           shippingAddress: shipping,
-          terms: { selling: data.terms.selling },
+          paymentInformation,
+          terms: { selling: data.terms?.selling },
         };
       });
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load customer data", err);
     }
   };
 
+  const handleItemSelect = async (index: number, itemId: string) => {
+    try {
+      const res = await getItemByItemCode(itemId);
+      if (!res || res.status_code !== 200) return;
+
+      const data = res.data;
+      setFormData((prev) => {
+        const items = [...prev.items];
+
+        items[index] = {
+          ...items[index],
+          itemCode: data.id,
+          description: data.itemDescription ?? data.itemName ?? "",
+          price: data.sellingPrice ?? items[index].price,
+          vatRate: data.taxPerct ?? 0,
+          vatCode: data.taxCode ?? "",
+        };
+
+        return { ...prev, items };
+      });
+    } catch (err) {
+      console.error("Failed to fetch item details", err);
+    }
+  };
+
+  /* ---------------- ITEMS ---------------- */
+
   const handleItemChange = (
     idx: number,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
-    const isNum = ["quantity", "price", "discount"].includes(name);
-
+    const isNum = ["quantity", "price", "discount", "vatRate"].includes(name);
     setFormData((prev) => {
       const items = [...prev.items];
       items[idx] = {
@@ -178,8 +245,6 @@ export const useInvoiceForm = (
     setFormData((prev) => {
       if (prev.items.length === 1) return prev;
       const items = prev.items.filter((_, i) => i !== idx);
-      const maxPage = Math.max(0, Math.ceil(items.length / ITEMS_PER_PAGE) - 1);
-      if (page > maxPage) setPage(maxPage);
       return { ...prev, items };
     });
   };
@@ -217,7 +282,7 @@ export const useInvoiceForm = (
 
     const tax = formData.items.reduce(
       (sum, item) => sum + parseFloat(item.vatRate || "0"),
-      0
+      0,
     );
 
     return { subTotal: sub, totalTax: tax, grandTotal: sub };
@@ -225,7 +290,7 @@ export const useInvoiceForm = (
 
   const paginatedItems = formData.items.slice(
     page * ITEMS_PER_PAGE,
-    (page + 1) * ITEMS_PER_PAGE
+    (page + 1) * ITEMS_PER_PAGE,
   );
 
   return {
@@ -239,16 +304,20 @@ export const useInvoiceForm = (
       setPage,
       activeTab,
       setActiveTab,
+      taxCategory,
+      setTaxCategory,
       isShippingOpen,
       setIsShippingOpen,
       sameAsBilling,
       itemCount: formData.items.length,
-      isExport: formData.invoiceType === "Export",
-      isLocal: formData.invoiceType === "LPO",
+      isExport: formData.invoiceType === "export",
+      isLocal: formData.invoiceType === "lpo",
+      isNonExport: formData.invoiceType === "non-export",
     },
     actions: {
       handleInputChange,
       handleCustomerSelect,
+      handleItemSelect,
       handleItemChange,
       updateItemDirectly,
       addItem,

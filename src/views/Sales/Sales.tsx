@@ -19,7 +19,6 @@ import {
   FaCalendarAlt,
   FaFileInvoice,
   FaFileInvoiceDollar,
-  FaCashRegister,
   FaChartBar,
 } from "react-icons/fa";
 
@@ -34,7 +33,7 @@ const salesTabs = [
     icon: <FaFileInvoiceDollar />,
   },
   { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
-  { id: "pos", name: "POS", icon: <FaCashRegister /> },
+  // { id: "pos", name: "POS", icon: <FaCashRegister /> },
   { id: "reports", name: "Reports", icon: <FaChartBar /> },
 ];
 
@@ -50,17 +49,36 @@ const SalesModule: React.FC = () => {
       component: <SalesDashboard />,
     },
     quotations: {
-      component: <QuotationsTable />,
-      onAdd: () => setOpenModal("quotation"),
+      component: (
+        <QuotationsTable
+          onAddQuotation={() => setOpenModal("quotation")}
+          onExportQuotation={() => {
+            console.log("Export invoices");
+          }}
+        />
+      ),
     },
     proformaInvoice: {
-      component: <ProformaInvoicesTable />,
-      onAdd: () => setOpenModal("proforma"),
+      component: (
+        <ProformaInvoicesTable
+          onAddProformaInvoice={() => setOpenModal("proforma")}
+          onExportProformaInvoice={() => {
+            console.log("Export proformainvoices");
+          }}
+        />
+      ),
     },
     invoices: {
-      component: <InvoiceTable />,
-      onAdd: () => setOpenModal("invoice"),
+      component: (
+        <InvoiceTable
+          onAddInvoice={() => setOpenModal("invoice")}
+          onExportInvoice={() => {
+            console.log("Export invoices");
+          }}
+        />
+      ),
     },
+
     pos: {
       component: <POS />,
       onAdd: () => setOpenModal("pos"),
@@ -85,7 +103,7 @@ const SalesModule: React.FC = () => {
   const tab = TAB_CONFIG[activeTab];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-800">
@@ -112,18 +130,18 @@ const SalesModule: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="">
         {tab?.onAdd && (
           <div className="flex items-center justify-end gap-4 mb-4">
-            <button
+            {/* <button
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
               onClick={tab.onAdd}
             >
               + Add
-            </button>
-            <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
+            </button> */}
+            {/* <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
               Export
-            </button>
+            </button> */}
           </div>
         )}
 

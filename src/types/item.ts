@@ -1,0 +1,51 @@
+export interface Item {
+  id: string;
+  itemName: string;
+  itemGroup: string;
+  itemClassCode: string;
+  itemTypeCode: string;
+  originNationCode: string;
+  packagingUnitCode: string;
+  svcCharge: string;
+  ins: string;
+  sellingPrice: number;
+  buyingPrice: number;
+  unitOfMeasureCd: string;
+  description: string;
+  sku: string;
+  taxPreference: string;
+  preferredVendor: string;
+  salesAccount: string;
+  purchaseAccount: string;
+  taxType: string;
+  taxCode: string;
+  taxName: string;
+  taxDescription: string;
+  taxPerct: string;
+  dimensionUnit: string;
+  weight: string;
+  valuationMethod: string;
+  trackingMethod: string;
+  reorderLevel: string;
+  minStockLevel: string;
+  maxStockLevel: string;
+  brand: string;
+  weightUnit: string;
+  dimensionLength: string;
+  dimensionWidth: string;
+  dimensionHeight: string;
+  taxCategory: string;
+}
+
+export interface ItemSummary {
+  id: string;
+  itemName: string;
+  itemGroup: string;
+  itemClassCode: string;
+  unitOfMeasureCd: string;
+  sellingPrice: number;
+  preferredVendor: string;
+  minStockLevel: string;
+  maxStockLevel: string;
+  taxCategory: string;
+}

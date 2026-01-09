@@ -20,25 +20,92 @@ const crmModule = {
   defaultTab: "dashboard",
   tabs: [
     { id: "dashboard", name: "Dashboard", icon: <FaCalendarAlt /> },
-    { id: "customer-managment", name: "Customer Management", icon: <FaIdBadge /> },
+    {
+      id: "customer-managment",
+      name: "Customer Management",
+      icon: <FaIdBadge />,
+    },
     // { id: "leads", name: "Leads", icon: <FaUser /> },
     // { id: "tickets", name: "Support Tickets", icon: <FaTicketAlt /> },
     { id: "reports", name: "Reports", icon: <FaChartBar /> },
   ],
   leads: [
-    { id: "LEAD-001", name: "Global Enterprises", contact: "Jane Wilson", status: "Qualified", value: 150000, source: "Website" },
-    { id: "LEAD-002", name: "StartupCo", contact: "Bob Chen", status: "New", value: 50000, source: "Referral" },
-    { id: "LEAD-003", name: "Manufacturing Inc", contact: "Alice Johnson", status: "Contacted", value: 80000, source: "Cold Call" },
+    {
+      id: "LEAD-001",
+      name: "Global Enterprises",
+      contact: "Jane Wilson",
+      status: "Qualified",
+      value: 150000,
+      source: "Website",
+    },
+    {
+      id: "LEAD-002",
+      name: "StartupCo",
+      contact: "Bob Chen",
+      status: "New",
+      value: 50000,
+      source: "Referral",
+    },
+    {
+      id: "LEAD-003",
+      name: "Manufacturing Inc",
+      contact: "Alice Johnson",
+      status: "Contacted",
+      value: 80000,
+      source: "Cold Call",
+    },
   ],
   opportunities: [
-    { id: "OPP-001", name: "Enterprise Software Deal", customer: "Global Enterprises", value: 150000, stage: "Proposal", probability: 70 },
-    { id: "OPP-002", name: "Startup Package", customer: "StartupCo", value: 50000, stage: "Qualification", probability: 30 },
-    { id: "OPP-003", name: "Manufacturing Solution", customer: "Manufacturing Inc", value: 80000, stage: "Needs Analysis", probability: 50 },
+    {
+      id: "OPP-001",
+      name: "Enterprise Software Deal",
+      customer: "Global Enterprises",
+      value: 150000,
+      stage: "Proposal",
+      probability: 70,
+    },
+    {
+      id: "OPP-002",
+      name: "Startup Package",
+      customer: "StartupCo",
+      value: 50000,
+      stage: "Qualification",
+      probability: 30,
+    },
+    {
+      id: "OPP-003",
+      name: "Manufacturing Solution",
+      customer: "Manufacturing Inc",
+      value: 80000,
+      stage: "Needs Analysis",
+      probability: 50,
+    },
   ],
   tickets: [
-    { id: "TICK-001", title: "System Login Issue", customer: "ABC Corporation", priority: "High", status: "Open", created: "2025-01-18" },
-    { id: "TICK-002", title: "Report Generation Error", customer: "XYZ Industries", priority: "Medium", status: "In Progress", created: "2025-01-17" },
-    { id: "TICK-003", title: "Feature Request - Export", customer: "Tech Solutions", priority: "Low", status: "Resolved", created: "2025-01-16" },
+    {
+      id: "TICK-001",
+      title: "System Login Issue",
+      customer: "ABC Corporation",
+      priority: "High",
+      status: "Open",
+      created: "2025-01-18",
+    },
+    {
+      id: "TICK-002",
+      title: "Report Generation Error",
+      customer: "XYZ Industries",
+      priority: "Medium",
+      status: "In Progress",
+      created: "2025-01-17",
+    },
+    {
+      id: "TICK-003",
+      title: "Feature Request - Export",
+      customer: "Tech Solutions",
+      priority: "Low",
+      status: "Resolved",
+      created: "2025-01-16",
+    },
   ],
 };
 
@@ -61,7 +128,7 @@ const CRM: React.FC = () => {
   };
 
   return (
-    <div className="bg-app min-h-screen">  
+    <div className="bg-app min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
         <h2 className="text-2xl font-bold flex items-center gap-2 text-main">
@@ -76,7 +143,9 @@ const CRM: React.FC = () => {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
-              activeTab === tab.id ? "text-primary border-b-2 border-current" : "text-muted hover:text-main"
+              activeTab === tab.id
+                ? "text-primary border-b-2 border-current"
+                : "text-muted hover:text-main"
             }`}
           >
             <span>{tab.icon}</span> {tab.name}
@@ -89,16 +158,11 @@ const CRM: React.FC = () => {
           {activeTab === "dashboard" && <CRMDashboard />}
 
           {activeTab === "customer-managment" && (
-            <CustomerManagement
-              onAdd={handleAddCustomer}
-            />
+            <CustomerManagement onAdd={handleAddCustomer} />
           )}
 
           {activeTab === "leads" && (
-            <Leads
-              leads={crmModule.leads}
-              onAdd={handleAddLead}
-            />
+            <Leads leads={crmModule.leads} onAdd={handleAddLead} />
           )}
 
           {activeTab === "tickets" && (

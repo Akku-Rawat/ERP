@@ -1,7 +1,7 @@
 import type { TermSection } from "./termsAndCondition";
 
 export interface ProformaInvoice {
-  proformaId?:string,
+  proformaId?: string;
   customerId: string;
   currencyCode: string;
   exchangeRt: string;

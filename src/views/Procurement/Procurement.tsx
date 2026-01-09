@@ -10,7 +10,6 @@ import {
   FaShoppingBag,
   FaTachometerAlt,
   FaFileSignature,
-  FaFileInvoiceDollar,
   FaTruckLoading,
   FaLandmark,
 } from "react-icons/fa";

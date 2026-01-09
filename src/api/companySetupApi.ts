@@ -2,14 +2,15 @@ import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
 
 const base_url = import.meta.env.VITE_BASE_URL as string;
+const vite_company_api_url = import.meta.env.VITE_COMPANY_API_URL as string;
 const api = createAxiosInstance(base_url);
 
 const ENDPOINTS = {
   createCompany: `${base_url}.company_setup.setup.create_company_api`,
   getAllCompanies: `${base_url}.company_setup.setup.get_companies_api`,
-  getCompanyById: `http://41.60.191.7:8081/api/method/erpnext.company-setup.setup.get_company_api`,
+  getCompanyById: `${vite_company_api_url}.get_company_api`,
   updateCompany: `${base_url}.company_setup.setup.update_company_info`,
-  updateCompanyById: `http://41.60.191.7:8081/api/method/erpnext.company-setup.setup.update_company_api`,
+  updateCompanyById: `${vite_company_api_url}.update_company_api`,
   deleteCompany: `${base_url}.company_setup.setup.delete_company_api`,
   updateAccountsCompanyInfo: `${base_url}.company_setup.setup.update_accounts_company_info`,
 };
