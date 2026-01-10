@@ -41,6 +41,7 @@ const salesTabs = [
 const SalesModule: React.FC = () => {
   const [activeTab, setActiveTab] = useState("salesdashboard");
   const [openModal, setOpenModal] = useState<ModalType>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const TAB_CONFIG: Record<
     string,
@@ -62,9 +63,11 @@ const SalesModule: React.FC = () => {
     proformaInvoice: {
       component: (
     <ProformaInvoicesTable
+     refreshKey={refreshKey}
       onAddProformaInvoice={() => setOpenModal("proforma")}
        onExportProformaInvoice={() => {
         console.log("Export proformainvoices");
+      
       }}
     />
      ),
@@ -100,6 +103,10 @@ const SalesModule: React.FC = () => {
       console.error("Create invoice error:", err);
     }
   };
+const handleProformaCreated = () => {
+  setRefreshKey((prev) => prev + 1);
+  setOpenModal(null);
+};
 
   const tab = TAB_CONFIG[activeTab];
 
@@ -165,7 +172,8 @@ const SalesModule: React.FC = () => {
       <ProformaInvoiceModal
         isOpen={openModal === "proforma"}
         onClose={() => setOpenModal(null)}
-        onSubmit={(data) => console.log("Proforma Invoice", data)}
+       onSubmit={handleProformaCreated}
+
       />
 
       <PosModal

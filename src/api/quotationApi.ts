@@ -8,7 +8,7 @@ const vite_quotation_api_url = import.meta.env.VITE_QUOTATION_API_URL as string;
 const ENDPOINTS = {
   getAllQuotations: `${vite_quotation_api_url}.get_all_quotations`,
   getQuotationDetails: `${vite_quotation_api_url}.get_quotation_details`,
-  createQuotation: `${base_url}.quotation.api.create_quotation`,
+  createQuotation: `${vite_quotation_api_url}.create_quotation`,
   deleteQuotation: `${base_url}.quotation.api.delete_quotation`,
   updateQuotationTerms: `${base_url}.quotation.api.update_quotation_terms_and_conditions_by_id`,
   updateQuotationAddress: `${base_url}.quotation.api.update_quotation_address`,

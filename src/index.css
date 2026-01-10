@@ -1,11 +1,14 @@
 @import "tailwindcss";
 
 
-/* सिर्फ ज़रूरी जगहों पर स्क्रॉल दिखाएँ */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
 @layer base {
   /* UNIVERSAL DEFAULTS  */
   :root {

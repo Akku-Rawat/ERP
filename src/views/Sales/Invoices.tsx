@@ -32,20 +32,24 @@ const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
   Approved: ["Pending", "Paid", "Overdue"],
 };
 
- const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
+const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
 // const InvoicesTable: React.FC<{ onAdd?: () => void }> = ({ onAdd }) => {
 
 interface InvoiceTableProps {
   onAddInvoice?: () => void;
-   onExportInvoice?: () => void;  
+  onExportInvoice?: () => void;
 }
-const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice,onExportInvoice, }) => {
+const InvoiceTable: React.FC<InvoiceTableProps> = ({
+  onAddInvoice,
+  onExportInvoice,
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
+
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -238,12 +242,11 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice,onExportInvoic
       key: "total",
       header: "Amount",
       align: "right",
-     render: (inv: InvoiceSummary) => (
-  <code className="text-xs px-2 py-1 rounded bg-row-hover text-main font-semibold whitespace-nowrap">
-    {inv.total.toLocaleString()} {inv.currency}
-  </code>
-)
-
+      render: (inv: InvoiceSummary) => (
+        <code className="text-xs px-2 py-1 rounded bg-row-hover text-main font-semibold whitespace-nowrap">
+          {inv.total.toLocaleString()} {inv.currency}
+        </code>
+      ),
     },
     {
       key: "invoiceStatus",
@@ -298,25 +301,28 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice,onExportInvoic
           data={filteredInvoices}
           rowKey={(row) => row.invoiceNumber}
           showToolbar
-        
-  enableAdd
-  addLabel="Add Invoice"
-  onAdd={onAddInvoice}   
-  enableColumnSelector
-    enableExport              
-  onExport={onExportInvoice} 
-  currentPage={page}
+          loading={loading}
+          serverSide
+         
+          enableAdd
+          addLabel="Add Invoice"
+          onAdd={onAddInvoice}
+          enableColumnSelector
+          enableExport
+          onExport={onExportInvoice}
+          currentPage={page}
           searchValue={searchTerm}
           onSearch={setSearchTerm}
-        
-         
           totalPages={totalPages}
           pageSize={pageSize}
           totalItems={totalItems}
+          pageSizeOptions={[10, 25, 50, 100]}
+  onPageSizeChange={(size) => {
+    setPageSize(size);
+    setPage(1); // reset page
+  }}
           onPageChange={setPage}
         />
-  
-
       )}
 
       <PdfPreviewModal

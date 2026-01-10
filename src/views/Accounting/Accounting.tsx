@@ -5,14 +5,25 @@ import {
   FaCalendar,
   FaChartBar,
   FaDollarSign,
+  FaFileInvoiceDollar,
+  FaMoneyCheckAlt,
+  FaWarehouse,
+  FaUniversity,
 } from "react-icons/fa";
 
+// Import existing components (your originals - unchanged)
 import GeneralLedger from "./GeneralLedger";
 import TrialBalance from "./TrialBalance";
 import ProfitLoss from "./ProfitLoss";
 import BalanceSheet from "./BalanceSheet";
 
-// TYPE DEFINITIONS
+// Import NEW components
+import AccountsReceivable from "./AccountsReceivable";
+import AccountsPayable from "./AccountsPayable";
+import FixedAssets from "./FixedAssets";
+import Banking from "./BankingModule";
+
+// TYPE DEFINITIONS (existing - unchanged)
 type Account = {
   code: string;
   name: string;
@@ -50,8 +61,7 @@ type BalanceSheetData = {
   activeAccounts: Account[];
 };
 
-// Sample Data
-
+// Sample Data (existing - unchanged)
 const accounts: Account[] = [
   {
     code: "1000",
@@ -321,24 +331,21 @@ const monthNames: { [key: string]: string } = {
   "12": "December",
 };
 
-// Accounting Module Meta for tabs and icon
-const accountingModule = {
-  name: "Accounting",
-  icon: <FaBriefcase />,
-  defaultTab: "gl",
-  tabs: [
-    { id: "gl", name: "General Ledger", icon: <FaChartPie /> },
-    { id: "trial", name: "Trial Balance", icon: <FaChartBar /> },
-    { id: "pl", name: "Profit & Loss", icon: <FaCalendar /> },
-    { id: "balance", name: "Balance Sheet", icon: <FaDollarSign /> },
-  ],
-};
+// CLEAN Tab Structure - Simple and Direct
+const allTabs = [
+  { id: "gl", name: "General Ledger", icon: <FaChartPie />, category: "core" },
+  { id: "trial", name: "Trial Balance", icon: <FaChartBar />, category: "core" },
+  { id: "ar", name: "Receivables", icon: <FaFileInvoiceDollar />, category: "operations" },
+  { id: "ap", name: "Payables", icon: <FaMoneyCheckAlt />, category: "operations" },
+  { id: "fa", name: "Fixed Assets", icon: <FaWarehouse />, category: "operations" },
+  { id: "bank", name: "Banking", icon: <FaUniversity />, category: "operations" },
+  { id: "pl", name: "Profit & Loss", icon: <FaCalendar />, category: "reports" },
+  { id: "balance", name: "Balance Sheet", icon: <FaDollarSign />, category: "reports" },
+];
 
 // Main component
 const AccountingModule: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>(
-    accountingModule.defaultTab,
-  );
+  const [activeTab, setActiveTab] = useState<string>("gl");
   const [glSubTab, setGlSubTab] = useState<string>("chart");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
@@ -347,7 +354,6 @@ const AccountingModule: React.FC = () => {
   const [reportYear, setReportYear] = useState<string>("2024");
   const [reportMonth, setReportMonth] = useState<string>("11");
 
-  // Filter label for GeneralLedger
   const getFilterLabel = (): string => {
     const labels: { [key: string]: string } = {
       all: "All Accounts",
@@ -362,7 +368,6 @@ const AccountingModule: React.FC = () => {
     return labels[selectedFilter] || "All Accounts";
   };
 
-  // Filter count for GeneralLedger
   const getFilterCount = (filter: string): number => {
     if (filter === "all") return accounts.length;
     if (filter === "active")
@@ -382,41 +387,45 @@ const AccountingModule: React.FC = () => {
     return 0;
   };
 
-  // Filter select handler
   const handleFilterSelect = (filter: string): void => {
     setSelectedFilter(filter);
     setShowFilterDropdown(false);
   };
 
   return (
-    <div className="p-6 bg-app ">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-main">
-          <span>{accountingModule.icon}</span> {accountingModule.name}
-        </h2>
-        {/* Optionally add summary counts here */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold flex items-center gap-3 text-gray-900">
+            <FaBriefcase className="text-blue-600" />
+            Accounting
+          </h1>
+        </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-4">
-        {accountingModule.tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
-              activeTab === tab.id
-                ? "text-teal-600 border-b-2 border-teal-600"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <span>{tab.icon}</span> {tab.name}
-          </button>
-        ))}
+      {/* Clean Single-Row Tabs */}
+      <div className="bg-white border-b border-gray-200 px-6">
+        <div className="flex gap-1 overflow-x-auto">
+          {allTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-3 font-medium text-sm whitespace-nowrap transition-all border-b-2 ${
+                activeTab === tab.id
+                  ? "text-blue-600 border-blue-600"
+                  : "text-gray-600 border-transparent hover:text-gray-900 hover:border-gray-300"
+              }`}
+            >
+              <span className="text-lg">{tab.icon}</span>
+              {tab.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Content */}
-      <div className="bg-app rounded-lg shadow-sm p-4 min-h-[400px]">
+      <div className="p-6">
         {activeTab === "gl" && (
           <GeneralLedger
             glSubTab={glSubTab}
@@ -467,6 +476,12 @@ const AccountingModule: React.FC = () => {
             profitLoss={profitLoss}
           />
         )}
+        
+        {/* NEW MODULES */}
+        {activeTab === "ar" && <AccountsReceivable />}
+        {activeTab === "ap" && <AccountsPayable />}
+        {activeTab === "fa" && <FixedAssets />}
+        {activeTab === "bank" && <Banking />}
       </div>
     </div>
   );

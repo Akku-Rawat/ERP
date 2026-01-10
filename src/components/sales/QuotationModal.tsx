@@ -8,12 +8,14 @@ import {
   getCustomerByCustomerCode,
 } from "../../api/customerApi";
 import CustomerSelect from "../selects/CustomerSelect";
+import { createQuotation } from "../../api/quotationApi";
+
 import ItemSelect from "../selects/ItemSelect";
 
-import Modal from "../../components/UI/modal/modal";
+import Modal from "../../components/ui/modal/modal";
 import {
   Button,
-} from "../../components/UI/modal/formComponent";
+} from "../../components/ui/modal/formComponent";
 
 interface ItemRow {
   productName: string;
@@ -36,6 +38,7 @@ const emptyItem: ItemRow = {
 
 interface FormData {
   CutomerName: string;
+  customerId?: string;
   quoteID: string;
   validUntil: string;
   dateOfQuotation: string;
@@ -72,6 +75,7 @@ interface FormData {
 
 const emptyForm: FormData = {
   CutomerName: "",
+ customerId: "",
   quoteID: "",
   validUntil: "",
   dateOfQuotation: "",
@@ -116,6 +120,36 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
   const [selectedTemplate, setSelectedTemplate] = useState(
     "General Service Terms",
   );
+
+const buildCreatePayload = () => ({
+  customer_id: form.customerId ?? form.CutomerName,
+
+  company_id: "1",
+  currency: form.currency,
+  custom_industry_bases: form.industry,
+  transaction_date: form.dateOfQuotation,
+  valid_till: form.validUntil,
+  items: items.map((item) => ({
+    item_code: item.productName,   // ItemSelect se aaya hua
+    qty: Number(item.quantity),
+    rate: Number(item.listPrice),
+  })),
+});
+
+
+
+
+const handleSave = async () => {
+  try {
+    const payload = buildCreatePayload();
+    const res = await createQuotation(payload);
+    console.log("CREATE SUCCESS:", res);
+  } catch (error) {
+    console.error("CREATE FAILED:", error);
+  }
+};
+
+
 
   const itemsPerPage = 5;
   const [page, setPage] = useState(0);
@@ -300,11 +334,24 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     <>
       <Button variant="secondary" onClick={onClose}>Cancel</Button>
       <Button variant="ghost" onClick={reset}>Reset</Button>
-      <Button variant="primary" type="submit">Save Quote</Button>
+      <Button
+  variant="primary"
+  onClick={handleSave}
+>
+  Save Quote
+</Button>
+
     </>
   }
 >
-  <form onSubmit={submit} className="h-full flex flex-col">
+<form
+  onSubmit={(e) => {
+    e.preventDefault();
+    handleSave();
+  }}
+  className="h-full flex flex-col"
+>
+ 
  
             
          
@@ -347,7 +394,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                         <CustomerSelect
                           value={form.CutomerName}
                           onChange={async ({ name, id }) => {
-                            setForm((p) => ({ ...p, CutomerName: name }));
+                            setForm((p) => ({ ...p, CutomerName: name,customerId: id, }));
                             await loadCustomerDetailsById(id);
                           }}
                           className="w-full"
@@ -461,16 +508,17 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                 </td>
                                 <td className="px-1 py-1">
                                   <ItemSelect
-                                    value={it.productName}
-                                    onChange={(item) => {
-                                      updateItem(i, {
-                                        productName: item.name,
-                                        description:
-                                          item.description ?? it.description,
-                                        listPrice: item.price ?? it.listPrice,
-                                      });
-                                    }}
-                                  />
+  value={it.productName}
+  onChange={(item) => {
+    updateItem(i, {
+      productName: item.itemCode,              // ✅ correct
+      description: item.itemName ?? "",        // or keep old
+      listPrice: item.sellingPrice ?? 0,       // ✅ correct
+    });
+  }}
+/>
+
+
                                 </td>
                                 <td className="px-1 py-1">
                                   <input

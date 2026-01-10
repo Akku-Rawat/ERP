@@ -37,14 +37,15 @@ const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
 interface ProformaInvoiceTableProps {
   onAddProformaInvoice?: () => void;
    onExportProformaInvoice?: () => void;  
+   refreshKey: number; 
 }
-  const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({ onAddProformaInvoice,onExportProformaInvoice, }) => {
+  const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({ onAddProformaInvoice,onExportProformaInvoice, refreshKey,}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [invoices, setInvoices] = useState<ProformaInvoiceSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -84,7 +85,7 @@ interface ProformaInvoiceTableProps {
 
   useEffect(() => {
     fetchInvoices();
-  }, [page, pageSize]);
+  }, [page, pageSize,refreshKey]);
 
   /* ===============================
      ACTIONS
@@ -287,6 +288,8 @@ interface ProformaInvoiceTableProps {
         </div>
       ) : (
         <Table
+         loading={loading}
+  serverSide
           columns={columns}
           data={filteredInvoices}
           rowKey={(row) => row.proformaId}
@@ -304,6 +307,11 @@ interface ProformaInvoiceTableProps {
           totalPages={totalPages}
           pageSize={pageSize}
           totalItems={totalItems}
+            pageSizeOptions={[10, 25, 50, 100]}
+  onPageSizeChange={(size) => {
+    setPageSize(size);
+    setPage(1); // reset page
+  }}
           onPageChange={setPage}
         />
       )}

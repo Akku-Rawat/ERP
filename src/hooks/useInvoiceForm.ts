@@ -11,6 +11,8 @@ import {
   EMPTY_ITEM,
   getPaymentMethodLabel,
 } from "../constants/invoice.constants";
+type InvoiceMode = "invoice" | "proforma";
+
 
 const ITEMS_PER_PAGE = 5;
 
@@ -22,7 +24,8 @@ type NestedSection =
 export const useInvoiceForm = (
   isOpen: boolean,
   onClose: () => void,
-  onSubmit?: (data: any) => void
+  onSubmit?: (data: any) => void,
+  mode:InvoiceMode="invoice"
 ) => {
   const [formData, setFormData] = useState<Invoice>(DEFAULT_INVOICE_FORM);
   const [customerDetails, setCustomerDetails] = useState<any>(null);
@@ -36,6 +39,17 @@ export const useInvoiceForm = (
   const [sameAsBilling, setSameAsBilling] = useState(true);
 
   const shippingEditedRef = useRef(false);
+  useEffect(() => {
+  if (!isOpen) return;
+
+  setFormData((prev) => ({
+    ...prev,
+    invoiceStatus: mode === "proforma" ? "Draft" : prev.invoiceStatus,
+    invoiceType:
+      mode === "proforma" ? "Non-Export" : prev.invoiceType,
+  }));
+}, [isOpen, mode]);
+
 
   useEffect(() => {
     if (!isOpen) return;
@@ -259,21 +273,31 @@ export const useInvoiceForm = (
     if (!checked) shippingEditedRef.current = false;
   };
 
-  const handleReset = () => {
-    setFormData(DEFAULT_INVOICE_FORM);
-    setCustomerDetails(null);
-    setCustomerNameDisplay("");
-    setActiveTab("details");
-    shippingEditedRef.current = false;
-    setPage(0);
+const handleReset = () => {
+  setFormData({
+    ...DEFAULT_INVOICE_FORM,
+    shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
+  });
+  setSameAsBilling(true);
+  shippingEditedRef.current = false;
+  setPage(0);
+};
+
+ const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const payload = {
+    ...formData,
+    subTotal,
+    totalTax,
+    grandTotal,
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit?.({ ...formData, subTotal, grandTotal, totalTax });
-    handleReset();
-    onClose();
-  };
+  onSubmit?.(payload);
+  handleReset();
+  onClose();
+};
+
 
   const { subTotal, totalTax, grandTotal } = useMemo(() => {
     const sub = formData.items.reduce((sum, item) => {

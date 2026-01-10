@@ -6,7 +6,7 @@ const api = createAxiosInstance(base_url);
 const vite_proforma_api_url = import.meta.env.VITE_PROFORMA_API_URL as string;
 
 const ENDPOINTS = {
-  createProformaInvoice: `${base_url}.proforma.api.create_proforma_api`,
+  createProformaInvoice: `${vite_proforma_api_url}.create_proforma_api`,
   getProformaInvoiceById: `${vite_proforma_api_url}.get_proforma_by_id`,
   getAllProformaInvoices: `${vite_proforma_api_url}.get_proforma_api`,
   updateProformaInvoiceStatus: `${base_url}.proforma.api.update_proforma_status`,

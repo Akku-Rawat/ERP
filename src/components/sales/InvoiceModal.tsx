@@ -6,12 +6,12 @@ import TermsAndCondition from "../TermsAndCondition";
 
 import CustomerSelect from "../selects/CustomerSelect";
 import CountrySelect from "../selects/CountrySelect";
-import Modal from "../../components/UI/modal/modal";
+import Modal from "../../components/ui/modal/modal";
 import {
   Input ,
   Select ,
   Button,
-} from "../../components/UI/modal/formComponent";
+} from "../../components/ui/modal/formComponent";
 
 import ItemSelect from "../selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";

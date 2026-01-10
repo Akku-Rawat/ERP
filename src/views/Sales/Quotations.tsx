@@ -30,7 +30,8 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation,onExpor
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+ const [pageSize, setPageSize] = useState(10);
+
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -199,6 +200,8 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation,onExpor
         </div>
       ) : (
         <Table
+        loading={loading}
+  serverSide
           columns={columns}
           data={filteredQuotations}
           rowKey={(row) => row.quotationNumber}
@@ -215,6 +218,11 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation,onExpor
           totalPages={totalPages}
           pageSize={pageSize}
           totalItems={totalItems}
+           pageSizeOptions={[10, 25, 50, 100]}
+  onPageSizeChange={(size) => {
+    setPageSize(size);
+    setPage(1); 
+  }}
           onPageChange={setPage}
           
         />

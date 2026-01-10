@@ -27,7 +27,8 @@ const EmployeeDirectory: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
+
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -178,13 +179,10 @@ useEffect(() => {
   return (
   <div className="p-8">
     {viewMode === "table" ? (
-      loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          <p className="mt-2 text-muted">Loading employees…</p>
-        </div>
-      ) : (
+      
         <Table
+          loading={loading}
+  
           columns={columns}
           data={employees}
           serverSide  
@@ -199,10 +197,15 @@ useEffect(() => {
           totalPages={totalPages}
           pageSize={pageSize}
           totalItems={totalItems}
+            pageSizeOptions={[10, 25, 50, 100]}
+  onPageSizeChange={(size) => {
+    setPageSize(size);
+    setPage(1); // reset page
+  }}
           onPageChange={setPage}
         />
       )
-    ) : selectedEmployee ? (
+     : selectedEmployee ? (
      <EmployeeDetailView
   employee={selectedEmployee}
   onBack={() => {

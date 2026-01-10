@@ -385,7 +385,7 @@ const validateCurrentTab = (): string | null => {
 const buildPayload = () => {
   const basicSalaryNum = Number(formData.basicSalary) || 0;
   
-  // ✅ Calculate actual amounts (convert percentage to amount if needed)
+
   const housingAmount = Number(formData.housingAllowance) || 0;
   const mealAmount = Number(formData.mealAllowance) || 0;
   const transportAmount = Number(formData.transportAllowance) || 0;

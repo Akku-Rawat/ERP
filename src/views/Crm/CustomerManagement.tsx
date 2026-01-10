@@ -100,21 +100,6 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     toast.success(editCustomer ? "Customer updated!" : "Customer created!");
   };
 
-  const filtered = customers.filter((c) =>
-    [
-      c.id,
-      c.name,
-      c.type,
-      c.currency,
-      c.onboardingBalance,
-      c.tpin,
-      c.displayName,
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
-
   const handleRowClick = (customer: CustomerDetail) => {
     setSelectedCustomer(customer);
     setViewMode("detail");
@@ -189,31 +174,27 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
         <>
           <div className="flex items-center justify-between mb-6" />
 
-          {custLoading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="mt-2 text-muted">Loading customers…</p>
-            </div>
-          ) : (
-            <>
-              <Table
-                columns={columns}
-                data={filtered}
-                showToolbar
-                searchValue={searchTerm}
-                onSearch={setSearchTerm}
-                enableAdd
-                addLabel="Add Customer"
-                onAdd={handleAddCustomer}
-                enableColumnSelector
-                currentPage={page}
-                totalPages={totalPages}
-                pageSize={pageSize}
-                totalItems={totalItems}
-                onPageChange={setPage}
-              />
-            </>
-          )}
+          <>
+            <Table
+              columns={columns}
+              data={customers}
+              showToolbar
+              loading={custLoading}
+              onPageSizeChange={(size) => setPageSize(size)}
+              pageSizeOptions={[10, 25, 50, 100]}
+              searchValue={searchTerm}
+              onSearch={setSearchTerm}
+              enableAdd
+              addLabel="Add Customer"
+              onAdd={handleAddCustomer}
+              enableColumnSelector
+              currentPage={page}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              totalItems={totalItems}
+              onPageChange={setPage}
+            />
+          </>
         </>
       ) : selectedCustomer ? (
         <CustomerDetailView
