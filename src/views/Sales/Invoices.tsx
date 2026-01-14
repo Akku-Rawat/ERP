@@ -18,7 +18,6 @@ import ActionButton, {
 
 import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
-import { Row } from "jspdf-autotable";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { Company } from "../../types/company";
 
@@ -58,7 +57,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   const [pdfOpen, setPdfOpen] = useState(false);
 
   const [openStatusMenuFor, setOpenStatusMenuFor] = useState<string | null>(
-    null
+    null,
   );
 
   const fetchInvoices = async () => {
@@ -97,7 +96,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
   const handleViewClick = async (
     invoiceNumber: string,
-    e?: React.MouseEvent
+    e?: React.MouseEvent,
   ) => {
     e?.stopPropagation();
 
@@ -146,12 +145,12 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
   const handleRowStatusChange = async (
     invoiceNumber: string,
-    status: InvoiceStatus
+    status: InvoiceStatus,
   ) => {
     if (
       CRITICAL_STATUSES.includes(status) &&
       !window.confirm(
-        `Mark invoice ${invoiceNumber} as ${status}? This action cannot be undone.`
+        `Mark invoice ${invoiceNumber} as ${status}? This action cannot be undone.`,
       )
     ) {
       return;
@@ -167,8 +166,8 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       prev.map((inv) =>
         inv.invoiceNumber === invoiceNumber
           ? { ...inv, invoiceStatus: status }
-          : inv
-      )
+          : inv,
+      ),
     );
 
     toast.success(`Invoice marked as ${status}`);
@@ -187,7 +186,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   const filteredInvoices = invoices.filter(
     (inv) =>
       inv.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inv.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+      inv.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Table columns definition

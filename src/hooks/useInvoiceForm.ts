@@ -9,7 +9,6 @@ import { getItemByItemCode } from "../api/itemApi";
 import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
-  getPaymentMethodLabel,
 } from "../constants/invoice.constants";
 import { CloudCog } from "lucide-react";
 type InvoiceMode = "invoice" | "proforma";
@@ -32,7 +31,7 @@ export const useInvoiceForm = (
   const [customerNameDisplay, setCustomerNameDisplay] = useState("");
   const [page, setPage] = useState(0);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details"
+    "details",
   );
   const [taxCategory, setTaxCategory] = useState<string | undefined>("");
   const [isShippingOpen, setIsShippingOpen] = useState(false);
@@ -72,7 +71,7 @@ export const useInvoiceForm = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
-    section?: NestedSection
+    section?: NestedSection,
   ) => {
     const { name, value } = e.target;
 
@@ -267,7 +266,7 @@ const countryCode = getCountryCode(
 
   const handleItemChange = (
     idx: number,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
     const isNum = ["quantity", "price", "discount", "vatRate"].includes(name);
@@ -347,7 +346,7 @@ const countryCode = getCountryCode(
 
     const tax = formData.items.reduce(
       (sum, item) => sum + parseFloat(item.vatRate || "0"),
-      0
+      0,
     );
 
     return { subTotal: sub, totalTax: tax, grandTotal: sub };
@@ -355,7 +354,7 @@ const countryCode = getCountryCode(
 
   const paginatedItems = formData.items.slice(
     page * ITEMS_PER_PAGE,
-    (page + 1) * ITEMS_PER_PAGE
+    (page + 1) * ITEMS_PER_PAGE,
   );
 
   return {

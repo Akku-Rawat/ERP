@@ -7,7 +7,6 @@ import {
   FaTrash,
   FaEye,
   FaEyeSlash,
-  FaRegCreditCard,
   FaTimes,
 } from "react-icons/fa";
 import type { BankAccount } from "../../types/company";
@@ -178,7 +177,10 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
   };
 
   const toggleAccountVisibility = (accountNumber: string) => {
-    setShowAccountNumber((prev) => ({ ...prev, [accountNumber]: !prev[accountNumber] }));
+    setShowAccountNumber((prev) => ({
+      ...prev,
+      [accountNumber]: !prev[accountNumber],
+    }));
   };
 
   const defaultAccount = bankAccounts.find((a) => a.isdefault);
@@ -236,7 +238,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
               {/* Account List */}
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {filteredAccounts.length === 0 ? (
-                  <div className="text-center py-8 text-muted text-sm">No accounts found</div>
+                  <div className="text-center py-8 text-muted text-sm">
+                    No accounts found
+                  </div>
                 ) : (
                   filteredAccounts.map((acc, i) => (
                     <div
@@ -252,7 +256,9 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
                         <p className="font-semibold text-main text-sm">
                           {acc.bankName}
                         </p>
-                        <p className="text-xs text-muted mt-1">IFSC: {acc.ifscCode}</p>
+                        <p className="text-xs text-muted mt-1">
+                          IFSC: {acc.ifscCode}
+                        </p>
                       </div>
                       <p className="text-xs text-muted font-mono truncate">
                         {acc.accountNo}
@@ -316,8 +322,12 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
                 <div className="w-24 h-24 rounded-full bg-app flex items-center justify-center mb-4 border-2 border-dashed border-[var(--border)]">
                   <FaUniversity className="w-10 h-10 text-muted opacity-50" />
                 </div>
-                <h3 className="text-lg font-semibold text-main mb-2">No Account Selected</h3>
-                <p className="text-muted">Select an account from the list to view details</p>
+                <h3 className="text-lg font-semibold text-main mb-2">
+                  No Account Selected
+                </h3>
+                <p className="text-muted">
+                  Select an account from the list to view details
+                </p>
               </div>
             ) : (
               <div className="p-6">
@@ -412,18 +422,42 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
 };
 
 // --- Reusable Small Component for Detail Blocks ---
-const DetailBlock = ({ label, value, isMono = false }: { label: string, value: string, isMono?: boolean }) => (
+const DetailBlock = ({
+  label,
+  value,
+  isMono = false,
+}: {
+  label: string;
+  value: string;
+  isMono?: boolean;
+}) => (
   <div className="space-y-2">
-    <label className="text-[11px] font-bold text-muted uppercase tracking-widest ml-1">{label}</label>
+    <label className="text-[11px] font-bold text-muted uppercase tracking-widest ml-1">
+      {label}
+    </label>
     <div className="bg-app border border-[var(--border)] rounded-xl px-4 py-3.5 group hover:border-[var(--primary)]/40 transition-colors">
-      <p className={`text-main font-bold text-base ${isMono ? 'font-mono tracking-wider' : ''}`}>{value}</p>
+      <p
+        className={`text-main font-bold text-base ${isMono ? "font-mono tracking-wider" : ""}`}
+      >
+        {value}
+      </p>
     </div>
   </div>
 );
 
 const FaCheck = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={3}
+      d="M5 13l4 4L19 7"
+    />
   </svg>
 );
 

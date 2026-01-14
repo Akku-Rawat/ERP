@@ -20,7 +20,6 @@ import type { Column } from "../../../components/ui/Table/type";
 import type { EmployeeSummary, Employee } from "../../../types/employee";
 import EmployeeDetailView from "../EmployeeManagement/mployeeDetailView";
 
-
 const EmployeeDirectory: React.FC = () => {
   const [employees, setEmployees] = useState<EmployeeSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,36 +35,32 @@ const EmployeeDirectory: React.FC = () => {
   const [editEmployee, setEditEmployee] = useState<Employee | null>(null);
   //state for detail view
   const [viewMode, setViewMode] = useState<"table" | "detail">("table");
-const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null,
+  );
 
+  //function to handle view employee details
+  const handleViewEmployee = async (id: string) => {
+    try {
+      const res = await getEmployeeById(id);
+      setSelectedEmployee(res.data ?? res);
+      setViewMode("detail");
+    } catch {
+      toast.error("Unable to load employee details");
+    }
+  };
 
+  const refreshSelectedEmployee = async () => {
+    if (!selectedEmployee?.id) return;
 
-
-
-//function to handle view employee details
-const handleViewEmployee = async (id: string) => {
-  try {
-    const res = await getEmployeeById(id);
+    const res = await getEmployeeById(selectedEmployee.id);
     setSelectedEmployee(res.data ?? res);
-    setViewMode("detail");
-  } catch {
-    toast.error("Unable to load employee details");
-  }
-};
-
-const refreshSelectedEmployee = async () => {
-  if (!selectedEmployee?.id) return;
-
-  const res = await getEmployeeById(selectedEmployee.id);
-  setSelectedEmployee(res.data ?? res);
-};
-
-
+  };
 
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-     const res = await getAllEmployees(page, pageSize, searchTerm);
+      const res = await getAllEmployees(page, pageSize, searchTerm);
       console.log(res);
       setEmployees(res.data.employees);
       setTotalPages(res.data.pagination?.total_pages || 1);
@@ -78,9 +73,9 @@ const refreshSelectedEmployee = async () => {
     }
   };
 
-useEffect(() => {
-  fetchEmployees();
-}, [page]);
+  useEffect(() => {
+    fetchEmployees();
+  }, [page]);
   /* ===============================
      ACTION HANDLERS
   ================================ */
@@ -121,10 +116,8 @@ useEffect(() => {
     toast.success(editEmployee ? "Employee updated" : "Employee added");
   };
 
-
-
   const uniqueDepartments = Array.from(
-    new Set(employees.map((e) => e.department))
+    new Set(employees.map((e) => e.department)),
   ).filter((d) => d !== "");
 
   /* ===============================
@@ -158,10 +151,7 @@ useEffect(() => {
       align: "center",
       render: (e) => (
         <ActionGroup>
-       <ActionButton
-  type="view"
-  onClick={() => handleViewEmployee(e.id)}
-/>
+          <ActionButton type="view" onClick={() => handleViewEmployee(e.id)} />
 
           <ActionMenu
             onEdit={(ev) => handleEdit(e.id, ev as any)}

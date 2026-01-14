@@ -13,7 +13,6 @@ import ItemSelect from "../selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
   invoiceStatusOptions,
-  invoiceTypeOptions,
   currencySymbols,
   paymentMethodOptions,
   currencyOptions,

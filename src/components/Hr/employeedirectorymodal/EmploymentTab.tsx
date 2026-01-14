@@ -4,7 +4,7 @@ type EmploymentTabProps = {
   formData: any;
   handleInputChange: (field: string, value: string | boolean) => void;
   departments: string[];
-  Level:string[];
+  Level: string[];
 };
 
 const EmploymentTab: React.FC<EmploymentTabProps> = ({
@@ -49,23 +49,23 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               ))}
             </select>
           </div>
-           <div>
-  <label className="block text-xs text-gray-600 mb-1 font-medium">
-    Level *
-  </label>
-  <select
-    value={formData.level}
-    onChange={(e) => handleInputChange("level", e.target.value)}
-    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-  >
-    <option value="">Select Level</option>
-    {Level.map((lvl) => (
-      <option key={lvl} value={lvl}>
-        {lvl}
-      </option>
-    ))}
-  </select>
-</div>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1 font-medium">
+              Level *
+            </label>
+            <select
+              value={formData.level}
+              onChange={(e) => handleInputChange("level", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="">Select Level</option>
+              {Level.map((lvl) => (
+                <option key={lvl} value={lvl}>
+                  {lvl}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
@@ -98,7 +98,9 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
             </label>
             <select
               value={formData.employeeType}
-              onChange={(e) => handleInputChange("employeeType", e.target.value)}
+              onChange={(e) =>
+                handleInputChange("employeeType", e.target.value)
+              }
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option>Permanent</option>
@@ -157,7 +159,9 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
             <input
               type="text"
               value={formData.workLocation}
-              onChange={(e) => handleInputChange("workLocation", e.target.value)}
+              onChange={(e) =>
+                handleInputChange("workLocation", e.target.value)
+              }
               placeholder="Office location"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             />

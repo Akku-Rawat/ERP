@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaBoxOpen, FaWarehouse, FaTruckMoving, FaBoxes } from "react-icons/fa";
+import { FaBoxOpen, FaBoxes } from "react-icons/fa";
 
 import Items from "./Items";
 import Warehouses from "./Warehouses";

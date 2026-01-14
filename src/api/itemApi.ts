@@ -16,7 +16,7 @@ const ENDPOINTS = {
 export async function getAllItems(
   page: number = 1,
   page_size: number = 10,
-  taxCategory: string | undefined = undefined
+  taxCategory: string | undefined = undefined,
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getAllItems, {
     params: { page, page_size, taxCategory },
@@ -43,7 +43,7 @@ export async function createItem(payload: any): Promise<any> {
 
 export async function updateItemByItemCode(
   item_code: string,
-  payload: any
+  payload: any,
 ): Promise<any> {
   const url = `${ENDPOINTS.updateItem}?item_code=${item_code}`;
   const resp: AxiosResponse = await api.put(url, payload);

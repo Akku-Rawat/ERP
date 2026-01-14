@@ -8,8 +8,12 @@ export default function GeneralSettingsTab() {
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-gray-900">General Settings</h2>
-        <p className="text-sm text-gray-600 mt-1">Company-wide HR configurations</p>
+        <h2 className="text-2xl font-semibold text-gray-900">
+          General Settings
+        </h2>
+        <p className="text-sm text-gray-600 mt-1">
+          Company-wide HR configurations
+        </p>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
@@ -24,7 +28,9 @@ export default function GeneralSettingsTab() {
               <option value="USD">USD - US Dollar</option>
               <option value="EUR">EUR - Euro</option>
             </select>
-            <p className="text-xs text-gray-500 mt-1">⚠️ Cannot change after first payroll</p>
+            <p className="text-xs text-gray-500 mt-1">
+              ⚠️ Cannot change after first payroll
+            </p>
           </div>
 
           <div>
@@ -33,11 +39,22 @@ export default function GeneralSettingsTab() {
             </label>
             <div className="flex gap-4">
               <label className="flex items-center">
-                <input type="radio" name="cycle" value="monthly" defaultChecked className="mr-2" />
+                <input
+                  type="radio"
+                  name="cycle"
+                  value="monthly"
+                  defaultChecked
+                  className="mr-2"
+                />
                 <span className="text-sm">Monthly</span>
               </label>
               <label className="flex items-center">
-                <input type="radio" name="cycle" value="biweekly" className="mr-2" />
+                <input
+                  type="radio"
+                  name="cycle"
+                  value="biweekly"
+                  className="mr-2"
+                />
                 <span className="text-sm">Bi-weekly</span>
               </label>
             </div>
@@ -99,15 +116,21 @@ export default function GeneralSettingsTab() {
 
         {/* Statutory Compliance */}
         <div className="border-t pt-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Statutory Compliance (Zambia)</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">
+            Statutory Compliance (Zambia)
+          </h3>
           <div className="space-y-2">
             <label className="flex items-center">
               <input type="checkbox" defaultChecked className="mr-3" />
-              <span className="text-sm text-gray-700">NAPSA (Social Security)</span>
+              <span className="text-sm text-gray-700">
+                NAPSA (Social Security)
+              </span>
             </label>
             <label className="flex items-center">
               <input type="checkbox" defaultChecked className="mr-3" />
-              <span className="text-sm text-gray-700">NHIMA (Health Insurance)</span>
+              <span className="text-sm text-gray-700">
+                NHIMA (Health Insurance)
+              </span>
             </label>
             <label className="flex items-center">
               <input type="checkbox" defaultChecked className="mr-3" />

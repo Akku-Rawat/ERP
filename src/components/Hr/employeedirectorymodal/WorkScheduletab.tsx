@@ -23,7 +23,7 @@ const TIME_SLOTS = [
   "09:00-18:00",
   "07:00-16:00",
   "10:00-19:00",
-  "Custom"
+  "Custom",
 ];
 
 export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({
@@ -32,19 +32,19 @@ export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({
 }) => {
   const handleQuickFill = (template: string) => {
     const schedules: Record<string, string> = {};
-    
+
     if (template === "standard") {
-      DAYS.slice(0, 5).forEach(day => {
+      DAYS.slice(0, 5).forEach((day) => {
         schedules[day.field] = "08:00-17:00";
       });
       schedules["weeklyScheduleSaturday"] = "Off";
       schedules["weeklyScheduleSunday"] = "Off";
     } else if (template === "shift") {
-      DAYS.forEach(day => {
+      DAYS.forEach((day) => {
         schedules[day.field] = "09:00-18:00";
       });
     }
-    
+
     Object.entries(schedules).forEach(([field, value]) => {
       handleInputChange(field, value);
     });
@@ -80,7 +80,7 @@ export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({
 
         {/* Day Schedule Inputs */}
         <div className="space-y-3">
-          {DAYS.map(day => (
+          {DAYS.map((day) => (
             <div key={day.key} className="grid grid-cols-3 gap-3 items-center">
               <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-gray-400" />
@@ -92,20 +92,22 @@ export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({
                 className="col-span-2 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
               >
                 <option value="">Select schedule...</option>
-                {TIME_SLOTS.map(slot => (
+                {TIME_SLOTS.map((slot) => (
                   <option key={slot} value={slot}>
                     {slot}
                   </option>
                 ))}
               </select>
-              
+
               {/* Show custom input if Custom selected */}
               {formData[day.field] === "Custom" && (
                 <input
                   type="text"
                   placeholder="e.g., 10:00-14:00"
                   value={formData[`${day.field}Custom`] || ""}
-                  onChange={(e) => handleInputChange(`${day.field}Custom`, e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange(`${day.field}Custom`, e.target.value)
+                  }
                   className="col-span-2 col-start-2 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               )}
@@ -115,15 +117,23 @@ export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({
 
         {/* Summary */}
         <div className="mt-4 p-3 bg-gray-50 rounded border border-gray-200">
-          <p className="text-xs font-medium text-gray-700 mb-2">📊 Weekly Summary:</p>
+          <p className="text-xs font-medium text-gray-700 mb-2">
+            📊 Weekly Summary:
+          </p>
           <div className="text-xs text-gray-600">
-            {DAYS.map(day => {
+            {DAYS.map((day) => {
               const schedule = formData[day.field];
               if (!schedule) return null;
               return (
                 <div key={day.key} className="flex justify-between py-1">
                   <span>{day.label}:</span>
-                  <span className={schedule === "Off" ? "text-red-600" : "text-green-600 font-medium"}>
+                  <span
+                    className={
+                      schedule === "Off"
+                        ? "text-red-600"
+                        : "text-green-600 font-medium"
+                    }
+                  >
                     {schedule}
                   </span>
                 </div>

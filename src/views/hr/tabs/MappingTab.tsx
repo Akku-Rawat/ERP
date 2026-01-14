@@ -1,12 +1,21 @@
 // CompanyMappingTab.tsx - REPLACES MappingTab.tsx
 import { useState } from "react";
-import { Save, AlertTriangle, Users, DollarSign, Calendar, Clock, CheckCircle } from "lucide-react";
+import {
+  Save,
+  AlertTriangle,
+  Users,
+  DollarSign,
+  Calendar,
+  Clock,
+  CheckCircle,
+} from "lucide-react";
 
 export default function CompanyMappingTab() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedSalary, setSelectedSalary] = useState("Executive Level");
   const [selectedLeave, setSelectedLeave] = useState("Standard Leave 2025");
-  const [selectedSchedule, setSelectedSchedule] = useState("Standard Work Week");
+  const [selectedSchedule, setSelectedSchedule] =
+    useState("Standard Work Week");
   const [effectiveDate, setEffectiveDate] = useState("2025-02-01");
   const [sendNotification, setSendNotification] = useState(true);
   const [confirmUnderstand, setConfirmUnderstand] = useState(false);
@@ -20,18 +29,24 @@ export default function CompanyMappingTab() {
       alert("Please confirm you understand this action");
       return;
     }
-    
+
     setShowConfirmModal(false);
-    
+
     // Here you would make API call
-    alert("✅ Company Mapping saved successfully!\nAll new employees will use these settings.");
+    alert(
+      "✅ Company Mapping saved successfully!\nAll new employees will use these settings.",
+    );
   };
 
   return (
     <div className="max-w-5xl space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-gray-900">Company Mapping</h2>
-        <p className="text-sm text-gray-600 mt-1">Link organizational settings to company</p>
+        <h2 className="text-2xl font-semibold text-gray-900">
+          Company Mapping
+        </h2>
+        <p className="text-sm text-gray-600 mt-1">
+          Link organizational settings to company
+        </p>
       </div>
 
       {/* Active Mapping Alert */}
@@ -39,8 +54,12 @@ export default function CompanyMappingTab() {
         <div className="flex items-start">
           <CheckCircle className="w-5 h-5 text-purple-600 mr-3 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-gray-900">ACTIVE MAPPING FOR: Tech Solutions Ltd</p>
-            <p className="text-xs text-gray-600 mt-1">Last updated: 15 Dec 2024 by HR Admin</p>
+            <p className="text-sm font-semibold text-gray-900">
+              ACTIVE MAPPING FOR: Tech Solutions Ltd
+            </p>
+            <p className="text-xs text-gray-600 mt-1">
+              Last updated: 15 Dec 2024 by HR Admin
+            </p>
           </div>
         </div>
       </div>
@@ -53,9 +72,14 @@ export default function CompanyMappingTab() {
               <DollarSign className="w-6 h-6 text-green-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">💰 SALARY STRUCTURE</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                💰 SALARY STRUCTURE
+              </h3>
               <p className="text-sm text-gray-600 mb-4">
-                Currently Linked: <span className="font-medium text-purple-600">{selectedSalary}</span>
+                Currently Linked:{" "}
+                <span className="font-medium text-purple-600">
+                  {selectedSalary}
+                </span>
               </p>
 
               <select
@@ -70,7 +94,9 @@ export default function CompanyMappingTab() {
 
               <div className="flex items-center text-sm text-gray-600 mb-2">
                 <Users className="w-4 h-4 mr-2" />
-                <span>Used by: <strong>12 employees</strong></span>
+                <span>
+                  Used by: <strong>12 employees</strong>
+                </span>
               </div>
 
               <div className="p-3 bg-gray-50 rounded border border-gray-200">
@@ -89,9 +115,14 @@ export default function CompanyMappingTab() {
               <Calendar className="w-6 h-6 text-orange-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">📅 LEAVE POLICY</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                📅 LEAVE POLICY
+              </h3>
               <p className="text-sm text-gray-600 mb-4">
-                Currently Linked: <span className="font-medium text-purple-600">{selectedLeave}</span>
+                Currently Linked:{" "}
+                <span className="font-medium text-purple-600">
+                  {selectedLeave}
+                </span>
               </p>
 
               <select
@@ -105,7 +136,9 @@ export default function CompanyMappingTab() {
 
               <div className="flex items-center text-sm text-gray-600 mb-2">
                 <Users className="w-4 h-4 mr-2" />
-                <span>Used by: <strong>156 employees</strong></span>
+                <span>
+                  Used by: <strong>156 employees</strong>
+                </span>
               </div>
 
               <div className="p-3 bg-gray-50 rounded border border-gray-200">
@@ -124,9 +157,14 @@ export default function CompanyMappingTab() {
               <Clock className="w-6 h-6 text-indigo-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">🕐 WORK SCHEDULE</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                🕐 WORK SCHEDULE
+              </h3>
               <p className="text-sm text-gray-600 mb-4">
-                Currently Linked: <span className="font-medium text-purple-600">{selectedSchedule}</span>
+                Currently Linked:{" "}
+                <span className="font-medium text-purple-600">
+                  {selectedSchedule}
+                </span>
               </p>
 
               <select
@@ -141,7 +179,9 @@ export default function CompanyMappingTab() {
 
               <div className="flex items-center text-sm text-gray-600 mb-2">
                 <Users className="w-4 h-4 mr-2" />
-                <span>Used by: <strong>134 employees</strong></span>
+                <span>
+                  Used by: <strong>134 employees</strong>
+                </span>
               </div>
 
               <div className="p-3 bg-gray-50 rounded border border-gray-200">
@@ -160,7 +200,9 @@ export default function CompanyMappingTab() {
               <Calendar className="w-6 h-6 text-blue-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">📆 EFFECTIVE DATE</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                📆 EFFECTIVE DATE
+              </h3>
               <p className="text-sm text-gray-600 mb-4">Apply changes from:</p>
 
               <input
@@ -173,7 +215,8 @@ export default function CompanyMappingTab() {
               <div className="mt-3 p-3 bg-amber-50 rounded border border-amber-200 flex items-start">
                 <AlertTriangle className="w-4 h-4 text-amber-600 mr-2 mt-0.5 flex-shrink-0" />
                 <p className="text-xs text-amber-800">
-                  Changing date affects payroll calculations and leave entitlements for existing employees
+                  Changing date affects payroll calculations and leave
+                  entitlements for existing employees
                 </p>
               </div>
             </div>
@@ -199,18 +242,18 @@ export default function CompanyMappingTab() {
           MAPPING HISTORY
         </h3>
         <div className="space-y-3">
-          <HistoryItem 
-            date="01 Jan 2025" 
+          <HistoryItem
+            date="01 Jan 2025"
             action="Salary Structure changed to Executive Level"
             type="salary"
           />
-          <HistoryItem 
-            date="15 Dec 2024" 
+          <HistoryItem
+            date="15 Dec 2024"
             action="Leave Policy updated to Standard 2025"
             type="leave"
           />
-          <HistoryItem 
-            date="01 Dec 2024" 
+          <HistoryItem
+            date="01 Dec 2024"
             action="Initial mapping created"
             type="system"
           />
@@ -226,26 +269,38 @@ export default function CompanyMappingTab() {
                 <AlertTriangle className="w-6 h-6 text-amber-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">⚠️ Confirm Mapping Change</h3>
-                <p className="text-sm text-gray-600 mt-1">Review impact before proceeding</p>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  ⚠️ Confirm Mapping Change
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Review impact before proceeding
+                </p>
               </div>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4 space-y-3 mb-4">
               <div>
-                <p className="text-sm font-medium text-gray-900 mb-2">IMPACT ANALYSIS:</p>
+                <p className="text-sm font-medium text-gray-900 mb-2">
+                  IMPACT ANALYSIS:
+                </p>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start">
                     <CheckCircle className="w-4 h-4 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">New employees will use these settings automatically</span>
+                    <span className="text-gray-700">
+                      New employees will use these settings automatically
+                    </span>
                   </li>
                   <li className="flex items-start">
                     <AlertTriangle className="w-4 h-4 text-amber-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Existing 211 employees remain on current settings</span>
+                    <span className="text-gray-700">
+                      Existing 211 employees remain on current settings
+                    </span>
                   </li>
                   <li className="flex items-start">
                     <AlertTriangle className="w-4 h-4 text-amber-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Effective from: {effectiveDate}</span>
+                    <span className="text-gray-700">
+                      Effective from: {effectiveDate}
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -265,22 +320,26 @@ export default function CompanyMappingTab() {
 
             <div className="space-y-3 mb-6">
               <label className="flex items-start text-sm cursor-pointer">
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   checked={sendNotification}
                   onChange={(e) => setSendNotification(e.target.checked)}
-                  className="mt-1 mr-3" 
+                  className="mt-1 mr-3"
                 />
-                <span className="text-gray-700">Send notification to HR team about this change</span>
+                <span className="text-gray-700">
+                  Send notification to HR team about this change
+                </span>
               </label>
               <label className="flex items-start text-sm cursor-pointer">
-                <input 
+                <input
                   type="checkbox"
                   checked={confirmUnderstand}
                   onChange={(e) => setConfirmUnderstand(e.target.checked)}
-                  className="mt-1 mr-3" 
+                  className="mt-1 mr-3"
                 />
-                <span className="text-gray-700 font-medium">I understand this will affect all new employee onboarding</span>
+                <span className="text-gray-700 font-medium">
+                  I understand this will affect all new employee onboarding
+                </span>
               </label>
             </div>
 
@@ -306,12 +365,23 @@ export default function CompanyMappingTab() {
   );
 }
 
-function HistoryItem({ date, action, type }: { date: string; action: string; type: string }) {
+function HistoryItem({
+  date,
+  action,
+  type,
+}: {
+  date: string;
+  action: string;
+  type: string;
+}) {
   const getIcon = () => {
-    switch(type) {
-      case 'salary': return <DollarSign className="w-3 h-3" />;
-      case 'leave': return <Calendar className="w-3 h-3" />;
-      default: return <Clock className="w-3 h-3" />;
+    switch (type) {
+      case "salary":
+        return <DollarSign className="w-3 h-3" />;
+      case "leave":
+        return <Calendar className="w-3 h-3" />;
+      default:
+        return <Clock className="w-3 h-3" />;
     }
   };
 

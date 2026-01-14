@@ -79,11 +79,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
           <Button variant="secondary" onClick={onClose} disabled={loading}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            onClick={handleSubmit}
-            loading={loading}
-          >
+          <Button variant="primary" onClick={handleSubmit} loading={loading}>
             Submit Request
           </Button>
         </div>

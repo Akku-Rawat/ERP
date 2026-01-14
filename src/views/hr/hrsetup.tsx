@@ -2,9 +2,8 @@ import { useState } from "react";
 import SettingsSidebar from "./SettingsSidebar";
 import GeneralSettingsTab from "./tabs/GeneralSettingsTab";
 import SalaryStructureTab from "./tabs/SalaryStructureTab";
-import { LeavePolicy } from "../../components/Hr/leavemanagemnetmodal/LeavePolicy";
-import  LeaveSetupTab  from "./tabs/LeavePolicyTab";
-import WorkScheduleTab  from "./tabs/WorkScheduleTab";
+import LeaveSetupTab from "./tabs/LeavePolicyTab";
+import WorkScheduleTab from "./tabs/WorkScheduleTab";
 import CompanyMappingTab from "./tabs/MappingTab";
 import SalarySlipSetup from "./tabs/Salaryslipsetup";
 
@@ -14,9 +13,9 @@ const TABS = [
   "Leave Policy",
   "Work Schedule",
   "salaryslip setup",
-  
+
   "Company Mapping",
-  ""
+  "",
 ];
 
 export default function HRSettings() {
@@ -38,7 +37,7 @@ export default function HRSettings() {
         {activeTab === "Leave Policy" && <LeaveSetupTab />}
         {activeTab === "Work Schedule" && <WorkScheduleTab />}
         {activeTab === "Company Mapping" && <CompanyMappingTab />}
-        {activeTab === "salaryslip setup" && <SalarySlipSetup/>}
+        {activeTab === "salaryslip setup" && <SalarySlipSetup />}
       </div>
     </div>
   );

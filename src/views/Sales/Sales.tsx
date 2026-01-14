@@ -20,7 +20,6 @@ import {
   FaCalendarAlt,
   FaFileInvoice,
   FaFileInvoiceDollar,
-  FaCashRegister,
   FaChartBar,
 } from "react-icons/fa";
 

@@ -1,6 +1,6 @@
 // CompensationTab.tsx - SIMPLIFIED VERSION MATCHING BACKEND
-import React, { useState, useEffect } from "react";
-import { Info, DollarSign, Calculator } from "lucide-react";
+import React, { useState } from "react";
+import { DollarSign, Calculator } from "lucide-react";
 
 type CompensationTabProps = {
   formData: any;

@@ -9,8 +9,6 @@ type IdentityVerificationModalProps = {
 };
 import { verifyEmployeeIdentity } from "../../../api/employeeapi";
 
-
-
 const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
   onVerified,
   onManualEntry,
@@ -21,47 +19,44 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-const handleVerify = async () => {
-  setError(null);
+  const handleVerify = async () => {
+    setError(null);
 
-  if (!identityValue.trim()) {
-    setError("Please enter an NRC or SSN number");
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    const result = await verifyEmployeeIdentity(
-      identityType,
-      identityValue.trim()
-    );
-
-    if (result.status !== "success") {
-      throw new Error(result.message || "Verification failed");
+    if (!identityValue.trim()) {
+      setError("Please enter an NRC or SSN number");
+      return;
     }
-const mappedData = {
-  identityInfo: {
-    nrc: identityType === "NRC" ? identityValue : "",
-     ssn: result.data.ssn || "",
-  },
-  personalInfo: {
-    firstName: result.data.firstName,
-    lastName: result.data.lastName,
-    gender: result.data.gender === "F" ? "Female" : "Male",
-  },
-};
 
+    setLoading(true);
 
+    try {
+      const result = await verifyEmployeeIdentity(
+        identityType,
+        identityValue.trim(),
+      );
 
-    onVerified(mappedData);
-  } catch (err: any) {
-    setError(err.message || "Unable to verify identity");
-  } finally {
-    setLoading(false);
-  }
-};
+      if (result.status !== "success") {
+        throw new Error(result.message || "Verification failed");
+      }
+      const mappedData = {
+        identityInfo: {
+          nrc: identityType === "NRC" ? identityValue : "",
+          ssn: result.data.ssn || "",
+        },
+        personalInfo: {
+          firstName: result.data.firstName,
+          lastName: result.data.lastName,
+          gender: result.data.gender === "F" ? "Female" : "Male",
+        },
+      };
 
+      onVerified(mappedData);
+    } catch (err: any) {
+      setError(err.message || "Unable to verify identity");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -78,8 +73,18 @@ const mappedData = {
           className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition text-gray-400 hover:text-gray-600"
           aria-label="Close"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
 
@@ -130,7 +135,9 @@ const mappedData = {
           {/* Input Field */}
           <div className="mb-4">
             <label className="block text-xs font-medium text-gray-600 mb-2">
-              {identityType === "NRC" ? "National Registration Card" : "Social Security Number"}
+              {identityType === "NRC"
+                ? "National Registration Card"
+                : "Social Security Number"}
             </label>
             <input
               type="text"
@@ -138,9 +145,7 @@ const mappedData = {
               onChange={(e) => setIdentityValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={
-                identityType === "NRC"
-                  ? "123456/78/9"
-                  : "SS2024001234"
+                identityType === "NRC" ? "123456/78/9" : "SS2024001234"
               }
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
             />
@@ -150,11 +155,11 @@ const mappedData = {
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2">
               <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-red-700 whitespace-pre-line">{error}</p>
+              <p className="text-xs text-red-700 whitespace-pre-line">
+                {error}
+              </p>
             </div>
           )}
-
-        
 
           {/* Verify Button */}
           <button
@@ -184,8 +189,8 @@ const mappedData = {
 
           {/* Info Text */}
           <p className="text-xs text-gray-500 text-center mt-4 leading-relaxed">
-            Identity verification helps prevent duplicates and auto-fills data from
-            national databases.
+            Identity verification helps prevent duplicates and auto-fills data
+            from national databases.
           </p>
         </div>
       </div>

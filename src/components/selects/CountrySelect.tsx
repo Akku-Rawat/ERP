@@ -35,7 +35,7 @@ export default function CountrySelect({
           sortOrder: c.sort_order,
           code: c.code,
           name: c.name,
-        }))
+        })),
       );
       setLoading(false);
     };
@@ -67,7 +67,7 @@ export default function CountrySelect({
   }, []);
 
   const filtered = countries.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
+    c.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   const openDropdown = () => {
@@ -130,7 +130,7 @@ export default function CountrySelect({
               )}
             </ul>
           </div>,
-          document.body
+          document.body,
         )}
     </div>
   );
