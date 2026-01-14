@@ -10,29 +10,29 @@ const EmployeeManagement: React.FC = () => {
   );
 
   return (
-    <div className="p-6 bg-app">
+    <div className="bg-app">
       <div className="space-y-6">
         <div className="flex gap-8 border-b border-gray-300 pb-4 overflow-x-auto">
           <button
             onClick={() => setMainTab("directory")}
-            className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
+            className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               mainTab === "directory"
-                ? "text-indigo-600 border-indigo-500"
-                : "text-gray-500 border-transparent hover:text-indigo-600"
+               ? "text-primary border-primary"
+        : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <Users /> Employee Directory
+            <Users size={15} /> Employee Directory
           </button>
 
           <button
             onClick={() => setMainTab("recruitment")}
-            className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
+            className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               mainTab === "recruitment"
-                ? "text-indigo-600 border-indigo-500"
-                : "text-gray-500 border-transparent hover:text-indigo-600"
+               ? "text-primary border-primary"
+        : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <UserCheck /> Recruitment
+            <UserCheck  size={15}/> Recruitment
           </button>
         </div>
 

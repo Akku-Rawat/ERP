@@ -21,41 +21,41 @@ const PerformanceDevelopment: React.FC = () => {
   }, [tab]);
 
   return (
-    <div className="p-6 bg-app">
+    <div className="bg-app">
       <div className="space-y-6">
         {/* top tabs */}
         <div className="flex gap-8 border-b border-gray-300 pb-4 overflow-x-auto">
           <button
             onClick={() => setTab("performance")}
-            className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
+            className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               tab === "performance"
-                ? "text-indigo-600 border-indigo-500"
-                : "text-gray-500 border-transparent hover:text-indigo-600"
+                ? "text-primary border-primary"
+        : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <Clipboard /> Performance Reviews
+            <Clipboard size={15}/> Performance Reviews
           </button>
 
           <button
             onClick={() => setTab("training")}
-            className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
+            className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               tab === "training"
-                ? "text-indigo-600 border-indigo-500"
-                : "text-gray-500 border-transparent hover:text-indigo-600"
+                 ? "text-primary border-primary"
+        : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <BookOpen /> Training & Development
+            <BookOpen size={15}/> Training & Development
           </button>
 
           <button
             onClick={() => setTab("appraisals")}
-            className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
+            className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               tab === "appraisals"
-                ? "text-indigo-600 border-indigo-500"
-                : "text-gray-500 border-transparent hover:text-indigo-600"
+                  ? "text-primary border-primary"
+        : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <FaMedal /> Appraisals
+            <FaMedal size={15}/> Appraisals
           </button>
         </div>
 

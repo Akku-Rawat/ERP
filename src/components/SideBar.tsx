@@ -14,6 +14,7 @@ import {
   FaBars,
   FaChevronDown,
   FaChevronUp,
+  FaWarehouse
 } from "react-icons/fa";
 
 const menuItems = [
@@ -24,6 +25,7 @@ const menuItems = [
   { name: "Inventory", to: "/inventory", icon: <FaBoxes /> },
   { name: "Accounting", to: "/accounting", icon: <FaBriefcase /> },
   { name: "Human Resource", to: "/hr", icon: <FaUserTie /> },
+  { name: "Fixed Assets", to: "/fasset", icon: <FaWarehouse /> },
 ];
 
 interface SidebarProps {

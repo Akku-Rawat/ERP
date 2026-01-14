@@ -217,7 +217,7 @@ const monthlyTrendData = [
   { month: "Nov", hours: 180 },
 ];
 
-const WorkforceManagementSystem: React.FC = () => {
+const TimeAttendance: React.FC = () => {
   const [currentView, setCurrentView] = useState<
     "dashboard" | "attendance" | "timesheet" | "setup"
   >("dashboard");
@@ -1227,4 +1227,4 @@ const WorkforceManagementSystem: React.FC = () => {
   );
 };
 
-export default WorkforceManagementSystem;
+export default TimeAttendance;
