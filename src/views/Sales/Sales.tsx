@@ -13,6 +13,7 @@ import ProformaInvoiceModal from "../../components/sales/ProformaInvoiceModal";
 import PosModal from "../../components/sales/PosModal";
 
 import { createSalesInvoice } from "../../api/salesApi";
+import { createQuotation } from "../../api/quotationApi";
 
 import {
   FaMoneyBillWave,
@@ -51,38 +52,37 @@ const SalesModule: React.FC = () => {
       component: <SalesDashboard />,
     },
     quotations: {
-         component: (
-    <QuotationsTable
-      onAddQuotation={() => setOpenModal("quotation")}
-       onExportQuotation={() => {
-        console.log("Export invoices");
-      }}
-    />
-     ),
-},
+      component: (
+        <QuotationsTable
+          key={refreshKey}
+          onAddQuotation={() => setOpenModal("quotation")}
+          onExportQuotation={() => {
+            console.log("Export quotations");
+          }}
+        />
+      ),
+    },
     proformaInvoice: {
       component: (
-    <ProformaInvoicesTable
-     refreshKey={refreshKey}
-      onAddProformaInvoice={() => setOpenModal("proforma")}
-       onExportProformaInvoice={() => {
-        console.log("Export proformainvoices");
-      
-      }}
-    />
-     ),
-},
-   invoices: {
-  component: (
-    <InvoiceTable
-      onAddInvoice={() => setOpenModal("invoice")}
-       onExportInvoice={() => {
-        console.log("Export invoices");
-      }}
-    />
-  ),
-},
-
+        <ProformaInvoicesTable
+          refreshKey={refreshKey}
+          onAddProformaInvoice={() => setOpenModal("proforma")}
+          onExportProformaInvoice={() => {
+            console.log("Export proforma invoices");
+          }}
+        />
+      ),
+    },
+    invoices: {
+      component: (
+        <InvoiceTable
+          onAddInvoice={() => setOpenModal("invoice")}
+          onExportInvoice={() => {
+            console.log("Export invoices");
+          }}
+        />
+      ),
+    },
     pos: {
       component: <POS />,
       onAdd: () => setOpenModal("pos"),
@@ -93,20 +93,43 @@ const SalesModule: React.FC = () => {
   };
 
   const handleInvoiceSubmit = async (payload: any) => {
-    console.log("Invoice payload (stub):", payload);
+    console.log("📤 Invoice payload:", payload);
 
     try {
       const response = await createSalesInvoice(payload);
-      console.log("Invoice response (stub):", response);
+      
       alert("Invoice created successfully!");
+      setOpenModal(null);
     } catch (err) {
-      console.error("Create invoice error:", err);
+      
+      alert("Failed to create invoice. Please try again.");
     }
   };
-const handleProformaCreated = () => {
-  setRefreshKey((prev) => prev + 1);
-  setOpenModal(null);
-};
+
+  const handleQuotationSubmit = async (payload: any) => {
+    console.log("📤 Quotation payload:", payload);
+
+    try {
+      const response = await createQuotation(payload);
+      
+      
+      if (response.status_code === 200 || response.status_code === 201) {
+        alert("Quotation created successfully!");
+        setRefreshKey((prev) => prev + 1); // Refresh quotations table
+        setOpenModal(null); // Close modal
+      } else {
+        throw new Error(response.message || "Failed to create quotation");
+      }
+    } catch (err: any) {
+      
+      alert(err.message || "Failed to create quotation. Please try again.");
+    }
+  };
+
+  const handleProformaCreated = () => {
+    setRefreshKey((prev) => prev + 1);
+    setOpenModal(null);
+  };
 
   const tab = TAB_CONFIG[activeTab];
 
@@ -141,15 +164,7 @@ const handleProformaCreated = () => {
       <div className="">
         {tab?.onAdd && (
           <div className="flex items-center justify-end gap-4 mb-4">
-            {/* <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-              onClick={tab.onAdd}
-            >
-              + Add
-            </button> */}
-            {/* <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
-              Export
-            </button> */}
+            {/* Add button if needed */}
           </div>
         )}
 
@@ -160,7 +175,7 @@ const handleProformaCreated = () => {
       <QuotationModal
         isOpen={openModal === "quotation"}
         onClose={() => setOpenModal(null)}
-        onSubmit={(data) => console.log("Quotation", data)}
+        onSubmit={handleQuotationSubmit}
       />
 
       <InvoiceModal
@@ -172,8 +187,7 @@ const handleProformaCreated = () => {
       <ProformaInvoiceModal
         isOpen={openModal === "proforma"}
         onClose={() => setOpenModal(null)}
-       onSubmit={handleProformaCreated}
-
+        onSubmit={handleProformaCreated}
       />
 
       <PosModal

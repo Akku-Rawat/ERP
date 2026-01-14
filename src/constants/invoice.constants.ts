@@ -97,7 +97,7 @@ export const invoiceStatusOptions = [
 export const invoiceTypeOptions = [
   { value: "LPO", label: "LPO" },
   { value: "Export", label: "Export" },
-  { value: "Non_Export", label: "Non Export" },
+  { value: "Non-Export", label: "Non Export" },
 ] as const;
 
 export const currencyOptions = [

@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { getPaymentMethodLabel } from "../../../constants/invoice.constants";
 
 const loadImageFromUrl = async (url: string): Promise<string> => {
   console.log("Url: ", url);
@@ -16,13 +17,13 @@ const loadImageFromUrl = async (url: string): Promise<string> => {
   });
 };
 
-export const generateQuotationPDF = async (
-  quotation: any,
+export const generateProformaInvoicePDF = async (
+  proformaInvoice: any,
   company: any,
   resultType: "save" | "bloburl" = "save"
 ) => {
   const doc = new jsPDF("p", "mm", "a4");
-  const currency = quotation.currency || "ZMW";
+  const currency = proformaInvoice.currency || "ZMW";
 
   /* ================= HEADER ================= */
   doc.setFont("helvetica", "bold");
@@ -52,7 +53,7 @@ export const generateQuotationPDF = async (
   }
 
   doc.setFontSize(14);
-  doc.text("QUOTATION", 105, 42, { align: "center" });
+  doc.text("PROFORMA INVOICE", 105, 42, { align: "center" });
 
   /* ================= BILL TO ================= */
   doc.setFontSize(9);
@@ -62,50 +63,34 @@ export const generateQuotationPDF = async (
   doc.setFont("helvetica", "normal");
   doc.text(
     [
-      quotation.customerName,
-      quotation.billingAddressLine1,
-      quotation.billingAddressLine2,
-      `${quotation.billingCity}, ${quotation.billingState} ${quotation.billingPostalCode}`,
+      proformaInvoice.customerName,
+      `TPIN: ${proformaInvoice.customerTpin || "N/A"}`,
+      proformaInvoice.billingAddress?.line1,
+      proformaInvoice.billingAddress?.line2,
     ].filter(Boolean),
     15,
     56
   );
 
   doc.setFont("helvetica", "bold");
-  doc.text(
-    `Quotation No: ${quotation.quotationNumber || quotation.id}`,
-    150,
-    52
-  );
-  doc.text(
-    `Date: ${quotation.transactionDate || quotation.quotationDate}`,
-    150,
-    56
-  );
-  doc.text(
-    `Valid Until: ${quotation.validTill || quotation.validUntil}`,
-    150,
-    60
-  );
+  doc.text(`Proforma No: ${proformaInvoice.proformaId}`, 150, 52);
+  doc.text(`Date: ${proformaInvoice.createdAt}`, 150, 56);
+  doc.text(`Due Date: ${proformaInvoice.dueDate}`, 150, 60);
 
   /* ================= ITEMS TABLE ================= */
   autoTable(doc, {
     startY: 80,
-    head: [["#", "Description", "Qty", "Unit Price", `Amount (${currency})`]],
-    body: quotation.items.map((i: any, idx: number) => {
-      const qty = Number(i.quantity || i.qty || 0);
-      const price = Number(i.listPrice || i.price || i.unitPrice || 0);
-      const discount = Number(i.discount || 0);
-      const lineTotal = qty * price - discount;
-
-      return [
-        idx + 1,
-        i.description || i.productName || "",
-        qty.toFixed(1),
-        price.toFixed(2),
-        lineTotal.toFixed(2),
-      ];
-    }),
+    head: [
+      ["#", "Name", "Qty", "Unit Price", `Total (${currency})`, "Tax Cat"],
+    ],
+    body: proformaInvoice.items.map((i: any, idx: number) => [
+      idx + 1,
+      i.description,
+      Number(i.qty).toFixed(1),
+      Number(i.price).toFixed(2),
+      (Number(i.qty) * Number(i.price)).toFixed(2),
+      i.vatCode,
+    ]),
     styles: {
       fontSize: 8,
       halign: "center",
@@ -125,46 +110,47 @@ export const generateQuotationPDF = async (
 
   const y = (doc as any).lastAutoTable.finalY + 6;
 
-  /* ================= TOTALS ================= */
-  const subTotal = Number(quotation.subTotal || 0);
-  const totalTax = Number(quotation.totalTax || 0);
-  const grandTotal = Number(quotation.grandTotal || 0);
+  /* ================= TAX SUMMARY ================= */
+  const total = proformaInvoice.items.reduce(
+    (s: number, i: any) => s + Number(i.qty) * Number(i.price),
+    0
+  );
 
   doc.setFont("helvetica", "bold");
-  doc.text("Sub-total", 120, y);
-  doc.text(`${subTotal.toFixed(2)} ${currency}`, 195, y, { align: "right" });
+  doc.text(`Taxable (0%)`, 120, y);
+  doc.text(`${total.toFixed(2)} ${currency}`, 195, y, { align: "right" });
 
-  doc.text("Tax", 120, y + 6);
-  doc.text(`${totalTax.toFixed(2)} ${currency}`, 195, y + 6, {
-    align: "right",
-  });
+  doc.text("Sub-total", 120, y + 6);
+  doc.text(`${total.toFixed(2)} ${currency}`, 195, y + 6, { align: "right" });
 
-  doc.text("Grand Total", 120, y + 12);
-  doc.text(`${grandTotal.toFixed(2)} ${currency}`, 195, y + 12, {
-    align: "right",
-  });
+  doc.text("VAT Total", 120, y + 12);
+  doc.text(`0.00 ${currency}`, 195, y + 12, { align: "right" });
 
-  /* ================= QUOTATION INFO ================= */
+  doc.text("Total Amount", 120, y + 18);
+  doc.text(`${total.toFixed(2)} ${currency}`, 195, y + 18, { align: "right" });
+
+  /* ================= PROFORMA INFO ================= */
   doc.setFont("helvetica", "bold");
-  doc.text("Quotation Information", 15, y + 32);
+  doc.text("Proforma Invoice Information", 15, y + 32);
 
   doc.setFont("helvetica", "normal");
   doc.text(
     [
-      `Date: ${quotation.transactionDate || quotation.quotationDate}`,
-      `Quotation No: ${quotation.quotationNumber || quotation.id}`,
-      `Valid Until: ${quotation.validTill || quotation.validUntil}`,
+      `Issue Date: ${proformaInvoice.createdAt}`,
+      `Proforma ID: ${proformaInvoice.proformaId}`,
+      `Status: ${proformaInvoice.status}`,
       `Currency: ${currency}`,
-      `Industry: ${quotation.industryBases || "N/A"}`,
+      `Exchange Rate: ${proformaInvoice.exchangeRate}`,
     ],
     15,
     y + 38
   );
 
-  /* ================= PAYMENT TERMS ================= */
+  /* ================= BANK DETAILS ================= */
   doc.setFont("helvetica", "bold");
-  doc.text("Payment Terms", 110, y + 32);
+  doc.text("Banking Details", 110, y + 32);
 
+  // Get first bank account from array
   const bankAccount = company.bankAccounts?.[0] || {};
 
   doc.setFont("helvetica", "normal");
@@ -180,17 +166,6 @@ export const generateQuotationPDF = async (
     y + 38
   );
 
-  /* ================= TERMS & CONDITIONS ================= */
-  if (quotation.termsAndConditions) {
-    doc.setFont("helvetica", "bold");
-    doc.text("Terms & Conditions", 15, y + 68);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    const terms = doc.splitTextToSize(quotation.termsAndConditions, 180);
-    doc.text(terms, 15, y + 73);
-  }
-
   /* ================= FOOTER ================= */
   doc.setFontSize(7);
   doc.setTextColor(120);
@@ -200,6 +175,6 @@ export const generateQuotationPDF = async (
   doc.text("Created By: Lorem Ipsum", 105, 292, { align: "center" });
 
   return resultType === "save"
-    ? doc.save(`Quotation_${quotation.quotationNumber || quotation.id}.pdf`)
+    ? doc.save(`Proforma_Invoice_${proformaInvoice.proformaId}.pdf`)
     : doc.output("bloburl");
 };
