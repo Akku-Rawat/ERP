@@ -273,39 +273,39 @@ const Recruitment: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-app">
+    <div className="bg-app">
       <div className="space-y-6">
         {/* ===== MAIN TABS: Recruitment (Active by default) vs Onboarding vs Offboarding ===== */}
         <div className="flex gap-8 border-b border-gray-300 pb-4 overflow-x-auto">
           <button
             onClick={() => setMainTab("recruitment")}
-            className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
+            className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               mainTab === "recruitment"
-                ? "text-indigo-600 border-indigo-500"
-                : "text-gray-500 border-transparent hover:text-indigo-600"
+                   ? "text-primary border-primary"
+        : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <Users /> Recruitment
+            <Users size={15} /> Recruitment
           </button>
           <button
             onClick={() => setMainTab("onboarding")}
-            className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
+            className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               mainTab === "onboarding"
-                ? "text-indigo-600 border-indigo-500"
-                : "text-gray-500 border-transparent hover:text-indigo-600"
+                  ? "text-primary border-primary"
+        : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <UserCheck /> Onboarding
+            <UserCheck size={15}/> Onboarding
           </button>
           <button
             onClick={() => setMainTab("offboarding")}
-            className={`flex items-center gap-2 text-lg font-semibold transition pb-2 border-b-4 whitespace-nowrap ${
+            className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               mainTab === "offboarding"
-                ? "text-indigo-600 border-indigo-500"
-                : "text-gray-500 border-transparent hover:text-indigo-600"
+                    ? "text-primary border-primary"
+        : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <DoorOpen /> Offboarding
+            <DoorOpen size={15} /> Offboarding
           </button>
         </div>
 
@@ -316,20 +316,20 @@ const Recruitment: React.FC = () => {
             <div className="flex gap-6 border-b border-gray-200 pb-3">
               <button
                 onClick={() => setRecruitmentSubTab("openings")}
-                className={`font-semibold transition pb-2 border-b-2 ${
+                className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
                   recruitmentSubTab === "openings"
-                    ? "text-indigo-600 border-indigo-500"
-                    : "text-gray-500 border-transparent hover:text-indigo-600"
+                     ? "text-primary border-primary"
+        : "text-muted border-transparent hover:text-main"
                 }`}
               >
                 Job Openings
               </button>
               <button
                 onClick={() => setRecruitmentSubTab("candidates")}
-                className={`font-semibold transition pb-2 border-b-2 ${
+                className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition${
                   recruitmentSubTab === "candidates"
-                    ? "text-indigo-600 border-indigo-500"
-                    : "text-gray-500 border-transparent hover:text-indigo-600"
+                     ? "text-primary border-primary"
+        : "text-muted border-transparent hover:text-main"
                 }`}
               >
                 Candidates Pipeline

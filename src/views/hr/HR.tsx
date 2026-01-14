@@ -12,9 +12,8 @@ import HrDashboard from "./HrDashboard";
 import EmployeeManagement from "./EmployeeManagement/EmployeeManagement";
 import PerformanceDevelopment from "./performance&growth/performancedevolpment";
 import ComplianceManagement from "./compiliance/ComplianceManagement";
-// import Attendance from './time_leave/Attendance';
-// import LeaveManagement from './time_leave/LeaveManagement';
-import TimeAttendance from "./time_leave/TimeAttendance";
+import TimeAttendance from "./time_leave/Attendance";
+import Leave from "./time_leave/Leave";
 import Payroll from "./Payroll";
 import HRSettingsPage from "./hrsetup";
 // import Recruitment from './EmployeeManagement/Recruitment';
@@ -22,10 +21,9 @@ import HRSettingsPage from "./hrsetup";
 const navTabs = [
   { key: "dashboard", label: "HR Dashboard", icon: <FaChartLine /> },
   { key: "Management", label: "Employee Management", icon: <FaUserFriends /> },
+   {key : 'leave', label: 'Leave Management', icon: <FaClipboardList /> },
   { key: "attendance", label: "Time & Attendance", icon: <FaCalendarDay /> },
   { key: "performance", label: "Performance&Growth", icon: <FaChartLine /> },
-  // {key : 'leave', label: 'Leave Management', icon: <FaClipboardList /> },
-
   // { key: 'attendance', label: 'Attendance', icon: <FaClipboardList /> },
   // { key: 'leave', label: 'Leave Management', icon: <FaCalendarDay /> },
   { key: "payroll", label: "Payroll", icon: <FaMoneyCheckAlt /> },
@@ -54,7 +52,7 @@ const HrPayrollModule: React.FC = () => {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-4
+            className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-2
               ${
                 tab === t.key
                   ? "text-teal-600 border-teal-500"
@@ -74,6 +72,7 @@ const HrPayrollModule: React.FC = () => {
         {/* {tab === 'attendance' && <Attendance />}
         {tab === 'leave' && <LeaveManagement />} */}
         {tab === "payroll" && <Payroll />}
+        {tab === 'leave' && <Leave />}
         {/* {tab === 'recruitment' && <Recruitment />} */}
         {tab === "performance" && <PerformanceDevelopment />}
         {tab === "compliance" && <ComplianceManagement />}
