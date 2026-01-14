@@ -10,8 +10,6 @@ import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
 } from "../constants/invoice.constants";
-import { CloudCog } from "lucide-react";
-type InvoiceMode = "invoice" | "proforma";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -20,45 +18,47 @@ type NestedSection =
   | "shippingAddress"
   | "paymentInformation";
 
-export const useInvoiceForm = (
+export const useQuotationForm = (
   isOpen: boolean,
   onClose: () => void,
-  onSubmit?: (data: any) => void,
-  mode: InvoiceMode = "invoice"
+  onSubmit?: (data: any) => void
 ) => {
-  const [formData, setFormData] = useState<Invoice>(DEFAULT_INVOICE_FORM);
+  const [formData, setFormData] = useState<Invoice>({
+    ...DEFAULT_INVOICE_FORM,
+    invoiceStatus: "Draft",
+    invoiceType: "Non-Export",
+  });
+
   const [customerDetails, setCustomerDetails] = useState<any>(null);
   const [customerNameDisplay, setCustomerNameDisplay] = useState("");
   const [page, setPage] = useState(0);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details",
+    "details"
   );
   const [taxCategory, setTaxCategory] = useState<string | undefined>("");
   const [isShippingOpen, setIsShippingOpen] = useState(false);
   const [sameAsBilling, setSameAsBilling] = useState(true);
 
   const shippingEditedRef = useRef(false);
+
+  // Initialize form data when modal opens
   useEffect(() => {
     if (!isOpen) return;
 
-    setFormData((prev) => ({
-      ...prev,
-      invoiceStatus: mode === "proforma" ? "Draft" : prev.invoiceStatus,
-      invoiceType: mode === "proforma" ? "Non-Export" : prev.invoiceType,
-    }));
-  }, [isOpen, mode]);
-
-  useEffect(() => {
-    if (!isOpen) return;
     const today = new Date().toISOString().split("T")[0];
     setFormData((prev) => ({
       ...prev,
       dateOfInvoice: prev.dateOfInvoice || today,
-      dueDate: prev.dueDate || today,
+      validUntil: "",
+
+      invoiceStatus: "Draft",
+      invoiceType: "Non-Export",
     }));
+
     setPage(0);
   }, [isOpen]);
 
+  // Sync shipping address with billing if sameAsBilling is true
   useEffect(() => {
     if (!sameAsBilling) return;
     setFormData((prev) => ({
@@ -71,7 +71,7 @@ export const useInvoiceForm = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
-    section?: NestedSection,
+    section?: NestedSection
   ) => {
     const { name, value } = e.target;
 
@@ -92,42 +92,30 @@ export const useInvoiceForm = (
     }
   };
 
-const getCountryCode = (
-  countries: { code: string; name: string }[],
-  countryName?: string
-): string => {
-  if (!countryName || !countries.length) return "";
+  const getCountryCode = (
+    countries: { code: string; name: string }[],
+    countryName?: string
+  ): string => {
+    if (!countryName || !countries.length) return "";
 
-  const n = countryName.trim().toLowerCase();
+    const n = countryName.trim().toLowerCase();
 
+    const byCode = countries.find((c) => c.code.toLowerCase() === n);
+    if (byCode) return byCode.code;
 
-  const byCode = countries.find(
-    c => c.code.toLowerCase() === n
-  );
-  if (byCode) return byCode.code;
+    const byName = countries.find((c) => c.name.toLowerCase().includes(n));
+    if (byName) return byName.code;
 
+    const reverse = countries.find((c) => n.includes(c.name.toLowerCase()));
+    if (reverse) return reverse.code;
 
-  const byName = countries.find(
-    c => c.name.toLowerCase().includes(n)
-  );
-  if (byName) return byName.code;
+    if (n === "usa" || n === "united states of america") return "US";
+    if (n === "uk" || n === "united kingdom") return "GB";
+    if (n === "uae") return "AE";
 
-
-  const reverse = countries.find(
-    c => n.includes(c.name.toLowerCase())
-  );
-  if (reverse) return reverse.code;
-
-  
-  if (n === "usa" || n === "united states of america") return "US";
-  if (n === "uk" || n === "united kingdom") return "GB";
-  if (n === "uae") return "AE";
-
-  return "";
-};
-
+    return "";
+  };
   const handleCustomerSelect = async ({
-    
     name,
     id,
   }: {
@@ -136,7 +124,6 @@ const getCountryCode = (
   }) => {
     setCustomerNameDisplay(name);
     setFormData((p) => ({ ...p, customerId: id }));
-    
 
     try {
       const [customerRes, companyRes] = await Promise.all([
@@ -145,12 +132,11 @@ const getCountryCode = (
       ]);
       console.log("Submitting customerId:", id);
 
-
       if (!customerRes || customerRes.status_code !== 200) return;
 
       const data = customerRes.data;
       console.log("RAW billingCountry:", data.billingCountry);
-console.log("RAW shippingCountry:", data.shippingCountry);
+      console.log("RAW shippingCountry:", data.shippingCountry);
 
       const company = companyRes?.data;
       const invoiceType = data.customerTaxCategory as
@@ -160,22 +146,19 @@ console.log("RAW shippingCountry:", data.shippingCountry);
 
       setTaxCategory(invoiceType);
 
-const countryLookupRes = await getCountryList();
-     const countryLookupList = Array.isArray(countryLookupRes)
-  ? countryLookupRes
-  : countryLookupRes?.data ?? [];
+      const countryLookupRes = await getCountryList();
+      const countryLookupList = Array.isArray(countryLookupRes)
+        ? countryLookupRes
+        : (countryLookupRes?.data ?? []);
 
       console.log("countryLookupResponse: ", countryLookupList);
-    
-console.log("FULL country API response:", countryLookupRes);
 
-      
+      console.log("FULL country API response:", countryLookupRes);
 
-const countryCode = getCountryCode(
-  countryLookupList,
-  data.shippingCountry || data.billingCountry
-);
-
+      const countryCode = getCountryCode(
+        countryLookupList,
+        data.shippingCountry || data.billingCountry
+      );
 
       setCustomerDetails(data);
 
@@ -249,10 +232,7 @@ const countryCode = getCountryCode(
           price: data.sellingPrice ?? items[index].price,
           vatRate: data.taxPerct ?? 0,
           vatCode:
-  formData.invoiceType === "Export"
-    ? "C1"
-    : data.taxCode ?? "",
-
+            formData.invoiceType === "Export" ? "C1" : (data.taxCode ?? ""),
         };
 
         return { ...prev, items };
@@ -262,11 +242,9 @@ const countryCode = getCountryCode(
     }
   };
 
-  /* ---------------- ITEMS ---------------- */
-
   const handleItemChange = (
     idx: number,
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = e.target;
     const isNum = ["quantity", "price", "discount", "vatRate"].includes(name);
@@ -316,45 +294,121 @@ const countryCode = getCountryCode(
   const handleReset = () => {
     setFormData({
       ...DEFAULT_INVOICE_FORM,
+      invoiceStatus: "Draft",
+      invoiceType: "Non-Export",
       shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
     });
     setSameAsBilling(true);
     shippingEditedRef.current = false;
     setPage(0);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const payload = {
-      ...formData,
-      subTotal,
-      totalTax,
-      grandTotal,
-    };
-
-    onSubmit?.(payload);
-    handleReset();
-    onClose();
+    setCustomerNameDisplay("");
+    setCustomerDetails(null);
   };
 
   const { subTotal, totalTax, grandTotal } = useMemo(() => {
     const sub = formData.items.reduce((sum, item) => {
-      const taxAmount = parseFloat(item.vatRate || "0");
-      return sum + item.quantity * item.price - item.discount + taxAmount;
+      const itemTotal = item.quantity * item.price - item.discount;
+      return sum + itemTotal;
     }, 0);
 
-    const tax = formData.items.reduce(
-      (sum, item) => sum + parseFloat(item.vatRate || "0"),
-      0,
-    );
+    const tax = formData.items.reduce((sum, item) => {
+      const itemSubtotal = item.quantity * item.price - item.discount;
+      const taxAmount = (itemSubtotal * parseFloat(item.vatRate || "0")) / 100;
+      return sum + taxAmount;
+    }, 0);
 
-    return { subTotal: sub, totalTax: tax, grandTotal: sub };
+    return {
+      subTotal: sub,
+      totalTax: tax,
+      grandTotal: sub + tax,
+    };
   }, [formData.items]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validation
+    if (!formData.customerId) {
+      alert("Please select a customer");
+      return;
+    }
+
+    if (!formData.dateOfInvoice) {
+      alert("Please select quotation date");
+      return;
+    }
+
+    if (!formData.dueDate) {
+      alert("Please select valid until date");
+      return;
+    }
+
+    if (formData.items.length === 0 || !formData.items[0].itemCode) {
+      alert("Please add at least one item");
+      return;
+    }
+
+    // Map to backend format for quotation
+    const payload = {
+      customerId: formData.customerId,
+      currencyCode: formData.currencyCode,
+      exchangeRt: "1",
+      dateOfQuotation: formData.dateOfInvoice,
+      validUntil: formData.dueDate,
+      industryBases: formData.industryBases || "Service",
+      invoiceType: formData.invoiceType, //
+      invoiceStatus: formData.invoiceStatus,
+
+      // Only include if export quotation
+      ...(formData.invoiceType === "Export" && {
+        destnCountryCd: formData.destnCountryCd,
+      }),
+
+      // Only include if LPO
+      ...(formData.invoiceType === "Lpo" && {
+        lpoNumber: formData.lpoNumber,
+      }),
+
+      billingAddress: formData.billingAddress,
+      shippingAddress: formData.shippingAddress,
+      paymentInformation: formData.paymentInformation,
+
+      items: formData.items
+        .filter((item) => item.itemCode) // Only include items with itemCode
+        .map((item) => ({
+          itemCode: item.itemCode,
+          quantity: item.quantity,
+          description: item.description,
+          discount: item.discount,
+          vatRate: item.vatRate.toString(),
+          price: item.price,
+          vatCode: item.vatCode,
+        })),
+
+      terms: formData.terms,
+
+      // Additional fields for tracking
+      subTotal,
+      totalTax,
+      grandTotal,
+      documentType: "quotation",
+    };
+
+    // Call the onSubmit callback
+    if (onSubmit) {
+      try {
+        await onSubmit(payload);
+      } catch (error) {}
+    } else {
+      alert(
+        "No onSubmit handler provided. Please check your QuotationModal usage."
+      );
+    }
+  };
 
   const paginatedItems = formData.items.slice(
     page * ITEMS_PER_PAGE,
-    (page + 1) * ITEMS_PER_PAGE,
+    (page + 1) * ITEMS_PER_PAGE
   );
 
   return {
@@ -375,8 +429,9 @@ const countryCode = getCountryCode(
       sameAsBilling,
       itemCount: formData.items.length,
       isExport: formData.invoiceType === "Export",
-      isLocal: formData.invoiceType === "Lpo",
+      isLocal: formData.invoiceType === "LPO",
       isNonExport: formData.invoiceType === "Non-Export",
+      isQuotation: true,
     },
     actions: {
       handleInputChange,

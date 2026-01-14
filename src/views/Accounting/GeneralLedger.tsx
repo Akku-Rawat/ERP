@@ -86,7 +86,7 @@ const GeneralLedger: React.FC<Props> = ({
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app">
       <div className="flex gap-6 border-b border-gray-200 mb-6">
         <button
           onClick={() => setGlSubTab("chart")}

@@ -47,7 +47,8 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
+
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -299,6 +300,9 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
           data={filteredInvoices}
           rowKey={(row) => row.invoiceNumber}
           showToolbar
+          loading={loading}
+          serverSide
+         
           enableAdd
           addLabel="Add Invoice"
           onAdd={onAddInvoice}
@@ -311,6 +315,11 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
           totalPages={totalPages}
           pageSize={pageSize}
           totalItems={totalItems}
+          pageSizeOptions={[10, 25, 50, 100]}
+  onPageSizeChange={(size) => {
+    setPageSize(size);
+    setPage(1); // reset page
+  }}
           onPageChange={setPage}
         />
       )}

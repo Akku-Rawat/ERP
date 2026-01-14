@@ -46,7 +46,7 @@ const CRMReports: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app">
       <h2 className="text-2xl font-semibold text-gray-800 mb-5">CRM Reports</h2>
       <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {reports.map((report) => (

@@ -273,7 +273,7 @@ const Recruitment: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app">
       <div className="space-y-6">
         {/* ===== MAIN TABS: Recruitment (Active by default) vs Onboarding vs Offboarding ===== */}
         <div className="flex gap-8 border-b border-gray-300 pb-4 overflow-x-auto">

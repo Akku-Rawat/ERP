@@ -8,7 +8,12 @@ import EmploymentTab from "./EmploymentTab";
 import CompensationTab from "./CompensationTab";
 import { LeaveSetupTab } from "./LeaveSetupTab";
 import { WorkScheduleTab } from "./WorkScheduletab";
-import { getLevelsFromHrSettings } from "../../../views/hr/tabs/salarystructure";
+import {
+  getSalaryStructureByDesignation,
+  getSalaryStructureByLevel,
+  getLevelsFromHrSettings,
+  getDefaultGrossSalary,
+} from "../../../views/hr/tabs/salarystructure";
 
 import { createEmployee, updateEmployeeById } from "../../../api/employeeapi";
 
@@ -56,7 +61,6 @@ const DEFAULT_FORM_DATA = {
   nhimaHealthInsurance: "",
   tpinId: "",
 
-  // ✅ NEW: Salary Components (matching backend)
   basicSalary: "",
   housingAllowance: "",
   mealAllowance: "",
@@ -137,7 +141,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   const [isPreFilled, setIsPreFilled] = useState(false);
 
   const [verifiedFields, setVerifiedFields] = useState<Record<string, boolean>>(
-    {},
+    {}
   );
 
   const levelsFromHrSettings = getLevelsFromHrSettings();
@@ -364,7 +368,6 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   const buildPayload = () => {
     const basicSalaryNum = Number(formData.basicSalary) || 0;
 
-    // ✅ Calculate actual amounts (convert percentage to amount if needed)
     const housingAmount = Number(formData.housingAllowance) || 0;
     const mealAmount = Number(formData.mealAllowance) || 0;
     const transportAmount = Number(formData.transportAllowance) || 0;
@@ -415,7 +418,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
       NhimaHealthInsurance: formData.nhimaHealthInsurance,
       TpinId: formData.tpinId,
 
-      // ✅ Salary Components - ALWAYS send final amounts
+      // Salary Components - ALWAYS send final amounts
       BasicSalary: basicSalaryNum,
       HousingAllowance: housingAmount,
       MealAllowance: mealAmount,
@@ -435,7 +438,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
       AccountNumber: formData.accountNumber,
       BranchCode: formData.branchCode,
 
-      // Work Schedule - ✅ Send as empty string instead of undefined/null
+      // Work Schedule - Send as empty string instead of undefined/null
       weeklyScheduleMonday: formData.weeklyScheduleMonday || "",
       weeklyScheduleTuesday: formData.weeklyScheduleTuesday || "",
       weeklyScheduleWednesday: formData.weeklyScheduleWednesday || "",
@@ -461,7 +464,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
 
     try {
       if (editData?.id) {
-        // ✅ EDIT FLOW
+        //  EDIT FLOW
         const payload = {
           id: String(editData.id), // backend expects this
           ...buildPayload(),
@@ -469,7 +472,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
 
         await updateEmployeeById(payload);
       } else {
-        // ✅ CREATE FLOW
+        //  CREATE FLOW
         await createEmployee(buildPayload());
       }
 

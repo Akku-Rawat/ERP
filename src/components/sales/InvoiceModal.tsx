@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
-import { FileText } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, X, Trash2 } from "lucide-react";
+import { FileText, Package, MapPin } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 
 import CustomerSelect from "../selects/CustomerSelect";
-import Modal from "../../components/UI/modal/modal";
-import { Input, Select, Button } from "../../components/UI/modal/formComponent";
+import CountrySelect from "../selects/CountrySelect";
+import Modal from "../../components/ui/modal/modal";
+import { Input, Select, Button } from "../../components/ui/modal/formComponent";
 
 import ItemSelect from "../selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
@@ -464,7 +466,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
           {ui.activeTab === "terms" && (
             <div className="h-full w-full mt-10">
               <TermsAndCondition
-                terms={formData.terms.selling}
+                terms={formData.terms?.selling}
                 setTerms={actions.setTerms}
               />
             </div>

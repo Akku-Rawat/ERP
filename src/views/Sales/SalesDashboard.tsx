@@ -135,7 +135,7 @@ const SalesDashboard: React.FC = () => {
     React.useState<TimeRange>("This Month");
 
   return (
-    <div className="bg-[#f8fafc] min-h-screen w-full pb-8">
+    <div className="bg-app w-full pb-8">
       <div className="max-w-auto mx-auto px-6">
         {/* KPI Cards */}
         <div className="flex gap-5 mb-8 flex-wrap">

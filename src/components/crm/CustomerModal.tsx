@@ -64,7 +64,7 @@ const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
 };
 
 const currencyOptions = ["ZMW", "USD", "INR"];
-const customerTaxCategoryOptions = ["export", "non-export", "lpo"];
+const customerTaxCategoryOptions = ["Export", "Non-Export", "LPO"];
 
 const CustomerModal: React.FC<{
   isOpen: boolean;
@@ -74,12 +74,12 @@ const CustomerModal: React.FC<{
   isEditMode?: boolean;
 }> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
   const [form, setForm] = useState<CustomerDetail & { sameAsBilling: boolean }>(
-    emptyForm,
+    emptyForm
   );
 
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details",
+    "details"
   );
 
   useEffect(() => {
@@ -130,8 +130,15 @@ const CustomerModal: React.FC<{
     }
   };
 
+  const normalizeTaxCategory = (value: string) => {
+    if (value.toLowerCase() === "export") return "Export";
+    if (value.toLowerCase() === "non-export") return "Non-Export";
+    if (value.toLowerCase() === "lpo") return "LPO";
+    return value;
+  };
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, type, value } = e.target;
 
@@ -140,12 +147,14 @@ const CustomerModal: React.FC<{
         ...prev,
         [name]: (e.target as HTMLInputElement).checked,
       }));
-    } else {
-      setForm((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      return;
     }
+
+    setForm((prev) => ({
+      ...prev,
+      [name]:
+        name === "customerTaxCategory" ? normalizeTaxCategory(value) : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -167,7 +176,7 @@ const CustomerModal: React.FC<{
       alert(
         isEditMode
           ? "Customer updated successfully!"
-          : "Customer created successfully!",
+          : "Customer created successfully!"
       );
 
       onSubmit?.(payload);

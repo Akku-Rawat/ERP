@@ -97,7 +97,7 @@ const ComplianceManagement: React.FC = () => {
   }, [section]);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app">
       {/* Breadcrumb + Title */}
       <div className="mb-6">
         <div className="text-sm text-gray-500 mb-2">HR • Compliance</div>

@@ -10,7 +10,7 @@ const AppLayout: React.FC = () => {
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
 
       <div
-        className={`flex-1 transition-all duration-300 bg-pink-500 ${
+        className={`flex-1 transition-all duration-300 bg-app ${
           sidebarOpen ? "md:ml-64" : "md:ml-16"
         }`}
       >

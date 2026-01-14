@@ -63,7 +63,7 @@ const Warehouses: React.FC<WarehousesProps> = ({
   const handleCloseModal = () => setModalOpen(false);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-app">
       {/* Header: Search Input + Add Button */}
       <div className="flex items-center justify-between mb-6">
         <div className="relative w-96">

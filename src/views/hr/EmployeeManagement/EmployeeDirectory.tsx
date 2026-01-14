@@ -26,7 +26,8 @@ const EmployeeDirectory: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
+
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -166,58 +167,62 @@ const EmployeeDirectory: React.FC = () => {
   ================================ */
 
   return (
-    <div className="p-8">
-      {viewMode === "table" ? (
-        loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-            <p className="mt-2 text-muted">Loading employees…</p>
-          </div>
-        ) : (
-          <Table
-            columns={columns}
-            data={employees}
-            serverSide
-            showToolbar
-            searchValue={searchTerm}
-            onSearch={setSearchTerm}
-            enableAdd
-            addLabel="Add Employee"
-            onAdd={handleAdd}
-            enableColumnSelector
-            currentPage={page}
-            totalPages={totalPages}
-            pageSize={pageSize}
-            totalItems={totalItems}
-            onPageChange={setPage}
-          />
-        )
-      ) : selectedEmployee ? (
-        <EmployeeDetailView
-          employee={selectedEmployee}
-          onBack={() => {
-            setViewMode("table");
-            setSelectedEmployee(null);
-          }}
-          onDocumentUploaded={refreshSelectedEmployee}
+  <div className="p-8">
+    {viewMode === "table" ? (
+      
+        <Table
+          loading={loading}
+  
+          columns={columns}
+          data={employees}
+          serverSide  
+          showToolbar
+          searchValue={searchTerm}
+          onSearch={setSearchTerm}
+          enableAdd
+          addLabel="Add Employee"
+          onAdd={handleAdd}
+          enableColumnSelector
+          currentPage={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+            pageSizeOptions={[10, 25, 50, 100]}
+  onPageSizeChange={(size) => {
+    setPageSize(size);
+    setPage(1); // reset page
+  }}
+          onPageChange={setPage}
         />
-      ) : null}
+      )
+     : selectedEmployee ? (
+     <EmployeeDetailView
+  employee={selectedEmployee}
+  onBack={() => {
+    setViewMode("table");
+    setSelectedEmployee(null);
+  }}
+  onDocumentUploaded={refreshSelectedEmployee}
+/>
 
-      {/* Add / Edit Modal */}
-      <AddEmployeeModal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setEditEmployee(null);
-        }}
-        onSuccess={handleSaved}
-        departments={uniqueDepartments}
-        level={[]}
-        editData={editEmployee}
-        mode={editEmployee ? "edit" : "add"}
-      />
-    </div>
-  );
+    ) : null}
+
+    {/* Add / Edit Modal */}
+    <AddEmployeeModal
+      isOpen={showModal}
+      onClose={() => {
+        setShowModal(false);
+        setEditEmployee(null);
+      }}
+      onSuccess={handleSaved}
+      departments={uniqueDepartments}
+      level={[]}
+      editData={editEmployee}
+       mode={editEmployee ? "edit" : "add"} 
+    />
+  </div>
+);
+
 };
 
 export default EmployeeDirectory;

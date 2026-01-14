@@ -29,7 +29,7 @@ const ItemsCategory: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -176,13 +176,10 @@ const ItemsCategory: React.FC = () => {
 
   return (
     <div className="p-8">
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          <p className="mt-2 text-muted">Loading categories…</p>
-        </div>
-      ) : (
+      
         <Table
+          loading={loading}
+          serverSide
           columns={columns}
           data={filteredGroups}
           showToolbar
@@ -195,9 +192,14 @@ const ItemsCategory: React.FC = () => {
           totalPages={totalPages}
           pageSize={pageSize}
           totalItems={totalItems}
+          pageSizeOptions={[10, 25, 50, 100]}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1); // reset page
+          }}
           onPageChange={setPage}
         />
-      )}
+      
 
       {/* CATEGORY MODAL */}
       <ItemsCategoryModal
