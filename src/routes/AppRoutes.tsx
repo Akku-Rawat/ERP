@@ -14,6 +14,7 @@ import Settings from "../views/Settings";
 import HrPayrollModule from "../views/hr/HR";
 import CompanySetup from "../views/CompanySetup/CompanySetup";
 import UserManagement from "../views/User/UserModule";
+import FixedAssets from "../views/FixedAssets/FixedAsset";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -33,6 +34,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/crm" element={<CrmModule />} />
           <Route path="settings" element={<Settings />} />
           <Route path="/hr" element={<HrPayrollModule />} />
+          <Route path="/fasset" element={<FixedAssets />} />
           <Route path="/companySetup" element={<CompanySetup />} />
           <Route path="/userManagement" element={<UserManagement />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
