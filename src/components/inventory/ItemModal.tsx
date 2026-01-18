@@ -12,8 +12,8 @@ import {
   getItemClasses,
 } from "../../api/itemZraApi";
 import Select from "../../components/ui/Select";
-import Modal from "../UI/modal/modal";
-import { Button } from "../../components/UI/modal/formComponent";
+import Modal from "../ui/modal/modal";
+import { Button } from "../../components/ui/modal/formComponent";
 
 type FormState = Record<string, any>;
 
@@ -156,7 +156,7 @@ const ItemModal: React.FC<{
   const handleForm = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    >
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));

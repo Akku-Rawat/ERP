@@ -6,8 +6,8 @@ import {
 import { getUOMs } from "../../api/itemZraApi";
 import { toast } from "sonner";
 import ItemGenericSelect from "../selects/ItemGenericSelect";
-import Modal from "../UI/modal/modal";
-import { Button } from "../UI/modal/formComponent";
+import Modal from "../ui/modal/modal";
+import { Button } from "../ui/modal/formComponent";
 
 const emptyForm: Record<string, any> = {
   id: "",
@@ -100,7 +100,7 @@ const ItemsCategoryModal: React.FC<{
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    >
   ) => {
     const { name, type, value } = e.target;
     if (type === "checkbox") {
@@ -284,7 +284,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         />
       </div>
     </label>
-  ),
+  )
 );
 Input.displayName = "Input";
 
