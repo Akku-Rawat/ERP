@@ -40,7 +40,6 @@ export const paymentMethodOptions = [
 export const getPaymentMethodLabel = (code?: string) =>
   paymentMethodOptions.find((p) => p.value === code)?.label ?? "UNKNOWN";
 
-
 export const DEFAULT_INVOICE_FORM = {
   customerId: "",
   currencyCode: "ZMW",
@@ -97,7 +96,7 @@ export const invoiceStatusOptions = [
 export const invoiceTypeOptions = [
   { value: "LPO", label: "LPO" },
   { value: "Export", label: "Export" },
-  { value: "Non_Export", label: "Non Export" },
+  { value: "Non-Export", label: "Non Export" },
 ] as const;
 
 export const currencyOptions = [
@@ -111,6 +110,5 @@ export const currencySymbols: Record<string, string> = {
   INR: "₹",
   USD: "$",
 };
-
 
 export const ITEMS_PER_PAGE = 5;

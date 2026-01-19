@@ -14,7 +14,7 @@ import PerformanceDevelopment from "./performance&growth/performancedevolpment";
 import ComplianceManagement from "./compiliance/ComplianceManagement";
 import TimeAttendance from "./time_leave/Attendance";
 import Leave from "./time_leave/Leave";
-import Payroll from "./Payroll";
+import PayrollManagement from "./payroll-system/PayrollManagement";
 import HRSettingsPage from "./hrsetup";
 // import Recruitment from './EmployeeManagement/Recruitment';
 
@@ -27,14 +27,13 @@ const navTabs = [
   // { key: 'attendance', label: 'Attendance', icon: <FaClipboardList /> },
   // { key: 'leave', label: 'Leave Management', icon: <FaCalendarDay /> },
   { key: "payroll", label: "Payroll", icon: <FaMoneyCheckAlt /> },
-  
+
   {
     key: `compliance`,
     label: `Compliance Management`,
     icon: <FaClipboardList />,
   },
-  {key:"settings", label:"Settings", icon:<FaSlidersH />},
-
+  { key: "settings", label: "Settings", icon: <FaSlidersH /> },
 ];
 
 const HrPayrollModule: React.FC = () => {
@@ -72,7 +71,7 @@ const HrPayrollModule: React.FC = () => {
         {tab === "attendance" && <TimeAttendance />}
         {/* {tab === 'attendance' && <Attendance />}
         {tab === 'leave' && <LeaveManagement />} */}
-        {tab === "payroll" && <Payroll />}
+        {tab === "payroll" && <PayrollManagement />}
         {tab === 'leave' && <Leave />}
         {/* {tab === 'recruitment' && <Recruitment />} */}
         {tab === "performance" && <PerformanceDevelopment />}

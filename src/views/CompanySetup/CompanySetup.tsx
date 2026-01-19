@@ -32,7 +32,7 @@ import type {
 import { getCompanyById } from "../../api/companySetupApi";
 
 import type { Terms } from "../../types/termsAndCondition";
-import Templates from "./Templates";
+// import Templates from "./Templates";
 
 const navTabs = [
   { key: "basic", label: "Basic Details", icon: <FaIdCard /> },
@@ -116,7 +116,7 @@ const CompanySetup: React.FC = () => {
           roundOffCostCenter: "CC-001-MAIN",
           depreciationAccount: "5100-DEPRECIATION",
           appreciationAccount: "5200-ASSET-APPRECIATION",
-        },
+        }
       );
 
       setBasicDetail({

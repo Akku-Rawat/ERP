@@ -3,15 +3,15 @@ import { createAxiosInstance } from "./axiosInstance";
 import type { ApiSingleResponse } from "../types/api";
 import type { ItemGroup } from "../types/itemGroup";
 
-const base_url = import.meta.env.VITE_BASE_URL as string;
+const base_url = import.meta.env.VITE_ITEM_API_URL as string;
 const api = createAxiosInstance(base_url);
 
 const ENDPOINTS = {
-  getAllItemGroups: `${base_url}.item.item.get_all_item_groups_api`,
-  getItemGroupById: `${base_url}.item.item.get_item_group_by_id_api`,
-  createItemGroup: `${base_url}.item.item.create_item_group_api`,
-  updateItemGroup: `${base_url}.item.item.update_item_group_api`,
-  deleteItemGroup: `${base_url}.item.item.delete_item_group`,
+  getAllItemGroups: `${base_url}.get_all_item_groups_api`,
+  getItemGroupById: `${base_url}.get_item_group_by_id_api`,
+  createItemGroup: `${base_url}.create_item_group_api`,
+  updateItemGroup: `${base_url}.update_item_group_api`,
+  deleteItemGroup: `${base_url}.delete_item_group`,
 };
 
 // export async function getAllItemGroups(

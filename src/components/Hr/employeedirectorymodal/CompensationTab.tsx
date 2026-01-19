@@ -1,6 +1,6 @@
 // CompensationTab.tsx - SIMPLIFIED VERSION MATCHING BACKEND
-import React, { useState, useEffect } from "react";
-import { Info, DollarSign, Calculator } from "lucide-react";
+import React, { useState } from "react";
+import { DollarSign, Calculator } from "lucide-react";
 
 type CompensationTabProps = {
   formData: any;
@@ -12,13 +12,21 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
   handleInputChange,
 }) => {
   // State for allowance input types
-  const [housingType, setHousingType] = useState<"percentage" | "amount">("amount");
+  const [housingType, setHousingType] = useState<"percentage" | "amount">(
+    "amount"
+  );
   const [mealType, setMealType] = useState<"percentage" | "amount">("amount");
-  const [transportType, setTransportType] = useState<"percentage" | "amount">("amount");
+  const [transportType, setTransportType] = useState<"percentage" | "amount">(
+    "amount"
+  );
   const [otherType, setOtherType] = useState<"percentage" | "amount">("amount");
 
   // Calculate allowance based on type
-  const calculateAllowance = (value: string, type: "percentage" | "amount", basicSalary: number) => {
+  const calculateAllowance = (
+    value: string,
+    type: "percentage" | "amount",
+    basicSalary: number
+  ) => {
     const numValue = parseFloat(value || "0");
     if (type === "percentage") {
       return (basicSalary * numValue) / 100;
@@ -29,14 +37,28 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
   // Calculate Gross Salary automatically
   const calculateGrossSalary = () => {
     const basic = parseFloat(formData.basicSalary || "0");
-const housingType = formData.housingAllowanceType;
-const mealType = formData.mealAllowanceType;
-const transportType = formData.transportAllowanceType;
-const otherType = formData.otherAllowanceType;
 
+    const housing = calculateAllowance(
+      formData.housingAllowance,
+      housingType,
+      basic
+    );
 
+    const meal = calculateAllowance(formData.mealAllowance, mealType, basic);
 
-    return basic + housingType + mealType + transportType + otherType;
+    const transport = calculateAllowance(
+      formData.transportAllowance,
+      transportType,
+      basic
+    );
+
+    const other = calculateAllowance(
+      formData.otherAllowances,
+      otherType,
+      basic
+    );
+
+    return basic + housing + meal + transport + other;
   };
 
   // ✅ Update gross salary when any field loses focus
@@ -68,12 +90,14 @@ const otherType = formData.otherAllowanceType;
               {/* Basic Salary */}
               <div>
                 <label className="block text-xs text-gray-600 mb-2 font-medium">
-                  Basic Salary (ZMW) *
+                  Basic Salary (ZMW) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
                   value={formData.basicSalary || ""}
-                  onChange={(e) => handleInputChange("basicSalary", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("basicSalary", e.target.value)
+                  }
                   onBlur={handleFieldBlur}
                   placeholder="e.g., 14500"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -89,14 +113,20 @@ const otherType = formData.otherAllowanceType;
                   <input
                     type="number"
                     value={formData.housingAllowance || ""}
-                    onChange={(e) => handleInputChange("housingAllowance", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("housingAllowance", e.target.value)
+                    }
                     onBlur={handleFieldBlur}
-                    placeholder={housingType === "percentage" ? "e.g., 20" : "e.g., 3000"}
+                    placeholder={
+                      housingType === "percentage" ? "e.g., 20" : "e.g., 3000"
+                    }
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                   <select
                     value={housingType}
-                    onChange={(e) => setHousingType(e.target.value as "percentage" | "amount")}
+                    onChange={(e) =>
+                      setHousingType(e.target.value as "percentage" | "amount")
+                    }
                     className="w-24 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="amount">ZMW</option>
@@ -105,10 +135,9 @@ const otherType = formData.otherAllowanceType;
                 </div>
                 {formData.basicSalary && formData.housingAllowance && (
                   <p className="text-xs text-gray-500 mt-1">
-                    {housingType === "percentage" 
-                      ? `Amount: ZMW ${calculateAllowance(formData.housingAllowance, housingType, parseFloat(formData.basicSalary)).toLocaleString(undefined, {maximumFractionDigits: 2})}`
-                      : `Percentage: ${((parseFloat(formData.housingAllowance) / parseFloat(formData.basicSalary)) * 100).toFixed(1)}%`
-                    }
+                    {housingType === "percentage"
+                      ? `Amount: ZMW ${calculateAllowance(formData.housingAllowance, housingType, parseFloat(formData.basicSalary)).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+                      : `Percentage: ${((parseFloat(formData.housingAllowance) / parseFloat(formData.basicSalary)) * 100).toFixed(1)}%`}
                   </p>
                 )}
               </div>
@@ -122,14 +151,20 @@ const otherType = formData.otherAllowanceType;
                   <input
                     type="number"
                     value={formData.mealAllowance || ""}
-                    onChange={(e) => handleInputChange("mealAllowance", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("mealAllowance", e.target.value)
+                    }
                     onBlur={handleFieldBlur}
-                    placeholder={mealType === "percentage" ? "e.g., 10" : "e.g., 1300"}
+                    placeholder={
+                      mealType === "percentage" ? "e.g., 10" : "e.g., 1300"
+                    }
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                   <select
                     value={mealType}
-                    onChange={(e) => setMealType(e.target.value as "percentage" | "amount")}
+                    onChange={(e) =>
+                      setMealType(e.target.value as "percentage" | "amount")
+                    }
                     className="w-24 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="amount">ZMW</option>
@@ -138,10 +173,9 @@ const otherType = formData.otherAllowanceType;
                 </div>
                 {formData.basicSalary && formData.mealAllowance && (
                   <p className="text-xs text-gray-500 mt-1">
-                    {mealType === "percentage" 
-                      ? `Amount: ZMW ${calculateAllowance(formData.mealAllowance, mealType, parseFloat(formData.basicSalary)).toLocaleString(undefined, {maximumFractionDigits: 2})}`
-                      : `Percentage: ${((parseFloat(formData.mealAllowance) / parseFloat(formData.basicSalary)) * 100).toFixed(1)}%`
-                    }
+                    {mealType === "percentage"
+                      ? `Amount: ZMW ${calculateAllowance(formData.mealAllowance, mealType, parseFloat(formData.basicSalary)).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+                      : `Percentage: ${((parseFloat(formData.mealAllowance) / parseFloat(formData.basicSalary)) * 100).toFixed(1)}%`}
                   </p>
                 )}
               </div>
@@ -155,14 +189,22 @@ const otherType = formData.otherAllowanceType;
                   <input
                     type="number"
                     value={formData.transportAllowance || ""}
-                    onChange={(e) => handleInputChange("transportAllowance", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("transportAllowance", e.target.value)
+                    }
                     onBlur={handleFieldBlur}
-                    placeholder={transportType === "percentage" ? "e.g., 8" : "e.g., 1000"}
+                    placeholder={
+                      transportType === "percentage" ? "e.g., 8" : "e.g., 1000"
+                    }
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                   <select
                     value={transportType}
-                    onChange={(e) => setTransportType(e.target.value as "percentage" | "amount")}
+                    onChange={(e) =>
+                      setTransportType(
+                        e.target.value as "percentage" | "amount"
+                      )
+                    }
                     className="w-24 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="amount">ZMW</option>
@@ -171,10 +213,9 @@ const otherType = formData.otherAllowanceType;
                 </div>
                 {formData.basicSalary && formData.transportAllowance && (
                   <p className="text-xs text-gray-500 mt-1">
-                    {transportType === "percentage" 
-                      ? `Amount: ZMW ${calculateAllowance(formData.transportAllowance, transportType, parseFloat(formData.basicSalary)).toLocaleString(undefined, {maximumFractionDigits: 2})}`
-                      : `Percentage: ${((parseFloat(formData.transportAllowance) / parseFloat(formData.basicSalary)) * 100).toFixed(1)}%`
-                    }
+                    {transportType === "percentage"
+                      ? `Amount: ZMW ${calculateAllowance(formData.transportAllowance, transportType, parseFloat(formData.basicSalary)).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+                      : `Percentage: ${((parseFloat(formData.transportAllowance) / parseFloat(formData.basicSalary)) * 100).toFixed(1)}%`}
                   </p>
                 )}
               </div>
@@ -188,14 +229,20 @@ const otherType = formData.otherAllowanceType;
                   <input
                     type="number"
                     value={formData.otherAllowances || ""}
-                    onChange={(e) => handleInputChange("otherAllowances", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("otherAllowances", e.target.value)
+                    }
                     onBlur={handleFieldBlur}
-                    placeholder={otherType === "percentage" ? "e.g., 5" : "e.g., 700"}
+                    placeholder={
+                      otherType === "percentage" ? "e.g., 5" : "e.g., 700"
+                    }
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                   <select
                     value={otherType}
-                    onChange={(e) => setOtherType(e.target.value as "percentage" | "amount")}
+                    onChange={(e) =>
+                      setOtherType(e.target.value as "percentage" | "amount")
+                    }
                     className="w-24 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="amount">ZMW</option>
@@ -204,10 +251,9 @@ const otherType = formData.otherAllowanceType;
                 </div>
                 {formData.basicSalary && formData.otherAllowances && (
                   <p className="text-xs text-gray-500 mt-1">
-                    {otherType === "percentage" 
-                      ? `Amount: ZMW ${calculateAllowance(formData.otherAllowances, otherType, parseFloat(formData.basicSalary)).toLocaleString(undefined, {maximumFractionDigits: 2})}`
-                      : `Percentage: ${((parseFloat(formData.otherAllowances) / parseFloat(formData.basicSalary)) * 100).toFixed(1)}%`
-                    }
+                    {otherType === "percentage"
+                      ? `Amount: ZMW ${calculateAllowance(formData.otherAllowances, otherType, parseFloat(formData.basicSalary)).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+                      : `Percentage: ${((parseFloat(formData.otherAllowances) / parseFloat(formData.basicSalary)) * 100).toFixed(1)}%`}
                   </p>
                 )}
               </div>
@@ -222,10 +268,16 @@ const otherType = formData.otherAllowanceType;
                     <DollarSign className="w-4 h-4 text-purple-600" />
                   </div>
                   <div className="text-2xl font-bold text-purple-900">
-                    ZMW {grossSalary.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                    ZMW{" "}
+                    {grossSalary.toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                    })}
                   </div>
                   <div className="text-xs text-purple-600 mt-1">
-                    Monthly: ZMW {monthlySalary.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                    Monthly: ZMW{" "}
+                    {monthlySalary.toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                    })}
                   </div>
                 </div>
               </div>
@@ -239,10 +291,14 @@ const otherType = formData.otherAllowanceType;
             </h4>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">Currency</label>
+                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                  Currency
+                </label>
                 <select
                   value={formData.currency || "ZMW"}
-                  onChange={(e) => handleInputChange("currency", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("currency", e.target.value)
+                  }
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="ZMW">ZMW</option>
@@ -250,10 +306,14 @@ const otherType = formData.otherAllowanceType;
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">Frequency</label>
+                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                  Frequency
+                </label>
                 <select
                   value={formData.paymentFrequency || "Monthly"}
-                  onChange={(e) => handleInputChange("paymentFrequency", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("paymentFrequency", e.target.value)
+                  }
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="Monthly">Monthly</option>
@@ -261,10 +321,14 @@ const otherType = formData.otherAllowanceType;
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">Method</label>
+                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                  Method
+                </label>
                 <select
                   value={formData.paymentMethod || "Bank Transfer"}
-                  onChange={(e) => handleInputChange("paymentMethod", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("paymentMethod", e.target.value)
+                  }
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="Bank Transfer">Bank Transfer</option>
@@ -285,10 +349,14 @@ const otherType = formData.otherAllowanceType;
             </h4>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">Account Type</label>
+                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                  Account Type <span className="text-red-500">*</span>
+                </label>
                 <select
                   value={formData.accountType || "Savings"}
-                  onChange={(e) => handleInputChange("accountType", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("accountType", e.target.value)
+                  }
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="Savings">Savings</option>
@@ -296,41 +364,57 @@ const otherType = formData.otherAllowanceType;
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">Account Name *</label>
+                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                  Account Name *<span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.accountName || ""}
-                  onChange={(e) => handleInputChange("accountName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("accountName", e.target.value)
+                  }
                   placeholder="Account holder name"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">Account Number *</label>
+                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                  Account Number *<span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.accountNumber || ""}
-                  onChange={(e) => handleInputChange("accountNumber", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("accountNumber", e.target.value)
+                  }
                   placeholder="Bank account number"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">Bank Name *</label>
+                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                  Bank Name *<span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.bankName || ""}
-                  onChange={(e) => handleInputChange("bankName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("bankName", e.target.value)
+                  }
                   placeholder="e.g., Zanaco Bank"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">Branch Code</label>
+                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                  Branch Code<span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.branchCode || ""}
-                  onChange={(e) => handleInputChange("branchCode", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("branchCode", e.target.value)
+                  }
                   placeholder="e.g., 027"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
@@ -345,27 +429,37 @@ const otherType = formData.otherAllowanceType;
             </h4>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">NHIMA Number</label>
+                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                  NHIMA Number
+                </label>
                 <input
                   type="text"
                   value={formData.nhimaHealthInsurance || ""}
-                  onChange={(e) => handleInputChange("nhimaHealthInsurance", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("nhimaHealthInsurance", e.target.value)
+                  }
                   placeholder="e.g., 88990011"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">NAPSA Number</label>
+                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                  NAPSA Number
+                </label>
                 <input
                   type="text"
                   value={formData.socialSecurityNapsa || ""}
-                  onChange={(e) => handleInputChange("socialSecurityNapsa", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("socialSecurityNapsa", e.target.value)
+                  }
                   placeholder="e.g., 33445566"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">TPIN</label>
+                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                  TPIN
+                </label>
                 <input
                   type="text"
                   value={formData.tpinId || ""}

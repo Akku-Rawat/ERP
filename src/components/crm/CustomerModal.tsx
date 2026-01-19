@@ -2,18 +2,24 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Modal from "../ui/modal/modal";
-import { Input, Select, Card, Button, Checkbox } from "../ui/modal/formComponent";
+import {
+  Input,
+  Select,
+  Card,
+  Button,
+  Checkbox,
+} from "../ui/modal/formComponent";
 import TermsAndCondition from "../../views/termandcondition";
 import type { TermSection } from "../../types/termsAndCondition";
-import { 
-  Mail, 
-  Phone, 
-  User, 
-  Building2, 
-  CreditCard, 
-  DollarSign, 
+import {
+  Mail,
+  Phone,
+  User,
+  Building2,
+  CreditCard,
+  DollarSign,
   MapPin,
-  FileText
+  FileText,
 } from "lucide-react";
 
 import {
@@ -58,7 +64,7 @@ const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
 };
 
 const currencyOptions = ["ZMW", "USD", "INR"];
-const customerTaxCategoryOptions = ["export", "non-export", "lpo"];
+const customerTaxCategoryOptions = ["Export", "Non-Export", "LPO"];
 
 const CustomerModal: React.FC<{
   isOpen: boolean;
@@ -68,12 +74,12 @@ const CustomerModal: React.FC<{
   isEditMode?: boolean;
 }> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
   const [form, setForm] = useState<CustomerDetail & { sameAsBilling: boolean }>(
-    emptyForm,
+    emptyForm
   );
 
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details",
+    "details"
   );
 
   useEffect(() => {
@@ -110,23 +116,29 @@ const CustomerModal: React.FC<{
     form.billingCountry,
   ]);
 
-
   // for next button
   const tabs: Array<"details" | "terms" | "address"> = [
-  "details",
-  "terms",
-  "address",
-];
+    "details",
+    "terms",
+    "address",
+  ];
 
-const handleNext = () => {
-  const currentIndex = tabs.indexOf(activeTab);
-  if (currentIndex < tabs.length - 1) {
-    setActiveTab(tabs[currentIndex + 1]);
-  }
-};
+  const handleNext = () => {
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1]);
+    }
+  };
+
+  const normalizeTaxCategory = (value: string) => {
+    if (value.toLowerCase() === "export") return "Export";
+    if (value.toLowerCase() === "non-export") return "Non-Export";
+    if (value.toLowerCase() === "lpo") return "LPO";
+    return value;
+  };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, type, value } = e.target;
 
@@ -135,12 +147,14 @@ const handleNext = () => {
         ...prev,
         [name]: (e.target as HTMLInputElement).checked,
       }));
-    } else {
-      setForm((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      return;
     }
+
+    setForm((prev) => ({
+      ...prev,
+      [name]:
+        name === "customerTaxCategory" ? normalizeTaxCategory(value) : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -162,7 +176,7 @@ const handleNext = () => {
       alert(
         isEditMode
           ? "Customer updated successfully!"
-          : "Customer created successfully!",
+          : "Customer created successfully!"
       );
 
       onSubmit?.(payload);
@@ -193,19 +207,19 @@ const handleNext = () => {
         <Button variant="secondary" onClick={reset}>
           Reset
         </Button>
-        
-      {/* NEXT BUTTON */}
-      <Button
-        variant="secondary"
-        onClick={handleNext}
-        disabled={activeTab === "address"}
-        type="button"
-      >
-        Next →
-      </Button>
-        <Button 
-          variant="primary" 
-          onClick={handleSubmit} 
+
+        {/* NEXT BUTTON */}
+        <Button
+          variant="secondary"
+          onClick={handleNext}
+          disabled={activeTab === "address"}
+          type="button"
+        >
+          Next →
+        </Button>
+        <Button
+          variant="primary"
+          onClick={handleSubmit}
           loading={loading}
           type="submit"
         >
@@ -220,7 +234,11 @@ const handleNext = () => {
       isOpen={isOpen}
       onClose={handleClose}
       title={isEditMode ? "Edit Customer" : "Add New Customer"}
-      subtitle={isEditMode ? "Update customer information" : "Fill in the details to create a new customer"}
+      subtitle={
+        isEditMode
+          ? "Update customer information"
+          : "Fill in the details to create a new customer"
+      }
       icon={isEditMode ? Building2 : User}
       footer={footer}
       maxWidth="6xl"
@@ -245,7 +263,11 @@ const handleNext = () => {
                   {tab === "details" && <User className="w-4 h-4" />}
                   {tab === "terms" && <FileText className="w-4 h-4" />}
                   {tab === "address" && <MapPin className="w-4 h-4" />}
-                  {tab === "details" ? "Details" : tab === "terms" ? "Terms" : "Address"}
+                  {tab === "details"
+                    ? "Details"
+                    : tab === "terms"
+                      ? "Terms"
+                      : "Address"}
                 </span>
                 {activeTab === tab && (
                   <motion.div

@@ -1,410 +1,205 @@
-import React, { useRef, useState, forwardRef } from "react";
-import { UploadCloud } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-export interface QuotationItem {
-  productName: string;
-  description: string;
-  quantity: number;
-  listPrice: number;
-  discount: number;
-  tax: number;
-}
+const loadImageFromUrl = async (url: string): Promise<string> => {
+  console.log("Url: ", url);
 
-export interface QuotationData {
-  quotationId?: string;
-  customerName: string;
-  subject?: string;
-  quotationDate: string;
-  validUntil: string;
-  estimateNo?: string;
-  customerNumber?: string;
-  currency: string;
-  billingAddressLine1?: string;
-  billingAddressLine2?: string;
-  billingCity?: string;
-  billingState?: string;
-  billingPostalCode?: string;
-  billingCountry?: string;
-  shippingAddressLine1?: string;
-  shippingAddressLine2?: string;
-  shippingCity?: string;
-  shippingState?: string;
-  shippingPostalCode?: string;
-  shippingCountry?: string;
-  poNumber?: string;
-  poDate?: string;
-  letterOfCredit?: string;
-  modeOfTransportation?: string;
-  transportationTerms?: string;
-  numberOfPackages?: string;
-  declaredValue?: string;
-  estimatedWeight?: string;
-  carrier?: string;
-  paymentTerms?: string;
-  paymentMethod?: string;
-  bankName?: string;
-  accountNumber?: string;
-  routingNumber?: string;
-  items: QuotationItem[];
-  subTotal: number;
-  totalDiscount: number;
-  totalTax: number;
-  adjustment: number;
-  grandTotal: number;
-  termsAndConditions?: string;
-  notes?: string;
-}
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Image fetch failed");
 
-// --- Props Interface ---
-export interface QuotationTemplate1Props {
-  data: QuotationData;
-  companyLogoUrl?: string;
-}
+  const blob = await res.blob();
 
-// --- Component ---
-const QuotationTemplate1 = forwardRef<HTMLDivElement, QuotationTemplate1Props>(
-  ({ data, companyLogoUrl }, ref) => {
-    const [logo, setLogo] = useState<string | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [signature, setSignature] = useState<string | null>(null);
-    const signatureInputRef = useRef<HTMLInputElement>(null);
-    const [signatureText, setSignatureText] = useState<string>("");
-    const [signatureMode, setSignatureMode] = useState<"upload" | "type">(
-      "upload",
-    );
+  return await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
+};
 
-    const getCurrencySymbol = () => {
-      switch (data.currency) {
-        case "ZMW":
-          return "ZK";
-        case "INR":
-          return "₹";
-        case "USD":
-          return "$";
-        default:
-          return "₹";
-      }
-    };
-    const symbol = getCurrencySymbol();
+export const generateQuotationPDF = async (
+  quotation: any,
+  company: any,
+  resultType: "save" | "bloburl" = "save"
+) => {
+  const doc = new jsPDF("p", "mm", "a4");
+  const currency = quotation.currency || "ZMW";
 
-    const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (ev) => setLogo(ev.target?.result as string);
-        reader.readAsDataURL(e.target.files[0]);
-      }
-    };
+  /* ================= HEADER ================= */
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text(company.companyName, 15, 15);
 
-    const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (ev) => setSignature(ev.target?.result as string);
-        reader.readAsDataURL(e.target.files[0]);
-      }
-    };
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text(`TPIN: ${company.tpin}`, 15, 20);
+  doc.text(`Phone: ${company.contactInfo.companyPhone}`, 15, 24);
+  doc.text(`Email: ${company.contactInfo.companyEmail}`, 15, 28);
 
-    return (
-      <div
-        ref={ref}
-        className="max-w-[800mm] bg-white p-8 shadow-lg"
-        style={{ minHeight: "297mm" }}
-      >
-        {/* Header */}
-        <div className="bg-blue-600 text-white px-6 py-4 mb-8 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            {/* Logo Upload */}
-            <div
-              className="w-16 h-16 rounded border-2 border-dashed border-white bg-blue-500 flex items-center justify-center cursor-pointer transition hover:bg-blue-400"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {logo || companyLogoUrl ? (
-                <img
-                  src={logo || companyLogoUrl}
-                  alt="Logo"
-                  className="w-14 h-14 object-contain rounded"
-                />
-              ) : (
-                <UploadCloud className="w-6 h-6 text-white" />
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                ref={fileInputRef}
-                onChange={handleLogoChange}
-              />
-            </div>
-            <h1 className="text-2xl font-bold">
-              Rolaface Software Pvt Limited
-            </h1>
-          </div>
-        </div>
+  /* ================= LOGO ================= */
+  if (company.documents.companyLogoUrl) {
+    try {
+      console.log(
+        "company.documents.companyLogoUrl",
+        company.documents.companyLogoUrl
+      );
+      const logoBase64 = await loadImageFromUrl(
+        company.documents.companyLogoUrl
+      );
+      doc.addImage(logoBase64, "JPEG", 150, 10, 30, 10);
+    } catch (e) {
+      console.warn("Logo load failed", e);
+    }
+  }
 
-        {/* Company Address */}
-        <div className="mb-8">
-          <p className="font-semibold text-gray-800">
-            Rolaface Software Pvt Limited
-          </p>
-          <p className="text-sm text-gray-600">
-            Your Trusted Technology Partner
-          </p>
-          <p className="text-sm text-gray-600">Business District, Tech Park</p>
-          <p className="text-sm text-gray-600">City, State 000000</p>
-        </div>
+  doc.setFontSize(14);
+  doc.text("QUOTATION", 105, 42, { align: "center" });
 
-        {/* Bill To, Ship To, Quotation Details */}
-        <div className="grid grid-cols-3 gap-8 mb-8">
-          <div>
-            <h3 className="font-bold text-gray-800 mb-2">Bill To</h3>
-            <p className="font-semibold text-gray-800">{data.customerName}</p>
-            <p className="text-sm text-gray-600">{data.billingAddressLine1}</p>
-            <p className="text-sm text-gray-600">
-              {data.billingCity}, {data.billingState} {data.billingPostalCode}
-            </p>
-          </div>
+  /* ================= BILL TO ================= */
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("Bill To:", 15, 52);
 
-          <div>
-            <h3 className="font-bold text-gray-800 mb-2">Ship To</h3>
-            <p className="font-semibold text-gray-800">{data.customerName}</p>
-            <p className="text-sm text-gray-600">{data.shippingAddressLine1}</p>
-            <p className="text-sm text-gray-600">
-              {data.shippingCity}, {data.shippingState}{" "}
-              {data.shippingPostalCode}
-            </p>
-          </div>
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    [
+      quotation.customerName,
+      quotation.billingAddressLine1,
+      quotation.billingAddressLine2,
+      `${quotation.billingCity}, ${quotation.billingState} ${quotation.billingPostalCode}`,
+    ].filter(Boolean),
+    15,
+    56
+  );
 
-          <div className="text-right">
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between gap-4">
-                <span className="font-bold text-gray-700">Quotation #</span>
-                <span className="text-gray-800">
-                  {data.quotationId || "QT-001"}
-                </span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="font-bold text-gray-700">Quotation Date</span>
-                <span className="text-gray-800">{data.quotationDate}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="font-bold text-gray-700">Valid Until</span>
-                <span className="text-gray-800">{data.validUntil}</span>
-              </div>
-              {data.poNumber && (
-                <div className="flex justify-between gap-4">
-                  <span className="font-bold text-gray-700">P.O.#</span>
-                  <span className="text-gray-800">{data.poNumber}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+  doc.setFont("helvetica", "bold");
+  doc.text(
+    `Quotation No: ${quotation.quotationNumber || quotation.id}`,
+    150,
+    52
+  );
+  doc.text(
+    `Date: ${quotation.transactionDate || quotation.quotationDate}`,
+    150,
+    56
+  );
+  doc.text(
+    `Valid Until: ${quotation.validTill || quotation.validUntil}`,
+    150,
+    60
+  );
 
-        {/* Items Table */}
-        <div className="mb-8">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-t border-b border-gray-400">
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  QTY
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  DESCRIPTION
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-bold text-gray-700">
-                  UNIT PRICE
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-bold text-gray-700">
-                  AMOUNT
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.items.map((item, index) => {
-                const lineTotal =
-                  item.quantity * item.listPrice - item.discount;
-                return (
-                  <tr key={index} className="border-b border-gray-300">
-                    <td className="px-4 py-3 text-sm text-gray-800">
-                      {item.quantity}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-800">
-                      {item.description}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-800 text-right">
-                      {item.listPrice.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-800 text-right">
-                      {lineTotal.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+  /* ================= ITEMS TABLE ================= */
+  autoTable(doc, {
+    startY: 80,
+    head: [["#", "Description", "Qty", "Unit Price", `Amount (${currency})`]],
+    body: quotation.items.map((i: any, idx: number) => {
+      const qty = Number(i.quantity || i.qty || 0);
+      const price = Number(i.listPrice || i.price || i.unitPrice || 0);
+      const discount = Number(i.discount || 0);
+      const lineTotal = qty * price - discount;
 
-        {/* Totals */}
-        <div className="flex justify-end mb-8">
-          <div className="w-80 space-y-2">
-            <div className="flex justify-between text-sm border-b border-gray-300 pb-2">
-              <span className="text-gray-700">Subtotal</span>
-              <span className="text-gray-800">
-                {data.subTotal.toLocaleString("en-IN", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm border-b border-gray-300 pb-2">
-              <span className="text-gray-700">
-                GST {((data.totalTax / data.subTotal) * 100).toFixed(1)}%
-              </span>
-              <span className="text-gray-800">
-                {data.totalTax.toLocaleString("en-IN", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </span>
-            </div>
-            <div className="flex justify-between text-lg font-bold border-t-2 border-gray-400 pt-3">
-              <span className="text-gray-800">TOTAL</span>
-              <span className="text-gray-800">
-                {symbol}
-                {data.grandTotal.toLocaleString("en-IN", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </span>
-            </div>
-          </div>
-        </div>
+      return [
+        idx + 1,
+        i.description || i.productName || "",
+        qty.toFixed(1),
+        price.toFixed(2),
+        lineTotal.toFixed(2),
+      ];
+    }),
+    styles: {
+      fontSize: 8,
+      halign: "center",
+    },
+    headStyles: {
+      fillColor: [44, 62, 80],
+      textColor: 255,
+      fontStyle: "bold",
+    },
+    columnStyles: {
+      1: { halign: "left" },
+      3: { halign: "right" },
+      4: { halign: "right" },
+    },
+    margin: { left: 15, right: 15 },
+  });
 
-        {/* Signature Section */}
-        <div className="flex justify-end mb-12">
-          <div className="w-80">
-            <h3 className="text-sm font-bold text-gray-700 mb-3">
-              Authorized Signature
-            </h3>
+  const y = (doc as any).lastAutoTable.finalY + 6;
 
-            {/* Toggle Buttons */}
-            <div className="flex gap-2 mb-3">
-              <button
-                onClick={() => setSignatureMode("upload")}
-                className={`px-3 py-1 rounded text-xs font-medium transition ${
-                  signatureMode === "upload"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-              >
-                Upload
-              </button>
-              <button
-                onClick={() => setSignatureMode("type")}
-                className={`px-3 py-1 rounded text-xs font-medium transition ${
-                  signatureMode === "type"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-              >
-                Type
-              </button>
-            </div>
+  /* ================= TOTALS ================= */
+  const subTotal = Number(quotation.subTotal || 0);
+  const totalTax = Number(quotation.totalTax || 0);
+  const grandTotal = Number(quotation.grandTotal || 0);
 
-            {/* Upload Mode */}
-            {signatureMode === "upload" && (
-              <div
-                className="w-full h-24 border-2 border-dashed border-gray-300 rounded bg-gray-50 flex items-center justify-center cursor-pointer transition hover:border-blue-400 mb-2"
-                onClick={() => signatureInputRef.current?.click()}
-              >
-                {signature ? (
-                  <img
-                    src={signature}
-                    alt="Signature"
-                    className="h-20 object-contain max-w-full"
-                  />
-                ) : (
-                  <div className="text-center">
-                    <UploadCloud className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-                    <span className="text-gray-500 text-xs">
-                      Click to upload
-                    </span>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={signatureInputRef}
-                  onChange={handleSignatureChange}
-                  className="hidden"
-                />
-              </div>
-            )}
+  doc.setFont("helvetica", "bold");
+  doc.text("Sub-total", 120, y);
+  doc.text(`${subTotal.toFixed(2)} ${currency}`, 195, y, { align: "right" });
 
-            {/* Type Mode */}
-            {signatureMode === "type" && (
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={signatureText}
-                  onChange={(e) => setSignatureText(e.target.value)}
-                  placeholder="Type your signature..."
-                  className="w-full px-3 py-2 border-2 border-gray-300 rounded focus:border-blue-500 focus:outline-none text-sm"
-                />
-                {signatureText && (
-                  <div className="w-full h-24 border-2 border-gray-300 rounded bg-white flex items-center justify-center mb-2">
-                    <p
-                      className="text-3xl text-gray-800"
-                      style={{ fontFamily: "Brush Script MT, cursive" }}
-                    >
-                      {signatureText}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
+  doc.text("Tax", 120, y + 6);
+  doc.text(`${totalTax.toFixed(2)} ${currency}`, 195, y + 6, {
+    align: "right",
+  });
 
-            <div className="text-center text-sm text-gray-600 mt-2">
-              <p className="font-semibold">Priya Chopra</p>
-            </div>
-          </div>
-        </div>
+  doc.text("Grand Total", 120, y + 12);
+  doc.text(`${grandTotal.toFixed(2)} ${currency}`, 195, y + 12, {
+    align: "right",
+  });
 
-        {/* Terms & Conditions */}
-        <div className="border-t border-gray-300 pt-6 space-y-4">
-          <div>
-            <h3 className="font-bold text-gray-800 mb-2">Terms & Conditions</h3>
-            <p className="text-sm text-gray-600">
-              {data.termsAndConditions ||
-                "This quotation is valid until the date mentioned above. Prices are subject to change without prior notice."}
-            </p>
-          </div>
+  /* ================= QUOTATION INFO ================= */
+  doc.setFont("helvetica", "bold");
+  doc.text("Quotation Information", 15, y + 32);
 
-          {data.bankName && (
-            <div>
-              <p className="font-semibold text-gray-800">{data.bankName}</p>
-              {data.accountNumber && (
-                <p className="text-sm text-gray-600">
-                  Account Number: {data.accountNumber}
-                </p>
-              )}
-              {data.routingNumber && (
-                <p className="text-sm text-gray-600">
-                  Routing Number: {data.routingNumber}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  },
-);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    [
+      `Date: ${quotation.transactionDate || quotation.quotationDate}`,
+      `Quotation No: ${quotation.quotationNumber || quotation.id}`,
+      `Valid Until: ${quotation.validTill || quotation.validUntil}`,
+      `Currency: ${currency}`,
+      `Industry: ${quotation.industryBases || "N/A"}`,
+    ],
+    15,
+    y + 38
+  );
 
-QuotationTemplate1.displayName = "QuotationTemplate1";
-export default QuotationTemplate1;
+  /* ================= PAYMENT TERMS ================= */
+  doc.setFont("helvetica", "bold");
+  doc.text("Payment Terms", 110, y + 32);
+
+  const bankAccount = company.bankAccounts?.[0] || {};
+
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    [
+      `${company.financialConfig?.baseCurrency || currency}`,
+      `ACC NO ${bankAccount.accountNo || "N/A"}`,
+      `BANK ${bankAccount.bankName || "N/A"}`,
+      `BRANCH ${bankAccount.branchAddress || "N/A"}`,
+      `SWIFTCODE ${bankAccount.swiftCode || "N/A"}`,
+    ],
+    110,
+    y + 38
+  );
+
+  /* ================= TERMS & CONDITIONS ================= */
+  if (quotation.termsAndConditions) {
+    doc.setFont("helvetica", "bold");
+    doc.text("Terms & Conditions", 15, y + 68);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    const terms = doc.splitTextToSize(quotation.termsAndConditions, 180);
+    doc.text(terms, 15, y + 73);
+  }
+
+  /* ================= FOOTER ================= */
+  doc.setFontSize(7);
+  doc.setTextColor(120);
+  doc.text("Powered by LoremIpsum Smart Invoice!", 105, 287, {
+    align: "center",
+  });
+  doc.text("Created By: Lorem Ipsum", 105, 292, { align: "center" });
+
+  return resultType === "save"
+    ? doc.save(`Quotation_${quotation.quotationNumber || quotation.id}.pdf`)
+    : doc.output("bloburl");
+};

@@ -1,0 +1,180 @@
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { getPaymentMethodLabel } from "../../../constants/invoice.constants";
+
+const loadImageFromUrl = async (url: string): Promise<string> => {
+  console.log("Url: ", url);
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Image fetch failed");
+
+  const blob = await res.blob();
+
+  return await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
+};
+
+export const generateProformaInvoicePDF = async (
+  proformaInvoice: any,
+  company: any,
+  resultType: "save" | "bloburl" = "save"
+) => {
+  const doc = new jsPDF("p", "mm", "a4");
+  const currency = proformaInvoice.currency || "ZMW";
+
+  /* ================= HEADER ================= */
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text(company.companyName, 15, 15);
+
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text(`TPIN: ${company.tpin}`, 15, 20);
+  doc.text(`Phone: ${company.contactInfo.companyPhone}`, 15, 24);
+  doc.text(`Email: ${company.contactInfo.companyEmail}`, 15, 28);
+
+  /* ================= LOGO ================= */
+  if (company.documents.companyLogoUrl) {
+    try {
+      console.log(
+        "company.documents.companyLogoUrl",
+        company.documents.companyLogoUrl
+      );
+      const logoBase64 = await loadImageFromUrl(
+        company.documents.companyLogoUrl
+      );
+      doc.addImage(logoBase64, "JPEG", 150, 10, 30, 10);
+    } catch (e) {
+      console.warn("Logo load failed", e);
+    }
+  }
+
+  doc.setFontSize(14);
+  doc.text("PROFORMA INVOICE", 105, 42, { align: "center" });
+
+  /* ================= BILL TO ================= */
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("Bill To:", 15, 52);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    [
+      proformaInvoice.customerName,
+      `TPIN: ${proformaInvoice.customerTpin || "N/A"}`,
+      proformaInvoice.billingAddress?.line1,
+      proformaInvoice.billingAddress?.line2,
+    ].filter(Boolean),
+    15,
+    56
+  );
+
+  doc.setFont("helvetica", "bold");
+  doc.text(`Proforma No: ${proformaInvoice.proformaId}`, 150, 52);
+  doc.text(`Date: ${proformaInvoice.createdAt}`, 150, 56);
+  doc.text(`Due Date: ${proformaInvoice.dueDate}`, 150, 60);
+
+  /* ================= ITEMS TABLE ================= */
+  autoTable(doc, {
+    startY: 80,
+    head: [
+      ["#", "Name", "Qty", "Unit Price", `Total (${currency})`, "Tax Cat"],
+    ],
+    body: proformaInvoice.items.map((i: any, idx: number) => [
+      idx + 1,
+      i.description,
+      Number(i.qty).toFixed(1),
+      Number(i.price).toFixed(2),
+      (Number(i.qty) * Number(i.price)).toFixed(2),
+      i.vatCode,
+    ]),
+    styles: {
+      fontSize: 8,
+      halign: "center",
+    },
+    headStyles: {
+      fillColor: [44, 62, 80],
+      textColor: 255,
+      fontStyle: "bold",
+    },
+    columnStyles: {
+      1: { halign: "left" },
+      3: { halign: "right" },
+      4: { halign: "right" },
+    },
+    margin: { left: 15, right: 15 },
+  });
+
+  const y = (doc as any).lastAutoTable.finalY + 6;
+
+  /* ================= TAX SUMMARY ================= */
+  const total = proformaInvoice.items.reduce(
+    (s: number, i: any) => s + Number(i.qty) * Number(i.price),
+    0
+  );
+
+  doc.setFont("helvetica", "bold");
+  doc.text(`Taxable (0%)`, 120, y);
+  doc.text(`${total.toFixed(2)} ${currency}`, 195, y, { align: "right" });
+
+  doc.text("Sub-total", 120, y + 6);
+  doc.text(`${total.toFixed(2)} ${currency}`, 195, y + 6, { align: "right" });
+
+  doc.text("VAT Total", 120, y + 12);
+  doc.text(`0.00 ${currency}`, 195, y + 12, { align: "right" });
+
+  doc.text("Total Amount", 120, y + 18);
+  doc.text(`${total.toFixed(2)} ${currency}`, 195, y + 18, { align: "right" });
+
+  /* ================= PROFORMA INFO ================= */
+  doc.setFont("helvetica", "bold");
+  doc.text("Proforma Invoice Information", 15, y + 32);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    [
+      `Issue Date: ${proformaInvoice.createdAt}`,
+      `Proforma ID: ${proformaInvoice.proformaId}`,
+      `Status: ${proformaInvoice.status}`,
+      `Currency: ${currency}`,
+      `Exchange Rate: ${proformaInvoice.exchangeRate}`,
+    ],
+    15,
+    y + 38
+  );
+
+  /* ================= BANK DETAILS ================= */
+  doc.setFont("helvetica", "bold");
+  doc.text("Banking Details", 110, y + 32);
+
+  // Get first bank account from array
+  const bankAccount = company.bankAccounts?.[0] || {};
+
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    [
+      `${company.financialConfig?.baseCurrency || currency}`,
+      `ACC NO ${bankAccount.accountNo || "N/A"}`,
+      `BANK ${bankAccount.bankName || "N/A"}`,
+      `BRANCH ${bankAccount.branchAddress || "N/A"}`,
+      `SWIFTCODE ${bankAccount.swiftCode || "N/A"}`,
+    ],
+    110,
+    y + 38
+  );
+
+  /* ================= FOOTER ================= */
+  doc.setFontSize(7);
+  doc.setTextColor(120);
+  doc.text("Powered by LoremIpsum Smart Invoice!", 105, 287, {
+    align: "center",
+  });
+  doc.text("Created By: Lorem Ipsum", 105, 292, { align: "center" });
+
+  return resultType === "save"
+    ? doc.save(`Proforma_Invoice_${proformaInvoice.proformaId}.pdf`)
+    : doc.output("bloburl");
+};

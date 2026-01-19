@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from "react";
-import { Search, Plus, Edit2, Trash2 } from "lucide-react";
-import LeadModal from "../../components/crm/LeadModal"; 
+import LeadModal from "../../components/crm/LeadModal";
 
-import Table from "../../components/ui/Table/Table";                
-import StatusBadge from "../../components/ui/Table/StatusBadge";   
-import ActionButton, { ActionGroup } from "../../components/ui/Table/ActionButton"; 
+import Table from "../../components/ui/Table/Table";
+import StatusBadge from "../../components/ui/Table/StatusBadge";
+import ActionButton, {
+  ActionGroup,
+} from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/Table";
 
 interface Lead {
@@ -26,9 +27,9 @@ const Leads: React.FC<LeadsProps> = ({ leads, onAdd }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [page, setPage] = useState(1);
-    const [pageSize] = useState(10);
-    const [totalPages, setTotalPages] = useState(1);
-    const [totalItems, setTotalItems] = useState(0);
+  const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const filteredLeads = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -67,50 +68,58 @@ const Leads: React.FC<LeadsProps> = ({ leads, onAdd }) => {
 
   const handleCloseModal = () => setModalOpen(false);
 
-  //columns definition can added 
+  //columns definition can added
   const columns: Column<Lead>[] = [
-  { key: "id", header: "Lead ID", align: "left" },
-  { key: "name", header: "Company Name", align: "left" },
-  { key: "contact", header: "Contact", align: "left" },
-  {
-    key: "status",
-    header: "Status",
-    align: "left",
-    render: (l) => <StatusBadge status={l.status} />,
-  },
-  {
-    key: "value",
-    header: "Value",
-    align: "right",
-    render: (l) => <span className="font-semibold">${l.value.toLocaleString()}</span>,
-  },
-  {
-    key: "source",
-    header: "Source",
-    align: "left",
-    render: (l) => <span className="text-xs bg-gray-100 px-2 py-1 rounded">{l.source}</span>,
-  },
-  {
-    key: "actions",
-    header: "Actions",
-    align: "center",
-    render: (l) => (
-      <ActionGroup>
-        <ActionButton type="edit" onClick={(e: any) => handleEditClick(l, e)} />
-        <ActionButton type="delete" onClick={(e: any) => handleDeleteClick(l, e)} variant="danger" />
-      </ActionGroup>
-    ),
-  },
-];
-
-
-
-
+    { key: "id", header: "Lead ID", align: "left" },
+    { key: "name", header: "Company Name", align: "left" },
+    { key: "contact", header: "Contact", align: "left" },
+    {
+      key: "status",
+      header: "Status",
+      align: "left",
+      render: (l) => <StatusBadge status={l.status} />,
+    },
+    {
+      key: "value",
+      header: "Value",
+      align: "right",
+      render: (l) => (
+        <span className="font-semibold">${l.value.toLocaleString()}</span>
+      ),
+    },
+    {
+      key: "source",
+      header: "Source",
+      align: "left",
+      render: (l) => (
+        <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+          {l.source}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      align: "center",
+      render: (l) => (
+        <ActionGroup>
+          <ActionButton
+            type="edit"
+            onClick={(e: any) => handleEditClick(l, e)}
+          />
+          <ActionButton
+            type="delete"
+            onClick={(e: any) => handleDeleteClick(l, e)}
+            variant="danger"
+          />
+        </ActionGroup>
+      ),
+    },
+  ];
 
   return (
-    <div >
+    <div>
       <div className="flex items-center justify-between mb-6">
-        
         {/* <button
           onClick={handleAddClick}
           className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm"
@@ -119,31 +128,27 @@ const Leads: React.FC<LeadsProps> = ({ leads, onAdd }) => {
         </button> */}
       </div>
 
- 
-<Table
-  columns={columns}
-  data={filteredLeads}
-  showToolbar
-  loading={false}
-  emptyMessage={searchTerm ? "No matches found." : "No leads yet."}
-  hoverable={true}
-  zebraStripes={false}
-  searchValue={searchTerm}
-  onSearch={setSearchTerm}
-  enableAdd
-  onAdd={handleAddClick}
-  addLabel="Add Lead"
- enableColumnSelector
-
-  // pagination forwarded into Table (Table will render Pagination inside card)
-  currentPage={page}
-  totalPages={totalPages}
-  pageSize={pageSize}
-  totalItems={totalItems}
-  onPageChange={setPage}
-
-/>
-
+      <Table
+        columns={columns}
+        data={filteredLeads}
+        showToolbar
+        loading={false}
+        emptyMessage={searchTerm ? "No matches found." : "No leads yet."}
+        hoverable={true}
+        zebraStripes={false}
+        searchValue={searchTerm}
+        onSearch={setSearchTerm}
+        enableAdd
+        onAdd={handleAddClick}
+        addLabel="Add Lead"
+        enableColumnSelector
+        // pagination forwarded into Table (Table will render Pagination inside card)
+        currentPage={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        onPageChange={setPage}
+      />
 
       {/* Lead modal for add/edit */}
       <LeadModal

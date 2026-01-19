@@ -47,7 +47,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         }}
       />
     </label>
-  )
+  ),
 );
 Input.displayName = "Input";
 
@@ -66,9 +66,8 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   children?: React.ReactNode;
 }
 
-
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, icon, options, children, className = "", ...props }, ref) => (
+  ({ label, icon, options = [], className = "", ...props }, ref) => (
     <label className="flex flex-col gap-2 text-sm w-full group">
       <span className="font-semibold text-muted flex items-center gap-2 group-focus-within:text-primary transition-colors">
         {icon && (
@@ -83,6 +82,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       <select
         ref={ref}
         {...props}
+        value={props.value ?? ""}
         className={[
           "w-full rounded-lg border-2 px-4 py-2.5 text-sm",
           "focus:outline-none focus:border-primary transition-all",
@@ -93,19 +93,25 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           className,
         ].join(" ")}
       >
-        {/* 🔹 options prop support */}
-        {options?.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
+      
+        <option value="" disabled>
+          Select
+        </option>
 
-        {/* 🔹 children fallback */}
-        {children}
+       {options.map((opt, idx) => (
+  <option
+    key={`${opt.value}-${idx}`}   
+    value={opt.value}
+  >
+    {opt.label}
+  </option>
+))}
+
       </select>
     </label>
-  )
+  ),
 );
+
 Select.displayName = "Select";
 
 Select.displayName = "Select";
@@ -113,8 +119,7 @@ Select.displayName = "Select";
 // ============================================================
 // Textarea Component
 // ============================================================
-interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
   icon?: React.ReactNode;
 }
@@ -144,8 +149,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           className,
         ].join(" ")}
         onFocus={(e) => {
-          e.currentTarget.style.boxShadow =
-            "0 0 0 3px rgba(37, 99, 235, 0.16)";
+          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(37, 99, 235, 0.16)";
           props.onFocus?.(e);
         }}
         onBlur={(e) => {
@@ -154,7 +158,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         }}
       />
     </label>
-  )
+  ),
 );
 Textarea.displayName = "Textarea";
 
@@ -191,7 +195,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         {label}
       </span>
     </label>
-  )
+  ),
 );
 Checkbox.displayName = "Checkbox";
 
@@ -241,8 +245,7 @@ export const Card: React.FC<CardProps> = ({
 // ============================================================
 // Button Component
 // ============================================================
-interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "ghost";
   icon?: React.ReactNode;
   loading?: boolean;
@@ -250,15 +253,8 @@ interface ButtonProps
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    {
-      variant = "primary",
-      icon,
-      loading,
-      children,
-      className = "",
-      ...props
-    },
-    ref
+    { variant = "primary", icon, loading, children, className = "", ...props },
+    ref,
   ) => {
     const baseClasses =
       "px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed";
@@ -304,6 +300,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
       </button>
     );
-  }
+  },
 );
 Button.displayName = "Button";

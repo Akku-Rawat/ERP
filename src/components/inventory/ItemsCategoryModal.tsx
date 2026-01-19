@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Save, Loader2 } from "lucide-react";
 import {
   updateItemGroupById,
   createItemGroup,
@@ -126,93 +124,86 @@ const ItemsCategoryModal: React.FC<{
 
   return (
     <Modal
-  isOpen={isOpen}
-  onClose={handleClose}
-  title={isEditMode ? "Edit Item Category" : "Add Item Category"}
-  subtitle="Manage item category details"
-  maxWidth="4xl"
-  height="80vh"
-footer={
-  <>
-    <Button variant="secondary" onClick={handleClose}>
-      Cancel
-    </Button>
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isEditMode ? "Edit Item Category" : "Add Item Category"}
+      subtitle="Manage item category details"
+      maxWidth="4xl"
+      height="80vh"
+      footer={
+        <>
+          <Button variant="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
 
-    <div className="flex gap-2">
-      <Button variant="ghost" onClick={reset}>
-        Reset
-      </Button>
-      <Button
-        variant="primary"
-        loading={loading}
-        type="submit"
-      >
-        {isEditMode ? "Update" : "Save"} Category
-      </Button>
-    </div>
-  </>
-}
-
->
-  <form onSubmit={handleSubmit} className="h-full flex flex-col">
-
-            {/* Tabs */}
-         <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10">
-  {(["type", "tax"] as const).map((tab) => (
-    <button
-      key={tab}
-      type="button"
-      onClick={() => setActiveTab(tab)}
-      className={`relative px-6 py-3 font-semibold text-sm rounded-t-lg ${
-        activeTab === tab
-          ? "text-primary bg-card shadow-sm"
-          : "text-muted hover:bg-card/50"
-      }`}
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={reset}>
+              Reset
+            </Button>
+            <Button variant="primary" loading={loading} type="submit">
+              {isEditMode ? "Update" : "Save"} Category
+            </Button>
+          </div>
+        </>
+      }
     >
-      {tab === "type" && "Category Details"}
-      {tab === "tax" && "Payment & Pricing"}
-    </button>
-  ))}
-</div>
+      <form onSubmit={handleSubmit} className="h-full flex flex-col">
+        {/* Tabs */}
+        <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10">
+          {(["type", "tax"] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className={`relative px-6 py-3 font-semibold text-sm rounded-t-lg ${
+                activeTab === tab
+                  ? "text-primary bg-card shadow-sm"
+                  : "text-muted hover:bg-card/50"
+              }`}
+            >
+              {tab === "type" && "Category Details"}
+              {tab === "tax" && "Payment & Pricing"}
+            </button>
+          ))}
+        </div>
 
-
-            {/* Tab Content */}
-            <section className="flex-1 overflow-y-auto p-6 space-y-8">
-              {/* Items Category Details Tab */}
-              {activeTab === "type" && (
-                <>
-                  <div className="space-y-4 mt-8">
-                    <h3 className="text-lg font-semibold text-gray-700 underline">
-                      Category Type
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Id"
-                        name="id"
-                        value={form.id}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Input
-                        label="Category Name"
-                        name="groupName"
-                        value={form.groupName}
-                        onChange={handleChange}
-                        // required
-                      />
-                      <Input
-                        label="Category Description"
-                        name="description"
-                        value={form.description}
-                        onChange={handleChange}
-                      />
-                      {/* <Input
+        {/* Tab Content */}
+        <section className="flex-1 overflow-y-auto p-6 space-y-8">
+          {/* Items Category Details Tab */}
+          {activeTab === "type" && (
+            <>
+              <div className="space-y-4 mt-8">
+                <h3 className="text-lg font-semibold text-gray-700 underline">
+                  Category Type
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                  <Input
+                    label="Id"
+                    name="id"
+                    value={form.id}
+                    onChange={handleChange}
+                    required
+                  />
+                  <Input
+                    label="Category Name"
+                    name="groupName"
+                    value={form.groupName}
+                    onChange={handleChange}
+                    // required
+                  />
+                  <Input
+                    label="Category Description"
+                    name="description"
+                    value={form.description}
+                    onChange={handleChange}
+                  />
+                  {/* <Input
                         label="Unit of Measurement"
                         name="unitOfMeasurement"
                         value={form.unitOfMeasurement}
                         onChange={handleChange}
                       /> */}
-                      {/* <ItemGenericSelect
+                  {/* <ItemGenericSelect
                         label="UOM"
                         value={form.unitOfMeasurement}
                         fetchData={getUOMs}
@@ -222,48 +213,46 @@ footer={
                           setForm(p => ({ ...p, unitOfMeasurement: id }));
                         }}
                       /> */}
-                      <ItemGenericSelect
-                        label="UOM"
-                        value={form.unitOfMeasurement}
-                        fetchData={getUOMs}
-                        onChange={({ id }) =>
-                          setForm((p) => ({ ...p, unitOfMeasurement: id }))
-                        }
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Payment Details Tab */}
-              {activeTab === "tax" && (
-                <div className="space-y-8 mt-8">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-700 underline mb-4">
-                      Payment Details
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <Input
-                        label="Selling Price"
-                        name="sellingPrice"
-                        value={form.sellingPrice || ""}
-                        onChange={handleChange}
-                      />
-                      <Input
-                        label="Sales Account"
-                        name="salesAccount"
-                        value={form.salesAccount || ""}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
+                  <ItemGenericSelect
+                    label="UOM"
+                    value={form.unitOfMeasurement}
+                    fetchData={getUOMs}
+                    onChange={({ id }) =>
+                      setForm((p) => ({ ...p, unitOfMeasurement: id }))
+                    }
+                  />
                 </div>
-              )}
-            </section>
+              </div>
+            </>
+          )}
 
-         
-        </form>
-</Modal>
+          {/* Payment Details Tab */}
+          {activeTab === "tax" && (
+            <div className="space-y-8 mt-8">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 underline mb-4">
+                  Payment Details
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                  <Input
+                    label="Selling Price"
+                    name="sellingPrice"
+                    value={form.sellingPrice || ""}
+                    onChange={handleChange}
+                  />
+                  <Input
+                    label="Sales Account"
+                    name="salesAccount"
+                    value={form.salesAccount || ""}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+      </form>
+    </Modal>
   );
 };
 

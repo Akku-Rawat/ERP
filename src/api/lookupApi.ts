@@ -10,10 +10,10 @@ const vite_unit_of_measurement_api_url = import.meta.env.VITE_UNIT_OF_MEASURE_LI
 const vite_packaging_unit_codes_api_url = import.meta.env.VITE_PACKAGING_UNIT_CODES_API_URL as string;
 
 const ENDPOINTS = {
-  getUnitOfMeasureList: `${vite_unit_of_measurement_api_url}/api/unit-of-measure-list`,
-  getItemClassList: `${vite_class_list_api_url}/api/item-class-list`,
-  getPackagingUnitCodes: `${ vite_packaging_unit_codes_api_url}/api/packaging-unit-codes`,
-  getCountryList: `${vite_country_list_api_url}/item-class-list/`,
+  getUnitOfMeasureList: `${vite_unit_of_measurement_api_url}/unit-of-measure-list`,
+  getItemClassList:`${vite_class_list_api_url}/item-class-list/`,
+  getPackagingUnitCodes: `${ vite_packaging_unit_codes_api_url}/packaging-unit-codes`,
+  getCountryList: `${vite_country_list_api_url}/country-list/`,
 };
 
 export async function getUnitOfMeasureList(): Promise<any> {

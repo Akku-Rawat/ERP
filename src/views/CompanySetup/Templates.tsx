@@ -3,12 +3,12 @@ import InvoiceDefaultTemplate from "../../components/template/invoice/InvoiceDef
 import QuotationDefaultTemplate from "../../components/template/quotation/QuotationDefaultTemplate";
 import RFQDefaultTemplate from "../../components/template/rfq/RFQDefaultTemplate";
 // import InvoiceUploadModal from "../../components/template/invoice/InvoiceUploadModal";
-import QuotationUploadModal from "../../components/template/quotation/QuotationUploadModal";
+// import QuotationUploadModal from "../../components/template/quotation/QuotationUploadModal";
 import RFQUploadModal from "../../components/template/rfq/RFQUploadModal";
 // import InvoiceTemplate1 from "../../components/template/invoice/InvoiceTemplate1";
 import InvoiceTemplate2 from "../../components/template/invoice/InvoiceTemplate2";
 import InvoiceTemplate3 from "../../components/template/invoice/InvoiceTemplate3";
-import QuotationTemplate1 from "../../components/template/quotation/QuotationTemplate1";
+
 import QuotationTemplate2 from "../../components/template/quotation/QuotationTemplate2";
 import QuotationTemplate3 from "../../components/template/quotation/QuotationTemplate3";
 import RFQTemplate1 from "../../components/template/rfq/rfqTemplate1";
@@ -316,7 +316,7 @@ const Templates: React.FC = () => {
                 ? "Current Invoice"
                 : `Invoice Template ${selectedInvoiceTemplate.replace(
                     "template",
-                    "",
+                    ""
                   )}`}
             </div>
           </div>
@@ -350,7 +350,7 @@ const Templates: React.FC = () => {
                 ? "Current Quotation"
                 : `Quotation Template ${selectedQuotationTemplate.replace(
                     "quotation",
-                    "",
+                    ""
                   )}`}
             </div>
           </div>

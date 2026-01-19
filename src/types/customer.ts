@@ -4,7 +4,7 @@ export interface CustomerSummary {
   id: string;
   tpin: string;
   name: string;
-  customerTaxCategory:string
+  customerTaxCategory: string;
   contactPerson: string;
   displayName: string;
   mobile: string;

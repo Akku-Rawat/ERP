@@ -3,10 +3,7 @@ import { X, Upload, FileText } from "lucide-react";
 
 type Props = {
   onClose: () => void;
-  onUpload: (payload: {
-    description: string;
-    file: File;
-  }) => Promise<void>;
+  onUpload: (payload: { description: string; file: File }) => Promise<void>;
 };
 
 const DocumentUploadModal: React.FC<Props> = ({ onClose, onUpload }) => {

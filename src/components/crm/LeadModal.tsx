@@ -1,20 +1,25 @@
 // src/components/modals/LeadModal.tsx
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Modal from "../ui/modal/modal";
-import { Input, Card, Button, Textarea } from "../ui/modal/formComponent";
-import { 
-  User, 
-  Building2, 
-  Mail, 
-  Phone, 
-  Briefcase, 
-  MapPin, 
+import Modal from "../../components/ui/modal/modal";
+import {
+  Input,
+  Card,
+  Button,
+  Textarea,
+} from "../../components/ui/modal/formComponent";
+import {
+  User,
+  Building2,
+  Mail,
+  Phone,
+  Briefcase,
+  MapPin,
   FileText,
   DollarSign,
   Users,
   Image as ImageIcon,
-  Check
+  Check,
 } from "lucide-react";
 
 export interface LeadModalProps {
@@ -118,7 +123,11 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
         <Button variant="secondary" onClick={() => setForm(emptyForm)}>
           Reset
         </Button>
-        <Button variant="primary" onClick={handleSubmit} icon={<Check className="w-4 h-4" />}>
+        <Button
+          variant="primary"
+          onClick={handleSubmit}
+          icon={<Check className="w-4 h-4" />}
+        >
           Save Lead
         </Button>
       </div>
@@ -239,7 +248,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
                     icon={<Phone className="w-4 h-4" />}
                     placeholder="+1234567890"
                   />
-                  
+
                   {/* Lead Source Select */}
                   <label className="flex flex-col gap-2 text-sm w-full group">
                     <span className="font-semibold text-muted group-focus-within:text-primary transition-colors">
@@ -251,10 +260,11 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
                       onChange={handleChange}
                       className="w-full rounded-lg border-2 border-[#e5e7eb] dark:border-[#1e293b] px-4 py-2.5 text-sm focus:outline-none focus:border-primary transition-all bg-card text-main hover:border-[#d1d5db] dark:hover:border-[#334155]"
                       onFocus={(e) => {
-                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(35, 124, 169, 0.12)';
+                        e.currentTarget.style.boxShadow =
+                          "0 0 0 3px rgba(35, 124, 169, 0.12)";
                       }}
                       onBlur={(e) => {
-                        e.currentTarget.style.boxShadow = '';
+                        e.currentTarget.style.boxShadow = "";
                       }}
                     >
                       <option value="">-- None --</option>
@@ -276,10 +286,11 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
                       onChange={handleChange}
                       className="w-full rounded-lg border-2 border-[#e5e7eb] dark:border-[#1e293b] px-4 py-2.5 text-sm focus:outline-none focus:border-primary transition-all bg-card text-main hover:border-[#d1d5db] dark:hover:border-[#334155]"
                       onFocus={(e) => {
-                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(35, 124, 169, 0.12)';
+                        e.currentTarget.style.boxShadow =
+                          "0 0 0 3px rgba(35, 124, 169, 0.12)";
                       }}
                       onBlur={(e) => {
-                        e.currentTarget.style.boxShadow = '';
+                        e.currentTarget.style.boxShadow = "";
                       }}
                     >
                       <option value="">-- None --</option>
@@ -386,7 +397,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit }) => {
                     icon={<FileText className="w-4 h-4" />}
                     rows={5}
                   />
-                  
+
                   <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-muted mb-2">
                       <ImageIcon className="w-4 h-4" />

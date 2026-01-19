@@ -9,10 +9,9 @@ import { getItemByItemCode } from "../api/itemApi";
 import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
-  getPaymentMethodLabel,
 } from "../constants/invoice.constants";
+import { CloudCog } from "lucide-react";
 type InvoiceMode = "invoice" | "proforma";
-
 
 const ITEMS_PER_PAGE = 5;
 
@@ -25,14 +24,14 @@ export const useInvoiceForm = (
   isOpen: boolean,
   onClose: () => void,
   onSubmit?: (data: any) => void,
-  mode:InvoiceMode="invoice"
+  mode: InvoiceMode = "invoice"
 ) => {
   const [formData, setFormData] = useState<Invoice>(DEFAULT_INVOICE_FORM);
   const [customerDetails, setCustomerDetails] = useState<any>(null);
   const [customerNameDisplay, setCustomerNameDisplay] = useState("");
   const [page, setPage] = useState(0);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details"
+    "details",
   );
   const [taxCategory, setTaxCategory] = useState<string | undefined>("");
   const [isShippingOpen, setIsShippingOpen] = useState(false);
@@ -40,15 +39,23 @@ export const useInvoiceForm = (
 
   const shippingEditedRef = useRef(false);
   useEffect(() => {
-  if (!isOpen) return;
+    if (!isOpen) return;
 
-  setFormData((prev) => ({
+    setFormData((prev) => ({
+      ...prev,
+      invoiceStatus: mode === "proforma" ? "Draft" : prev.invoiceStatus,
+      invoiceType: mode === "proforma" ? "Non-Export" : prev.invoiceType,
+    }));
+  }, [isOpen, mode]);
+  const setInvoiceFromApi = (invoice: any) => {
+  setFormData((prev: any) => ({
     ...prev,
-    invoiceStatus: mode === "proforma" ? "Draft" : prev.invoiceStatus,
-    invoiceType:
-      mode === "proforma" ? "Non-Export" : prev.invoiceType,
+    ...invoice,
+    items: invoice.items,
   }));
-}, [isOpen, mode]);
+
+  setCustomerDetails(invoice.customer);
+};
 
 
   useEffect(() => {
@@ -74,7 +81,7 @@ export const useInvoiceForm = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
-    section?: NestedSection
+    section?: NestedSection,
   ) => {
     const { name, value } = e.target;
 
@@ -95,22 +102,42 @@ export const useInvoiceForm = (
     }
   };
 
-  const getCountryCode = (
-    countries: { code: string; name: string }[],
-    countryName?: string
-  ): string => {
-    if (!countryName) return "";
+const getCountryCode = (
+  countries: { code: string; name: string }[],
+  countryName?: string
+): string => {
+  if (!countryName || !countries.length) return "";
 
-    const normalized = countryName.trim().toUpperCase();
+  const n = countryName.trim().toLowerCase();
 
-    return (
-      countries.find((c) => c.name === normalized)?.code ??
-      countries.find((c) => normalized.includes(c.name))?.code ??
-      ""
-    );
-  };
+
+  const byCode = countries.find(
+    c => c.code.toLowerCase() === n
+  );
+  if (byCode) return byCode.code;
+
+
+  const byName = countries.find(
+    c => c.name.toLowerCase().includes(n)
+  );
+  if (byName) return byName.code;
+
+
+  const reverse = countries.find(
+    c => n.includes(c.name.toLowerCase())
+  );
+  if (reverse) return reverse.code;
+
+  
+  if (n === "usa" || n === "united states of america") return "US";
+  if (n === "uk" || n === "united kingdom") return "GB";
+  if (n === "uae") return "AE";
+
+  return "";
+};
 
   const handleCustomerSelect = async ({
+    
     name,
     id,
   }: {
@@ -119,30 +146,46 @@ export const useInvoiceForm = (
   }) => {
     setCustomerNameDisplay(name);
     setFormData((p) => ({ ...p, customerId: id }));
+    
 
     try {
       const [customerRes, companyRes] = await Promise.all([
         getCustomerByCustomerCode(id),
         getCompanyById("COMP-00003"),
       ]);
+      console.log("Submitting customerId:", id);
+
 
       if (!customerRes || customerRes.status_code !== 200) return;
 
       const data = customerRes.data;
+      console.log("RAW billingCountry:", data.billingCountry);
+console.log("RAW shippingCountry:", data.shippingCountry);
+
       const company = companyRes?.data;
       const invoiceType = data.customerTaxCategory as
-        | "export"
-        | "non-export"
-        | "lpo";
+        | "Export"
+        | "Non-Export"
+        | "Lpo";
 
       setTaxCategory(invoiceType);
 
-      const countryLookupList = await getCountryList();
+const countryLookupRes = await getCountryList();
+     const countryLookupList = Array.isArray(countryLookupRes)
+  ? countryLookupRes
+  : countryLookupRes?.data ?? [];
 
-      const countryCode = getCountryCode(
-        countryLookupList,
-        data.billingCountry
-      );
+      console.log("countryLookupResponse: ", countryLookupList);
+    
+console.log("FULL country API response:", countryLookupRes);
+
+      
+
+const countryCode = getCountryCode(
+  countryLookupList,
+  data.shippingCountry || data.billingCountry
+);
+
 
       setCustomerDetails(data);
 
@@ -181,10 +224,13 @@ export const useInvoiceForm = (
         } else if (!shippingEditedRef.current) {
           shipping = shippingFromCustomer;
         }
+        console.log("invoiceType: ", invoiceType);
+        console.log("taxCategory: ", taxCategory);
+        console.log("countryCode: ", countryCode);
 
         return {
           ...prev,
-          destnCountryCd: invoiceType === "export" ? countryCode : "",
+          destnCountryCd: invoiceType === "Export" ? countryCode : "",
           invoiceType,
           billingAddress: billing,
           shippingAddress: shipping,
@@ -197,36 +243,58 @@ export const useInvoiceForm = (
     }
   };
 
-  const handleItemSelect = async (index: number, itemId: string) => {
-    try {
-      const res = await getItemByItemCode(itemId);
-      if (!res || res.status_code !== 200) return;
+ const handleItemSelect = async (index: number, itemId: string) => {
+  const currentItem = formData.items[index];
 
-      const data = res.data;
-      setFormData((prev) => {
-        const items = [...prev.items];
+  // 🔒 Invoice-loaded item → do NOT auto override
+  if (currentItem?._fromInvoice) {
+    setFormData((prev) => {
+      const items = [...prev.items];
+      items[index] = {
+        ...items[index],
+        itemCode: itemId,
+        _fromInvoice: false, // unlock for user edits
+      };
+      return { ...prev, items };
+    });
+    return;
+  }
 
-        items[index] = {
-          ...items[index],
-          itemCode: data.id,
-          description: data.itemDescription ?? data.itemName ?? "",
-          price: data.sellingPrice ?? items[index].price,
-          vatRate: data.taxPerct ?? 0,
-          vatCode: data.taxCode ?? "",
-        };
 
-        return { ...prev, items };
-      });
-    } catch (err) {
-      console.error("Failed to fetch item details", err);
-    }
-  };
+  try {
+    const res = await getItemByItemCode(itemId);
+    if (!res || res.status_code !== 200) return;
+
+    const data = res.data;
+
+    setFormData((prev) => {
+      const items = [...prev.items];
+
+      items[index] = {
+        ...items[index],
+        itemCode: data.id,
+        description: data.itemDescription ?? data.itemName ?? "",
+        price: data.sellingPrice ?? items[index].price,
+        vatRate: data.taxPerct ?? 0,
+        vatCode:
+          prev.invoiceType === "Export"
+            ? "C1"
+            : data.taxCode ?? "",
+      };
+
+      return { ...prev, items };
+    });
+  } catch (err) {
+    console.error("Failed to fetch item details", err);
+  }
+};
+
 
   /* ---------------- ITEMS ---------------- */
 
   const handleItemChange = (
     idx: number,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
     const isNum = ["quantity", "price", "discount", "vatRate"].includes(name);
@@ -263,6 +331,50 @@ export const useInvoiceForm = (
       return { ...prev, items };
     });
   };
+const setFormDataFromInvoice = async (invoice: any) => {
+  setFormData((prev: any) => ({
+    ...prev,
+    
+
+    // ===== BASIC INFO =====
+    invoiceNumber: invoice.invoiceNumber,
+    invoiceType: invoice.invoiceType ?? "",
+    invoiceStatus: invoice.invoiceStatus ?? "",
+    currencyCode: invoice.currencyCode,
+    dateOfInvoice: invoice.dateOfInvoice,
+    dueDate: invoice.dueDate,
+
+    // ===== ADDRESSES =====
+    billingAddress: invoice.billingAddress ?? prev.billingAddress,
+    shippingAddress: invoice.shippingAddress ?? prev.shippingAddress,
+
+    // ===== ITEMS =====
+items: invoice.items.map((it: any) => {
+  const base = Number(it.quantity ?? 0) * Number(it.price ?? 0)
+               - Number(it.discount ?? 0);
+
+  const taxAmount = Number(it.vatTaxableAmount ?? 0);
+  const taxRate =
+    base > 0 ? Number(((taxAmount / base) * 100).toFixed(2)) : 0;
+
+  return {
+    itemCode: it.itemCode,
+    description: it.description ?? "",
+    quantity: Number(it.quantity ?? 0),   // ✅ FIXED
+    price: Number(it.price ?? 0),
+    discount: Number(it.discount ?? 0),
+    vatRate: taxRate,                     // ✅ % calculated
+    vatCode: it.vatCode ?? "",
+    _fromInvoice: true,
+  };
+})
+
+,
+  }));
+setCustomerDetails(invoice.customer);
+
+};
+
 
   const setTerms = (selling: TermSection) => {
     setFormData((prev) => ({ ...prev, terms: { selling } }));
@@ -273,49 +385,53 @@ export const useInvoiceForm = (
     if (!checked) shippingEditedRef.current = false;
   };
 
-const handleReset = () => {
-  setFormData({
-    ...DEFAULT_INVOICE_FORM,
-    shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
-  });
-  setSameAsBilling(true);
-  shippingEditedRef.current = false;
-  setPage(0);
-};
-
- const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-
-  const payload = {
-    ...formData,
-    subTotal,
-    totalTax,
-    grandTotal,
+  const handleReset = () => {
+    setFormData({
+      ...DEFAULT_INVOICE_FORM,
+      shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
+    });
+    setSameAsBilling(true);
+    shippingEditedRef.current = false;
+    setPage(0);
   };
 
-  onSubmit?.(payload);
-  handleReset();
-  onClose();
-};
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
 
+    const payload = {
+      ...formData,
+      subTotal,
+      totalTax,
+      grandTotal,
+    };
 
-  const { subTotal, totalTax, grandTotal } = useMemo(() => {
-    const sub = formData.items.reduce((sum, item) => {
-      const taxAmount = parseFloat(item.vatRate || "0");
-      return sum + item.quantity * item.price - item.discount + taxAmount;
-    }, 0);
+    onSubmit?.(payload);
+    handleReset();
+    onClose();
+  };
 
-    const tax = formData.items.reduce(
-      (sum, item) => sum + parseFloat(item.vatRate || "0"),
-      0
-    );
+const { subTotal, totalTax, grandTotal } = useMemo(() => {
+  let sub = 0;
+  let tax = 0;
 
-    return { subTotal: sub, totalTax: tax, grandTotal: sub };
-  }, [formData.items]);
+  formData.items.forEach(item => {
+    const base = item.quantity * item.price - item.discount;
+    const taxAmt = base * (Number(item.vatRate || 0) / 100);
+
+    sub += base;
+    tax += taxAmt;
+  });
+
+  return {
+    subTotal: sub,
+    totalTax: tax,
+    grandTotal: sub + tax,
+  };
+}, [formData.items]);
 
   const paginatedItems = formData.items.slice(
     page * ITEMS_PER_PAGE,
-    (page + 1) * ITEMS_PER_PAGE
+    (page + 1) * ITEMS_PER_PAGE,
   );
 
   return {
@@ -335,9 +451,9 @@ const handleReset = () => {
       setIsShippingOpen,
       sameAsBilling,
       itemCount: formData.items.length,
-      isExport: formData.invoiceType === "export",
-      isLocal: formData.invoiceType === "lpo",
-      isNonExport: formData.invoiceType === "non-export",
+      isExport: formData.invoiceType === "Export",
+      isLocal: formData.invoiceType === "Lpo",
+      isNonExport: formData.invoiceType === "Non-Export",
     },
     actions: {
       handleInputChange,
@@ -351,6 +467,8 @@ const handleReset = () => {
       handleSameAsBillingChange,
       handleReset,
       handleSubmit,
+      setInvoiceFromApi,
+      setFormDataFromInvoice,
     },
   };
 };

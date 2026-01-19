@@ -128,6 +128,7 @@ function FilterDropdown({
   if (!isOpen || !position) return null;
 
   return createPortal(
+    
     <div
       ref={dropdownRef}
       className="fixed w-80 bg-card border border-[var(--border)] rounded-2xl shadow-2xl z-[9999] overflow-hidden"

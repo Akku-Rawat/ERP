@@ -1,7 +1,7 @@
 import type { TermSection } from "./termsAndCondition";
 
 export interface Invoice {
-  invoiceNumber?:string,
+  invoiceNumber?: string;
   customerId: string;
   currencyCode: string;
   exchangeRt: string;
@@ -52,6 +52,7 @@ export interface InvoiceItem {
   vatRate: string;
   price: number;
   vatCode: string;
+   _fromInvoice?: boolean;
 }
 
 export interface PaymentInformation {

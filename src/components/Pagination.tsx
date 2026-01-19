@@ -53,9 +53,7 @@ export default function Pagination({
       {/* Left: summary */}
       <div className="text-sm text-gray-600">
         Showing{" "}
-        <span className="font-medium">
-          {(currentPage - 1) * pageSize + 1}
-        </span>{" "}
+        <span className="font-medium">{(currentPage - 1) * pageSize + 1}</span>{" "}
         –{" "}
         <span className="font-medium">
           {Math.min(currentPage * pageSize, totalItems)}
@@ -79,7 +77,10 @@ export default function Pagination({
         <nav aria-label="Pagination" className="flex items-center gap-2">
           {range.map((r, i) =>
             typeof r === "string" ? (
-              <span key={`dot-${i}`} className="px-3 py-1 text-sm text-gray-400">
+              <span
+                key={`dot-${i}`}
+                className="px-3 py-1 text-sm text-gray-400"
+              >
                 {r}
               </span>
             ) : (

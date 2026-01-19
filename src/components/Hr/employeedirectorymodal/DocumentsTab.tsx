@@ -53,18 +53,12 @@ export default function DocumentsTab({
               </div>
 
               <div>
-                <div className="text-sm font-medium text-gray-800">
-                  {key}
-                </div>
+                <div className="text-sm font-medium text-gray-800">{key}</div>
 
                 {doc.uploaded ? (
-                  <div className="text-xs text-green-600">
-                    {doc.fileName}
-                  </div>
+                  <div className="text-xs text-green-600">{doc.fileName}</div>
                 ) : (
-                  <div className="text-xs text-gray-400">
-                    Not uploaded
-                  </div>
+                  <div className="text-xs text-gray-400">Not uploaded</div>
                 )}
               </div>
             </div>

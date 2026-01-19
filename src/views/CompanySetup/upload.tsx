@@ -395,7 +395,9 @@ const Upload: React.FC = () => {
                     >
                       •
                     </span>
-                    <span className="text-muted">Supported formats: PNG, JPG, SVG</span>
+                    <span className="text-muted">
+                      Supported formats: PNG, JPG, SVG
+                    </span>
                   </li>
                   <li className="text-xs flex items-start gap-2">
                     <span
@@ -407,7 +409,9 @@ const Upload: React.FC = () => {
                     >
                       •
                     </span>
-                    <span className="text-muted">Use transparent background for logos</span>
+                    <span className="text-muted">
+                      Use transparent background for logos
+                    </span>
                   </li>
                   <li className="text-xs flex items-start gap-2">
                     <span
@@ -419,7 +423,9 @@ const Upload: React.FC = () => {
                     >
                       •
                     </span>
-                    <span className="text-muted">Ensure signatures are clear and legible</span>
+                    <span className="text-muted">
+                      Ensure signatures are clear and legible
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -483,12 +489,8 @@ const Upload: React.FC = () => {
               {isUploading ? (
                 // Uploading State
                 <div className="p-12 text-center">
-                  <div
-                    className="inline-block p-6 rounded-full mb-4 bg-primary/10"
-                  >
-                    <FaUpload
-                      className="w-12 h-12 animate-pulse text-primary-700"
-                    />
+                  <div className="inline-block p-6 rounded-full mb-4 bg-primary/10">
+                    <FaUpload className="w-12 h-12 animate-pulse text-primary-700" />
                   </div>
                   <h3 className="text-lg font-semibold text-muted mb-2">
                     Uploading...
@@ -507,9 +509,7 @@ const Upload: React.FC = () => {
                         }}
                       />
                     </div>
-                    <p
-                      className="text-sm font-semibold text-primary-700"
-                    >
+                    <p className="text-sm font-semibold text-primary-700">
                       {progress}% Complete
                     </p>
                   </div>
@@ -546,9 +546,7 @@ const Upload: React.FC = () => {
                     <div
                       className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-primary/10`}
                     >
-                      <FaUpload
-                        className={`w-10 h-10 text-primary-700`}
-                      />
+                      <FaUpload className={`w-10 h-10 text-primary-700`} />
                     </div>
                     <p className="text-lg font-semibold text-main mb-2">
                       {dragActive === selectedType
@@ -606,9 +604,7 @@ const Upload: React.FC = () => {
                   {/* File Information Grid */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label
-                        className="block text-xs font-semibold mb-2 uppercase tracking-wide text-main"
-                      >
+                      <label className="block text-xs font-semibold mb-2 uppercase tracking-wide text-main">
                         File Name
                       </label>
                       <div className="bg-card border border-theme rounded-lg px-4 py-3">
@@ -622,15 +618,11 @@ const Upload: React.FC = () => {
                     </div>
 
                     <div>
-                      <label
-                        className="block text-xs font-semibold mb-2 uppercase tracking-wide text-main"
-                      >
+                      <label className="block text-xs font-semibold mb-2 uppercase tracking-wide text-main">
                         File Size
                       </label>
                       <div className="bg-card border border-theme rounded-lg px-4 py-3 flex items-center justify-between">
-                        <p
-                          className="font-medium text-sm text-main"
-                        >
+                        <p className="font-medium text-sm text-main">
                           {currentFile.size}
                         </p>
                         <span className="text-success">✓</span>
@@ -638,33 +630,23 @@ const Upload: React.FC = () => {
                     </div>
 
                     <div>
-                      <label
-                        className="block text-xs font-semibold mb-2 uppercase tracking-wide text-main"
-                      >
+                      <label className="block text-xs font-semibold mb-2 uppercase tracking-wide text-main">
                         Format
                       </label>
                       <div className="bg-card border border-theme rounded-lg px-4 py-3">
-                        <p
-                          className="font-medium text-sm uppercase text-main"
-                        >
+                        <p className="font-medium text-sm uppercase text-main">
                           {currentFile.file.type.split("/")[1]}
                         </p>
                       </div>
                     </div>
 
                     <div>
-                      <label
-                        className="block text-xs font-semibold mb-2 uppercase tracking-wide text-main"
-                      >
+                      <label className="block text-xs font-semibold mb-2 uppercase tracking-wide text-main">
                         Uploaded
                       </label>
                       <div className="bg-card border border-theme rounded-lg px-4 py-3">
-                        <p
-                          className="font-medium text-sm flex items-center gap-2 text-main"
-                        >
-                          <FaClock
-                            className="w-3.5 h-3.5 text-muted"
-                          />
+                        <p className="font-medium text-sm flex items-center gap-2 text-main">
+                          <FaClock className="w-3.5 h-3.5 text-muted" />
                           {formatDate(currentFile.uploadedAt)}
                         </p>
                       </div>

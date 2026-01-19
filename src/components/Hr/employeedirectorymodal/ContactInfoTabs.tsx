@@ -19,7 +19,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Personal Email *
+              Personal Email <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -30,19 +30,21 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-             Company Email
+              Company Email *<span className="text-red-500">*</span>
             </label>
             <input
               type="email"
               value={formData.CompanyEmail}
-              onChange={(e) => handleInputChange("CompanyEmail", e.target.value)}
+              onChange={(e) =>
+                handleInputChange("CompanyEmail", e.target.value)
+              }
               placeholder="@company.co.zm"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Phone Number *
+              Phone Number * <span className="text-red-500">*</span>
             </label>
             <input
               type="tel"
@@ -54,7 +56,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Alternate Phone
+              Alternate Phone  *<span className="text-red-500">*</span>
             </label>
             <input
               type="tel"
@@ -127,7 +129,9 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
               <input
                 type="text"
                 value={formData.postalCode}
-                onChange={(e) => handleInputChange("postalCode", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("postalCode", e.target.value)
+                }
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
@@ -143,7 +147,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Name
+              Name  *<span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -156,7 +160,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Phone
+              Phone   *<span className="text-red-500">*</span>
             </label>
             <input
               type="tel"
@@ -176,7 +180,10 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
               type="text"
               value={formData.emergencyContactRelationship}
               onChange={(e) =>
-                handleInputChange("emergencyContactRelationship", e.target.value)
+                handleInputChange(
+                  "emergencyContactRelationship",
+                  e.target.value,
+                )
               }
               placeholder="e.g., Spouse, Parent"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"

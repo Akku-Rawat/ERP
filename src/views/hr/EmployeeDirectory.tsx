@@ -1,21 +1,20 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 import { FaPlus, FaSearch } from "react-icons/fa";
 import { useEffect } from "react";
 
-
 // Reusable Components
-import Table from "../../components/ui/Table/Table"; 
+import Table from "../../components/ui/Table/Table";
 import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
-import ActionButton, { ActionGroup, ActionMenu } from "../../components/ui/Table/ActionButton";
+import ActionButton, {
+  ActionGroup,
+  ActionMenu,
+} from "../../components/ui/Table/ActionButton";
 
 // Modals
 import IdentityVerificationModal from "../../components/Hr/employeedirectorymodal/IdentityVerificationModal";
 import AddEmployeeModal from "../../components/Hr/employeedirectorymodal/AddEmployeeModal";
 import { getAllEmployees } from "../../api/employeeapi";
-
-
-
 
 // Types
 type Employee = {
@@ -27,71 +26,64 @@ type Employee = {
   status: "Active" | "Inactive" | "On Leave";
 };
 
-
-
 const EmployeeDirectory: React.FC = () => {
   // Modal States
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [showAddEmployee, setShowAddEmployee] = useState(false);
   const [verifiedData, setVerifiedData] = useState<any>(null);
 
-  // Filter States 
+  // Filter States
   const [searchTerm, setSearchTerm] = useState("");
   const [department, setDepartment] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState("");
-  
 
-  // Pagination States 
+  // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
   const [employees, setEmployees] = useState<Employee[]>([]);
-const [loading, setLoading] = useState(false);
-const [totalItems, setTotalItems] = useState(0);
-const fetchEmployees = async () => {
-  try {
-    setLoading(true);
+  const [loading, setLoading] = useState(false);
+  const [totalItems, setTotalItems] = useState(0);
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
 
-    const res = await getAllEmployees({
-      page: currentPage,
-      page_size: pageSize,
-      status,
-      department,
-      jobTitle: searchTerm,
-      workLocation: location,
-    });
+      const res = await getAllEmployees({
+        page: currentPage,
+        page_size: pageSize,
+        status,
+        department,
+        jobTitle: searchTerm,
+        workLocation: location,
+      });
 
-    setEmployees(res.data.employees || []);
-    setTotalItems(res.data.pagination?.total || 0);
-  } catch (err) {
-    console.error("Failed to fetch employees", err);
-  } finally {
-    setLoading(false);
-  }
-};
+      setEmployees(res.data.employees || []);
+      setTotalItems(res.data.pagination?.total || 0);
+    } catch (err) {
+      console.error("Failed to fetch employees", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    fetchEmployees();
+  }, [currentPage, pageSize, status, department, location, searchTerm]);
 
-useEffect(() => {
-  fetchEmployees();
-}, [currentPage, pageSize, status, department, location, searchTerm]);
+  const uniqueDepartments = Array.from(
+    new Set(
+      employees.map((e) => e.department).filter((d): d is string => Boolean(d)),
+    ),
+  );
 
-const uniqueDepartments = Array.from(
-  new Set(
-    employees
-      .map(e => e.department)
-      .filter((d): d is string => Boolean(d))
-  )
-);
-
-
-const uniqueLocations = Array.from(
-  new Set(
-    employees
-      .map(e => e.workLocation)
-      .filter((l): l is string => Boolean(l))
-  )
-);
+  const uniqueLocations = Array.from(
+    new Set(
+      employees
+        .map((e) => e.workLocation)
+        .filter((l): l is string => Boolean(l)),
+    ),
+  );
 
   // --- HANDLERS ---
   const handleVerified = (data: any) => {
@@ -133,9 +125,9 @@ const uniqueLocations = Array.from(
 
   // --- COLUMNS DEFINITION ---
   const columns: Column<Employee>[] = [
-    { 
-      key: "name", 
-      header: "Name", 
+    {
+      key: "name",
+      header: "Name",
       align: "left",
       render: (emp) => (
         <div className="flex items-center gap-3">
@@ -144,17 +136,17 @@ const uniqueLocations = Array.from(
           </div>
           <span className="font-medium text-gray-800">{emp.name}</span>
         </div>
-      )
+      ),
     },
     { key: "jobTitle", header: "Job Title", align: "left" },
     { key: "department", header: "Department", align: "left" },
     { key: "workLocation", header: "Location", align: "left" },
 
-    { 
-      key: "status", 
-      header: "Status", 
+    {
+      key: "status",
+      header: "Status",
       align: "center",
-      render: (emp) => <StatusBadge status={emp.status} /> 
+      render: (emp) => <StatusBadge status={emp.status} />,
     },
     {
       key: "actions",
@@ -167,15 +159,15 @@ const uniqueLocations = Array.from(
             iconOnly
             onClick={() => handleRowClick(emp)}
           />
-        <ActionMenu
-  onEdit={emp.id ? (e) => handleEdit(emp.id!, e) : undefined}
-  onDelete={emp.id ? (e) => handleDelete(emp.id!, e) : undefined}
-/>
+          <ActionMenu
+            onEdit={emp.id ? (e) => handleEdit(emp.id!, e) : undefined}
+            onDelete={emp.id ? (e) => handleDelete(emp.id!, e) : undefined}
+          />
         </ActionGroup>
       ),
     },
   ];
-const totalPages = Math.ceil(totalItems / pageSize);
+  const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
     <div className="space-y-6">
@@ -202,9 +194,13 @@ const totalPages = Math.ceil(totalItems / pageSize);
               className="block w-full px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-600 text-sm focus:ring-2 focus:ring-teal-500 appearance-none"
             >
               <option value="">Department</option>
-              {uniqueDepartments.map((d) => <option key={d} value={d}>{d}</option>)}
+              {uniqueDepartments.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
             </select>
-            <FaSearch className="absolute right-3 top-2.5 text-gray-400 pointer-events-none text-xs" /> 
+            <FaSearch className="absolute right-3 top-2.5 text-gray-400 pointer-events-none text-xs" />
           </div>
 
           {/* Location */}
@@ -215,7 +211,11 @@ const totalPages = Math.ceil(totalItems / pageSize);
               className="block w-full px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-600 text-sm focus:ring-2 focus:ring-teal-500 appearance-none"
             >
               <option value="">Location</option>
-              {uniqueLocations.map((l) => <option key={l} value={l}>{l}</option>)}
+              {uniqueLocations.map((l) => (
+                <option key={l} value={l}>
+                  {l}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -242,25 +242,23 @@ const totalPages = Math.ceil(totalItems / pageSize);
           </button>
         </div>
       </div>
-{loading && (
-  <div className="text-center py-4 text-gray-500">
-    Loading employees...
-  </div>
-)}
+      {loading && (
+        <div className="text-center py-4 text-gray-500">
+          Loading employees...
+        </div>
+      )}
       {/* --- REUSABLE TABLE WRAPPED IN WHITE BG --- */}
-     
-      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
-       
-     <Table
-  columns={columns}
-  data={employees}
-  currentPage={currentPage}
-  totalPages={totalPages}
-  pageSize={pageSize}
-  totalItems={totalItems}
-  onPageChange={setCurrentPage}
-/>
 
+      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+        <Table
+          columns={columns}
+          data={employees}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* Modals */}
