@@ -1,12 +1,14 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Calendar, Clock, FileText, CheckCircle2, X } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import AdvancedCalendar from "../../../components/Hr/leavemanagemnetmodal/Calendar";
 import { applyLeave } from "../../../api/leaveApi";
 import { getAllEmployees } from "../../../api/employeeapi";
+import { getEmployeeById } from "../../../api/employeeapi";
 
 
-/* ---------- Types ---------- */
+
+/*  Types  */
 type LeaveStatus = "approved" | "pending" | "rejected" | "cancelled";
 
 type Leave = {
@@ -38,75 +40,113 @@ const LeaveApply: React.FC = () => {
   });
 
   const LEAVE_TYPES: LeaveType[] = [
-  { id: "PL", name: "Privilege Leave" },
-  { id: "SL", name: "Sick Leave" },
-  { id: "CL", name: "Casual Leave" },
-  { id: "ML", name: "Maternity Leave" },
-  { id: "EL", name: "Emergency Leave" },
-];
+    { id: "PL", name: "Privilege Leave" },
+    { id: "SL", name: "Sick Leave" },
+    { id: "CL", name: "Casual Leave" },
+    { id: "LP", name: "Leave Without Pay" },
+    { id: "CO", name: " Compensatory Off" },
+  ];
 
 
   // const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
+  const [selectedRange, setSelectedRange] = useState<DateRange | undefined>();
   const [loading, setLoading] = useState(false);
-const [employees, setEmployees] = useState<any[]>([]);
-const [employeeId, setEmployeeId] = useState<string>("");
-const [leaveApprover, setLeaveApprover] = useState<{
-  id: string;
-  name: string;
-} | null>(null);
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [employeeId, setEmployeeId] = useState<string>("");
+  const [leaveApprover, setLeaveApprover] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
 
-useEffect(() => {
-  const fetchEmployees = async () => {
-    const res = await getAllEmployees(1, 100);
-    setEmployees(res.data.employees || []);
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      const res = await getAllEmployees(1, 100);
+      setEmployees(res.data.employees || []);
+    };
+    fetchEmployees();
+  }, []);
+
+
+  useEffect(() => {
+    if (!formData.startDate) {
+      setSelectedRange(undefined);
+      return;
+    }
+
+    const from = new Date(formData.startDate);
+    const to = formData.endDate
+      ? new Date(formData.endDate)
+      : undefined;
+
+    setSelectedRange({ from, to });
+  }, [formData.startDate, formData.endDate]);
+
+
+  useEffect(() => {
+    if (!employeeId) {
+      setLeaveApprover(null);
+      return;
+    }
+
+
+    const fetchReportingManager = async () => {
+      try {
+        // get selected employee detail
+        const empRes = await getEmployeeById(employeeId);
+        const emp = empRes?.data || empRes;
+
+        //  reporting manager ID
+        const managerEmployeeCode =
+          emp?.employmentInfo?.reportingManager; // HR-EMP-00011
+
+        if (!managerEmployeeCode) {
+          setLeaveApprover(null);
+          return;
+        }
+
+        //  find manager from employee list
+        const manager = employees.find(
+          (e) => e.employeeId === managerEmployeeCode
+        );
+
+        if (manager) {
+          setLeaveApprover({
+            id: manager.id,
+            name: manager.name,
+          });
+        } else {
+          setLeaveApprover(null);
+        }
+      } catch (err) {
+        console.error("Failed to fetch reporting manager", err);
+        setLeaveApprover(null);
+      }
+    };
+
+    fetchReportingManager();
+  }, [employeeId, employees]);
+
+  const formatLocalDate = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
   };
-  fetchEmployees();
-}, []);
-
-
-
-
-useEffect(() => {
-  if (!employeeId || employees.length === 0) return;
-
-  const currentEmployee = employees.find(e => e.id === employeeId);
-  if (!currentEmployee) return;
-
-  const managerId =
-    currentEmployee.reportingManager ||
-    currentEmployee.employmentInfo?.reportingManager;
-
-  if (!managerId) {
-    setLeaveApprover(null);
-    return;
-  }
-
-  const manager = employees.find(e => e.id === managerId);
-  if (manager) {
-    setLeaveApprover({ id: manager.id, name: manager.name });
-  }
-}, [employeeId, employees]);
-
 
   const calendarLeaves: Leave[] = [];
-
-  const formatDate = (d: Date) =>
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-      d.getDate()
-    ).padStart(2, "0")}`;
-
   const handleRangeSelect = (range?: DateRange) => {
     if (!range?.from) return;
 
+    setSelectedRange(range);
+
+    const from = formatLocalDate(range.from);
+    const to = range.to ? formatLocalDate(range.to) : "";
+
     setFormData((p) => ({
       ...p,
-      startDate: formatDate(range.from),
-      endDate: p.isHalfDay
-        ? formatDate(range.from)
-        : range.to
-        ? formatDate(range.to)
-        : "",
+      startDate: from,
+      endDate: p.isHalfDay ? from : to,
     }));
   };
 
@@ -118,9 +158,12 @@ useEffect(() => {
     const { id, value, type, checked } = e.target as HTMLInputElement;
 
     setFormData((p) => {
-      const updated = { ...p, [id]: type === "checkbox" ? checked : value };
+      const updated = {
+        ...p,
+        [id]: type === "checkbox" ? checked : value,
+      };
 
-      // ✅ Half-day logic: end date = start date
+      // half day lock
       if (id === "isHalfDay" && checked && p.startDate) {
         updated.endDate = p.startDate;
       }
@@ -138,61 +181,86 @@ useEffect(() => {
     return day === 0 || day === 6;
   };
 
-  let totalDays = 0;
-  let workDays = 0;
-  let leaveDays = 0;
 
-if (formData.startDate && formData.endDate) {
-  const start = new Date(formData.startDate);
-  const end = new Date(formData.endDate);
-  const current = new Date(start);
+   let totalDays = 0;
+   let workDays = 0;
+   let dayOffDays = 0;
+ 
+  if (formData.startDate && formData.endDate) {
+    const start = new Date(formData.startDate);
+    const end = new Date(formData.endDate);
+    const current = new Date(start);
 
-  while (current <= end) {
-    totalDays++;
+    while (current <= end) {
+      totalDays++;
 
-    if (!isWeekend(current)) {
-      workDays++;
+      if (isWeekend(current)) {
+        dayOffDays++;
+      } else {
+        workDays++;
+      }
+
+      current.setDate(current.getDate() + 1);
     }
-
-    current.setDate(current.getDate() + 1);
   }
-
-if (formData.isHalfDay) {
-  // since half day forces single date
-  workDays = isWeekend(new Date(formData.startDate)) ? 0 : 0.5;
-}
-
-leaveDays = totalDays - workDays;
-
-}
-
 
   const showSummary =
     !!formData.startDate || !!formData.endDate || formData.isHalfDay;
 
-const buildPayload = () => ({
-  employeeId,
-  leaveType: formData.type,
-  leaveFromDate: formData.startDate,
-  leaveToDate: formData.endDate,
-  isHalfDay: formData.isHalfDay,
-  leaveReason: formData.reason,
-  leaveStatus: "Open",
-  approverId: leaveApprover?.id,
-});
-
-
+  const buildPayload = () => {
+    const fromDate = formData.startDate;
+    const toDate =
+      formData.isHalfDay
+        ? fromDate
+        : formData.endDate || fromDate;
+    return {
+      employeeId,
+      leaveType: formData.type,
+      leaveFromDate: fromDate,
+      leaveToDate: toDate,
+      isHalfDay: formData.isHalfDay,
+      leaveReason: formData.reason,
+      leaveStatus: "Open",
+      approverId: leaveApprover?.id || "",
+    };
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!employeeId) {
+      alert("Select employee");
+      return;
+    }
+
+    if (!leaveApprover?.id) {
+      alert("Leave approver not assigned");
+      return;
+    }
+
+    if (!formData.startDate) {
+      alert("Start date required");
+      return;
+    }
+
+    if (!formData.isHalfDay && !formData.endDate) {
+      alert("End date required");
+      return;
+    }
+
     setLoading(true);
     try {
       await applyLeave(buildPayload());
       handleReset();
-    } finally {
-      setLoading(false);
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        "Failed to submit leave request";
+      alert(msg);
     }
+
   };
+
 
   const handleReset = () => {
     setFormData({
@@ -202,6 +270,7 @@ const buildPayload = () => ({
       reason: "",
       isHalfDay: false,
     });
+    setSelectedRange(undefined);
   };
 
   return (
@@ -217,6 +286,7 @@ const buildPayload = () => ({
             <div className="p-8">
               <AdvancedCalendar
                 leaves={calendarLeaves}
+                selectedRange={selectedRange}
                 onRangeSelect={handleRangeSelect}
               />
             </div>
@@ -235,23 +305,23 @@ const buildPayload = () => ({
               {/* LEAVE TYPE + APPROVER */}
               <div className="grid md:grid-cols-2 gap-6">
                 {/* DEV ONLY - REMOVE AFTER LOGIN */}
-<div>
-  <label className="text-sm font-semibold text-red-600">
-    Select Employee (DEV)
-  </label>
-  <select
-    value={employeeId}
-    onChange={(e) => setEmployeeId(e.target.value)}
-    className="w-full mt-2 px-2 py-1 rounded-xl border"
-  >
-    <option value="">Select employee</option>
-    {employees.map(emp => (
-      <option key={emp.id} value={emp.id}>
-        {emp.name} ({emp.id})
-      </option>
-    ))}
-  </select>
-</div>
+                <div>
+                  <label className="text-sm font-semibold text-red-600">
+                    Select Employee
+                  </label>
+                  <select
+                    value={employeeId}
+                    onChange={(e) => setEmployeeId(e.target.value)}
+                    className="w-full mt-2 px-2 py-1 rounded-xl border"
+                  >
+                    <option value="">Select employee</option>
+                    {employees.map(emp => (
+                      <option key={emp.id} value={emp.id}>
+                        {emp.name} ({emp.id})
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <div>
                   <label className="text-sm font-semibold">LEAVE TYPE</label>
@@ -274,15 +344,15 @@ const buildPayload = () => ({
                 <div>
                   <label className="text-sm font-semibold">LEAVE APPROVER</label>
                   <input
-  disabled
-  value={leaveApprover?.name || "Auto assigned"}
-  className="w-full mt-2 px-2 py-1 rounded-xl border bg-app opacity-80"
-/>
+                    disabled
+                    value={leaveApprover?.name || "No reporting manager assigned"}
+                    className="w-full mt-2 px-2 py-1 rounded-xl border bg-app opacity-80"
+                  />
 
                 </div>
               </div>
 
-              {/* HALF DAY (MOVED HERE) */}
+              {/* HALF DAY  */}
               <label className="flex gap-2 text-sm font-medium">
                 <input
                   type="checkbox"
@@ -321,14 +391,13 @@ const buildPayload = () => ({
                     <div className="mt-2 flex items-center gap-4 text-xs">
                       <div className="flex items-center gap-1">
                         <Clock size={14} />
-                        <span className="font-semibold">TOTAL:</span>
-                        {totalDays}
+                        <span className="font-semibold">TOTAL:</span> {totalDays}
                       </div>
                       <div>
                         <span className="font-semibold">WORK:</span> {workDays}
                       </div>
                       <div>
-                        <span className="font-semibold">LEAVE:</span> {leaveDays}
+                           <span className="font-semibold">DAY OFF:</span> {dayOffDays}
                       </div>
                     </div>
                   )}
@@ -346,24 +415,24 @@ const buildPayload = () => ({
               />
 
               {/* ACTIONS */}
-            <div className="flex justify-end gap-3">
-  <button
-    type="button"
-    onClick={handleReset}
-    className="border rounded-lg px-4 py-2 flex items-center gap-2 text-sm leading-none"
-  >
-    <X size={14} /> Reset
-  </button>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="border rounded-lg px-4 py-2 flex items-center gap-2 text-sm leading-none"
+                >
+                  <X size={14} /> Reset
+                </button>
 
-  <button
-    type="submit"
-    disabled={loading}
-    className="bg-primary text-white rounded-lg px-4 py-2 flex items-center gap-2 text-sm leading-none"
-  >
-    <CheckCircle2 size={14} />
-    {loading ? "Submitting..." : "Submit"}
-  </button>
-</div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-primary text-white rounded-lg px-4 py-2 flex items-center gap-2 text-sm leading-none"
+                >
+                  <CheckCircle2 size={14} />
+                  {loading ? "Submitting..." : "Submit"}
+                </button>
+              </div>
 
             </form>
           </div>

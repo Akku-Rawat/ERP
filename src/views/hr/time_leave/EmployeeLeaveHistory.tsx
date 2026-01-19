@@ -8,6 +8,9 @@ import Modal from "../../../components/ui/modal/modal";
 import { Card } from "../../../components/ui/modal/formComponent";
 import type { Column } from "../../../components/ui/Table/type";
 import { useTableLogic } from "../../../components/ui/Table/useTableLogic";
+import { useEffect } from "react";
+import { getAllEmployeeLeaveHistory } from "../../../api/leaveApi";
+
 
 /* Types */
 type EmployeeLeaveHistory = {
@@ -22,125 +25,63 @@ type EmployeeLeaveHistory = {
   days: number;
   reason: string;
   applied_date: string;
-  approved_by?: string;
 };
 
-/* Mock Data */
-const MOCK_EMPLOYEE_LEAVES: EmployeeLeaveHistory[] = [
-  {
-    id: "1",
-    employee_name: "Rajesh Kumar",
-    employee_id: "EMP001",
-    department: "Engineering",
-    type: "Casual Leave",
-    status: "Approved",
-    start_date: "2026-01-20",
-    end_date: "2026-01-21",
-    days: 2,
-    reason: "Personal work",
-    applied_date: "15-01-2026",
-    approved_by: "Amit Sharma",
-  },
-  {
-    id: "2",
-    employee_name: "Priya Singh",
-    employee_id: "EMP002",
-    department: "HR",
-    type: "Sick Leave",
-    status: "Approved",
-    start_date: "2026-01-18",
-    end_date: "2026-01-19",
-    days: 2,
-    reason: "Fever and cold",
-    applied_date: "17-01-2026",
-    approved_by: "Neha Verma",
-  },
-  {
-    id: "3",
-    employee_name: "Amit Patel",
-    employee_id: "EMP003",
-    department: "Sales",
-    type: "Casual Leave",
-    status: "Pending",
-    start_date: "2026-01-22",
-    end_date: "2026-01-24",
-    days: 3,
-    reason: "Family function",
-    applied_date: "14-01-2026",
-  },
-  {
-    id: "4",
-    employee_name: "Neha Sharma",
-    employee_id: "EMP004",
-    department: "Marketing",
-    type: "Emergency Leave",
-    status: "Approved",
-    start_date: "2026-01-10",
-    end_date: "2026-01-10",
-    days: 1,
-    reason: "Medical emergency",
-    applied_date: "10-01-2026",
-    approved_by: "Rajesh Kumar",
-  },
-  {
-    id: "5",
-    employee_name: "Vikram Joshi",
-    employee_id: "EMP005",
-    department: "Engineering",
-    type: "Sick Leave",
-    status: "Rejected",
-    start_date: "2026-01-15",
-    end_date: "2026-01-16",
-    days: 2,
-    reason: "Doctor appointment",
-    applied_date: "14-01-2026",
-  },
-  {
-    id: "6",
-    employee_name: "Rajesh Kumar",
-    employee_id: "EMP001",
-    department: "Engineering",
-    type: "Sick Leave",
-    status: "Approved",
-    start_date: "2026-01-10",
-    end_date: "2026-01-11",
-    days: 2,
-    reason: "Fever",
-    applied_date: "09-01-2026",
-    approved_by: "Amit Sharma",
-  },
-  {
-    id: "7",
-    employee_name: "Priya Singh",
-    employee_id: "EMP002",
-    department: "HR",
-    type: "Casual Leave",
-    status: "Approved",
-    start_date: "2025-12-28",
-    end_date: "2025-12-30",
-    days: 3,
-    reason: "Year end vacation",
-    applied_date: "20-12-2025",
-    approved_by: "Neha Verma",
-  },
-];
+
+const mapEmployeeLeaveFromApi = (l: any): EmployeeLeaveHistory => ({
+  id: l.leaveId,
+  employee_name: l.employeeName,
+  employee_id: l.employeeId,
+  department: l.department,
+  type: l.leaveType,
+  status: l.status,
+  start_date: l.fromDate,
+  end_date: l.toDate,
+  days: l.totalDays,
+  reason: l.reason,
+  applied_date: l.appliedOn,
+});
+
+
 
 /* Component */
 const EmployeeHistory: React.FC = () => {
   const [selectedLeave, setSelectedLeave] = useState<EmployeeLeaveHistory | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState<string>("");
+  const [leaves, setLeaves] = useState<EmployeeLeaveHistory[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  /* Filter by employee */
+
   const filteredData = selectedEmployee
-    ? MOCK_EMPLOYEE_LEAVES.filter((l) => l.employee_id === selectedEmployee)
-    : MOCK_EMPLOYEE_LEAVES;
+    ? leaves.filter((l) => l.employee_id === selectedEmployee)
+    : leaves;
 
-  /* Get unique employees */
   const uniqueEmployees = Array.from(
     new Map(
-      MOCK_EMPLOYEE_LEAVES.map((l) => [l.employee_id, { id: l.employee_id, name: l.employee_name }])
+      leaves.map((l) => [
+        l.employee_id,
+        { id: l.employee_id, name: l.employee_name },
+      ])
     ).values()
   );
+
+
+  useEffect(() => {
+    const fetchEmployeeLeaves = async () => {
+      setLoading(true);
+      try {
+        const res = await getAllEmployeeLeaveHistory();
+
+        const mapped = (res.data?.data || []).map(mapEmployeeLeaveFromApi);
+        setLeaves(mapped);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmployeeLeaves();
+  }, []);
+
 
   /* Columns */
   const columns: Column<EmployeeLeaveHistory>[] = [
@@ -353,41 +294,18 @@ const EmployeeHistory: React.FC = () => {
 
   return (
     <div className="p-8">
-      {/* ===== STATS CARDS ===== */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard
-          label="Total Requests"
-          value={filteredData.length}
-          color="text-blue-500"
-        />
-        <StatCard
-          label="Approved"
-          value={filteredData.filter((l) => l.status === "Approved").length}
-          color="text-green-500"
-        />
-        <StatCard
-          label="Pending"
-          value={filteredData.filter((l) => l.status === "Pending").length}
-          color="text-yellow-500"
-        />
-        <StatCard
-          label="Rejected"
-          value={filteredData.filter((l) => l.status === "Rejected").length}
-          color="text-red-500"
-        />
-      </div>
-
-      {/* ===== TABLE ===== */}
+      {/*  TABLE  */}
       <Table
         columns={columns}
         data={filteredData}
+        loading={loading}
         showToolbar
         extraFilters={historyFilters}
         toolbarPlaceholder="Search employee name, reason..."
         emptyMessage="No leave history found."
       />
 
-      {/* ===== DETAILS MODAL ===== */}
+      {/*  DETAILS MODAL  */}
       <Modal
         isOpen={!!selectedLeave}
         onClose={() => setSelectedLeave(null)}
@@ -441,12 +359,6 @@ const EmployeeHistory: React.FC = () => {
                   <span className="text-muted">Applied Date</span>
                   <p>{selectedLeave.applied_date}</p>
                 </div>
-                {selectedLeave.approved_by && (
-                  <div>
-                    <span className="text-muted">Approved By</span>
-                    <p className="font-semibold">{selectedLeave.approved_by}</p>
-                  </div>
-                )}
                 <div className="col-span-2">
                   <span className="text-muted">Reason</span>
                   <p className="italic mt-1">"{selectedLeave.reason}"</p>
@@ -460,20 +372,6 @@ const EmployeeHistory: React.FC = () => {
   );
 };
 
-/* Stat Card Component */
-const StatCard = ({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number;
-  color: string;
-}) => (
-  <div className="bg-card border border-theme rounded-xl p-4 text-center">
-    <div className={`text-2xl font-bold ${color}`}>{value}</div>
-    <div className="text-xs text-muted mt-1">{label}</div>
-  </div>
-);
+
 
 export default EmployeeHistory;

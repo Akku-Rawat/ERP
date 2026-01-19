@@ -18,3 +18,22 @@ export async function applyLeave(payload: {
   const resp: AxiosResponse = await api.post("", payload);
   return resp.data;
 }
+
+export async function getMyLeaveHistory(): Promise<AxiosResponse> {
+  const resp: AxiosResponse = await api.get("/my-history");
+  return resp.data;
+}
+
+
+export async function cancelLeave(
+  leaveId: string
+): Promise<AxiosResponse> {
+  const resp: AxiosResponse = await api.put(`/${leaveId}/cancel`);
+  return resp.data;
+}
+
+
+export async function getAllEmployeeLeaveHistory(): Promise<any> {
+  const resp = await api.get("/all-history");
+  return resp.data;
+}

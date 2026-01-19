@@ -25,7 +25,7 @@ const menuItems = [
   { name: "Inventory", to: "/inventory", icon: <FaBoxes /> },
   { name: "Accounting", to: "/accounting", icon: <FaBriefcase /> },
   { name: "Human Resource", to: "/hr", icon: <FaUserTie /> },
-  { name: "Fixed Assets", to: "/fasset", icon: <FaWarehouse /> },
+  // { name: "Fixed Assets", to: "/fasset", icon: <FaWarehouse /> },
 ];
 
 interface SidebarProps {

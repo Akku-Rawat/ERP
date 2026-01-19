@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { FaCalendarAlt, FaClock } from "react-icons/fa";
 import { CalendarDays , XCircle } from "lucide-react";
 import Table from "../../../components/ui/Table/Table";
@@ -10,8 +10,10 @@ import Modal from "../../../components/ui/modal/modal";
 import { Card,Select } from "../../../components/ui/modal/formComponent";
 import type { Column } from "../../../components/ui/Table/type";
 import { useTableLogic } from "../../../components/ui/Table/useTableLogic";
+import { getMyLeaveHistory, cancelLeave } from "../../../api/leaveApi";
 
-/* ---------- Types ---------- */
+
+/*  Types  */
 type LeaveRequest = {
   id: string;
   type: string;
@@ -27,45 +29,47 @@ interface HistoryProps {
   onNewRequest: () => void;
 }
 
-/* ---------- Mock Data ---------- */
-const MOCK_LEAVES: LeaveRequest[] = [
-  {
-    id: "1",
-    type: "Casual Leave",
-    status: "Approved",
-    start_date: "2026-01-14",
-    end_date: "2026-01-16",
-    days: 3,
-    reason: "Family function",
-    date: "12-01-2026",
-  },
-  {
-    id: "2",
-    type: "Sick Leave",
-    status: "Pending",
-    start_date: "2025-12-20",
-    end_date: "2025-12-20",
-    days: 1,
-    reason: "Fever",
-    date: "18-12-2025",
-  },
-];
 
-const handleCancelLeave = (leave: LeaveRequest) => {
-  console.log("Cancel leave request:", leave.id);
 
-  // later API call
-  // setStatus("Cancelled")
-};
 
+const mapLeaveFromApi = (l: any): LeaveRequest => ({
+  id: l.leaveId,
+  type: l.leaveType,
+  status: l.status,
+  start_date: l.fromDate,
+  end_date: l.toDate,
+  days: l.totalDays,
+  reason: l.reason,
+  date: l.appliedOn,
+});
 
 
 const History: React.FC<HistoryProps> = ({ onNewRequest }) => {
+  
   const [selectedLeave, setSelectedLeave] =
     useState<LeaveRequest | null>(null);
+    const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
+const [loading, setLoading] = useState(false);
+
+useEffect(() => {
+  const fetchLeaves = async () => {
+    setLoading(true);
+    try {
+      const res = await getMyLeaveHistory();
+
+      const mapped = (res.data || []).map(mapLeaveFromApi);
+      setLeaves(mapped);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchLeaves();
+}, []);
+
 
     
-  /* ---------- Columns (CRM Style) ---------- */
+  /*  Columns (CRM Style)  */
   const columns: Column<LeaveRequest>[] = [
     {
       key: "type",
@@ -150,8 +154,10 @@ const History: React.FC<HistoryProps> = ({ onNewRequest }) => {
   setLeaveTypeFilter,
 } = useTableLogic<LeaveRequest>({
   columns,
-  data: MOCK_LEAVES,
+  data: leaves,
 });
+
+
 
     
 const historyFilters = (
@@ -216,22 +222,41 @@ const historyFilters = (
   </>
 );
 
+
+const handleCancelLeave = async (leave: LeaveRequest) => {
+  try {
+    await cancelLeave(leave.id);
+
+    setLeaves((prev) =>
+      prev.map((l) =>
+        l.id === leave.id
+          ? { ...l, status: "Cancelled" }
+          : l
+      )
+    );
+  } catch {
+    alert("Failed to cancel leave");
+  }
+};
+
   
 
   return (
     <div className="p-8">
       {/* ===== CRM TABLE ===== */}
-      <Table
-        columns={columns}
-        data={MOCK_LEAVES}
-        showToolbar
-        enableAdd
-        extraFilters={historyFilters}  
-        addLabel="New Request"
-        onAdd={onNewRequest}
-        toolbarPlaceholder="Search reason / type..."
-        emptyMessage="No leave requests found."
-      />
+     <Table
+  columns={columns}
+  data={leaves}
+  loading={loading}
+  showToolbar
+  enableAdd
+  extraFilters={historyFilters}
+  addLabel="New Request"
+  onAdd={onNewRequest}
+  toolbarPlaceholder="Search reason / type..."
+  emptyMessage="No leave requests found."
+/>
+
 
       {/* ===== DETAILS MODAL ===== */}
       <Modal

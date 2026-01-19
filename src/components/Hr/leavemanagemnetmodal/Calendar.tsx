@@ -3,7 +3,7 @@ import { DayPicker } from "react-day-picker";
 import type { DateRange } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 
-type LeaveStatus = "approved" | "pending" | "rejected";
+type LeaveStatus = "approved" | "pending" | "rejected" | "cancelled";
 
 interface CalendarLeave {
   start: Date;
@@ -11,10 +11,13 @@ interface CalendarLeave {
   status: LeaveStatus;
 }
 
+
 interface AdvancedCalendarProps {
   leaves: CalendarLeave[];
+  selectedRange?: DateRange;
   onRangeSelect: (range: DateRange | undefined) => void;
 }
+
 
 const expandDateRange = (start: Date, end: Date): Date[] => {
   const dates: Date[] = [];
@@ -28,16 +31,17 @@ const expandDateRange = (start: Date, end: Date): Date[] => {
 
 const AdvancedCalendar: React.FC<AdvancedCalendarProps> = ({
   leaves,
+  selectedRange,
   onRangeSelect,
 }) => {
-  const [selectedRange, setSelectedRange] =
-    useState<DateRange | undefined>();
+
 
   const modifiers = useMemo(() => {
     const result: Record<LeaveStatus, Date[]> = {
       approved: [],
       pending: [],
       rejected: [],
+      cancelled: []
     };
 
     leaves.forEach((leave) => {
@@ -52,10 +56,7 @@ const AdvancedCalendar: React.FC<AdvancedCalendarProps> = ({
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const handleSelect = (range?: DateRange) => {
-    setSelectedRange(range);
-    onRangeSelect(range);
-  };
+ 
 
   return (
     <div>
@@ -64,7 +65,7 @@ const AdvancedCalendar: React.FC<AdvancedCalendarProps> = ({
         mode="range"
         fixedWeeks
         selected={selectedRange}
-        onSelect={handleSelect}
+        onSelect={onRangeSelect}
         modifiers={modifiers}
         disabled={{ before: today }}
         modifiersClassNames={{
