@@ -2,10 +2,17 @@
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
 
-const leave_apply_url = import.meta.env.VITE_LEAVE_APPLY as string;
-const api = createAxiosInstance(leave_apply_url);
+const base_url = import.meta.env.VITE_HRMS_API_URL as string;
+const api = createAxiosInstance(base_url);
 
-export async function applyLeave(payload: {
+const ENDPOINTS = {
+  applyLeave: `${base_url}.leave.api.create_leave_application`,
+  myLeaveHistory: `${base_url}.my_leave_history_api`,
+  cancelLeave: `${base_url}.cancel_leave_api`,
+  allLeaveHistory: `${base_url}.all_leave_history_api`,
+};
+
+export type ApplyLeavePayload = {
   employeeId: string;
   leaveType: string;
   leaveFromDate: string;
@@ -14,26 +21,36 @@ export async function applyLeave(payload: {
   leaveReason: string;
   leaveStatus: string;
   approverId: string;
-}): Promise<any> {
-  const resp: AxiosResponse = await api.post("", payload);
+};
+
+export async function applyLeave(
+  payload: ApplyLeavePayload
+): Promise<any> {
+  const resp: AxiosResponse = await api.post(
+    ENDPOINTS.applyLeave,
+    payload
+  );
   return resp.data;
 }
 
-export async function getMyLeaveHistory(): Promise<AxiosResponse> {
-  const resp: AxiosResponse = await api.get("/my-history");
+export async function getMyLeaveHistory(): Promise<any> {
+  const resp: AxiosResponse = await api.get(
+    ENDPOINTS.myLeaveHistory
+  );
   return resp.data;
 }
-
 
 export async function cancelLeave(
   leaveId: string
-): Promise<AxiosResponse> {
-  const resp: AxiosResponse = await api.put(`/${leaveId}/cancel`);
+): Promise<any> {
+  const url = `${ENDPOINTS.cancelLeave}?leave_id=${leaveId}`;
+  const resp: AxiosResponse = await api.put(url);
   return resp.data;
 }
 
-
 export async function getAllEmployeeLeaveHistory(): Promise<any> {
-  const resp = await api.get("/all-history");
+  const resp: AxiosResponse = await api.get(
+    ENDPOINTS.allLeaveHistory
+  );
   return resp.data;
 }
