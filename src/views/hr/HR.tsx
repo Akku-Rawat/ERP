@@ -23,11 +23,10 @@ const navTabs = [
   { key: "Management", label: "Employee Management", icon: <FaUserFriends /> },
    {key : 'leave', label: 'Leave Management', icon: <FaClipboardList /> },
   { key: "attendance", label: "Time & Attendance", icon: <FaCalendarDay /> },
-  { key: "performance", label: "Performance&Growth", icon: <FaChartLine /> },
+  { key: "performance", label: "Performance & Growth", icon: <FaChartLine /> },
   // { key: 'attendance', label: 'Attendance', icon: <FaClipboardList /> },
   // { key: 'leave', label: 'Leave Management', icon: <FaCalendarDay /> },
-  { key: "payroll", label: "Payroll", icon: <FaMoneyCheckAlt /> },
-
+  { key: "payroll", label: "Payroll", icon: <FaMoneyCheckAlt /> }, 
   {
     key: `compliance`,
     label: `Compliance Management`,
@@ -40,7 +39,7 @@ const HrPayrollModule: React.FC = () => {
   const [tab, setTab] = useState(navTabs[0].key);
 
   return (
-    <div className="bg-app  p-8 pb-20">
+    <div className="bg-app  p-8 pb-5">
       {/* Header */}
       <h1 className="text-main -3xl font-bold mb-6 flex items-center gap-2">
         <FaUserTie /> Human Resources
@@ -52,7 +51,7 @@ const HrPayrollModule: React.FC = () => {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-2
+            className={`flex items-center gap-2 pb-3 text-m font-medium transition border-b-2
               ${
                 tab === t.key
                   ? "text-teal-600 border-teal-500"

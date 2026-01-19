@@ -172,14 +172,14 @@ const EmployeeDetailView: React.FC<Props> = ({ employee, onBack, onDocumentUploa
                 <div className="w-16 h-16 mx-auto bg-white rounded-full flex items-center justify-center text-primary text-xl font-bold shadow-lg mb-2 ring-2 ring-white/30">
                   {personalInfo?.FirstName?.[0]}{personalInfo?.LastName?.[0]}
                 </div>
-                <h3 className="text-white text-sm font-bold">{personalInfo?.FirstName} {personalInfo?.LastName}</h3>
-                <p className="text-white/90 text-xs">{employmentInfo?.JobTitle}</p>
+                <h3 className="text-black text-sm font-bold">{personalInfo?.FirstName} {personalInfo?.LastName}</h3>
+                <p className="text-black text-xs">{employmentInfo?.JobTitle}</p>
               </div>
 
               {/* Employee ID */}
-              <div className="px-4 py-2 bg-background border-b border-border text-center">
-                <p className="text-[10px] text-muted font-bold uppercase mb-0.5">ID</p>
-                <p className="text-sm font-mono font-bold text-main">{employmentInfo?.employeeId}</p>
+              <div className="px-4 py-2 border-b border-border text-center">
+                <p className="text-[10px] text-black font-bold uppercase mb-0.5">ID</p>
+                <p className="text-sm font-mono font-bold text-black">{employmentInfo?.employeeId}</p>
               </div>
 
               {/* Quick Info - Compact */}

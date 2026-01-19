@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTableLogic } from "./useTableLogic";
-import type { Column } from "../Table/type";
+import type { Column } from "./type";
 import ColumnSelector from "./ColumnSelector";
 import Pagination from "../../Pagination";
 import {
@@ -18,6 +18,7 @@ interface TableProps<T> {
   onRowClick?: (item: T) => void;
   loading?: boolean;
   emptyMessage?: string;
+  extraFilters?: React.ReactNode;
   showToolbar?: boolean;
   enableAdd?: boolean;
   enableExport?: boolean;
@@ -200,6 +201,7 @@ function Table<T extends Record<string, any>>({
   columns,
   data,
   onRowClick,
+   extraFilters,
   rowKey,
   loading = false,
   emptyMessage = "No records found.",
@@ -290,6 +292,14 @@ function Table<T extends Record<string, any>>({
               </>
             )}
           </div>
+
+      {extraFilters && (
+  <div className="flex items-center gap-4 shrink-0">
+    {extraFilters}
+  </div>
+)}
+
+
 
           {/* Action Buttons */}
           {onPageSizeChange && (

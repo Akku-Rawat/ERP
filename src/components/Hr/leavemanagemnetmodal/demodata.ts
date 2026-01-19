@@ -47,18 +47,6 @@ export const demoLeaveRequests = () => {
       status: "Approved",
       appliedOn: "Nov 10, 2024",
     },
-    {
-      id: "LR004",
-      employeeId: "EMP204",
-      employeeName: "David Martinez",
-      leaveType: "Sick Leave",
-      startDate: "Nov 18, 2024",
-      endDate: "Nov 19, 2024",
-      days: 2,
-      reason: "Flu symptoms",
-      status: "Rejected",
-      appliedOn: "Nov 17, 2024",
-    },
   ];
 };
 

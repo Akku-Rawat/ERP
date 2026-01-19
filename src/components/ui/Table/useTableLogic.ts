@@ -2,7 +2,7 @@
 import React from "react";
 import { compareIdSmart } from "./sortUtils";
 import { detectNumericKey, detectCustomerIdKey } from "./filterHelpers";
-import type { Column } from "../Table/type";
+import type { Column } from "./type";
 
 export type UseTableLogicProps<T> = {
   columns: Column<T>[];
@@ -46,10 +46,12 @@ export const useTableLogic = <T extends Record<string, any>>({
   );
 
   const numericKey = React.useMemo(() => detectNumericKey(columns), [columns]);
-  const customerIdKey = React.useMemo(
-    () => detectCustomerIdKey(columns),
-    [columns],
-  );
+  const customerIdKey = React.useMemo(() => detectCustomerIdKey(columns), [columns]);
+  
+  const [yearFilter, setYearFilter] = React.useState("");
+const [leaveTypeFilter, setLeaveTypeFilter] = React.useState("");
+
+  
 
   const processedData = React.useMemo(() => {
     const q = (effectiveSearch ?? "").trim().toLowerCase();
@@ -94,6 +96,28 @@ export const useTableLogic = <T extends Record<string, any>>({
         });
         if (!foundName && !foundEmail) return false;
       }
+
+      if (yearFilter) {
+  const dateValue = row["date"];
+  if (dateValue) {
+    const year = String(dateValue).split("-")[2];
+    if (year !== yearFilter) return false;
+  } else {
+    return false;
+  }
+}
+
+
+if (leaveTypeFilter) {
+  const leaveType = row["type"];
+  if (
+    !leaveType ||
+    String(leaveType).toLowerCase() !== leaveTypeFilter.toLowerCase()
+  ) {
+    return false;
+  }
+}
+
 
       if (typeFilter) {
         const typeKeys = [
@@ -148,6 +172,8 @@ export const useTableLogic = <T extends Record<string, any>>({
     minFilter,
     maxFilter,
     columns,
+     yearFilter,         
+  leaveTypeFilter,  
     numericKey,
     customerIdKey,
     sortOrder,
@@ -178,6 +204,11 @@ export const useTableLogic = <T extends Record<string, any>>({
 
     sortOrder,
     setSortOrder,
+    yearFilter,
+setYearFilter,
+leaveTypeFilter,
+setLeaveTypeFilter,
+
 
     numericKey,
     customerIdKey,
