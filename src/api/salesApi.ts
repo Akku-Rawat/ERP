@@ -4,6 +4,7 @@ import { createAxiosInstance } from "./axiosInstance";
 
 const base_url = import.meta.env.VITE_INVOICE_API_URL as string;
 const api = createAxiosInstance(base_url);
+const creditapi=import.meta.env.VITE_CREDIT_NOTE_API_URL as string;
 
 const ENDPOINTS = {
   createSalesInvoice: `${base_url}.create_sales_invoice`,
@@ -11,8 +12,8 @@ const ENDPOINTS = {
   getSalesInvoiceById: `${base_url}.get_sales_invoice_by_id`,
   updateInvoiceStatus: `${base_url}.get_sales_invoice_by_id`,
   deleteSalesInvoice: `${base_url}.delete_sales_invoice`,
-  createCreditNote: `${base_url}.create_credit_note_from_invoice`,
-  createDebitNote: `${base_url}.create_debit_note_from_invoice`,
+  createCreditNote: `${creditapi}`,
+  createDebitNote: `${creditapi}.create_debit_note_from_invoice`,
 };
 
 export async function createSalesInvoice(payload: any): Promise<any> {
@@ -58,15 +59,23 @@ export async function deleteSalesInvoiceById(id: string): Promise<any> {
 }
 
 export async function createCreditNoteFromInvoice(payload: {
-  sales_invoice_no: string;
-  items: { item_code: string; qty: number; price: number }[];
+  originalSalesInvoiceNumber: string;
+  CreditNoteReasonCode: string;
+  invcAdjustReason?: string;
+  transactionProgress: string;
+  items: {
+    itemCode: string;
+    quantity: number;
+    price: number;
+  }[];
 }): Promise<any> {
   const resp: AxiosResponse = await api.post(
     ENDPOINTS.createCreditNote,
-    payload,
+    payload
   );
   return resp.data;
 }
+
 
 export async function createDebitNoteFromInvoice(payload: {
   sales_invoice_no: string;

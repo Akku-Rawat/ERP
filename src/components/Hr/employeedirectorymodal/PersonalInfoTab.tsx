@@ -12,6 +12,8 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
   handleInputChange,
   verifiedFields,
 }) => {
+  const [dobError, setDobError] = React.useState<string | null>(null);
+
   const verifiedInputStyle =
     "bg-gray-100 text-gray-600 cursor-not-allowed border-gray-300";
 
@@ -25,7 +27,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              NRC Number *
+              NRC Number <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -101,7 +103,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              First Name *
+              First Name <span className="text-red-500">*</span>
             </label>
             <input
               value={formData.firstName}
@@ -128,7 +130,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Last Name *
+              Last Name <span className="text-red-500">*</span>
             </label>
             <input
               value={formData.lastName}
@@ -144,18 +146,43 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Date of Birth *
+              Date of Birth <span className="text-red-500">*</span>
             </label>
-            <input
-              type="date"
-              value={formData.dateOfBirth}
-              onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
+           <input
+  type="date"
+  value={formData.dateOfBirth}
+  onChange={(e) => {
+    const selectedDate = e.target.value;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dob = new Date(selectedDate);
+
+    if (dob >= today) {
+      setDobError("Date of birth cannot be today or a future date");
+    } else {
+      setDobError(null);
+      handleInputChange("dateOfBirth", selectedDate);
+    }
+  }}
+  className={`w-full px-3 py-2 text-sm rounded-lg border focus:outline-none
+    ${
+      dobError
+        ? "border-red-400 focus:ring-2 focus:ring-red-500"
+        : "border-gray-300 focus:ring-2 focus:ring-purple-500"
+    }`}
+/>
+{dobError && (
+  <p className="text-[10px] text-red-600 mt-1 font-medium">
+    {dobError}
+  </p>
+)}
+
+
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Gender *
+              Gender <span className="text-red-500">*</span>
             </label>
             <select
               value={formData.gender}

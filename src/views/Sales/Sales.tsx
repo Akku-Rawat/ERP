@@ -7,6 +7,7 @@ import POS from "./POS";
 import SalesDashboard from "./SalesDashboard";
 import ProformaInvoicesTable from "./ProformaInvoice";
 
+
 import QuotationModal from "../../components/sales/QuotationModal";
 import InvoiceModal from "../../components/sales/InvoiceModal";
 import ProformaInvoiceModal from "../../components/sales/ProformaInvoiceModal";
@@ -14,6 +15,8 @@ import PosModal from "../../components/sales/PosModal";
 
 import { createSalesInvoice } from "../../api/salesApi";
 import { createQuotation } from "../../api/quotationApi";
+import CreditNotesTable from "./CreditNotesTable";
+import DebitNotesTable from "./DebitNotesTable";
 
 import {
   FaMoneyBillWave,
@@ -34,6 +37,10 @@ const salesTabs = [
     icon: <FaFileInvoiceDollar />,
   },
   { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
+  
+  { id: "creditNotes", name: "Credit Notes", icon: <FaFileInvoiceDollar /> },
+{ id: "debitNotes", name: "Debit Notes", icon: <FaFileInvoiceDollar /> },
+
   // { id: "pos", name: "POS", icon: <FaCashRegister /> },
   { id: "reports", name: "Reports", icon: <FaChartBar /> },
 ];
@@ -86,9 +93,24 @@ const SalesModule: React.FC = () => {
       component: <POS />,
       onAdd: () => setOpenModal("pos"),
     },
+  creditNotes: {
+  component: (
+    <CreditNotesTable />
+  ),
+},
+
+debitNotes: {
+  component: (
+    <DebitNotesTable />
+  ),
+},
+
+    
     reports: {
       component: <ReportTable />,
     },
+
+     
   };
 
   const handleInvoiceSubmit = async (payload: any) => {

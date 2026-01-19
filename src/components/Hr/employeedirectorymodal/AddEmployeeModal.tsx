@@ -1,4 +1,3 @@
-// AddEmployeeModal.tsx - FIXED VERSION WITH AUTO-POPULATION
 import React, { useState, useEffect } from "react";
 import { X, Upload, User, CheckCircle2, AlertCircle } from "lucide-react";
 import IdentityVerificationModal from "./IdentityVerificationModal";
@@ -15,7 +14,16 @@ import {
   getDefaultGrossSalary,
 } from "../../../views/hr/tabs/salarystructure";
 
-import { createEmployee, updateEmployeeById } from "../../../api/employeeapi";
+import { EMPLOYEE_ROLE_CONFIG } from "../../../api/config/employeeRoleConfig";
+import { filterEmployeesByRole } from "../../../api/config/employeeRoleFilter";
+import { getAllEmployees} from "../../../api/employeeapi";
+
+
+import {
+  createEmployee,
+  updateEmployeeById,
+ 
+} from "../../../api/employeeapi";
 
 const DEFAULT_FORM_DATA = {
   // Personal
@@ -46,6 +54,7 @@ const DEFAULT_FORM_DATA = {
   department: "",
   jobTitle: "",
   employmentStatus: "Active",
+  hrManager: "",
   reportingManager: "",
   employeeType: "Permanent",
   engagementDate: "",
@@ -139,6 +148,15 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   const activeTab = TAB_ORDER[currentTabIndex];
   const isLastTab = currentTabIndex === TAB_ORDER.length - 1;
   const [isPreFilled, setIsPreFilled] = useState(false);
+type EmployeeLite = {
+  employeeId: string;
+  name: string;
+  jobTitle: string;
+};
+
+const [reportingManagers, setReportingManagers] = useState<EmployeeLite[]>([]);
+const [hrManagers, setHrManagers] = useState<EmployeeLite[]>([]);
+
 
   const [verifiedFields, setVerifiedFields] = useState<Record<string, boolean>>(
     {}
@@ -345,6 +363,36 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
         return null;
     }
   };
+useEffect(() => {
+  if (!isOpen) return;
+
+  const fetchEmployees = async () => {
+    try {
+      const res = await getAllEmployees(1, 200, "Active");
+      const employees = res?.data?.employees ?? [];
+
+      setReportingManagers(
+        filterEmployeesByRole(
+          employees,
+          EMPLOYEE_ROLE_CONFIG.reportingManager
+        )
+      );
+
+      setHrManagers(
+        filterEmployeesByRole(
+          employees,
+          EMPLOYEE_ROLE_CONFIG.hrManager
+        )
+      );
+    } catch (err) {
+      console.error("Failed to fetch employees", err);
+    }
+  };
+
+  fetchEmployees();
+}, [isOpen]);
+
+
 
   const handleNext = () => {
     const error = validateCurrentTab();
@@ -366,6 +414,8 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   };
 
   const buildPayload = () => {
+     
+
     const basicSalaryNum = Number(formData.basicSalary) || 0;
 
     const housingAmount = Number(formData.housingAllowance) || 0;
@@ -374,6 +424,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
     const otherAmount = Number(formData.otherAllowances) || 0;
 
     const payload: any = {
+      
       FirstName: formData.firstName,
       LastName: formData.lastName,
       OtherNames: formData.otherNames,
@@ -412,11 +463,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
       workAddress: formData.workAddress,
       shift: formData.shift,
 
-      // IDs
-      NrcId: formData.nrcId,
-      SocialSecurityNapsa: formData.socialSecurityNapsa,
-      NhimaHealthInsurance: formData.nhimaHealthInsurance,
-      TpinId: formData.tpinId,
+
 
       // Salary Components - ALWAYS send final amounts
       BasicSalary: basicSalaryNum,
@@ -455,9 +502,16 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
 
       verifiedFromSource: !!verifiedData,
     };
+  if (!editData) {
+    payload.NrcId = formData.nrcId;
+    payload.SocialSecurityNapsa = formData.socialSecurityNapsa;
+    payload.TpinId = formData.tpinId;
+   payload.NhimaHealthInsurance=formData.nhimaHealthInsurance;
+    
+  }
 
-    return payload;
-  };
+  return payload;
+};
   const handleSave = async () => {
     setLoading(true);
     setError(null);
@@ -479,7 +533,16 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
       onSuccess?.();
       onClose();
     } catch (e: any) {
-      setError(e.message || "Failed to save employee");
+      console.error("Create/Update Employee Error:", e);
+
+      const apiMessage =
+        e?.response?.data?.message ||
+        e?.response?.data?.error ||
+        e?.response?.data?.details ||
+        e?.message ||
+        "Failed to save employee";
+
+      setError(apiMessage);
     } finally {
       setLoading(false);
     }
@@ -597,13 +660,12 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
         {/* Tabs */}
         <div className="flex border-b border-gray-200 bg-white px-6 overflow-x-auto">
           {TAB_ORDER.map((tab, index) => {
-            const isClickable =
-              mode === "edit" ? true : index <= currentTabIndex;
+            const isClickable = true;
 
             return (
               <button
                 key={tab}
-                disabled={!isClickable}
+                // disabled={!isClickable}
                 onClick={() => isClickable && setCurrentTabIndex(index)}
                 className={`px-3 py-2.5 text-xs font-medium whitespace-nowrap transition
                   ${
@@ -643,6 +705,8 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
               handleInputChange={handleInputChange}
               departments={departments}
               Level={levelsFromHrSettings}
+              managers={reportingManagers}
+              hrManagers={hrManagers}
             />
           )}
 
