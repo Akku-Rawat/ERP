@@ -57,6 +57,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
     formData,
     customerDetails,
     customerNameDisplay,
+    
     paginatedItems,
     totals,
     ui,

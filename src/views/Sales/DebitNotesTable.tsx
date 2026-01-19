@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
+
 import Table from "../../components/ui/Table/Table";
 import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
+import CreateDebitNoteModal from "./createDebitNoteModal";
+import { getAllDebitNotes } from "../../api/salesApi";
 
 type DebitNote = {
   noteNo: string;
@@ -13,28 +16,21 @@ type DebitNote = {
 };
 
 const DebitNotesTable: React.FC = () => {
-  const [data] = useState<DebitNote[]>([
-    {
-      noteNo: "DN-001",
-      invoiceNo: "INV-0038",
-      customer: "LMN Corp",
-      date: "2026-01-13",
-      amount: 3500,
-      status: "Approved",
-    },
-    {
-      noteNo: "DN-002",
-      invoiceNo: "INV-0021",
-      customer: "OPQ Ltd",
-      date: "2026-01-11",
-      amount: 2100,
-      status: "Rejected",
-    },
-  ]);
+  const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [data, setData] = useState<DebitNote[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+const [totalPages, setTotalPages] = useState(1);
+const [totalItems, setTotalItems] = useState(0);
+
+  const [searchTerm, setSearchTerm] = useState("");
 
   const columns: Column<DebitNote>[] = [
-    { key: "noteNo", header: "Debit Note No" },
-    { key: "invoiceNo", header: "Invoice No" },
+    { key: "noteNo", header: "Debit invoice No" },
+    { key: "invoiceNo", header: "Reciept No" },
     { key: "customer", header: "Customer" },
     {
       key: "amount",
@@ -50,19 +46,76 @@ const DebitNotesTable: React.FC = () => {
     },
   ];
 
-  return (
-    <Table
-      columns={columns}
-      data={data}
-      showToolbar
-      enableAdd
-      addLabel="Add Debit Note"
-      emptyMessage="No debit notes found"
-    />
-    
-    
+  const fetchDebitNotes = async () => {
+    try {
+      setLoading(true);
 
-   
+    const resp = await getAllDebitNotes(page, pageSize);
+
+
+      const mappedData: DebitNote[] = resp.data.map((item: any) => ({
+        noteNo: item.invoiceNumber,
+        invoiceNo: item.receiptNumber,
+        customer: item.customerName,
+        date: item.dateOfInvoice,
+        amount: item.totalAmount,
+        status: item.invoiceStatus ?? "Draft",
+      }));
+
+      setData(mappedData);
+      setTotalPages(resp.pagination.total_pages);
+    setTotalItems(resp.pagination.total);
+    } catch (error) {
+      console.error("Failed to load debit notes", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+useEffect(() => {
+  fetchDebitNotes();
+}, [page, pageSize]);
+
+
+
+  return (
+    <>
+      <Table
+        columns={columns}
+        data={data}
+        showToolbar
+        enableAdd
+        searchValue={searchTerm}
+        onSearch={setSearchTerm}
+        loading={loading}
+        addLabel="Add Debit Note"
+        onAdd={() => setOpenCreateModal(true)}
+        emptyMessage="No debit notes found"
+        enableColumnSelector
+        currentPage={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        pageSizeOptions={[10, 25, 50, 100]}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1); // reset page
+        }}
+        onPageChange={setPage}
+      />
+
+      <CreateDebitNoteModal
+        isOpen={openCreateModal}
+        onClose={() => setOpenCreateModal(false)}
+        onSubmit={(payload) => {
+          console.log("debit Note Payload:", payload);
+          setOpenCreateModal(false);
+          fetchDebitNotes();
+        }}
+        invoiceId={data.length > 0 ? data[0].invoiceNo : ""}
+      />
+    </>
   );
 };
 

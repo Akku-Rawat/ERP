@@ -1,30 +1,34 @@
 import React from "react";
 import Modal from "../../components/ui/modal/modal";
-import debitNoteForm from "./debitNoteform";
+import DebitNoteForm from "./debitNoteform";
 import { FileMinus } from "lucide-react";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (payload: any) => void;
+  invoiceId: string;
+  
 }
 
 const CreateDebitNoteModal: React.FC<Props> = ({
   isOpen,
   onClose,
   onSubmit,
+  invoiceId,
 }) => {
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Create Credit Note"
+      title="Create Debit Note"
       subtitle="Sales Invoice Adjustment"
       icon={FileMinus}
       maxWidth="6xl"
       height="90vh"
     >
-      <debitNoteForm  onSubmit={onSubmit} />
+      <DebitNoteForm onSubmit={onSubmit} invoiceId={invoiceId} />
+
     </Modal>
   );
 };

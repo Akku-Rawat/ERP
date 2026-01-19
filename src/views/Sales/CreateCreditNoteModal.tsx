@@ -7,12 +7,15 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (payload: any) => void;
+  invoiceId: string;
+
 }
 
 const CreateCreditNoteModal: React.FC<Props> = ({
   isOpen,
   onClose,
   onSubmit,
+  invoiceId
 }) => {
   return (
     <Modal
@@ -24,7 +27,7 @@ const CreateCreditNoteModal: React.FC<Props> = ({
       maxWidth="6xl"
       height="90vh"
     >
-      <CreditNoteInvoiceLikeForm onSubmit={onSubmit} />
+      <CreditNoteInvoiceLikeForm onSubmit={onSubmit} invoiceId={invoiceId} />
     </Modal>
   );
 };

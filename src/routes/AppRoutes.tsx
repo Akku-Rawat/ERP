@@ -15,10 +15,16 @@ import HrPayrollModule from "../views/hr/HR";
 import CompanySetup from "../views/CompanySetup/CompanySetup";
 import UserManagement from "../views/User/UserModule";
 import FixedAssets from "../views/FixedAssets/FixedAsset";
+import { Toaster } from "react-hot-toast";
+
 
 const AppRoutes: React.FC = () => {
   return (
+    <>
+
+    <Toaster position="top-right" />
     <Routes>
+       
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
 
@@ -44,6 +50,7 @@ const AppRoutes: React.FC = () => {
       {/* Root redirect */}
       <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
+    </>
   );
 };
 

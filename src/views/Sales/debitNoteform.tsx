@@ -6,8 +6,10 @@ import { Plus, X, Trash2 } from "lucide-react";
 import { useEffect } from "react";
 import { getSalesInvoiceById } from "../../api/salesApi";
 import { getAllSalesInvoices } from "../../api/salesApi";
+import toast from "react-hot-toast";
 
-import { createCreditNoteFromInvoice } from "../../api/salesApi";
+
+import { createDebitNoteFromInvoice } from "../../api/salesApi";
 
 import {
   Input,
@@ -28,18 +30,15 @@ import {
 // import Input from "../ui/Input";
 // import Select from "../ui/Select";
 
-interface debitNoteForm {
+interface DebitNoteFormProps {
   onSubmit?: (data: any) => void;
   invoiceId: string;
 }
-const CREDIT_NOTE_REASONS = [
-  { value: "01", label: "Wrong product(s)" },
-  { value: "02", label: "Wrong price" },
-  { value: "03", label: "Damaged goods" },
-  { value: "04", label: "Wrong customer invoiced" },
-  { value: "05", label: "Duplicated invoice" },
-  { value: "06", label: "Excess supplies" },
-  { value: "07", label: "Other (Provide other reason)" },
+const DEBIT_NOTE_REASONS = [
+  { value: "01", label: "Wrong quantity invoiced" },
+  { value: "02", label: "Wrong invoice amount" },
+  { value: "03", label: "omitted items" },
+  { value: "04", label: "other(s)" },
 ];
 
 const TRANSACTION_PROGRESS = [
@@ -49,7 +48,7 @@ const TRANSACTION_PROGRESS = [
   { value: "06", label: "Transferred" },
 ];
 
-const debitNoteForm: React.FC<debitNoteForm> = ({
+const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
   onSubmit,
   invoiceId,
 }) => {
@@ -62,11 +61,12 @@ const debitNoteForm: React.FC<debitNoteForm> = ({
     ui,
     actions,
   } = useInvoiceForm(true, () => {}, onSubmit);
-  const [creditMeta, setCreditMeta] = useState({
-    creditNoteReasonCode: "",
+  const [debitMeta, setDebitMeta] = useState({
+    debitNoteReasonCode: "",
     invcAdjustReason: "",
     transactionProgress: "02",
   });
+
   const [invoiceOptions, setInvoiceOptions] = useState<
     { value: string; label: string }[]
   >([]);
@@ -90,61 +90,59 @@ const debitNoteForm: React.FC<debitNoteForm> = ({
 
     fetchInvoices();
   }, []);
-useEffect(() => {
-  if (!formData.invoiceNumber) return;
+  useEffect(() => {
+    if (!formData.invoiceNumber) return;
 
-  const invoiceNumber = formData.invoiceNumber; 
+    const invoiceNumber = formData.invoiceNumber;
 
-  const fetchInvoice = async () => {
-    try {
-      const res = await getSalesInvoiceById(invoiceNumber);
+    const fetchInvoice = async () => {
+      try {
+        const res = await getSalesInvoiceById(invoiceNumber);
 
-      if (res?.status_code === 200) {
-        actions.setFormDataFromInvoice(res.data);
+        if (res?.status_code === 200) {
+          actions.setFormDataFromInvoice(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch invoice", err);
       }
-    } catch (err) {
-      console.error("Failed to fetch invoice", err);
+    };
+
+    fetchInvoice();
+  }, [formData.invoiceNumber]);
+
+  const getInvoiceAdjustReason = () => {
+    if (debitMeta.debitNoteReasonCode === "04") {
+      return debitMeta.invcAdjustReason?.trim();
     }
+
+    return DEBIT_NOTE_REASONS.find(
+      (r) => r.value === debitMeta.debitNoteReasonCode,
+    )?.label;
   };
 
-  fetchInvoice();
-}, [formData.invoiceNumber]);
-
-
-const getInvoiceAdjustReason = () => {
-  if (creditMeta.creditNoteReasonCode === "07") {
-    return creditMeta.invcAdjustReason?.trim();
-  }
-
-  return CREDIT_NOTE_REASONS.find(
-    (r) => r.value === creditMeta.creditNoteReasonCode
-  )?.label;
-};
-
-const handleCreateCreditNote = async () => {
+  const handleCreateDebitNote = async () => {
   try {
     if (!formData.invoiceNumber) {
-      console.error("Invoice number missing");
+      toast.error("Invoice number missing");
       return;
     }
 
-    if (!creditMeta.creditNoteReasonCode) {
-      console.error("Credit note reason missing");
+    if (!debitMeta.debitNoteReasonCode) {
+      toast.error("Debit note reason missing");
       return;
     }
 
     const invcAdjustReason = getInvoiceAdjustReason();
-
     if (!invcAdjustReason) {
-      console.error("Invoice adjustment reason is required");
+      toast.error("Adjustment reason required");
       return;
     }
 
     const payload = {
       originalSalesInvoiceNumber: formData.invoiceNumber,
-      CreditNoteReasonCode: creditMeta.creditNoteReasonCode,
-      invcAdjustReason, // ALWAYS NON-EMPTY
-      transactionProgress: creditMeta.transactionProgress,
+      DebitNoteReasonCode: debitMeta.debitNoteReasonCode,
+      invcAdjustReason,
+      transactionProgress: debitMeta.transactionProgress,
       items: formData.items.map((it: any) => ({
         itemCode: it.itemCode,
         quantity: Number(it.quantity),
@@ -152,17 +150,16 @@ const handleCreateCreditNote = async () => {
       })),
     };
 
-    console.log("FINAL CREDIT NOTE PAYLOAD", payload);
+    const res = await createDebitNoteFromInvoice(payload);
 
-    const res = await createCreditNoteFromInvoice(payload);
-    console.log("Credit Note Created", res);
+    toast.success("Debit Note created successfully");
 
     onSubmit?.(res);
   } catch (err) {
-    console.error("Create Credit Note failed", err);
+    console.error(err);
+    toast.error("Failed to create Debit Note");
   }
 };
-
 
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
@@ -201,29 +198,28 @@ const handleCreateCreditNote = async () => {
               <div className="" title="Credit Note Information">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Select
-  label="Invoice Number"
-  options={invoiceOptions}
-  value={formData.invoiceNumber ?? ""}
-  onChange={(e) =>
-    actions.handleInputChange({
-      target: {
-        name: "invoiceNumber",
-        value: e.target.value,
-      },
-    } as any)
-  }
-/>
-
+                    label="Invoice Number"
+                    options={invoiceOptions}
+                    value={formData.invoiceNumber ?? ""}
+                    onChange={(e) =>
+                      actions.handleInputChange({
+                        target: {
+                          name: "invoiceNumber",
+                          value: e.target.value,
+                        },
+                      } as any)
+                    }
+                  />
 
                   <Select
-                    label="Credit Note Reason Code"
+                    label="Debit Note Reason Code"
                     required
-                    options={CREDIT_NOTE_REASONS}
-                    value={creditMeta.creditNoteReasonCode}
+                    options={DEBIT_NOTE_REASONS}
+                    value={debitMeta.debitNoteReasonCode}
                     onChange={(e) =>
-                      setCreditMeta({
-                        ...creditMeta,
-                        creditNoteReasonCode: e.target.value,
+                      setDebitMeta({
+                        ...debitMeta,
+                        debitNoteReasonCode: e.target.value,
                       })
                     }
                   />
@@ -232,26 +228,26 @@ const handleCreateCreditNote = async () => {
                     label="Transaction Progress"
                     required
                     options={TRANSACTION_PROGRESS}
-                    value={creditMeta.transactionProgress}
+                    value={debitMeta.transactionProgress}
                     onChange={(e) =>
-                      setCreditMeta({
-                        ...creditMeta,
+                      setDebitMeta({
+                        ...debitMeta,
                         transactionProgress: e.target.value,
                       })
                     }
                   />
                 </div>
 
-                {creditMeta.creditNoteReasonCode === "07" && (
+                {debitMeta.debitNoteReasonCode === "04" && (
                   <Textarea
                     className="mt-4"
                     label="Reason / Remark"
                     required
                     placeholder="Provide reason in brief"
-                    value={creditMeta.invcAdjustReason}
+                    value={debitMeta.invcAdjustReason}
                     onChange={(e) =>
-                      setCreditMeta({
-                        ...creditMeta,
+                      setDebitMeta({
+                        ...debitMeta,
                         invcAdjustReason: e.target.value,
                       })
                     }
@@ -586,9 +582,9 @@ const handleCreateCreditNote = async () => {
                   <Button
                     type="button"
                     className="w-full mt-4"
-                    onClick={handleCreateCreditNote}
+                    onClick={handleCreateDebitNote}
                   >
-                    Create Credit Note
+                    Create Debit Note
                   </Button>
                 </div>
               </div>
@@ -831,4 +827,4 @@ const handleCreateCreditNote = async () => {
   );
 };
 
-export default debitNoteForm
+export default DebitNoteForm;
