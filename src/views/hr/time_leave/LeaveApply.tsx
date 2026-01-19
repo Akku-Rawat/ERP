@@ -225,41 +225,44 @@ const LeaveApply: React.FC = () => {
     };
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (!employeeId) {
-      alert("Select employee");
-      return;
-    }
+  if (!employeeId) {
+    alert("Select employee");
+    return;
+  }
 
-    if (!leaveApprover?.id) {
-      alert("Leave approver not assigned");
-      return;
-    }
+  if (!leaveApprover?.id) {
+    alert("Leave approver not assigned");
+    return;
+  }
 
-    if (!formData.startDate) {
-      alert("Start date required");
-      return;
-    }
+  if (!formData.startDate) {
+    alert("Start date required");
+    return;
+  }
 
-    if (!formData.isHalfDay && !formData.endDate) {
-      alert("End date required");
-      return;
-    }
+  if (!formData.isHalfDay && !formData.endDate) {
+    alert("End date required");
+    return;
+  }
 
-    setLoading(true);
-    try {
-      await applyLeave(buildPayload());
-      handleReset();
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        "Failed to submit leave request";
-      alert(msg);
-    }
+  setLoading(true);
 
-  };
+  try {
+    await applyLeave(buildPayload());
+    handleReset();
+  } catch (err: any) {
+    const msg =
+      err?.response?.data?.message ||
+      "Failed to submit leave request";
+    alert(msg);
+  } finally {
+    setLoading(false); // ✅ THIS WAS MISSING
+  }
+};
+
 
 
   const handleReset = () => {
