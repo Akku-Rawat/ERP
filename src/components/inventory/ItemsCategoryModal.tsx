@@ -8,8 +8,8 @@ import {
 import { getUOMs } from "../../api/itemZraApi";
 import { toast } from "sonner";
 import ItemGenericSelect from "../selects/ItemGenericSelect";
-import Modal from "../UI/modal/modal";
-import { Button } from "../UI/modal/formComponent";
+import Modal from "../ui/modal/modal";
+import { Button } from "../ui/modal/formComponent";
 
 const emptyForm: Record<string, any> = {
   id: "",

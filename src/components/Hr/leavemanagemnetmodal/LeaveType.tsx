@@ -1,6 +1,6 @@
 // LeaveType.tsx
 import React from "react";
-import { FaArrowLeft } from "react-icons/fa";
+import { ArrowLeft, Plus } from "lucide-react";
 
 export interface LeaveTypeProps {
   onAdd: () => void;
@@ -9,91 +9,114 @@ export interface LeaveTypeProps {
 
 export const LeaveType: React.FC<LeaveTypeProps> = ({ onAdd, onClose }) => {
   const rows = [
-    "Leave Without Pay",
-    "Privilege Leave",
-    "Sick Leave",
-    "Compensatory Off",
-    "Casual Leave",
+    { name: "Leave Without Pay", count: 0 },
+    { name: "Privilege Leave", count: 0 },
+    { name: "Sick Leave", count: 0 },
+    { name: "Compensatory Off", count: 0 },
+    { name: "Casual Leave", count: 3 },
   ];
 
   return (
-    <div className="flex">
-      {/* Left Sidebar */}
-      <aside className="w-56 pr-6">
-        <div className="space-y-6 sticky top-6">
-          <h4 className="text-sm font-medium text-slate-700">Filter By</h4>
-          <div>
-            <select className="w-full py-2 px-3 rounded bg-white border border-gray-200 text-sm">
-              <option>Assigned To</option>
-            </select>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main */}
-      <div className="flex-1 bg-white rounded-xl border border-slate-200">
-        <div className="p-6 flex items-center justify-between border-b border-slate-100 bg-white">
-          <div className="flex items-center gap-3">
-            {onClose && (
-              <button
-                onClick={onClose}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-              >
-                <FaArrowLeft className="w-5 h-5" /> Back
-              </button>
-            )}
-            <h2 className="text-lg font-semibold">Leave Type</h2>
-          </div>
-
-          <div className="flex items-center gap-3">
+    <div className="bg-card border border-theme rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="p-6 flex items-center justify-between border-b border-theme">
+        <div className="flex items-center gap-3">
+          {onClose && (
             <button
-              onClick={onAdd}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded"
+              onClick={onClose}
+              className="flex items-center gap-2 text-muted hover:text-main transition"
             >
-              + Add Leave Type
+              <ArrowLeft size={20} />
             </button>
-          </div>
+          )}
+          <h2 className="text-xl font-bold text-main">Leave Type</h2>
         </div>
 
-        <div className="p-4">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="ml-auto text-sm text-slate-600">
-              Last Updated On
-            </div>
-          </div>
+        <button
+          onClick={onAdd}
+          className="flex items-center gap-2 px-4 py-2 bg-primary rounded-xl font-semibold transition"
+        >
+          <Plus size={18} />
+          Add Leave Type
+        </button>
+      </div>
 
-          <div className="min-h-[280px]">
-            <ul className="divide-y divide-slate-100">
-              {rows.map((t, i) => (
-                <li
-                  key={i}
-                  className="flex items-center justify-between py-3 px-2"
-                >
-                  <div className="flex items-center gap-3">
-                    <input type="checkbox" className="w-4 h-4" />
-                    <div>
-                      <div className="font-medium text-slate-800">{t}</div>
-                      <div className="text-xs text-slate-500">{t}</div>
-                    </div>
+      {/* Meta Info */}
+      <div className="px-6 py-3 border-b border-theme flex items-center justify-between">
+        <span className="text-sm text-muted">
+          {rows.length} Leave Types
+        </span>
+        <span className="text-xs text-muted">
+          Last Updated On: Jan 15, 2026
+        </span>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="table-head">
+              <th className="px-6 py-3 text-left text-sm font-semibold">
+                <input type="checkbox" className="w-4 h-4" />
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">
+                Leave Type Name
+              </th>
+              <th className="px-6 py-3 text-center text-sm font-semibold">
+                Total Allocations
+              </th>
+              <th className="px-6 py-3 text-center text-sm font-semibold">
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <tr
+                key={i}
+                className="row-hover border-b border-theme transition cursor-pointer"
+              >
+                <td className="px-6 py-4">
+                  <input type="checkbox" className="w-4 h-4" />
+                </td>
+                <td className="px-6 py-4">
+                  <div className="font-medium text-main">{row.name}</div>
+                  <div className="text-xs text-muted mt-1">
+                    {row.name}
                   </div>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-card border border-theme text-sm font-semibold text-main">
+                    {row.count}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-card border border-theme text-main">
+                    Active
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-                  <div className="flex items-center gap-4 text-sm text-slate-500">
-                    <div className="text-center">{i === 4 ? 3 : 0}</div>
-                    <div className="w-4 h-4 rounded bg-gray-100" />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="pt-6">
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <button className="px-2 py-1 bg-gray-50 rounded">20</button>
-              <button className="px-2 py-1 bg-gray-50 rounded">100</button>
-              <button className="px-2 py-1 bg-gray-50 rounded">500</button>
-              <button className="px-2 py-1 bg-gray-50 rounded">2500</button>
-            </div>
-          </div>
+      {/* Footer Pagination */}
+      <div className="px-6 py-4 border-t border-theme flex items-center justify-between">
+        <div className="text-sm text-muted">
+          Showing <span className="font-semibold text-main">1-5</span> of{" "}
+          <span className="font-semibold text-main">{rows.length}</span> results
+        </div>
+        <div className="flex items-center gap-2">
+          <button className="px-3 py-1 text-sm border border-theme rounded-lg text-muted hover:text-main transition">
+            20
+          </button>
+          <button className="px-3 py-1 text-sm border border-theme rounded-lg text-muted hover:text-main transition">
+            100
+          </button>
+          <button className="px-3 py-1 text-sm border border-theme rounded-lg text-muted hover:text-main transition">
+            500
+          </button>
         </div>
       </div>
     </div>

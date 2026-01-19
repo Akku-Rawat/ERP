@@ -1,13 +1,16 @@
-// LeavePolicy.tsx
+// LeaveAllocation.tsx
 import React from "react";
 import { ArrowLeft, Plus, FileText } from "lucide-react";
 
-export interface LeavePolicyProps {
+export interface LeaveAllocationProps {
   onAdd: () => void;
   onClose?: () => void;
 }
 
-export const LeavePolicy: React.FC<LeavePolicyProps> = ({ onAdd, onClose }) => {
+export const LeaveAllocation: React.FC<LeaveAllocationProps> = ({
+  onAdd,
+  onClose,
+}) => {
   return (
     <div className="bg-card border border-theme rounded-2xl overflow-hidden">
       {/* Header */}
@@ -21,7 +24,7 @@ export const LeavePolicy: React.FC<LeavePolicyProps> = ({ onAdd, onClose }) => {
               <ArrowLeft size={20} />
             </button>
           )}
-          <h2 className="text-xl font-bold text-main">Leave Policy</h2>
+          <h2 className="text-xl font-bold text-main">Leave Allocation</h2>
         </div>
 
         <button
@@ -29,13 +32,13 @@ export const LeavePolicy: React.FC<LeavePolicyProps> = ({ onAdd, onClose }) => {
           className="flex items-center gap-2 px-4 py-2 bg-primary rounded-xl font-semibold transition"
         >
           <Plus size={18} />
-          Add Leave Policy
+          Add Leave Allocation
         </button>
       </div>
 
       {/* Meta Info */}
       <div className="px-6 py-3 border-b border-theme flex items-center justify-between">
-        <span className="text-sm text-muted">0 Policies</span>
+        <span className="text-sm text-muted">0 Allocations</span>
         <span className="text-xs text-muted">Last Updated On: Jan 15, 2026</span>
       </div>
 
@@ -46,10 +49,10 @@ export const LeavePolicy: React.FC<LeavePolicyProps> = ({ onAdd, onClose }) => {
             <FileText size={40} className="text-muted" />
           </div>
           <h3 className="text-lg font-semibold text-main mb-2">
-            No Leave Policies Yet
+            No Leave Allocations Yet
           </h3>
           <p className="text-muted text-sm mb-6">
-            Create your first leave policy to define rules and eligibility criteria for different types of leaves
+            Allocate leaves to employees for specific periods and leave types
           </p>
          
         </div>

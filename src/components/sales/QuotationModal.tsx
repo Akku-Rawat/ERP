@@ -12,10 +12,10 @@ import { createQuotation } from "../../api/quotationApi";
 
 import ItemSelect from "../selects/ItemSelect";
 
-import Modal from "../../components/ui/modal/modal";
+import Modal from "../ui/modal/modal";
 import {
   Button,
-} from "../../components/ui/modal/formComponent";
+} from "../ui/modal/formComponent";
 
 interface ItemRow {
   productName: string;

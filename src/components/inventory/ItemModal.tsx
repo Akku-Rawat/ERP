@@ -13,11 +13,11 @@ import {
   getUOMs,
   getItemClasses,
 } from "../../api/itemZraApi";
-import Select from "../../components/ui/Select";
-import Modal from "../UI/modal/modal";
+import Select from "../ui/Select";
+import Modal from "../ui/modal/modal";
 import {
   Button,
-} from "../../components/UI/modal/formComponent";
+} from "../ui/modal/formComponent";
 
 type FormState = Record<string, any>;
 

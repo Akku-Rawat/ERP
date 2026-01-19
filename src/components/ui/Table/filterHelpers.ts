@@ -1,5 +1,5 @@
 // filterHelpers.ts
-import type { Column } from "../Table/type";
+import type { Column } from "./type";
 
 export type FilterState = {
   name?: string;
