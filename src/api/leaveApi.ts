@@ -1,6 +1,13 @@
 // src/api/leaveApi.ts
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
+import type {
+  ApplyLeavePayload,
+  UpdateLeaveStatusPayload,
+  UpdateLeaveStatusResponse,
+  PendingLeaveResponse,
+} from "../types/leave";
+
 
 const base_url = import.meta.env.VITE_HRMS_API_URL as string;
 const api = createAxiosInstance(base_url);
@@ -10,22 +17,12 @@ const ENDPOINTS = {
   myLeaveHistory: `${base_url}.my_leave_history_api`,
   cancelLeave: `${base_url}.cancel_leave_api`,
   allLeaveHistory: `${base_url}.leave.api.get_all_leaves`,
-  pendingLeaves: `${base_url}.leave.api.get_pending_leaves`,
+  pendingLeaves: `${base_url}.leave.api.get_all_pending_leaves`,
   updateLeaveStatus: `${base_url}.leave.api.update_leave_status`, 
   leaveBalance: `${base_url}.leave.api.get_employee_leave_balance`,
 
 };
 
-export type ApplyLeavePayload = {
-  employeeId: string;
-  leaveType: string;
-  leaveFromDate: string;
-  leaveToDate: string;
-  isHalfDay: boolean;
-  leaveReason: string;
-  leaveStatus: string;
-  approverId?: string;
-};
 
 export async function applyLeave(
   payload: ApplyLeavePayload
@@ -36,6 +33,8 @@ export async function applyLeave(
   );
   return resp.data;
 }
+
+
 
 export async function getMyLeaveHistory(): Promise<any> {
   const resp: AxiosResponse = await api.get(
@@ -70,18 +69,9 @@ export async function getAllEmployeeLeaveHistory(
 }
 
 
-export type UpdateLeaveStatusPayload = {
-  leaveId: string;
-  status: "Approved" | "Rejected";
-  rejectionReason?: string;
-};
-
 export async function updateLeaveStatus(
   payload: UpdateLeaveStatusPayload
-): Promise<{
-  leaveId: string;
-  newStatus: string;
-}> {
+): Promise<UpdateLeaveStatusResponse> {
   const resp = await api.patch(
     ENDPOINTS.updateLeaveStatus,
     payload
@@ -94,8 +84,8 @@ export async function updateLeaveStatus(
 
 export async function getPendingLeaveRequests(
   page: number = 1,
-  pageSize: number = 50
-): Promise<any> {
+  pageSize: number = 100
+): Promise<PendingLeaveResponse> {
   const resp: AxiosResponse = await api.get(
     ENDPOINTS.pendingLeaves,
     {

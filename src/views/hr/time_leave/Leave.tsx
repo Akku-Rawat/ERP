@@ -17,10 +17,6 @@ const Leave: React.FC = () => {
   };
 
 
-  // debug helper 
-  useEffect(() => {
-    console.log("Leave active tab:", tab);
-  }, [tab]);
 
   return (
     <div className=" bg-app">
@@ -99,7 +95,6 @@ const Leave: React.FC = () => {
 
         </div>
 
-        {/* content switch (force remount with keys) */}
         <div>
           {tab === "leave" && <LeaveManagement />}
 
