@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect} from "react";
 import {
   Calendar,
   Clock,
@@ -9,8 +9,10 @@ import {
   TrendingUp,
   AlertCircle,
 } from "lucide-react";
+import { getMyLeaveHistory, getEmployeeLeaveBalance } from "../../../api/leaveApi";
 
-/* ---------- Types ---------- */
+
+/*  Types  */
 type LeaveStatus = "approved" | "pending" | "rejected";
 
 type LeaveRequest = {
@@ -31,54 +33,6 @@ type LeaveTypeBalance = {
   color: string;
 };
 
-/* ---------- Mock Data ---------- */
-const EMPLOYEE_NAME = "User";
-
-const LEAVE_STATS = {
-  totalBalance: 24,
-  used: 8,
-  pending: 2,
-  remaining: 14,
-};
-
-const RECENT_REQUESTS: LeaveRequest[] = [
-  {
-    id: "1",
-    type: "Casual Leave",
-    startDate: "2026-01-20",
-    endDate: "2026-01-21",
-    days: 2,
-    reason: "Personal work",
-    status: "pending",
-    appliedOn: "2026-01-15",
-  },
-  {
-    id: "2",
-    type: "Sick Leave",
-    startDate: "2026-01-10",
-    endDate: "2026-01-11",
-    days: 2,
-    reason: "Fever and cold",
-    status: "approved",
-    appliedOn: "2026-01-09",
-  },
-  {
-    id: "3",
-    type: "Casual Leave",
-    startDate: "2025-12-24",
-    endDate: "2025-12-24",
-    days: 1,
-    reason: "Family function",
-    status: "approved",
-    appliedOn: "2025-12-20",
-  },
-];
-
-const LEAVE_TYPE_BALANCES: LeaveTypeBalance[] = [
-  { type: "Sick Leave", total: 10, used: 3, color: "bg-blue-500" },
-  { type: "Casual Leave", total: 12, used: 5, color: "bg-purple-500" },
-  { type: "Emergency Leave", total: 2, used: 0, color: "bg-orange-500" },
-];
 
 const UPCOMING_HOLIDAYS = [
   { date: "26 Jan", name: "Republic Day" },
@@ -86,9 +40,88 @@ const UPCOMING_HOLIDAYS = [
   { date: "26 Mar", name: "Holi" },
 ];
 
-/* ---------- Component ---------- */
+/*  Component  */
 const EmployeeDashboard: React.FC = () => {
   const [selectedAction, setSelectedAction] = useState<string>("");
+  const [employeeName, setEmployeeName] = useState<string>("");
+  const [recentRequests, setRecentRequests] = useState<LeaveRequest[]>([]);
+
+  const [leaveSummary, setLeaveSummary] = useState<{
+  totalLeaves: number;
+  used: number;
+  pending: number;
+  available: number;
+} | null>(null);
+
+const [leaveTypeBalances, setLeaveTypeBalances] = useState<
+  {
+    type: string;
+    total: number;
+    used: number;
+    available: number;
+    color: string;
+  }[]
+>([]);
+
+useEffect(() => {
+  const fetchRecentLeaves = async () => {
+    try {
+      const res = await getMyLeaveHistory();
+
+      const mapped = (res.data.leaves || [])
+        .slice(0, 3)
+        .map((l: any) => ({
+          id: l.leaveId,
+          type: l.leaveType.name,
+          startDate: l.duration.fromDate,
+          endDate: l.duration.toDate,
+          days: l.duration.totalDays,
+          reason: l.leaveReason,
+          status:
+            l.status === "OPEN"
+              ? "pending"
+              : l.status === "APPROVED"
+              ? "approved"
+              : "rejected",
+          appliedOn: l.appliedOn,
+        }));
+
+      setRecentRequests(mapped);
+    } catch {
+      setRecentRequests([]);
+    }
+  };
+
+  fetchRecentLeaves();
+}, []);
+
+
+
+useEffect(() => {
+  const fetchLeaveBalance = async () => {
+    const res = await getEmployeeLeaveBalance(); // API to be implemented later
+
+    setEmployeeName(res.data.employeeName ?? "");
+
+    const summary = res.data.summary;
+    const balances = res.data.balances;
+
+    setLeaveSummary(summary);
+
+    setLeaveTypeBalances(
+      balances.map((b: any) => ({
+        type: b.leaveType.name,
+        total: b.total,
+        used: b.used,
+        available: b.available,
+        color: "bg-primary", // UI concern only
+      }))
+    );
+  };
+
+  fetchLeaveBalance();
+}, []);
+
 
   const handleQuickAction = (action: string) => {
     setSelectedAction(action);
@@ -102,7 +135,8 @@ const EmployeeDashboard: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold text-main">
-              Welcome back, {EMPLOYEE_NAME}
+               Welcome back, {employeeName || "—"}
+
             </h1>
           </div>
           <div className="text-right">
@@ -121,28 +155,29 @@ const EmployeeDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <StatCard
             label="Total Balance"
-            value={LEAVE_STATS.totalBalance}
+            value={leaveSummary?.totalLeaves ?? 0}
             icon={Calendar}
             color="text-blue-600"
             bgColor="bg-blue-100 dark:bg-blue-900/30"
           />
           <StatCard
             label="Used"
-            value={LEAVE_STATS.used}
+           value={leaveSummary?.used ?? 0}
             icon={CheckCircle}
             color="text-green-600"
             bgColor="bg-green-100 dark:bg-green-900/30"
           />
           <StatCard
             label="Pending"
-            value={LEAVE_STATS.pending}
+          value={leaveSummary?.pending ?? 0}
             icon={Clock3}
             color="text-yellow-600"
             bgColor="bg-yellow-100 dark:bg-yellow-900/30"
           />
           <StatCard
             label="Remaining"
-            value={LEAVE_STATS.remaining}
+           value={leaveSummary?.available ?? 0}
+
             icon={TrendingUp}
             color="text-purple-600"
             bgColor="bg-purple-100 dark:bg-purple-900/30"
@@ -166,7 +201,13 @@ const EmployeeDashboard: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                {RECENT_REQUESTS.map((req) => (
+                {recentRequests.length === 0 && (
+                  <div className="text-xs text-muted text-center py-6">
+                    No recent leave requests
+                  </div>
+                )}
+
+                  {recentRequests.map((req) => (
                   <div
                     key={req.id}
                     className="bg-app border border-theme rounded-lg p-3 hover:shadow-sm transition"
@@ -210,7 +251,7 @@ const EmployeeDashboard: React.FC = () => {
               </h2>
 
               <div className="space-y-3">
-                {LEAVE_TYPE_BALANCES.map((leave, idx) => (
+                {leaveTypeBalances.map((leave, idx) => (
                   <div key={idx}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-semibold text-main">
@@ -317,7 +358,7 @@ const EmployeeDashboard: React.FC = () => {
   );
 };
 
-/* ---------- Stat Card Component ---------- */
+/*  Stat Card Component  */
 const StatCard = ({
   label,
   value,
@@ -344,7 +385,7 @@ const StatCard = ({
   </div>
 );
 
-/* ---------- Status Badge ---------- */
+/*  Status Badge  */
 const StatusBadge = ({ status }: { status: LeaveStatus }) => {
   const styles = {
     approved: "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
@@ -370,7 +411,7 @@ const StatusBadge = ({ status }: { status: LeaveStatus }) => {
   );
 };
 
-/* ---------- Holiday Item ---------- */
+/*  Holiday Item  */
 const HolidayItem = ({ date, name }: { date: string; name: string }) => (
   <div className="flex items-center gap-2 p-2 bg-app border border-theme rounded-lg hover:shadow-sm transition">
     <div className="bg-primary/10 px-2 py-1 rounded">

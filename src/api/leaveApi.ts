@@ -10,6 +10,10 @@ const ENDPOINTS = {
   myLeaveHistory: `${base_url}.my_leave_history_api`,
   cancelLeave: `${base_url}.cancel_leave_api`,
   allLeaveHistory: `${base_url}.leave.api.get_all_leaves`,
+  pendingLeaves: `${base_url}.leave.api.get_pending_leaves`,
+  updateLeaveStatus: `${base_url}.leave.api.update_leave_status`, 
+  leaveBalance: `${base_url}.leave.api.get_employee_leave_balance`,
+
 };
 
 export type ApplyLeavePayload = {
@@ -20,7 +24,7 @@ export type ApplyLeavePayload = {
   isHalfDay: boolean;
   leaveReason: string;
   leaveStatus: string;
-  approverId: string;
+  approverId?: string;
 };
 
 export async function applyLeave(
@@ -65,3 +69,51 @@ export async function getAllEmployeeLeaveHistory(
   return resp.data;
 }
 
+
+export type UpdateLeaveStatusPayload = {
+  leaveId: string;
+  status: "Approved" | "Rejected";
+  rejectionReason?: string;
+};
+
+export async function updateLeaveStatus(
+  payload: UpdateLeaveStatusPayload
+): Promise<{
+  leaveId: string;
+  newStatus: string;
+}> {
+  const resp = await api.patch(
+    ENDPOINTS.updateLeaveStatus,
+    payload
+  );
+
+  return resp.data.data;
+}
+
+
+
+export async function getPendingLeaveRequests(
+  page: number = 1,
+  pageSize: number = 50
+): Promise<any> {
+  const resp: AxiosResponse = await api.get(
+    ENDPOINTS.pendingLeaves,
+    {
+      params: {
+        page,
+        page_size: pageSize,
+      },
+    }
+  );
+
+  return resp.data;
+}
+
+
+export async function getEmployeeLeaveBalance(): Promise<any> {
+  const resp: AxiosResponse = await api.get(
+    ENDPOINTS.leaveBalance
+  );
+
+  return resp.data;
+}

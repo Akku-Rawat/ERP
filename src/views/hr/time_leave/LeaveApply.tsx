@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, Clock, FileText, CheckCircle2, X } from "lucide-react";
+import { Calendar, Clock, FileText, CheckCircle2, X ,XCircle } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import AdvancedCalendar from "../../../components/Hr/leavemanagemnetmodal/Calendar";
 import { applyLeave } from "../../../api/leaveApi";
 import { getAllEmployees } from "../../../api/employeeapi";
 import { getEmployeeById } from "../../../api/employeeapi";
+import toast from "react-hot-toast";
 
 
 
 /*  Types  */
-type LeaveStatus = "approved" | "pending" | "rejected" | "cancelled";
+type LeaveStatus = "APPROVED" | "PENDING" | "REJECTED" | "CANCELLED";
 
 type Leave = {
   start: Date;
@@ -30,7 +31,11 @@ type LeaveType = {
   name: string;
 };
 
+
+
 const LeaveApply: React.FC = () => {
+
+  
   const [formData, setFormData] = useState<LeaveFormData>({
     type: "",
     startDate: "",
@@ -59,6 +64,7 @@ const LeaveApply: React.FC = () => {
   } | null>(null);
 
 
+
   useEffect(() => {
     const fetchEmployees = async () => {
       const res = await getAllEmployees(1, 100);
@@ -83,49 +89,45 @@ const LeaveApply: React.FC = () => {
   }, [formData.startDate, formData.endDate]);
 
 
-  useEffect(() => {
-    if (!employeeId) {
-      setLeaveApprover(null);
-      return;
-    }
+ useEffect(() => {
+  if (!employeeId) {
+    setLeaveApprover(null);
+    return;
+  }
 
+  const fetchReportingManager = async () => {
+    try {
+      const empRes = await getEmployeeById(employeeId);
+      const emp = empRes?.data || empRes;
 
-    const fetchReportingManager = async () => {
-      try {
-        // get selected employee detail
-        const empRes = await getEmployeeById(employeeId);
-        const emp = empRes?.data || empRes;
+      const managerEmployeeCode =
+        emp?.employmentInfo?.reportingManager;
 
-        //  reporting manager ID
-        const managerEmployeeCode =
-          emp?.employmentInfo?.reportingManager; // HR-EMP-00011
+      if (!managerEmployeeCode) {
+        setLeaveApprover(null);
+        return;
+      }
 
-        if (!managerEmployeeCode) {
-          setLeaveApprover(null);
-          return;
-        }
+      const manager = employees.find(
+        (e) => e.employeeId === managerEmployeeCode
+      );
 
-        //  find manager from employee list
-        const manager = employees.find(
-          (e) => e.employeeId === managerEmployeeCode
-        );
-
-        if (manager) {
-          setLeaveApprover({
-            id: manager.id,
-            name: manager.name,
-          });
-        } else {
-          setLeaveApprover(null);
-        }
-      } catch (err) {
-        console.error("Failed to fetch reporting manager", err);
+      if (manager) {
+        setLeaveApprover({
+          id: manager.id,
+          name: manager.name,
+        });
+      } else {
         setLeaveApprover(null);
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch reporting manager", err);
+      setLeaveApprover(null);
+    }
+  };
 
-    fetchReportingManager();
-  }, [employeeId, employees]);
+  fetchReportingManager();
+}, [employeeId, employees]);
 
   const formatLocalDate = (date: Date) => {
     const y = date.getFullYear();
@@ -221,30 +223,29 @@ const LeaveApply: React.FC = () => {
       isHalfDay: formData.isHalfDay,
       leaveReason: formData.reason,
       leaveStatus: "Open",
-      approverId: leaveApprover?.id || "",
+       ...(leaveApprover?.id && { approverId: leaveApprover.id }), //  only include if exists
     };
   };
+
+
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
-  if (!employeeId) {
-    alert("Select employee");
-    return;
-  }
+ if (!employeeId) {
+  toast.error("Please select employee");
+  return;
+}
 
-  if (!leaveApprover?.id) {
-    alert("Leave approver not assigned");
-    return;
-  }
 
-  if (!formData.startDate) {
-    alert("Start date required");
-    return;
-  }
+ if (!formData.startDate) {
+  toast.error("Start date is required");
+  return;
+}
+
 
   if (!formData.isHalfDay && !formData.endDate) {
-    alert("End date required");
+      toast.error("End date is required");
     return;
   }
 
@@ -252,14 +253,15 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   try {
     await applyLeave(buildPayload());
+
+    toast.success("Leave applied successfully");
+
+
     handleReset();
   } catch (err: any) {
-    const msg =
-      err?.response?.data?.message ||
-      "Failed to submit leave request";
-    alert(msg);
+    toast.error("Failed to submit leave request");
   } finally {
-    setLoading(false); // ✅ THIS WAS MISSING
+    setLoading(false);
   }
 };
 
@@ -279,6 +281,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   return (
     <div className="bg-app">
       <div className="max-w-7xl mx-auto grid lg:grid-cols-5 gap-6">
+
         {/* LEFT */}
         <div className="lg:col-span-2">
           <div className="bg-card rounded-2xl border border-theme">

@@ -62,7 +62,7 @@ const EmployeeHistory: React.FC = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<string>("");
   const [leaves, setLeaves] = useState<EmployeeLeaveHistory[]>([]);
   const [loading, setLoading] = useState(false);
-const [page, setPage] = useState(1);
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -186,8 +186,8 @@ useEffect(() => {
     setYearFilter,
     leaveTypeFilter,
     setLeaveTypeFilter,
-    departmentFilter,
-    setDepartmentFilter,
+    // departmentFilter,
+    // setDepartmentFilter,
   } = useTableLogic<EmployeeLeaveHistory>({
     columns,
     data: filteredData,
@@ -197,7 +197,7 @@ useEffect(() => {
   const historyFilters = (
     <>
       {/* EMPLOYEE FILTER */}
-      <div className="relative">
+      {/* <div className="relative">
         <select
           value={selectedEmployee}
           onChange={(e) => setSelectedEmployee(e.target.value)}
@@ -225,10 +225,10 @@ useEffect(() => {
         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
           ▾
         </span>
-      </div>
+      </div> */}
 
       {/* DEPARTMENT FILTER */}
-      <div className="relative">
+      {/* <div className="relative">
         <select
           value={departmentFilter}
           onChange={(e) => setDepartmentFilter(e.target.value)}
@@ -255,7 +255,7 @@ useEffect(() => {
         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
           ▾
         </span>
-      </div>
+      </div> */}
 
       {/* YEAR FILTER */}
       <div className="relative">

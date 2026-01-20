@@ -7,6 +7,7 @@ import Setup from "./Setup";
 import EmployeeDashboard from "./EmployeeLeaveDashboard";
 import EmployeeHistory from "./EmployeeLeaveHistory";
 
+
 const Leave: React.FC = () => {
   const [tab, setTab] = useState<"leave" | "employeeDashboard" | "leaveApply" | "history" | "employeeHistory" | "setup">("leave");
 
