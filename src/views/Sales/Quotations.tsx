@@ -97,6 +97,9 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
       setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchCompany("1").catch(() => toast.error("Failed to load company data"));
+  }, []);
 
   useEffect(() => {
     fetchQuotations();
@@ -115,24 +118,25 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
         return;
       }
 
-      const companyData = await fetchCompany("COMP-00003");
+      if (!company) {
+        toast.error("Company data not loaded");
+        return;
+      }
 
       const quotation = quotationRes.data as QuotationData;
       setSelectedQuotation(quotation);
 
-      const url = await generateQuotationPDF(quotation, companyData, "bloburl");
-
+      const url = await generateQuotationPDF(quotation, company, "bloburl");
       setPdfUrl(url as string);
       setPdfOpen(true);
     } catch (error) {
-      console.error("View error:", error);
       toast.error("Failed to generate preview");
     }
   };
 
   const handleDownload = async (
     quotationNumber: string,
-    e?: React.MouseEvent
+    e?: React.MouseEvent,
   ) => {
     e?.stopPropagation();
 
@@ -169,7 +173,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
       String(q.quotationNumber)
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      q.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+      q.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   /* ===============================
