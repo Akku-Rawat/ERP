@@ -99,7 +99,7 @@ useEffect(() => {
 
 useEffect(() => {
   const fetchLeaveBalance = async () => {
-    const res = await getEmployeeLeaveBalance(); // API to be implemented later
+    const res = await getEmployeeLeaveBalance();
 
     setEmployeeName(res.data.employeeName ?? "");
 

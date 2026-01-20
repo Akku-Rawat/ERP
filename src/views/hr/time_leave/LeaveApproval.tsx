@@ -1,4 +1,4 @@
-import React, { useState, useMemo , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaCheckCircle,
   FaTimesCircle,
@@ -18,7 +18,7 @@ type LeaveRequest = {
   endDate: string;
   days: number;
   reason: string;
-  status: "Pending" | "Approved" | "Rejected";
+  status: "OPEN" | "Approved" | "Rejected";
   appliedOn: string;
 };
 
@@ -40,18 +40,18 @@ useEffect(() => {
      const res = await getPendingLeaveRequests(1, 50);
 
 
-      const mapped: LeaveRequest[] = (res.data?.leaves || []).map((l: any) => ({
-        id: l.leaveId,
-        employeeName: l.employee.employeeName,
-        leaveType: l.leaveType.name,
-        startDate: l.duration.fromDate,
-        endDate: l.duration.toDate,
-        days: l.duration.totalDays,
-        reason: l.leaveReason || "-",
-       status: "Pending",
+    const mapped: LeaveRequest[] = (res.data?.leaves || []).map((l: any) => ({
+  id: l.leaveId,
+  employeeName: l.employee.employeeName ?? "Unknown Employee",
+  leaveType: l.leaveType.name,
+  startDate: l.duration.fromDate,
+  endDate: l.duration.toDate,
+  days: l.duration.totalDays,
+  reason: l.leaveReason || "-",
+  status: l.status, // <-- OPEN from backend
+  appliedOn: l.appliedOn,
+}));
 
-        appliedOn: l.appliedOn,
-      }));
 
       setRequests(mapped);
     } finally {
@@ -63,7 +63,6 @@ useEffect(() => {
 }, []);
 
  
-
 
 const approveLeave = async (id: string) => {
   try {
@@ -99,11 +98,8 @@ const rejectLeave = async (id: string) => {
 });
 
 
-    setRequests(prev =>
-      prev.map(r =>
-        r.id === id ? { ...r, status: "Rejected" } : r
-      )
-    );
+  setRequests(prev => prev.filter(r => r.id !== id));
+
 
   
    toast.success("Leave rejected successfully");
@@ -153,7 +149,7 @@ const rejectLeave = async (id: string) => {
                     “{req.reason}”
                   </p>
 
-                {req.status === "Pending" && (
+                {req.status === "OPEN" && (
   <div className="mt-4 flex gap-3">
     <button
       disabled={actionLoadingId === req.id}
@@ -222,7 +218,10 @@ const rejectLeave = async (id: string) => {
           disabled={!rejectionReason.trim() || !rejectingLeaveId}
           onClick={async () => {
             await rejectLeave(rejectingLeaveId!);
-            setShowRejectDialog(false);
+setShowRejectDialog(false);
+setRejectingLeaveId(null);
+setRejectionReason("");
+
           }}
           className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg disabled:opacity-50"
         >
