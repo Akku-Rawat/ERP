@@ -27,20 +27,32 @@ type EmployeeLeaveHistory = {
   applied_date: string;
 };
 
-
 const mapEmployeeLeaveFromApi = (l: any): EmployeeLeaveHistory => ({
   id: l.leaveId,
-  employee_name: l.employeeName,
-  employee_id: l.employeeId,
-  department: l.department,
-  type: l.leaveType,
-  status: l.status,
-  start_date: l.fromDate,
-  end_date: l.toDate,
-  days: l.totalDays,
-  reason: l.reason,
+
+  employee_name: l.employee.employeeName,
+  employee_id: l.employee.employeeId,
+  department: l.employee.department,
+
+  type: l.leaveType.name,
+
+  status:
+    l.status === "APPROVED"
+      ? "Approved"
+      : l.status === "REJECTED"
+      ? "Rejected"
+      : l.status === "CANCELLED"
+      ? "Cancelled"
+      : "Pending",
+
+  start_date: l.duration.fromDate,
+  end_date: l.duration.toDate,
+  days: l.duration.totalDays,
+
+  reason: "-", // API does not send reason
   applied_date: l.appliedOn,
 });
+
 
 
 
@@ -50,6 +62,11 @@ const EmployeeHistory: React.FC = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<string>("");
   const [leaves, setLeaves] = useState<EmployeeLeaveHistory[]>([]);
   const [loading, setLoading] = useState(false);
+const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
 
   const filteredData = selectedEmployee
@@ -66,21 +83,28 @@ const EmployeeHistory: React.FC = () => {
   );
 
 
-  useEffect(() => {
-    const fetchEmployeeLeaves = async () => {
-      setLoading(true);
-      try {
-        const res = await getAllEmployeeLeaveHistory();
+useEffect(() => {
+  const fetchEmployeeLeaves = async () => {
+    setLoading(true);
+    try {
+      const res = await getAllEmployeeLeaveHistory(page, pageSize);
 
-        const mapped = (res.data?.data || []).map(mapEmployeeLeaveFromApi);
-        setLeaves(mapped);
-      } finally {
-        setLoading(false);
+      const mapped = (res.data?.leaves || []).map(mapEmployeeLeaveFromApi);
+      setLeaves(mapped);
+
+      const pg = res.data?.pagination;
+      if (pg) {
+        setTotalPages(pg.total_pages);
+        setTotalItems(pg.total);
       }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchEmployeeLeaves();
-  }, []);
+  fetchEmployeeLeaves();
+}, [page, pageSize]); 
+
 
 
   /* Columns */
@@ -303,7 +327,21 @@ const EmployeeHistory: React.FC = () => {
         extraFilters={historyFilters}
         toolbarPlaceholder="Search employee name, reason..."
         emptyMessage="No leave history found."
-      />
+        currentPage={page}
+         enableColumnSelector
+          searchValue={searchTerm}
+          onSearch={setSearchTerm}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          pageSizeOptions={[10, 25, 50, 100]}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1); // reset page
+          }}
+          onPageChange={setPage}
+        />
+      
 
       {/*  DETAILS MODAL  */}
       <Modal

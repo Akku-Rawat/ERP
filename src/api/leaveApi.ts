@@ -9,7 +9,7 @@ const ENDPOINTS = {
   applyLeave: `${base_url}.leave.api.create_leave_application`,
   myLeaveHistory: `${base_url}.my_leave_history_api`,
   cancelLeave: `${base_url}.cancel_leave_api`,
-  allLeaveHistory: `${base_url}.all_leave_history_api`,
+  allLeaveHistory: `${base_url}.leave.api.get_all_leaves`,
 };
 
 export type ApplyLeavePayload = {
@@ -48,9 +48,20 @@ export async function cancelLeave(
   return resp.data;
 }
 
-export async function getAllEmployeeLeaveHistory(): Promise<any> {
+export async function getAllEmployeeLeaveHistory(
+  page: number = 1,
+  pageSize: number = 100
+): Promise<any> {
   const resp: AxiosResponse = await api.get(
-    ENDPOINTS.allLeaveHistory
+    ENDPOINTS.allLeaveHistory,
+    {
+      params: {
+        page,
+        page_size: pageSize,
+      },
+    }
   );
+
   return resp.data;
 }
+
