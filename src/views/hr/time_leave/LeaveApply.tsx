@@ -44,7 +44,7 @@ const LeaveApply: React.FC = () => {
     { id: "SL", name: "Sick Leave" },
     { id: "CL", name: "Casual Leave" },
     { id: "LP", name: "Leave Without Pay" },
-    { id: "CO", name: " Compensatory Off" },
+    { id: "CO", name: "Compensatory Off" },
   ];
 
 
