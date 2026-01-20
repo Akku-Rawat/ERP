@@ -61,7 +61,7 @@ const EmployeeDirectory: React.FC = () => {
     try {
       setLoading(true);
       const res = await getAllEmployees(page, pageSize, searchTerm);
-      console.log(res);
+   
       setEmployees(res.data.employees);
       setTotalPages(res.data.pagination?.total_pages || 1);
       setTotalItems(res.data.pagination?.total || 0);

@@ -10,6 +10,7 @@ import type { Column } from "../../../components/ui/Table/type";
 import { useTableLogic } from "../../../components/ui/Table/useTableLogic";
 import { useEffect } from "react";
 import { getAllEmployeeLeaveHistory } from "../../../api/leaveApi";
+import { useMemo } from "react";
 
 
 /* Types */
@@ -69,18 +70,11 @@ const EmployeeHistory: React.FC = () => {
   const [totalItems, setTotalItems] = useState(0);
 
 
-  const filteredData = selectedEmployee
+const filteredData = useMemo(() => {
+  return selectedEmployee
     ? leaves.filter((l) => l.employee_id === selectedEmployee)
     : leaves;
-
-  const uniqueEmployees = Array.from(
-    new Map(
-      leaves.map((l) => [
-        l.employee_id,
-        { id: l.employee_id, name: l.employee_name },
-      ])
-    ).values()
-  );
+}, [leaves, selectedEmployee]);
 
 
 useEffect(() => {
@@ -106,92 +100,41 @@ useEffect(() => {
 }, [page, pageSize]); 
 
 
-
-  /* Columns */
-  const columns: Column<EmployeeLeaveHistory>[] = [
-    {
-      key: "employee",
-      header: "Employee",
-      align: "left",
-      render: (l) => (
-        <div>
-          <div className="font-semibold flex items-center gap-2">
-            <FaUser className="text-primary text-xs" />
-            {l.employee_name}
-          </div>
-          <div className="text-xs text-muted">{l.employee_id} • {l.department}</div>
+const columns = useMemo<Column<EmployeeLeaveHistory>[]>(() => [
+  {
+    key: "employee",
+    header: "Employee",
+    render: (l) => (
+      <div>
+        <div className="font-semibold">{l.employee_name}</div>
+        <div className="text-xs text-muted">
+          {l.employee_id} • {l.department}
         </div>
-      ),
-    },
-    {
-      key: "type",
-      header: "Type",
-      align: "left",
-      render: (l) => (
-        <div>
-          <div className="font-semibold text-sm">{l.type}</div>
-          <div className="text-xs text-muted italic">{l.reason}</div>
-        </div>
-      ),
-    },
-    {
-      key: "period",
-      header: "Period",
-      align: "left",
-      render: (l) => (
-        <span className="text-xs">
-          <FaCalendarAlt className="inline mr-1 text-muted" />
-          {l.start_date} → {l.end_date}
-        </span>
-      ),
-    },
-    {
-      key: "days",
-      header: "Days",
-      align: "center",
-      render: (l) => (
-        <span className="inline-flex items-center gap-1">
-          <FaClock className="text-muted" />
-          {l.days}
-        </span>
-      ),
-    },
-    {
-      key: "applied_date",
-      header: "Applied",
-      align: "left",
-    },
-    {
-      key: "status",
-      header: "Status",
-      align: "left",
-      render: (l) => <StatusBadge status={l.status} />,
-    },
-    {
-      key: "actions",
-      header: "Actions",
-      align: "center",
-      render: (l) => (
-        <ActionButton
-          type="view"
-          iconOnly
-          onClick={() => setSelectedLeave(l)}
-        />
-      ),
-    },
-  ];
+      </div>
+    ),
+  },
+  { key: "type", header: "Type", render: (l) => l.type },
+  { key: "period", header: "Period", render: (l) => `${l.start_date} → ${l.end_date}` },
+  { key: "days", header: "Days", align: "center" },
+  {
+    key: "status",
+    header: "Status",
+    render: (l) => <StatusBadge status={l.status} />,
+  },
+  {
+    key: "actions",
+    header: "Actions",
+    align: "center",
+    render: (l) => (
+      <ActionButton type="view" iconOnly onClick={() => setSelectedLeave(l)} />
+    ),
+  },
+], []);
 
-  const {
-    yearFilter,
-    setYearFilter,
-    leaveTypeFilter,
-    setLeaveTypeFilter,
-    // departmentFilter,
-    // setDepartmentFilter,
-  } = useTableLogic<EmployeeLeaveHistory>({
-    columns,
-    data: filteredData,
-  });
+const table = useTableLogic<EmployeeLeaveHistory>({
+  columns,
+  data: filteredData,
+});
 
   /* Filters */
   const historyFilters = (
@@ -260,8 +203,8 @@ useEffect(() => {
       {/* YEAR FILTER */}
       <div className="relative">
         <select
-          value={yearFilter}
-          onChange={(e) => setYearFilter(e.target.value)}
+        value={table.yearFilter}
+onChange={(e) => table.setYearFilter(e.target.value)}
           className="
             appearance-none
             px-4 py-2
@@ -288,8 +231,8 @@ useEffect(() => {
       {/* LEAVE TYPE FILTER */}
       <div className="relative">
         <select
-          value={leaveTypeFilter}
-          onChange={(e) => setLeaveTypeFilter(e.target.value)}
+          value={table.leaveTypeFilter}
+  onChange={(e) => table.setLeaveTypeFilter(e.target.value)}
           className="
             appearance-none
             px-4 py-2
@@ -321,7 +264,7 @@ useEffect(() => {
       {/*  TABLE  */}
       <Table
         columns={columns}
-        data={filteredData}
+         data={filteredData}
         loading={loading}
         showToolbar
         extraFilters={historyFilters}
@@ -329,8 +272,7 @@ useEffect(() => {
         emptyMessage="No leave history found."
         currentPage={page}
          enableColumnSelector
-          searchValue={searchTerm}
-          onSearch={setSearchTerm}
+         
           totalPages={totalPages}
           pageSize={pageSize}
           totalItems={totalItems}
