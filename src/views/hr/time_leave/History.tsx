@@ -1,83 +1,99 @@
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaCalendarAlt, FaClock } from "react-icons/fa";
-import { CalendarDays , XCircle } from "lucide-react";
+import { CalendarDays, XCircle } from "lucide-react";
 import Table from "../../../components/ui/Table/Table";
 import StatusBadge from "../../../components/ui/Table/StatusBadge";
-import ActionButton, {
-  ActionGroup,
-} from "../../../components/ui/Table/ActionButton";
+import ActionButton from "../../../components/ui/Table/ActionButton";
 import Modal from "../../../components/ui/modal/modal";
-import { Card,Select } from "../../../components/ui/modal/formComponent";
+import { Card } from "../../../components/ui/modal/formComponent";
 import type { Column } from "../../../components/ui/Table/type";
 import { useTableLogic } from "../../../components/ui/Table/useTableLogic";
-import { getMyLeaveHistory, cancelLeave } from "../../../api/leaveApi";
+import { getLeaveHistoryByEmployee } from "../../../api/leaveApi";
+import LeaveDetailModal from "../../../components/Hr/leave/LeaveDetailModal";
+import { cancelLeave } from "../../../api/leaveApi";
+import type { LeaveUI } from "../../../types/leave/uiLeave";
+import { mapLeaveFromApi } from "../../../types/leave/leaveMapper";
 
 
-/*  Types  */
-type LeaveRequest = {
-  id: string;
-  type: string;
-  status: "Approved" | "Pending" | "Rejected" | "Cancelled";
-  start_date: string;
-  end_date: string;
-  days: number;
-  reason: string;
-  date: string;
-};
+
 
 interface HistoryProps {
   onNewRequest: () => void;
+  onEditLeave: (leaveId: string) => void;
 }
 
 
+const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
+  const [selectedLeave, setSelectedLeave] = useState<LeaveUI | null>(null);
+  const [leaves, setLeaves] = useState<LeaveUI[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedLeaveId, setSelectedLeaveId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
 
-const mapLeaveFromApi = (l: any): LeaveRequest => ({
-  id: l.leaveId,
-  type: l.leaveType,
-  status: l.status,
-  start_date: l.fromDate,
-  end_date: l.toDate,
-  days: l.totalDays,
-  reason: l.reason,
-  date: l.appliedOn,
-});
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      setLoading(true);
+      try {
+        const res = await getLeaveHistoryByEmployee("22", page, pageSize);
+
+        setLeaves(res.data.leaves.map(mapLeaveFromApi));
+
+        const pg = res.data.pagination;
+        if (pg) {
+          setTotalItems(pg.total);
+          setTotalPages(pg.total_pages);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [page, pageSize]);
 
 
-const History: React.FC<HistoryProps> = ({ onNewRequest }) => {
-  
-  const [selectedLeave, setSelectedLeave] =
-    useState<LeaveRequest | null>(null);
-    const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
-const [loading, setLoading] = useState(false);
 
-useEffect(() => {
-  const fetchLeaves = async () => {
-    setLoading(true);
+
+
+  const handleCancelLeave = async (leaveId: string) => {
     try {
-      const res = await getMyLeaveHistory();
+      setLoading(true);
 
-      const mapped = (res.data || []).map(mapLeaveFromApi);
-      setLeaves(mapped);
+      await cancelLeave(leaveId);
+
+      // Update UI without refetch
+      setLeaves((prev) =>
+        prev.map((l) =>
+          l.id === leaveId
+            ? { ...l, status: "Cancelled" }
+            : l
+        )
+      );
+    } catch (err) {
+      console.error("Cancel leave failed", err);
     } finally {
       setLoading(false);
     }
   };
 
-  fetchLeaves();
-}, []);
 
 
-    
-  /*  Columns (CRM Style)  */
-  const columns: Column<LeaveRequest>[] = [
+
+  /*  Columns */
+  const columns: Column<LeaveUI>[] = [
+
     {
       key: "type",
       header: "Type",
       align: "left",
       render: (l) => (
         <div>
-          <div className="font-semibold">{l.type}</div>
+          <div className="font-semibold">{l.leaveType}</div>
           <div className="text-xs text-muted italic">{l.reason}</div>
         </div>
       ),
@@ -85,11 +101,10 @@ useEffect(() => {
     {
       key: "period",
       header: "Period",
-      align: "left",
       render: (l) => (
         <span className="text-xs">
           <FaCalendarAlt className="inline mr-1 text-muted" />
-          {l.start_date} → {l.end_date}
+          {l.startDate} → {l.endDate}
         </span>
       ),
     },
@@ -100,165 +115,163 @@ useEffect(() => {
       render: (l) => (
         <span className="inline-flex items-center gap-1">
           <FaClock className="text-muted" />
-          {l.days}
+          {l.totalDays}
         </span>
       ),
     },
+
     {
-      key: "date",
+      key: "appliedOn",
       header: "Applied",
-      align: "left",
+      render: (l) => l.appliedOn,
     },
+
     {
       key: "status",
       header: "Status",
       align: "left",
       render: (l) => <StatusBadge status={l.status} />,
     },
-{
-  key: "actions",
-  header: "Actions",
-  align: "center",
-  render: (l) => (
-    <div className="flex items-center justify-center gap-3 min-w-[72px]">
-      {/* View */}
-      <ActionButton
-        type="view"
-        iconOnly
-        onClick={() => setSelectedLeave(l)}
-      />
+    {
+      key: "actions",
+      header: "Actions",
+      align: "center",
+      render: (l) => (
+        <div className="flex items-center justify-center gap-3 min-w-[72px]">
+          {/* View */}
+          <ActionButton
+            type="view"
+            iconOnly
+            onClick={() => setSelectedLeaveId(l.id)}
 
-      {/* Cancel (only for Pending, but space stays consistent) */}
-      {l.status === "Pending" ? (
-        <ActionButton
-          type="custom"
-          variant="danger"
-          iconOnly
-          icon={<XCircle className="w-4 h-4" />}
-          onClick={() => handleCancelLeave(l)}
-        />
-      ) : (
-        <span className="w-8 h-8" /> // spacer to keep alignment
-      )}
-    </div>
-  ),
-}
+          />
 
+          {/* Cancel (only for Pending, but space stays consistent) */}
+          {l.status === "Pending" ? (
+            <ActionButton
+              type="custom"
+              variant="danger"
+              iconOnly
+              icon={<XCircle className="w-4 h-4" />}
+              onClick={() => handleCancelLeave(l.id)}
+            />
+          ) : (
+            <span className="w-8 h-8" />
+          )}
 
-  ];
-
-  const {
-  yearFilter,
-  setYearFilter,
-  leaveTypeFilter,
-  setLeaveTypeFilter,
-} = useTableLogic<LeaveRequest>({
-  columns,
-  data: leaves,
-});
-
-
-
-    
-const historyFilters = (
-  <>
-    {/* YEAR FILTER */}
-    <div className="relative">
-      <select
-        value={yearFilter}
-        onChange={(e) => setYearFilter(e.target.value)}
-        className="
-          appearance-none
-          px-4 py-2
-          pr-9
-          rounded-xl
-          border border-[var(--border)]
-          bg-app
-          text-[10px] font-black uppercase tracking-widest
-          text-muted
-          hover:text-primary hover:border-primary
-          focus:outline-none focus:ring-2 focus:ring-primary/10
-          cursor-pointer
-        "
-      >
-        <option value="">Year: All</option>
-        <option value="2026">Year: 2026</option>
-        <option value="2025">Year: 2025</option>
-      </select>
-
-      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
-        ▾
-      </span>
-    </div>
-
-    {/* LEAVE TYPE FILTER */}
-    <div className="relative">
-      <select
-        value={leaveTypeFilter}
-        onChange={(e) => setLeaveTypeFilter(e.target.value)}
-        className="
-          appearance-none
-          px-4 py-2
-          pr-9
-          rounded-xl
-          border border-[var(--border)]
-          bg-app
-          text-[10px] font-black uppercase tracking-widest
-          text-muted
-          hover:text-primary hover:border-primary
-          focus:outline-none focus:ring-2 focus:ring-primary/10
-          cursor-pointer
-        "
-      >
-        <option value="">Type: All</option>
-        <option value="Casual Leave">Type: Casual</option>
-        <option value="Sick Leave">Type: Sick</option>
-      </select>
-
-      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
-        ▾
-      </span>
-    </div>
-  </>
-);
-
-
-const handleCancelLeave = async (leave: LeaveRequest) => {
-  try {
-    await cancelLeave(leave.id);
-
-    setLeaves((prev) =>
-      prev.map((l) =>
-        l.id === leave.id
-          ? { ...l, status: "Cancelled" }
-          : l
-      )
-    );
-  } catch {
-    alert("Failed to cancel leave");
-  }
-};
-
-  
-
-  return (
-    <div className="p-8">
-      {/* ===== CRM TABLE ===== */}
-     <Table
-  columns={columns}
-  data={leaves}
-  loading={loading}
-  showToolbar
-  enableAdd
-  extraFilters={historyFilters}
-  addLabel="New Request"
-  onAdd={onNewRequest}
-  toolbarPlaceholder="Search reason / type..."
-  emptyMessage="No leave requests found."
+          {l.status === "Pending" && (
+   <ActionButton
+  type="edit"
+  iconOnly
+  onClick={() => onEditLeave(l.id)}
 />
 
 
-      {/* ===== DETAILS MODAL ===== */}
+          )}
+        </div>
+      ),
+    }
+  ];
+
+  const table = useTableLogic<LeaveUI>({
+    columns,
+    data: leaves,
+  });
+
+
+
+
+  const historyFilters = (
+    <>
+      {/* YEAR FILTER */}
+      <div className="relative">
+        <select
+          value={table.yearFilter}
+          onChange={(e) => table.setYearFilter(e.target.value)}
+          className="
+          appearance-none
+          px-4 py-2
+          pr-9
+          rounded-xl
+          border border-[var(--border)]
+          bg-app
+          text-[10px] font-black uppercase tracking-widest
+          text-muted
+          hover:text-primary hover:border-primary
+          focus:outline-none focus:ring-2 focus:ring-primary/10
+          cursor-pointer
+        "
+        >
+          <option value="">Year: All</option>
+          <option value="2026">Year: 2026</option>
+          <option value="2025">Year: 2025</option>
+        </select>
+
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
+          ▾
+        </span>
+      </div>
+
+      {/* LEAVE TYPE FILTER */}
+      <div className="relative">
+        <select
+          value={table.leaveTypeFilter}
+          onChange={(e) => table.setLeaveTypeFilter(e.target.value)}
+          className="
+          appearance-none
+          px-4 py-2
+          pr-9
+          rounded-xl
+          border border-[var(--border)]
+          bg-app
+          text-[10px] font-black uppercase tracking-widest
+          text-muted
+          hover:text-primary hover:border-primary
+          focus:outline-none focus:ring-2 focus:ring-primary/10
+          cursor-pointer
+        "
+        >
+          <option value="">Type: All</option>
+          <option value="Casual Leave">Type: Casual</option>
+          <option value="Sick Leave">Type: Sick</option>
+        </select>
+
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
+          ▾
+        </span>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="p-8">
+
+      <Table
+        columns={columns}
+        data={table.processedData}
+        loading={loading}
+        showToolbar
+        enableAdd
+        extraFilters={historyFilters}
+        addLabel="New Request"
+        onAdd={onNewRequest}
+        toolbarPlaceholder="Search reason / type..."
+        emptyMessage="No leave requests found."
+        currentPage={page}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+      />
+
+
+
+
+      {/*  DETAILS MODAL  */}
       <Modal
         isOpen={!!selectedLeave}
         onClose={() => setSelectedLeave(null)}
@@ -272,7 +285,7 @@ const handleCancelLeave = async (leave: LeaveRequest) => {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-muted">Type</span>
-                <p className="font-semibold">{selectedLeave.type}</p>
+                <p className="font-semibold">{selectedLeave.leaveType}</p>
               </div>
 
               <div>
@@ -283,13 +296,13 @@ const handleCancelLeave = async (leave: LeaveRequest) => {
               <div>
                 <span className="text-muted">Period</span>
                 <p>
-                  {selectedLeave.start_date} → {selectedLeave.end_date}
+                  {selectedLeave.startDate} → {selectedLeave.endDate}
                 </p>
               </div>
 
               <div>
                 <span className="text-muted">Days</span>
-                <p>{selectedLeave.days}</p>
+                <p>{selectedLeave.totalDays}</p>
               </div>
 
               <div className="col-span-2">
@@ -302,6 +315,13 @@ const handleCancelLeave = async (leave: LeaveRequest) => {
           </Card>
         )}
       </Modal>
+      <LeaveDetailModal
+        leaveId={selectedLeaveId}
+        onClose={() => setSelectedLeaveId(null)}
+      />
+
+
+
     </div>
   );
 };

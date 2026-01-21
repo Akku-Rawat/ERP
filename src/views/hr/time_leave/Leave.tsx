@@ -10,11 +10,18 @@ import EmployeeHistory from "./EmployeeLeaveHistory";
 
 const Leave: React.FC = () => {
   const [tab, setTab] = useState<"leave" | "employeeDashboard" | "leaveApply" | "history" | "employeeHistory" | "setup">("leave");
+const [editLeaveId, setEditLeaveId] = useState<string | null>(null);
+
+const handleGoToApply = () => {
+  setEditLeaveId(null);   
+  setTab("leaveApply");
+};
 
 
-  const handleGoToApply = () => {
-    setTab("leaveApply");
-  };
+  const handleEditLeave = (leaveId: string) => {
+  setEditLeaveId(leaveId);
+  setTab("leaveApply");
+};
 
 
 
@@ -98,13 +105,20 @@ const Leave: React.FC = () => {
         <div>
           {tab === "leave" && <LeaveManagement />}
 
-          {tab === "leaveApply" && <LeaveApply />}
+          {tab === "leaveApply" && <LeaveApply editLeaveId={editLeaveId} />}
+
 
           {tab === "employeeDashboard" && <EmployeeDashboard />}
 
           {tab === "employeeHistory" && <EmployeeHistory />}
 
-          {tab === "history" && <History onNewRequest={handleGoToApply} />}
+      {tab === "history" && (
+  <History
+    onNewRequest={handleGoToApply}
+    onEditLeave={handleEditLeave}
+  />
+)}
+
 
           {tab === "setup" && <Setup />}
 

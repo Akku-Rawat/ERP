@@ -7,24 +7,13 @@ import {
 import { getPendingLeaveRequests } from "../../../api/leaveApi";
 import { updateLeaveStatus } from "../../../api/leaveApi";
 import toast from "react-hot-toast";
-
-
-/*  Types  */
-type LeaveRequest = {
-  id: string;
-  employeeName: string;
-  leaveType: string;
-  startDate: string;
-  endDate: string;
-  days: number;
-  reason: string;
-  status: "OPEN" | "Approved" | "Rejected";
-  appliedOn: string;
-};
+import type { LeaveUI } from "../../../types/leave/uiLeave";
+import { mapLeaveFromApi } from "../../../types/leave/leaveMapper";
 
 /*  Component  */
 const LeaveManagment: React.FC = () => {
- const [requests, setRequests] = useState<LeaveRequest[]>([]);
+const [requests, setRequests] = useState<LeaveUI[]>([]);
+
 const [loading, setLoading] = useState(false);
 const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -37,23 +26,8 @@ useEffect(() => {
   const fetchLeaves = async () => {
     setLoading(true);
     try {
-     const res = await getPendingLeaveRequests(1, 50);
-
-
-    const mapped: LeaveRequest[] = (res.data?.leaves || []).map((l: any) => ({
-  id: l.leaveId,
-  employeeName: l.employee.employeeName ?? "Unknown Employee",
-  leaveType: l.leaveType.name,
-  startDate: l.duration.fromDate,
-  endDate: l.duration.toDate,
-  days: l.duration.totalDays,
-  reason: l.leaveReason || "-",
-  status: l.status, // <-- OPEN from backend
-  appliedOn: l.appliedOn,
-}));
-
-
-      setRequests(mapped);
+      const res = await getPendingLeaveRequests(1, 50);
+      setRequests((res.data?.leaves || []).map(mapLeaveFromApi));
     } finally {
       setLoading(false);
     }
@@ -61,6 +35,7 @@ useEffect(() => {
 
   fetchLeaves();
 }, []);
+
 
  
 
@@ -136,7 +111,8 @@ const rejectLeave = async (id: string) => {
                       </div>
 
                       <div className="text-sm text-muted">
-                        {req.leaveType} • {req.startDate} → {req.endDate} ({req.days} days)
+                        {req.leaveType} • {req.startDate} → {req.endDate} ({req.totalDays} days)
+
                       </div>
                     </div>
 
@@ -149,7 +125,7 @@ const rejectLeave = async (id: string) => {
                     “{req.reason}”
                   </p>
 
-                {req.status === "OPEN" && (
+                {req.status === "Pending" && (
   <div className="mt-4 flex gap-3">
     <button
       disabled={actionLoadingId === req.id}

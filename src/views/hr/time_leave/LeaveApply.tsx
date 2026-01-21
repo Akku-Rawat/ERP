@@ -1,22 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, Clock, FileText, CheckCircle2, X ,XCircle } from "lucide-react";
+import { Calendar, Clock, FileText, CheckCircle2, X  } from "lucide-react";
 import type { DateRange } from "react-day-picker";
-import AdvancedCalendar from "../../../components/Hr/leavemanagemnetmodal/Calendar";
+import AdvancedCalendar from "../../../components/Hr/leave/Calendar";
 import { applyLeave } from "../../../api/leaveApi";
 import { getAllEmployees } from "../../../api/employeeapi";
 import { getEmployeeById } from "../../../api/employeeapi";
 import toast from "react-hot-toast";
+import { getLeaveById, updateLeaveApplication } from "../../../api/leaveApi";
 
 
 
-/*  Types  */
-type LeaveStatus = "APPROVED" | "PENDING" | "REJECTED" | "CANCELLED";
 
-type Leave = {
-  start: Date;
-  end: Date;
-  status: LeaveStatus;
-};
 
 type LeaveFormData = {
   type: string;
@@ -26,16 +20,15 @@ type LeaveFormData = {
   isHalfDay: boolean;
 };
 
-type LeaveType = {
-  id: string;
-  name: string;
-};
+
+interface LeaveApplyProps {
+  editLeaveId?: string | null;
+}
 
 
 
-const LeaveApply: React.FC = () => {
-
-  
+const LeaveApply: React.FC<LeaveApplyProps> = ({ editLeaveId }) => {
+ 
   const [formData, setFormData] = useState<LeaveFormData>({
     type: "",
     startDate: "",
@@ -44,13 +37,13 @@ const LeaveApply: React.FC = () => {
     isHalfDay: false,
   });
 
-  const LEAVE_TYPES: LeaveType[] = [
-    { id: "PL", name: "Privilege Leave" },
-    { id: "SL", name: "Sick Leave" },
-    { id: "CL", name: "Casual Leave" },
-    { id: "LP", name: "Leave Without Pay" },
-    { id: "CO", name: "Compensatory Off" },
-  ];
+const LEAVE_TYPES = [
+  { id: "Privilege Leave", name: "Privilege Leave" },
+  { id: "Sick Leave", name: "Sick Leave" },
+  { id: "Casual Leave", name: "Casual Leave" },
+  { id: "Leave Without Pay", name: "Leave Without Pay" },
+  { id: "Compensatory Off", name: "Compensatory Off" },
+];
 
 
   // const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
@@ -62,7 +55,7 @@ const LeaveApply: React.FC = () => {
     id: string;
     name: string;
   } | null>(null);
-
+ const isEditMode = Boolean(editLeaveId);
 
 
   useEffect(() => {
@@ -72,6 +65,32 @@ const LeaveApply: React.FC = () => {
     };
     fetchEmployees();
   }, []);
+
+  useEffect(() => {
+  if (!editLeaveId) return;
+
+  const fetchLeaveDetail = async () => {
+    try {
+      const res = await getLeaveById(editLeaveId);
+      const l = res.data;
+
+      setEmployeeId(l.employee.employeeId);
+
+      setFormData({
+        type: l.leaveType,
+        startDate: l.fromDate,
+        endDate: l.toDate,
+        isHalfDay: l.isHalfDay,
+        reason: l.leaveReason,
+      });
+    } catch (err) {
+      console.error("Failed to fetch leave", err);
+    }
+  };
+
+  fetchLeaveDetail();
+}, [editLeaveId]);
+
 
 
   useEffect(() => {
@@ -135,6 +154,8 @@ const LeaveApply: React.FC = () => {
     const d = String(date.getDate()).padStart(2, "0");
     return `${y}-${m}-${d}`;
   };
+
+  
 
   const calendarLeaves: Leave[] = [];
   const handleRangeSelect = (range?: DateRange) => {
@@ -222,11 +243,13 @@ const LeaveApply: React.FC = () => {
       leaveToDate: toDate,
       isHalfDay: formData.isHalfDay,
       leaveReason: formData.reason,
-      leaveStatus: "Open",
+     leaveStatus: "Open",
        ...(leaveApprover?.id && { approverId: leaveApprover.id }), //  only include if exists
     };
   };
 
+
+  
 
 
 const handleSubmit = async (e: React.FormEvent) => {
@@ -252,12 +275,26 @@ const handleSubmit = async (e: React.FormEvent) => {
   setLoading(true);
 
   try {
-    await applyLeave(buildPayload());
+    if (isEditMode && editLeaveId) {
+  await updateLeaveApplication({
+    leaveId: editLeaveId,
+    leaveFromDate: formData.startDate,
+    leaveToDate: formData.endDate,
+    isHalfDay: formData.isHalfDay,
+    leaveReason: formData.reason,
+  });
 
-    toast.success("Leave applied successfully");
+  toast.success("Leave updated successfully");
+} else {
+  await applyLeave(buildPayload());
+  toast.success("Leave applied successfully");
+}
 
 
-    handleReset();
+  if (!isEditMode) {
+  handleReset();
+}
+
   } catch (err: any) {
     toast.error("Failed to submit leave request");
   } finally {
@@ -267,16 +304,19 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 
 
-  const handleReset = () => {
-    setFormData({
-      type: "",
-      startDate: "",
-      endDate: "",
-      reason: "",
-      isHalfDay: false,
-    });
-    setSelectedRange(undefined);
-  };
+const handleReset = () => {
+  setFormData({
+    type: "",
+    startDate: "",
+    endDate: "",
+    reason: "",
+    isHalfDay: false,
+  });
+  setSelectedRange(undefined);
+  setEmployeeId("");
+  setLeaveApprover(null);
+};
+
 
   return (
     <div className="bg-app">
@@ -310,15 +350,14 @@ const handleSubmit = async (e: React.FormEvent) => {
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
               {/* LEAVE TYPE + APPROVER */}
               <div className="grid md:grid-cols-2 gap-6">
-                {/* DEV ONLY - REMOVE AFTER LOGIN */}
                 <div>
                   <label className="text-sm font-semibold text-red-600">
                     Select Employee
                   </label>
                   <select
                     value={employeeId}
-                    onChange={(e) => setEmployeeId(e.target.value)}
-                    className="w-full mt-2 px-2 py-1 rounded-xl border"
+  disabled={isEditMode}
+  onChange={(e) => setEmployeeId(e.target.value)}
                   >
                     <option value="">Select employee</option>
                     {employees.map(emp => (
@@ -332,14 +371,15 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <div>
                   <label className="text-sm font-semibold">LEAVE TYPE</label>
                   <select
-                    id="type"
-                    value={formData.type}
-                    onChange={handleChange}
+                  id="type"
+  value={formData.type}
+  disabled={isEditMode}
+  onChange={handleChange}
                     className="w-full mt-2 px-2 py-1 rounded-xl border bg-app"
                   >
                     <option value="">Select Leave Type</option>
                     {LEAVE_TYPES.map((lt) => (
-                      <option key={lt.id} value={lt.name}>
+                      <option key={lt.id} value={lt.id}>
                         {lt.name}
                       </option>
                     ))}
@@ -436,7 +476,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                   className="bg-primary text-white rounded-lg px-4 py-2 flex items-center gap-2 text-sm leading-none"
                 >
                   <CheckCircle2 size={14} />
-                  {loading ? "Submitting..." : "Submit"}
+                  {loading
+  ? isEditMode ? "Updating..." : "Submitting..."
+  : isEditMode ? "Update" : "Submit"}
+
                 </button>
               </div>
 

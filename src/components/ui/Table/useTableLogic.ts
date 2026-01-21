@@ -97,19 +97,18 @@ const [leaveTypeFilter, setLeaveTypeFilter] = React.useState("");
         if (!foundName && !foundEmail) return false;
       }
 
-      if (yearFilter) {
-  const dateValue = row["date"];
-  if (dateValue) {
-    const year = String(dateValue).split("-")[2];
-    if (year !== yearFilter) return false;
-  } else {
-    return false;
-  }
+if (yearFilter) {
+  const dateValue = row["appliedOn"];
+  if (!dateValue) return false;
+
+  const year = String(dateValue).split("-")[0];
+  if (year !== yearFilter) return false;
 }
 
 
+
 if (leaveTypeFilter) {
-  const leaveType = row["type"];
+  const leaveType = row["leaveType"];
   if (
     !leaveType ||
     String(leaveType).toLowerCase() !== leaveTypeFilter.toLowerCase()
@@ -117,6 +116,7 @@ if (leaveTypeFilter) {
     return false;
   }
 }
+
 
 
       if (typeFilter) {

@@ -9,7 +9,6 @@ import {
   TrendingUp,
   AlertCircle,
 } from "lucide-react";
-import { getMyLeaveHistory, getEmployeeLeaveBalance } from "../../../api/leaveApi";
 
 
 /*  Types  */
@@ -63,64 +62,8 @@ const [leaveTypeBalances, setLeaveTypeBalances] = useState<
   }[]
 >([]);
 
-useEffect(() => {
-  const fetchRecentLeaves = async () => {
-    try {
-      const res = await getMyLeaveHistory();
-
-      const mapped = (res.data.leaves || [])
-        .slice(0, 3)
-        .map((l: any) => ({
-          id: l.leaveId,
-          type: l.leaveType.name,
-          startDate: l.duration.fromDate,
-          endDate: l.duration.toDate,
-          days: l.duration.totalDays,
-          reason: l.leaveReason,
-          status:
-            l.status === "OPEN"
-              ? "pending"
-              : l.status === "APPROVED"
-              ? "approved"
-              : "rejected",
-          appliedOn: l.appliedOn,
-        }));
-
-      setRecentRequests(mapped);
-    } catch {
-      setRecentRequests([]);
-    }
-  };
-
-  fetchRecentLeaves();
-}, []);
 
 
-
-useEffect(() => {
-  const fetchLeaveBalance = async () => {
-    const res = await getEmployeeLeaveBalance();
-
-    setEmployeeName(res.data.employeeName ?? "");
-
-    const summary = res.data.summary;
-    const balances = res.data.balances;
-
-    setLeaveSummary(summary);
-
-    setLeaveTypeBalances(
-      balances.map((b: any) => ({
-        type: b.leaveType.name,
-        total: b.total,
-        used: b.used,
-        available: b.available,
-        color: "bg-primary", // UI concern only
-      }))
-    );
-  };
-
-  fetchLeaveBalance();
-}, []);
 
 
   const handleQuickAction = (action: string) => {
