@@ -5,7 +5,7 @@ import { createLeaveAllocation } from "../../../../api/leaveApi";
 import { getAllEmployees } from "../../../../api/employeeapi";
 
 interface Props {
-  employeeId: string;  
+  employeeId: string;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -18,10 +18,7 @@ const LEAVE_TYPES = [
   "Compensatory Off",
 ];
 
-const LeaveAllocationForm: React.FC<Props> = ({
-  onClose,
-  onSuccess,
-}) => {
+const LeaveAllocationForm: React.FC<Props> = ({ onClose, onSuccess }) => {
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
@@ -55,18 +52,17 @@ const LeaveAllocationForm: React.FC<Props> = ({
   /*
      Helpers
      */
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value, type, checked } = e.target;
+const handleChange = (e: any) => {
+  const { name, value, type, checked } = e.target;
 
-    setFormData((p) => ({
-      ...p,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
+  setFormData((prev) => ({
+    ...prev,
+    [name]: type === "checkbox" ? checked : value,
+  }));
+};
+
+
+
 
   const validate = () => {
     if (!formData.employeeId) {
@@ -112,8 +108,7 @@ const LeaveAllocationForm: React.FC<Props> = ({
       onClose();
     } catch (err: any) {
       const msg =
-        err?.response?.data?.message ||
-        "Failed to create leave allocation";
+        err?.response?.data?.message || "Failed to create leave allocation";
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -185,9 +180,9 @@ const LeaveAllocationForm: React.FC<Props> = ({
             >
               <option value="">Select Employee</option>
               {employees.map((e) => (
-                <option key={e.employeeId} value={e.employeeId}>
-                  {e.name} ({e.employeeId})
-                </option>
+      <option key={e.id} value={e.id}>
+  {e.name} ({e.employeeId})
+</option>
               ))}
             </select>
           </div>
@@ -256,14 +251,10 @@ const LeaveAllocationForm: React.FC<Props> = ({
             onClick={() => setShowNotes(!showNotes)}
             className="flex items-center justify-between w-full"
           >
-            <h3 className="text-lg font-bold text-main">
-              Notes
-            </h3>
+            <h3 className="text-lg font-bold text-main">Notes</h3>
             <ChevronDown
               size={20}
-              className={`transition ${
-                showNotes ? "rotate-180" : ""
-              }`}
+              className={`transition ${showNotes ? "rotate-180" : ""}`}
             />
           </button>
 
