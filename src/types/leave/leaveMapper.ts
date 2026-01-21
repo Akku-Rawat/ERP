@@ -1,6 +1,7 @@
 import { STATUS_MAP } from "../leave/leaveStatus";
 import type { BackendStatus } from "../leave/leaveStatus";
 import type { LeaveUI } from "../leave/uiLeave";
+import type { LeaveAllocationUI } from "../leave/uiLeave";
 
 const normalizeStatus = (status: string) => {
   if (!status) return "Pending";
@@ -36,3 +37,20 @@ export const mapLeaveFromApi = (l: any): LeaveUI => ({
 
   appliedOn: l.appliedOn,
 });
+
+
+
+
+export const mapAllocationFromApi = (a: any): LeaveAllocationUI => {
+  const allocated = a.totalLeavesAllocated ?? 0;
+  const remaining = a.unusedLeaves ?? 0;
+
+  return {
+    id: a.id,
+    leaveType: a.leaveType,
+    period: `${a.fromDate} → ${a.toDate}`,
+    allocated,
+    used: allocated - remaining,
+    remaining,
+  };
+};

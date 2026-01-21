@@ -269,52 +269,6 @@ const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
       />
 
 
-
-
-      {/*  DETAILS MODAL  */}
-      <Modal
-        isOpen={!!selectedLeave}
-        onClose={() => setSelectedLeave(null)}
-        title="Leave Details"
-        subtitle="Applied leave information"
-        icon={CalendarDays}
-        maxWidth="md"
-      >
-        {selectedLeave && (
-          <Card title="Leave Information">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-muted">Type</span>
-                <p className="font-semibold">{selectedLeave.leaveType}</p>
-              </div>
-
-              <div>
-                <span className="text-muted">Status</span>
-                <p className="font-semibold">{selectedLeave.status}</p>
-              </div>
-
-              <div>
-                <span className="text-muted">Period</span>
-                <p>
-                  {selectedLeave.startDate} → {selectedLeave.endDate}
-                </p>
-              </div>
-
-              <div>
-                <span className="text-muted">Days</span>
-                <p>{selectedLeave.totalDays}</p>
-              </div>
-
-              <div className="col-span-2">
-                <span className="text-muted">Reason</span>
-                <p className="italic mt-1">
-                  “{selectedLeave.reason}”
-                </p>
-              </div>
-            </div>
-          </Card>
-        )}
-      </Modal>
       <LeaveDetailModal
         leaveId={selectedLeaveId}
         onClose={() => setSelectedLeaveId(null)}

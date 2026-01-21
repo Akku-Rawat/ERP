@@ -8,6 +8,9 @@ import type {
   PendingLeaveResponse,
     UpdateLeaveApplicationPayload,        
   UpdateLeaveApplicationResponse, 
+    CreateLeaveAllocationPayload,
+  CreateLeaveAllocationResponse,
+  LeaveAllocationListResponse,
 } from "../types/leave/leave";
 
 
@@ -23,6 +26,8 @@ const ENDPOINTS = {
   leaveById:`${base_url}.leave.api.get_leave_by_id`,
    cancelLeave: `${base_url}.leave.api.cancel_leave`,
      updateLeaveApplication:`${base_url}.leave.api.update_leave_application`,
+      createLeaveAllocation: `${base_url}.leave_allocation.api.create_leave_allocation`,
+  getLeaveAllocationsByEmployee: `${base_url}.leave_allocation.api.get_leave_allocations_by_employee_id`,
 };
 
 
@@ -132,6 +137,39 @@ export async function updateLeaveApplication(
   const resp = await api.put(
     ENDPOINTS.updateLeaveApplication,
     payload
+  );
+
+  return resp.data;
+}
+
+
+
+
+export async function createLeaveAllocation(
+  payload: CreateLeaveAllocationPayload
+): Promise<CreateLeaveAllocationResponse> {
+  const resp = await api.post(
+    ENDPOINTS.createLeaveAllocation,
+    payload
+  );
+
+  return resp.data;
+}
+
+export async function getLeaveAllocationsByEmployee(
+  employeeId: string,
+  page = 1,
+  pageSize = 10
+): Promise<LeaveAllocationListResponse> {
+  const resp = await api.get(
+    ENDPOINTS.getLeaveAllocationsByEmployee,
+    {
+      params: {
+        employeeId,
+        page,
+        pageSize,
+      },
+    }
   );
 
   return resp.data;

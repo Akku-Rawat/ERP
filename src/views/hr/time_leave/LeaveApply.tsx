@@ -7,6 +7,9 @@ import { getAllEmployees } from "../../../api/employeeapi";
 import { getEmployeeById } from "../../../api/employeeapi";
 import toast from "react-hot-toast";
 import { getLeaveById, updateLeaveApplication } from "../../../api/leaveApi";
+import { getLeaveAllocationsByEmployee } from "../../../api/leaveApi";
+import { mapAllocationFromApi } from "../../../types/leave/leaveMapper";
+import type { LeaveAllocationUI } from "../../../types/leave/uiLeave";
 
 
 
@@ -56,6 +59,33 @@ const LEAVE_TYPES = [
     name: string;
   } | null>(null);
  const isEditMode = Boolean(editLeaveId);
+const [allocations, setAllocations] = useState<LeaveAllocationUI[]>([]);
+const [allocLoading, setAllocLoading] = useState(false);
+
+
+
+useEffect(() => {
+  if (!employeeId) {
+    setAllocations([]);
+    return;
+  }
+
+  const fetchAllocations = async () => {
+    try {
+      setAllocLoading(true);
+      const res = await getLeaveAllocationsByEmployee(employeeId, 1, 50);
+      const list = res.data.allocations || [];
+      setAllocations(list.map(mapAllocationFromApi));
+    } catch {
+      setAllocations([]);
+    } finally {
+      setAllocLoading(false);
+    }
+  };
+
+  fetchAllocations();
+}, [employeeId]);
+
 
 
   useEffect(() => {
@@ -210,8 +240,8 @@ const LEAVE_TYPES = [
    let dayOffDays = 0;
  
   if (formData.startDate && formData.endDate) {
-    const start = new Date(formData.startDate);
-    const end = new Date(formData.endDate);
+    const start = new Date(formData.startDate + "T00:00:00");
+    const end = new Date(formData.endDate + "T00:00:00");
     const current = new Date(start);
 
     while (current <= end) {
@@ -249,6 +279,36 @@ const LEAVE_TYPES = [
   };
 
 
+
+  const hasValidAllocation = () => {
+  if (!formData.type || !formData.startDate) return true;
+
+  const allocation = allocations.find(
+    (a) => a.leaveType === formData.type
+  );
+
+  if (!allocation) {
+    toast.error(
+      "No leave allocation found for this leave type. Please contact HR."
+    );
+    return false;
+  }
+
+  if (allocation.remaining <= 0) {
+    toast.error("No remaining leaves available for this leave type.");
+    return false;
+  }
+
+  if (totalDays > allocation.remaining) {
+    toast.error(
+      `Only ${allocation.remaining} leave(s) remaining for ${formData.type}.`
+    );
+    return false;
+  }
+
+  return true;
+};
+
   
 
 
@@ -271,6 +331,10 @@ const handleSubmit = async (e: React.FormEvent) => {
       toast.error("End date is required");
     return;
   }
+
+  if (!hasValidAllocation()) {
+  return;
+}
 
   setLoading(true);
 
@@ -361,7 +425,7 @@ const handleReset = () => {
                   >
                     <option value="">Select employee</option>
                     {employees.map(emp => (
-                      <option key={emp.id} value={emp.id}>
+                      <option key={emp.employeeId} value={emp.employeeId}>
                         {emp.name} ({emp.id})
                       </option>
                     ))}
@@ -472,7 +536,7 @@ const handleReset = () => {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || allocLoading}
                   className="bg-primary text-white rounded-lg px-4 py-2 flex items-center gap-2 text-sm leading-none"
                 >
                   <CheckCircle2 size={14} />

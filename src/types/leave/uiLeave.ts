@@ -12,3 +12,13 @@ export type LeaveUI = {
   status: UIStatus;
   appliedOn: string;
 };
+
+
+export type LeaveAllocationUI = {
+  id: string;
+  leaveType: string;
+  period: string;          
+  allocated: number;
+  used: number;
+  remaining: number;
+};

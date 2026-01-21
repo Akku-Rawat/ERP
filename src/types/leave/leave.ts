@@ -146,3 +146,50 @@ export type UpdateLeaveApplicationResponse = {
   status: "success" | "fail"; 
   message: string;
  };
+
+
+
+ // Leave Allocation
+
+export type LeaveAllocation = {
+  id: string;                 
+  employeeId: string;
+  leaveType: string;
+  fromDate: string;
+  toDate: string;
+  totalLeavesAllocated: number;
+  unusedLeaves: number;
+};
+
+export type LeaveAllocationListResponse = {
+  status_code: number;
+  status: "success" | "fail";
+  message: string;
+  data: {
+    allocations: LeaveAllocation[];
+    pagination: {
+      page: number;
+      pageSize: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  };
+};
+
+export type CreateLeaveAllocationPayload = {
+  employeeId: string;
+  leaveType: string;
+  fromDate: string;
+  toDate: string;
+  totalLeavesAllocated?: number;
+  addUnusedLeaves?: boolean;
+  notes?: string;
+};
+
+export type CreateLeaveAllocationResponse = {
+  status_code: number;
+  status: "success" | "fail";
+  message: string;
+};
