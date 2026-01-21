@@ -22,12 +22,14 @@ const ENDPOINTS = {
   allLeaveHistory: `${base_url}.leave.api.get_all_leaves`,
   pendingLeaves: `${base_url}.leave.api.get_all_pending_leaves`,
   updateLeaveStatus: `${base_url}.leave.api.update_leave_status`, 
-    leaveHistoryByEmployee:`${base_url}.leave.api.get_leaves_by_employee_id`,
+  leaveHistoryByEmployee:`${base_url}.leave.api.get_leaves_by_employee_id`,
   leaveById:`${base_url}.leave.api.get_leave_by_id`,
-   cancelLeave: `${base_url}.leave.api.cancel_leave`,
-     updateLeaveApplication:`${base_url}.leave.api.update_leave_application`,
-      createLeaveAllocation: `${base_url}.leave_allocation.api.create_leave_allocation`,
+  cancelLeave: `${base_url}.leave.api.cancel_leave`,
+  updateLeaveApplication:`${base_url}.leave.api.update_leave_application`,
+  createLeaveAllocation: `${base_url}.leave_allocation.api.create_leave_allocation`,
   getLeaveAllocationsByEmployee: `${base_url}.leave_allocation.api.get_leave_allocations_by_employee_id`,
+getLeaveBalance : `${base_url}.leave_balance.api.get_employee_leave_balance_report`,
+    getHolidays: `${base_url}.holidays.api.get_holidays`
 };
 
 
@@ -168,6 +170,48 @@ export async function getLeaveAllocationsByEmployee(
         employeeId,
         page,
         pageSize,
+      },
+    }
+  );
+
+  return resp.data;
+}
+
+
+export async function getEmployeeLeaveBalanceReport(params: {
+  employeeId: string;
+  fromDate: string;
+  toDate: string;
+  page?: number;
+  page_size?: number;
+}) {
+  const resp = await api.get(
+    ENDPOINTS.getLeaveBalance,
+    {
+      params: {
+        page: params.page ?? 1,
+        page_size: params.page_size ?? 100,
+        employeeId: params.employeeId,
+        fromDate: params.fromDate,
+        toDate: params.toDate,
+      },
+    }
+  );
+
+  return resp.data;
+}
+
+
+export async function getHolidays(params?: {
+  page?: number;
+  page_size?: number;
+}) {
+  const resp: AxiosResponse = await api.get(
+    ENDPOINTS.getHolidays,
+    {
+      params: {
+        page: params?.page ?? 1,
+        page_size: params?.page_size ?? 20,
       },
     }
   );
