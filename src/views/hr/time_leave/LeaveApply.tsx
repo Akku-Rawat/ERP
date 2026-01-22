@@ -279,6 +279,7 @@ useEffect(() => {
       if (isEditMode && editLeaveId) {
         await updateLeaveApplication({
           leaveId: editLeaveId,
+          leaveType: formData.type, 
           leaveFromDate: formData.startDate,
           leaveToDate: formData.endDate,
           isHalfDay: formData.isHalfDay,
