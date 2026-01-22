@@ -84,30 +84,31 @@ const LeaveApply: React.FC<LeaveApplyProps> = ({ editLeaveId }) => {
     fetchEmployees();
   }, []);
 
-  useEffect(() => {
-    if (!editLeaveId) return;
+useEffect(() => {
+  if (!editLeaveId) return;
 
-    const fetchLeaveDetail = async () => {
-      try {
-        const res = await getLeaveById(editLeaveId);
-        const l = res.data;
+  const fetchLeaveDetail = async () => {
+    try {
+      const res = await getLeaveById(editLeaveId);
+      const l = res.data;
 
-        setEmployeeId(l.employee.id);
+      // MUST use employee.employeeId (DB ID)
+      setEmployeeId(String(l.employee.employeeId));
 
-        setFormData({
-          type: l.leaveType,
-          startDate: l.fromDate,
-          endDate: l.toDate,
-          isHalfDay: l.isHalfDay,
-          reason: l.leaveReason,
-        });
-      } catch (err) {
-        console.error("Failed to fetch leave", err);
-      }
-    };
+      setFormData({
+        type: l.leaveType,
+        startDate: l.fromDate,
+        endDate: l.toDate,
+        isHalfDay: l.isHalfDay,
+        reason: l.leaveReason,
+      });
+    } catch (err) {
+      console.error("Failed to fetch leave", err);
+    }
+  };
 
-    fetchLeaveDetail();
-  }, [editLeaveId]);
+  fetchLeaveDetail();
+}, [editLeaveId]);
 
   useEffect(() => {
     if (!formData.startDate) {
@@ -167,7 +168,7 @@ const LeaveApply: React.FC<LeaveApplyProps> = ({ editLeaveId }) => {
     return `${y}-${m}-${d}`;
   };
 
-  const calendarLeaves: Leave[] = [];
+  const calendarLeaves: any[] = [];
   const handleRangeSelect = (range?: DateRange) => {
     if (!range?.from) return;
 
@@ -376,6 +377,7 @@ const LeaveApply: React.FC<LeaveApplyProps> = ({ editLeaveId }) => {
                     value={employeeId}
                     disabled={isEditMode}
                     onChange={(e) => setEmployeeId(e.target.value)}
+                    className="w-full mt-2 px-2 py-1 rounded-xl border bg-app"
                   >
                     <option value="">Select employee</option>
                     {employees.map((emp) => (
