@@ -175,7 +175,13 @@ const ItemsCategory: React.FC = () => {
   ================================ */
 
   return (
-    <div className="p-8">
+   <div className="p-8">
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="mt-2 text-muted">Loading invoices…</p>
+        </div>
+      ) : (
       
         <Table
           loading={loading}
@@ -200,7 +206,7 @@ const ItemsCategory: React.FC = () => {
           onPageChange={setPage}
         />
       
-
+        )}
       {/* CATEGORY MODAL */}
       <ItemsCategoryModal
         isOpen={showModal}

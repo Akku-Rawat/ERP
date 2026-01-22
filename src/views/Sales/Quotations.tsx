@@ -11,9 +11,11 @@ import ActionButton, {
   ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
+import SalesFilter from "../../components/filters/SalesFilters";
 
 import PdfPreviewModal from "./PdfPreviewModal";
 import { generateQuotationPDF } from "../../components/template/quotation/QuotationTemplate1";
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 interface QuotationTableProps {
   onAddQuotation?: () => void;
@@ -27,6 +29,9 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [quotations, setQuotations] = useState<QuotationSummary[]>([]);
   const [loading, setLoading] = useState(true);
+const [status, setStatus] = useState("");
+const [fromDate, setFromDate] = useState("");
+const [toDate, setToDate] = useState("");
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -47,7 +52,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
   ================================ */
 
   const fetchCompany = async (companyId: string) => {
-    const res = await getCompanyById(companyId);
+    const res = await getCompanyById(COMPANY_ID);
 
     if (!res || res.status_code !== 200) {
       throw new Error("Company fetch failed");
@@ -63,7 +68,12 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
   const fetchQuotations = async () => {
     try {
       setLoading(true);
-      const res = await getAllQuotations(page, pageSize);
+    const res = await getAllQuotations(page, pageSize, {
+      search: searchTerm,
+      status,
+      fromDate,
+      toDate,
+    });
 
       if (!res || res.status_code !== 200) {
         console.error("Invalid response:", res);
@@ -97,10 +107,13 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
       setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchCompany("1").catch(() => toast.error("Failed to load company data"));
+  }, []);
 
   useEffect(() => {
     fetchQuotations();
-  }, [page, pageSize]);
+  },[page, pageSize, searchTerm, status, fromDate, toDate]);
 
   /* ===============================
      ACTIONS
@@ -115,24 +128,25 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
         return;
       }
 
-      const companyData = await fetchCompany("COMP-00003");
+      if (!company) {
+        toast.error("Company data not loaded");
+        return;
+      }
 
       const quotation = quotationRes.data as QuotationData;
       setSelectedQuotation(quotation);
 
-      const url = await generateQuotationPDF(quotation, companyData, "bloburl");
-
+      const url = await generateQuotationPDF(quotation, company, "bloburl");
       setPdfUrl(url as string);
       setPdfOpen(true);
     } catch (error) {
-      console.error("View error:", error);
       toast.error("Failed to generate preview");
     }
   };
 
   const handleDownload = async (
     quotationNumber: string,
-    e?: React.MouseEvent
+    e?: React.MouseEvent,
   ) => {
     e?.stopPropagation();
 
@@ -144,7 +158,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
     try {
       const res = await getQuotationById(quotationNumber);
       if (!res || res.status_code !== 200) return;
-      getCompanyById("COMP-00003");
+      getCompanyById(COMPANY_ID);
 
       await generateQuotationPDF(res.data, company, "save");
       toast.success("Quotation downloaded");
@@ -161,16 +175,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
     setPdfOpen(false);
   };
 
-  /* ===============================
-     FILTER
-  ================================ */
-  const filteredQuotations = quotations.filter(
-    (q) =>
-      String(q.quotationNumber)
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      q.customerName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
 
   /* ===============================
      TABLE COLUMNS
@@ -232,14 +237,24 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
       ) : (
         <Table
           loading={loading}
-          serverSide
+          serverSide={true}
           columns={columns}
-          data={filteredQuotations}
+          data={quotations}
           rowKey={(row) => row.quotationNumber}
           showToolbar
           searchValue={searchTerm}
           onSearch={setSearchTerm}
           enableColumnSelector
+           extraFilters={
+    <SalesFilter
+      status={status}
+      setStatus={setStatus}
+      fromDate={fromDate}
+      setFromDate={setFromDate}
+      toDate={toDate}
+      setToDate={setToDate}
+    />
+  }
           enableAdd
           addLabel="Add Quotation"
           onAdd={onAddQuotation}

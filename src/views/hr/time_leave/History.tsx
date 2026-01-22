@@ -1,172 +1,281 @@
-import React, { useMemo, useState } from "react";
-import {
-  FaClipboardList,
-  FaCalendarAlt,
-  FaClock,
-  FaEye,
-  FaCopy,
-  FaPlus,
-} from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { FaCalendarAlt, FaClock } from "react-icons/fa";
+import { CalendarDays, XCircle } from "lucide-react";
+import Table from "../../../components/ui/Table/Table";
+import StatusBadge from "../../../components/ui/Table/StatusBadge";
+import ActionButton from "../../../components/ui/Table/ActionButton";
+import Modal from "../../../components/ui/modal/modal";
+import { Card } from "../../../components/ui/modal/formComponent";
+import type { Column } from "../../../components/ui/Table/type";
+import { useTableLogic } from "../../../components/ui/Table/useTableLogic";
+import { getLeaveHistoryByEmployee } from "../../../api/leaveApi";
+import LeaveDetailModal from "../../../components/Hr/leave/LeaveDetailModal";
+import { cancelLeave } from "../../../api/leaveApi";
+import type { LeaveUI } from "../../../types/leave/uiLeave";
+import { mapLeaveFromApi } from "../../../types/leave/leaveMapper";
 
-/* ---------- Mock Types ---------- */
-type LeaveRequest = {
-  id: string;
-  type: string;
-  status: "Approved" | "Pending" | "Rejected";
-  start_date: string;
-  end_date: string;
-  days: number;
-  reason: string;
-  date: string;
-};
 
-/* ---------- Mock Data ---------- */
-const MOCK_LEAVES: LeaveRequest[] = [
-  {
-    id: "1",
-    type: "Casual Leave",
-    status: "Approved",
-    start_date: "2026-01-14",
-    end_date: "2026-01-16",
-    days: 3,
-    reason: "Family function",
-    date: "12-01-2026",
-  },
-  {
-    id: "2",
-    type: "Sick Leave",
-    status: "Pending",
-    start_date: "2026-01-20",
-    end_date: "2026-01-20",
-    days: 1,
-    reason: "Fever",
-    date: "18-01-2026",
-  },
-];
+
 
 interface HistoryProps {
   onNewRequest: () => void;
+  onEditLeave: (leaveId: string) => void;
 }
 
 
-/* ---------- Component ---------- */
-const History: React.FC<HistoryProps> = ({ onNewRequest }) => {
+const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
+  const [selectedLeave, setSelectedLeave] = useState<LeaveUI | null>(null);
+  const [leaves, setLeaves] = useState<LeaveUI[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedLeaveId, setSelectedLeaveId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const [search, setSearch] = useState("");
-  const [showAll, setShowAll] = useState(false);
 
-  const filtered = useMemo(() => {
-    let data = MOCK_LEAVES;
 
-    if (search) {
-      data = data.filter(
-        (l) =>
-          l.type.toLowerCase().includes(search.toLowerCase()) ||
-          l.reason.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    const fetchHistory = async () => {
+      setLoading(true);
+      try {
+        const res = await getLeaveHistoryByEmployee("20", page, pageSize);
+
+        setLeaves(res.data.leaves.map(mapLeaveFromApi));
+
+        const pg = res.data.pagination;
+        if (pg) {
+          setTotalItems(pg.total);
+          setTotalPages(pg.total_pages);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [page, pageSize]);
+
+
+
+
+
+  const handleCancelLeave = async (leaveId: string) => {
+    try {
+      setLoading(true);
+
+      await cancelLeave(leaveId);
+
+      // Update UI without refetch
+      setLeaves((prev) =>
+        prev.map((l) =>
+          l.id === leaveId
+            ? { ...l, status: "Cancelled" }
+            : l
+        )
       );
+    } catch (err) {
+      console.error("Cancel leave failed", err);
+    } finally {
+      setLoading(false);
     }
-
-    return showAll ? data : data.slice(0, 5);
-  }, [search, showAll]);
-
-  return (
-    <div className="bg-app">
-      <div className="max-w-6xl mx-auto bg-card border border-theme rounded-2xl overflow-hidden">
-
-       {/* Header */}
-<div className="p-4 border-b border-theme flex items-center justify-between gap-4">
-  
-  
-
-  {/* Middle: Search */}
-  <div className="max-w-xs">
-    <input
-      type="text"
-      placeholder="Search leaves..."
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-      className="w-full px-3 py-2 border border-theme rounded-xl bg-app text-main text-sm"
-    />
-  </div>
-
-  {/* Right: New Request */}
-  <button
-    onClick={onNewRequest}
-    className="px-4 py-2 bg-primary text-white rounded-xl text-sm flex items-center gap-2 whitespace-nowrap"
-  >
-    <FaPlus size={12} />
-    New Request
-  </button>
-</div>
+  };
 
 
-       
 
-        {/* List */}
-        <div className="p-4 space-y-3 max-h-[500px] overflow-auto">
-          {filtered.length === 0 ? (
-            <div className="text-center text-muted py-10">
-              No leave requests found
-            </div>
+
+  /*  Columns */
+  const columns: Column<LeaveUI>[] = [
+
+    {
+      key: "type",
+      header: "Type",
+      align: "left",
+      render: (l) => (
+        <div>
+          <div className="font-semibold">{l.leaveType}</div>
+          <div className="text-xs text-muted italic">{l.reason}</div>
+        </div>
+      ),
+    },
+    {
+      key: "period",
+      header: "Period",
+      render: (l) => (
+        <span className="text-xs">
+          <FaCalendarAlt className="inline mr-1 text-muted" />
+          {l.startDate} → {l.endDate}
+        </span>
+      ),
+    },
+    {
+      key: "days",
+      header: "Days",
+      align: "center",
+      render: (l) => (
+        <span className="inline-flex items-center gap-1">
+          <FaClock className="text-muted" />
+          {l.totalDays}
+        </span>
+      ),
+    },
+
+    {
+      key: "appliedOn",
+      header: "Applied",
+      render: (l) => l.appliedOn,
+    },
+
+    {
+      key: "status",
+      header: "Status",
+      align: "left",
+      render: (l) => <StatusBadge status={l.status} />,
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      align: "center",
+      render: (l) => (
+        <div className="flex items-center justify-center gap-3 min-w-[72px]">
+          {/* View */}
+          <ActionButton
+            type="view"
+            iconOnly
+            onClick={() => setSelectedLeaveId(l.id)}
+
+          />
+
+          {/* Cancel (only for Pending, but space stays consistent) */}
+          {l.status === "Pending" ? (
+            <ActionButton
+              type="custom"
+              variant="danger"
+              iconOnly
+              icon={<XCircle className="w-4 h-4" />}
+              onClick={() => handleCancelLeave(l.id)}
+            />
           ) : (
-            filtered.map((req) => (
-              <div
-                key={req.id}
-                className="bg-card border border-theme rounded-xl p-4 row-hover transition"
-              >
-                <div className="flex justify-between items-center mb-2">
-                  <div className="font-semibold text-main">
-                    {req.type}
-                  </div>
-                  <span className="text-xs text-muted">
-                    {req.status}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-muted mb-3">
-                  <div className="flex items-center gap-2">
-                    <FaCalendarAlt size={12} />
-                    {req.start_date} → {req.end_date}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FaClock size={12} />
-                    {req.days} days
-                  </div>
-                  <div>Applied: {req.date}</div>
-                </div>
-
-                <p className="text-xs text-main italic mb-3">
-                  “{req.reason}”
-                </p>
-
-                <div className="flex gap-2">
-                  <button className="px-3 py-1.5 border border-theme rounded-lg text-xs text-main">
-                    <FaEye className="inline mr-1" />
-                    Details
-                  </button>
-                  {req.status === "Approved" && (
-                    <button className="px-3 py-1.5 border border-theme rounded-lg text-xs text-main">
-                      <FaCopy className="inline mr-1" />
-                      Apply Again
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
+            <span className="w-8 h-8" />
           )}
 
-          {MOCK_LEAVES.length > 5 && (
-            <div className="text-center">
-              <button
-                onClick={() => setShowAll(!showAll)}
-                className="text-sm text-primary"
-              >
-                {showAll ? "Show Less" : "See More"}
-              </button>
-            </div>
+          {l.status === "Pending" && (
+   <ActionButton
+  type="edit"
+  iconOnly
+  onClick={() => onEditLeave(l.id)}
+/>
+
+
           )}
         </div>
+      ),
+    }
+  ];
+
+  const table = useTableLogic<LeaveUI>({
+    columns,
+    data: leaves,
+  });
+
+
+
+
+  const historyFilters = (
+    <>
+      {/* YEAR FILTER */}
+      <div className="relative">
+        <select
+          value={table.yearFilter}
+          onChange={(e) => table.setYearFilter(e.target.value)}
+          className="
+          appearance-none
+          px-4 py-2
+          pr-9
+          rounded-xl
+          border border-[var(--border)]
+          bg-app
+          text-[10px] font-black uppercase tracking-widest
+          text-muted
+          hover:text-primary hover:border-primary
+          focus:outline-none focus:ring-2 focus:ring-primary/10
+          cursor-pointer
+        "
+        >
+          <option value="">Year: All</option>
+          <option value="2026">Year: 2026</option>
+          <option value="2025">Year: 2025</option>
+        </select>
+
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
+          ▾
+        </span>
       </div>
+
+      {/* LEAVE TYPE FILTER */}
+      <div className="relative">
+        <select
+          value={table.leaveTypeFilter}
+          onChange={(e) => table.setLeaveTypeFilter(e.target.value)}
+          className="
+          appearance-none
+          px-4 py-2
+          pr-9
+          rounded-xl
+          border border-[var(--border)]
+          bg-app
+          text-[10px] font-black uppercase tracking-widest
+          text-muted
+          hover:text-primary hover:border-primary
+          focus:outline-none focus:ring-2 focus:ring-primary/10
+          cursor-pointer
+        "
+        >
+          <option value="">Type: All</option>
+          <option value="Casual Leave">Type: Casual</option>
+          <option value="Sick Leave">Type: Sick</option>
+        </select>
+
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
+          ▾
+        </span>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="p-8">
+
+      <Table
+        columns={columns}
+        data={table.processedData}
+        loading={loading}
+        showToolbar
+        enableAdd
+        extraFilters={historyFilters}
+        addLabel="New Request"
+        onAdd={onNewRequest}
+        toolbarPlaceholder="Search reason / type..."
+        emptyMessage="No leave requests found."
+        currentPage={page}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+      />
+
+
+      <LeaveDetailModal
+        leaveId={selectedLeaveId}
+        onClose={() => setSelectedLeaveId(null)}
+      />
+
+
+
     </div>
   );
 };

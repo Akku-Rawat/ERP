@@ -8,6 +8,7 @@ import type { InvoiceSummary, Invoice } from "../../types/invoice";
 import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTemplate1";
 import PdfPreviewModal from "./PdfPreviewModal";
 import toast from "react-hot-toast";
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 import Table from "../../components/ui/Table/Table";
 
@@ -55,11 +56,18 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
-
+  const [company, setCompany] = useState<Company | null>(null);
   const [openStatusMenuFor, setOpenStatusMenuFor] = useState<string | null>(
     null,
   );
-
+  const fetchCompany = async () => {
+    const res = await getCompanyById(COMPANY_ID); // valid ID
+    if (!res || res.status_code !== 200) {
+      throw new Error("Company fetch failed");
+    }
+    setCompany(res.data);
+    return res.data;
+  };
   const fetchInvoices = async () => {
     try {
       setLoading(true);
@@ -89,6 +97,9 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchCompany().catch(() => toast.error("Failed to load company data"));
+  }, []);
 
   useEffect(() => {
     fetchInvoices();
@@ -100,38 +111,40 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   ) => {
     e?.stopPropagation();
 
-    const [invoiceRes, companyRes] = await Promise.all([
-      getSalesInvoiceById(invoiceNumber),
-      getCompanyById("COMP-00003"),
-    ]);
+    try {
+      if (!company) {
+        toast.error("Company data not loaded");
+        return;
+      }
 
-    const invoice = invoiceRes.data as Invoice;
-    const company = companyRes.data as Company;
+      const invoiceRes = await getSalesInvoiceById(invoiceNumber);
+      const invoice = invoiceRes.data as Invoice;
 
-    setSelectedInvoice(invoice);
+      setSelectedInvoice(invoice);
 
-    const url = await generateInvoicePDF(invoice, company, "bloburl");
-    setPdfUrl(url as string);
-    setPdfOpen(true);
+      const url = await generateInvoicePDF(invoice, company, "bloburl");
+      setPdfUrl(url as string);
+      setPdfOpen(true);
+    } catch {
+      toast.error("Failed to generate preview");
+    }
   };
 
   const handleDownload = async (inv: InvoiceSummary, e?: React.MouseEvent) => {
     e?.stopPropagation();
 
     try {
-      const [invoiceRes, companyRes] = await Promise.all([
-        getSalesInvoiceById(inv.invoiceNumber),
-        getCompanyById("COMP-00003"),
-      ]);
+      if (!company) {
+        toast.error("Company data not loaded");
+        return;
+      }
 
+      const invoiceRes = await getSalesInvoiceById(inv.invoiceNumber);
       const invoice = invoiceRes.data as Invoice;
-      const company = companyRes.data as Company;
 
       await generateInvoicePDF(invoice, company, "save");
-
       toast.success("Invoice downloaded successfully!");
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Failed to download invoice");
     }
   };
@@ -302,7 +315,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
           showToolbar
           loading={loading}
           serverSide
-         
           enableAdd
           addLabel="Add Invoice"
           onAdd={onAddInvoice}
@@ -316,10 +328,10 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
           pageSize={pageSize}
           totalItems={totalItems}
           pageSizeOptions={[10, 25, 50, 100]}
-  onPageSizeChange={(size) => {
-    setPageSize(size);
-    setPage(1); // reset page
-  }}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1); // reset page
+          }}
           onPageChange={setPage}
         />
       )}
@@ -330,7 +342,9 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
         pdfUrl={pdfUrl}
         onClose={handleClosePdf}
         onDownload={() =>
-          selectedInvoice && generateInvoicePDF(selectedInvoice, "save")
+          selectedInvoice &&
+          company &&
+          generateInvoicePDF(selectedInvoice, company, "save")
         }
       />
     </div>

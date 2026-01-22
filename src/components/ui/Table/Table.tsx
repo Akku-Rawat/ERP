@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTableLogic } from "./useTableLogic";
-import type { Column } from "../Table/type";
+import type { Column } from "./type";
 import ColumnSelector from "./ColumnSelector";
 import Pagination from "../../Pagination";
 import {
@@ -18,6 +18,7 @@ interface TableProps<T> {
   onRowClick?: (item: T) => void;
   loading?: boolean;
   emptyMessage?: string;
+  extraFilters?: React.ReactNode;
   showToolbar?: boolean;
   enableAdd?: boolean;
   enableExport?: boolean;
@@ -53,130 +54,6 @@ const SkeletonRow: React.FC<{ columnsCount: number }> = ({ columnsCount }) => (
   </tr>
 );
 
-/**
- * Filter dropdown component
- */
-interface FilterDropdownProps {
-  isOpen: boolean;
-  onClose: () => void;
-  anchorRef: React.RefObject<HTMLButtonElement>;
-  nameFilter: string;
-  setNameFilter: (value: string) => void;
-  typeFilter: string;
-  setTypeFilter: (value: string) => void;
-  onReset: () => void;
-}
-
-function FilterDropdown({
-  isOpen,
-  onClose,
-  anchorRef,
-  nameFilter,
-  setNameFilter,
-  typeFilter,
-  setTypeFilter,
-  onReset,
-}: FilterDropdownProps) {
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{
-    top: number;
-    left: number;
-  } | null>(null);
-
-  useLayoutEffect(() => {
-    if (isOpen && anchorRef.current) {
-      const rect = anchorRef.current.getBoundingClientRect();
-      const dropdownWidth = 320;
-      setPosition({
-        top: rect.bottom + window.scrollY + 8,
-        left: Math.max(rect.right + window.scrollX - dropdownWidth, 8),
-      });
-    }
-  }, [isOpen, anchorRef]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(target) &&
-        anchorRef.current &&
-        !anchorRef.current.contains(target)
-      ) {
-        onClose();
-      }
-    };
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [isOpen, onClose, anchorRef]);
-
-  if (!isOpen || !position) return null;
-
-  return createPortal(
-    <div
-      ref={dropdownRef}
-      className="fixed w-80 bg-card border border-[var(--border)] rounded-2xl shadow-2xl z-[9999] overflow-hidden"
-      style={{ top: position.top, left: position.left }}
-    >
-      <div className="px-5 py-3 border-b border-[var(--border)] bg-row-hover/30">
-        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-main">
-          Filter Records
-        </h4>
-      </div>
-      <div className="p-5 space-y-4">
-        <FilterField label="Search Keywords">
-          <input
-            type="text"
-            value={nameFilter}
-            onChange={(e) => setNameFilter(e.target.value)}
-            className="w-full px-4 py-2.5 bg-app border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
-            placeholder="Enter keywords..."
-          />
-        </FilterField>
-        <FilterField label="Category/Type">
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="w-full px-4 py-2.5 bg-app border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
-          >
-            <option value="">All Categories</option>
-            <option value="Individual">Individual</option>
-            <option value="Company">Company</option>
-          </select>
-        </FilterField>
-      </div>
-      <div className="px-5 py-3 border-t border-[var(--border)] bg-row-hover/10 flex items-center justify-between">
-        <button
-          onClick={onReset}
-          className="text-[10px] font-black uppercase text-muted hover:text-danger transition-colors"
-        >
-          Reset
-        </button>
-        <button
-          onClick={onClose}
-          className="bg-primary text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-md hover:opacity-90 transition-all"
-        >
-          Apply
-        </button>
-      </div>
-    </div>,
-    document.body
-  );
-}
 
 interface FilterFieldProps {
   label: string;
@@ -199,6 +76,7 @@ function Table<T extends Record<string, any>>({
   columns,
   data,
   onRowClick,
+   extraFilters,
   rowKey,
   loading = false,
   emptyMessage = "No records found.",
@@ -228,14 +106,7 @@ function Table<T extends Record<string, any>>({
     setVisibleKeys,
     allKeys,
     toggleColumn,
-    filtersOpen,
-    setFiltersOpen,
-    nameFilter,
-    setNameFilter,
-    typeFilter,
-    setTypeFilter,
-    setMinFilter,
-    setMaxFilter,
+ 
     sortOrder,
     setSortOrder,
     processedData,
@@ -254,12 +125,6 @@ function Table<T extends Record<string, any>>({
     }
   };
 
-  const handleResetFilters = () => {
-    setNameFilter("");
-    setTypeFilter("");
-    setMinFilter("");
-    setMaxFilter("");
-  };
 
   const displayData = serverSide ? data : (processedData ?? []);
  const visibleColumns = loading ? columns : columns.filter((col) => visibleKeys.includes(col.key));
@@ -290,25 +155,15 @@ function Table<T extends Record<string, any>>({
             )}
           </div>
 
-          {/* Action Buttons */}
-          {onPageSizeChange && (
-                <div className="flex items-center gap-2">
-                  <label className="text-[9px] font-black uppercase text-muted tracking-[0.2em] opacity-50">
-                    Show:
-                  </label>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                    className="px-3 py-1.5 bg-app border border-[var(--border)] rounded-lg text-[10px] font-black uppercase text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
-                  >
-                    {pageSizeOptions.map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+      {extraFilters && (
+  <div className="flex items-center gap-4 shrink-0">
+    {extraFilters}
+  </div>
+)}
+
+
+
+         
           
           <div className="flex items-center gap-2 shrink-0">
             {loading ? (
@@ -342,31 +197,8 @@ function Table<T extends Record<string, any>>({
                   </span>
                 </button>
 
-                <button
-                  ref={filterButtonRef}
-                  onClick={() => setFiltersOpen(!filtersOpen)}
-                  className={`p-2 rounded-xl border border-[var(--border)] bg-app text-muted hover:text-primary hover:border-primary transition-all flex items-center gap-2 px-3 whitespace-nowrap ${
-                    filtersOpen
-                      ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
-                      : ""
-                  }`}
-                >
-                  <FaFilter size={10} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">
-                    Filters
-                  </span>
-                </button>
+              
 
-                <FilterDropdown
-                  isOpen={filtersOpen}
-                  onClose={() => setFiltersOpen(false)}
-                  anchorRef={filterButtonRef}
-                  nameFilter={nameFilter}
-                  setNameFilter={setNameFilter}
-                  typeFilter={typeFilter}
-                  setTypeFilter={setTypeFilter}
-                  onReset={handleResetFilters}
-                />
 
                 {enableColumnSelector && (
                   <ColumnSelector
@@ -486,6 +318,25 @@ function Table<T extends Record<string, any>>({
 
              
             </div>
+             {/* Action Buttons */}
+          {onPageSizeChange && (
+                <div className="flex items-center gap-2">
+                  <label className="text-[9px] font-black uppercase text-muted tracking-[0.2em] opacity-50">
+                    Show:
+                  </label>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                    className="px-3 py-1.5 bg-app border border-[var(--border)] rounded-lg text-[10px] font-black uppercase text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
+                  >
+                    {pageSizeOptions.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
             <Pagination
               currentPage={currentPage || 1}

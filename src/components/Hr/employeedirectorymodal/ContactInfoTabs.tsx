@@ -19,7 +19,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Personal Email *
+              Personal Email <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -30,7 +30,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Company Email
+              Company Email *<span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -44,7 +44,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Phone Number *
+              Phone Number * <span className="text-red-500">*</span>
             </label>
             <input
               type="tel"
@@ -56,7 +56,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Alternate Phone
+              Alternate Phone  *<span className="text-red-500">*</span>
             </label>
             <input
               type="tel"
@@ -147,7 +147,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Name
+              Name  *<span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -160,7 +160,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Phone
+              Phone   *<span className="text-red-500">*</span>
             </label>
             <input
               type="tel"

@@ -8,7 +8,7 @@ import {
 } from "../../api/proformaInvoiceApi";
 
 import { getCompanyById } from "../../api/companySetupApi";
-
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 import type {
   ProformaInvoice,
   ProformaInvoiceSummary,
@@ -68,7 +68,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   ================================ */
 
   const fetchCompany = async (companyId: string) => {
-    const res = await getCompanyById(companyId);
+    const res = await getCompanyById(COMPANY_ID);
 
     if (!res || res.status_code !== 200) {
       throw new Error("Company fetch failed");
@@ -105,6 +105,9 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
       setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchCompany("1").catch(() => toast.error("Failed to load company data"));
+  }, []);
 
   useEffect(() => {
     fetchInvoices();
@@ -123,20 +126,22 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
         return;
       }
 
-      const companyData = await fetchCompany("COMP-00003");
+      if (!company) {
+        toast.error("Company data not loaded");
+        return;
+      }
 
       setSelectedInvoice(res.data);
 
       const url = await generateProformaInvoicePDF(
         res.data,
-        companyData,
-        "bloburl"
+        company,
+        "bloburl",
       );
 
       setPdfUrl(url as string);
       setPdfOpen(true);
-    } catch (error) {
-      console.error("View error:", error);
+    } catch {
       toast.error("Failed to generate preview");
     }
   };
@@ -145,23 +150,24 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
     e?.stopPropagation();
 
     try {
+      if (!company) {
+        toast.error("Company data not loaded");
+        return;
+      }
+
       const res = await getProformaInvoiceById(proformaId);
       if (!res || res.status_code !== 200) return;
 
-      const companyData = await fetchCompany("COMP-00003");
-
-      await generateProformaInvoicePDF(res.data, companyData, "save");
-
+      await generateProformaInvoicePDF(res.data, company, "save");
       toast.success("Proforma invoice downloaded");
-    } catch (error) {
-      console.error("Download error:", error);
+    } catch {
       toast.error("Download failed");
     }
   };
 
   const handleStatusChange = async (
     proformaId: string,
-    status: InvoiceStatus
+    status: InvoiceStatus,
   ) => {
     if (
       CRITICAL_STATUSES.includes(status) &&
@@ -178,8 +184,8 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
 
     setInvoices((prev) =>
       prev.map((inv) =>
-        inv.proformaId === proformaId ? { ...inv, status } : inv
-      )
+        inv.proformaId === proformaId ? { ...inv, status } : inv,
+      ),
     );
 
     toast.success(`Marked as ${status}`);
@@ -206,7 +212,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   const filteredInvoices = invoices.filter(
     (inv) =>
       inv.proformaId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inv.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+      inv.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   /* ===============================
@@ -282,7 +288,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
                 label: `Mark as ${status}`,
                 danger: status === "Paid",
                 onClick: () => handleStatusChange(inv.proformaId, status),
-              })
+              }),
             )}
           />
         </ActionGroup>

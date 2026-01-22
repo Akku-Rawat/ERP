@@ -67,7 +67,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, icon, options, children, className = "", ...props }, ref) => (
+  ({ label, icon, options = [], className = "", ...props }, ref) => (
     <label className="flex flex-col gap-2 text-sm w-full group">
       <span className="font-semibold text-muted flex items-center gap-2 group-focus-within:text-primary transition-colors">
         {icon && (
@@ -82,6 +82,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       <select
         ref={ref}
         {...props}
+        value={props.value ?? ""}
         className={[
           "w-full rounded-lg border-2 px-4 py-2.5 text-sm",
           "focus:outline-none focus:border-primary transition-all",
@@ -92,19 +93,25 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           className,
         ].join(" ")}
       >
-        {/* 🔹 options prop support */}
-        {options?.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
+      
+        <option value="" disabled>
+          Select
+        </option>
 
-        {/* 🔹 children fallback */}
-        {children}
+       {options.map((opt, idx) => (
+  <option
+    key={`${opt.value}-${idx}`}   
+    value={opt.value}
+  >
+    {opt.label}
+  </option>
+))}
+
       </select>
     </label>
   ),
 );
+
 Select.displayName = "Select";
 
 Select.displayName = "Select";

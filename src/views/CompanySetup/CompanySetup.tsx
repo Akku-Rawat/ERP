@@ -16,6 +16,7 @@ import BuyingSelling from "./BuyingSelling";
 import SubscribedModules from "./subscribedmodule";
 import BankDetails from "./BankDetails";
 import Upload from "./upload";
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID as string;
 
 import type {
   CompanyDocuments,
@@ -92,7 +93,7 @@ const CompanySetup: React.FC = () => {
   const fetchCompanyDetail = async () => {
     try {
       setLoading(true);
-      const response = await getCompanyById("COMP-00003");
+      const response = await getCompanyById(COMPANY_ID);
       setCompanyDetail(response.data as Company);
 
       // console.log("response: ", response);

@@ -90,7 +90,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               {/* Basic Salary */}
               <div>
                 <label className="block text-xs text-gray-600 mb-2 font-medium">
-                  Basic Salary (ZMW) *
+                  Basic Salary (ZMW) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -350,7 +350,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
             <div className="space-y-3">
               <div>
                 <label className="block text-xs text-gray-600 mb-1 font-medium">
-                  Account Type
+                  Account Type <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.accountType || "Savings"}
@@ -365,7 +365,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               </div>
               <div>
                 <label className="block text-xs text-gray-600 mb-1 font-medium">
-                  Account Name *
+                  Account Name *<span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -379,7 +379,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               </div>
               <div>
                 <label className="block text-xs text-gray-600 mb-1 font-medium">
-                  Account Number *
+                  Account Number *<span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -393,7 +393,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               </div>
               <div>
                 <label className="block text-xs text-gray-600 mb-1 font-medium">
-                  Bank Name *
+                  Bank Name *<span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -407,7 +407,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               </div>
               <div>
                 <label className="block text-xs text-gray-600 mb-1 font-medium">
-                  Branch Code
+                  Branch Code<span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"

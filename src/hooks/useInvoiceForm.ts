@@ -14,6 +14,7 @@ import { CloudCog } from "lucide-react";
 type InvoiceMode = "invoice" | "proforma";
 
 const ITEMS_PER_PAGE = 5;
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 type NestedSection =
   | "billingAddress"
@@ -47,6 +48,16 @@ export const useInvoiceForm = (
       invoiceType: mode === "proforma" ? "Non-Export" : prev.invoiceType,
     }));
   }, [isOpen, mode]);
+  const setInvoiceFromApi = (invoice: any) => {
+  setFormData((prev: any) => ({
+    ...prev,
+    ...invoice,
+    items: invoice.items,
+  }));
+
+  setCustomerDetails(invoice.customer);
+};
+
 
   useEffect(() => {
     if (!isOpen) return;
@@ -141,7 +152,7 @@ const getCountryCode = (
     try {
       const [customerRes, companyRes] = await Promise.all([
         getCustomerByCustomerCode(id),
-        getCompanyById("COMP-00003"),
+        getCompanyById(COMPANY_ID),
       ]);
       console.log("Submitting customerId:", id);
 
@@ -233,34 +244,52 @@ const countryCode = getCountryCode(
     }
   };
 
-  const handleItemSelect = async (index: number, itemId: string) => {
-    try {
-      const res = await getItemByItemCode(itemId);
-      if (!res || res.status_code !== 200) return;
+ const handleItemSelect = async (index: number, itemId: string) => {
+  const currentItem = formData.items[index];
 
-      const data = res.data;
-      setFormData((prev) => {
-        const items = [...prev.items];
+  // 🔒 Invoice-loaded item → do NOT auto override
+  if (currentItem?._fromInvoice) {
+    setFormData((prev) => {
+      const items = [...prev.items];
+      items[index] = {
+        ...items[index],
+        itemCode: itemId,
+        _fromInvoice: false, // unlock for user edits
+      };
+      return { ...prev, items };
+    });
+    return;
+  }
 
-        items[index] = {
-          ...items[index],
-          itemCode: data.id,
-          description: data.itemDescription ?? data.itemName ?? "",
-          price: data.sellingPrice ?? items[index].price,
-          vatRate: data.taxPerct ?? 0,
-          vatCode:
-  formData.invoiceType === "Export"
-    ? "C1"
-    : data.taxCode ?? "",
 
-        };
+  try {
+    const res = await getItemByItemCode(itemId);
+    if (!res || res.status_code !== 200) return;
 
-        return { ...prev, items };
-      });
-    } catch (err) {
-      console.error("Failed to fetch item details", err);
-    }
-  };
+    const data = res.data;
+
+    setFormData((prev) => {
+      const items = [...prev.items];
+
+      items[index] = {
+        ...items[index],
+        itemCode: data.id,
+        description: data.itemDescription ?? data.itemName ?? "",
+        price: data.sellingPrice ?? items[index].price,
+        vatRate: data.taxPerct ?? 0,
+        vatCode:
+          prev.invoiceType === "Export"
+            ? "C1"
+            : data.taxCode ?? "",
+      };
+
+      return { ...prev, items };
+    });
+  } catch (err) {
+    console.error("Failed to fetch item details", err);
+  }
+};
+
 
   /* ---------------- ITEMS ---------------- */
 
@@ -303,6 +332,50 @@ const countryCode = getCountryCode(
       return { ...prev, items };
     });
   };
+const setFormDataFromInvoice = async (invoice: any) => {
+  setFormData((prev: any) => ({
+    ...prev,
+    
+
+    // ===== BASIC INFO =====
+    invoiceNumber: invoice.invoiceNumber,
+    invoiceType: invoice.invoiceType ?? "",
+    invoiceStatus: invoice.invoiceStatus ?? "",
+    currencyCode: invoice.currencyCode,
+    dateOfInvoice: invoice.dateOfInvoice,
+    dueDate: invoice.dueDate,
+
+    // ===== ADDRESSES =====
+    billingAddress: invoice.billingAddress ?? prev.billingAddress,
+    shippingAddress: invoice.shippingAddress ?? prev.shippingAddress,
+
+    // ===== ITEMS =====
+items: invoice.items.map((it: any) => {
+  const base = Number(it.quantity ?? 0) * Number(it.price ?? 0)
+               - Number(it.discount ?? 0);
+
+  const taxAmount = Number(it.vatTaxableAmount ?? 0);
+  const taxRate =
+    base > 0 ? Number(((taxAmount / base) * 100).toFixed(2)) : 0;
+
+  return {
+    itemCode: it.itemCode,
+    description: it.description ?? "",
+    quantity: Number(it.quantity ?? 0),   // ✅ FIXED
+    price: Number(it.price ?? 0),
+    discount: Number(it.discount ?? 0),
+    vatRate: taxRate,                     // ✅ % calculated
+    vatCode: it.vatCode ?? "",
+    _fromInvoice: true,
+  };
+})
+
+,
+  }));
+setCustomerDetails(invoice.customer);
+
+};
+
 
   const setTerms = (selling: TermSection) => {
     setFormData((prev) => ({ ...prev, terms: { selling } }));
@@ -338,19 +411,24 @@ const countryCode = getCountryCode(
     onClose();
   };
 
-  const { subTotal, totalTax, grandTotal } = useMemo(() => {
-    const sub = formData.items.reduce((sum, item) => {
-      const taxAmount = parseFloat(item.vatRate || "0");
-      return sum + item.quantity * item.price - item.discount + taxAmount;
-    }, 0);
+const { subTotal, totalTax, grandTotal } = useMemo(() => {
+  let sub = 0;
+  let tax = 0;
 
-    const tax = formData.items.reduce(
-      (sum, item) => sum + parseFloat(item.vatRate || "0"),
-      0,
-    );
+  formData.items.forEach(item => {
+    const base = item.quantity * item.price - item.discount;
+    const taxAmt = base * (Number(item.vatRate || 0) / 100);
 
-    return { subTotal: sub, totalTax: tax, grandTotal: sub };
-  }, [formData.items]);
+    sub += base;
+    tax += taxAmt;
+  });
+
+  return {
+    subTotal: sub,
+    totalTax: tax,
+    grandTotal: sub + tax,
+  };
+}, [formData.items]);
 
   const paginatedItems = formData.items.slice(
     page * ITEMS_PER_PAGE,
@@ -390,6 +468,8 @@ const countryCode = getCountryCode(
       handleSameAsBillingChange,
       handleReset,
       handleSubmit,
+      setInvoiceFromApi,
+      setFormDataFromInvoice,
     },
   };
 };

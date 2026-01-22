@@ -182,7 +182,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
 
   const handleSubmit = async () => {
     const payload = {
-      id: "COMP-00003",
+      id: "VITE_COMPANY_ID",
       accountingSetup: form.accountingSetup,
       financialConfig: form.financialConfig,
     };

@@ -9,8 +9,8 @@ interface ProformaInvoiceModalProps {
   onSubmit?: () => void;
 }
 
-import Modal from "../../components/ui/modal/modal";
-import { Button } from "../../components/ui/modal/formComponent";
+import Modal from "../ui/modal/modal";
+import { Button } from "../ui/modal/formComponent";
 
 import {
   getAllCustomers,

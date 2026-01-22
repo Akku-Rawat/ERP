@@ -5,9 +5,12 @@ import { Check, RotateCcw, Save } from "lucide-react";
 import type { Terms, TermSection } from "../../types/termsAndCondition";
 
 import { updateCompanyById } from "../../api/companySetupApi";
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
+
 interface BuyingSellingProps {
   terms?: Terms | null;
 }
+
 
 const emptySection = (): TermSection => ({
   general: "",
@@ -23,6 +26,7 @@ const emptySection = (): TermSection => ({
     notes: "",
   },
 });
+
 
 const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
   const [showSuccess, setShowSuccess] = useState(false);
@@ -76,9 +80,9 @@ const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
 
   const handleSubmit = async () => {
     const payload = {
-      id: "COMP-00003",
-      ...formData,
-    };
+    id: COMPANY_ID,          
+    terms: formData,         
+  };
 
     try {
       console.log("payload:", payload);

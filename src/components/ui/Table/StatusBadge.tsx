@@ -7,31 +7,39 @@ interface StatusBadgeProps {
   variant?: BadgeVariant;
 }
 
+
+
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, variant }) => {
   const safeStatus = (status ?? "unknown").toLowerCase();
+
+  
 
   const getVariant = (): BadgeVariant => {
     if (variant) return variant;
 
-    if (
-      safeStatus.includes("paid") ||
-      safeStatus.includes("completed") ||
-      safeStatus.includes("active")
-    ) {
-      return "success";
-    }
+  if (
+  safeStatus.includes("paid") ||
+  safeStatus.includes("completed") ||
+  safeStatus.includes("active") ||
+  safeStatus.includes("approved")
+) {
+  return "success";
+}
+
 
     if (safeStatus.includes("pending") || safeStatus.includes("processing")) {
       return "warning";
     }
 
-    if (
-      safeStatus.includes("overdue") ||
-      safeStatus.includes("cancelled") ||
-      safeStatus.includes("failed")
-    ) {
-      return "danger";
-    }
+  if (
+  safeStatus.includes("overdue") ||
+  safeStatus.includes("cancelled") ||
+  safeStatus.includes("failed") ||
+  safeStatus.includes("rejected")
+) {
+  return "danger";
+}
+
 
     if (safeStatus.includes("draft") || safeStatus.includes("new")) {
       return "info";
@@ -50,12 +58,21 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, variant }) => {
 
   const currentVariant = getVariant();
 
+  const displayStatus =
+  status
+    ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+    : "Unknown";
+
+
+
   return (
     <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${variantStyles[currentVariant]}`}
+      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
+        variantStyles[currentVariant]
+      }`}
     >
       <span className="w-1.5 h-1.5 rounded-full mr-2 bg-current opacity-60" />
-      {status ?? "Unknown"}
+      {displayStatus}
     </span>
   );
 };
