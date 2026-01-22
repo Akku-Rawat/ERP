@@ -5,6 +5,7 @@ import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
 import { getCountryList } from "../api/lookupApi";
 import { getItemByItemCode } from "../api/itemApi";
+const COMPANY_ID= import.meta.env.VITE_COMPANY_ID;
 
 import {
   DEFAULT_INVOICE_FORM,
@@ -128,7 +129,7 @@ export const useQuotationForm = (
     try {
       const [customerRes, companyRes] = await Promise.all([
         getCustomerByCustomerCode(id),
-        getCompanyById("COMP-00003"),
+        getCompanyById(COMPANY_ID),
       ]);
       console.log("Submitting customerId:", id);
 

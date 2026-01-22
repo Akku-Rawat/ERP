@@ -8,7 +8,7 @@ import {
 } from "../../api/proformaInvoiceApi";
 
 import { getCompanyById } from "../../api/companySetupApi";
-
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 import type {
   ProformaInvoice,
   ProformaInvoiceSummary,
@@ -68,7 +68,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   ================================ */
 
   const fetchCompany = async (companyId: string) => {
-    const res = await getCompanyById(companyId);
+    const res = await getCompanyById(COMPANY_ID);
 
     if (!res || res.status_code !== 200) {
       throw new Error("Company fetch failed");

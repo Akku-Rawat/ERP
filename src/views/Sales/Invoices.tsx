@@ -8,6 +8,7 @@ import type { InvoiceSummary, Invoice } from "../../types/invoice";
 import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTemplate1";
 import PdfPreviewModal from "./PdfPreviewModal";
 import toast from "react-hot-toast";
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 import Table from "../../components/ui/Table/Table";
 
@@ -60,7 +61,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     null,
   );
   const fetchCompany = async () => {
-    const res = await getCompanyById("1"); // valid ID
+    const res = await getCompanyById(COMPANY_ID); // valid ID
     if (!res || res.status_code !== 200) {
       throw new Error("Company fetch failed");
     }

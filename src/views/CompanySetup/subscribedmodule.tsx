@@ -15,12 +15,12 @@ import {
   FaCrown,
   FaRocket,
   FaInfoCircle,
-  FaCog,
+ 
 } from "react-icons/fa";
 
 // Import your reusable Table component
 import Table from "../../components/ui/Table/Table";
-import type { Column } from "../ui/Table/type"; // Adjust path
+import type { Column } from "../../components/ui/Table/type";
 
 // ---------- Types ----------
 type Tier = "Free" | "Pro" | "Enterprise";
@@ -276,7 +276,7 @@ export default function SubscribedModules(): JSX.Element {
               className="p-2 rounded-lg text-muted hover:text-main hover:bg-row-hover transition-all"
               title="Settings"
             >
-              <FaCog className="w-4 h-4" />
+              
             </button>
           </div>
         ),

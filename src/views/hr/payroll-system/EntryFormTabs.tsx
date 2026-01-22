@@ -2,11 +2,19 @@
 
 import React from 'react';
 import type { PayrollEntry, Employee } from './types';
+import { Edit2 } from "lucide-react";
 
 interface OverviewTabProps {
   data: PayrollEntry;
   onChange: (field: string, value: any) => void;
 }
+interface EmployeesTabProps {
+  data: PayrollEntry;
+  onChange: (field: string, value: any) => void;
+  employees: Employee[];
+  onEditEmployee?: (employee: Employee) => void;
+}
+
 
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
@@ -145,13 +153,14 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
   </div>
 );
 
-interface EmployeesTabProps {
-  data: PayrollEntry;
-  onChange: (field: string, value: any) => void;
-  employees: Employee[];
-}
 
-export const EmployeesTab: React.FC<EmployeesTabProps> = ({ data, onChange, employees }) => {
+
+export const EmployeesTab: React.FC<EmployeesTabProps> = ({
+  data,
+  onChange,
+  employees,
+  onEditEmployee
+}) => {
   const toggleEmployee = (empId: string) => {
     const current = data.selectedEmployees || [];
     const updated = current.includes(empId) 
@@ -225,41 +234,64 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({ data, onChange, empl
           {data.selectedEmployees?.length || 0} selected
         </span>
       </div>
-      <div className="space-y-3 max-h-96 overflow-y-auto">
-        {employees.filter(e => e.isActive).map(emp => {
-          const isSelected = data.selectedEmployees?.includes(emp.id);
-          return (
-            <div
-              key={emp.id}
-              onClick={() => toggleEmployee(emp.id)}
-              className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
-                isSelected ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-blue-300'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => {}}
-                    className="w-5 h-5 text-blue-600 rounded"
-                  />
-                  <div>
-                    <p className="font-semibold text-slate-800">{emp.name}</p>
-                    <p className="text-sm text-slate-600">{emp.id} • {emp.designation}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-slate-800">
-                    ₹{(emp.basicSalary + emp.hra + emp.allowances).toLocaleString()}
-                  </p>
-                  <p className="text-xs text-slate-500">Gross</p>
-                </div>
-              </div>
+   <div className="space-y-3 max-h-96 overflow-y-auto">
+  {employees.filter(e => e.isActive).map(emp => {
+    const isSelected = data.selectedEmployees?.includes(emp.id);
+
+    return (
+      <div
+        key={emp.id}
+        className={`border-2 rounded-xl p-4 transition-all ${
+          isSelected
+            ? "border-blue-500 bg-blue-50"
+            : "border-slate-200 hover:border-blue-300"
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          
+          {/* LEFT: Selection */}
+          <div
+            className="flex items-center gap-4 cursor-pointer"
+            onClick={() => toggleEmployee(emp.id)}
+          >
+            <input
+              type="checkbox"
+              checked={isSelected}
+              readOnly
+              className="w-5 h-5 text-blue-600 rounded"
+            />
+            <div>
+              <p className="font-semibold text-slate-800">{emp.name}</p>
+              <p className="text-sm text-slate-600">
+                {emp.id} • {emp.designation}
+              </p>
             </div>
-          );
-        })}
+          </div>
+
+          {/* RIGHT: Salary + Edit */}
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="font-bold text-slate-800">
+                ₹{(emp.basicSalary + emp.hra + emp.allowances).toLocaleString()}
+              </p>
+              <p className="text-xs text-slate-500">Gross</p>
+            </div>
+
+            {/* EDIT BUTTON */}
+           <button onClick={(e) => {
+  e.stopPropagation();
+  onEditEmployee?.(emp);
+}}>
+
+              <Edit2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       </div>
+    );
+  })}
+</div>
+
     </div>
   );
 };

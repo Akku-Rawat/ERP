@@ -13,6 +13,10 @@ import { OverviewTab, EmployeesTab, AccountingTab } from './EntryFormTabs';
 // import { AttendanceManager, LeaveManager } from './AttendanceLeaves';
 import { LoanManager, AdvanceManager } from './LoansAdvances';
 import { PayrollReports, ApprovalWorkflowManager } from './ReportsApprovals';
+import TaxDeduction from "./TaxDeduction";
+import type { Employee } from "./types";
+import EditEmployeePayrollModal from "./EditEmployeePayrollModal";
+
 
 export default function PayrollManagement() {
   const [view, setView] = useState<'dashboard' | 'newEntry' | 'attendance' | 'loans' | 'reports' | 'approvals'>('dashboard');
@@ -30,6 +34,10 @@ export default function PayrollManagement() {
   const [selectedRecord, setSelectedRecord] = useState<PayrollRecord | null>(null);
   const [editingRecord, setEditingRecord] = useState<PayrollRecord | null>(null);
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
+  const [tableTab, setTableTab] = useState<'summary' | 'tax'>('summary');
+  const [editEmployee, setEditEmployee] = useState<Employee | null>(null);
+  
+
 
   // New Entry State
   const [activeTab, setActiveTab] = useState(0);
@@ -205,6 +213,8 @@ export default function PayrollManagement() {
     </div>
   );
 
+
+
   // New Entry View
   if (view === 'newEntry') {
     return (
@@ -252,7 +262,8 @@ export default function PayrollManagement() {
 
             <div className="p-8">
               {activeTab === 0 && <OverviewTab data={formData} onChange={handleFormChange} />}
-              {activeTab === 1 && <EmployeesTab data={formData} onChange={handleFormChange} employees={demoEmployees} />}
+              {activeTab === 1 && <EmployeesTab data={formData} onChange={handleFormChange} employees={demoEmployees} onEditEmployee={(emp) => setEditEmployee(emp)}
+  />}
               {activeTab === 2 && <AccountingTab data={formData} onChange={handleFormChange} employees={demoEmployees} />}
             </div>
 
@@ -363,13 +374,50 @@ export default function PayrollManagement() {
 
         <FilterBar searchQuery={searchQuery} onSearchChange={setSearchQuery} selectedDept={selectedDept} onDeptChange={setSelectedDept}
           departments={departments} filterStatus={filterStatus} onStatusChange={setFilterStatus} pendingCount={stats.pending} onRunPayroll={handleRunPayroll} />
+         {/* Table Tabs */}
+<div className="bg-white rounded-xl shadow-sm border border-slate-200">
+  <div className="flex border-b border-slate-200">
+    <button
+      onClick={() => setTableTab('summary')}
+      className={`flex-1 px-6 py-3 text-sm font-semibold transition ${
+        tableTab === 'summary'
+          ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+          : 'text-slate-600 hover:bg-slate-50'
+      }`}
+    >
+      Employee Summary
+    </button>
 
-        <PayrollTable records={filteredRecords} expandedRows={expandedRows} onToggleRow={toggleRow}
-         onViewPayslip={(record) => {
-  setSelectedRecord(record);  
-}}
-          onEditRecord={(record) => setEditingRecord({...record})}
-          onViewRunDetails={(record) => { setSelectedPayrollRun(record.id); setView('runDetails'); }} />
+    <button
+      onClick={() => setTableTab('tax')}
+      className={`flex-1 px-6 py-3 text-sm font-semibold transition ${
+        tableTab === 'tax'
+          ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+          : 'text-slate-600 hover:bg-slate-50'
+      }`}
+    >
+      Tax Deduction
+    </button>
+    
+  </div>
+  
+</div>
+{tableTab === "summary" && (
+  <PayrollTable
+    records={filteredRecords}
+    expandedRows={expandedRows}
+    onToggleRow={toggleRow}
+    onViewPayslip={(record) => setSelectedRecord(record)}
+    onEditRecord={(record) => setEditingRecord({ ...record })}
+    onViewRunDetails={(record) => {
+      setSelectedPayrollRun(record.id);
+      setView("runDetails");
+    }}
+  />
+)}
+
+{tableTab === "tax" && <TaxDeduction />}
+
 
         <QuickCreateModal show={showCreateModal} onClose={() => setShowCreateModal(false)} employees={demoEmployees}
           selectedEmployees={selectedEmployees} onToggleEmployee={toggleEmployee} onSelectAll={selectAllEmployees} onCreate={handleCreatePayroll} />

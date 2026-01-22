@@ -17,12 +17,24 @@ const ENDPOINTS = {
   updateQuotation: `${base_url}.quotation.api.update_quotation`,
 };
 
+export type QuotationFilters = {
+  search?: string;
+  status?: string;
+  fromDate?: string;
+  toDate?: string;
+};
+
 export async function getAllQuotations(
   page: number = 1,
-  page_size: number = 10
+  page_size: number = 10,
+  filters?: QuotationFilters
 ): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllQuotations, {
-    params: { page, page_size },
+  const resp = await api.get(ENDPOINTS.getAllQuotations, {
+    params: {
+      page,
+      page_size,
+      ...filters,
+    },
   });
   return resp.data;
 }

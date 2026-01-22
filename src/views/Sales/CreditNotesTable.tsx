@@ -74,8 +74,16 @@ const [totalItems, setTotalItems] = useState(0);
 
 
   return (
-    <>
-      <Table
+    
+    
+     <div className="p-8">
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="mt-2 text-muted">Loading invoices…</p>
+        </div>
+      ) : (
+        <Table
         columns={columns}
         data={data}
         loading={loading}
@@ -96,8 +104,9 @@ const [totalItems, setTotalItems] = useState(0);
         }}
         onPageChange={setPage}
       />
+      )}
 
-      <CreateCreditNoteModal
+    <CreateCreditNoteModal
         isOpen={openCreateModal}
         onClose={() => setOpenCreateModal(false)}
         onSubmit={(payload) => {
@@ -106,8 +115,11 @@ const [totalItems, setTotalItems] = useState(0);
         }}
         invoiceId={data.length > 0 ? data[0].invoiceNo : ""}
       />
-    </>
+    </div>
   );
 };
 
 export default CreditNotesTable;
+  
+
+        

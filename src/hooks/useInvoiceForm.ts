@@ -14,6 +14,7 @@ import { CloudCog } from "lucide-react";
 type InvoiceMode = "invoice" | "proforma";
 
 const ITEMS_PER_PAGE = 5;
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 type NestedSection =
   | "billingAddress"
@@ -151,7 +152,7 @@ const getCountryCode = (
     try {
       const [customerRes, companyRes] = await Promise.all([
         getCustomerByCustomerCode(id),
-        getCompanyById("COMP-00003"),
+        getCompanyById(COMPANY_ID),
       ]);
       console.log("Submitting customerId:", id);
 
