@@ -29,6 +29,7 @@ const ENDPOINTS = {
   createLeaveAllocation: `${base_url}.leave_allocation.api.create_leave_allocation`,
   getLeaveAllocationsByEmployee: `${base_url}.leave_allocation.api.get_leave_allocations_by_employee_id`,
 getLeaveBalance : `${base_url}.leave_balance.api.get_employee_leave_balance_report`,
+    getHolidays: `${base_url}.holidays.api.get_holidays`
 };
 
 
@@ -201,3 +202,19 @@ export async function getEmployeeLeaveBalanceReport(params: {
 }
 
 
+export async function getHolidays(params?: {
+  page?: number;
+  page_size?: number;
+}) {
+  const resp: AxiosResponse = await api.get(
+    ENDPOINTS.getHolidays,
+    {
+      params: {
+        page: params?.page ?? 1,
+        page_size: params?.page_size ?? 20,
+      },
+    }
+  );
+
+  return resp.data;
+}
