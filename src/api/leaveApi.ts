@@ -104,7 +104,7 @@ export async function cancelLeave(leaveId: string) {
 export async function updateLeaveApplication(
   payload: UpdateLeaveApplicationPayload,
 ): Promise<UpdateLeaveApplicationResponse> {
-  const resp = await api.put(ENDPOINTS.updateLeaveApplication, payload);
+  const resp = await api.patch(ENDPOINTS.updateLeaveApplication, payload);
 
   return resp.data;
 }
