@@ -6,7 +6,8 @@ import type { Column } from "./type";
 
 export type UseTableLogicProps<T> = {
   columns: Column<T>[];
-  data: T[];
+ data?: T[];
+ 
   searchValue?: string;
 };
 
@@ -18,6 +19,7 @@ export const useTableLogic = <T extends Record<string, any>>({
   const [internalSearch, setInternalSearch] = React.useState("");
   const effectiveSearch = searchValue ?? internalSearch;
   const setSearch = (v: string) => setInternalSearch(v);
+  const safeData = Array.isArray(data) ? data : [];
 
   // column visibility
   const allKeys = React.useMemo(() => columns.map((c) => c.key), [columns]);
@@ -46,18 +48,19 @@ export const useTableLogic = <T extends Record<string, any>>({
   );
 
   const numericKey = React.useMemo(() => detectNumericKey(columns), [columns]);
-  const customerIdKey = React.useMemo(
-    () => detectCustomerIdKey(columns),
-    [columns],
-  );
-
+  const customerIdKey = React.useMemo(() => detectCustomerIdKey(columns), [columns]);
+  
   const [yearFilter, setYearFilter] = React.useState("");
-  const [leaveTypeFilter, setLeaveTypeFilter] = React.useState("");
+const [leaveTypeFilter, setLeaveTypeFilter] = React.useState("");
+
+  
 
   const processedData = React.useMemo(() => {
     const q = (effectiveSearch ?? "").trim().toLowerCase();
 
-    let rows = data.filter((row) => {
+   let rows = safeData.filter((row) => {
+
+
       // toolbar search
       if (q) {
         const any = columns.some((col) => {
@@ -98,23 +101,27 @@ export const useTableLogic = <T extends Record<string, any>>({
         if (!foundName && !foundEmail) return false;
       }
 
-      if (yearFilter) {
-        const dateValue = row["appliedOn"];
-        if (!dateValue) return false;
+if (yearFilter) {
+  const dateValue = row["appliedOn"];
+  if (!dateValue) return false;
 
-        const year = String(dateValue).split("-")[0];
-        if (year !== yearFilter) return false;
-      }
+  const year = String(dateValue).split("-")[0];
+  if (year !== yearFilter) return false;
+}
 
-      if (leaveTypeFilter) {
-        const leaveType = row["leaveType"];
-        if (
-          !leaveType ||
-          String(leaveType).toLowerCase() !== leaveTypeFilter.toLowerCase()
-        ) {
-          return false;
-        }
-      }
+
+
+if (leaveTypeFilter) {
+  const leaveType = row["leaveType"];
+  if (
+    !leaveType ||
+    String(leaveType).toLowerCase() !== leaveTypeFilter.toLowerCase()
+  ) {
+    return false;
+  }
+}
+
+
 
       if (typeFilter) {
         const typeKeys = [
@@ -169,8 +176,8 @@ export const useTableLogic = <T extends Record<string, any>>({
     minFilter,
     maxFilter,
     columns,
-    yearFilter,
-    leaveTypeFilter,
+     yearFilter,         
+  leaveTypeFilter,  
     numericKey,
     customerIdKey,
     sortOrder,
@@ -202,9 +209,10 @@ export const useTableLogic = <T extends Record<string, any>>({
     sortOrder,
     setSortOrder,
     yearFilter,
-    setYearFilter,
-    leaveTypeFilter,
-    setLeaveTypeFilter,
+setYearFilter,
+leaveTypeFilter,
+setLeaveTypeFilter,
+
 
     numericKey,
     customerIdKey,

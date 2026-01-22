@@ -21,6 +21,7 @@ const EmployeeHistory: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [leaves, setLeaves] = useState<LeaveUI[]>([]);
+  const [selectedLeaveId, setSelectedLeaveId] = useState<string | null>(null);
 
   const filteredData = useMemo(() => {
     return selectedEmployee
@@ -100,7 +101,7 @@ const EmployeeHistory: React.FC = () => {
           <ActionButton
             type="view"
             iconOnly
-            onClick={() => setSelectedLeave(l)}
+            onClick={() => setSelectedLeaveId(l.id)}
           />
         ),
       },
@@ -259,10 +260,9 @@ const EmployeeHistory: React.FC = () => {
         }}
         onPageChange={setPage}
       />
-
       <EmployeeLeaveDetailModal
-        leave={selectedLeave}
-        onClose={() => setSelectedLeave(null)}
+        leaveId={selectedLeaveId}
+        onClose={() => setSelectedLeaveId(null)}
       />
     </div>
   );

@@ -1,41 +1,65 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CalendarDays } from "lucide-react";
 import Modal from "../../ui/modal/modal";
 import { Card } from "../../ui/modal/formComponent";
 import StatusBadge from "../../ui/Table/StatusBadge";
-import type { LeaveUI } from "../../../types/leave/uiLeave";
+import { getLeaveById } from "../../../api/leaveApi";
+import type { LeaveDetailResponse } from "../../../types/leave/leave";
 
 interface Props {
-  leave: LeaveUI | null;
+  leaveId: string | null;
   onClose: () => void;
 }
 
-const EmployeeLeaveDetailModal: React.FC<Props> = ({ leave, onClose }) => {
+const EmployeeLeaveDetailModal: React.FC<Props> = ({ leaveId, onClose }) => {
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<LeaveDetailResponse["data"] | null>(null);
+
+  useEffect(() => {
+    if (!leaveId) return;
+
+    const fetchLeave = async () => {
+      try {
+        setLoading(true);
+        const res = await getLeaveById(leaveId);
+        setData(res.data);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeave();
+  }, [leaveId]);
+
   return (
     <Modal
-      isOpen={!!leave}
+      isOpen={!!leaveId}
       onClose={onClose}
       title="Leave Request Details"
       subtitle="Complete leave information"
       icon={CalendarDays}
       maxWidth="md"
     >
-      {leave && (
+      {loading && <p className="text-sm text-muted">Loading...</p>}
+
+      {!loading && data && (
         <div className="space-y-4">
           {/* Employee Info */}
           <Card title="Employee Information">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-muted">Employee Name</span>
-                <p className="font-semibold">{leave.employeeName}</p>
+                <p className="font-semibold">{data.employee.employeeName}</p>
               </div>
+
               <div>
                 <span className="text-muted">Employee ID</span>
-                <p className="font-semibold">{leave.employeeId}</p>
+                <p className="font-semibold">{data.employee.employeeId}</p>
               </div>
+
               <div className="col-span-2">
                 <span className="text-muted">Department</span>
-                <p className="font-semibold">{leave.department}</p>
+                <p className="font-semibold">{data.employee.department}</p>
               </div>
             </div>
           </Card>
@@ -45,37 +69,44 @@ const EmployeeLeaveDetailModal: React.FC<Props> = ({ leave, onClose }) => {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-muted">Type</span>
-                <p className="font-semibold">{leave.leaveType}</p>
+                <p className="font-semibold">{data.leaveType}</p>
               </div>
 
               <div>
                 <span className="text-muted">Status</span>
                 <div className="mt-1">
-                  <StatusBadge status={leave.status} />
+                  <StatusBadge status={data.status} />
                 </div>
               </div>
 
               <div>
                 <span className="text-muted">Period</span>
                 <p>
-                  {leave.startDate} → {leave.endDate}
+                  {data.fromDate} → {data.toDate}
                 </p>
               </div>
 
               <div>
                 <span className="text-muted">Days</span>
-                <p>{leave.totalDays}</p>
+                <p>{data.totalDays}</p>
               </div>
 
               <div>
                 <span className="text-muted">Applied Date</span>
-                <p>{leave.appliedOn}</p>
+                <p>{data.appliedOn}</p>
               </div>
 
               <div className="col-span-2">
                 <span className="text-muted">Reason</span>
-                <p className="italic mt-1">"{leave.reason}"</p>
+                <p className="italic mt-1">"{data.leaveReason}"</p>
               </div>
+
+              {data.rejectionReason && (
+                <div className="col-span-2 text-red-600">
+                  <span className="text-muted">Rejection Reason</span>
+                  <p className="italic mt-1">"{data.rejectionReason}"</p>
+                </div>
+              )}
             </div>
           </Card>
         </div>

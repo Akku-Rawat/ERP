@@ -1,15 +1,15 @@
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
 
-const base_url = import.meta.env.VITE_BASE_URL as string;
+const base_url = import.meta.env.VITE_CUSTOMER_API_URL as string;
 const api = createAxiosInstance(base_url);
 
 const ENDPOINTS = {
-  getCustomerById: `${base_url}.customer.customer.get_customer_by_id`,
-  getAllCustomers: `${base_url}.customer.customer.get_all_customers_api`,
-  createCustomer: `${base_url}.customer.customer.create_customer_api`,
-  deleteCustomer: `${base_url}.customer.customer.delete_customer_by_id`,
-  updateCustomer: `${base_url}.customer.customer.update_customer_by_id`,
+  getCustomerById: `${base_url}.get_customer_by_id`,
+  getAllCustomers: `${base_url}.get_all_customers_api`,
+  createCustomer: `${base_url}.create_customer_api`,
+  deleteCustomer: `${base_url}.delete_customer_by_id`,
+  updateCustomer: `${base_url}.update_customer_by_id`,
 };
 
 export async function getAllCustomers(
