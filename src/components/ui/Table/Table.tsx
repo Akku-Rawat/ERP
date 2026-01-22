@@ -126,7 +126,12 @@ function Table<T extends Record<string, any>>({
   };
 
 
-  const displayData = serverSide ? data : (processedData ?? []);
+  const displayData = Array.isArray(
+  serverSide ? data : processedData
+)
+  ? (serverSide ? data : processedData)
+  : [];
+
  const visibleColumns = loading ? columns : columns.filter((col) => visibleKeys.includes(col.key));
 
   return (

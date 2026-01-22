@@ -266,7 +266,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
               key={t.id}
               onClick={() => setActiveTab(t.id)}
               className={`flex-1 py-3 flex items-center justify-center gap-2 text-sm font-medium ${
-                activeTab === t.id ? "bg-primary-600 text-white" : "text-muted"
+                activeTab === t.id ? "table-head text-table-head-text" : "text-main"
               }`}
             >
               <t.icon />
@@ -292,7 +292,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
               )}
 
               {renderSelect(
-                "Financial Year",
+                "Financial Year Starts From",
                 "financialYearStart",
                 "financialConfig",
                 [

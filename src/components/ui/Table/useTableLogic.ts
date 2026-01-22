@@ -6,7 +6,8 @@ import type { Column } from "./type";
 
 export type UseTableLogicProps<T> = {
   columns: Column<T>[];
-  data: T[];
+ data?: T[];
+ 
   searchValue?: string;
 };
 
@@ -18,6 +19,7 @@ export const useTableLogic = <T extends Record<string, any>>({
   const [internalSearch, setInternalSearch] = React.useState("");
   const effectiveSearch = searchValue ?? internalSearch;
   const setSearch = (v: string) => setInternalSearch(v);
+  const safeData = Array.isArray(data) ? data : [];
 
   // column visibility
   const allKeys = React.useMemo(() => columns.map((c) => c.key), [columns]);
@@ -56,7 +58,9 @@ const [leaveTypeFilter, setLeaveTypeFilter] = React.useState("");
   const processedData = React.useMemo(() => {
     const q = (effectiveSearch ?? "").trim().toLowerCase();
 
-    let rows = data.filter((row) => {
+   let rows = safeData.filter((row) => {
+
+
       // toolbar search
       if (q) {
         const any = columns.some((col) => {

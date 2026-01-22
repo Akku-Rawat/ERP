@@ -13,7 +13,7 @@ export const createAxiosInstance = (
 
   if (withAuth) {
     instance.defaults.headers.common["Authorization"] =
-      import.meta.env.VITE_AUTHORIZATION;
+      import.meta.env.VITE_API_AUTH_TOKEN;
   }
 
   return instance;

@@ -181,6 +181,7 @@ return (
           <Table
             columns={columns}
             data={customers}
+             serverSide   
             showToolbar
             loading={custLoading}
             onPageSizeChange={(size) => setPageSize(size)}

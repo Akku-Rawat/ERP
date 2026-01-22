@@ -97,7 +97,7 @@ const SupplierModal: React.FC<{
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: import.meta.env.VITE_AUTHORIZATION,
+              Authorization: import.meta.env.VITE_API_AUTH_TOKEN,
             },
             body: JSON.stringify(payload),
           },
@@ -107,7 +107,7 @@ const SupplierModal: React.FC<{
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: import.meta.env.VITE_AUTHORIZATION,
+            Authorization: import.meta.env.VITE_API_AUTH_TOKEN,
           },
           body: JSON.stringify(payload),
         });

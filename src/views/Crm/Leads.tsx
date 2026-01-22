@@ -6,7 +6,7 @@ import StatusBadge from "../../components/ui/Table/StatusBadge";
 import ActionButton, {
   ActionGroup,
 } from "../../components/ui/Table/ActionButton";
-import type { Column } from "../../components/ui/Table/Table";
+import type { Column } from "../../components/ui/Table/type";
 
 interface Lead {
   id: string;

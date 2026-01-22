@@ -193,7 +193,7 @@ const CompanySetup: React.FC = () => {
         )}
         {tab === "buyingSelling" && <BuyingSelling terms={terms} />}
         {tab === "subscribed" && <SubscribedModules />}
-        {tab === "Templates" && <Templates />}
+        {/* {tab === "Templates" && <Templates /> } */}
         {tab === "logo" && <Upload />}
       </div>
     </div>
