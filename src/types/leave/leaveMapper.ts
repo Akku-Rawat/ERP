@@ -2,6 +2,7 @@ import { STATUS_MAP } from "../leave/leaveStatus";
 import type { BackendStatus } from "../leave/leaveStatus";
 import type { LeaveUI } from "../leave/uiLeave";
 import type { LeaveAllocationUI } from "../leave/uiLeave";
+import type { LeaveBalanceUI } from "./leaveBalance";
 
 const normalizeStatus = (status: string) => {
   if (!status) return "Pending";
@@ -52,5 +53,27 @@ export const mapAllocationFromApi = (a: any): LeaveAllocationUI => {
     allocated,
     used: allocated - remaining,
     remaining,
+  };
+};
+
+
+
+export const mapLeaveBalanceFromApi = (data: any): LeaveBalanceUI => {
+  const summary = data?.summary ?? {};
+  const balances = data?.leaveBalances ?? [];
+
+  return {
+    summary: {
+      totalAllocated: Number(summary.totalAllocated ?? 0),
+      totalTaken: Number(summary.totalTaken ?? 0),
+      totalExpired: Number(summary.totalExpired ?? 0),
+      totalClosingBalance: Number(summary.totalClosingBalance ?? 0),
+    },
+    balances: balances.map((l: any) => ({
+      leaveType: l.leaveType,
+      allocated: Number(l.newLeavesAllocated ?? 0),
+      taken: Number(l.leavesTaken ?? 0),
+      remaining: Number(l.closingBalance ?? 0),
+    })),
   };
 };

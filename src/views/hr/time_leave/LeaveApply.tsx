@@ -7,11 +7,12 @@ import { getAllEmployees } from "../../../api/employeeapi";
 import { getEmployeeById } from "../../../api/employeeapi";
 import toast from "react-hot-toast";
 import { getLeaveById, updateLeaveApplication } from "../../../api/leaveApi";
-import { getLeaveAllocationsByEmployee } from "../../../api/leaveApi";
-import { mapAllocationFromApi } from "../../../types/leave/leaveMapper";
-import type { LeaveAllocationUI } from "../../../types/leave/uiLeave";
+import type { LeaveBalanceUI } from "../../../types/leave/leaveBalance";
 
-
+import {
+  mapLeaveBalanceFromApi,
+} from "../../../types/leave/leaveMapper";
+import { getEmployeeLeaveBalanceReport } from "../../../api/leaveApi";
 
 
 
@@ -40,13 +41,6 @@ const LeaveApply: React.FC<LeaveApplyProps> = ({ editLeaveId }) => {
     isHalfDay: false,
   });
 
-const LEAVE_TYPES = [
-  { id: "Privilege Leave", name: "Privilege Leave" },
-  { id: "Sick Leave", name: "Sick Leave" },
-  { id: "Casual Leave", name: "Casual Leave" },
-  { id: "Leave Without Pay", name: "Leave Without Pay" },
-  { id: "Compensatory Off", name: "Compensatory Off" },
-];
 
 
   // const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
@@ -59,33 +53,42 @@ const LEAVE_TYPES = [
     name: string;
   } | null>(null);
  const isEditMode = Boolean(editLeaveId);
-const [allocations, setAllocations] = useState<LeaveAllocationUI[]>([]);
-const [allocLoading, setAllocLoading] = useState(false);
+const [leaveBalance, setLeaveBalance] =
+  useState<LeaveBalanceUI | null>(null);
+
+const [balanceLoading, setBalanceLoading] = useState(false);
+
 
 
 
 useEffect(() => {
   if (!employeeId) {
-    setAllocations([]);
+    setLeaveBalance(null);
     return;
   }
 
-  const fetchAllocations = async () => {
+  const fetchLeaveBalance = async () => {
     try {
-      setAllocLoading(true);
-      const res = await getLeaveAllocationsByEmployee(employeeId, 1, 50);
-      const list = res.data.allocations || [];
-      setAllocations(list.map(mapAllocationFromApi));
-    } catch {
-      setAllocations([]);
+      setBalanceLoading(true);
+
+      const res = await getEmployeeLeaveBalanceReport({
+        employeeId,
+        fromDate: "2026-01-01", // TODO: make FY dynamic
+        toDate: "2026-12-31",
+      });
+
+      const uiBalance = mapLeaveBalanceFromApi(res.data);
+      setLeaveBalance(uiBalance);
+    } catch (err) {
+      console.error("Failed to fetch leave balance", err);
+      setLeaveBalance(null);
     } finally {
-      setAllocLoading(false);
+      setBalanceLoading(false);
     }
   };
 
-  fetchAllocations();
+  fetchLeaveBalance();
 }, [employeeId]);
-
 
 
   useEffect(() => {
@@ -104,7 +107,8 @@ useEffect(() => {
       const res = await getLeaveById(editLeaveId);
       const l = res.data;
 
-      setEmployeeId(l.employee.employeeId);
+    setEmployeeId(l.employee.id);
+
 
       setFormData({
         type: l.leaveType,
@@ -280,91 +284,58 @@ useEffect(() => {
 
 
 
-  const hasValidAllocation = () => {
-  if (!formData.type || !formData.startDate) return true;
-
-  const allocation = allocations.find(
-    (a) => a.leaveType === formData.type
-  );
-
-  if (!allocation) {
-    toast.error(
-      "No leave allocation found for this leave type. Please contact HR."
-    );
-    return false;
-  }
-
-  if (allocation.remaining <= 0) {
-    toast.error("No remaining leaves available for this leave type.");
-    return false;
-  }
-
-  if (totalDays > allocation.remaining) {
-    toast.error(
-      `Only ${allocation.remaining} leave(s) remaining for ${formData.type}.`
-    );
-    return false;
-  }
-
-  return true;
-};
-
   
-
-
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
- if (!employeeId) {
-  toast.error("Please select employee");
-  return;
-}
-
-
- if (!formData.startDate) {
-  toast.error("Start date is required");
-  return;
-}
-
-
-  if (!formData.isHalfDay && !formData.endDate) {
-      toast.error("End date is required");
+  if (!employeeId) {
+    toast.error("Please select employee");
     return;
   }
 
-  if (!hasValidAllocation()) {
-  return;
-}
+  if (!formData.startDate) {
+    toast.error("Start date is required");
+    return;
+  }
+
+  if (!formData.isHalfDay && !formData.endDate) {
+    toast.error("End date is required");
+    return;
+  }
 
   setLoading(true);
 
   try {
     if (isEditMode && editLeaveId) {
-  await updateLeaveApplication({
-    leaveId: editLeaveId,
-    leaveFromDate: formData.startDate,
-    leaveToDate: formData.endDate,
-    isHalfDay: formData.isHalfDay,
-    leaveReason: formData.reason,
-  });
+      await updateLeaveApplication({
+        leaveId: editLeaveId,
+        leaveFromDate: formData.startDate,
+        leaveToDate: formData.endDate,
+        isHalfDay: formData.isHalfDay,
+        leaveReason: formData.reason,
+      });
 
-  toast.success("Leave updated successfully");
-} else {
-  await applyLeave(buildPayload());
-  toast.success("Leave applied successfully");
-}
+      toast.success("Leave updated successfully");
+    } else {
+      await applyLeave(buildPayload());
+      toast.success("Leave applied successfully");
+    }
 
-
-  if (!isEditMode) {
-  handleReset();
-}
-
+    if (!isEditMode) {
+      handleReset();
+    }
   } catch (err: any) {
-    toast.error("Failed to submit leave request");
+    const msg =
+      err?.response?.data?.message ||
+      "Unable to apply leave. Please contact HR.";
+
+    toast.error(msg);
   } finally {
     setLoading(false);
   }
 };
+
+
 
 
 
@@ -406,10 +377,34 @@ const handleReset = () => {
         {/* RIGHT */}
         <div className="lg:col-span-3">
           <div className="bg-card rounded-2xl border border-theme">
-            <div className="bg-primary p-6 text-white flex gap-2 items-center">
-              <FileText size={20} />
-              <h2 className="font-bold">Leave Request Form</h2>
-            </div>
+           <div className="bg-primary p-6 text-white flex items-center justify-between">
+  <div className="flex gap-2 items-center">
+    <FileText size={20} />
+    <h2 className="font-bold">Leave Request Form</h2>
+  </div>
+
+  {/* INLINE LEAVE SUMMARY */}
+  <div className="text-xs font-medium bg-white/10 px-3 py-1.5 rounded-full">
+    Total:{" "}
+    <span className="font-bold">
+      {leaveBalance?.summary.totalAllocated ?? 0}
+    </span>
+    {" | "}
+    Taken:{" "}
+    <span className="font-bold">
+      {leaveBalance?.summary.totalTaken ?? 0}
+    </span>
+    {" | "}
+    Available:{" "}
+    <span className="font-bold">
+      {leaveBalance?.summary.totalClosingBalance ?? 0}
+    </span>
+  </div>
+</div>
+
+
+
+
 
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
               {/* LEAVE TYPE + APPROVER */}
@@ -425,9 +420,10 @@ const handleReset = () => {
                   >
                     <option value="">Select employee</option>
                     {employees.map(emp => (
-                      <option key={emp.employeeId} value={emp.employeeId}>
-                        {emp.name} ({emp.id})
-                      </option>
+                     <option key={emp.id} value={emp.id}>
+  {emp.name} ({emp.employeeId})
+</option>
+
                     ))}
                   </select>
                 </div>
@@ -435,20 +431,22 @@ const handleReset = () => {
                 <div>
                   <label className="text-sm font-semibold">LEAVE TYPE</label>
                   <select
-                  id="type"
+  id="type"
   value={formData.type}
-  disabled={isEditMode}
+  disabled={isEditMode || balanceLoading}
   onChange={handleChange}
-                    className="w-full mt-2 px-2 py-1 rounded-xl border bg-app"
-                  >
-                    <option value="">Select Leave Type</option>
-                    {LEAVE_TYPES.map((lt) => (
-                      <option key={lt.id} value={lt.id}>
-                        {lt.name}
-                      </option>
-                    ))}
+  className="w-full mt-2 px-2 py-1 rounded-xl border bg-app"
+>
+  <option value="">Select Leave Type</option>
 
-                  </select>
+{leaveBalance?.balances.map((b) => (
+  <option key={b.leaveType} value={b.leaveType}>
+    {b.leaveType} ({b.remaining} / {b.allocated})
+  </option>
+))}
+
+</select>
+
                 </div>
 
                 <div>
@@ -535,10 +533,12 @@ const handleReset = () => {
                 </button>
 
                 <button
-                  type="submit"
-                  disabled={loading || allocLoading}
-                  className="bg-primary text-white rounded-lg px-4 py-2 flex items-center gap-2 text-sm leading-none"
-                >
+  type="submit"
+disabled={loading || balanceLoading}
+
+  className="bg-primary text-white rounded-lg px-4 py-2 flex items-center gap-2 text-sm leading-none"
+>
+
                   <CheckCircle2 size={14} />
                   {loading
   ? isEditMode ? "Updating..." : "Submitting..."

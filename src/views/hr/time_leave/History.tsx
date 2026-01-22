@@ -39,7 +39,7 @@ const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
     const fetchHistory = async () => {
       setLoading(true);
       try {
-        const res = await getLeaveHistoryByEmployee("22", page, pageSize);
+        const res = await getLeaveHistoryByEmployee("20", page, pageSize);
 
         setLeaves(res.data.leaves.map(mapLeaveFromApi));
 
