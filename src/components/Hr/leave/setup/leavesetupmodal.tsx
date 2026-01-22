@@ -9,8 +9,9 @@ import { LeavePeriodForm } from "./LeavePeriodForm";
 import { LeavePolicy } from "./LeavePolicy";
 import { LeavePolicyForm } from "./LeavePolicyForm";
 import { LeaveBlockList, LeaveBlockListForm } from "./LeaveBlockList";
-import { LeaveAllocation } from "./LeaveAllocation";
-import { LeaveAllocationForm } from "./LeaveAllocationForm";
+import LeaveAllocation from "./LeaveAllocation";
+import LeaveAllocationForm from "./LeaveAllocationForm";
+
 import { LeaveEncashment } from "./LeaveEncashment";
 import { LeaveEncashmentForm } from "./LeaveEncashmentForm";
 import { LeavePolicyAssignment } from "./LeavePolicyAssignment";
@@ -50,6 +51,8 @@ const LeaveSetupModal: React.FC<LeaveSetupModalProps> = ({
   initialView = "setup-menu",
 }) => {
   const [currentView, setCurrentView] = useState<ViewType>(initialView);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+
 
   useEffect(() => {
     if (isOpen) {
@@ -258,15 +261,22 @@ const LeaveSetupModal: React.FC<LeaveSetupModalProps> = ({
           {/* Leave Allocation */}
           {currentView === "leave-allocation" && (
             <div className="p-6">
-              <LeaveAllocation
-                onAdd={() => setCurrentView("allocation-form")}
-                onClose={() => setCurrentView("allocation-menu")}
-              />
+             <LeaveAllocation
+  employeeId={selectedEmployeeId}
+  onAdd={() => setCurrentView("allocation-form")}
+  onClose={() => setCurrentView("allocation-menu")}
+/>
+
             </div>
           )}
           {currentView === "allocation-form" && (
             <div className="p-6">
-              <LeaveAllocationForm onClose={() => setCurrentView("leave-allocation")} />
+             <LeaveAllocationForm
+  employeeId={selectedEmployeeId}
+  onClose={() => setCurrentView("leave-allocation")}
+  onSuccess={() => setCurrentView("leave-allocation")}
+/>
+
             </div>
           )}
 

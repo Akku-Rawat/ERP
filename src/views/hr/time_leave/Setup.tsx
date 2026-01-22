@@ -4,7 +4,7 @@ import {
   Users,
   LayoutGrid,
 } from "lucide-react";
-import LeaveSetupModal from "../../../components/Hr/leavemanagemnetmodal/leavesetupmodal";
+import LeaveSetupModal from "../../../components/Hr/leave/setup/leavesetupmodal";
 
 type ModalType = "setup" | "allocation" | null;
 
