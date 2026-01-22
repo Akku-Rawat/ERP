@@ -100,7 +100,7 @@ const ItemsCategoryModal: React.FC<{
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    >
   ) => {
     const { name, type, value } = e.target;
     if (type === "checkbox") {
@@ -284,7 +284,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         />
       </div>
     </label>
-  ),
+  )
 );
 Input.displayName = "Input";
 
