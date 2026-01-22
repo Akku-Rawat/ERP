@@ -93,20 +93,15 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           className,
         ].join(" ")}
       >
-      
         <option value="" disabled>
           Select
         </option>
 
-       {options.map((opt, idx) => (
-  <option
-    key={`${opt.value}-${idx}`}   
-    value={opt.value}
-  >
-    {opt.label}
-  </option>
-))}
-
+        {options.map((opt, idx) => (
+          <option key={`${opt.value}-${idx}`} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
       </select>
     </label>
   ),

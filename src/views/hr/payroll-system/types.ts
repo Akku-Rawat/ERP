@@ -39,11 +39,11 @@ export interface AttendanceRecord {
 export interface LeaveRecord {
   id: string;
   employeeId: string;
-  leaveType: 'Casual' | 'Sick' | 'Earned' | 'LWP' | 'Maternity' | 'Paternity';
+  leaveType: "Casual" | "Sick" | "Earned" | "LWP" | "Maternity" | "Paternity";
   fromDate: string;
   toDate: string;
   days: number;
-  status: 'Pending' | 'Approved' | 'Rejected';
+  status: "Pending" | "Approved" | "Rejected";
   reason: string;
   isPaid: boolean;
 }
@@ -51,13 +51,13 @@ export interface LeaveRecord {
 export interface LoanRecord {
   id: string;
   employeeId: string;
-  loanType: 'Personal' | 'Home' | 'Vehicle' | 'Emergency';
+  loanType: "Personal" | "Home" | "Vehicle" | "Emergency";
   amount: number;
   remainingAmount: number;
   emiAmount: number;
   startDate: string;
   endDate: string;
-  status: 'Active' | 'Completed' | 'Closed';
+  status: "Active" | "Completed" | "Closed";
 }
 
 export interface AdvanceRecord {
@@ -68,13 +68,13 @@ export interface AdvanceRecord {
   remainingAmount: number;
   reason: string;
   date: string;
-  status: 'Pending' | 'Approved' | 'Deducting' | 'Completed';
+  status: "Pending" | "Approved" | "Deducting" | "Completed";
 }
 
 export interface Bonus {
   id: string;
   label: string;
-  bonusType: 'Performance' | 'Festival' | 'Retention' | 'Referral' | 'Project';
+  bonusType: "Performance" | "Festival" | "Retention" | "Referral" | "Project";
   amount: number;
   approved: boolean;
   date: string;
@@ -97,12 +97,12 @@ export interface TaxInvestment {
   hra: number;
   homeLoanInterest: number;
   other: number;
-  regime: 'Old' | 'New';
+  regime: "Old" | "New";
 }
 
 export interface PayrollRecord {
   id: string;
-  payrollName: string; 
+  payrollName: string;
   employeeId: string;
   employeeName: string;
   email: string;
@@ -114,13 +114,13 @@ export interface PayrollRecord {
   ifscCode: string;
   pfNumber: string;
   panNumber: string;
-  
+
   // Attendance
   workingDays: number;
   paidDays: number;
   absentDays: number;
   leaveDays: number;
-  
+
   // Earnings
   basicSalary: number;
   hra: number;
@@ -130,7 +130,7 @@ export interface PayrollRecord {
   arrears: number;
   arrearDetails?: Arrear[];
   overtimePay: number;
-  
+
   // Deductions
   taxDeduction: number;
   pfDeduction: number;
@@ -139,20 +139,27 @@ export interface PayrollRecord {
   loanDeduction: number;
   advanceDeduction: number;
   otherDeductions: number;
-  
+
   // Calculations
   grossPay: number;
   totalDeductions: number;
   netPay: number;
-  
+
   // Status & Workflow
-  status: "Draft" | "Pending" | "Approved" | "Rejected" | "Processing" | "Paid" | "Failed";
+  status:
+    | "Draft"
+    | "Pending"
+    | "Approved"
+    | "Rejected"
+    | "Processing"
+    | "Paid"
+    | "Failed";
   paymentDate?: string;
   createdDate: string;
   approvedBy?: string;
   approvedDate?: string;
   rejectionReason?: string;
-  
+
   // Tax
   taxRegime: "Old" | "New";
   taxableIncome: number;
@@ -161,7 +168,7 @@ export interface PayrollRecord {
 
 export interface PayrollEntry {
   postingDate: string;
-  payrollName: string; 
+  payrollName: string;
   currency: string;
   company: string;
   payrollPayableAccount: string;
@@ -176,7 +183,7 @@ export interface PayrollEntry {
   project: string;
   letterHead: string;
   selectedEmployees: string[];
-    // filters
+  // filters
   branch?: string;
   department?: string;
   designation?: string;
@@ -192,11 +199,11 @@ export interface ApprovalWorkflow {
   requestDate: string;
   approverIds: string[];
   currentApprover: string;
-  status: 'Pending' | 'Approved' | 'Rejected';
+  status: "Pending" | "Approved" | "Rejected";
   comments: string[];
   approvalHistory: {
     approverId: string;
-    action: 'Approved' | 'Rejected';
+    action: "Approved" | "Rejected";
     date: string;
     comment: string;
   }[];
@@ -210,7 +217,7 @@ export interface BankTransferRecord {
   bankAccount: string;
   ifscCode: string;
   amount: number;
-  status: 'Pending' | 'Processed' | 'Failed';
+  status: "Pending" | "Processed" | "Failed";
   transactionId?: string;
   processedDate?: string;
 }

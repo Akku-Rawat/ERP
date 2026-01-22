@@ -1,9 +1,9 @@
 // LoansAdvances.tsx - Loan and Advance Management Components
 
-import React, { useState } from 'react';
-import { DollarSign, CreditCard, Plus, TrendingDown } from 'lucide-react';
-import type { LoanRecord, AdvanceRecord, Employee } from './types';
-import { demoLoans, demoAdvances } from './constants';
+import React, { useState } from "react";
+import { DollarSign, CreditCard, Plus } from "lucide-react";
+import type { LoanRecord, AdvanceRecord, Employee } from "./types";
+import { demoLoans, demoAdvances } from "./constants";
 
 interface LoanManagerProps {
   employees: Employee[];
@@ -13,41 +13,41 @@ export const LoanManager: React.FC<LoanManagerProps> = ({ employees }) => {
   const [loans, setLoans] = useState<LoanRecord[]>(demoLoans);
   const [showAddLoan, setShowAddLoan] = useState(false);
   const [newLoan, setNewLoan] = useState<Partial<LoanRecord>>({
-    employeeId: '',
-    loanType: 'Personal',
+    employeeId: "",
+    loanType: "Personal",
     amount: 0,
     emiAmount: 0,
-    startDate: '',
-    endDate: ''
+    startDate: "",
+    endDate: "",
   });
 
   const handleAddLoan = () => {
     if (!newLoan.employeeId || !newLoan.amount || !newLoan.emiAmount) {
-      alert('Fill all required fields');
+      alert("Fill all required fields");
       return;
     }
 
     const loan: LoanRecord = {
       id: `LOAN${Date.now()}`,
-      employeeId: newLoan.employeeId!,
+      employeeId: newLoan.employeeId,
       loanType: newLoan.loanType as any,
-      amount: newLoan.amount!,
-      remainingAmount: newLoan.amount!,
-      emiAmount: newLoan.emiAmount!,
+      amount: newLoan.amount,
+      remainingAmount: newLoan.amount,
+      emiAmount: newLoan.emiAmount,
       startDate: newLoan.startDate!,
       endDate: newLoan.endDate!,
-      status: 'Active'
+      status: "Active",
     };
 
     setLoans([...loans, loan]);
     setShowAddLoan(false);
     setNewLoan({
-      employeeId: '',
-      loanType: 'Personal',
+      employeeId: "",
+      loanType: "Personal",
       amount: 0,
       emiAmount: 0,
-      startDate: '',
-      endDate: ''
+      startDate: "",
+      endDate: "",
     });
   };
 
@@ -62,7 +62,8 @@ export const LoanManager: React.FC<LoanManagerProps> = ({ employees }) => {
           onClick={() => setShowAddLoan(!showAddLoan)}
           className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2"
         >
-          <Plus className="w-4 h-4" />Add Loan
+          <Plus className="w-4 h-4" />
+          Add Loan
         </button>
       </div>
 
@@ -72,17 +73,23 @@ export const LoanManager: React.FC<LoanManagerProps> = ({ employees }) => {
           <div className="grid grid-cols-2 gap-4">
             <select
               value={newLoan.employeeId}
-              onChange={(e) => setNewLoan({ ...newLoan, employeeId: e.target.value })}
+              onChange={(e) =>
+                setNewLoan({ ...newLoan, employeeId: e.target.value })
+              }
               className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="">Select Employee</option>
-              {employees.map(emp => (
-                <option key={emp.id} value={emp.id}>{emp.name}</option>
+              {employees.map((emp) => (
+                <option key={emp.id} value={emp.id}>
+                  {emp.name}
+                </option>
               ))}
             </select>
             <select
               value={newLoan.loanType}
-              onChange={(e) => setNewLoan({ ...newLoan, loanType: e.target.value as any })}
+              onChange={(e) =>
+                setNewLoan({ ...newLoan, loanType: e.target.value as any })
+              }
               className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="Personal">Personal Loan</option>
@@ -92,28 +99,39 @@ export const LoanManager: React.FC<LoanManagerProps> = ({ employees }) => {
             </select>
             <input
               type="number"
-              value={newLoan.amount || ''}
-              onChange={(e) => setNewLoan({ ...newLoan, amount: parseFloat(e.target.value) })}
+              value={newLoan.amount || ""}
+              onChange={(e) =>
+                setNewLoan({ ...newLoan, amount: parseFloat(e.target.value) })
+              }
               placeholder="Loan Amount"
               className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <input
               type="number"
-              value={newLoan.emiAmount || ''}
-              onChange={(e) => setNewLoan({ ...newLoan, emiAmount: parseFloat(e.target.value) })}
+              value={newLoan.emiAmount || ""}
+              onChange={(e) =>
+                setNewLoan({
+                  ...newLoan,
+                  emiAmount: parseFloat(e.target.value),
+                })
+              }
               placeholder="EMI Amount"
               className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <input
               type="date"
               value={newLoan.startDate}
-              onChange={(e) => setNewLoan({ ...newLoan, startDate: e.target.value })}
+              onChange={(e) =>
+                setNewLoan({ ...newLoan, startDate: e.target.value })
+              }
               className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <input
               type="date"
               value={newLoan.endDate}
-              onChange={(e) => setNewLoan({ ...newLoan, endDate: e.target.value })}
+              onChange={(e) =>
+                setNewLoan({ ...newLoan, endDate: e.target.value })
+              }
               className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
@@ -135,54 +153,73 @@ export const LoanManager: React.FC<LoanManagerProps> = ({ employees }) => {
       )}
 
       <div className="space-y-3">
-        {loans.map(loan => {
-          const emp = employees.find(e => e.id === loan.employeeId);
-          const progress = ((loan.amount - loan.remainingAmount) / loan.amount) * 100;
-          
+        {loans.map((loan) => {
+          const emp = employees.find((e) => e.id === loan.employeeId);
+          const progress =
+            ((loan.amount - loan.remainingAmount) / loan.amount) * 100;
+
           return (
-            <div key={loan.id} className="border border-slate-200 rounded-lg p-4">
+            <div
+              key={loan.id}
+              className="border border-slate-200 rounded-lg p-4"
+            >
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <p className="font-semibold text-slate-800">{emp?.name}</p>
-                  <p className="text-sm text-slate-600">{loan.loanType} Loan • {loan.id}</p>
+                  <p className="text-sm text-slate-600">
+                    {loan.loanType} Loan • {loan.id}
+                  </p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  loan.status === 'Active' ? 'bg-green-100 text-green-700' :
-                  loan.status === 'Completed' ? 'bg-blue-100 text-blue-700' :
-                  'bg-slate-100 text-slate-700'
-                }`}>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    loan.status === "Active"
+                      ? "bg-green-100 text-green-700"
+                      : loan.status === "Completed"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-slate-100 text-slate-700"
+                  }`}
+                >
                   {loan.status}
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-4 gap-3 mb-3">
                 <div className="bg-orange-50 rounded p-2">
                   <p className="text-xs text-slate-600">Total Amount</p>
-                  <p className="font-bold text-slate-800">₹{loan.amount.toLocaleString()}</p>
+                  <p className="font-bold text-slate-800">
+                    ₹{loan.amount.toLocaleString()}
+                  </p>
                 </div>
                 <div className="bg-red-50 rounded p-2">
                   <p className="text-xs text-slate-600">Remaining</p>
-                  <p className="font-bold text-red-600">₹{loan.remainingAmount.toLocaleString()}</p>
+                  <p className="font-bold text-red-600">
+                    ₹{loan.remainingAmount.toLocaleString()}
+                  </p>
                 </div>
                 <div className="bg-blue-50 rounded p-2">
                   <p className="text-xs text-slate-600">EMI/Month</p>
-                  <p className="font-bold text-blue-600">₹{loan.emiAmount.toLocaleString()}</p>
+                  <p className="font-bold text-blue-600">
+                    ₹{loan.emiAmount.toLocaleString()}
+                  </p>
                 </div>
                 <div className="bg-green-50 rounded p-2">
                   <p className="text-xs text-slate-600">Paid</p>
-                  <p className="font-bold text-green-600">{progress.toFixed(0)}%</p>
+                  <p className="font-bold text-green-600">
+                    {progress.toFixed(0)}%
+                  </p>
                 </div>
               </div>
-              
+
               <div className="w-full bg-slate-200 rounded-full h-2">
                 <div
                   className="bg-gradient-to-r from-orange-500 to-orange-600 h-2 rounded-full transition-all"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              
+
               <p className="text-xs text-slate-500 mt-2">
-                {new Date(loan.startDate).toLocaleDateString()} - {new Date(loan.endDate).toLocaleDateString()}
+                {new Date(loan.startDate).toLocaleDateString()} -{" "}
+                {new Date(loan.endDate).toLocaleDateString()}
               </p>
             </div>
           );
@@ -196,45 +233,55 @@ interface AdvanceManagerProps {
   employees: Employee[];
 }
 
-export const AdvanceManager: React.FC<AdvanceManagerProps> = ({ employees }) => {
+export const AdvanceManager: React.FC<AdvanceManagerProps> = ({
+  employees,
+}) => {
   const [advances, setAdvances] = useState<AdvanceRecord[]>(demoAdvances);
   const [showAddAdvance, setShowAddAdvance] = useState(false);
   const [newAdvance, setNewAdvance] = useState<Partial<AdvanceRecord>>({
-    employeeId: '',
+    employeeId: "",
     amount: 0,
     deductionAmount: 0,
-    reason: ''
+    reason: "",
   });
 
   const handleAddAdvance = () => {
-    if (!newAdvance.employeeId || !newAdvance.amount || !newAdvance.deductionAmount) {
-      alert('Fill all required fields');
+    if (
+      !newAdvance.employeeId ||
+      !newAdvance.amount ||
+      !newAdvance.deductionAmount
+    ) {
+      alert("Fill all required fields");
       return;
     }
 
     const advance: AdvanceRecord = {
       id: `ADV${Date.now()}`,
-      employeeId: newAdvance.employeeId!,
-      amount: newAdvance.amount!,
-      deductionAmount: newAdvance.deductionAmount!,
-      remainingAmount: newAdvance.amount!,
+      employeeId: newAdvance.employeeId,
+      amount: newAdvance.amount,
+      deductionAmount: newAdvance.deductionAmount,
+      remainingAmount: newAdvance.amount,
       reason: newAdvance.reason!,
-      date: new Date().toISOString().split('T')[0],
-      status: 'Pending'
+      date: new Date().toISOString().split("T")[0],
+      status: "Pending",
     };
 
     setAdvances([...advances, advance]);
     setShowAddAdvance(false);
     setNewAdvance({
-      employeeId: '',
+      employeeId: "",
       amount: 0,
       deductionAmount: 0,
-      reason: ''
+      reason: "",
     });
   };
 
   const handleApprove = (id: string) => {
-    setAdvances(advances.map(a => a.id === id ? { ...a, status: 'Deducting' as const } : a));
+    setAdvances(
+      advances.map((a) =>
+        a.id === id ? { ...a, status: "Deducting" as const } : a,
+      ),
+    );
   };
 
   return (
@@ -248,7 +295,8 @@ export const AdvanceManager: React.FC<AdvanceManagerProps> = ({ employees }) => 
           onClick={() => setShowAddAdvance(!showAddAdvance)}
           className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 flex items-center gap-2"
         >
-          <Plus className="w-4 h-4" />Add Advance
+          <Plus className="w-4 h-4" />
+          Add Advance
         </button>
       </div>
 
@@ -258,32 +306,48 @@ export const AdvanceManager: React.FC<AdvanceManagerProps> = ({ employees }) => 
           <div className="grid grid-cols-2 gap-4">
             <select
               value={newAdvance.employeeId}
-              onChange={(e) => setNewAdvance({ ...newAdvance, employeeId: e.target.value })}
+              onChange={(e) =>
+                setNewAdvance({ ...newAdvance, employeeId: e.target.value })
+              }
               className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
               <option value="">Select Employee</option>
-              {employees.map(emp => (
-                <option key={emp.id} value={emp.id}>{emp.name}</option>
+              {employees.map((emp) => (
+                <option key={emp.id} value={emp.id}>
+                  {emp.name}
+                </option>
               ))}
             </select>
             <input
               type="number"
-              value={newAdvance.amount || ''}
-              onChange={(e) => setNewAdvance({ ...newAdvance, amount: parseFloat(e.target.value) })}
+              value={newAdvance.amount || ""}
+              onChange={(e) =>
+                setNewAdvance({
+                  ...newAdvance,
+                  amount: parseFloat(e.target.value),
+                })
+              }
               placeholder="Advance Amount"
               className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
             <input
               type="number"
-              value={newAdvance.deductionAmount || ''}
-              onChange={(e) => setNewAdvance({ ...newAdvance, deductionAmount: parseFloat(e.target.value) })}
+              value={newAdvance.deductionAmount || ""}
+              onChange={(e) =>
+                setNewAdvance({
+                  ...newAdvance,
+                  deductionAmount: parseFloat(e.target.value),
+                })
+              }
               placeholder="Monthly Deduction"
               className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
             <input
               type="text"
               value={newAdvance.reason}
-              onChange={(e) => setNewAdvance({ ...newAdvance, reason: e.target.value })}
+              onChange={(e) =>
+                setNewAdvance({ ...newAdvance, reason: e.target.value })
+              }
               placeholder="Reason"
               className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
@@ -306,27 +370,38 @@ export const AdvanceManager: React.FC<AdvanceManagerProps> = ({ employees }) => 
       )}
 
       <div className="space-y-3">
-        {advances.map(advance => {
-          const emp = employees.find(e => e.id === advance.employeeId);
-          const progress = ((advance.amount - advance.remainingAmount) / advance.amount) * 100;
-          
+        {advances.map((advance) => {
+          const emp = employees.find((e) => e.id === advance.employeeId);
+          const progress =
+            ((advance.amount - advance.remainingAmount) / advance.amount) * 100;
+
           return (
-            <div key={advance.id} className="border border-slate-200 rounded-lg p-4">
+            <div
+              key={advance.id}
+              className="border border-slate-200 rounded-lg p-4"
+            >
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <p className="font-semibold text-slate-800">{emp?.name}</p>
-                  <p className="text-xs text-slate-500">{advance.id} • {new Date(advance.date).toLocaleDateString()}</p>
+                  <p className="text-xs text-slate-500">
+                    {advance.id} • {new Date(advance.date).toLocaleDateString()}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    advance.status === 'Pending' ? 'bg-amber-100 text-amber-700' :
-                    advance.status === 'Approved' ? 'bg-green-100 text-green-700' :
-                    advance.status === 'Deducting' ? 'bg-blue-100 text-blue-700' :
-                    'bg-slate-100 text-slate-700'
-                  }`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      advance.status === "Pending"
+                        ? "bg-amber-100 text-amber-700"
+                        : advance.status === "Approved"
+                          ? "bg-green-100 text-green-700"
+                          : advance.status === "Deducting"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-slate-100 text-slate-700"
+                    }`}
+                  >
                     {advance.status}
                   </span>
-                  {advance.status === 'Pending' && (
+                  {advance.status === "Pending" && (
                     <button
                       onClick={() => handleApprove(advance.id)}
                       className="px-3 py-1 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700"
@@ -336,25 +411,33 @@ export const AdvanceManager: React.FC<AdvanceManagerProps> = ({ employees }) => 
                   )}
                 </div>
               </div>
-              
-              <p className="text-sm text-slate-600 mb-3 italic">{advance.reason}</p>
-              
+
+              <p className="text-sm text-slate-600 mb-3 italic">
+                {advance.reason}
+              </p>
+
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-teal-50 rounded p-2">
                   <p className="text-xs text-slate-600">Total</p>
-                  <p className="font-bold text-slate-800">₹{advance.amount.toLocaleString()}</p>
+                  <p className="font-bold text-slate-800">
+                    ₹{advance.amount.toLocaleString()}
+                  </p>
                 </div>
                 <div className="bg-blue-50 rounded p-2">
                   <p className="text-xs text-slate-600">Deduction/Month</p>
-                  <p className="font-bold text-blue-600">₹{advance.deductionAmount.toLocaleString()}</p>
+                  <p className="font-bold text-blue-600">
+                    ₹{advance.deductionAmount.toLocaleString()}
+                  </p>
                 </div>
                 <div className="bg-red-50 rounded p-2">
                   <p className="text-xs text-slate-600">Remaining</p>
-                  <p className="font-bold text-red-600">₹{advance.remainingAmount.toLocaleString()}</p>
+                  <p className="font-bold text-red-600">
+                    ₹{advance.remainingAmount.toLocaleString()}
+                  </p>
                 </div>
               </div>
-              
-              {advance.status === 'Deducting' && (
+
+              {advance.status === "Deducting" && (
                 <>
                   <div className="w-full bg-slate-200 rounded-full h-2 mt-3">
                     <div
@@ -362,7 +445,9 @@ export const AdvanceManager: React.FC<AdvanceManagerProps> = ({ employees }) => 
                       style={{ width: `${progress}%` }}
                     />
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">{progress.toFixed(0)}% recovered</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {progress.toFixed(0)}% recovered
+                  </p>
                 </>
               )}
             </div>

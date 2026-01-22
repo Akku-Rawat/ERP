@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Plus, X, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 // import TermsAndCondition from "../TermsAndCondition";
 import { useEffect } from "react";
@@ -57,7 +57,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
     formData,
     customerDetails,
     customerNameDisplay,
-    
+
     paginatedItems,
     totals,
     ui,
@@ -91,80 +91,77 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
 
     fetchInvoices();
   }, []);
-useEffect(() => {
-  if (!formData.invoiceNumber) return;
+  useEffect(() => {
+    if (!formData.invoiceNumber) return;
 
-  const invoiceNumber = formData.invoiceNumber; 
+    const invoiceNumber = formData.invoiceNumber;
 
-  const fetchInvoice = async () => {
-    try {
-      const res = await getSalesInvoiceById(invoiceNumber);
+    const fetchInvoice = async () => {
+      try {
+        const res = await getSalesInvoiceById(invoiceNumber);
 
-      if (res?.status_code === 200) {
-        actions.setFormDataFromInvoice(res.data);
+        if (res?.status_code === 200) {
+          actions.setFormDataFromInvoice(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch invoice", err);
       }
-    } catch (err) {
-      console.error("Failed to fetch invoice", err);
-    }
-  };
-
-  fetchInvoice();
-}, [formData.invoiceNumber]);
-
-
-const getInvoiceAdjustReason = () => {
-  if (creditMeta.creditNoteReasonCode === "07") {
-    return creditMeta.invcAdjustReason?.trim();
-  }
-
-  return CREDIT_NOTE_REASONS.find(
-    (r) => r.value === creditMeta.creditNoteReasonCode
-  )?.label;
-};
-
-const handleCreateCreditNote = async () => {
-  try {
-    if (!formData.invoiceNumber) {
-      console.error("Invoice number missing");
-      return;
-    }
-
-    if (!creditMeta.creditNoteReasonCode) {
-      console.error("Credit note reason missing");
-      return;
-    }
-
-    const invcAdjustReason = getInvoiceAdjustReason();
-
-    if (!invcAdjustReason) {
-      console.error("Invoice adjustment reason is required");
-      return;
-    }
-
-    const payload = {
-      originalSalesInvoiceNumber: formData.invoiceNumber,
-      CreditNoteReasonCode: creditMeta.creditNoteReasonCode,
-      invcAdjustReason, // ALWAYS NON-EMPTY
-      transactionProgress: creditMeta.transactionProgress,
-      items: formData.items.map((it: any) => ({
-        itemCode: it.itemCode,
-        quantity: Number(it.quantity),
-        price: Number(it.price),
-      })),
     };
 
-    console.log("FINAL CREDIT NOTE PAYLOAD", payload);
+    fetchInvoice();
+  }, [formData.invoiceNumber]);
 
-    const res = await createCreditNoteFromInvoice(payload);
-    console.log("Credit Note Created", res);
+  const getInvoiceAdjustReason = () => {
+    if (creditMeta.creditNoteReasonCode === "07") {
+      return creditMeta.invcAdjustReason?.trim();
+    }
 
-    onSubmit?.(res);
-  } catch (err) {
-    console.error("Create Credit Note failed", err);
-  }
-};
+    return CREDIT_NOTE_REASONS.find(
+      (r) => r.value === creditMeta.creditNoteReasonCode,
+    )?.label;
+  };
 
+  const handleCreateCreditNote = async () => {
+    try {
+      if (!formData.invoiceNumber) {
+        console.error("Invoice number missing");
+        return;
+      }
 
+      if (!creditMeta.creditNoteReasonCode) {
+        console.error("Credit note reason missing");
+        return;
+      }
+
+      const invcAdjustReason = getInvoiceAdjustReason();
+
+      if (!invcAdjustReason) {
+        console.error("Invoice adjustment reason is required");
+        return;
+      }
+
+      const payload = {
+        originalSalesInvoiceNumber: formData.invoiceNumber,
+        CreditNoteReasonCode: creditMeta.creditNoteReasonCode,
+        invcAdjustReason, // ALWAYS NON-EMPTY
+        transactionProgress: creditMeta.transactionProgress,
+        items: formData.items.map((it: any) => ({
+          itemCode: it.itemCode,
+          quantity: Number(it.quantity),
+          price: Number(it.price),
+        })),
+      };
+
+      console.log("FINAL CREDIT NOTE PAYLOAD", payload);
+
+      const res = await createCreditNoteFromInvoice(payload);
+      console.log("Credit Note Created", res);
+
+      onSubmit?.(res);
+    } catch (err) {
+      console.error("Create Credit Note failed", err);
+    }
+  };
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
 
@@ -202,19 +199,18 @@ const handleCreateCreditNote = async () => {
               <div className="" title="Credit Note Information">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Select
-  label="Invoice Number"
-  options={invoiceOptions}
-  value={formData.invoiceNumber ?? ""}
-  onChange={(e) =>
-    actions.handleInputChange({
-      target: {
-        name: "invoiceNumber",
-        value: e.target.value,
-      },
-    } as any)
-  }
-/>
-
+                    label="Invoice Number"
+                    options={invoiceOptions}
+                    value={formData.invoiceNumber ?? ""}
+                    onChange={(e) =>
+                      actions.handleInputChange({
+                        target: {
+                          name: "invoiceNumber",
+                          value: e.target.value,
+                        },
+                      } as any)
+                    }
+                  />
 
                   <Select
                     label="Credit Note Reason Code"

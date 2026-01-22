@@ -5,16 +5,18 @@ const base_url = import.meta.env.VITE_ITEM_API_URL as string;
 const api = createAxiosInstance(base_url);
 
 const classApi = createAxiosInstance(
-  import.meta.env.VITE_CLASS_LIST_API_URL as string
+  import.meta.env.VITE_CLASS_LIST_API_URL as string,
 );
 
+const vite_class_list_api_url = import.meta.env
+  .VITE_CLASS_LIST_API_URL as string;
 
-const vite_class_list_api_url=import.meta.env.VITE_CLASS_LIST_API_URL as string;
-
-
-const vite_country_list_api_url = import.meta.env.VITE_COUNTRY_LIST_API_URL as string;
-const vite_unit_of_measurement_api_url = import.meta.env.VITE_UNIT_OF_MEASURE_LIST_API_URL as string;
-const vite_packaging_unit_codes_api_url = import.meta.env.VITE_PACKAGING_UNIT_CODES_API_URL as string;
+const vite_country_list_api_url = import.meta.env
+  .VITE_COUNTRY_LIST_API_URL as string;
+const vite_unit_of_measurement_api_url = import.meta.env
+  .VITE_UNIT_OF_MEASURE_LIST_API_URL as string;
+const vite_packaging_unit_codes_api_url = import.meta.env
+  .VITE_PACKAGING_UNIT_CODES_API_URL as string;
 
 const ENDPOINTS = {
   packagingUnitCodes: `${vite_packaging_unit_codes_api_url}/packaging-unit-codes/`,

@@ -21,12 +21,12 @@ import HRSettingsPage from "./hrsetup";
 const navTabs = [
   { key: "dashboard", label: "HR Dashboard", icon: <FaChartLine /> },
   { key: "Management", label: "Employee Management", icon: <FaUserFriends /> },
-   {key : 'leave', label: 'Leave Management', icon: <FaClipboardList /> },
+  { key: "leave", label: "Leave Management", icon: <FaClipboardList /> },
   { key: "attendance", label: "Time & Attendance", icon: <FaCalendarDay /> },
   { key: "performance", label: "Performance & Growth", icon: <FaChartLine /> },
   // { key: 'attendance', label: 'Attendance', icon: <FaClipboardList /> },
   // { key: 'leave', label: 'Leave Management', icon: <FaCalendarDay /> },
-  { key: "payroll", label: "Payroll", icon: <FaMoneyCheckAlt /> }, 
+  { key: "payroll", label: "Payroll", icon: <FaMoneyCheckAlt /> },
   {
     key: `compliance`,
     label: `Compliance Management`,
@@ -71,7 +71,7 @@ const HrPayrollModule: React.FC = () => {
         {/* {tab === 'attendance' && <Attendance />}
         {tab === 'leave' && <LeaveManagement />} */}
         {tab === "payroll" && <PayrollManagement />}
-        {tab === 'leave' && <Leave />}
+        {tab === "leave" && <Leave />}
         {/* {tab === 'recruitment' && <Recruitment />} */}
         {tab === "performance" && <PerformanceDevelopment />}
         {tab === "compliance" && <ComplianceManagement />}

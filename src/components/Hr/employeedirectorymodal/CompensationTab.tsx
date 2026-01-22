@@ -13,11 +13,11 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
 }) => {
   // State for allowance input types
   const [housingType, setHousingType] = useState<"percentage" | "amount">(
-    "amount"
+    "amount",
   );
   const [mealType, setMealType] = useState<"percentage" | "amount">("amount");
   const [transportType, setTransportType] = useState<"percentage" | "amount">(
-    "amount"
+    "amount",
   );
   const [otherType, setOtherType] = useState<"percentage" | "amount">("amount");
 
@@ -25,7 +25,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
   const calculateAllowance = (
     value: string,
     type: "percentage" | "amount",
-    basicSalary: number
+    basicSalary: number,
   ) => {
     const numValue = parseFloat(value || "0");
     if (type === "percentage") {
@@ -41,7 +41,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
     const housing = calculateAllowance(
       formData.housingAllowance,
       housingType,
-      basic
+      basic,
     );
 
     const meal = calculateAllowance(formData.mealAllowance, mealType, basic);
@@ -49,13 +49,13 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
     const transport = calculateAllowance(
       formData.transportAllowance,
       transportType,
-      basic
+      basic,
     );
 
     const other = calculateAllowance(
       formData.otherAllowances,
       otherType,
-      basic
+      basic,
     );
 
     return basic + housing + meal + transport + other;
@@ -202,7 +202,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                     value={transportType}
                     onChange={(e) =>
                       setTransportType(
-                        e.target.value as "percentage" | "amount"
+                        e.target.value as "percentage" | "amount",
                       )
                     }
                     className="w-24 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"

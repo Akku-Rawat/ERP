@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 
 import Table from "../../components/ui/Table/Table";
 import type { Column } from "../../components/ui/Table/type";
@@ -23,8 +23,8 @@ const DebitNotesTable: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-const [totalPages, setTotalPages] = useState(1);
-const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -50,8 +50,7 @@ const [totalItems, setTotalItems] = useState(0);
     try {
       setLoading(true);
 
-    const resp = await getAllDebitNotes(page, pageSize);
-
+      const resp = await getAllDebitNotes(page, pageSize);
 
       const mappedData: DebitNote[] = resp.data.map((item: any) => ({
         noteNo: item.invoiceNumber,
@@ -64,7 +63,7 @@ const [totalItems, setTotalItems] = useState(0);
 
       setData(mappedData);
       setTotalPages(resp.pagination.total_pages);
-    setTotalItems(resp.pagination.total);
+      setTotalItems(resp.pagination.total);
     } catch (error) {
       console.error("Failed to load debit notes", error);
     } finally {
@@ -72,47 +71,44 @@ const [totalItems, setTotalItems] = useState(0);
     }
   };
 
-
-useEffect(() => {
-  fetchDebitNotes();
-}, [page, pageSize]);
-
-
+  useEffect(() => {
+    fetchDebitNotes();
+  }, [page, pageSize]);
 
   return (
-     <div className="p-8">
+    <div className="p-8">
       {loading ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           <p className="mt-2 text-muted">Loading invoices…</p>
         </div>
       ) : (
-       <Table
-        columns={columns}
-        data={data}
-        showToolbar
-        enableAdd
-        searchValue={searchTerm}
-        onSearch={setSearchTerm}
-        loading={loading}
-        addLabel="Add Debit Note"
-        onAdd={() => setOpenCreateModal(true)}
-        emptyMessage="No debit notes found"
-        enableColumnSelector
-        currentPage={page}
-        totalPages={totalPages}
-        pageSize={pageSize}
-        totalItems={totalItems}
-        pageSizeOptions={[10, 25, 50, 100]}
-        onPageSizeChange={(size) => {
-          setPageSize(size);
-          setPage(1); // reset page
-        }}
-        onPageChange={setPage}
-      />
+        <Table
+          columns={columns}
+          data={data}
+          showToolbar
+          enableAdd
+          searchValue={searchTerm}
+          onSearch={setSearchTerm}
+          loading={loading}
+          addLabel="Add Debit Note"
+          onAdd={() => setOpenCreateModal(true)}
+          emptyMessage="No debit notes found"
+          enableColumnSelector
+          currentPage={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          pageSizeOptions={[10, 25, 50, 100]}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1); // reset page
+          }}
+          onPageChange={setPage}
+        />
       )}
 
-    <CreateDebitNoteModal
+      <CreateDebitNoteModal
         isOpen={openCreateModal}
         onClose={() => setOpenCreateModal(false)}
         onSubmit={(payload) => {
@@ -127,5 +123,3 @@ useEffect(() => {
 };
 
 export default DebitNotesTable;
- 
-      

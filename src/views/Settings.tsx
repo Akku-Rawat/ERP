@@ -9,7 +9,7 @@ import {
   FaUndo,
   FaCheckCircle,
 } from "react-icons/fa";
-import { ThemeSwitcher } from "../components/ThemeSwitcher"; 
+import { ThemeSwitcher } from "../components/ThemeSwitcher";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("general");

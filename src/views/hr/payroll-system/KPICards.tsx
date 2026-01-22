@@ -1,7 +1,7 @@
 // KPICards.tsx - Dashboard KPI statistics cards
 
-import React from 'react';
-import { Users, CheckCircle, Clock, DollarSign } from 'lucide-react';
+import React from "react";
+import { Users, CheckCircle, Clock, DollarSign } from "lucide-react";
 
 interface KPICardsProps {
   totalRecords: number;
@@ -10,11 +10,11 @@ interface KPICardsProps {
   totalPayout: number;
 }
 
-export const KPICards: React.FC<KPICardsProps> = ({ 
-  totalRecords, 
-  paidCount, 
-  pendingCount, 
-  totalPayout 
+export const KPICards: React.FC<KPICardsProps> = ({
+  totalRecords,
+  paidCount,
+  pendingCount,
+  totalPayout,
 }) => {
   return (
     <div className="grid grid-cols-4 gap-4">

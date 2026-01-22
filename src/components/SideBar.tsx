@@ -14,7 +14,6 @@ import {
   FaBars,
   FaChevronDown,
   FaChevronUp,
-  FaWarehouse
 } from "react-icons/fa";
 
 const menuItems = [

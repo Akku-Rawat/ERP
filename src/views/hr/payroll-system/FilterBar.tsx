@@ -1,7 +1,7 @@
 // FilterBar.tsx - Search and filter component
 
-import React from 'react';
-import { Search, TrendingUp } from 'lucide-react';
+import React from "react";
+import { Search, TrendingUp } from "lucide-react";
 
 interface FilterBarProps {
   searchQuery: string;
@@ -24,7 +24,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   filterStatus,
   onStatusChange,
   pendingCount,
-  onRunPayroll
+  onRunPayroll,
 }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
@@ -45,7 +45,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           onChange={(e) => onDeptChange(e.target.value)}
           className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          {departments.map(d => <option key={d} value={d}>{d}</option>)}
+          {departments.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
         </select>
 
         <select

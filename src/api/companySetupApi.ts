@@ -5,7 +5,6 @@ const base_url = import.meta.env.VITE_BASE_URL as string;
 const vite_company_api_url = import.meta.env.VITE_COMPANY_API_URL as string;
 const api = createAxiosInstance(base_url);
 
-
 const ENDPOINTS = {
   createCompany: `${base_url}.company_setup.setup.create_company_api`,
   getAllCompanies: `${base_url}.company_setup.setup.get_companies_api`,

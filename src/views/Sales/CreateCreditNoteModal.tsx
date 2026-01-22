@@ -8,14 +8,13 @@ interface Props {
   onClose: () => void;
   onSubmit: (payload: any) => void;
   invoiceId: string;
-
 }
 
 const CreateCreditNoteModal: React.FC<Props> = ({
   isOpen,
   onClose,
   onSubmit,
-  invoiceId
+  invoiceId,
 }) => {
   return (
     <Modal

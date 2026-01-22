@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 
 interface ProformaInvoiceModalProps {
@@ -12,10 +11,7 @@ interface ProformaInvoiceModalProps {
 import Modal from "../ui/modal/modal";
 import { Button } from "../ui/modal/formComponent";
 
-import {
-  getAllCustomers,
-  getCustomerByCustomerCode,
-} from "../../api/customerApi";
+import { getAllCustomers } from "../../api/customerApi";
 
 import CustomerSelect from "../selects/CustomerSelect";
 import ItemSelect from "../selects/ItemSelect";
@@ -23,7 +19,6 @@ import { createProformaInvoice } from "../../api/proformaInvoiceApi";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
   invoiceStatusOptions,
-  invoiceTypeOptions,
   currencySymbols,
   paymentMethodOptions,
   currencyOptions,
@@ -54,12 +49,11 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
       alert("Proforma Invoice created successfully");
       onSubmit?.();
     },
-    "proforma"
+    "proforma",
   );
- 
 
   const [custLoading, setCustLoading] = useState(true);
-const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
+  const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
   useEffect(() => {
     if (!isOpen) return;
 
@@ -104,7 +98,7 @@ const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
             <Button variant="ghost" onClick={actions.handleReset}>
               Reset
             </Button>
-             <Button variant="primary" type="submit" form="proforma-form">
+            <Button variant="primary" type="submit" form="proforma-form">
               Save Invoice
             </Button>
           </div>
@@ -114,7 +108,6 @@ const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
       height="90vh"
     >
       <form id="proforma-form" onSubmit={actions.handleSubmit}>
-
         {/* Tabs */}
         <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
           {(["details", "terms", "address"] as const).map((tab) => (
@@ -184,14 +177,14 @@ const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
                     </div>
 
                     <div className="flex flex-col gap-1">
-                       <Select
-                         label="Invoice Status"
-                         name="invoiceStatus"
-                         value={formData.invoiceStatus}
-                         onChange={actions.handleInputChange}
-                                               options={invoiceStatusOptions}
-                                             />
-                                           </div>
+                      <Select
+                        label="Invoice Status"
+                        name="invoiceStatus"
+                        value={formData.invoiceStatus}
+                        onChange={actions.handleInputChange}
+                        options={invoiceStatusOptions}
+                      />
+                    </div>
 
                     {/* <div className="flex flex-col gap-1">
                                             <Select
@@ -476,7 +469,8 @@ const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
                           Sub Total
                         </span>
                         <span className="font-medium text-gray-800">
-                          {symbol} {totals.grandTotal} {totals.subTotal.toFixed(2)}
+                          {symbol} {totals.grandTotal}{" "}
+                          {totals.subTotal.toFixed(2)}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -484,7 +478,8 @@ const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
                           Total Tax
                         </span>
                         <span className="font-medium text-gray-800">
-                          {symbol} {totals.grandTotal} {totals.totalTax.toFixed(2)}
+                          {symbol} {totals.grandTotal}{" "}
+                          {totals.totalTax.toFixed(2)}
                         </span>
                       </div>
                       <div className="flex justify-between border-t pt-2 mt-2">

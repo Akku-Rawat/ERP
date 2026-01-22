@@ -168,61 +168,60 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     },
   ];
 
-return (
-  <div className="p-8">
-    {viewMode === "table" ? (
-      <>
-        {custLoading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <p className="mt-2 text-muted">Loading customers…</p>
-          </div>
-        ) : (
-          <Table
-            columns={columns}
-            data={customers}
-            showToolbar
-            loading={custLoading}
-            onPageSizeChange={(size) => setPageSize(size)}
-            pageSizeOptions={[10, 25, 50, 100]}
-            searchValue={searchTerm}
-            onSearch={setSearchTerm}
-            enableAdd
-            addLabel="Add Customer"
-            onAdd={handleAddCustomer}
-            enableColumnSelector
-            currentPage={page}
-            totalPages={totalPages}
-            pageSize={pageSize}
-            totalItems={totalItems}
-            onPageChange={setPage}
-          />
-        )}
-      </>
-    ) : selectedCustomer ? (
-      <CustomerDetailView
-        customer={selectedCustomer}
-        customers={customers}
-        onBack={handleBack}
-        onCustomerSelect={handleRowClick}
-        onAdd={onAdd}
-        onEdit={handleEditCustomer}
+  return (
+    <div className="p-8">
+      {viewMode === "table" ? (
+        <>
+          {custLoading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="mt-2 text-muted">Loading customers…</p>
+            </div>
+          ) : (
+            <Table
+              columns={columns}
+              data={customers}
+              showToolbar
+              loading={custLoading}
+              onPageSizeChange={(size) => setPageSize(size)}
+              pageSizeOptions={[10, 25, 50, 100]}
+              searchValue={searchTerm}
+              onSearch={setSearchTerm}
+              enableAdd
+              addLabel="Add Customer"
+              onAdd={handleAddCustomer}
+              enableColumnSelector
+              currentPage={page}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              totalItems={totalItems}
+              onPageChange={setPage}
+            />
+          )}
+        </>
+      ) : selectedCustomer ? (
+        <CustomerDetailView
+          customer={selectedCustomer}
+          customers={customers}
+          onBack={handleBack}
+          onCustomerSelect={handleRowClick}
+          onAdd={onAdd}
+          onEdit={handleEditCustomer}
+        />
+      ) : null}
+
+      <CustomerModal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setEditCustomer(null);
+        }}
+        onSubmit={handleCustomerSaved}
+        initialData={editCustomer}
+        isEditMode={!!editCustomer}
       />
-    ) : null}
-
-    <CustomerModal
-      isOpen={showModal}
-      onClose={() => {
-        setShowModal(false);
-        setEditCustomer(null);
-      }}
-      onSubmit={handleCustomerSaved}
-      initialData={editCustomer}
-      isEditMode={!!editCustomer}
-    />
-  </div>
-);
-
+    </div>
+  );
 };
 
 export default CustomerManagement;

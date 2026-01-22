@@ -4,7 +4,6 @@ import React from "react";
 const TaxDeduction: React.FC = () => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
-
       {/* Header */}
       <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg p-4">
         <div>

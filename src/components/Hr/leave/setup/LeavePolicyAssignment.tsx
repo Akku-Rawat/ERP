@@ -24,7 +24,9 @@ export const LeavePolicyAssignment: React.FC<LeavePolicyAssignmentProps> = ({
               <ArrowLeft size={20} />
             </button>
           )}
-          <h2 className="text-xl font-bold text-main">Leave Policy Assignment</h2>
+          <h2 className="text-xl font-bold text-main">
+            Leave Policy Assignment
+          </h2>
         </div>
 
         <button
@@ -39,7 +41,9 @@ export const LeavePolicyAssignment: React.FC<LeavePolicyAssignmentProps> = ({
       {/* Meta Info */}
       <div className="px-6 py-3 border-b border-theme flex items-center justify-between">
         <span className="text-sm text-muted">0 Assignments</span>
-        <span className="text-xs text-muted">Last Updated On: Jan 15, 2026</span>
+        <span className="text-xs text-muted">
+          Last Updated On: Jan 15, 2026
+        </span>
       </div>
 
       {/* Empty State */}
@@ -52,7 +56,8 @@ export const LeavePolicyAssignment: React.FC<LeavePolicyAssignmentProps> = ({
             No Policy Assignments Yet
           </h3>
           <p className="text-muted text-sm mb-6">
-            Assign leave policies to employees to define their leave entitlements and rules
+            Assign leave policies to employees to define their leave
+            entitlements and rules
           </p>
           <button
             onClick={onAdd}

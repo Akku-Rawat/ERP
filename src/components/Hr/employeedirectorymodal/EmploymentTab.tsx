@@ -1,5 +1,4 @@
-import React,{useEffect} from "react";
-
+import React, { useEffect } from "react";
 
 type EmploymentTabProps = {
   formData: any;
@@ -10,7 +9,6 @@ type EmploymentTabProps = {
   hrManagers: { name: string; employeeId: string }[];
 };
 
-
 const EmploymentTab: React.FC<EmploymentTabProps> = ({
   formData,
   handleInputChange,
@@ -19,16 +17,15 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
   managers,
 }) => {
   const isContractBased =
-  formData.employeeType === "Contract" ||
-  formData.employeeType === "Temporary" ||
-  formData.employeeType === "Intern";
+    formData.employeeType === "Contract" ||
+    formData.employeeType === "Temporary" ||
+    formData.employeeType === "Intern";
   useEffect(() => {
     if (!isContractBased && formData.contractEndDate) {
       handleInputChange("contractEndDate", "");
     }
   }, [formData.employeeType]);
   return (
-    
     <div className="w-full max-w-5xl mx-auto space-y-5">
       <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-4">
         <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
@@ -180,28 +177,28 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
-          
-          <div>
-  <label className="block text-xs text-gray-600 mb-1 font-medium">
-    Contract End Date
-    {isContractBased && <span className="text-red-500"> *</span>}
-  </label>
 
-  <input
-    type="date"
-    value={formData.contractEndDate}
-    onChange={(e) =>
-      handleInputChange("contractEndDate", e.target.value)
-    }
-    disabled={!isContractBased}
-    className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2
+          <div>
+            <label className="block text-xs text-gray-600 mb-1 font-medium">
+              Contract End Date
+              {isContractBased && <span className="text-red-500"> *</span>}
+            </label>
+
+            <input
+              type="date"
+              value={formData.contractEndDate}
+              onChange={(e) =>
+                handleInputChange("contractEndDate", e.target.value)
+              }
+              disabled={!isContractBased}
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2
       ${
         isContractBased
           ? "border-gray-300 focus:ring-purple-500"
           : "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
       }`}
-  />
-</div>
+            />
+          </div>
 
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
@@ -217,22 +214,18 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
             />
           </div>
           <div>
-            
             <label className="block text-xs text-gray-600 mb-1 font-medium">
               Work Address
             </label>
             <input
               type="text"
               value={formData.workAddress}
-              onChange={(e) =>
-                handleInputChange("workAddress", e.target.value)
-              }
+              onChange={(e) => handleInputChange("workAddress", e.target.value)}
               placeholder="Office Address"
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
           <div>
-            
             <label className="block text-xs text-gray-600 mb-1 font-medium">
               Work Location
             </label>

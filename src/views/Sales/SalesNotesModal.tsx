@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Modal from "../../components/ui/modal/modal";
-import CreditNotesTable from "./CreditNotesTable"
+import CreditNotesTable from "./CreditNotesTable";
 import DebitNotesTable from "./DebitNotesTable";
 import { FileText } from "lucide-react";
 

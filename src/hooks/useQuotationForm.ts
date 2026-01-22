@@ -5,7 +5,7 @@ import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
 import { getCountryList } from "../api/lookupApi";
 import { getItemByItemCode } from "../api/itemApi";
-const COMPANY_ID= import.meta.env.VITE_COMPANY_ID;
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 import {
   DEFAULT_INVOICE_FORM,
@@ -22,7 +22,7 @@ type NestedSection =
 export const useQuotationForm = (
   isOpen: boolean,
   onClose: () => void,
-  onSubmit?: (data: any) => void
+  onSubmit?: (data: any) => void,
 ) => {
   const [formData, setFormData] = useState<Invoice>({
     ...DEFAULT_INVOICE_FORM,
@@ -34,7 +34,7 @@ export const useQuotationForm = (
   const [customerNameDisplay, setCustomerNameDisplay] = useState("");
   const [page, setPage] = useState(0);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details"
+    "details",
   );
   const [taxCategory, setTaxCategory] = useState<string | undefined>("");
   const [isShippingOpen, setIsShippingOpen] = useState(false);
@@ -72,7 +72,7 @@ export const useQuotationForm = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
-    section?: NestedSection
+    section?: NestedSection,
   ) => {
     const { name, value } = e.target;
 
@@ -95,7 +95,7 @@ export const useQuotationForm = (
 
   const getCountryCode = (
     countries: { code: string; name: string }[],
-    countryName?: string
+    countryName?: string,
   ): string => {
     if (!countryName || !countries.length) return "";
 
@@ -158,7 +158,7 @@ export const useQuotationForm = (
 
       const countryCode = getCountryCode(
         countryLookupList,
-        data.shippingCountry || data.billingCountry
+        data.shippingCountry || data.billingCountry,
       );
 
       setCustomerDetails(data);
@@ -245,7 +245,7 @@ export const useQuotationForm = (
 
   const handleItemChange = (
     idx: number,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
     const isNum = ["quantity", "price", "discount", "vatRate"].includes(name);
@@ -402,14 +402,14 @@ export const useQuotationForm = (
       } catch (error) {}
     } else {
       alert(
-        "No onSubmit handler provided. Please check your QuotationModal usage."
+        "No onSubmit handler provided. Please check your QuotationModal usage.",
       );
     }
   };
 
   const paginatedItems = formData.items.slice(
     page * ITEMS_PER_PAGE,
-    (page + 1) * ITEMS_PER_PAGE
+    (page + 1) * ITEMS_PER_PAGE,
   );
 
   return {

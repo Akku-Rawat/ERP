@@ -56,7 +56,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Alternate Phone  *<span className="text-red-500">*</span>
+              Alternate Phone *<span className="text-red-500">*</span>
             </label>
             <input
               type="tel"
@@ -147,7 +147,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Name  *<span className="text-red-500">*</span>
+              Name *<span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -160,7 +160,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Phone   *<span className="text-red-500">*</span>
+              Phone *<span className="text-red-500">*</span>
             </label>
             <input
               type="tel"

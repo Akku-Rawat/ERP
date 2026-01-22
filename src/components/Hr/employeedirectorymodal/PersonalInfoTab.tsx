@@ -148,37 +148,35 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             <label className="block text-xs text-gray-600 mb-1 font-medium">
               Date of Birth <span className="text-red-500">*</span>
             </label>
-           <input
-  type="date"
-  value={formData.dateOfBirth}
-  onChange={(e) => {
-    const selectedDate = e.target.value;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+            <input
+              type="date"
+              value={formData.dateOfBirth}
+              onChange={(e) => {
+                const selectedDate = e.target.value;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
 
-    const dob = new Date(selectedDate);
+                const dob = new Date(selectedDate);
 
-    if (dob >= today) {
-      setDobError("Date of birth cannot be today or a future date");
-    } else {
-      setDobError(null);
-      handleInputChange("dateOfBirth", selectedDate);
-    }
-  }}
-  className={`w-full px-3 py-2 text-sm rounded-lg border focus:outline-none
+                if (dob >= today) {
+                  setDobError("Date of birth cannot be today or a future date");
+                } else {
+                  setDobError(null);
+                  handleInputChange("dateOfBirth", selectedDate);
+                }
+              }}
+              className={`w-full px-3 py-2 text-sm rounded-lg border focus:outline-none
     ${
       dobError
         ? "border-red-400 focus:ring-2 focus:ring-red-500"
         : "border-gray-300 focus:ring-2 focus:ring-purple-500"
     }`}
-/>
-{dobError && (
-  <p className="text-[10px] text-red-600 mt-1 font-medium">
-    {dobError}
-  </p>
-)}
-
-
+            />
+            {dobError && (
+              <p className="text-[10px] text-red-600 mt-1 font-medium">
+                {dobError}
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-xs text-gray-600 mb-1 font-medium">

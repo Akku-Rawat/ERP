@@ -52,17 +52,14 @@ const LeaveAllocationForm: React.FC<Props> = ({ onClose, onSuccess }) => {
   /*
      Helpers
      */
-const handleChange = (e: any) => {
-  const { name, value, type, checked } = e.target;
+  const handleChange = (e: any) => {
+    const { name, value, type, checked } = e.target;
 
-  setFormData((prev) => ({
-    ...prev,
-    [name]: type === "checkbox" ? checked : value,
-  }));
-};
-
-
-
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
 
   const validate = () => {
     if (!formData.employeeId) {
@@ -180,9 +177,9 @@ const handleChange = (e: any) => {
             >
               <option value="">Select Employee</option>
               {employees.map((e) => (
-      <option key={e.id} value={e.id}>
-  {e.name} ({e.employeeId})
-</option>
+                <option key={e.id} value={e.id}>
+                  {e.name} ({e.employeeId})
+                </option>
               ))}
             </select>
           </div>

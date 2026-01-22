@@ -5,7 +5,7 @@ import { mapAllocationFromApi } from "../../../../types/leave/leaveMapper";
 import type { LeaveAllocationUI } from "../../../../types/leave/uiLeave";
 
 export interface LeaveAllocationProps {
-  employeeId: string;          
+  employeeId: string;
   onAdd: () => void;
   onClose?: () => void;
 }
@@ -50,9 +50,7 @@ const LeaveAllocation: React.FC<LeaveAllocationProps> = ({
               <ArrowLeft size={20} />
             </button>
           )}
-          <h2 className="text-xl font-bold text-main">
-            Leave Allocation
-          </h2>
+          <h2 className="text-xl font-bold text-main">Leave Allocation</h2>
         </div>
 
         <button
@@ -86,7 +84,8 @@ const LeaveAllocation: React.FC<LeaveAllocationProps> = ({
                 No Leave Allocations Yet
               </h3>
               <p className="text-muted text-sm">
-                Allocate leaves to employees for specific periods and leave types
+                Allocate leaves to employees for specific periods and leave
+                types
               </p>
             </div>
           </div>
@@ -100,12 +99,8 @@ const LeaveAllocation: React.FC<LeaveAllocationProps> = ({
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <div className="font-semibold text-main">
-                      {a.leaveType}
-                    </div>
-                    <div className="text-xs text-muted">
-                      {a.period}
-                    </div>
+                    <div className="font-semibold text-main">{a.leaveType}</div>
+                    <div className="text-xs text-muted">{a.period}</div>
                   </div>
 
                   <div className="text-right text-xs">
@@ -114,8 +109,7 @@ const LeaveAllocation: React.FC<LeaveAllocationProps> = ({
                       {a.allocated}
                     </div>
                     <div>
-                      <span className="font-semibold">Used:</span>{" "}
-                      {a.used}
+                      <span className="font-semibold">Used:</span> {a.used}
                     </div>
                     <div>
                       <span className="font-semibold">Remaining:</span>{" "}

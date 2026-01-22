@@ -19,7 +19,7 @@ const ENDPOINTS = {
 export async function getAllEmployees(
   page: number = 1,
   page_size: number = 200,
-  status: string = "Active"
+  status: string = "Active",
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getAllEmployees, {
     params: {
@@ -82,6 +82,3 @@ export async function verifyEmployeeIdentity(
 
   return resp.data;
 }
-
-
-

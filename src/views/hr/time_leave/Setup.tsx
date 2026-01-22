@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import {
-  Settings,
-  Users,
-  LayoutGrid,
-} from "lucide-react";
+import { Settings, Users } from "lucide-react";
 import LeaveSetupModal from "../../../components/Hr/leave/setup/leavesetupmodal";
 
 type ModalType = "setup" | "allocation" | null;
@@ -16,14 +12,24 @@ const Setup: React.FC = () => {
       title: "Leave Configuration",
       description: "Configure leave types, periods, and policies",
       icon: <Settings size={32} className="text-primary" />,
-      items: ["Leave Types", "Leave Periods", "Leave Policies", "Holiday Lists", "Leave Block List"],
+      items: [
+        "Leave Types",
+        "Leave Periods",
+        "Leave Policies",
+        "Holiday Lists",
+        "Leave Block List",
+      ],
       modalType: "setup" as ModalType,
     },
     {
       title: "Leave Allocation",
       description: "Manage leave allocations and encashments",
       icon: <Users size={32} className="text-primary" />,
-      items: ["Leave Allocation", "Leave Policy Assignment", "Leave Encashment"],
+      items: [
+        "Leave Allocation",
+        "Leave Policy Assignment",
+        "Leave Encashment",
+      ],
       modalType: "allocation" as ModalType,
     },
   ];
@@ -31,8 +37,6 @@ const Setup: React.FC = () => {
   return (
     <div className="bg-app">
       <div className="max-w-7xl mx-auto">
-        
-
         {/* Setup Categories */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {setupCategories.map((category, idx) => (
@@ -67,14 +71,15 @@ const Setup: React.FC = () => {
             </div>
           ))}
         </div>
-
       </div>
 
       {/* Modal */}
-      <LeaveSetupModal 
-        isOpen={modalType !== null} 
+      <LeaveSetupModal
+        isOpen={modalType !== null}
         onClose={() => setModalType(null)}
-        initialView={modalType === "allocation" ? "allocation-menu" : "setup-menu"}
+        initialView={
+          modalType === "allocation" ? "allocation-menu" : "setup-menu"
+        }
       />
     </div>
   );

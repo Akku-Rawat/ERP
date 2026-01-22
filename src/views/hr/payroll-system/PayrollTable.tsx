@@ -122,10 +122,10 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                         record.status === "Paid"
                           ? "bg-green-100 text-green-700"
                           : record.status === "Pending"
-                          ? "bg-amber-100 text-amber-700"
-                          : record.status === "Approved"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-red-100 text-red-700"
+                            ? "bg-amber-100 text-amber-700"
+                            : record.status === "Approved"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-red-100 text-red-700"
                       }`}
                     >
                       {record.status === "Paid" && (
@@ -176,13 +176,19 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                       {/* TOP INFO CARDS */}
                       <div className="grid grid-cols-4 gap-6 mb-8">
                         <InfoCard title="Employee Details" icon={Users}>
-                          <InfoRow label="Designation" value={record.designation} />
+                          <InfoRow
+                            label="Designation"
+                            value={record.designation}
+                          />
                           <InfoRow label="Grade" value={record.grade} badge />
                           <InfoRow label="PAN" value={record.panNumber} />
                         </InfoCard>
 
                         <InfoCard title="Attendance" icon={Calendar}>
-                          <InfoRow label="Working Days" value={record.workingDays} />
+                          <InfoRow
+                            label="Working Days"
+                            value={record.workingDays}
+                          />
                           <InfoRow label="Paid Days" value={record.paidDays} />
                           <InfoRow
                             label="LOP Days"
@@ -192,16 +198,23 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                         </InfoCard>
 
                         <InfoCard title="Bank Details" icon={CreditCard}>
-                          <InfoRow label="Account No." value={record.bankAccount} />
+                          <InfoRow
+                            label="Account No."
+                            value={record.bankAccount}
+                          />
                           <InfoRow label="IFSC" value={record.ifscCode} />
                         </InfoCard>
 
                         <InfoCard title="Tax Regime" icon={DollarSign}>
-                          <InfoRow label="Regime" value={record.taxRegime} badge />
+                          <InfoRow
+                            label="Regime"
+                            value={record.taxRegime}
+                            badge
+                          />
                           <InfoRow
                             label="Taxable Income"
                             value={`₹${(record.taxableIncome / 1000).toFixed(
-                              0
+                              0,
                             )}K / year`}
                           />
                         </InfoCard>
@@ -215,17 +228,35 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                           icon={TrendingUp}
                           color="green"
                         >
-                          <MoneyRow label="Basic Salary" value={record.basicSalary} />
+                          <MoneyRow
+                            label="Basic Salary"
+                            value={record.basicSalary}
+                          />
                           <MoneyRow label="HRA" value={record.hra} />
-                          <MoneyRow label="Allowances" value={record.allowances} />
+                          <MoneyRow
+                            label="Allowances"
+                            value={record.allowances}
+                          />
                           {record.overtimePay > 0 && (
-                            <MoneyRow label="Overtime" value={record.overtimePay} highlight />
+                            <MoneyRow
+                              label="Overtime"
+                              value={record.overtimePay}
+                              highlight
+                            />
                           )}
                           {record.totalBonus > 0 && (
-                            <MoneyRow label="Bonus" value={record.totalBonus} highlight />
+                            <MoneyRow
+                              label="Bonus"
+                              value={record.totalBonus}
+                              highlight
+                            />
                           )}
                           {record.arrears > 0 && (
-                            <MoneyRow label="Arrears" value={record.arrears} highlight />
+                            <MoneyRow
+                              label="Arrears"
+                              value={record.arrears}
+                              highlight
+                            />
                           )}
                           <Divider />
                           <MoneyRow
@@ -245,7 +276,10 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                             label={`Income Tax (${record.taxRegime})`}
                             value={record.taxDeduction}
                           />
-                          <MoneyRow label="Provident Fund" value={record.pfDeduction} />
+                          <MoneyRow
+                            label="Provident Fund"
+                            value={record.pfDeduction}
+                          />
                           {record.esiDeduction > 0 && (
                             <MoneyRow label="ESI" value={record.esiDeduction} />
                           )}
@@ -254,7 +288,10 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                             value={record.professionalTax}
                           />
                           {record.loanDeduction > 0 && (
-                            <MoneyRow label="Loan EMI" value={record.loanDeduction} />
+                            <MoneyRow
+                              label="Loan EMI"
+                              value={record.loanDeduction}
+                            />
                           )}
                           {record.advanceDeduction > 0 && (
                             <MoneyRow

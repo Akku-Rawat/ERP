@@ -1,10 +1,8 @@
-import React, { useState , useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import {
   Calendar,
   Clock,
   CheckCircle,
-  XCircle,
-  Clock3,
   FileText,
   TrendingUp,
   AlertCircle,
@@ -14,7 +12,6 @@ import { getEmployeeLeaveBalanceReport } from "../../../api/leaveApi";
 import { getLeaveHistoryByEmployee } from "../../../api/leaveApi";
 import { mapLeaveFromApi } from "../../../types/leave/leaveMapper";
 import { getHolidays } from "../../../api/leaveApi";
-
 
 /*  Types  */
 type LeaveStatus = "approved" | "pending" | "rejected";
@@ -30,143 +27,133 @@ type LeaveRequest = {
   appliedOn: string;
 };
 
-
-
 /*  Component  */
 const EmployeeDashboard: React.FC = () => {
   const [selectedAction, setSelectedAction] = useState<string>("");
   const [employeeName, setEmployeeName] = useState<string>("");
   const [recentRequests, setRecentRequests] = useState<LeaveRequest[]>([]);
 
-const [leaveSummary, setLeaveSummary] = useState<{
-  allocated: number;
-  taken: number;
-  expired: number;
-  available: number;
-} | null>(null);
-
-const [holidays, setHolidays] = useState<
-  { date: string; name: string }[]
->([]);
-
-const [leaveTypeBalances, setLeaveTypeBalances] = useState<
-  {
-    type: string;
-    total: number;
-    used: number;
+  const [leaveSummary, setLeaveSummary] = useState<{
+    allocated: number;
+    taken: number;
+    expired: number;
     available: number;
-    color: string;
-  }[]
->([]);
+  } | null>(null);
 
+  const [holidays, setHolidays] = useState<{ date: string; name: string }[]>(
+    [],
+  );
 
-useEffect(() => {
-  const fetchHolidays = async () => {
-    try {
-      const res = await getHolidays({ page: 1, page_size: 20 });
+  const [leaveTypeBalances, setLeaveTypeBalances] = useState<
+    {
+      type: string;
+      total: number;
+      used: number;
+      available: number;
+      color: string;
+    }[]
+  >([]);
 
-      const today = new Date();
+  useEffect(() => {
+    const fetchHolidays = async () => {
+      try {
+        const res = await getHolidays({ page: 1, page_size: 20 });
 
-      const upcoming = res.data.holidays
-        .filter((h: any) => new Date(h.fromDate) >= today)
-        .sort(
-          (a: any, b: any) =>
-            new Date(a.fromDate).getTime() - new Date(b.fromDate).getTime()
-        )
-        .slice(0, 3)
-        .map((h: any) => ({
-          name: h.name,
-          date: new Date(h.fromDate).toLocaleDateString("en-IN", {
-            day: "2-digit",
-            month: "short",
-          }),
-        }));
+        const today = new Date();
 
-      setHolidays(upcoming);
-    } catch (err) {
-      console.error("Failed to fetch holidays", err);
-    }
-  };
+        const upcoming = res.data.holidays
+          .filter((h: any) => new Date(h.fromDate) >= today)
+          .sort(
+            (a: any, b: any) =>
+              new Date(a.fromDate).getTime() - new Date(b.fromDate).getTime(),
+          )
+          .slice(0, 3)
+          .map((h: any) => ({
+            name: h.name,
+            date: new Date(h.fromDate).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+            }),
+          }));
 
-  fetchHolidays();
-}, []);
+        setHolidays(upcoming);
+      } catch (err) {
+        console.error("Failed to fetch holidays", err);
+      }
+    };
 
+    fetchHolidays();
+  }, []);
 
+  useEffect(() => {
+    const fetchLeaveBalance = async () => {
+      try {
+        const res = await getEmployeeLeaveBalanceReport({
+          employeeId: "6", // later replace with logged-in user
+          fromDate: "2026-01-01",
+          toDate: "2026-12-31",
+        });
 
-useEffect(() => {
-  const fetchLeaveBalance = async () => {
-    try {
-      const res = await getEmployeeLeaveBalanceReport({
-        employeeId: "6", // later replace with logged-in user
-        fromDate: "2026-01-01",
-        toDate: "2026-12-31",
-      });
+        const { summary, leaveBalances } = res.data;
 
-      const { summary, leaveBalances } = res.data;
+        // Top stats
+        setLeaveSummary({
+          allocated: summary.totalAllocated,
+          taken: summary.totalTaken,
+          expired: summary.totalExpired,
+          available: summary.totalClosingBalance,
+        });
 
-      // Top stats
-      setLeaveSummary({
-        allocated: summary.totalAllocated,
-        taken: summary.totalTaken,
-        expired: summary.totalExpired,
-        available: summary.totalClosingBalance,
-      });
+        // Breakdown
+        setLeaveTypeBalances(
+          leaveBalances.map((l: any, idx: number) => ({
+            type: l.leaveType,
+            total: l.newLeavesAllocated,
+            used: l.leavesTaken,
+            available: l.closingBalance,
+            color: [
+              "bg-blue-500",
+              "bg-green-500",
+              "bg-purple-500",
+              "bg-orange-500",
+              "bg-pink-500",
+            ][idx % 5],
+          })),
+        );
+      } catch (err) {
+        console.error("Failed to fetch leave balance", err);
+      }
+    };
 
-      // Breakdown
-      setLeaveTypeBalances(
-        leaveBalances.map((l: any, idx: number) => ({
-          type: l.leaveType,
-          total: l.newLeavesAllocated,
-          used: l.leavesTaken,
-          available: l.closingBalance,
-          color: [
-            "bg-blue-500",
-            "bg-green-500",
-            "bg-purple-500",
-            "bg-orange-500",
-            "bg-pink-500",
-          ][idx % 5],
-        }))
-      );
-    } catch (err) {
-      console.error("Failed to fetch leave balance", err);
-    }
-  };
+    fetchLeaveBalance();
+  }, []);
 
-  fetchLeaveBalance();
-}, []);
+  useEffect(() => {
+    const fetchRecentLeaves = async () => {
+      try {
+        const res = await getLeaveHistoryByEmployee("6", 1, 5); // last 5
 
+        const leaves = res.data.leaves.map(mapLeaveFromApi);
 
-useEffect(() => {
-  const fetchRecentLeaves = async () => {
-    try {
-      const res = await getLeaveHistoryByEmployee("6", 1, 5); // last 5
+        setRecentRequests(
+          leaves.map((l: any) => ({
+            id: l.id,
+            type: l.leaveType,
+            startDate: l.startDate,
+            endDate: l.endDate,
+            days: l.totalDays,
+            reason: l.reason,
+            status: l.status.toLowerCase(), // approved | pending | rejected
+            appliedOn: l.appliedOn,
+          })),
+        );
+      } catch (err) {
+        console.error("Failed to fetch recent leave requests", err);
+      }
+    };
 
-      const leaves = res.data.leaves.map(mapLeaveFromApi);
-
-      setRecentRequests(
-        leaves.map((l: any) => ({
-          id: l.id,
-          type: l.leaveType,
-          startDate: l.startDate,
-          endDate: l.endDate,
-          days: l.totalDays,
-          reason: l.reason,
-          status: l.status.toLowerCase(), // approved | pending | rejected
-          appliedOn: l.appliedOn,
-        }))
-      );
-    } catch (err) {
-      console.error("Failed to fetch recent leave requests", err);
-    }
-  };
-
-  fetchRecentLeaves();
-}, []);
- 
-
-
-
+    fetchRecentLeaves();
+  }, []);
 
   const handleQuickAction = (action: string) => {
     setSelectedAction(action);
@@ -180,8 +167,7 @@ useEffect(() => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold text-main">
-               Welcome back, {employeeName || "—"}
-
+              Welcome back, {employeeName || "—"}
             </h1>
           </div>
           <div className="text-right">
@@ -198,30 +184,29 @@ useEffect(() => {
 
         {/* Top Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <StatCard
-  label="Allocated"
-  value={leaveSummary?.allocated ?? 0}
-  icon={Calendar}
-/>
+          <StatCard
+            label="Allocated"
+            value={leaveSummary?.allocated ?? 0}
+            icon={Calendar}
+          />
 
-<StatCard
-  label="Taken"
-  value={leaveSummary?.taken ?? 0}
-  icon={CheckCircle}
-/>
+          <StatCard
+            label="Taken"
+            value={leaveSummary?.taken ?? 0}
+            icon={CheckCircle}
+          />
 
-<StatCard
-  label="Expired"
-  value={leaveSummary?.expired ?? 0}
-  icon={AlertCircle}
-/>
+          <StatCard
+            label="Expired"
+            value={leaveSummary?.expired ?? 0}
+            icon={AlertCircle}
+          />
 
-<StatCard
-  label="Available"
-  value={leaveSummary?.available ?? 0}
-  icon={TrendingUp}
-/>
-
+          <StatCard
+            label="Available"
+            value={leaveSummary?.available ?? 0}
+            icon={TrendingUp}
+          />
         </div>
 
         {/* Main Content Grid */}
@@ -247,7 +232,7 @@ useEffect(() => {
                   </div>
                 )}
 
-                  {recentRequests.map((req) => (
+                {recentRequests.map((req) => (
                   <div
                     key={req.id}
                     className="bg-app border border-theme rounded-lg p-3 hover:shadow-sm transition"
@@ -290,38 +275,37 @@ useEffect(() => {
                 Leave Type Breakdown
               </h2>
 
-             <div className="space-y-3 overflow-y-auto max-h-[240px] pr-1">
+              <div className="space-y-3 overflow-y-auto max-h-[240px] pr-1">
                 {leaveTypeBalances.map((leave, idx) => {
-  const percent =
-    leave.total > 0 ? (leave.used / leave.total) * 100 : 0;
+                  const percent =
+                    leave.total > 0 ? (leave.used / leave.total) * 100 : 0;
 
-  return (
-    <div key={idx}>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-semibold text-main">
-          {leave.type}
-        </span>
-        <span className="text-xs text-muted">
-          {leave.used} / {leave.total} used
-        </span>
-      </div>
+                  return (
+                    <div key={idx}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-main">
+                          {leave.type}
+                        </span>
+                        <span className="text-xs text-muted">
+                          {leave.used} / {leave.total} used
+                        </span>
+                      </div>
 
-      <div className="flex items-center gap-2">
-        <div className="flex-1 bg-app rounded-full h-3 overflow-hidden">
-          <div
-            className={`${leave.color} h-full rounded-full transition-all duration-500`}
-            style={{ width: `${percent}%` }}
-          />
-        </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 bg-app rounded-full h-3 overflow-hidden">
+                          <div
+                            className={`${leave.color} h-full rounded-full transition-all duration-500`}
+                            style={{ width: `${percent}%` }}
+                          />
+                        </div>
 
-        <span className="text-sm font-bold text-main min-w-[3rem] text-right">
-          {leave.available} left
-        </span>
-      </div>
-    </div>
-  );
-})}
-
+                        <span className="text-sm font-bold text-main min-w-[3rem] text-right">
+                          {leave.available} left
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -336,15 +320,18 @@ useEffect(() => {
               </h2>
 
               {holidays.length === 0 && (
-  <div className="text-xs text-muted text-center py-3">
-    No upcoming holidays
-  </div>
-)}
+                <div className="text-xs text-muted text-center py-3">
+                  No upcoming holidays
+                </div>
+              )}
 
-{holidays.map((holiday, idx) => (
-  <HolidayItem key={idx} date={holiday.date} name={holiday.name} />
-))}
-
+              {holidays.map((holiday, idx) => (
+                <HolidayItem
+                  key={idx}
+                  date={holiday.date}
+                  name={holiday.name}
+                />
+              ))}
             </div>
 
             {/* Quick Actions */}
@@ -390,9 +377,14 @@ useEffect(() => {
             {/* Leave Policy */}
             <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-xl p-3">
               <div className="flex items-start gap-2">
-                <AlertCircle size={16} className="text-primary mt-0.5 flex-shrink-0" />
+                <AlertCircle
+                  size={16}
+                  className="text-primary mt-0.5 flex-shrink-0"
+                />
                 <div className="flex-1">
-                  <h3 className="font-bold text-main mb-2 text-sm">Leave Policy</h3>
+                  <h3 className="font-bold text-main mb-2 text-sm">
+                    Leave Policy
+                  </h3>
                   <ul className="text-xs text-muted space-y-1">
                     <li>• Apply 3 days in advance</li>
                     <li>• Max 7 consecutive days</li>
@@ -423,11 +415,12 @@ const StatCard = ({
   color?: string;
   bgColor?: string;
 }) => (
-
   <div className="bg-card border border-theme rounded-xl p-4 hover:shadow-md transition">
     <div className="flex items-center justify-between">
       <div>
-        <div className="text-xs text-muted mb-1 uppercase tracking-wide">{label}</div>
+        <div className="text-xs text-muted mb-1 uppercase tracking-wide">
+          {label}
+        </div>
         <div className="text-3xl font-bold text-main">{value}</div>
       </div>
       <div className={`${bgColor} p-3 rounded-lg`}>
@@ -436,8 +429,6 @@ const StatCard = ({
     </div>
   </div>
 );
-
-
 
 /*  Holiday Item  */
 const HolidayItem = ({ date, name }: { date: string; name: string }) => (

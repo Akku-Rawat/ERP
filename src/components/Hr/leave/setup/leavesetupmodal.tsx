@@ -1,6 +1,6 @@
 // LeaveSetupModal.tsx
 import React, { useState, useEffect } from "react";
-import { FaCog, FaArrowLeft } from "react-icons/fa";
+import { FaCog } from "react-icons/fa";
 
 import { LeaveType } from "./LeaveType";
 import { LeaveTypeForm } from "./LeaveTypeForm";
@@ -53,7 +53,6 @@ const LeaveSetupModal: React.FC<LeaveSetupModalProps> = ({
   const [currentView, setCurrentView] = useState<ViewType>(initialView);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
 
-
   useEffect(() => {
     if (isOpen) {
       setCurrentView(initialView);
@@ -93,8 +92,8 @@ const LeaveSetupModal: React.FC<LeaveSetupModalProps> = ({
               {isSetupMenu
                 ? "Leave Configuration"
                 : isAllocationMenu
-                ? "Leave Allocation"
-                : "Leave Setup & Configuration"}
+                  ? "Leave Allocation"
+                  : "Leave Setup & Configuration"}
             </h2>
           </div>
           <button
@@ -254,29 +253,29 @@ const LeaveSetupModal: React.FC<LeaveSetupModalProps> = ({
           )}
           {currentView === "leave-block-form" && (
             <div className="p-6">
-              <LeaveBlockListForm onClose={() => setCurrentView("leave-block-list")} />
+              <LeaveBlockListForm
+                onClose={() => setCurrentView("leave-block-list")}
+              />
             </div>
           )}
 
           {/* Leave Allocation */}
           {currentView === "leave-allocation" && (
             <div className="p-6">
-             <LeaveAllocation
-  employeeId={selectedEmployeeId}
-  onAdd={() => setCurrentView("allocation-form")}
-  onClose={() => setCurrentView("allocation-menu")}
-/>
-
+              <LeaveAllocation
+                employeeId={selectedEmployeeId}
+                onAdd={() => setCurrentView("allocation-form")}
+                onClose={() => setCurrentView("allocation-menu")}
+              />
             </div>
           )}
           {currentView === "allocation-form" && (
             <div className="p-6">
-             <LeaveAllocationForm
-  employeeId={selectedEmployeeId}
-  onClose={() => setCurrentView("leave-allocation")}
-  onSuccess={() => setCurrentView("leave-allocation")}
-/>
-
+              <LeaveAllocationForm
+                employeeId={selectedEmployeeId}
+                onClose={() => setCurrentView("leave-allocation")}
+                onSuccess={() => setCurrentView("leave-allocation")}
+              />
             </div>
           )}
 
@@ -291,7 +290,9 @@ const LeaveSetupModal: React.FC<LeaveSetupModalProps> = ({
           )}
           {currentView === "encashment-form" && (
             <div className="p-6">
-              <LeaveEncashmentForm onClose={() => setCurrentView("leave-encashment")} />
+              <LeaveEncashmentForm
+                onClose={() => setCurrentView("leave-encashment")}
+              />
             </div>
           )}
 
@@ -306,7 +307,9 @@ const LeaveSetupModal: React.FC<LeaveSetupModalProps> = ({
           )}
           {currentView === "policy-assignment-form" && (
             <div className="p-6">
-              <LeavePolicyAssignmentForm onClose={() => setCurrentView("policy-assignment")} />
+              <LeavePolicyAssignmentForm
+                onClose={() => setCurrentView("policy-assignment")}
+              />
             </div>
           )}
         </div>

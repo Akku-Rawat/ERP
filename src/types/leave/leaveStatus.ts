@@ -6,4 +6,4 @@ export const STATUS_MAP = {
 } as const;
 
 export type BackendStatus = keyof typeof STATUS_MAP;
-export type UIStatus = typeof STATUS_MAP[BackendStatus];
+export type UIStatus = (typeof STATUS_MAP)[BackendStatus];

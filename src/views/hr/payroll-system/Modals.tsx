@@ -8,7 +8,6 @@ import {
   Mail,
   AlertCircle,
   TrendingUp,
-  Calendar,
   Plus,
   Trash2,
 } from "lucide-react";
@@ -38,9 +37,9 @@ export const QuickCreateModal: React.FC<QuickCreateModalProps> = ({
 
   return (
     <div
-  className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-  onClick={onClose}
->
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
       <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
           <div className="flex items-center justify-between">
@@ -203,11 +202,10 @@ export const EditModal: React.FC<EditModalProps> = ({
   };
 
   return (
-   <div
-  className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-  onClick={onClose}
->
-
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
       <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6">
           <h2 className="text-2xl font-bold">Edit Salary</h2>
@@ -420,11 +418,10 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-     <div
-  className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl"
-  onClick={(e) => e.stopPropagation()}
->
-
+      <div
+        className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="bg-gradient-to-r from-teal-600 to-teal-700 text-white p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -436,14 +433,14 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                 })}
               </p>
             </div>
-           <button
-  type="button"
-  onClick={(e) => {
-    e.stopPropagation();
-    onClose();
-  }}
-  className="p-2 hover:bg-white/20 rounded-lg"
->
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              className="p-2 hover:bg-white/20 rounded-lg"
+            >
               <X className="w-6 h-6" />
             </button>
           </div>

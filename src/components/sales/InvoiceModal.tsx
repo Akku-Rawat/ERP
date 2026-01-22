@@ -1,11 +1,9 @@
-import React, { useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, Trash2 } from "lucide-react";
-import { FileText, Package, MapPin } from "lucide-react";
+import React, { useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
+import { FileText } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 
 import CustomerSelect from "../selects/CustomerSelect";
-import CountrySelect from "../selects/CountrySelect";
 import Modal from "../../components/ui/modal/modal";
 import { Input, Select, Button } from "../../components/ui/modal/formComponent";
 

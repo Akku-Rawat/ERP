@@ -149,9 +149,7 @@ const Dashboard = () => {
     <div className="p-6 bg-app min-h-screen">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6 flex-wrap">
-        <h1 className="text-2xl font-semibold text-main">
-          Dashboard Overview
-        </h1>
+        <h1 className="text-2xl font-semibold text-main">Dashboard Overview</h1>
       </div>
 
       {/* BUSINESS OVERVIEW CARDS */}

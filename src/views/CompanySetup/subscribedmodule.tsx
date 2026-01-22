@@ -15,7 +15,6 @@ import {
   FaCrown,
   FaRocket,
   FaInfoCircle,
- 
 } from "react-icons/fa";
 
 // Import your reusable Table component
@@ -275,9 +274,7 @@ export default function SubscribedModules(): JSX.Element {
               onClick={(e) => e.stopPropagation()}
               className="p-2 rounded-lg text-muted hover:text-main hover:bg-row-hover transition-all"
               title="Settings"
-            >
-              
-            </button>
+            ></button>
           </div>
         ),
       },

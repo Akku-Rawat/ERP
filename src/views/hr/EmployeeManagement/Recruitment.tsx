@@ -281,8 +281,8 @@ const Recruitment: React.FC = () => {
             onClick={() => setMainTab("recruitment")}
             className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               mainTab === "recruitment"
-                   ? "text-primary border-primary"
-        : "text-muted border-transparent hover:text-main"
+                ? "text-primary border-primary"
+                : "text-muted border-transparent hover:text-main"
             }`}
           >
             <Users size={15} /> Recruitment
@@ -291,18 +291,18 @@ const Recruitment: React.FC = () => {
             onClick={() => setMainTab("onboarding")}
             className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               mainTab === "onboarding"
-                  ? "text-primary border-primary"
-        : "text-muted border-transparent hover:text-main"
+                ? "text-primary border-primary"
+                : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <UserCheck size={15}/> Onboarding
+            <UserCheck size={15} /> Onboarding
           </button>
           <button
             onClick={() => setMainTab("offboarding")}
             className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               mainTab === "offboarding"
-                    ? "text-primary border-primary"
-        : "text-muted border-transparent hover:text-main"
+                ? "text-primary border-primary"
+                : "text-muted border-transparent hover:text-main"
             }`}
           >
             <DoorOpen size={15} /> Offboarding
@@ -318,8 +318,8 @@ const Recruitment: React.FC = () => {
                 onClick={() => setRecruitmentSubTab("openings")}
                 className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
                   recruitmentSubTab === "openings"
-                     ? "text-primary border-primary"
-        : "text-muted border-transparent hover:text-main"
+                    ? "text-primary border-primary"
+                    : "text-muted border-transparent hover:text-main"
                 }`}
               >
                 Job Openings
@@ -328,8 +328,8 @@ const Recruitment: React.FC = () => {
                 onClick={() => setRecruitmentSubTab("candidates")}
                 className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition${
                   recruitmentSubTab === "candidates"
-                     ? "text-primary border-primary"
-        : "text-muted border-transparent hover:text-main"
+                    ? "text-primary border-primary"
+                    : "text-muted border-transparent hover:text-main"
                 }`}
               >
                 Candidates Pipeline

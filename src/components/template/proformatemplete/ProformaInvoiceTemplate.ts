@@ -1,6 +1,5 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { getPaymentMethodLabel } from "../../../constants/invoice.constants";
 
 const loadImageFromUrl = async (url: string): Promise<string> => {
   console.log("Url: ", url);
@@ -20,7 +19,7 @@ const loadImageFromUrl = async (url: string): Promise<string> => {
 export const generateProformaInvoicePDF = async (
   proformaInvoice: any,
   company: any,
-  resultType: "save" | "bloburl" = "save"
+  resultType: "save" | "bloburl" = "save",
 ) => {
   const doc = new jsPDF("p", "mm", "a4");
   const currency = proformaInvoice.currency || "ZMW";
@@ -41,10 +40,10 @@ export const generateProformaInvoicePDF = async (
     try {
       console.log(
         "company.documents.companyLogoUrl",
-        company.documents.companyLogoUrl
+        company.documents.companyLogoUrl,
       );
       const logoBase64 = await loadImageFromUrl(
-        company.documents.companyLogoUrl
+        company.documents.companyLogoUrl,
       );
       doc.addImage(logoBase64, "JPEG", 150, 10, 30, 10);
     } catch (e) {
@@ -69,7 +68,7 @@ export const generateProformaInvoicePDF = async (
       proformaInvoice.billingAddress?.line2,
     ].filter(Boolean),
     15,
-    56
+    56,
   );
 
   doc.setFont("helvetica", "bold");
@@ -113,7 +112,7 @@ export const generateProformaInvoicePDF = async (
   /* ================= TAX SUMMARY ================= */
   const total = proformaInvoice.items.reduce(
     (s: number, i: any) => s + Number(i.qty) * Number(i.price),
-    0
+    0,
   );
 
   doc.setFont("helvetica", "bold");
@@ -143,7 +142,7 @@ export const generateProformaInvoicePDF = async (
       `Exchange Rate: ${proformaInvoice.exchangeRate}`,
     ],
     15,
-    y + 38
+    y + 38,
   );
 
   /* ================= BANK DETAILS ================= */
@@ -163,7 +162,7 @@ export const generateProformaInvoicePDF = async (
       `SWIFTCODE ${bankAccount.swiftCode || "N/A"}`,
     ],
     110,
-    y + 38
+    y + 38,
   );
 
   /* ================= FOOTER ================= */

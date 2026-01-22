@@ -1,6 +1,6 @@
 // LeaveBlockList.tsx
 import React, { useState } from "react";
-import { ArrowLeft, Plus, Trash2, Edit } from "lucide-react";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 
 export interface LeaveBlockListProps {
   onAdd: () => void;
@@ -39,7 +39,9 @@ export const LeaveBlockList: React.FC<LeaveBlockListProps> = ({
       {/* Meta Info */}
       <div className="px-6 py-3 border-b border-theme flex items-center justify-between">
         <span className="text-sm text-muted">0 Block Lists</span>
-        <span className="text-xs text-muted">Last Updated On: Jan 15, 2026</span>
+        <span className="text-xs text-muted">
+          Last Updated On: Jan 15, 2026
+        </span>
       </div>
 
       {/* Empty State */}
@@ -64,9 +66,9 @@ export const LeaveBlockList: React.FC<LeaveBlockListProps> = ({
             No Block Lists Created
           </h3>
           <p className="text-muted text-sm mb-6">
-            Create block lists to prevent leave applications during specific periods or days
+            Create block lists to prevent leave applications during specific
+            periods or days
           </p>
-          
         </div>
       </div>
     </div>
@@ -95,7 +97,10 @@ export const LeaveBlockListForm: React.FC<{ onClose: () => void }> = ({
   };
 
   const addAllowedUser = () => {
-    setAllowedUsers([...allowedUsers, { id: allowedUsers.length + 1, user: "" }]);
+    setAllowedUsers([
+      ...allowedUsers,
+      { id: allowedUsers.length + 1, user: "" },
+    ]);
   };
 
   const removeAllowedUser = (id: number) => {
@@ -114,8 +119,12 @@ export const LeaveBlockListForm: React.FC<{ onClose: () => void }> = ({
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h2 className="text-xl font-bold text-main">New Leave Block List</h2>
-            <span className="text-xs font-medium text-orange-600">Not Saved</span>
+            <h2 className="text-xl font-bold text-main">
+              New Leave Block List
+            </h2>
+            <span className="text-xs font-medium text-orange-600">
+              Not Saved
+            </span>
           </div>
         </div>
         <button className="px-6 py-2 bg-primary rounded-xl font-semibold transition">
@@ -178,7 +187,8 @@ export const LeaveBlockListForm: React.FC<{ onClose: () => void }> = ({
                 Applies to Company
               </label>
               <p className="text-xs text-muted mt-1">
-                If not checked, the list will have to be added to each Department where it has to be applied
+                If not checked, the list will have to be added to each
+                Department where it has to be applied
               </p>
             </div>
           </div>
@@ -214,7 +224,10 @@ export const LeaveBlockListForm: React.FC<{ onClose: () => void }> = ({
               <tbody>
                 {blockDates.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-4 py-12 text-center text-muted">
+                    <td
+                      colSpan={4}
+                      className="px-4 py-12 text-center text-muted"
+                    >
                       No dates added yet
                     </td>
                   </tr>
@@ -269,7 +282,8 @@ export const LeaveBlockListForm: React.FC<{ onClose: () => void }> = ({
           <div className="mb-4">
             <h3 className="text-lg font-bold text-main mb-1">Allow Users</h3>
             <p className="text-sm text-muted">
-              Allow the following users to approve Leave Applications for block days
+              Allow the following users to approve Leave Applications for block
+              days
             </p>
           </div>
 
@@ -291,7 +305,10 @@ export const LeaveBlockListForm: React.FC<{ onClose: () => void }> = ({
               <tbody>
                 {allowedUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="px-4 py-12 text-center text-muted">
+                    <td
+                      colSpan={3}
+                      className="px-4 py-12 text-center text-muted"
+                    >
                       No users added
                     </td>
                   </tr>

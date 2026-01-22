@@ -12,12 +12,10 @@ export const LayoutWithTheme: React.FC<LayoutWithThemeProps> = ({
   const [open, setOpen] = useState(true);
 
   return (
-  
     <div className="bg-app min-h-screen flex overflow-hidden">
       {/*  SIDEBAR  */}
       <Sidebar open={open} setOpen={setOpen} />
 
-    
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ease-in-out min-h-screen ${
           open ? "ml-64" : "ml-20"
@@ -38,9 +36,7 @@ export const LayoutWithTheme: React.FC<LayoutWithThemeProps> = ({
           </div>
         </header>
 
-      
         <main className="flex-1 p-6 overflow-y-auto custom-scrollbar">
-         
           <div className="w-full h-full max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-2 duration-500">
             {children}
           </div>

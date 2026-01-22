@@ -27,7 +27,7 @@ export type QuotationFilters = {
 export async function getAllQuotations(
   page: number = 1,
   page_size: number = 10,
-  filters?: QuotationFilters
+  filters?: QuotationFilters,
 ): Promise<any> {
   const resp = await api.get(ENDPOINTS.getAllQuotations, {
     params: {
@@ -48,7 +48,7 @@ export async function getQuotationById(id: string): Promise<any> {
 export async function createQuotation(payload: any): Promise<any> {
   const resp: AxiosResponse = await api.post(
     ENDPOINTS.createQuotation,
-    payload
+    payload,
   );
   return resp.data;
 }
@@ -63,7 +63,7 @@ export async function deleteQuotationById(id: string): Promise<any> {
 export async function updateQuotationTermsById(payload: any): Promise<any> {
   const resp: AxiosResponse = await api.put(
     ENDPOINTS.updateQuotationTerms,
-    payload
+    payload,
   );
   return resp.data;
 }
@@ -71,7 +71,7 @@ export async function updateQuotationTermsById(payload: any): Promise<any> {
 export async function updateQuotationAddressById(payload: any): Promise<any> {
   const resp: AxiosResponse = await api.put(
     ENDPOINTS.updateQuotationAddress,
-    payload
+    payload,
   );
   return resp.data;
 }

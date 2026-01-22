@@ -334,13 +334,48 @@ const monthNames: { [key: string]: string } = {
 // CLEAN Tab Structure - Simple and Direct
 const allTabs = [
   { id: "gl", name: "General Ledger", icon: <FaChartPie />, category: "core" },
-  { id: "trial", name: "Trial Balance", icon: <FaChartBar />, category: "core" },
-  { id: "ar", name: "Receivables", icon: <FaFileInvoiceDollar />, category: "operations" },
-  { id: "ap", name: "Payables", icon: <FaMoneyCheckAlt />, category: "operations" },
-  { id: "fa", name: "Fixed Assets", icon: <FaWarehouse />, category: "operations" },
-  { id: "bank", name: "Banking", icon: <FaUniversity />, category: "operations" },
-  { id: "pl", name: "Profit & Loss", icon: <FaCalendar />, category: "reports" },
-  { id: "balance", name: "Balance Sheet", icon: <FaDollarSign />, category: "reports" },
+  {
+    id: "trial",
+    name: "Trial Balance",
+    icon: <FaChartBar />,
+    category: "core",
+  },
+  {
+    id: "ar",
+    name: "Receivables",
+    icon: <FaFileInvoiceDollar />,
+    category: "operations",
+  },
+  {
+    id: "ap",
+    name: "Payables",
+    icon: <FaMoneyCheckAlt />,
+    category: "operations",
+  },
+  {
+    id: "fa",
+    name: "Fixed Assets",
+    icon: <FaWarehouse />,
+    category: "operations",
+  },
+  {
+    id: "bank",
+    name: "Banking",
+    icon: <FaUniversity />,
+    category: "operations",
+  },
+  {
+    id: "pl",
+    name: "Profit & Loss",
+    icon: <FaCalendar />,
+    category: "reports",
+  },
+  {
+    id: "balance",
+    name: "Balance Sheet",
+    icon: <FaDollarSign />,
+    category: "reports",
+  },
 ];
 
 // Main component
@@ -476,7 +511,7 @@ const AccountingModule: React.FC = () => {
             profitLoss={profitLoss}
           />
         )}
-        
+
         {/* NEW MODULES */}
         {activeTab === "ar" && <AccountsReceivable />}
         {activeTab === "ap" && <AccountsPayable />}

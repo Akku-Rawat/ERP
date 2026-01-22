@@ -7,7 +7,6 @@ import POS from "./POS";
 import SalesDashboard from "./SalesDashboard";
 import ProformaInvoicesTable from "./ProformaInvoice";
 
-
 import QuotationModal from "../../components/sales/QuotationModal";
 import InvoiceModal from "../../components/sales/InvoiceModal";
 import ProformaInvoiceModal from "../../components/sales/ProformaInvoiceModal";
@@ -37,9 +36,9 @@ const salesTabs = [
     icon: <FaFileInvoiceDollar />,
   },
   { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
-  
+
   { id: "creditNotes", name: "Credit Notes", icon: <FaFileInvoiceDollar /> },
-{ id: "debitNotes", name: "Debit Notes", icon: <FaFileInvoiceDollar /> },
+  { id: "debitNotes", name: "Debit Notes", icon: <FaFileInvoiceDollar /> },
 
   // { id: "pos", name: "POS", icon: <FaCashRegister /> },
   { id: "reports", name: "Reports", icon: <FaChartBar /> },
@@ -93,24 +92,17 @@ const SalesModule: React.FC = () => {
       component: <POS />,
       onAdd: () => setOpenModal("pos"),
     },
-  creditNotes: {
-  component: (
-    <CreditNotesTable />
-  ),
-},
+    creditNotes: {
+      component: <CreditNotesTable />,
+    },
 
-debitNotes: {
-  component: (
-    <DebitNotesTable />
-  ),
-},
+    debitNotes: {
+      component: <DebitNotesTable />,
+    },
 
-    
     reports: {
       component: <ReportTable />,
     },
-
-     
   };
 
   const handleInvoiceSubmit = async (payload: any) => {
@@ -118,11 +110,10 @@ debitNotes: {
 
     try {
       const response = await createSalesInvoice(payload);
-      
+
       alert("Invoice created successfully!");
       setOpenModal(null);
     } catch (err) {
-      
       alert("Failed to create invoice. Please try again.");
     }
   };
@@ -132,8 +123,7 @@ debitNotes: {
 
     try {
       const response = await createQuotation(payload);
-      
-      
+
       if (response.status_code === 200 || response.status_code === 201) {
         alert("Quotation created successfully!");
         setRefreshKey((prev) => prev + 1); // Refresh quotations table
@@ -142,7 +132,6 @@ debitNotes: {
         throw new Error(response.message || "Failed to create quotation");
       }
     } catch (err: any) {
-      
       alert(err.message || "Failed to create quotation. Please try again.");
     }
   };

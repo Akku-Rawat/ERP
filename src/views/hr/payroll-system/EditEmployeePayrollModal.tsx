@@ -24,7 +24,7 @@ const EditEmployeePayrollModal: React.FC<EditEmployeePayrollModalProps> = ({
   if (!open || !form) return null;
 
   const update = (field: keyof Employee, value: any) => {
-    setForm((prev) => prev ? { ...prev, [field]: value } : prev);
+    setForm((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
   const handleSave = () => {
@@ -35,7 +35,6 @@ const EditEmployeePayrollModal: React.FC<EditEmployeePayrollModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
       <div className="bg-white w-full max-w-2xl rounded-xl shadow-xl border border-slate-200">
-
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <div>
@@ -54,7 +53,6 @@ const EditEmployeePayrollModal: React.FC<EditEmployeePayrollModalProps> = ({
         {/* Body */}
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-2 gap-6">
-
             <Field
               label="Basic Salary"
               value={form.basicSalary}
@@ -96,7 +94,8 @@ const EditEmployeePayrollModal: React.FC<EditEmployeePayrollModalProps> = ({
           <div className="bg-slate-50 border rounded-lg p-4 flex justify-between">
             <span className="font-semibold">Estimated Gross</span>
             <span className="font-bold text-green-700">
-              ₹{(
+              ₹
+              {(
                 form.basicSalary +
                 form.hra +
                 form.allowances +

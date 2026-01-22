@@ -9,7 +9,6 @@ export type ApplyLeavePayload = {
   approverId?: string;
 };
 
-
 export type PendingLeave = {
   leaveId: string;
   employee: {
@@ -28,7 +27,6 @@ export type PendingLeave = {
   appliedOn: string;
 };
 
-
 export type PendingLeaveResponse = {
   status_code: number;
   status: string;
@@ -46,21 +44,16 @@ export type PendingLeaveResponse = {
   };
 };
 
-
 export type UpdateLeaveStatusResponse = {
   leaveId: string;
   newStatus: "Approved" | "Rejected";
 };
-
-
-
 
 export type UpdateLeaveStatusPayload = {
   leaveId: string;
   status: "Approved" | "Rejected";
   rejectionReason?: string;
 };
-
 
 export type Leave = {
   leaveId: string;
@@ -74,7 +67,6 @@ export type Leave = {
   appliedOn: string;
   rejectionReason?: string;
 };
-
 
 export type LeaveHistoryResponse = {
   status_code: number;
@@ -97,7 +89,6 @@ export type LeaveHistoryResponse = {
     leaves: Leave[];
   };
 };
-
 
 export type LeaveDetailResponse = {
   status_code: number;
@@ -123,13 +114,11 @@ export type LeaveDetailResponse = {
   };
 };
 
-
 export type CancelLeaveResponse = {
   status_code: number;
   status: "success" | "fail";
   message: string;
 };
-
 
 export type UpdateLeaveApplicationPayload = {
   leaveId: string;
@@ -140,19 +129,16 @@ export type UpdateLeaveApplicationPayload = {
   leaveReason?: string;
 };
 
-
-export type UpdateLeaveApplicationResponse = { 
-  status_code: number; 
-  status: "success" | "fail"; 
+export type UpdateLeaveApplicationResponse = {
+  status_code: number;
+  status: "success" | "fail";
   message: string;
- };
+};
 
-
-
- // Leave Allocation
+// Leave Allocation
 
 export type LeaveAllocation = {
-  id: string;                 
+  id: string;
   employeeId: string;
   leaveType: string;
   fromDate: string;

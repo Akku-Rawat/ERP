@@ -61,7 +61,7 @@ const EmployeeDirectory: React.FC = () => {
     try {
       setLoading(true);
       const res = await getAllEmployees(page, pageSize, searchTerm);
-   
+
       setEmployees(res.data.employees);
       setTotalPages(res.data.pagination?.total_pages || 1);
       setTotalItems(res.data.pagination?.total || 0);
@@ -167,15 +167,13 @@ const EmployeeDirectory: React.FC = () => {
   ================================ */
 
   return (
-  <div className="p-8">
-    {viewMode === "table" ? (
-      
+    <div className="p-8">
+      {viewMode === "table" ? (
         <Table
           loading={loading}
-  
           columns={columns}
           data={employees}
-          serverSide  
+          serverSide
           showToolbar
           searchValue={searchTerm}
           onSearch={setSearchTerm}
@@ -187,42 +185,39 @@ const EmployeeDirectory: React.FC = () => {
           totalPages={totalPages}
           pageSize={pageSize}
           totalItems={totalItems}
-            pageSizeOptions={[10, 25, 50, 100]}
-  onPageSizeChange={(size) => {
-    setPageSize(size);
-    setPage(1); // reset page
-  }}
+          pageSizeOptions={[10, 25, 50, 100]}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1); // reset page
+          }}
           onPageChange={setPage}
         />
-      )
-     : selectedEmployee ? (
-     <EmployeeDetailView
-  employee={selectedEmployee}
-  onBack={() => {
-    setViewMode("table");
-    setSelectedEmployee(null);
-  }}
-  onDocumentUploaded={refreshSelectedEmployee}
-/>
+      ) : selectedEmployee ? (
+        <EmployeeDetailView
+          employee={selectedEmployee}
+          onBack={() => {
+            setViewMode("table");
+            setSelectedEmployee(null);
+          }}
+          onDocumentUploaded={refreshSelectedEmployee}
+        />
+      ) : null}
 
-    ) : null}
-
-    {/* Add / Edit Modal */}
-    <AddEmployeeModal
-      isOpen={showModal}
-      onClose={() => {
-        setShowModal(false);
-        setEditEmployee(null);
-      }}
-      onSuccess={handleSaved}
-      departments={uniqueDepartments}
-      level={[]}
-      editData={editEmployee}
-       mode={editEmployee ? "edit" : "add"} 
-    />
-  </div>
-);
-
+      {/* Add / Edit Modal */}
+      <AddEmployeeModal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setEditEmployee(null);
+        }}
+        onSuccess={handleSaved}
+        departments={uniqueDepartments}
+        level={[]}
+        editData={editEmployee}
+        mode={editEmployee ? "edit" : "add"}
+      />
+    </div>
+  );
 };
 
 export default EmployeeDirectory;

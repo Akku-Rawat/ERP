@@ -29,9 +29,9 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [quotations, setQuotations] = useState<QuotationSummary[]>([]);
   const [loading, setLoading] = useState(true);
-const [status, setStatus] = useState("");
-const [fromDate, setFromDate] = useState("");
-const [toDate, setToDate] = useState("");
+  const [status, setStatus] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -68,12 +68,12 @@ const [toDate, setToDate] = useState("");
   const fetchQuotations = async () => {
     try {
       setLoading(true);
-    const res = await getAllQuotations(page, pageSize, {
-      search: searchTerm,
-      status,
-      fromDate,
-      toDate,
-    });
+      const res = await getAllQuotations(page, pageSize, {
+        search: searchTerm,
+        status,
+        fromDate,
+        toDate,
+      });
 
       if (!res || res.status_code !== 200) {
         console.error("Invalid response:", res);
@@ -113,7 +113,7 @@ const [toDate, setToDate] = useState("");
 
   useEffect(() => {
     fetchQuotations();
-  },[page, pageSize, searchTerm, status, fromDate, toDate]);
+  }, [page, pageSize, searchTerm, status, fromDate, toDate]);
 
   /* ===============================
      ACTIONS
@@ -174,8 +174,6 @@ const [toDate, setToDate] = useState("");
     setSelectedQuotation(null);
     setPdfOpen(false);
   };
-
-
 
   /* ===============================
      TABLE COLUMNS
@@ -245,16 +243,16 @@ const [toDate, setToDate] = useState("");
           searchValue={searchTerm}
           onSearch={setSearchTerm}
           enableColumnSelector
-           extraFilters={
-    <SalesFilter
-      status={status}
-      setStatus={setStatus}
-      fromDate={fromDate}
-      setFromDate={setFromDate}
-      toDate={toDate}
-      setToDate={setToDate}
-    />
-  }
+          extraFilters={
+            <SalesFilter
+              status={status}
+              setStatus={setStatus}
+              fromDate={fromDate}
+              setFromDate={setFromDate}
+              toDate={toDate}
+              setToDate={setToDate}
+            />
+          }
           enableAdd
           addLabel="Add Quotation"
           onAdd={onAddQuotation}

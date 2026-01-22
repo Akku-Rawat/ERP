@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 
-import { Plus, X, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 // import TermsAndCondition from "../TermsAndCondition";
 import { useEffect } from "react";
 import { getSalesInvoiceById } from "../../api/salesApi";
 import { getAllSalesInvoices } from "../../api/salesApi";
 import toast from "react-hot-toast";
-
 
 import { createDebitNoteFromInvoice } from "../../api/salesApi";
 
@@ -121,46 +120,45 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
   };
 
   const handleCreateDebitNote = async () => {
-  try {
-    if (!formData.invoiceNumber) {
-      toast.error("Invoice number missing");
-      return;
+    try {
+      if (!formData.invoiceNumber) {
+        toast.error("Invoice number missing");
+        return;
+      }
+
+      if (!debitMeta.debitNoteReasonCode) {
+        toast.error("Debit note reason missing");
+        return;
+      }
+
+      const invcAdjustReason = getInvoiceAdjustReason();
+      if (!invcAdjustReason) {
+        toast.error("Adjustment reason required");
+        return;
+      }
+
+      const payload = {
+        originalSalesInvoiceNumber: formData.invoiceNumber,
+        DebitNoteReasonCode: debitMeta.debitNoteReasonCode,
+        invcAdjustReason,
+        transactionProgress: debitMeta.transactionProgress,
+        items: formData.items.map((it: any) => ({
+          itemCode: it.itemCode,
+          quantity: Number(it.quantity),
+          price: Number(it.price),
+        })),
+      };
+
+      const res = await createDebitNoteFromInvoice(payload);
+
+      toast.success("Debit Note created successfully");
+
+      onSubmit?.(res);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create Debit Note");
     }
-
-    if (!debitMeta.debitNoteReasonCode) {
-      toast.error("Debit note reason missing");
-      return;
-    }
-
-    const invcAdjustReason = getInvoiceAdjustReason();
-    if (!invcAdjustReason) {
-      toast.error("Adjustment reason required");
-      return;
-    }
-
-    const payload = {
-      originalSalesInvoiceNumber: formData.invoiceNumber,
-      DebitNoteReasonCode: debitMeta.debitNoteReasonCode,
-      invcAdjustReason,
-      transactionProgress: debitMeta.transactionProgress,
-      items: formData.items.map((it: any) => ({
-        itemCode: it.itemCode,
-        quantity: Number(it.quantity),
-        price: Number(it.price),
-      })),
-    };
-
-    const res = await createDebitNoteFromInvoice(payload);
-
-    toast.success("Debit Note created successfully");
-
-    onSubmit?.(res);
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to create Debit Note");
-  }
-};
-
+  };
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
 

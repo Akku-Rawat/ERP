@@ -16,7 +16,7 @@ const ENDPOINTS = {
 export async function createProformaInvoice(payload: any): Promise<any> {
   const resp: AxiosResponse = await api.post(
     ENDPOINTS.createProformaInvoice,
-    payload
+    payload,
   );
   return resp.data;
 }

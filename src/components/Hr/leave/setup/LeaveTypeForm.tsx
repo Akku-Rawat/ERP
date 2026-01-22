@@ -22,7 +22,9 @@ export const LeaveTypeForm: React.FC<{ onClose: () => void }> = ({
           </button>
           <div>
             <h2 className="text-xl font-bold text-main">New Leave Type</h2>
-            <span className="text-xs font-medium text-orange-600">Not Saved</span>
+            <span className="text-xs font-medium text-orange-600">
+              Not Saved
+            </span>
           </div>
         </div>
         <button className="px-6 py-2 bg-primary rounded-xl font-semibold transition">
@@ -174,7 +176,9 @@ export const LeaveTypeForm: React.FC<{ onClose: () => void }> = ({
 
         {/* Additional Settings */}
         <div className="mt-6 pt-6 border-t border-theme">
-          <h3 className="text-lg font-bold text-main mb-4">Additional Settings</h3>
+          <h3 className="text-lg font-bold text-main mb-4">
+            Additional Settings
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-main mb-2">

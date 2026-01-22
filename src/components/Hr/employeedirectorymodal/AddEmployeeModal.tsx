@@ -7,23 +7,13 @@ import EmploymentTab from "./EmploymentTab";
 import CompensationTab from "./CompensationTab";
 import { LeaveSetupTab } from "./LeaveSetupTab";
 import { WorkScheduleTab } from "./WorkScheduletab";
-import {
-  getSalaryStructureByDesignation,
-  getSalaryStructureByLevel,
-  getLevelsFromHrSettings,
-  getDefaultGrossSalary,
-} from "../../../views/hr/tabs/salarystructure";
+import { getLevelsFromHrSettings } from "../../../views/hr/tabs/salarystructure";
 
 import { EMPLOYEE_ROLE_CONFIG } from "../../../api/config/employeeRoleConfig";
 import { filterEmployeesByRole } from "../../../api/config/employeeRoleFilter";
-import { getAllEmployees} from "../../../api/employeeapi";
+import { getAllEmployees } from "../../../api/employeeapi";
 
-
-import {
-  createEmployee,
-  updateEmployeeById,
- 
-} from "../../../api/employeeapi";
+import { createEmployee, updateEmployeeById } from "../../../api/employeeapi";
 
 const DEFAULT_FORM_DATA = {
   // Personal
@@ -148,18 +138,19 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   const activeTab = TAB_ORDER[currentTabIndex];
   const isLastTab = currentTabIndex === TAB_ORDER.length - 1;
   const [isPreFilled, setIsPreFilled] = useState(false);
-type EmployeeLite = {
-  employeeId: string;
-  name: string;
-  jobTitle: string;
-};
+  type EmployeeLite = {
+    employeeId: string;
+    name: string;
+    jobTitle: string;
+  };
 
-const [reportingManagers, setReportingManagers] = useState<EmployeeLite[]>([]);
-const [hrManagers, setHrManagers] = useState<EmployeeLite[]>([]);
-
+  const [reportingManagers, setReportingManagers] = useState<EmployeeLite[]>(
+    [],
+  );
+  const [hrManagers, setHrManagers] = useState<EmployeeLite[]>([]);
 
   const [verifiedFields, setVerifiedFields] = useState<Record<string, boolean>>(
-    {}
+    {},
   );
 
   const levelsFromHrSettings = getLevelsFromHrSettings();
@@ -363,36 +354,31 @@ const [hrManagers, setHrManagers] = useState<EmployeeLite[]>([]);
         return null;
     }
   };
-useEffect(() => {
-  if (!isOpen) return;
+  useEffect(() => {
+    if (!isOpen) return;
 
-  const fetchEmployees = async () => {
-    try {
-      const res = await getAllEmployees(1, 200, "Active");
-      const employees = res?.data?.employees ?? [];
+    const fetchEmployees = async () => {
+      try {
+        const res = await getAllEmployees(1, 200, "Active");
+        const employees = res?.data?.employees ?? [];
 
-      setReportingManagers(
-        filterEmployeesByRole(
-          employees,
-          EMPLOYEE_ROLE_CONFIG.reportingManager
-        )
-      );
+        setReportingManagers(
+          filterEmployeesByRole(
+            employees,
+            EMPLOYEE_ROLE_CONFIG.reportingManager,
+          ),
+        );
 
-      setHrManagers(
-        filterEmployeesByRole(
-          employees,
-          EMPLOYEE_ROLE_CONFIG.hrManager
-        )
-      );
-    } catch (err) {
-      console.error("Failed to fetch employees", err);
-    }
-  };
+        setHrManagers(
+          filterEmployeesByRole(employees, EMPLOYEE_ROLE_CONFIG.hrManager),
+        );
+      } catch (err) {
+        console.error("Failed to fetch employees", err);
+      }
+    };
 
-  fetchEmployees();
-}, [isOpen]);
-
-
+    fetchEmployees();
+  }, [isOpen]);
 
   const handleNext = () => {
     const error = validateCurrentTab();
@@ -414,8 +400,6 @@ useEffect(() => {
   };
 
   const buildPayload = () => {
-     
-
     const basicSalaryNum = Number(formData.basicSalary) || 0;
 
     const housingAmount = Number(formData.housingAllowance) || 0;
@@ -424,7 +408,6 @@ useEffect(() => {
     const otherAmount = Number(formData.otherAllowances) || 0;
 
     const payload: any = {
-      
       FirstName: formData.firstName,
       LastName: formData.lastName,
       OtherNames: formData.otherNames,
@@ -463,8 +446,6 @@ useEffect(() => {
       workAddress: formData.workAddress,
       shift: formData.shift,
 
-
-
       // Salary Components - ALWAYS send final amounts
       BasicSalary: basicSalaryNum,
       HousingAllowance: housingAmount,
@@ -502,16 +483,15 @@ useEffect(() => {
 
       verifiedFromSource: !!verifiedData,
     };
-  if (!editData) {
-    payload.NrcId = formData.nrcId;
-    payload.SocialSecurityNapsa = formData.socialSecurityNapsa;
-    payload.TpinId = formData.tpinId;
-   payload.NhimaHealthInsurance=formData.nhimaHealthInsurance;
-    
-  }
+    if (!editData) {
+      payload.NrcId = formData.nrcId;
+      payload.SocialSecurityNapsa = formData.socialSecurityNapsa;
+      payload.TpinId = formData.tpinId;
+      payload.NhimaHealthInsurance = formData.nhimaHealthInsurance;
+    }
 
-  return payload;
-};
+    return payload;
+  };
   const handleSave = async () => {
     setLoading(true);
     setError(null);

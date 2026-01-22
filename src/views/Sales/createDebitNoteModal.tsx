@@ -8,7 +8,6 @@ interface Props {
   onClose: () => void;
   onSubmit: (payload: any) => void;
   invoiceId: string;
-  
 }
 
 const CreateDebitNoteModal: React.FC<Props> = ({
@@ -28,7 +27,6 @@ const CreateDebitNoteModal: React.FC<Props> = ({
       height="90vh"
     >
       <DebitNoteForm onSubmit={onSubmit} invoiceId={invoiceId} />
-
     </Modal>
   );
 };

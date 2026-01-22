@@ -52,7 +52,7 @@ export interface InvoiceItem {
   vatRate: string;
   price: number;
   vatCode: string;
-   _fromInvoice?: boolean;
+  _fromInvoice?: boolean;
 }
 
 export interface PaymentInformation {

@@ -10,7 +10,6 @@ import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
 } from "../constants/invoice.constants";
-import { CloudCog } from "lucide-react";
 type InvoiceMode = "invoice" | "proforma";
 
 const ITEMS_PER_PAGE = 5;
@@ -25,7 +24,7 @@ export const useInvoiceForm = (
   isOpen: boolean,
   onClose: () => void,
   onSubmit?: (data: any) => void,
-  mode: InvoiceMode = "invoice"
+  mode: InvoiceMode = "invoice",
 ) => {
   const [formData, setFormData] = useState<Invoice>(DEFAULT_INVOICE_FORM);
   const [customerDetails, setCustomerDetails] = useState<any>(null);
@@ -49,15 +48,14 @@ export const useInvoiceForm = (
     }));
   }, [isOpen, mode]);
   const setInvoiceFromApi = (invoice: any) => {
-  setFormData((prev: any) => ({
-    ...prev,
-    ...invoice,
-    items: invoice.items,
-  }));
+    setFormData((prev: any) => ({
+      ...prev,
+      ...invoice,
+      items: invoice.items,
+    }));
 
-  setCustomerDetails(invoice.customer);
-};
-
+    setCustomerDetails(invoice.customer);
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -103,42 +101,31 @@ export const useInvoiceForm = (
     }
   };
 
-const getCountryCode = (
-  countries: { code: string; name: string }[],
-  countryName?: string
-): string => {
-  if (!countryName || !countries.length) return "";
+  const getCountryCode = (
+    countries: { code: string; name: string }[],
+    countryName?: string,
+  ): string => {
+    if (!countryName || !countries.length) return "";
 
-  const n = countryName.trim().toLowerCase();
+    const n = countryName.trim().toLowerCase();
 
+    const byCode = countries.find((c) => c.code.toLowerCase() === n);
+    if (byCode) return byCode.code;
 
-  const byCode = countries.find(
-    c => c.code.toLowerCase() === n
-  );
-  if (byCode) return byCode.code;
+    const byName = countries.find((c) => c.name.toLowerCase().includes(n));
+    if (byName) return byName.code;
 
+    const reverse = countries.find((c) => n.includes(c.name.toLowerCase()));
+    if (reverse) return reverse.code;
 
-  const byName = countries.find(
-    c => c.name.toLowerCase().includes(n)
-  );
-  if (byName) return byName.code;
+    if (n === "usa" || n === "united states of america") return "US";
+    if (n === "uk" || n === "united kingdom") return "GB";
+    if (n === "uae") return "AE";
 
-
-  const reverse = countries.find(
-    c => n.includes(c.name.toLowerCase())
-  );
-  if (reverse) return reverse.code;
-
-  
-  if (n === "usa" || n === "united states of america") return "US";
-  if (n === "uk" || n === "united kingdom") return "GB";
-  if (n === "uae") return "AE";
-
-  return "";
-};
+    return "";
+  };
 
   const handleCustomerSelect = async ({
-    
     name,
     id,
   }: {
@@ -147,7 +134,6 @@ const getCountryCode = (
   }) => {
     setCustomerNameDisplay(name);
     setFormData((p) => ({ ...p, customerId: id }));
-    
 
     try {
       const [customerRes, companyRes] = await Promise.all([
@@ -156,12 +142,11 @@ const getCountryCode = (
       ]);
       console.log("Submitting customerId:", id);
 
-
       if (!customerRes || customerRes.status_code !== 200) return;
 
       const data = customerRes.data;
       console.log("RAW billingCountry:", data.billingCountry);
-console.log("RAW shippingCountry:", data.shippingCountry);
+      console.log("RAW shippingCountry:", data.shippingCountry);
 
       const company = companyRes?.data;
       const invoiceType = data.customerTaxCategory as
@@ -171,22 +156,19 @@ console.log("RAW shippingCountry:", data.shippingCountry);
 
       setTaxCategory(invoiceType);
 
-const countryLookupRes = await getCountryList();
-     const countryLookupList = Array.isArray(countryLookupRes)
-  ? countryLookupRes
-  : countryLookupRes?.data ?? [];
+      const countryLookupRes = await getCountryList();
+      const countryLookupList = Array.isArray(countryLookupRes)
+        ? countryLookupRes
+        : (countryLookupRes?.data ?? []);
 
       console.log("countryLookupResponse: ", countryLookupList);
-    
-console.log("FULL country API response:", countryLookupRes);
 
-      
+      console.log("FULL country API response:", countryLookupRes);
 
-const countryCode = getCountryCode(
-  countryLookupList,
-  data.shippingCountry || data.billingCountry
-);
-
+      const countryCode = getCountryCode(
+        countryLookupList,
+        data.shippingCountry || data.billingCountry,
+      );
 
       setCustomerDetails(data);
 
@@ -244,52 +226,47 @@ const countryCode = getCountryCode(
     }
   };
 
- const handleItemSelect = async (index: number, itemId: string) => {
-  const currentItem = formData.items[index];
+  const handleItemSelect = async (index: number, itemId: string) => {
+    const currentItem = formData.items[index];
 
-  // 🔒 Invoice-loaded item → do NOT auto override
-  if (currentItem?._fromInvoice) {
-    setFormData((prev) => {
-      const items = [...prev.items];
-      items[index] = {
-        ...items[index],
-        itemCode: itemId,
-        _fromInvoice: false, // unlock for user edits
-      };
-      return { ...prev, items };
-    });
-    return;
-  }
+    // 🔒 Invoice-loaded item → do NOT auto override
+    if (currentItem?._fromInvoice) {
+      setFormData((prev) => {
+        const items = [...prev.items];
+        items[index] = {
+          ...items[index],
+          itemCode: itemId,
+          _fromInvoice: false, // unlock for user edits
+        };
+        return { ...prev, items };
+      });
+      return;
+    }
 
+    try {
+      const res = await getItemByItemCode(itemId);
+      if (!res || res.status_code !== 200) return;
 
-  try {
-    const res = await getItemByItemCode(itemId);
-    if (!res || res.status_code !== 200) return;
+      const data = res.data;
 
-    const data = res.data;
+      setFormData((prev) => {
+        const items = [...prev.items];
 
-    setFormData((prev) => {
-      const items = [...prev.items];
+        items[index] = {
+          ...items[index],
+          itemCode: data.id,
+          description: data.itemDescription ?? data.itemName ?? "",
+          price: data.sellingPrice ?? items[index].price,
+          vatRate: data.taxPerct ?? 0,
+          vatCode: prev.invoiceType === "Export" ? "C1" : (data.taxCode ?? ""),
+        };
 
-      items[index] = {
-        ...items[index],
-        itemCode: data.id,
-        description: data.itemDescription ?? data.itemName ?? "",
-        price: data.sellingPrice ?? items[index].price,
-        vatRate: data.taxPerct ?? 0,
-        vatCode:
-          prev.invoiceType === "Export"
-            ? "C1"
-            : data.taxCode ?? "",
-      };
-
-      return { ...prev, items };
-    });
-  } catch (err) {
-    console.error("Failed to fetch item details", err);
-  }
-};
-
+        return { ...prev, items };
+      });
+    } catch (err) {
+      console.error("Failed to fetch item details", err);
+    }
+  };
 
   /* ---------------- ITEMS ---------------- */
 
@@ -332,50 +309,46 @@ const countryCode = getCountryCode(
       return { ...prev, items };
     });
   };
-const setFormDataFromInvoice = async (invoice: any) => {
-  setFormData((prev: any) => ({
-    ...prev,
-    
+  const setFormDataFromInvoice = async (invoice: any) => {
+    setFormData((prev: any) => ({
+      ...prev,
 
-    // ===== BASIC INFO =====
-    invoiceNumber: invoice.invoiceNumber,
-    invoiceType: invoice.invoiceType ?? "",
-    invoiceStatus: invoice.invoiceStatus ?? "",
-    currencyCode: invoice.currencyCode,
-    dateOfInvoice: invoice.dateOfInvoice,
-    dueDate: invoice.dueDate,
+      // ===== BASIC INFO =====
+      invoiceNumber: invoice.invoiceNumber,
+      invoiceType: invoice.invoiceType ?? "",
+      invoiceStatus: invoice.invoiceStatus ?? "",
+      currencyCode: invoice.currencyCode,
+      dateOfInvoice: invoice.dateOfInvoice,
+      dueDate: invoice.dueDate,
 
-    // ===== ADDRESSES =====
-    billingAddress: invoice.billingAddress ?? prev.billingAddress,
-    shippingAddress: invoice.shippingAddress ?? prev.shippingAddress,
+      // ===== ADDRESSES =====
+      billingAddress: invoice.billingAddress ?? prev.billingAddress,
+      shippingAddress: invoice.shippingAddress ?? prev.shippingAddress,
 
-    // ===== ITEMS =====
-items: invoice.items.map((it: any) => {
-  const base = Number(it.quantity ?? 0) * Number(it.price ?? 0)
-               - Number(it.discount ?? 0);
+      // ===== ITEMS =====
+      items: invoice.items.map((it: any) => {
+        const base =
+          Number(it.quantity ?? 0) * Number(it.price ?? 0) -
+          Number(it.discount ?? 0);
 
-  const taxAmount = Number(it.vatTaxableAmount ?? 0);
-  const taxRate =
-    base > 0 ? Number(((taxAmount / base) * 100).toFixed(2)) : 0;
+        const taxAmount = Number(it.vatTaxableAmount ?? 0);
+        const taxRate =
+          base > 0 ? Number(((taxAmount / base) * 100).toFixed(2)) : 0;
 
-  return {
-    itemCode: it.itemCode,
-    description: it.description ?? "",
-    quantity: Number(it.quantity ?? 0),   // ✅ FIXED
-    price: Number(it.price ?? 0),
-    discount: Number(it.discount ?? 0),
-    vatRate: taxRate,                     // ✅ % calculated
-    vatCode: it.vatCode ?? "",
-    _fromInvoice: true,
+        return {
+          itemCode: it.itemCode,
+          description: it.description ?? "",
+          quantity: Number(it.quantity ?? 0), // ✅ FIXED
+          price: Number(it.price ?? 0),
+          discount: Number(it.discount ?? 0),
+          vatRate: taxRate, // ✅ % calculated
+          vatCode: it.vatCode ?? "",
+          _fromInvoice: true,
+        };
+      }),
+    }));
+    setCustomerDetails(invoice.customer);
   };
-})
-
-,
-  }));
-setCustomerDetails(invoice.customer);
-
-};
-
 
   const setTerms = (selling: TermSection) => {
     setFormData((prev) => ({ ...prev, terms: { selling } }));
@@ -411,24 +384,24 @@ setCustomerDetails(invoice.customer);
     onClose();
   };
 
-const { subTotal, totalTax, grandTotal } = useMemo(() => {
-  let sub = 0;
-  let tax = 0;
+  const { subTotal, totalTax, grandTotal } = useMemo(() => {
+    let sub = 0;
+    let tax = 0;
 
-  formData.items.forEach(item => {
-    const base = item.quantity * item.price - item.discount;
-    const taxAmt = base * (Number(item.vatRate || 0) / 100);
+    formData.items.forEach((item) => {
+      const base = item.quantity * item.price - item.discount;
+      const taxAmt = base * (Number(item.vatRate || 0) / 100);
 
-    sub += base;
-    tax += taxAmt;
-  });
+      sub += base;
+      tax += taxAmt;
+    });
 
-  return {
-    subTotal: sub,
-    totalTax: tax,
-    grandTotal: sub + tax,
-  };
-}, [formData.items]);
+    return {
+      subTotal: sub,
+      totalTax: tax,
+      grandTotal: sub + tax,
+    };
+  }, [formData.items]);
 
   const paginatedItems = formData.items.slice(
     page * ITEMS_PER_PAGE,

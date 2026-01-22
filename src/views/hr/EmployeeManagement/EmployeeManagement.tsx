@@ -17,8 +17,8 @@ const EmployeeManagement: React.FC = () => {
             onClick={() => setMainTab("directory")}
             className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               mainTab === "directory"
-               ? "text-primary border-primary"
-        : "text-muted border-transparent hover:text-main"
+                ? "text-primary border-primary"
+                : "text-muted border-transparent hover:text-main"
             }`}
           >
             <Users size={15} /> Employee Directory
@@ -28,11 +28,11 @@ const EmployeeManagement: React.FC = () => {
             onClick={() => setMainTab("recruitment")}
             className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               mainTab === "recruitment"
-               ? "text-primary border-primary"
-        : "text-muted border-transparent hover:text-main"
+                ? "text-primary border-primary"
+                : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <UserCheck  size={15}/> Recruitment
+            <UserCheck size={15} /> Recruitment
           </button>
         </div>
 

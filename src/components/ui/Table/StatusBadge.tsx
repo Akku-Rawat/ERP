@@ -7,39 +7,33 @@ interface StatusBadgeProps {
   variant?: BadgeVariant;
 }
 
-
-
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, variant }) => {
   const safeStatus = (status ?? "unknown").toLowerCase();
-
-  
 
   const getVariant = (): BadgeVariant => {
     if (variant) return variant;
 
-  if (
-  safeStatus.includes("paid") ||
-  safeStatus.includes("completed") ||
-  safeStatus.includes("active") ||
-  safeStatus.includes("approved")
-) {
-  return "success";
-}
-
+    if (
+      safeStatus.includes("paid") ||
+      safeStatus.includes("completed") ||
+      safeStatus.includes("active") ||
+      safeStatus.includes("approved")
+    ) {
+      return "success";
+    }
 
     if (safeStatus.includes("pending") || safeStatus.includes("processing")) {
       return "warning";
     }
 
-  if (
-  safeStatus.includes("overdue") ||
-  safeStatus.includes("cancelled") ||
-  safeStatus.includes("failed") ||
-  safeStatus.includes("rejected")
-) {
-  return "danger";
-}
-
+    if (
+      safeStatus.includes("overdue") ||
+      safeStatus.includes("cancelled") ||
+      safeStatus.includes("failed") ||
+      safeStatus.includes("rejected")
+    ) {
+      return "danger";
+    }
 
     if (safeStatus.includes("draft") || safeStatus.includes("new")) {
       return "info";
@@ -58,12 +52,9 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, variant }) => {
 
   const currentVariant = getVariant();
 
-  const displayStatus =
-  status
+  const displayStatus = status
     ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
     : "Unknown";
-
-
 
   return (
     <span

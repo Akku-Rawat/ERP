@@ -21,8 +21,8 @@ const CreditNotesTable: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-const [totalPages, setTotalPages] = useState(1);
-const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const [openCreateModal, setOpenCreateModal] = useState(false);
 
@@ -68,15 +68,12 @@ const [totalItems, setTotalItems] = useState(0);
     }
   };
 
- useEffect(() => {
-  fetchCreditNotes();
-}, [page, pageSize]);
-
+  useEffect(() => {
+    fetchCreditNotes();
+  }, [page, pageSize]);
 
   return (
-    
-    
-     <div className="p-8">
+    <div className="p-8">
       {loading ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -84,29 +81,29 @@ const [totalItems, setTotalItems] = useState(0);
         </div>
       ) : (
         <Table
-        columns={columns}
-        data={data}
-        loading={loading}
-        showToolbar
-        enableAdd
-        addLabel="Add Credit Note"
-        onAdd={() => setOpenCreateModal(true)}
-        emptyMessage="No credit notes found"
-        enableColumnSelector
-        currentPage={page}
-        totalPages={totalPages}
-        pageSize={pageSize}
-        totalItems={totalItems}
-        pageSizeOptions={[10, 25, 50, 100]}
-        onPageSizeChange={(size) => {
-          setPageSize(size);
-          setPage(1); // reset page
-        }}
-        onPageChange={setPage}
-      />
+          columns={columns}
+          data={data}
+          loading={loading}
+          showToolbar
+          enableAdd
+          addLabel="Add Credit Note"
+          onAdd={() => setOpenCreateModal(true)}
+          emptyMessage="No credit notes found"
+          enableColumnSelector
+          currentPage={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          pageSizeOptions={[10, 25, 50, 100]}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1); // reset page
+          }}
+          onPageChange={setPage}
+        />
       )}
 
-    <CreateCreditNoteModal
+      <CreateCreditNoteModal
         isOpen={openCreateModal}
         onClose={() => setOpenCreateModal(false)}
         onSubmit={(payload) => {
@@ -120,6 +117,3 @@ const [totalItems, setTotalItems] = useState(0);
 };
 
 export default CreditNotesTable;
-  
-
-        

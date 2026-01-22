@@ -74,12 +74,12 @@ const CustomerModal: React.FC<{
   isEditMode?: boolean;
 }> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
   const [form, setForm] = useState<CustomerDetail & { sameAsBilling: boolean }>(
-    emptyForm
+    emptyForm,
   );
 
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details"
+    "details",
   );
 
   useEffect(() => {
@@ -138,7 +138,7 @@ const CustomerModal: React.FC<{
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, type, value } = e.target;
 
@@ -176,7 +176,7 @@ const CustomerModal: React.FC<{
       alert(
         isEditMode
           ? "Customer updated successfully!"
-          : "Customer created successfully!"
+          : "Customer created successfully!",
       );
 
       onSubmit?.(payload);

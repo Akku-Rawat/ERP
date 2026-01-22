@@ -46,12 +46,13 @@ export const useTableLogic = <T extends Record<string, any>>({
   );
 
   const numericKey = React.useMemo(() => detectNumericKey(columns), [columns]);
-  const customerIdKey = React.useMemo(() => detectCustomerIdKey(columns), [columns]);
-  
-  const [yearFilter, setYearFilter] = React.useState("");
-const [leaveTypeFilter, setLeaveTypeFilter] = React.useState("");
+  const customerIdKey = React.useMemo(
+    () => detectCustomerIdKey(columns),
+    [columns],
+  );
 
-  
+  const [yearFilter, setYearFilter] = React.useState("");
+  const [leaveTypeFilter, setLeaveTypeFilter] = React.useState("");
 
   const processedData = React.useMemo(() => {
     const q = (effectiveSearch ?? "").trim().toLowerCase();
@@ -97,27 +98,23 @@ const [leaveTypeFilter, setLeaveTypeFilter] = React.useState("");
         if (!foundName && !foundEmail) return false;
       }
 
-if (yearFilter) {
-  const dateValue = row["appliedOn"];
-  if (!dateValue) return false;
+      if (yearFilter) {
+        const dateValue = row["appliedOn"];
+        if (!dateValue) return false;
 
-  const year = String(dateValue).split("-")[0];
-  if (year !== yearFilter) return false;
-}
+        const year = String(dateValue).split("-")[0];
+        if (year !== yearFilter) return false;
+      }
 
-
-
-if (leaveTypeFilter) {
-  const leaveType = row["leaveType"];
-  if (
-    !leaveType ||
-    String(leaveType).toLowerCase() !== leaveTypeFilter.toLowerCase()
-  ) {
-    return false;
-  }
-}
-
-
+      if (leaveTypeFilter) {
+        const leaveType = row["leaveType"];
+        if (
+          !leaveType ||
+          String(leaveType).toLowerCase() !== leaveTypeFilter.toLowerCase()
+        ) {
+          return false;
+        }
+      }
 
       if (typeFilter) {
         const typeKeys = [
@@ -172,8 +169,8 @@ if (leaveTypeFilter) {
     minFilter,
     maxFilter,
     columns,
-     yearFilter,         
-  leaveTypeFilter,  
+    yearFilter,
+    leaveTypeFilter,
     numericKey,
     customerIdKey,
     sortOrder,
@@ -205,10 +202,9 @@ if (leaveTypeFilter) {
     sortOrder,
     setSortOrder,
     yearFilter,
-setYearFilter,
-leaveTypeFilter,
-setLeaveTypeFilter,
-
+    setYearFilter,
+    leaveTypeFilter,
+    setLeaveTypeFilter,
 
     numericKey,
     customerIdKey,

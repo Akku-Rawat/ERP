@@ -117,7 +117,7 @@ const CompanySetup: React.FC = () => {
           roundOffCostCenter: "CC-001-MAIN",
           depreciationAccount: "5100-DEPRECIATION",
           appreciationAccount: "5200-ASSET-APPRECIATION",
-        }
+        },
       );
 
       setBasicDetail({

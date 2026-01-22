@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  FaEllipsisH,
-  FaFilter,
-  FaWarehouse,
-  FaArrowUp,
-} from "react-icons/fa";
+import { FaEllipsisH, FaFilter, FaWarehouse, FaArrowUp } from "react-icons/fa";
 import {
   LineChart,
   Line,
@@ -61,21 +56,16 @@ const StatCard = ({
 
     <div className="flex items-center gap-3 text-gray-700">
       <div className="text-xl">{icon}</div>
-      <p className="text-xs font-medium uppercase tracking-wide">
-        {title}
-      </p>
+      <p className="text-xs font-medium uppercase tracking-wide">{title}</p>
     </div>
 
-    <p className="text-3xl font-semibold text-gray-900 mt-3">
-      {value}
-    </p>
+    <p className="text-3xl font-semibold text-gray-900 mt-3">{value}</p>
 
     <div className="flex items-center text-xs mt-2 text-gray-500">
       <FaArrowUp className="mr-1" /> +12% this year
     </div>
   </div>
 );
-
 
 const Panel = ({
   title,
@@ -106,24 +96,19 @@ const FixedAssetDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Stat Cards */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-  <StatCard
-    title="Total Assets"
-    value="24"
-    icon={<FaWarehouse />}
-  />
-  <StatCard
-    title="New Assets (This Year)"
-    value="6"
-    icon={<FaWarehouse />}
-  />
-  <StatCard
-    title="Asset Value"
-    value="ZK 4,80,000"
-    icon={<FaWarehouse />}
-  />
-</div>
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatCard title="Total Assets" value="24" icon={<FaWarehouse />} />
+        <StatCard
+          title="New Assets (This Year)"
+          value="6"
+          icon={<FaWarehouse />}
+        />
+        <StatCard
+          title="Asset Value"
+          value="ZK 4,80,000"
+          icon={<FaWarehouse />}
+        />
+      </div>
 
       {/* Asset Value Analytics */}
       <Panel title="Asset Value Analytics">

@@ -1,4 +1,4 @@
-import { Plus, X, Trash2, FileText } from "lucide-react";
+import { Plus, Trash2, FileText } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 import { useQuotationForm } from "../../hooks/useQuotationForm";
 import { Input, Select, Button } from "../../components/ui/modal/formComponent";

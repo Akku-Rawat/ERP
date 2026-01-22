@@ -18,7 +18,6 @@ import {
 import type { BasicDetailsForm } from "../../types/company";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
-
 import { updateCompanyById } from "../../api/companySetupApi";
 
 const defaultForm: BasicDetailsForm = {
@@ -200,7 +199,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
 
   const handleSubmit = async () => {
     const payload = {
-      id: COMPANY_ID ,
+      id: COMPANY_ID,
       ...mapFormToApiPayload(form),
     };
 

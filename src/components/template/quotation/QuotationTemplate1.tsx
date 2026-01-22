@@ -19,7 +19,7 @@ const loadImageFromUrl = async (url: string): Promise<string> => {
 export const generateQuotationPDF = async (
   quotation: any,
   company: any,
-  resultType: "save" | "bloburl" = "save"
+  resultType: "save" | "bloburl" = "save",
 ) => {
   const doc = new jsPDF("p", "mm", "a4");
   const currency = quotation.currency || "ZMW";
@@ -40,10 +40,10 @@ export const generateQuotationPDF = async (
     try {
       console.log(
         "company.documents.companyLogoUrl",
-        company.documents.companyLogoUrl
+        company.documents.companyLogoUrl,
       );
       const logoBase64 = await loadImageFromUrl(
-        company.documents.companyLogoUrl
+        company.documents.companyLogoUrl,
       );
       doc.addImage(logoBase64, "JPEG", 150, 10, 30, 10);
     } catch (e) {
@@ -68,24 +68,24 @@ export const generateQuotationPDF = async (
       `${quotation.billingCity}, ${quotation.billingState} ${quotation.billingPostalCode}`,
     ].filter(Boolean),
     15,
-    56
+    56,
   );
 
   doc.setFont("helvetica", "bold");
   doc.text(
     `Quotation No: ${quotation.quotationNumber || quotation.id}`,
     150,
-    52
+    52,
   );
   doc.text(
     `Date: ${quotation.transactionDate || quotation.quotationDate}`,
     150,
-    56
+    56,
   );
   doc.text(
     `Valid Until: ${quotation.validTill || quotation.validUntil}`,
     150,
-    60
+    60,
   );
 
   /* ================= ITEMS TABLE ================= */
@@ -158,7 +158,7 @@ export const generateQuotationPDF = async (
       `Industry: ${quotation.industryBases || "N/A"}`,
     ],
     15,
-    y + 38
+    y + 38,
   );
 
   /* ================= PAYMENT TERMS ================= */
@@ -177,7 +177,7 @@ export const generateQuotationPDF = async (
       `SWIFTCODE ${bankAccount.swiftCode || "N/A"}`,
     ],
     110,
-    y + 38
+    y + 38,
   );
 
   /* ================= TERMS & CONDITIONS ================= */
