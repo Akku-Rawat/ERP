@@ -690,7 +690,7 @@ const Upload: React.FC = () => {
           <button
             onClick={handleSave}
             disabled={!logo && !signature}
-            className={`px-8 py-2.5 text-white text-sm font-semibold rounded-lg transition-all ${
+className={`px-6 py-2.5 border border-theme text-muted text-sm font-semibold rounded-lg hover:bg-card/20 transition ${
               logo || signature
                 ? "bg-primary cursor-pointer shadow-sm"
                 : "bg-muted cursor-not-allowed" // Disabled state color changed to bg-muted

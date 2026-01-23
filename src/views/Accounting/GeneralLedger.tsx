@@ -92,8 +92,8 @@ const GeneralLedger: React.FC<Props> = ({
           onClick={() => setGlSubTab("chart")}
           className={`pb-3 border-b-2 ${
             glSubTab === "chart"
-              ? "border-indigo-500 text-indigo-600 font-medium"
-              : "border-transparent text-gray-600 hover:text-gray-800"
+                ? "text-primary border-b-2 border-current"
+                : "text-muted hover:text-main"
           }`}
         >
           Chart of Accounts
@@ -102,8 +102,8 @@ const GeneralLedger: React.FC<Props> = ({
           onClick={() => setGlSubTab("journal")}
           className={`pb-3 border-b-2 ${
             glSubTab === "journal"
-              ? "border-indigo-500 text-indigo-600 font-medium"
-              : "border-transparent text-gray-600 hover:text-gray-800"
+                ? "text-primary border-b-2 border-current"
+                : "text-muted hover:text-main"
           }`}
         >
           Journal Entries
