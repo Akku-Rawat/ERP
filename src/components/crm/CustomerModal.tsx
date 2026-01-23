@@ -42,7 +42,7 @@ const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   email: "",
   accountNumber: "",
   status: "Active",
-
+  customerTaxCategory: "",
   billingAddressLine1: "",
   billingAddressLine2: "",
   billingPostalCode: "",
@@ -93,6 +93,15 @@ const CustomerModal: React.FC<{
     }
     setActiveTab("details");
   }, [initialData, isOpen]);
+  useEffect(() => {
+    if (!form.displayName) {
+      if (form.name) {
+        setForm((prev) => ({ ...prev, displayName: form.name }));
+      } else if (form.contactPerson) {
+        setForm((prev) => ({ ...prev, displayName: form.contactPerson }));
+      }
+    }
+  }, [form.name, form.contactPerson]);
 
   useEffect(() => {
     if (form.sameAsBilling) {
@@ -136,24 +145,19 @@ const CustomerModal: React.FC<{
     if (value.toLowerCase() === "lpo") return "LPO";
     return value;
   };
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
-    const { name, type, value } = e.target;
-
-    if (type === "checkbox") {
-      setForm((prev) => ({
-        ...prev,
-        [name]: (e.target as HTMLInputElement).checked,
-      }));
-      return;
-    }
+    const { name, value } = e.target;
 
     setForm((prev) => ({
       ...prev,
       [name]:
-        name === "customerTaxCategory" ? normalizeTaxCategory(value) : value,
+        name === "onboardingBalance"
+          ? Number(value)
+          : name === "customerTaxCategory"
+            ? normalizeTaxCategory(value)
+            : value,
     }));
   };
 
@@ -303,12 +307,11 @@ const CustomerModal: React.FC<{
                         name="type"
                         value={form.type}
                         onChange={handleChange}
-                        required
-                        icon={<Building2 className="w-4 h-4" />}
-                      >
-                        <option value="Individual">Individual</option>
-                        <option value="Company">Company</option>
-                      </Select>
+                        options={[
+                          { value: "Individual", label: "Individual" },
+                          { value: "Company", label: "Company" },
+                        ]}
+                      />
 
                       <Input
                         label="Customer Name"
@@ -334,20 +337,18 @@ const CustomerModal: React.FC<{
                         name="displayName"
                         value={form.displayName}
                         onChange={handleChange}
-                        required
-                      >
-                        <option value="" disabled>
-                          Select Display Name
-                        </option>
-                        {form.name && (
-                          <option value={form.name}>{form.name}</option>
-                        )}
-                        {form.contactPerson && (
-                          <option value={form.contactPerson}>
-                            {form.contactPerson}
-                          </option>
-                        )}
-                      </Select>
+                        options={[
+                          { value: "", label: "Select Display Name" },
+                          {
+                            value: form.name,
+                            label: form.name || "Customer Name",
+                          },
+                          {
+                            value: form.contactPerson,
+                            label: form.contactPerson || "Contact Person",
+                          },
+                        ].filter((o) => o.value)} // removes empty invalid options
+                      />
 
                       <Input
                         label="TPIN"
@@ -364,29 +365,26 @@ const CustomerModal: React.FC<{
                         name="customerTaxCategory"
                         value={form.customerTaxCategory}
                         onChange={handleChange}
-                        icon={<DollarSign className="w-4 h-4" />}
-                      >
-                        <option value="">Select Tax Category</option>
-                        {customerTaxCategoryOptions.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </Select>
+                        options={[
+                          { value: "", label: "Select Tax Category" },
+                          { value: "Export", label: "Export" },
+                          { value: "Non-Export", label: "Non-Export" },
+                          { value: "LPO", label: "LPO" },
+                        ]}
+                      />
+
                       <Select
                         label="Currency"
                         name="currency"
                         value={form.currency}
                         onChange={handleChange}
-                        icon={<DollarSign className="w-4 h-4" />}
-                      >
-                        <option value="">Select Currency</option>
-                        {currencyOptions.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </Select>
+                        options={[
+                          { value: "", label: "Select Currency" },
+                          { value: "ZMW", label: "ZMW" },
+                          { value: "USD", label: "USD" },
+                          { value: "INR", label: "INR" },
+                        ]}
+                      />
 
                       <Input
                         label="Bank Account"
