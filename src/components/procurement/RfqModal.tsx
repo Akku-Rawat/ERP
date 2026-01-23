@@ -256,7 +256,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
       height="90vh"
     >
       <div className="h-full flex flex-col">
-        {/* ================= TABS ================= */}
+        {/*  TABS  */}
         <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
           {(["details", "emailTemplates", "terms"] as const).map((tab) => (
             <button
@@ -285,9 +285,9 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
           ))}
         </div>
 
-        {/* ================= CONTENT ================= */}
+        {/*  CONTENT  */}
         <section className="flex-1 overflow-y-auto p-4 space-y-6">
-          {/* ========== DETAILS TAB ========== */}
+          {/*  DETAILS TAB  */}
           {activeTab === "details" && (
             <div className="grid grid-cols-3 gap-6 p-4">
               {/* LEFT SIDE */}
@@ -501,7 +501,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {/* ========== EMAIL TAB ========== */}
+          {/*  EMAIL TAB  */}
           {activeTab === "emailTemplates" && (
             <Card title="Email Template">
               <div className=" mx-auto bg-white rounded-lg p-6 shadow border border-gray-300">
@@ -707,7 +707,7 @@ const RfqTabsModal: React.FC<RfqTabsModalProps> = ({ isOpen, onClose }) => {
             </Card>
           )}
 
-          {/* ========== TERMS TAB ========== */}
+          {/*  TERMS TAB  */}
           {activeTab === "terms" && (
             <Card title="Terms & Conditions">
               <div className="space-y-8 mx-auto bg-white rounded-lg p-6  ">

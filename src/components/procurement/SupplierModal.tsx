@@ -4,9 +4,10 @@ import { Mail, Building2, DollarSign } from "lucide-react";
 import toast from "react-hot-toast";
 import Modal from "../ui/modal/modal";
 import { Input, Select, Card, Button } from "../ui/modal/formComponent";
+import { createSupplier } from "../../api/supplierApi";
 
-const base_url = import.meta.env.VITE_BASE_URL;
-const CUSTOMER_ENDPOINT = `${base_url}/resource/Customer`;
+
+
 
 const emptyForm: Record<string, any> = {
   // Supplier Details
@@ -84,58 +85,79 @@ const SupplierModal: React.FC<{
     }
   };
 
+  const handleClose = () => {
+    setForm(emptyForm);
+    onClose();
+  };
+const reset = () => {
+  if (initialData) {
+    setForm(initialData);
+  } else {
+    setForm(emptyForm);
+  }
+};
+
+
+  const mapSupplierPayload = (form: any) => ({
+    supplier_name: form.supplierName,
+    supplier_code: form.supplierCode,
+    tpin: form.tpin,
+
+    contact_person: form.contactPerson,
+    phone_no: form.phoneNo,
+    alternate_no: form.alternateNo,
+    email_id: form.emailId,
+
+    currency: form.currency,
+    payment_terms: form.paymentTerms,
+    opening_balance: Number(form.openingBalance),
+    date_of_addition: form.dateOfAddition,
+
+    bank_account_name: form.bankAccount,
+    account_number: form.accountNumber,
+    account_holder: form.accountHolder,
+    sort_code: form.sortCode,
+    swift_code: form.swiftCode,
+    branch_address: form.branchAddress,
+
+    billing_address_line1: form.billingAddressLine1,
+    billing_address_line2: form.billingAddressLine2,
+    billing_city: form.billingCity,
+    district: form.district,
+    province: form.province,
+    billing_postal_code: form.billingPostalCode,
+    billing_country: form.billingCountry,
+  });
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      const payload = { ...form };
-      let response;
-      if (isEditMode && initialData?.supplierName) {
-        response = await fetch(
-          `${CUSTOMER_ENDPOINT}/${initialData.supplierName}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: import.meta.env.VITE_AUTHORIZATION,
-            },
-            body: JSON.stringify(payload),
-          },
-        );
+      const payload = mapSupplierPayload(form);
+
+
+      if (isEditMode && initialData?.custom_supplier_id) {
+        // await updateSupplier(payload); 
+        console.warn("Update API not enabled yet");
+        toast.success("Update mode UI ready (API pending)");
       } else {
-        response = await fetch(CUSTOMER_ENDPOINT, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: import.meta.env.VITE_AUTHORIZATION,
-          },
-          body: JSON.stringify(payload),
-        });
+        await createSupplier(payload);
+        toast.success("Supplier created successfully!");
       }
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || "Failed to save vendor");
-      }
-      await response.json();
-      toast.success(isEditMode ? "Vendor updated!" : "Vendor created!");
+
       onSubmit?.({ ...form });
       handleClose();
     } catch (err: any) {
-      toast.error(err.message || "Something went wrong");
+      console.error(err);
+      toast.error(err?.message || "Failed to save supplier");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    setForm(emptyForm);
-    onClose();
-  };
-  const reset = () => {
-    setForm(initialData ?? emptyForm);
-  };
 
-  // Footer
   const footer = (
     <>
       <Button variant="secondary" onClick={handleClose}>
@@ -159,14 +181,10 @@ const SupplierModal: React.FC<{
         >
           Next →
         </Button>
-        <Button
-          variant="primary"
-          onClick={handleSubmit}
-          loading={loading}
-          type="submit"
-        >
+        <Button variant="primary" loading={loading} type="submit">
           {isEditMode ? "Update Supplier" : "Save Supplier"}
         </Button>
+
       </div>
     </>
   );
@@ -195,11 +213,10 @@ const SupplierModal: React.FC<{
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
-                className={`relative px-6 py-3 font-semibold text-sm capitalize transition-all duration-200 rounded-t-lg ${
-                  activeTab === tab
+                className={`relative px-6 py-3 font-semibold text-sm capitalize transition-all duration-200 rounded-t-lg ${activeTab === tab
                     ? "text-primary bg-card shadow-sm"
                     : "text-muted hover:text-main hover:bg-card/50"
-                }`}
+                  }`}
               >
                 <span className="relative z-10 flex items-center gap-2">
                   {tab === "supplier" && <Building2 className="w-4 h-4" />}
@@ -235,7 +252,7 @@ const SupplierModal: React.FC<{
                     icon={<Building2 className="w-5 h-5 text-primary" />}
                   >
                     <div className="space-y-6">
-                      {/* ================= SUPPLIER DETAILS ================= */}
+                      {/*  SUPPLIER DETAILS  */}
                       <div className="space-y-3">
                         <h3 className="text-sm font-semibold text-gray-700">
                           Supplier Details
@@ -265,10 +282,10 @@ const SupplierModal: React.FC<{
                         </div>
                       </div>
 
-                      {/* ================= DIVIDER ================= */}
+                      {/*  DIVIDER  */}
                       <div className="border-t border-gray-200" />
 
-                      {/* ================= CONTACT DETAILS ================= */}
+                      {/*  CONTACT DETAILS  */}
                       <div className="space-y-3">
                         <h3 className="text-sm font-semibold text-gray-700">
                           Contact Details
@@ -304,10 +321,10 @@ const SupplierModal: React.FC<{
                         </div>
                       </div>
 
-                      {/* ================= DIVIDER ================= */}
+                      {/*  DIVIDER  */}
                       <div className="border-t border-gray-200" />
 
-                      {/* ================= ADDRESS DETAILS ================= */}
+                      {/*  ADDRESS DETAILS  */}
                       <div className="space-y-3">
                         <h3 className="text-sm font-semibold text-gray-700">
                           Address Details
@@ -368,7 +385,7 @@ const SupplierModal: React.FC<{
                     subtitle="Payment terms and bank information"
                     icon={<DollarSign className="w-5 h-5 text-primary" />}
                   >
-                    {/* ================= PAYMENT DETAILS ================= */}
+                    {/*  PAYMENT DETAILS  */}
                     <div className="space-y-4">
                       <h3 className="text-sm font-semibold text-gray-700">
                         Payment Details
@@ -413,15 +430,18 @@ const SupplierModal: React.FC<{
                           name="openingBalance"
                           type="number"
                           value={form.openingBalance || ""}
-                          onChange={handleChange}
+                          onChange={(e) =>
+                            setForm((p) => ({ ...p, openingBalance: Number(e.target.value) }))
+                          }
                         />
+
                       </div>
                     </div>
 
-                    {/* ================= DIVIDER ================= */}
+                    {/*  DIVIDER  */}
                     <div className="my-6 border-t border-gray-200" />
 
-                    {/* ================= BANK DETAILS ================= */}
+                    {/*  BANK DETAILS  */}
                     <div className="space-y-4">
                       <h3 className="text-sm font-semibold text-gray-700">
                         Bank Details

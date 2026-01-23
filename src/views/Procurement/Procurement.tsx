@@ -81,7 +81,7 @@ const Procurement: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div>
         {activeTab === "supplier" && <SupplierManagement onAdd={handleAdd} />}
         {activeTab === "rfqs" && <RFQsTable onAdd={handleAdd} />}
         {activeTab === "orders" && <PurchaseOrdersTable onAdd={handleAdd} />}

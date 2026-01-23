@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion} from "framer-motion";
 import { Plus, X, Trash2 } from "lucide-react";
+import Modal from "../ui/modal/modal";
+import { Input, Select, Card, Button, Textarea } from "../ui/modal/formComponent";
+import { Building2 } from "lucide-react";
+
 
 // --- TAX ROW TYPES/STATE
 type TaxRow = {
@@ -462,62 +466,78 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
     setPreviewOpen(false);
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
-        >
+  const footer = (
+  <>
+    <Button variant="secondary" onClick={onClose}>Cancel</Button>
+    <div className="flex gap-2">
+      <Button variant="secondary" onClick={reset}>Reset</Button>
+      <Button variant="primary" type="submit">Save Purchase Invoice</Button>
+    </div>
+  </>
+);
+
+ return (
+  <Modal
+    isOpen={isOpen}
+    onClose={onClose}
+    title="New Purchase Invoice"
+    subtitle="Create and manage purchase invoice"
+    icon={Building2}
+    maxWidth="6xl"
+    height="90vh"
+    footer={footer}
+  >
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 20, scale: 0.98 }}
+      transition={{ duration: 0.25 }}
+      className="h-full flex flex-col"
+    >
           <form
             onSubmit={submit}
             className="flex flex-col h-full overflow-hidden"
           >
-            {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-indigo-700">
-                Create Purchase Invoice
-              </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-1 rounded-full hover:bg-gray-200"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-            </header>
+     
 
             {/* Tabs */}
-            <div className="flex border-b bg-gray-50">
-              {(["details", "email", "tax", "address", "terms"] as const).map(
-                (tab) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-6 py-3 font-medium text-sm capitalize transition-colors ${activeTab === tab ? "text-indigo-600 border-b-2 border-indigo-600 bg-white" : "text-gray-600 hover:text-gray-900"}`}
-                  >
-                    {tab === "details"
-                      ? "Details"
-                      : tab === "email"
-                        ? "Email"
-                        : tab === "tax"
-                          ? "Tax"
-                          : tab === "address"
-                            ? "Address"
-                            : "Terms and Conditions"}
-                  </button>
-                ),
-              )}
-            </div>
+    <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
+  {(["details", "email", "tax", "address", "terms"] as const).map((tab) => (
+    <button
+      key={tab}
+      type="button"
+      onClick={() => setActiveTab(tab)}
+      className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg transition ${
+        activeTab === tab
+          ? "text-primary bg-card shadow-sm"
+          : "text-muted hover:bg-card/50"
+      }`}
+    >
+      {tab === "details" && "Details"}
+      {tab === "email" && "Email"}
+      {tab === "tax" && "Tax"}
+      {tab === "address" && "Address"}
+      {tab === "terms" && "Terms & Conditions"}
+
+      {/* Active Tab Background Animation */}
+      {activeTab === tab && (
+        <motion.div
+          layoutId="activeInvoiceTab"
+          className="absolute inset-0 bg-card rounded-t-lg shadow-sm"
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          style={{ zIndex: -1 }}
+        />
+      )}
+    </button>
+  ))}
+</div>
+
 
             {/* Tab Content */}
             <section className="flex-1 overflow-y-auto p-4 space-y-6">
-              {/* =========== DETAILS TAB =========== */}
+              {/*  DETAILS TAB  */}
               {activeTab === "details" && (
-                <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4">
+                <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4 mt-6">
                   <div className="col-span-2">
                     <div className="flex flex-col gap-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -720,24 +740,23 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
                       </table>
                     </div>
                     <div className="flex justify-between mt-3">
-                      <button
-                        type="button"
-                        onClick={addItem}
-                        className="flex items-center gap-1 rounded bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200"
-                      >
-                        <Plus className="w-4 h-4" /> Add Item
-                      </button>
-                    </div>
+                   
+                   <Button
+                     variant="secondary"
+                     className="mt-3"
+                     onClick={addItem}
+                   >
+                     <Plus className="w-4 h-4" /> Add Item
+                   </Button>
+                 </div>
                   </div>
 
                   {/* Supplier Details + Summary */}
                   <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
                     <div className="w-full max-w-sm space-y-6">
                       {/* Supplier Details */}
-                      <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-                        <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
-                          Supplier Details
-                        </h3>
+                    <Card title="Supplier Details">
+                        
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="font-medium text-gray-600">
@@ -764,13 +783,11 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
                             </span>
                           </div>
                         </div>
-                      </div>
+                      </Card>
 
                       {/* Summary */}
-                      <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-                        <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
-                          Order Summary
-                        </h3>
+                      <Card title=" Order Summary">
+                       
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="font-medium text-gray-600">
@@ -816,7 +833,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
                             </span>
                           </div>
                         </div>
-                      </div>
+                      </Card>
                     </div>
                   </div>
                 </div>
@@ -824,7 +841,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
 
               {/* EMAIL TAB (BLANK) */}
               {activeTab === "email" && (
-                <div className="mx-auto bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="mx-auto bg-white rounded-lg p-6 shadow-sm border border-gray-200 mt-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-800">
                       Email Template
@@ -1055,7 +1072,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
 
               {/* TAX TAB */}
               {activeTab === "tax" && (
-                <div className="space-y-6">
+                <div className="space-y-6 mt-6">
                   <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
                     Taxes and Charges
                   </h3>
@@ -1260,26 +1277,28 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
                     >
                       <Plus className="w-4 h-4" /> Add Row
                     </button>
+
+                    
                   </div>
                 </div>
               )}
 
               {/* ADDRESS TAB */}
               {activeTab === "address" && (
-                <div className="space-y-8">
+                <div className="space-y-8 mt-6">
                   <div>
                     <h3 className="mb-2 text-lg font-semibold text-gray-800">
                       Supplier Address
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <TextArea
+                      <Textarea
                         label="Supplier Address"
                         name="supplierAddress"
                         value={form.supplierAddress}
                         onChange={handleForm}
                         rows={2}
                       />
-                      <TextArea
+                      <Textarea
                         label="Supplier Contact"
                         name="supplierContact"
                         value={form.supplierContact}
@@ -1294,14 +1313,14 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
                       Shipping Address
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <TextArea
+                      <Textarea
                         label="Dispatch Address"
                         name="dispatchAddress"
                         value={form.dispatchAddress}
                         onChange={handleForm}
                         rows={2}
                       />
-                      <TextArea
+                      <Textarea
                         label="Shipping Address"
                         name="shippingAddress"
                         value={form.shippingAddress}
@@ -1316,14 +1335,14 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
                       Company Billing Address
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <TextArea
+                      <Textarea
                         label="Company Billing Address"
                         name="companyBillingAddress"
                         value={form.companyBillingAddress}
                         onChange={handleForm}
                         rows={2}
                       />
-                      <TextArea
+                      <Textarea
                         label="Place of Supply"
                         name="placeOfSupply"
                         value={form.placeOfSupply}
@@ -1337,7 +1356,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
 
               {/* TERMS TAB */}
               {activeTab === "terms" && (
-                <div className="space-y-8 mx-auto bg-white rounded-lg p-6  ">
+                <div className="space-y-8 mx-auto bg-white rounded-lg p-6  mt-6">
                   <div>
                     <h3 className="mb-2 text-lg font-semibold text-gray-800">
                       Payment Terms
@@ -1693,94 +1712,12 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
               )}
             </section>
 
-            {/* Footer */}
-            <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
-                >
-                  Reset
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-full bg-indigo-500 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-600"
-                >
-                  Save Purchase Order
-                </button>
-              </div>
-            </footer>
           </form>
         </motion.div>
-      </AnimatePresence>
-    </div>
+    </Modal>
   );
 };
 
-const Input = React.forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement> & { label: string }
->(({ label, className = "", ...props }, ref) => (
-  <label className="flex flex-col gap-1 text-sm w-full">
-    <span className="font-medium text-gray-600">{label}</span>
-    <input
-      ref={ref}
-      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""} ${className}`}
-      {...props}
-    />
-  </label>
-));
-Input.displayName = "Input";
 
-const Select: React.FC<{
-  label: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: { value: string; label: string }[];
-}> = ({ label, name, value, onChange, options }) => (
-  <label className="flex flex-col gap-1 text-sm">
-    <span className="font-medium text-gray-600">{label}</span>
-    <select
-      name={name}
-      value={value}
-      onChange={onChange}
-      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
-  </label>
-);
-
-const TextArea: React.FC<{
-  label: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  rows?: number;
-}> = ({ label, name, value, onChange, rows = 3 }) => (
-  <label className="flex flex-col gap-1 text-sm w-full">
-    <span className="font-medium text-gray-600">{label}</span>
-    <textarea
-      name={name}
-      value={value}
-      onChange={onChange}
-      rows={rows}
-      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
-    />
-  </label>
-);
 
 export default PurchaseInvoiceModal;
