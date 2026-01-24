@@ -64,6 +64,7 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         <Button variant="primary" onClick={handleSubmit} loading={loading} type="submit">
           {isEditMode ? "Update Supplier" : "Save Supplier"}
         </Button>
+
       </div>
     </>
   );
@@ -96,7 +97,7 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
                   activeTab === key
                     ? "text-primary bg-card shadow-sm"
                     : "text-muted hover:text-main hover:bg-card/50"
-                }`}
+                  }`}
               >
                 <span className="relative z-10 flex items-center gap-2">
                   <Icon className="w-4 h-4" />
