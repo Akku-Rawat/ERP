@@ -1,7 +1,7 @@
 import React from "react";
 import { Building2, Mail } from "lucide-react";
-import { Input, Card } from "../ui/modal/formComponent";
-import type { SupplierFormData } from "../../types/Supply/supplier";
+import { Input, Card } from "../../ui/modal/formComponent";
+import type { SupplierFormData } from "../../../types/Supply/supplier";
 
 interface SupplierInfoTabProps {
   form: SupplierFormData;

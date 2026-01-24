@@ -14,7 +14,7 @@ import {
   FaLandmark,
 } from "react-icons/fa";
 import SupplierManagement from "./SupplierManagement";
-import SupplierModal from "../../components/procurement/SupplierModal";
+import SupplierModal from "../../components/procurement/supply/SupplierModal";
 import PurchaseInvoiceTable from "./PurchaseInvoice";
 
 const procurement = {

@@ -1,8 +1,8 @@
 import React from "react";
 import { DollarSign } from "lucide-react";
-import { Input, Select, Card } from "../ui/modal/formComponent";
-import type { SupplierFormData } from "../../types/Supply/supplier";
-import { currencyOptions } from "../../types/Supply/supplier";
+import { Input, Select, Card } from "../../ui/modal/formComponent";
+import type { SupplierFormData } from "../../../types/Supply/supplier";
+import { currencyOptions } from "../../../types/Supply/supplier";
 
 interface PaymentInfoTabProps {
   form: SupplierFormData;

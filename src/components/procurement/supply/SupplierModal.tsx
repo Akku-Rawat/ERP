@@ -1,12 +1,12 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Building2, DollarSign } from "lucide-react";
-import Modal from "../ui/modal/modal";
-import { Button } from "../ui/modal/formComponent";
+import Modal from "../../ui/modal/modal";
+import { Button } from "../../ui/modal/formComponent";
 import { SupplierInfoTab } from "./SupplierInfoTab";
 import { PaymentInfoTab } from "./PaymentInfoTab";
-import { useSupplierForm } from "../../hooks/useSupplierForm";
-import type { SupplierFormData, SupplierTab } from "../../types/Supply/supplier";
+import { useSupplierForm } from "../../../hooks/useSupplierForm";
+import type { SupplierFormData, SupplierTab } from "../../../types/Supply/supplier";
 
 interface SupplierModalProps {
   isOpen: boolean;

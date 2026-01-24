@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import SupplierDetailView from "./SupplierDetailView";
-import SupplierModal from "../../components/procurement/SupplierModal";
+import SupplierModal from "../../components/procurement/supply/SupplierModal";
 import toast from "react-hot-toast";
 
 import { getSuppliers } from "../../api/supplierApi";

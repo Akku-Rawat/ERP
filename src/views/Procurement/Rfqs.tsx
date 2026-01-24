@@ -1,6 +1,15 @@
 import React, { useState, useMemo } from "react";
 import { Search, Plus, Edit2, Trash2 } from "lucide-react";
 import RfqTabsModal from "../../components/procurement/rfq/RfqModal";
+import toast from "react-hot-toast";
+import { useEffect } from "react";
+import type { Column } from "../../components/ui/Table/type";
+import Table from "../../components/ui/Table/Table";
+import StatusBadge from "../../components/ui/Table/StatusBadge";  
+import ActionButton, {
+  ActionGroup,
+  ActionMenu,
+} from "../../components/ui/Table/ActionButton";
 
 interface RFQ {
   id: string;
@@ -139,7 +148,6 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
       <RfqTabsModal
         isOpen={modalOpen}
         onClose={handleCloseModal}
-        rfq={selectedRFQ}
       />
     </div>
   );
