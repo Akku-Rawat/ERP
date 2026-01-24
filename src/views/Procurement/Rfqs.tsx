@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Search, Plus, Edit2, Trash2 } from "lucide-react";
-import RfqTabsModal from "../../components/procurement/RfqModal";
+import RfqTabsModal from "../../components/procurement/rfq/RfqModal";
 
 interface RFQ {
   id: string;

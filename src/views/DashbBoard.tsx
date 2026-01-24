@@ -3,16 +3,17 @@ import {
   TrendingUp, TrendingDown, DollarSign, ShoppingCart, 
   Users, FileText, ArrowUpRight, ArrowDownRight,
   Calendar, ChevronRight, Eye, Check, Clock,
-  AlertCircle, ArrowRight, Building2, UserCircle2
+  AlertCircle, Building2, UserCircle2
 } from 'lucide-react';
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState('month');
+  const [viewType, setViewType] = useState('overdue');
 
   const kpiCards = [
     { label: 'Revenue', value: '₹124,800', change: 8.2, target: '₹150,000', progress: 83, icon: DollarSign, gradient: 'from-emerald-500 to-emerald-600', trend: 'up' },
     { label: 'Expenses', value: '₹3,482', change: 6.1, target: '₹5,000', progress: 70, icon: ShoppingCart, gradient: 'from-rose-500 to-rose-600', trend: 'up' },
-    { label: 'Active Customers', value: '1,294', change: 2.5, target: '₹1,500', progress: 86, icon: Users, gradient: 'from-blue-500 to-blue-600', trend: 'up' },
+    { label: 'Active Customers', value: '1,294', change: 2.5, target: '1,500', progress: 86, icon: Users, gradient: 'from-blue-500 to-blue-600', trend: 'up' },
     { label: 'Pending Tasks', value: '845', change: -15, target: '0', progress: 15, icon: FileText, gradient: 'from-amber-500 to-amber-600', trend: 'down' }
   ];
 
@@ -50,41 +51,98 @@ const Dashboard = () => {
     ]
   };
 
-  const payableOverdues = [
-    { id: 'INV-5421', vendor: 'Tech Solutions Ltd', amount: 85000, dueDate: '2026-01-10', daysOverdue: 12, severity: 'critical' },
-    { id: 'INV-5389', vendor: 'Office Supplies Co', amount: 12500, dueDate: '2026-01-15', daysOverdue: 7, severity: 'high' },
-    { id: 'INV-5402', vendor: 'Marketing Agency', amount: 45000, dueDate: '2026-01-18', daysOverdue: 4, severity: 'medium' }
+  // All payables with due dates
+  const allPayables = [
+    { id: 'INV-5421', vendor: 'Tech Solutions Ltd', amount: 85000, dueDate: '2026-01-10', status: 'overdue' },
+    { id: 'INV-5389', vendor: 'Office Supplies Co', amount: 12500, dueDate: '2026-01-15', status: 'overdue' },
+    { id: 'INV-5402', vendor: 'Marketing Agency', amount: 45000, dueDate: '2026-01-18', status: 'overdue' },
+    { id: 'INV-5456', vendor: 'Cloud Services Inc', amount: 28000, dueDate: '2026-01-25', status: 'upcoming' },
+    { id: 'INV-5467', vendor: 'Software Licenses Ltd', amount: 52000, dueDate: '2026-01-28', status: 'upcoming' },
+    { id: 'INV-5478', vendor: 'Hardware Suppliers', amount: 35000, dueDate: '2026-02-05', status: 'upcoming' }
   ];
 
-  const receivableOverdues = [
-    { id: 'INV-8842', customer: 'ABC Corporation', amount: 125000, dueDate: '2026-01-08', daysOverdue: 14, severity: 'critical' },
-    { id: 'INV-8801', customer: 'XYZ Enterprises', amount: 68000, dueDate: '2026-01-12', daysOverdue: 10, severity: 'high' },
-    { id: 'INV-8823', customer: 'Global Tech Inc', amount: 42000, dueDate: '2026-01-17', daysOverdue: 5, severity: 'medium' }
+  // All receivables with due dates
+  const allReceivables = [
+    { id: 'INV-8842', customer: 'ABC Corporation', amount: 125000, dueDate: '2026-01-08', status: 'overdue' },
+    { id: 'INV-8801', customer: 'XYZ Enterprises', amount: 68000, dueDate: '2026-01-12', status: 'overdue' },
+    { id: 'INV-8823', customer: 'Global Tech Inc', amount: 42000, dueDate: '2026-01-17', status: 'overdue' },
+    { id: 'INV-8890', customer: 'Retail Solutions Co', amount: 95000, dueDate: '2026-01-26', status: 'upcoming' },
+    { id: 'INV-8901', customer: 'Manufacturing Ltd', amount: 78000, dueDate: '2026-01-30', status: 'upcoming' },
+    { id: 'INV-8912', customer: 'Tech Innovations', amount: 62000, dueDate: '2026-02-03', status: 'upcoming' }
   ];
+
+  // Calculate days difference
+  const today = new Date('2026-01-23');
+  const calculateDays = (dueDate) => {
+    const due = new Date(dueDate);
+    const diffTime = today - due;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  // Process payables
+  const payableOverdues = allPayables
+    .filter(item => item.status === 'overdue')
+    .map(item => ({
+      ...item,
+      daysOverdue: calculateDays(item.dueDate),
+      severity: calculateDays(item.dueDate) > 10 ? 'critical' : calculateDays(item.dueDate) > 5 ? 'high' : 'medium'
+    }))
+    .sort((a, b) => b.daysOverdue - a.daysOverdue);
+
+  const payableUpcoming = allPayables
+    .filter(item => item.status === 'upcoming')
+    .map(item => ({
+      ...item,
+      daysUntilDue: -calculateDays(item.dueDate),
+      urgency: -calculateDays(item.dueDate) <= 3 ? 'urgent' : -calculateDays(item.dueDate) <= 7 ? 'soon' : 'normal'
+    }))
+    .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+
+  // Process receivables
+  const receivableOverdues = allReceivables
+    .filter(item => item.status === 'overdue')
+    .map(item => ({
+      ...item,
+      daysOverdue: calculateDays(item.dueDate),
+      severity: calculateDays(item.dueDate) > 10 ? 'critical' : calculateDays(item.dueDate) > 5 ? 'high' : 'medium'
+    }))
+    .sort((a, b) => b.daysOverdue - a.daysOverdue);
+
+  const receivableUpcoming = allReceivables
+    .filter(item => item.status === 'upcoming')
+    .map(item => ({
+      ...item,
+      daysUntilDue: -calculateDays(item.dueDate),
+      urgency: -calculateDays(item.dueDate) <= 3 ? 'urgent' : -calculateDays(item.dueDate) <= 7 ? 'soon' : 'normal'
+    }))
+    .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
 
   const totalPayableOverdue = payableOverdues.reduce((sum, item) => sum + item.amount, 0);
   const totalReceivableOverdue = receivableOverdues.reduce((sum, item) => sum + item.amount, 0);
+  const totalPayableUpcoming = payableUpcoming.reduce((sum, item) => sum + item.amount, 0);
+  const totalReceivableUpcoming = receivableUpcoming.reduce((sum, item) => sum + item.amount, 0);
 
   return (
-    <div className="min-h-screen bg-app p-3 md:p-4 lg:p-5">
-      <div className="max-w-[1600px] mx-auto">
+    <div className="min-h-screen bg-gray-50 p-3 md:p-4 lg:p-5">
+      <div className="max-w-7xl mx-auto">
         
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-main mb-0.5">Welcome back, Admin 👋</h1>
-            <p className="text-muted text-xs md:text-sm">Here's what's happening with your business today</p>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-0.5">Welcome back, Admin 👋</h1>
+            <p className="text-gray-600 text-xs md:text-sm">Here's what's happening with your business today</p>
           </div>
           
           <div className="flex items-center gap-2">
-            <div className="bg-card border border-theme rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
-              <Calendar className="text-muted" size={14} />
-              <span className="text-main font-medium text-xs hidden md:inline">Jan 22, 2026</span>
+            <div className="bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
+              <Calendar className="text-gray-600" size={14} />
+              <span className="text-gray-900 font-medium text-xs hidden md:inline">Jan 23, 2026</span>
             </div>
             <select 
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="bg-card border-theme text-main rounded-lg px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="bg-white border border-gray-200 text-gray-900 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             >
               <option value="week">This Week</option>
               <option value="month">This Month</option>
@@ -96,12 +154,12 @@ const Dashboard = () => {
         {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-4">
           {kpiCards.map((card, idx) => (
-            <div key={idx} className="bg-card border border-theme rounded-xl p-3 hover:shadow-lg transition-all duration-300 group">
+            <div key={idx} className="bg-white border border-gray-200 rounded-xl p-3 hover:shadow-lg transition-all duration-300 group">
               <div className="flex items-center justify-between mb-2">
                 <div className={`p-2 bg-gradient-to-br ${card.gradient} rounded-lg shadow-sm group-hover:shadow-md transition-shadow`}>
                   <card.icon className="text-white" size={16} />
                 </div>
-                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold shadow-sm ${
+                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold shadow-sm ${
                   card.trend === 'up' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
                 }`}>
                   {card.trend === 'up' ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
@@ -110,16 +168,16 @@ const Dashboard = () => {
               </div>
               
               <div className="mb-2">
-                <p className="text-[10px] font-semibold text-muted mb-1">{card.label}</p>
-                <p className="text-xl font-bold text-main">{card.value}</p>
+                <p className="text-xs font-semibold text-gray-600 mb-1">{card.label}</p>
+                <p className="text-xl font-bold text-gray-900">{card.value}</p>
               </div>
               
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[10px] text-muted font-medium">
+                <div className="flex items-center justify-between text-xs text-gray-600 font-medium">
                   <span>Target: {card.target}</span>
-                  <span className="font-bold text-primary">{card.progress}%</span>
+                  <span className="font-bold text-blue-600">{card.progress}%</span>
                 </div>
-                <div className="h-1.5 bg-app rounded-full overflow-hidden shadow-inner">
+                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden shadow-inner">
                   <div 
                     className={`h-full bg-gradient-to-r ${card.gradient} rounded-full transition-all duration-700 shadow-sm`}
                     style={{width: `${card.progress}%`}}
@@ -132,103 +190,230 @@ const Dashboard = () => {
 
         {/* OVERDUE SECTION + QUICK ACTIONS */}
         <div className="mb-4">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 bg-red-50 rounded-lg border border-red-200">
-              <AlertCircle className="text-red-600" size={16} />
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className={`p-1.5 rounded-lg border ${viewType === 'overdue' ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
+                <AlertCircle className={viewType === 'overdue' ? 'text-red-600' : 'text-blue-600'} size={16} />
+              </div>
+              <h2 className="text-base font-bold text-gray-900">
+                {viewType === 'overdue' ? 'Overdue Payments' : 'Upcoming Payments'}
+              </h2>
             </div>
-            <h2 className="text-base font-bold text-main">Overdue Payments</h2>
+            
+            <div className="flex gap-2">
+              <button
+                onClick={() => setViewType('overdue')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  viewType === 'overdue'
+                    ? 'bg-red-600 text-white shadow-sm'
+                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Overdue ({payableOverdues.length + receivableOverdues.length})
+              </button>
+              <button
+                onClick={() => setViewType('upcoming')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  viewType === 'upcoming'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Due Soon ({payableUpcoming.length + receivableUpcoming.length})
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-10 gap-3">
-            {/* Payables Overdue */}
-            <div className="lg:col-span-4 bg-card border border-theme rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
-              <div className="p-3 border-b border-theme flex items-center justify-between bg-gradient-to-r from-red-50/50 to-transparent">
+            {/* Payables Section */}
+            <div className="lg:col-span-4 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+              <div className={`p-3 border-b border-gray-200 flex items-center justify-between ${
+                viewType === 'overdue' 
+                  ? 'bg-gradient-to-r from-red-50/50 to-transparent'
+                  : 'bg-gradient-to-r from-blue-50/50 to-transparent'
+              }`}>
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-red-100 rounded-lg">
-                    <Building2 size={16} className="text-red-600" />
+                  <div className={`p-1.5 rounded-lg ${
+                    viewType === 'overdue' ? 'bg-red-100' : 'bg-blue-100'
+                  }`}>
+                    <Building2 size={16} className={viewType === 'overdue' ? 'text-red-600' : 'text-blue-600'} />
                   </div>
                   <div>
-                    <h3 className="text-xs font-bold text-main">You Owe</h3>
-                    <p className="text-[10px] text-muted">To vendors</p>
+                    <h3 className="text-xs font-bold text-gray-900">You Owe</h3>
+                    <p className="text-xs text-gray-600">To vendors</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-red-600">₹{(totalPayableOverdue / 1000).toFixed(0)}K</div>
-                  <div className="text-[10px] text-muted font-medium">{payableOverdues.length} invoices</div>
+                  <div className={`text-lg font-bold ${viewType === 'overdue' ? 'text-red-600' : 'text-blue-600'}`}>
+                    ₹{((viewType === 'overdue' ? totalPayableOverdue : totalPayableUpcoming) / 1000).toFixed(0)}K
+                  </div>
+                  <div className="text-xs text-gray-600 font-medium">
+                    {viewType === 'overdue' ? payableOverdues.length : payableUpcoming.length} invoices
+                  </div>
                 </div>
               </div>
 
-              <div className="divide-y divide-[var(--border)]">
-                {payableOverdues.map((item, idx) => (
-                  <div key={idx} className="p-2.5 row-hover transition-all cursor-pointer">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-main text-xs">{item.id}</span>
-                          <span className="text-[10px] px-1.5 py-0.5 bg-red-50 text-red-600 font-bold rounded border border-red-200">{item.daysOverdue}d</span>
+              <div className="divide-y divide-gray-200">
+                {viewType === 'overdue' ? (
+                  payableOverdues.map((item, idx) => (
+                    <div key={idx} className="p-2.5 hover:bg-gray-50 transition-all cursor-pointer">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-gray-900 text-xs">{item.id}</span>
+                            <span className={`text-xs px-1.5 py-0.5 font-bold rounded border ${
+                              item.severity === 'critical' 
+                                ? 'bg-red-100 text-red-700 border-red-300'
+                                : item.severity === 'high'
+                                ? 'bg-orange-100 text-orange-700 border-orange-300'
+                                : 'bg-yellow-100 text-yellow-700 border-yellow-300'
+                            }`}>
+                              {item.daysOverdue}d overdue
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-1">{item.vendor}</p>
+                          <p className="text-xs text-rose-600 font-semibold mt-0.5">Due: {item.dueDate}</p>
                         </div>
-                        <p className="text-[11px] text-muted mt-1">{item.vendor}</p>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-gray-900">₹{(item.amount / 1000).toFixed(1)}K</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold text-main">₹{(item.amount / 1000).toFixed(1)}K</p>
-                      </div>
+                      <button className="w-full mt-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow">
+                        Pay Now
+                      </button>
                     </div>
-                    <button className="w-full mt-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-bold transition-all shadow-sm hover:shadow">
-                      Pay Now
-                    </button>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  payableUpcoming.map((item, idx) => (
+                    <div key={idx} className="p-2.5 hover:bg-gray-50 transition-all cursor-pointer">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-gray-900 text-xs">{item.id}</span>
+                            <span className={`text-xs px-1.5 py-0.5 font-bold rounded border ${
+                              item.urgency === 'urgent'
+                                ? 'bg-orange-100 text-orange-700 border-orange-300'
+                                : item.urgency === 'soon'
+                                ? 'bg-blue-100 text-blue-700 border-blue-300'
+                                : 'bg-gray-100 text-gray-700 border-gray-300'
+                            }`}>
+                              {item.daysUntilDue}d left
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-1">{item.vendor}</p>
+                          <p className="text-xs text-blue-600 font-semibold mt-0.5">Due: {item.dueDate}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-gray-900">₹{(item.amount / 1000).toFixed(1)}K</p>
+                        </div>
+                      </div>
+                      <button className="w-full mt-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow">
+                        Schedule Payment
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
 
-              <div className="p-2 bg-app border-t border-theme">
-                <button className="w-full py-1.5 text-[11px] font-bold text-primary hover:text-primary-600 flex items-center justify-center gap-1 transition-colors">
+              <div className="p-2 bg-gray-50 border-t border-gray-200">
+                <button className="w-full py-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1 transition-colors">
                   View All <ChevronRight size={14} />
                 </button>
               </div>
             </div>
 
-            {/* Receivables Overdue */}
-            <div className="lg:col-span-4 bg-card border border-theme rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
-              <div className="p-3 border-b border-theme flex items-center justify-between bg-gradient-to-r from-emerald-50/50 to-transparent">
+            {/* Receivables Section */}
+            <div className="lg:col-span-4 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+              <div className={`p-3 border-b border-gray-200 flex items-center justify-between ${
+                viewType === 'overdue'
+                  ? 'bg-gradient-to-r from-emerald-50/50 to-transparent'
+                  : 'bg-gradient-to-r from-green-50/50 to-transparent'
+              }`}>
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-emerald-100 rounded-lg">
-                    <UserCircle2 size={16} className="text-emerald-600" />
+                  <div className={`p-1.5 rounded-lg ${
+                    viewType === 'overdue' ? 'bg-emerald-100' : 'bg-green-100'
+                  }`}>
+                    <UserCircle2 size={16} className={viewType === 'overdue' ? 'text-emerald-600' : 'text-green-600'} />
                   </div>
                   <div>
-                    <h3 className="text-xs font-bold text-main">They Owe</h3>
-                    <p className="text-[10px] text-muted">From customers</p>
+                    <h3 className="text-xs font-bold text-gray-900">They Owe</h3>
+                    <p className="text-xs text-gray-600">From customers</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-emerald-600">₹{(totalReceivableOverdue / 1000).toFixed(0)}K</div>
-                  <div className="text-[10px] text-muted font-medium">{receivableOverdues.length} invoices</div>
+                  <div className={`text-lg font-bold ${viewType === 'overdue' ? 'text-emerald-600' : 'text-green-600'}`}>
+                    ₹{((viewType === 'overdue' ? totalReceivableOverdue : totalReceivableUpcoming) / 1000).toFixed(0)}K
+                  </div>
+                  <div className="text-xs text-gray-600 font-medium">
+                    {viewType === 'overdue' ? receivableOverdues.length : receivableUpcoming.length} invoices
+                  </div>
                 </div>
               </div>
 
-              <div className="divide-y divide-[var(--border)]">
-                {receivableOverdues.map((item, idx) => (
-                  <div key={idx} className="p-2.5 row-hover transition-all cursor-pointer">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-main text-xs">{item.id}</span>
-                          <span className="text-[10px] px-1.5 py-0.5 bg-orange-50 text-orange-600 font-bold rounded border border-orange-200">{item.daysOverdue}d</span>
+              <div className="divide-y divide-gray-200">
+                {viewType === 'overdue' ? (
+                  receivableOverdues.map((item, idx) => (
+                    <div key={idx} className="p-2.5 hover:bg-gray-50 transition-all cursor-pointer">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-gray-900 text-xs">{item.id}</span>
+                            <span className={`text-xs px-1.5 py-0.5 font-bold rounded border ${
+                              item.severity === 'critical'
+                                ? 'bg-red-100 text-red-700 border-red-300'
+                                : item.severity === 'high'
+                                ? 'bg-orange-100 text-orange-700 border-orange-300'
+                                : 'bg-yellow-100 text-yellow-700 border-yellow-300'
+                            }`}>
+                              {item.daysOverdue}d overdue
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-1">{item.customer}</p>
+                          <p className="text-xs text-rose-600 font-semibold mt-0.5">Due: {item.dueDate}</p>
                         </div>
-                        <p className="text-[11px] text-muted mt-1">{item.customer}</p>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-gray-900">₹{(item.amount / 1000).toFixed(1)}K</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold text-main">₹{(item.amount / 1000).toFixed(1)}K</p>
-                      </div>
+                      <button className="w-full mt-1 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow">
+                        Follow Up Now
+                      </button>
                     </div>
-                    <button className="w-full mt-1 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-[10px] font-bold transition-all shadow-sm hover:shadow">
-                      Follow Up
-                    </button>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  receivableUpcoming.map((item, idx) => (
+                    <div key={idx} className="p-2.5 hover:bg-gray-50 transition-all cursor-pointer">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-gray-900 text-xs">{item.id}</span>
+                            <span className={`text-xs px-1.5 py-0.5 font-bold rounded border ${
+                              item.urgency === 'urgent'
+                                ? 'bg-orange-100 text-orange-700 border-orange-300'
+                                : item.urgency === 'soon'
+                                ? 'bg-green-100 text-green-700 border-green-300'
+                                : 'bg-gray-100 text-gray-700 border-gray-300'
+                            }`}>
+                              {item.daysUntilDue}d left
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-1">{item.customer}</p>
+                          <p className="text-xs text-green-600 font-semibold mt-0.5">Due: {item.dueDate}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-gray-900">₹{(item.amount / 1000).toFixed(1)}K</p>
+                        </div>
+                      </div>
+                      <button className="w-full mt-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow">
+                        Send Reminder
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
 
-              <div className="p-2 bg-app border-t border-theme">
-                <button className="w-full py-1.5 text-[11px] font-bold text-primary hover:text-primary-600 flex items-center justify-center gap-1 transition-colors">
+              <div className="p-2 bg-gray-50 border-t border-gray-200">
+                <button className="w-full py-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1 transition-colors">
                   View All <ChevronRight size={14} />
                 </button>
               </div>
@@ -239,12 +424,12 @@ const Dashboard = () => {
               {quickActions.map((action, idx) => (
                 <button 
                   key={idx}
-                  className="bg-card border border-theme rounded-xl p-3 hover:shadow-md transition-all duration-300 group flex lg:flex-col items-center justify-center lg:items-center gap-2 lg:gap-0"
+                  className="bg-white border border-gray-200 rounded-xl p-3 hover:shadow-md transition-all duration-300 group flex lg:flex-col items-center justify-center lg:items-center gap-2 lg:gap-0"
                 >
                   <div className={`w-11 h-11 bg-${action.color}-50 border border-${action.color}-200 rounded-xl flex items-center justify-center lg:mb-2 group-hover:scale-110 transition-transform shadow-sm`}>
                     <action.icon className={`text-${action.color}-600`} size={20} />
                   </div>
-                  <p className="text-main font-bold text-xs text-center">{action.label}</p>
+                  <p className="text-gray-900 font-bold text-xs text-center">{action.label}</p>
                 </button>
               ))}
             </div>
@@ -253,37 +438,37 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-3">
           {/* Cash Flow Overview */}
-          <div className="lg:col-span-2 bg-card border border-theme rounded-2xl p-4 md:p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+          <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-4 md:p-6 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-5 gap-2">
               <div>
-                <h3 className="text-base md:text-lg font-bold text-main">Cashflow</h3>
-                <p className="text-[10px] md:text-xs text-muted mt-1">Where money might be for details</p>
+                <h3 className="text-base md:text-lg font-bold text-gray-900">Cashflow</h3>
+                <p className="text-xs md:text-sm text-gray-600 mt-1">Monthly income and expenses overview</p>
               </div>
-              <button className="text-[10px] md:text-xs px-3 py-1.5 bg-card border border-theme rounded-lg text-muted hover:bg-app hover:border-primary/30 transition-all duration-200 self-start sm:self-auto shadow-sm hover:shadow font-semibold">
-                All
+              <button className="text-xs md:text-sm px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 hover:border-blue-300 transition-all duration-200 self-start sm:self-auto shadow-sm hover:shadow font-semibold">
+                All Time
               </button>
             </div>
 
             {/* Legend */}
-            <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-4 md:mb-5 text-[10px] md:text-xs">
+            <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-4 md:mb-5 text-xs md:text-sm">
               <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm">
                 <div className="w-3 h-1.5 bg-gradient-to-r from-blue-600 to-blue-500 rounded-full"></div>
-                <span className="text-main font-bold">Cash Inflow</span>
+                <span className="text-muted font-bold">Cash Inflow</span>
               </div>
               <div className="flex items-center gap-2 bg-cyan-50 px-3 py-1.5 rounded-lg border border-cyan-200 shadow-sm">
                 <div className="w-3 h-1.5 bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full"></div>
-                <span className="text-main font-bold">Cash Outflows</span>
+                <span className="text-muted font-bold">Cash Outflows</span>
               </div>
               <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 shadow-sm">
                 <div className="w-3 h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"></div>
-                <span className="text-main font-bold">Net Cashflow</span>
+                <span className="text-muted font-bold">Net Cashflow</span>
               </div>
             </div>
 
             {/* Chart Area */}
-            <div className="relative h-48 md:h-64 bg-gradient-to-b from-app/30 to-card rounded-xl p-3 md:p-4 border border-theme">
+            <div className="relative h-48 md:h-64 bg-gradient-to-b from-gray-50 to-white rounded-xl p-3 md:p-4 border border-gray-200">
               {/* Y-axis labels */}
-              <div className="absolute left-0 top-3 md:top-4 bottom-8 md:bottom-10 flex flex-col justify-between text-[9px] md:text-[10px] font-bold text-muted pr-2">
+              <div className="absolute left-0 top-3 md:top-4 bottom-8 md:bottom-10 flex flex-col justify-between text-xs md:text-sm font-bold text-gray-600 pr-2">
                 <span>400</span>
                 <span>300</span>
                 <span>200</span>
@@ -296,7 +481,7 @@ const Dashboard = () => {
                 {/* Grid lines */}
                 <div className="absolute inset-0 bottom-8 md:bottom-10 flex flex-col justify-between">
                   {[0, 1, 2, 3, 4].map(i => (
-                    <div key={i} className="border-t border-theme opacity-50"></div>
+                    <div key={i} className="border-t border-gray-200 opacity-50"></div>
                   ))}
                 </div>
 
@@ -308,7 +493,7 @@ const Dashboard = () => {
                       <stop offset="100%" stopColor="#3b82f6" stopOpacity="1"/>
                     </linearGradient>
                     <linearGradient id="cyanGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.9"/>
+                      <stop offset="0%" stopColor="#50a9b9" stopOpacity="0.9"/>
                       <stop offset="100%" stopColor="#22d3ee" stopOpacity="1"/>
                     </linearGradient>
                     <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -355,9 +540,9 @@ const Dashboard = () => {
                   ))}
                 </svg>
 
-                <div className="absolute bottom-0 left-0 right-0 flex justify-between text-[9px] md:text-[10px] font-bold text-muted">
+                <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs md:text-sm font-bold text-gray-600">
                   {['Jan', 'Feb', 'Mar', 'Apr', 'May'].map(month => (
-                    <span key={month} className="bg-card/80 px-2 py-0.5 rounded shadow-sm border border-theme">{month}</span>
+                    <span key={month} className="bg-white px-2 py-0.5 rounded shadow-sm border border-gray-200">{month}</span>
                   ))}
                 </div>
               </div>
@@ -365,8 +550,8 @@ const Dashboard = () => {
           </div>
 
           {/* Top Categories */}
-          <div className="bg-card border border-theme rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
-            <h3 className="text-sm font-bold text-main mb-3">Sales by Category</h3>
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
+            <h3 className="text-sm font-bold text-gray-900 mb-3">Sales by Category</h3>
             
             <div className="space-y-3">
               {categories.map((cat, idx) => (
@@ -374,14 +559,14 @@ const Dashboard = () => {
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
                       <div className={`w-2.5 h-2.5 ${cat.color} rounded-full shadow-sm`}></div>
-                      <span className="text-xs font-bold text-main">{cat.name}</span>
+                      <span className="text-xs font-bold text-gray-900">{cat.name}</span>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-bold text-main">₹{cat.value.toLocaleString()}</p>
-                      <p className="text-[10px] text-muted font-semibold">{cat.percentage}%</p>
+                      <p className="text-xs font-bold text-gray-900">₹{cat.value.toLocaleString()}</p>
+                      <p className="text-xs text-gray-600 font-semibold">{cat.percentage}%</p>
                     </div>
                   </div>
-                  <div className="h-2 bg-app rounded-full overflow-hidden shadow-inner">
+                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden shadow-inner">
                     <div 
                       className={`h-full ${cat.color} rounded-full transition-all duration-700 shadow-sm`}
                       style={{width: `${cat.percentage}%`}}
@@ -397,13 +582,13 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           
           {/* Recent Activity */}
-          <div className="bg-card border border-theme rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
-            <div className="p-3 border-b border-theme bg-gradient-to-r from-app/50 to-transparent">
-              <h3 className="text-sm font-bold text-main">Recent Activity</h3>
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+            <div className="p-3 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-transparent">
+              <h3 className="text-sm font-bold text-gray-900">Recent Activity</h3>
             </div>
-            <div className="divide-y divide-[var(--border)] max-h-[300px] overflow-y-auto">
+            <div className="divide-y divide-gray-200 max-h-80 overflow-y-auto">
               {recentActivity.map((item, idx) => (
-                <div key={idx} className="p-3 row-hover transition-all cursor-pointer group">
+                <div key={idx} className="p-3 hover:bg-gray-50 transition-all cursor-pointer group">
                   <div className="flex items-start gap-2.5">
                     <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform ${
                       item.status === 'completed' ? 'bg-emerald-50 border border-emerald-200' :
@@ -414,10 +599,10 @@ const Dashboard = () => {
                        <FileText className="text-blue-600" size={16} />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-main truncate">{item.title}</p>
+                      <p className="text-xs font-bold text-gray-900 truncate">{item.title}</p>
                       <div className="flex items-center justify-between mt-1">
-                        <span className="text-[10px] text-muted font-semibold">{item.time}</span>
-                        <span className="text-xs font-bold text-primary">{item.amount}</span>
+                        <span className="text-xs text-gray-600 font-semibold">{item.time}</span>
+                        <span className="text-xs font-bold text-blue-600">{item.amount}</span>
                       </div>
                     </div>
                   </div>
@@ -427,24 +612,24 @@ const Dashboard = () => {
           </div>
 
           {/* Top Customers */}
-          <div className="bg-card border border-theme rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
-            <div className="p-3 border-b border-theme bg-gradient-to-r from-app/50 to-transparent flex items-center justify-between">
-              <h3 className="text-sm font-bold text-main">Top Customers</h3>
-              <button className="text-primary text-xs font-bold hover:text-primary-600 flex items-center gap-0.5 transition-colors">
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+            <div className="p-3 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-transparent flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-900">Top Customers</h3>
+              <button className="text-blue-600 text-xs font-bold hover:text-blue-700 flex items-center gap-0.5 transition-colors">
                 View All <ChevronRight size={14} />
               </button>
             </div>
-            <div className="divide-y divide-[var(--border)]">
+            <div className="divide-y divide-gray-200">
               {topEntities.customers.map((customer, idx) => (
-                <div key={idx} className="p-3 row-hover transition-all cursor-pointer group">
+                <div key={idx} className="p-3 hover:bg-gray-50 transition-all cursor-pointer group">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-bold text-main">{customer.name}</p>
-                      <p className="text-[10px] text-muted font-semibold mt-0.5">{customer.id}</p>
+                      <p className="text-xs font-bold text-gray-900">{customer.name}</p>
+                      <p className="text-xs text-gray-600 font-semibold mt-0.5">{customer.id}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs font-bold text-emerald-600">₹{customer.amount.toLocaleString()}</p>
-                      <div className={`text-[10px] font-bold flex items-center justify-end gap-0.5 mt-0.5 ${
+                      <div className={`text-xs font-bold flex items-center justify-end gap-0.5 mt-0.5 ${
                         customer.trend > 0 ? 'text-emerald-600' : 'text-rose-600'
                       }`}>
                         {customer.trend > 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
@@ -458,24 +643,24 @@ const Dashboard = () => {
           </div>
 
           {/* Top Suppliers */}
-          <div className="bg-card border border-theme rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
-            <div className="p-3 border-b border-theme bg-gradient-to-r from-app/50 to-transparent flex items-center justify-between">
-              <h3 className="text-sm font-bold text-main">Top Suppliers</h3>
-              <button className="text-primary text-xs font-bold hover:text-primary-600 flex items-center gap-0.5 transition-colors">
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+            <div className="p-3 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-transparent flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-900">Top Suppliers</h3>
+              <button className="text-blue-600 text-xs font-bold hover:text-blue-700 flex items-center gap-0.5 transition-colors">
                 View All <ChevronRight size={14} />
               </button>
             </div>
-            <div className="divide-y divide-[var(--border)]">
+            <div className="divide-y divide-gray-200">
               {topEntities.suppliers.map((supplier, idx) => (
-                <div key={idx} className="p-3 row-hover transition-all cursor-pointer group">
+                <div key={idx} className="p-3 hover:bg-gray-50 transition-all cursor-pointer group">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-bold text-main">{supplier.name}</p>
-                      <p className="text-[10px] text-muted font-semibold mt-0.5">{supplier.id}</p>
+                      <p className="text-xs font-bold text-gray-900">{supplier.name}</p>
+                      <p className="text-xs text-gray-600 font-semibold mt-0.5">{supplier.id}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs font-bold text-rose-600">₹{supplier.amount.toLocaleString()}</p>
-                      <div className={`text-[10px] font-bold flex items-center justify-end gap-0.5 mt-0.5 ${
+                      <div className={`text-xs font-bold flex items-center justify-end gap-0.5 mt-0.5 ${
                         supplier.trend > 0 ? 'text-emerald-600' : 'text-rose-600'
                       }`}>
                         {supplier.trend > 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
