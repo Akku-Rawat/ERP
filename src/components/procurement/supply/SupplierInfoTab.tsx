@@ -2,10 +2,12 @@ import React from "react";
 import { Building2, Mail } from "lucide-react";
 import { Input, Card } from "../../ui/modal/formComponent";
 import type { SupplierFormData } from "../../../types/Supply/supplier";
+import CountrySelect from "../../selects/CountrySelect";
+
 
 interface SupplierInfoTabProps {
   form: SupplierFormData;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
 }
 
 export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange }) => {
@@ -61,6 +63,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               name="phoneNo"
               value={form.phoneNo}
               onChange={onChange}
+              type="tel"
             />
             <Input
               label="Alternate No"
@@ -73,6 +76,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               name="emailId"
               value={form.emailId}
               onChange={onChange}
+              type="email"
               icon={<Mail className="w-4 h-4" />}
             />
           </div>
@@ -90,43 +94,57 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               value={form.billingAddressLine1}
               onChange={onChange}
             />
+
             <Input
               label="Address Line 2"
               name="billingAddressLine2"
               value={form.billingAddressLine2}
               onChange={onChange}
             />
+
             <Input
               label="City"
               name="billingCity"
               value={form.billingCity}
               onChange={onChange}
             />
+
+            <CountrySelect
+              value={form.billingCountry}
+              label="Country"
+              onChange={(country: { code: string; name: string }) =>
+                onChange({
+                  target: { name: "billingCountry", value: country.code },
+                } as any)
+              }
+            />
+
+
             <Input
               label="District"
               name="district"
               value={form.district}
               onChange={onChange}
             />
+
             <Input
               label="Province"
               name="province"
               value={form.province}
               onChange={onChange}
             />
-            <Input
-              label="Country"
-              name="billingCountry"
-              value={form.billingCountry}
-              onChange={onChange}
-            />
+
+          
+
             <Input
               label="Postal Code"
               name="billingPostalCode"
               value={form.billingPostalCode}
               onChange={onChange}
+              type="number"
             />
           </div>
+
         </div>
       </div>
     </Card>

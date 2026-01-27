@@ -61,9 +61,13 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         >
           Next →
         </Button>
-        <Button variant="primary" onClick={handleSubmit} loading={loading} type="submit">
-          {isEditMode ? "Update Supplier" : "Save Supplier"}
-        </Button>
+   <Button
+  variant="primary"
+  loading={loading}
+  onClick={handleSubmit}
+>
+  {isEditMode ? "Update Supplier" : "Save Supplier"}
+</Button>
 
       </div>
     </>

@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 import { getSuppliers } from "../../api/supplierApi";
 
-// 🔥 SAME UI TABLE COMPONENTS AS CUSTOMER
+
 import Table from "../../components/ui/Table/Table";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import ActionButton, {
@@ -14,30 +14,15 @@ import ActionButton, {
 } from "../../components/ui/Table/ActionButton";
 
 import type { Column } from "../../components/ui/Table/type";
+import type { Supplier, SupplierFormData } from "../../types/Supply/supplier";
 
-// ================= TYPES =================
-export interface Supplier {
-  supplierName: string;
-  supplierCode?: string;
-  tpin?: string;
-  contactPerson?: string;
-  phoneNo?: string;
-  emailId?: string;
-  currency?: string;
-  paymentTerms?: string;
-  openingBalance?: string;
-  accountNumber?: string;
-  accountHolder?: string;
-  swiftCode?: string;
-  sortCode?: string;
-  billingAddressLine1?: string;
-  billingCity?: string;
-  billingCountry?: string;
-  status?: "active" | "inactive" | "pending";
-  supplierId?: string; // backend id if exists
-}
+
+
 
 interface Props {}
+
+
+
 
 const SupplierManagement: React.FC<Props> = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -51,37 +36,46 @@ const SupplierManagement: React.FC<Props> = () => {
   const [showModal, setShowModal] = useState(false);
   const [editSupplier, setEditSupplier] = useState<Supplier | null>(null);
 
-  // ================= FETCH SUPPLIERS =================
-  const fetchSuppliers = async () => {
-    try {
-      setLoading(true);
-      const res = await getSuppliers(); // API NOT REMOVED
-      setSuppliers(res);
-    } catch (err) {
-      console.error("Error loading suppliers:", err);
-      toast.error("Failed to load suppliers");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //  FETCH SUPPLIERS 
+const fetchSuppliers = async () => {
+  try {
+    setLoading(true);
+    const res = await getSuppliers();
+
+    const list = res.map((s: any) => ({
+      ...s,
+      status: s.status?.toLowerCase(), // Active → active
+    }));
+
+    setSuppliers(list);
+  } catch (err) {
+    console.error("Error loading suppliers:", err);
+    toast.error("Failed to load suppliers");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   useEffect(() => {
     fetchSuppliers();
   }, []);
 
-  // ================= SEARCH FILTER =================
-  const filteredSuppliers = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    return suppliers.filter(
-      (s) =>
-        s.supplierName?.toLowerCase().includes(term) ||
-        (s.supplierCode ?? "").toLowerCase().includes(term) ||
-        (s.tpin ?? "").toLowerCase().includes(term) ||
-        (s.status ?? "").toLowerCase().includes(term),
-    );
-  }, [suppliers, searchTerm]);
+  //  SEARCH FILTER 
+const filteredSuppliers = useMemo(() => {
+  const term = searchTerm.toLowerCase();
+  return suppliers.filter(
+    (s) =>
+      (s.supplierName || "").toLowerCase().includes(term) ||
+      (s.supplierCode || "").toLowerCase().includes(term) ||
+      (s.tpin || "").toLowerCase().includes(term) ||
+      (s.status || "").toLowerCase().includes(term)
+  );
+}, [suppliers, searchTerm]);
 
-  // ================= ROW CLICK =================
+
+  //  ROW CLICK 
   const handleRowClick = (supplier: Supplier) => {
     setSelectedSupplier(supplier);
     setViewMode("detail");
@@ -92,7 +86,7 @@ const SupplierManagement: React.FC<Props> = () => {
     setSelectedSupplier(null);
   };
 
-  // ================= MODAL HANDLERS =================
+  //  MODAL HANDLERS 
   const handleAddSupplier = () => {
     setEditSupplier(null);
     setShowModal(true);
@@ -111,15 +105,15 @@ const SupplierManagement: React.FC<Props> = () => {
     toast.success(editSupplier ? "Supplier updated!" : "Supplier created!");
   };
 
-  // ================= DELETE (API later) =================
-  const handleDelete = (name: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (window.confirm(`Delete supplier "${name}"?`)) {
-      toast.success("Delete API ready — connect backend later");
-    }
-  };
+  //  DELETE (API later) 
+const handleDelete = (supplierId: string, e: React.MouseEvent) => {
+  e.stopPropagation();
+  if (window.confirm("Delete supplier?")) {
+    toast.success("Delete API ready");
+  }
+};
 
-  // ================= TABLE COLUMNS (ENTERPRISE STYLE) =================
+  //  TABLE COLUMNS (ENTERPRISE STYLE) 
   const columns: Column<Supplier>[] = [
     { key: "supplierCode", header: "Code", align: "left" },
 
@@ -171,14 +165,14 @@ const SupplierManagement: React.FC<Props> = () => {
 
           <ActionMenu
             onEdit={(e) => handleEditSupplier(s, e as any)}
-            onDelete={(e) => handleDelete(s.supplierName, e as any)}
+            onDelete={(e) => handleDelete(s.supplierId!, e as any)}
           />
         </ActionGroup>
       ),
     },
   ];
 
-  // ================= UI =================
+  //  UI 
   return (
     <div className="p-8">
       {viewMode === "table" ? (
@@ -206,6 +200,7 @@ const SupplierManagement: React.FC<Props> = () => {
           }}
         />
       ) : null}
+
 
       {/* SUPPLIER MODAL */}
       <SupplierModal
