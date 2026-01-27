@@ -139,12 +139,6 @@ const CustomerModal: React.FC<{
     }
   };
 
-  const normalizeTaxCategory = (value: string) => {
-    if (value.toLowerCase() === "export") return "Export";
-    if (value.toLowerCase() === "non-export") return "Non-Export";
-    if (value.toLowerCase() === "lpo") return "LPO";
-    return value;
-  };
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -152,12 +146,7 @@ const CustomerModal: React.FC<{
 
     setForm((prev) => ({
       ...prev,
-      [name]:
-        name === "onboardingBalance"
-          ? Number(value)
-          : name === "customerTaxCategory"
-            ? normalizeTaxCategory(value)
-            : value,
+      [name]: name === "onboardingBalance" ? Number(value) : value,
     }));
   };
 
@@ -366,7 +355,7 @@ const CustomerModal: React.FC<{
                         value={form.customerTaxCategory}
                         onChange={handleChange}
                         options={[
-                          { value: "", label: "Select Tax Category" },
+                          
                           { value: "Export", label: "Export" },
                           { value: "Non-Export", label: "Non-Export" },
                           { value: "LPO", label: "LPO" },
@@ -379,7 +368,7 @@ const CustomerModal: React.FC<{
                         value={form.currency}
                         onChange={handleChange}
                         options={[
-                          { value: "", label: "Select Currency" },
+                        
                           { value: "ZMW", label: "ZMW" },
                           { value: "USD", label: "USD" },
                           { value: "INR", label: "INR" },
