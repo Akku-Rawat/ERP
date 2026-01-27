@@ -13,8 +13,7 @@ const vite_class_list_api_url = import.meta.env
 
 const vite_country_list_api_url = import.meta.env
   .VITE_COUNTRY_LIST_API_URL as string;
-const vite_unit_of_measurement_api_url = import.meta.env
-  .VITE_UNIT_OF_MEASURE_LIST_API_URL as string;
+const vite_unit_of_measurement_api_url = import.meta.env.VITE_UNIT_OF_MEASURE_API_URL as string;
 const vite_packaging_unit_codes_api_url = import.meta.env
   .VITE_PACKAGING_UNIT_CODES_API_URL as string;
 
