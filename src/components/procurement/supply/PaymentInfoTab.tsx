@@ -71,6 +71,15 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
         <h3 className="text-sm font-semibold text-gray-700">Bank Details</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+
+            <Input
+            label="Bank Account"
+            name="bankAccount"
+            value={form.bankAccount}
+            onChange={onChange}
+            required
+          />
+
           <Input
             label="Account No"
             name="accountNumber"

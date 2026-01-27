@@ -78,12 +78,27 @@ export const usePurchaseOrderForm = ({
     }));
   }, [form.items]);
 
+ 
+
   const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
-  };
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => {
+  const { name, value } = e.target;
+
+  setForm((prev) => {
+    const keys = name.split(".");
+    const updated = { ...prev } as any;
+    let obj = updated;
+
+    keys.slice(0, -1).forEach((k) => {
+      obj[k] = { ...obj[k] };
+      obj = obj[k];
+    });
+
+    obj[keys[keys.length - 1]] = value;
+    return updated;
+  });
+};
 
   const handleSupplierChange = (name: string) => {
     setForm((p) => ({ ...p, supplier: name }));

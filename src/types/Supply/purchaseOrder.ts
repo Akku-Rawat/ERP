@@ -21,6 +21,19 @@ export interface PaymentRow {
   paymentAmount: number;
 }
 
+export type AddressBlock = {
+  addressTitle: string;
+  addressType: "Billing" | "Shipping";
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  phone?: string;
+  email?: string;
+};
+
 export interface PurchaseOrderFormData {
   poNumber: string;
   date: string;
@@ -34,12 +47,16 @@ export interface PurchaseOrderFormData {
   status: string;
   costCenter: string;
   project: string;
-  supplierAddress: string;
-  supplierContact: string;
-  dispatchAddress: string;
-  shippingAddress: string;
-  companyBillingAddress: string;
+
+  addresses: {
+    supplierAddress: AddressBlock;
+    dispatchAddress: AddressBlock;
+    shippingAddress: AddressBlock;
+    companyBillingAddress: AddressBlock;
+  };
+
   placeOfSupply: string;
+
   paymentTermsTemplate: string;
   termsAndConditions: string;
   totalQuantity: number;
@@ -49,8 +66,7 @@ export interface PurchaseOrderFormData {
   items: ItemRow[];
   taxRows: TaxRow[];
   paymentRows: PaymentRow[];
-  
-  // Email template
+
   templateName: string;
   templateType: string;
   subject: string;
@@ -58,6 +74,7 @@ export interface PurchaseOrderFormData {
   sendAttachedFiles: boolean;
   sendPrint: boolean;
 }
+
 
 export const emptyItem: ItemRow = {
   itemCode: "",
@@ -82,6 +99,20 @@ export const emptyPaymentRow: PaymentRow = {
   paymentAmount: 0,
 };
 
+export const emptyAddress: AddressBlock = {
+  addressTitle: "",
+  addressType: "Billing",
+  addressLine1: "",
+  addressLine2: "",
+  city: "",
+  state: "",
+  country: "",
+  postalCode: "",
+  phone: "",
+  email: "",
+};
+
+
 export const emptyPOForm: PurchaseOrderFormData = {
   poNumber: "",
   date: "",
@@ -95,21 +126,27 @@ export const emptyPOForm: PurchaseOrderFormData = {
   taxesChargesTemplate: "",
   costCenter: "",
   project: "",
-  supplierAddress: "",
-  supplierContact: "",
-  dispatchAddress: "",
-  shippingAddress: "",
-  companyBillingAddress: "",
+
+  addresses: {
+    supplierAddress: { ...emptyAddress, addressTitle: "Supplier Main Address", addressType: "Billing" },
+    dispatchAddress: { ...emptyAddress, addressTitle: "Warehouse Dispatch", addressType: "Shipping" },
+    shippingAddress: { ...emptyAddress, addressTitle: "Customer Delivery Address", addressType: "Shipping" },
+    companyBillingAddress: { ...emptyAddress, addressTitle: "Company HQ Billing", addressType: "Billing" },
+  },
+
   placeOfSupply: "",
+
   paymentTermsTemplate: "",
   termsAndConditions: "",
   totalQuantity: 0,
   grandTotal: 0,
   roundingAdjustment: 0,
   roundedTotal: 0,
+
   items: [{ ...emptyItem }],
   taxRows: [{ ...emptyTaxRow }],
   paymentRows: [{ ...emptyPaymentRow }],
+
   templateName: "",
   templateType: "",
   subject: "",
@@ -117,5 +154,6 @@ export const emptyPOForm: PurchaseOrderFormData = {
   sendAttachedFiles: false,
   sendPrint: false,
 };
+
 
 export type POTab = "details" | "email" | "tax" | "address" | "terms";
