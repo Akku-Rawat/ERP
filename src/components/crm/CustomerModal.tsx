@@ -58,7 +58,8 @@ const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   shippingCountry: "",
 
   terms: {
-    selling: {},
+    selling: { payment: { phases: [] } },
+    
   },
   sameAsBilling: false,
 };

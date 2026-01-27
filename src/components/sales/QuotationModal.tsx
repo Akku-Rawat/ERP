@@ -214,7 +214,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 
                 {/* ITEMS */}
                 <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  Invoiced Items
+                  Quoted Items
                 </h3>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm text-gray-600">

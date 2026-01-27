@@ -5,6 +5,7 @@ import { getAllQuotations, getQuotationById } from "../../api/quotationApi";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { QuotationSummary, QuotationData } from "../../types/quotation";
 
+
 import Table from "../../components/ui/Table/Table";
 import ActionButton, {
   ActionGroup,
@@ -21,6 +22,8 @@ interface QuotationTableProps {
   onAddQuotation?: () => void;
   onExportQuotation?: () => void;
 }
+type QuotationStatus = "Draft" | "Sent" | "Pending" | "Accepted" | "Rejected";
+
 
 const QuotationsTable: React.FC<QuotationTableProps> = ({
   onAddQuotation,
@@ -46,6 +49,18 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
 
   // Company data state
   const [company, setCompany] = useState<any>(null);
+
+  const QUOTATION_STATUS_TRANSITIONS: Record<QuotationStatus, QuotationStatus[]> = {
+  Draft: ["Sent", "Pending"],
+  Sent: ["Pending", "Accepted", "Rejected"],
+  Pending: ["Accepted", "Rejected"],
+  Accepted: [],
+  Rejected: [],
+};
+const CRITICAL_QUOTATION_STATUSES: QuotationStatus[] = ["Accepted"];
+
+
+
 
   /* ===============================
      FETCH COMPANY DATA
