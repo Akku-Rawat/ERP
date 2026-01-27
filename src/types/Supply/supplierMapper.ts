@@ -36,13 +36,21 @@ export const mapSupplierApi = (d: any): Supplier => ({
 
 
 
-export const mapSupplierToApi = (f: SupplierFormData) => ({
+export const mapSupplierToApi = (
+  f: SupplierFormData,
+  supplierId?: string | number
+) => ({
+  ...(supplierId ? { supplierId } : {}), 
+
   supplierName: f.supplierName,
   supplierCode: f.supplierCode,
   tpin: f.tpin,
   currency: f.currency,
-  mobile_no: f.phoneNo,
+  contactPerson: f.contactPerson,
+  phoneNo: f.phoneNo,
+  alternateNo: f.alternateNo,
   emailId: f.emailId,
+
   billingAddressLine1: f.billingAddressLine1,
   billingAddressLine2: f.billingAddressLine2,
   city: f.billingCity,
@@ -50,11 +58,13 @@ export const mapSupplierToApi = (f: SupplierFormData) => ({
   province: f.province,
   country: f.billingCountry,
   postalCode: f.billingPostalCode,
+
   accountNumber: f.accountNumber,
   accountHolder: f.accountHolder,
   sortCode: f.sortCode,
   swiftCode: f.swiftCode,
   branchAddress: f.branchAddress,
+
   openingBalance: f.openingBalance,
   paymentTerms: f.paymentTerms,
   dateOfAddition: f.dateOfAddition,

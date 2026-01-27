@@ -3,12 +3,12 @@ import toast from "react-hot-toast";
 import type { SupplierFormData, SupplierTab } from "../types/Supply/supplier";
 import { emptySupplierForm } from "../types/Supply/supplier";
 import { createSupplier, updateSupplier } from "../api/supplierApi";
-
-
+import { mapSupplierToApi } from "../types/Supply/supplierMapper";
+import { Supplier } from "../types/Supply/supplier";
 
 
 interface UseSupplierFormProps {
-  initialData?: SupplierFormData | null;
+   initialData?: Supplier | null; 
   isEditMode?: boolean;
   onSuccess?: (data: SupplierFormData) => void;
   onClose?: () => void;
@@ -45,31 +45,28 @@ export const useSupplierForm = ({
 
 
 
-
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-
+const handleSubmit = async (e?: React.FormEvent) => {
+  e?.preventDefault();
   try {
-    let resp;
+    setLoading(true);
+
+    const payload = mapSupplierToApi(form, initialData?.supplierId);
 
     if (isEditMode) {
-      resp = await updateSupplier(form);
+      await updateSupplier(payload); 
     } else {
-      resp = await createSupplier(form);
+      await createSupplier(payload); 
     }
 
-    toast.success(isEditMode ? "Supplier updated!" : "Supplier created!");
     onSuccess?.(form);
-    reset();
     onClose?.();
-  } catch (err: any) {
-    console.error(err);
-    toast.error(err?.message || "Failed to save supplier");
+  } catch (err) {
+    console.error("Supplier save failed", err);
   } finally {
     setLoading(false);
   }
 };
+
 
   // Reset Form
   const reset = () => {

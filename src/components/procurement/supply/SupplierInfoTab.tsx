@@ -114,7 +114,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               label="Country"
               onChange={(country: { code: string; name: string }) =>
                 onChange({
-                  target: { name: "billingCountry", value: country.code },
+                  target: { name: "billingCountry", value: country.name },
                 } as any)
               }
             />
