@@ -64,8 +64,8 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Create Invoice"
-      subtitle="Create and manage proforma invoice details"
+      title="Create Quotation"
+      subtitle="Create and manage quotation details"
       icon={FileText}
       footer={footerContent}
       maxWidth="6xl"
@@ -99,7 +99,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
             <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4 mt-8">
               <div className="col-span-2">
                 <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  ProfromaInvoice Information
+                  Quotation Details
                 </h3>
 
                 <div className="flex flex-col gap-4">
