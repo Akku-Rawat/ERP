@@ -50,6 +50,7 @@ export const mapSupplierToApi = (
   phoneNo: f.phoneNo,
   alternateNo: f.alternateNo,
   emailId: f.emailId,
+bankAccount: f.bankAccount,
 
   billingAddressLine1: f.billingAddressLine1,
   billingAddressLine2: f.billingAddressLine2,
