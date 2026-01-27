@@ -39,23 +39,25 @@ const HrPayrollModule: React.FC = () => {
   const [tab, setTab] = useState(navTabs[0].key);
 
   return (
-    <div className="bg-app  p-8 pb-5">
+    <div className="p-6 bg-app min-h-screen">
       {/* Header */}
-      <h1 className="text-main -3xl font-bold mb-6 flex items-center gap-2">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-main">
         <FaUserTie /> Human Resources
-      </h1>
+      </h2>
+      </div>
 
       {/* Navbar */}
-      <div className="flex gap-8 mb-8 border-b border-gray-300">
+      <div className="flex border-b border-gray-200 mb-4">
         {navTabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex items-center gap-2 pb-3 text-m font-medium transition border-b-2
+            className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors 
               ${
                 tab === t.key
-                  ? "text-teal-600 border-teal-500"
-                  : "text-gray-500 border-transparent hover:text-teal-600"
+               ? "text-primary border-b-2 border-current"
+                : "text-muted hover:text-main"
               }`}
           >
             {t.icon} {t.label}

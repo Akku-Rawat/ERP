@@ -156,16 +156,16 @@ const CompanySetup: React.FC = () => {
       </h1>
 
       {/* Navbar */}
-      <div className="flex gap-8 mb-8 border-b border-[var(--border)] overflow-x-auto">
+      <div className="flex  mb-4 border-b border-gray-200 ">
         {navTabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex items-center gap-2 pb-3 text-base font-medium transition border-b-2 border-theme 
+            className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors
               ${
                 tab === t.key
-                  ? "border-[var(--primary)] text-main font-semibold"
-                  : "border-transparent text-muted hover:text-primary"
+                ? "text-primary border-b-2 border-current"
+                : "text-muted hover:text-main"
               }
             `}
             style={{ background: "transparent" }}

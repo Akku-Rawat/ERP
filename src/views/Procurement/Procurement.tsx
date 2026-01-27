@@ -14,7 +14,7 @@ import {
   FaLandmark,
 } from "react-icons/fa";
 import SupplierManagement from "./SupplierManagement";
-import SupplierModal from "../../components/procurement/SupplierModal";
+import SupplierModal from "../../components/procurement/supply/SupplierModal";
 import PurchaseInvoiceTable from "./PurchaseInvoice";
 
 const procurement = {
@@ -71,8 +71,8 @@ const Procurement: React.FC = () => {
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
-                ? "text-teal-600 border-b-2 border-teal-600"
-                : "text-gray-500 hover:text-gray-700"
+            ? "text-primary border-b-2 border-current"
+                : "text-muted hover:text-main"
             }`}
           >
             <span>{tab.icon}</span> {tab.name}
@@ -81,7 +81,7 @@ const Procurement: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div>
         {activeTab === "supplier" && <SupplierManagement onAdd={handleAdd} />}
         {activeTab === "rfqs" && <RFQsTable onAdd={handleAdd} />}
         {activeTab === "orders" && <PurchaseOrdersTable onAdd={handleAdd} />}

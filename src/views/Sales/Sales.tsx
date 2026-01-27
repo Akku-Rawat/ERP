@@ -160,8 +160,8 @@ const SalesModule: React.FC = () => {
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
-                ? "text-teal-600 border-b-2 border-teal-600"
-                : "text-gray-500 hover:text-gray-700"
+                 ? "text-primary border-b-2 border-current"
+                : "text-muted hover:text-main"
             }`}
           >
             {tab.icon}

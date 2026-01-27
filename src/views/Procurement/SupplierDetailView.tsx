@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect} from "react";
 import {
   X,
   Search,
@@ -8,33 +8,12 @@ import {
   Plus,
   Building2,
 } from "lucide-react";
+import type { SupplierFormData ,Supplier } from "../../types/Supply/supplier";
+import { getSupplierById } from "../../api/supplierApi";
+import { mapSupplierApi } from "../../types/Supply/supplierMapper";
 
-interface Supplier {
-  supplierName: string;
-  supplierCode?: string;
-  tpin?: string;
-  contactPerson?: string;
-  phoneNo?: string;
-  alternateNo?: string;
-  emailId?: string;
-  currency?: string;
-  paymentTerms?: string;
-  dateOfAddition?: string;
-  openingBalance?: string;
-  accountNumber?: string;
-  accountHolder?: string;
-  sortCode?: string;
-  swiftCode?: string;
-  branchAddress?: string;
-  billingAddressLine1?: string;
-  billingAddressLine2?: string;
-  billingCity?: string;
-  district?: string;
-  province?: string;
-  billingCountry?: string;
-  billingPostalCode?: string;
-  status?: "active" | "inactive" | "pending";
-}
+
+
 
 interface Props {
   supplier: Supplier;
@@ -55,13 +34,43 @@ const SupplierDetailView: React.FC<Props> = ({
   const [activeTab, setActiveTab] = useState<
     "overview" | "purchase-orders" | "bills"
   >("overview");
+  const [supplierDetail, setSupplierDetail] = useState<Supplier | null>(null);
+const [loading, setLoading] = useState(false);
 
-  const filteredSuppliers = suppliers.filter(
-    (s) =>
-      s.supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.supplierCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.tpin?.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+
+const filteredSuppliers = suppliers.filter(
+  (s) =>
+    (s.supplierName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.supplierCode || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.tpin || "").toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+
+useEffect(() => {
+  if (!supplier?.supplierId) return;
+
+  const fetchDetail = async () => {
+    try {
+      setLoading(true);
+
+      if (!supplier.supplierId) return;
+
+         const res = await getSupplierById(supplier.supplierId);
+
+      const mapped = mapSupplierApi(res.data || res); 
+
+      setSupplierDetail(mapped);
+    } catch (err) {
+      console.error("Failed to load supplier detail", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchDetail();
+}, [supplier?.supplierId]);
+
+
 
   const getStatusColor = (status?: string) => {
     switch (status) {
@@ -78,13 +87,13 @@ const SupplierDetailView: React.FC<Props> = ({
 
   const formatAddress = () => {
     const parts = [
-      supplier.billingAddressLine1,
-      supplier.billingAddressLine2,
-      supplier.billingCity,
-      supplier.district,
-      supplier.province,
-      supplier.billingPostalCode,
-      supplier.billingCountry,
+      supplierDetail?.billingAddressLine1,
+      supplierDetail?.billingAddressLine2,
+      supplierDetail?.billingCity,
+      supplierDetail?.district,
+      supplierDetail?.province,
+      supplierDetail?.billingPostalCode,
+      supplierDetail?.billingCountry,
     ].filter(Boolean);
     return parts.length > 0 ? parts.join(", ") : "—";
   };
@@ -125,10 +134,10 @@ const SupplierDetailView: React.FC<Props> = ({
           <div className="flex-1 overflow-y-auto">
             {filteredSuppliers.map((s) => (
               <div
-                key={s.supplierName}
+                key={s.supplierId || s.supplierCode || s.supplierName}
                 onClick={() => onSupplierSelect(s)}
                 className={`p-4 border-b cursor-pointer transition-all duration-200 ${
-                  s.supplierName === supplier.supplierName
+                  s.supplierName === supplierDetail?.supplierName
                     ? "bg-indigo-50 border-l-4 border-l-indigo-600"
                     : "hover:bg-gray-50"
                 }`}
@@ -136,12 +145,12 @@ const SupplierDetailView: React.FC<Props> = ({
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                      s.supplierName === supplier.supplierName
+                      s.supplierName === supplierDetail?.supplierName
                         ? "bg-indigo-600"
                         : "bg-gray-500"
                     }`}
                   >
-                    {s.supplierName.charAt(0).toUpperCase()}
+                    {(s.supplierName || "?").charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-gray-900 truncate">
@@ -214,11 +223,11 @@ const SupplierDetailView: React.FC<Props> = ({
                   <div className="flex justify-between items-start mb-8">
                     <div>
                       <h2 className="text-3xl font-bold text-gray-900">
-                        {supplier.supplierName}
+                        {supplierDetail?.supplierName}
                       </h2>
-                      {supplier.supplierCode && (
+                      {supplierDetail?.supplierCode && (
                         <p className="text-sm text-gray-500 font-mono mt-1">
-                          Code: {supplier.supplierCode}
+                          Code: {supplierDetail?.supplierCode}
                         </p>
                       )}
                     </div>
@@ -239,7 +248,7 @@ const SupplierDetailView: React.FC<Props> = ({
                           Currency
                         </p>
                         <p className="mt-1 font-medium">
-                          {supplier.currency || "—"}
+                          {supplierDetail?.currency || "—"}
                         </p>
                       </div>
                     </div>
@@ -249,7 +258,7 @@ const SupplierDetailView: React.FC<Props> = ({
                           Phone
                         </p>
                         <p className="mt-1 font-medium">
-                          {supplier.phoneNo || "—"}
+                          {supplierDetail?.phoneNo || "—"}
                         </p>
                       </div>
                     </div>
@@ -259,7 +268,7 @@ const SupplierDetailView: React.FC<Props> = ({
                           Email
                         </p>
                         <p className="mt-1 font-medium">
-                          {supplier.emailId || "—"}
+                          {supplierDetail?.emailId || "—"}
                         </p>
                       </div>
                     </div>
@@ -269,7 +278,7 @@ const SupplierDetailView: React.FC<Props> = ({
                           TPIN
                         </p>
                         <p className="mt-1 font-medium">
-                          {supplier.tpin || "—"}
+                          {supplierDetail?.tpin || "—"}
                         </p>
                       </div>
                     </div>
@@ -279,19 +288,19 @@ const SupplierDetailView: React.FC<Props> = ({
                           Opening Balance
                         </p>
                         <p className="mt-1 font-medium">
-                          {supplier.openingBalance || "0.00"}
+                          {Number(supplierDetail?.openingBalance || 0).toLocaleString()}
                         </p>
                       </div>
                     </div>
-                    {supplier.status && (
+                    {supplierDetail?.status && (
                       <div>
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                           Status
                         </p>
                         <span
-                          className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(supplier.status)}`}
+                          className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(supplierDetail?.status)}`}
                         >
-                          {supplier.status.toUpperCase()}
+                          {supplierDetail?.status.toUpperCase()}
                         </span>
                       </div>
                     )}
@@ -312,43 +321,43 @@ const SupplierDetailView: React.FC<Props> = ({
                     </div>
 
                     {/* Bank Details */}
-                    {(supplier.accountNumber || supplier.accountHolder) && (
+                    {(supplierDetail?.accountNumber || supplierDetail?.accountHolder) && (
                       <div className="bg-gradient-to-br from-indigo-50 to-white border border-indigo-200 rounded-xl p-6">
                         <h4 className="font-semibold text-gray-900 mb-4">
                           Bank Details
                         </h4>
                         <div className="space-y-3 text-sm">
-                          {supplier.accountHolder && (
+                          {supplierDetail?.accountHolder && (
                             <div className="flex justify-between">
                               <span className="text-gray-600">
                                 Account Holder:
                               </span>
                               <span className="font-medium">
-                                {supplier.accountHolder}
+                                {supplierDetail?.accountHolder}
                               </span>
                             </div>
                           )}
-                          {supplier.accountNumber && (
+                          {supplierDetail?.accountNumber && (
                             <div className="flex justify-between">
                               <span className="text-gray-600">Account No:</span>
                               <span className="font-medium font-mono">
-                                {supplier.accountNumber}
+                                {supplierDetail?.accountNumber}
                               </span>
                             </div>
                           )}
-                          {supplier.swiftCode && (
-                            <div className="justify-between">
+                          {supplierDetail?.swiftCode && (
+                            <div className="flex justify-between">
                               <span className="text-gray-600">SWIFT:</span>
                               <span className="font-medium uppercase">
-                                {supplier.swiftCode}
+                                {supplierDetail?.swiftCode}
                               </span>
                             </div>
                           )}
-                          {supplier.sortCode && (
+                          {supplierDetail?.sortCode && (
                             <div className="flex justify-between">
                               <span className="text-gray-600">Sort Code:</span>
                               <span className="font-medium">
-                                {supplier.sortCode}
+                                {supplierDetail?.sortCode}
                               </span>
                             </div>
                           )}

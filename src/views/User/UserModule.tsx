@@ -204,27 +204,16 @@ const UserModule: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div
-        className="flex border-b mb-4"
-        style={{ borderColor: "var(--border)" }}
-      >
+      <div className="flex border-b border-gray-200 mb-4">
         {userManagementModule.tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
-                ? "text-primary"
+                  ? "text-primary border-b-2 border-current"
                 : "text-muted hover:text-main"
             }`}
-            style={
-              activeTab === tab.id
-                ? {
-                    background: "transparent",
-                    borderBottom: `3px solid var(--primary)`,
-                  }
-                : undefined
-            }
           >
             <span>{tab.icon}</span> {tab.name}
           </button>

@@ -67,7 +67,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
      FETCH COMPANY DATA
   ================================ */
 
-  const fetchCompany = async (companyId: string) => {
+  const fetchCompany = async () => {
     const res = await getCompanyById(COMPANY_ID);
 
     if (!res || res.status_code !== 200) {
@@ -106,7 +106,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
     }
   };
   useEffect(() => {
-    fetchCompany("1").catch(() => toast.error("Failed to load company data"));
+    fetchCompany().catch(() => toast.error("Failed to load company data"));
   }, []);
 
   useEffect(() => {
