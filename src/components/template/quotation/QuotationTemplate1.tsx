@@ -78,7 +78,7 @@ export const generateQuotationPDF = async (
     52,
   );
   doc.text(
-    `Date: ${quotation.transactionDate || quotation.quotationDate}`,
+    `Date: ${quotation.dateOfInvoice || quotation.quotationDate}`,
     150,
     56,
   );
@@ -151,7 +151,7 @@ export const generateQuotationPDF = async (
   doc.setFont("helvetica", "normal");
   doc.text(
     [
-      `Date: ${quotation.transactionDate || quotation.quotationDate}`,
+      `Date: ${quotation.dateOfInvoice || quotation.quotationDate}`,
       `Quotation No: ${quotation.quotationNumber || quotation.id}`,
       `Valid Until: ${quotation.validTill || quotation.validUntil}`,
       `Currency: ${currency}`,
