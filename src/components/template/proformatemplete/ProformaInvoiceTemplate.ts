@@ -73,7 +73,7 @@ export const generateProformaInvoicePDF = async (
 
   doc.setFont("helvetica", "bold");
   doc.text(`Proforma No: ${proformaInvoice.proformaId}`, 150, 52);
-  doc.text(`Date: ${proformaInvoice.createdAt}`, 150, 56);
+  doc.text(`Date: ${proformaInvoice.dateOfInvoice}`, 150, 56);
   doc.text(`Due Date: ${proformaInvoice.dueDate}`, 150, 60);
 
   /* ================= ITEMS TABLE ================= */
@@ -85,9 +85,9 @@ export const generateProformaInvoicePDF = async (
     body: proformaInvoice.items.map((i: any, idx: number) => [
       idx + 1,
       i.description,
-      Number(i.qty).toFixed(1),
+      Number(i.quantity).toFixed(1),
       Number(i.price).toFixed(2),
-      (Number(i.qty) * Number(i.price)).toFixed(2),
+      (Number(i.quantity) * Number(i.price)).toFixed(2),
       i.vatCode,
     ]),
     styles: {
@@ -111,7 +111,7 @@ export const generateProformaInvoicePDF = async (
 
   /* ================= TAX SUMMARY ================= */
   const total = proformaInvoice.items.reduce(
-    (s: number, i: any) => s + Number(i.qty) * Number(i.price),
+    (s: number, i: any) => s + Number(i.quantity) * Number(i.price),
     0,
   );
 
@@ -135,7 +135,7 @@ export const generateProformaInvoicePDF = async (
   doc.setFont("helvetica", "normal");
   doc.text(
     [
-      `Issue Date: ${proformaInvoice.createdAt}`,
+      `Issue Date: ${proformaInvoice.dateOfInvoice}`,
       `Proforma ID: ${proformaInvoice.proformaId}`,
       `Status: ${proformaInvoice.status}`,
       `Currency: ${currency}`,

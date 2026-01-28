@@ -51,6 +51,10 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
     },
     "proforma",
   );
+  const handleClose = () => {
+    actions.handleReset();
+    onClose();
+  };
 
   const [custLoading, setCustLoading] = useState(true);
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
@@ -86,14 +90,15 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title="Create Proforma Invoice"
       subtitle="Create and manage proforma invoice details"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
+
           <div className="flex gap-2">
             <Button variant="ghost" onClick={actions.handleReset}>
               Reset
@@ -378,8 +383,8 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                                 onChange={(e) => actions.handleItemChange(i, e)}
                               />
                             </td>
-                            <td className="px-2 py-2 text-right font-semibold text-gray-900 whitespace-nowrap">
-                              {symbol} {totals.grandTotal} {amount.toFixed(2)}
+                            <td className="px-2 py-2 text-right font-semibold text-gray-900">
+                              {symbol} {amount.toFixed(2)}
                             </td>
 
                             <td className="px-1 py-1 text-center">
@@ -468,26 +473,24 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                         <span className="font-medium text-gray-600">
                           Sub Total
                         </span>
-                        <span className="font-medium text-gray-800">
-                          {symbol} {totals.grandTotal}{" "}
-                          {totals.subTotal.toFixed(2)}
+                        <span>
+                          {symbol} {totals.subTotal.toFixed(2)}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-medium text-gray-600">
                           Total Tax
                         </span>
-                        <span className="font-medium text-gray-800">
-                          {symbol} {totals.grandTotal}{" "}
-                          {totals.totalTax.toFixed(2)}
+                        <span>
+                          {symbol} {totals.totalTax.toFixed(2)}
                         </span>
                       </div>
                       <div className="flex justify-between border-t pt-2 mt-2">
                         <span className="text-base font-semibold text-gray-700">
                           Total Amount
                         </span>
-                        <span className="text-base font-bold text-blue-600">
-                          {totals.grandTotal} {totals.grandTotal.toFixed(2)}
+                        <span>
+                          {symbol} {totals.grandTotal.toFixed(2)}
                         </span>
                       </div>
                     </div>

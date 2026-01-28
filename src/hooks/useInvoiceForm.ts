@@ -39,7 +39,7 @@ export const useInvoiceForm = (
 
   const shippingEditedRef = useRef(false);
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) { handleReset();}return;
 
     setFormData((prev) => ({
       ...prev,
@@ -338,10 +338,10 @@ export const useInvoiceForm = (
         return {
           itemCode: it.itemCode,
           description: it.description ?? "",
-          quantity: Number(it.quantity ?? 0), // ✅ FIXED
+          quantity: Number(it.quantity ?? 0),
           price: Number(it.price ?? 0),
           discount: Number(it.discount ?? 0),
-          vatRate: taxRate, // ✅ % calculated
+          vatRate: taxRate,
           vatCode: it.vatCode ?? "",
           _fromInvoice: true,
         };
@@ -364,9 +364,16 @@ export const useInvoiceForm = (
       ...DEFAULT_INVOICE_FORM,
       shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
     });
+    setCustomerDetails(null);
+    setCustomerNameDisplay("");
+    setTaxCategory("");
+
+    // reset UI state
+    setActiveTab("details");
     setSameAsBilling(true);
-    shippingEditedRef.current = false;
+    setIsShippingOpen(false);
     setPage(0);
+    shippingEditedRef.current = false;
   };
 
   const handleSubmit = (e: React.FormEvent) => {

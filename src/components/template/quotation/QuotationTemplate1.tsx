@@ -63,14 +63,13 @@ export const generateQuotationPDF = async (
   doc.text(
     [
       quotation.customerName,
-      quotation.billingAddressLine1,
-      quotation.billingAddressLine2,
-      `${quotation.billingCity}, ${quotation.billingState} ${quotation.billingPostalCode}`,
+      `TPIN: ${quotation.customerTpin || "N/A"}`,
+      quotation.billingAddress?.line1,
+      quotation.billingAddress?.line2,
     ].filter(Boolean),
     15,
     56,
   );
-
   doc.setFont("helvetica", "bold");
   doc.text(
     `Quotation No: ${quotation.quotationNumber || quotation.id}`,
@@ -78,7 +77,7 @@ export const generateQuotationPDF = async (
     52,
   );
   doc.text(
-    `Date: ${quotation.dateOfInvoice || quotation.quotationDate}`,
+    `Date: ${quotation.transactionDate || quotation.quotationDate}`,
     150,
     56,
   );
@@ -126,23 +125,25 @@ export const generateQuotationPDF = async (
   const y = (doc as any).lastAutoTable.finalY + 6;
 
   /* ================= TOTALS ================= */
-  const subTotal = Number(quotation.subTotal || 0);
-  const totalTax = Number(quotation.totalTax || 0);
-  const grandTotal = Number(quotation.grandTotal || 0);
+
+  const total = quotation.items.reduce(
+    (s: number, i: any) => s + Number(i.quantity) * Number(i.price),
+    0,
+  );
 
   doc.setFont("helvetica", "bold");
-  doc.text("Sub-total", 120, y);
-  doc.text(`${subTotal.toFixed(2)} ${currency}`, 195, y, { align: "right" });
+  doc.text(`Taxable (0%)`, 120, y);
+  doc.text(`${total.toFixed(2)} ${currency}`, 195, y, { align: "right" });
 
-  doc.text("Tax", 120, y + 6);
-  doc.text(`${totalTax.toFixed(2)} ${currency}`, 195, y + 6, {
-    align: "right",
-  });
+  doc.text("Sub-total", 120, y + 6);
+  doc.text(`${total.toFixed(2)} ${currency}`, 195, y + 6, { align: "right" });
 
-  doc.text("Grand Total", 120, y + 12);
-  doc.text(`${grandTotal.toFixed(2)} ${currency}`, 195, y + 12, {
-    align: "right",
-  });
+  doc.text("VAT Total", 120, y + 12);
+  doc.text(`0.00 ${currency}`, 195, y + 12, { align: "right" });
+
+  doc.text("Total Amount", 120, y + 18);
+  doc.text(`${total.toFixed(2)} ${currency}`, 195, y + 18, { align: "right" });
+ 
 
   /* ================= QUOTATION INFO ================= */
   doc.setFont("helvetica", "bold");
@@ -151,7 +152,7 @@ export const generateQuotationPDF = async (
   doc.setFont("helvetica", "normal");
   doc.text(
     [
-      `Date: ${quotation.dateOfInvoice || quotation.quotationDate}`,
+      `Date: ${quotation.transactionDate || quotation.quotationDate}`,
       `Quotation No: ${quotation.quotationNumber || quotation.id}`,
       `Valid Until: ${quotation.validTill || quotation.validUntil}`,
       `Currency: ${currency}`,
