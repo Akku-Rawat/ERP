@@ -6,7 +6,7 @@ import TermsAndCondition from "../TermsAndCondition";
 import CustomerSelect from "../selects/CustomerSelect";
 import Modal from "../../components/ui/modal/modal";
 import { Input, Select, Button } from "../../components/ui/modal/formComponent";
-
+import toast from "react-hot-toast";
 import ItemSelect from "../selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
@@ -43,9 +43,15 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
   const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault(); 
+
+  try {
     actions.handleSubmit(e);
-  };
+  } catch (err: any) {
+    toast.error(err.message || "Invalid invoice data");
+  }
+};
+
 
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
 
@@ -58,7 +64,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
         <Button variant="ghost" onClick={actions.handleReset} type="button">
           Reset
         </Button>
-        <Button variant="primary" onClick={handleFormSubmit}>
+        <Button variant="primary" type="submit">
           Save Invoice
         </Button>
       </div>
@@ -76,7 +82,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
       maxWidth="6xl"
       height="90vh"
     >
-      <form onSubmit={actions.handleSubmit} className="h-full flex flex-col">
+      <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
         <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
           {(["details", "terms", "address"] as const).map((tab) => (
@@ -697,3 +703,4 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 };
 
 export default InvoiceModal;
+ 

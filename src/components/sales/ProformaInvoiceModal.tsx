@@ -12,7 +12,7 @@ import Modal from "../ui/modal/modal";
 import { Button } from "../ui/modal/formComponent";
 
 import { getAllCustomers } from "../../api/customerApi";
-
+import toast from "react-hot-toast";
 import CustomerSelect from "../selects/CustomerSelect";
 import ItemSelect from "../selects/ItemSelect";
 import { createProformaInvoice } from "../../api/proformaInvoiceApi";
@@ -51,6 +51,14 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
     },
     "proforma",
   );
+const handleFormSubmit = (e: React.FormEvent) => {
+  try {
+    actions.handleSubmit(e); // hook call
+  } catch (err: any) {
+    toast.error(err.message || "Invalid form");
+  }
+};
+
   const handleClose = () => {
     actions.handleReset();
     onClose();
@@ -112,7 +120,8 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
       maxWidth="6xl"
       height="90vh"
     >
-      <form id="proforma-form" onSubmit={actions.handleSubmit}>
+      <form id="proforma-form" onSubmit={handleFormSubmit}>
+
         {/* Tabs */}
         <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
           {(["details", "terms", "address"] as const).map((tab) => (

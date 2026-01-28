@@ -57,6 +57,36 @@ export const useInvoiceForm = (
     setCustomerDetails(invoice.customer);
   };
 
+  const validateForm = (): boolean => {
+  if (!formData.customerId) {
+    throw new Error("Please select a customer");
+  }
+
+  if (!formData.dueDate) {
+    throw new Error("Please select due date");
+  }
+
+  if (!formData.items.length) {
+    throw new Error("Please add at least one item");
+  }
+
+  formData.items.forEach((it, idx) => {
+    if (!it.itemCode) {
+      throw new Error(`Item ${idx + 1}: Please select item`);
+    }
+
+    if (!it.quantity || it.quantity <= 0) {
+      throw new Error(`Item ${idx + 1}: Quantity must be greater than 0`);
+    }
+
+    if (!it.price || it.price <= 0) {
+      throw new Error(`Item ${idx + 1}: Price must be greater than 0`);
+    }
+  });
+
+  return true;
+};
+
   useEffect(() => {
     if (!isOpen) return;
     const today = new Date().toISOString().split("T")[0];
@@ -376,8 +406,11 @@ export const useInvoiceForm = (
     shippingEditedRef.current = false;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    validateForm();
 
     const payload = {
       ...formData,
@@ -389,7 +422,11 @@ export const useInvoiceForm = (
     onSubmit?.(payload);
     handleReset();
     onClose();
-  };
+  } catch (err: any) {
+    throw err; 
+  }
+};
+
 
   const { subTotal, totalTax, grandTotal } = useMemo(() => {
     let sub = 0;

@@ -9,6 +9,8 @@ import ItemSelect from "../selects/ItemSelect";
 
 import Modal from "../../components/ui/modal/modal";
 
+import toast from "react-hot-toast";
+
 import {
   invoiceStatusOptions,
   currencySymbols,
@@ -37,10 +39,51 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     ui,
     actions,
   } = useQuotationForm(isOpen, onClose, onSubmit);
+  const validateForm = () => {
+  // 1️⃣ Customer
+  if (!formData.customerId) {
+    toast.error("Please select a customer");
+    return false;
+  }
+  if (!formData.dueDate) {
+    toast.error("Please enter a valid until date");
+    return false;
+  }
+
+  // 2️⃣ At least 1 item
+  if (!formData.items.length) {
+    toast.error("Please add at least one item");
+    return false;
+  }
+
+  // 3️⃣ Validate items
+  for (let i = 0; i < formData.items.length; i++) {
+    const it = formData.items[i];
+
+    if (!it.itemCode) {
+      toast.error(`Item ${i + 1}: Please select an item`);
+      return false;
+    }
+
+    if (!it.quantity || it.quantity <= 0) {
+      toast.error(`Item ${i + 1}: Quantity must be greater than 0`);
+      return false;
+    }
+
+    if (!it.price || it.price <= 0) {
+      toast.error(`Item ${i + 1}: Unit price must be greater than 0`);
+      return false;
+    }
+  
+  }
+
+  return true;
+};
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+     if (!validateForm()) return;
     actions.handleSubmit(e);
   };
 
