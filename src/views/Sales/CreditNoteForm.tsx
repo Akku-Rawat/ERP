@@ -376,13 +376,13 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   <thead className="bg-gray-100 text-gray-700 text-xs uppercase tracking-wide">
                     <tr>
                       <th className="px-2 py-2 text-left">#</th>
-                      <th className="px-2 py-2 text-left">Item</th>
-                      <th className="px-2 py-2 text-left">Description</th>
-                      <th className="px-2 py-2 text-left">Quantity</th>
-                      <th className="px-2 py-2 text-left">Unit Price</th>
-                      <th className="px-2 py-2 text-left">Discount</th>
-                      <th className="px-2 py-2 text-left">Tax</th>
-                      <th className="px-2 py-2 text-left">Tax Code</th>
+                      <th className="w-[190px]">Item</th>
+                      <th className="w-[90px]">Description</th>
+                      <th className="w-[90px]">Quantity</th>
+                      <th className="w-[90px]">Unit Price</th>
+                      <th className="w-[90px]">Discount</th>
+                      <th className="w-[90px]">Tax</th>
+                      <th className="w-[90px]">Tax Code</th>
                       <th className="px-2 py-2 text-right">Amount</th>
                       <th></th>
                     </tr>
