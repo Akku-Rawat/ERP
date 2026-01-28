@@ -141,7 +141,6 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               name="billingPostalCode"
               value={form.billingPostalCode}
               onChange={onChange}
-              type="number"
             />
           </div>
 

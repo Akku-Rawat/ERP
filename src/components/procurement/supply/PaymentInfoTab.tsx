@@ -39,12 +39,13 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
           />
 
           <Input
-            label="Payment Terms (Days)"
+            label="Payment Terms "
             name="paymentTerms"
-            type="number"
+            min={0}        // UI block
             value={form.paymentTerms}
             onChange={onChange}
           />
+
 
           <Input
             label="Date of Addition"

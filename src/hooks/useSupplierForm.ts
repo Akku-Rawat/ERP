@@ -14,6 +14,33 @@ interface UseSupplierFormProps {
   onClose?: () => void;
 }
 
+const validateSupplier = (form: SupplierFormData) => {
+  if (!form.supplierName) return "Supplier Name is required";
+  if (!form.tpin) return "TPIN is required";
+  if (!form.phoneNo) return "Phone Number is required";
+  if (!form.emailId) return "Email is required";
+  if (!form.currency) return "Currency is required";
+
+  // TPIN must be exactly 10 digits
+  if (!/^\d{10}$/.test(form.tpin)) {
+    return "TPIN must be exactly 10 digits";
+  }
+
+  // Email validation
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.emailId)) {
+    return "Invalid email format";
+  }
+
+  // Phone validation (10–15 digits)
+  if (!/^\d{10,15}$/.test(form.phoneNo)) {
+    return "Phone number must be 10-15 digits";
+  }
+
+  return null;
+};
+
+
+
 export const useSupplierForm = ({
   initialData,
   isEditMode = false,
@@ -25,10 +52,20 @@ export const useSupplierForm = ({
   const [activeTab, setActiveTab] = useState<SupplierTab>("supplier");
 
   // Prefill Edit Data
-  useEffect(() => {
-    setForm(initialData || emptySupplierForm);
-    setActiveTab("supplier");
-  }, [initialData]);
+useEffect(() => {
+  if (initialData) {
+    // Edit mode → keep backend date
+    setForm(initialData);
+  } else {
+    setForm({
+      ...emptySupplierForm,
+      dateOfAddition: new Date().toISOString().split("T")[0],
+    });
+  }
+
+  setActiveTab("supplier");
+}, [initialData]);
+
 
   // Input Change
   const handleChange = (
@@ -44,34 +81,48 @@ export const useSupplierForm = ({
   };
 
 
-
 const handleSubmit = async (e?: React.FormEvent) => {
   e?.preventDefault();
+
+  const error = validateSupplier(form);
+  if (error) {
+    toast.error(error);
+    return;
+  }
+
+  const toastId = toast.loading(
+    isEditMode ? "Updating supplier..." : "Creating supplier..."
+  );
+
   try {
     setLoading(true);
-
     const payload = mapSupplierToApi(form, initialData?.supplierId);
 
     if (isEditMode) {
-      await updateSupplier(payload); 
+      await updateSupplier(payload);
+      toast.success("Supplier updated successfully", { id: toastId });
     } else {
-      await createSupplier(payload); 
+      await createSupplier(payload);
+      toast.success("Supplier created successfully", { id: toastId });
     }
 
     onSuccess?.(form);
     onClose?.();
   } catch (err) {
-    console.error("Supplier save failed", err);
+    console.error(err);
+    toast.error("Failed to save supplier", { id: toastId });
   } finally {
     setLoading(false);
   }
 };
 
 
+
   // Reset Form
-  const reset = () => {
-    setForm(initialData || emptySupplierForm);
-  };
+const reset = () => {
+  setForm(initialData || emptySupplierForm);
+  toast("Form reset");
+};
 
   // Next Tab
   const goToNextTab = () => {
