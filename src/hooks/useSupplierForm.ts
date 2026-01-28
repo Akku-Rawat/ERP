@@ -90,31 +90,26 @@ const handleSubmit = async (e?: React.FormEvent) => {
     return;
   }
 
-  const toastId = toast.loading(
-    isEditMode ? "Updating supplier..." : "Creating supplier..."
-  );
-
   try {
     setLoading(true);
     const payload = mapSupplierToApi(form, initialData?.supplierId);
 
     if (isEditMode) {
       await updateSupplier(payload);
-      toast.success("Supplier updated successfully", { id: toastId });
     } else {
       await createSupplier(payload);
-      toast.success("Supplier created successfully", { id: toastId });
     }
 
-    onSuccess?.(form);
+    onSuccess?.(form); 
     onClose?.();
   } catch (err) {
     console.error(err);
-    toast.error("Failed to save supplier", { id: toastId });
+    toast.error("Failed to save supplier");
   } finally {
     setLoading(false);
   }
 };
+
 
 
 
