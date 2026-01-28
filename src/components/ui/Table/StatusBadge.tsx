@@ -11,36 +11,34 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, variant }) => {
   const safeStatus = (status ?? "unknown").toLowerCase();
 
   const getVariant = (): BadgeVariant => {
-    if (variant) return variant;
+  if (variant) return variant;
 
-    if (
-      safeStatus.includes("paid") ||
-      safeStatus.includes("completed") ||
-      safeStatus.includes("active") ||
-      safeStatus.includes("approved")
-    ) {
-      return "success";
-    }
+  if (safeStatus === "active" || safeStatus === "paid" || safeStatus === "completed" || safeStatus === "approved") {
+    return "success";
+  }
 
-    if (safeStatus.includes("pending") || safeStatus.includes("processing")) {
-      return "warning";
-    }
+  if (safeStatus === "pending" || safeStatus === "processing") {
+    return "warning";
+  }
 
-    if (
-      safeStatus.includes("overdue") ||
-      safeStatus.includes("cancelled") ||
-      safeStatus.includes("failed") ||
-      safeStatus.includes("rejected")
-    ) {
-      return "danger";
-    }
+  if (
+    safeStatus === "inactive" ||
+    safeStatus === "unactive" ||
+    safeStatus === "overdue" ||
+    safeStatus === "cancelled" ||
+    safeStatus === "failed" ||
+    safeStatus === "rejected"
+  ) {
+    return "danger";
+  }
 
-    if (safeStatus.includes("draft") || safeStatus.includes("new")) {
-      return "info";
-    }
+  if (safeStatus === "draft" || safeStatus === "new") {
+    return "info";
+  }
 
-    return "default";
-  };
+  return "default";
+};
+
 
   const variantStyles: Record<BadgeVariant, string> = {
     success: "bg-emerald-50 text-emerald-700 border-emerald-200",

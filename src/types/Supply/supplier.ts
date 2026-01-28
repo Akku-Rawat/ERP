@@ -2,7 +2,7 @@ export interface SupplierFormData {
   tpin?: string;
   supplierName?: string;
   supplierCode?: string;
- paymentTerms: string | number;
+  paymentTerms: string ;
   currency?: string;
   bankAccount?: string;
   contactPerson?: string;
@@ -30,7 +30,7 @@ export const emptySupplierForm: SupplierFormData = {
   tpin: "",
   supplierName: "",
   supplierCode: "",
-  paymentTerms: 0,
+  paymentTerms: "",
   currency: "",
   bankAccount: "",
   contactPerson: "",
@@ -58,7 +58,8 @@ export type Currency = typeof currencyOptions[number];
 
 export type SupplierTab = "supplier" | "payment";
 
-export type SupplierStatus = "active" | "inactive" | "pending";
+export type SupplierStatus = "active" | "inactive";
+
 
 export type Supplier = SupplierFormData & {
   supplierId?: string;

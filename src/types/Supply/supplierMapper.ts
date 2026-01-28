@@ -6,31 +6,26 @@ export const mapSupplierApi = (d: any): Supplier => ({
   supplierCode: d.supplierCode,
   tpin: d.tpin,
   currency: d.currency,
-
   phoneNo: d.mobile_no || d.phoneNo,
   alternateNo: d.alternateNo || "",
   emailId: d.emailId,
   contactPerson: d.contactPerson || "",
-
   billingAddressLine1: d.billingAddressLine1,
   billingAddressLine2: d.billingAddressLine2,
-  billingCity: d.city,
   district: d.district,
   province: d.province,
-  billingCountry: d.country,
-  billingPostalCode: d.postalCode,
-
+  billingCity: d.city || "",
+  billingCountry: d.country || "",
+  billingPostalCode: d.postalCode || "",
   bankAccount: d.bankAccount || "",
   accountNumber: d.accountNumber,
   accountHolder: d.accountHolder,
   sortCode: d.sortCode,
   swiftCode: d.swiftCode,
   branchAddress: d.branchAddress,
-
   openingBalance: Number(d.openingBalance || 0),
-  paymentTerms: Number(d.paymentTerms || 0),
+  paymentTerms: d.paymentTerms || "",
   dateOfAddition: d.dateOfAddition,
-
   status: d.status?.toLowerCase(),
 });
 
@@ -50,8 +45,7 @@ export const mapSupplierToApi = (
   phoneNo: f.phoneNo,
   alternateNo: f.alternateNo,
   emailId: f.emailId,
-bankAccount: f.bankAccount,
-
+  bankAccount: f.bankAccount,
   billingAddressLine1: f.billingAddressLine1,
   billingAddressLine2: f.billingAddressLine2,
   city: f.billingCity,
@@ -59,14 +53,12 @@ bankAccount: f.bankAccount,
   province: f.province,
   country: f.billingCountry,
   postalCode: f.billingPostalCode,
-
   accountNumber: f.accountNumber,
   accountHolder: f.accountHolder,
   sortCode: f.sortCode,
   swiftCode: f.swiftCode,
   branchAddress: f.branchAddress,
-
-  openingBalance: f.openingBalance,
-  paymentTerms: f.paymentTerms,
+  openingBalance: Number(f.openingBalance || 0),
+  paymentTerms: f.paymentTerms || "",
   dateOfAddition: f.dateOfAddition,
 });

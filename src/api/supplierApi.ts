@@ -13,9 +13,12 @@ const ENDPOINTS = {
   deleteSupplier: `${base_url}.delete_supplier`,
 };
 
-export async function getSuppliers(): Promise<any[]> {
-  const resp = await api.get(ENDPOINTS.getSuppliers);
-  return resp.data?.data?.suppliers || [];
+
+export async function getSuppliers(page = 1, pageSize = 10) {
+  const resp = await api.get(
+    `${ENDPOINTS.getSuppliers}?page=${page}&page_size=${pageSize}`
+  );
+  return resp.data;
 }
 
 

@@ -4,7 +4,8 @@ import SupplierModal from "../../components/procurement/supply/SupplierModal";
 import toast from "react-hot-toast";
 
 import { getSuppliers } from "../../api/supplierApi";
-
+import { getSupplierById } from "../../api/supplierApi";
+import { mapSupplierApi } from "../../types/Supply/supplierMapper";
 
 import Table from "../../components/ui/Table/Table";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
@@ -12,17 +13,11 @@ import ActionButton, {
   ActionGroup,
   ActionMenu,
 } from "../../components/ui/Table/ActionButton";
-
 import type { Column } from "../../components/ui/Table/type";
-import type { Supplier, SupplierFormData } from "../../types/Supply/supplier";
-
-
+import type { Supplier} from "../../types/Supply/supplier";
 
 
 interface Props {}
-
-
-
 
 const SupplierManagement: React.FC<Props> = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -32,22 +27,46 @@ const SupplierManagement: React.FC<Props> = () => {
   const [viewMode, setViewMode] = useState<"table" | "detail">("table");
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
 
-  // Modal State (same pattern as Customer)
+
   const [showModal, setShowModal] = useState(false);
   const [editSupplier, setEditSupplier] = useState<Supplier | null>(null);
 
-  //  FETCH SUPPLIERS 
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  
+
+
+const normalizeStatus = (status?: string) => {
+  if (!status) return "active";
+
+  const s = status.toLowerCase();
+
+  if (s === "unactive" || s === "inactive") return "inactive";
+  if (s === "active") return "active";
+
+  return "active";
+};
+
+
+// FETCH SUPPLIERS
 const fetchSuppliers = async () => {
   try {
     setLoading(true);
-    const res = await getSuppliers();
 
-    const list = res.map((s: any) => ({
+    const res = await getSuppliers(page, pageSize);
+
+    const list = res.data.suppliers.map((s: any) => ({
       ...s,
-      status: s.status?.toLowerCase(), // Active → active
+      status: normalizeStatus(s.status),
     }));
 
     setSuppliers(list);
+    setTotalPages(res.data.pagination?.total_pages || 1);
+    setTotalItems(res.data.pagination?.total || 0);
+
+
   } catch (err) {
     console.error("Error loading suppliers:", err);
     toast.error("Failed to load suppliers");
@@ -57,10 +76,10 @@ const fetchSuppliers = async () => {
 };
 
 
+useEffect(() => {
+  fetchSuppliers();
+}, [page, pageSize]);
 
-  useEffect(() => {
-    fetchSuppliers();
-  }, []);
 
   //  SEARCH FILTER 
 const filteredSuppliers = useMemo(() => {
@@ -75,11 +94,17 @@ const filteredSuppliers = useMemo(() => {
 }, [suppliers, searchTerm]);
 
 
-  //  ROW CLICK 
-  const handleRowClick = (supplier: Supplier) => {
-    setSelectedSupplier(supplier);
-    setViewMode("detail");
-  };
+  
+const handleRowClick = (supplier: Supplier) => {
+  if (!supplier.supplierId) {
+    toast.error("Invalid supplier record");
+    return;
+  }
+
+  setSelectedSupplier(supplier);
+  setViewMode("detail");
+};
+
 
   const handleBack = () => {
     setViewMode("table");
@@ -92,26 +117,44 @@ const filteredSuppliers = useMemo(() => {
     setShowModal(true);
   };
 
-  const handleEditSupplier = (supplier: Supplier, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditSupplier(supplier);
-    setShowModal(true);
-  };
-
-  const handleSupplierSaved = async () => {
-    setShowModal(false);
-    setEditSupplier(null);
-    await fetchSuppliers();
-    toast.success(editSupplier ? "Supplier updated!" : "Supplier created!");
-  };
-
-  //  DELETE (API later) 
-const handleDelete = (supplierId: string, e: React.MouseEvent) => {
+const handleEditSupplier = async (supplier: Supplier, e: React.MouseEvent) => {
   e.stopPropagation();
-  if (window.confirm("Delete supplier?")) {
-    toast.success("Delete API ready");
+
+  if (!supplier.supplierId) {
+    toast.error("Supplier ID missing");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const res = await getSupplierById(supplier.supplierId);
+    const mapped = mapSupplierApi(res.data || res);
+
+    setEditSupplier(mapped);
+    setShowModal(true);
+    toast.success("Supplier loaded");
+
+  } catch (err) {
+    console.error("Failed to load supplier for edit", err);
+    toast.error("Failed to load supplier details");
+  } finally {
+    setLoading(false);
   }
 };
+
+
+const handleSupplierSaved = async () => {
+  setShowModal(false);
+  setEditSupplier(null);
+  await fetchSuppliers();
+
+  toast.success(editSupplier ? "Supplier updated successfully" : "Supplier created successfully");
+};
+
+  const handleEditFromDetail = async (supplier: Supplier) => {
+  await handleEditSupplier(supplier, {} as any);
+};
+
 
   //  TABLE COLUMNS (ENTERPRISE STYLE) 
   const columns: Column<Supplier>[] = [
@@ -165,7 +208,6 @@ const handleDelete = (supplierId: string, e: React.MouseEvent) => {
 
           <ActionMenu
             onEdit={(e) => handleEditSupplier(s, e as any)}
-            onDelete={(e) => handleDelete(s.supplierId!, e as any)}
           />
         </ActionGroup>
       ),
@@ -181,12 +223,19 @@ const handleDelete = (supplierId: string, e: React.MouseEvent) => {
           data={filteredSuppliers}
           showToolbar
           loading={loading}
+          onPageSizeChange={(size) => setPageSize(size)}
+          pageSizeOptions={[10, 25, 50, 100]}
           searchValue={searchTerm}
           onSearch={setSearchTerm}
           enableAdd
           addLabel="Add Supplier"
           onAdd={handleAddSupplier}
           enableColumnSelector
+          currentPage={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          onPageChange={setPage}
         />
       ) : selectedSupplier ? (
         <SupplierDetailView
@@ -194,10 +243,7 @@ const handleDelete = (supplierId: string, e: React.MouseEvent) => {
           suppliers={suppliers}
           onBack={handleBack}
           onSupplierSelect={handleRowClick}
-          onEdit={(s) => {
-            setEditSupplier(s);
-            setShowModal(true);
-          }}
+          onEdit={handleEditFromDetail}
         />
       ) : null}
 

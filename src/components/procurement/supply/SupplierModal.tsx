@@ -50,7 +50,7 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         Cancel
       </Button>
       <div className="flex gap-3">
-        <Button variant="secondary" onClick={reset}>
+        <Button variant="secondary" onClick={reset} type="button">
           Reset
         </Button>
         <Button
@@ -61,13 +61,15 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         >
           Next →
         </Button>
-   <Button
+<Button
   variant="primary"
   loading={loading}
-  onClick={handleSubmit}
+  type="submit"
+  form="supplierForm"
 >
   {isEditMode ? "Update Supplier" : "Save Supplier"}
 </Button>
+
 
       </div>
     </>
@@ -89,7 +91,12 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
       height="90vh"
     >
       <div className="h-full flex flex-col">
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+        <form
+  id="supplierForm"
+  onSubmit={handleSubmit}
+  className="flex-1 flex flex-col min-h-0"
+>
+
           {/* Tabs */}
           <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
             {tabs.map(({ key, icon: Icon, label }) => (
