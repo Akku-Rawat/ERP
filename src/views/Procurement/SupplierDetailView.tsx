@@ -9,8 +9,6 @@ import {
   Building2,
 } from "lucide-react";
 import type { SupplierFormData ,Supplier } from "../../types/Supply/supplier";
-import { getSupplierById } from "../../api/supplierApi";
-import { mapSupplierApi } from "../../types/Supply/supplierMapper";
 
 
 
@@ -34,7 +32,7 @@ const SupplierDetailView: React.FC<Props> = ({
   const [activeTab, setActiveTab] = useState<
     "overview" | "purchase-orders" | "bills"
   >("overview");
-  const [supplierDetail, setSupplierDetail] = useState<Supplier | null>(null);
+  const supplierDetail = supplier; 
 const [loading, setLoading] = useState(false);
 
 
@@ -46,29 +44,7 @@ const filteredSuppliers = suppliers.filter(
 );
 
 
-useEffect(() => {
-  if (!supplier?.supplierId) return;
 
-  const fetchDetail = async () => {
-    try {
-      setLoading(true);
-
-      if (!supplier.supplierId) return;
-
-         const res = await getSupplierById(supplier.supplierId);
-
-      const mapped = mapSupplierApi(res.data || res); 
-
-      setSupplierDetail(mapped);
-    } catch (err) {
-      console.error("Failed to load supplier detail", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchDetail();
-}, [supplier?.supplierId]);
 
 
 
@@ -232,7 +208,7 @@ useEffect(() => {
                       )}
                     </div>
                     <button
-                      onClick={() => onEdit(supplier)}
+                        onClick={() => onEdit(supplierDetail!)}
                       className="p-3 hover:bg-gray-100 rounded-lg transition"
                       title="Edit Supplier"
                     >
@@ -326,42 +302,53 @@ useEffect(() => {
                         <h4 className="font-semibold text-gray-900 mb-4">
                           Bank Details
                         </h4>
-                        <div className="space-y-3 text-sm">
-                          {supplierDetail?.accountHolder && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">
-                                Account Holder:
-                              </span>
-                              <span className="font-medium">
-                                {supplierDetail?.accountHolder}
-                              </span>
-                            </div>
-                          )}
-                          {supplierDetail?.accountNumber && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Account No:</span>
-                              <span className="font-medium font-mono">
-                                {supplierDetail?.accountNumber}
-                              </span>
-                            </div>
-                          )}
-                          {supplierDetail?.swiftCode && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">SWIFT:</span>
-                              <span className="font-medium uppercase">
-                                {supplierDetail?.swiftCode}
-                              </span>
-                            </div>
-                          )}
-                          {supplierDetail?.sortCode && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Sort Code:</span>
-                              <span className="font-medium">
-                                {supplierDetail?.sortCode}
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                      <div className="space-y-3 text-sm">
+  {supplierDetail?.accountHolder && (
+    <div className="flex justify-between">
+      <span className="text-gray-600">Account Holder:</span>
+      <span className="font-medium">
+        {supplierDetail?.accountHolder}
+      </span>
+    </div>
+  )}
+
+  {supplierDetail?.bankAccount && (
+    <div className="flex justify-between">
+      <span className="text-gray-600">Bank Account:</span>
+      <span className="font-medium">
+        {supplierDetail?.bankAccount}
+      </span>
+    </div>
+  )}
+
+  {supplierDetail?.accountNumber && (
+    <div className="flex justify-between">
+      <span className="text-gray-600">Account No:</span>
+      <span className="font-medium font-mono">
+        {supplierDetail?.accountNumber}
+      </span>
+    </div>
+  )}
+
+  {supplierDetail?.swiftCode && (
+    <div className="flex justify-between">
+      <span className="text-gray-600">SWIFT:</span>
+      <span className="font-medium uppercase">
+        {supplierDetail?.swiftCode}
+      </span>
+    </div>
+  )}
+
+  {supplierDetail?.sortCode && (
+    <div className="flex justify-between">
+      <span className="text-gray-600">Sort Code:</span>
+      <span className="font-medium">
+        {supplierDetail?.sortCode}
+      </span>
+    </div>
+  )}
+</div>
+
                       </div>
                     )}
                   </div>

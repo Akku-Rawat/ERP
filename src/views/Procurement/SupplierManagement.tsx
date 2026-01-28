@@ -95,14 +95,16 @@ const filteredSuppliers = useMemo(() => {
 
 
   
-const handleRowClick = (supplier: Supplier) => {
-  if (!supplier.supplierId) {
-    toast.error("Invalid supplier record");
-    return;
-  }
+const handleRowClick = async (supplier: Supplier) => {
+  if (!supplier.supplierId) return; 
 
-  setSelectedSupplier(supplier);
+  setLoading(true);
+  const res = await getSupplierById(supplier.supplierId);
+  const mapped = mapSupplierApi(res.data || res);
+
+  setSelectedSupplier(mapped);
   setViewMode("detail");
+  setLoading(false);
 };
 
 
@@ -117,29 +119,16 @@ const handleRowClick = (supplier: Supplier) => {
     setShowModal(true);
   };
 
-const handleEditSupplier = async (supplier: Supplier, e: React.MouseEvent) => {
-  e.stopPropagation();
+const handleEditSupplier = async (supplier: Supplier) => {
+  if (!supplier.supplierId) return;
 
-  if (!supplier.supplierId) {
-    toast.error("Supplier ID missing");
-    return;
-  }
+  setLoading(true);
+  const res = await getSupplierById(supplier.supplierId);
+  const mapped = mapSupplierApi(res.data || res);
 
-  try {
-    setLoading(true);
-    const res = await getSupplierById(supplier.supplierId);
-    const mapped = mapSupplierApi(res.data || res);
-
-    setEditSupplier(mapped);
-    setShowModal(true);
-    toast.success("Supplier loaded");
-
-  } catch (err) {
-    console.error("Failed to load supplier for edit", err);
-    toast.error("Failed to load supplier details");
-  } finally {
-    setLoading(false);
-  }
+  setEditSupplier(mapped); 
+  setShowModal(true);
+  setLoading(false);
 };
 
 
@@ -151,8 +140,8 @@ const handleSupplierSaved = async () => {
   toast.success(editSupplier ? "Supplier updated successfully" : "Supplier created successfully");
 };
 
-  const handleEditFromDetail = async (supplier: Supplier) => {
-  await handleEditSupplier(supplier, {} as any);
+const handleEditFromDetail = (supplier: Supplier) => {
+  handleEditSupplier(supplier);
 };
 
 
@@ -207,7 +196,7 @@ const handleSupplierSaved = async () => {
           />
 
           <ActionMenu
-            onEdit={(e) => handleEditSupplier(s, e as any)}
+            onEdit={(e) => handleEditSupplier(s)}
           />
         </ActionGroup>
       ),

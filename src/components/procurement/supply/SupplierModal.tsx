@@ -6,16 +6,17 @@ import { Button } from "../../ui/modal/formComponent";
 import { SupplierInfoTab } from "./SupplierInfoTab";
 import { PaymentInfoTab } from "./PaymentInfoTab";
 import { useSupplierForm } from "../../../hooks/useSupplierForm";
-import type { SupplierFormData, SupplierTab } from "../../../types/Supply/supplier";
+import type {  SupplierTab , SupplierFormData , Supplier } from "../../../types/Supply/supplier";
+
+
 
 interface SupplierModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (data: SupplierFormData) => void;
-  initialData?: SupplierFormData | null;
+  onSubmit?: (data: SupplierFormData) => void; 
+  initialData?: Supplier | null;
   isEditMode?: boolean;
 }
-
 const tabs: { key: SupplierTab; icon: typeof Building2; label: string }[] = [
   { key: "supplier", icon: Building2, label: "Supplier" },
   { key: "payment", icon: DollarSign, label: "Payment" },
@@ -46,9 +47,10 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
 
   const footer = (
     <>
-      <Button variant="secondary" onClick={onClose}>
+      <Button variant="secondary" onClick={onClose} type="button">
         Cancel
       </Button>
+
       <div className="flex gap-3">
         <Button variant="secondary" onClick={reset} type="button">
           Reset
@@ -61,14 +63,14 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         >
           Next →
         </Button>
-<Button
-  variant="primary"
-  loading={loading}
-  type="submit"
-  form="supplierForm"
->
-  {isEditMode ? "Update Supplier" : "Save Supplier"}
-</Button>
+        <Button
+          variant="primary"
+          loading={loading}
+          type="submit"
+          form="supplierForm"
+        >
+          {isEditMode ? "Update Supplier" : "Save Supplier"}
+        </Button>
 
 
       </div>
@@ -92,10 +94,10 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
     >
       <div className="h-full flex flex-col">
         <form
-  id="supplierForm"
-  onSubmit={handleSubmit}
-  className="flex-1 flex flex-col min-h-0"
->
+          id="supplierForm"
+          onSubmit={handleSubmit}
+          className="flex-1 flex flex-col min-h-0"
+        >
 
           {/* Tabs */}
           <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">

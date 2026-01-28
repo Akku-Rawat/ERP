@@ -5,7 +5,7 @@ import { emptySupplierForm } from "../types/Supply/supplier";
 import { createSupplier, updateSupplier } from "../api/supplierApi";
 import { mapSupplierToApi } from "../types/Supply/supplierMapper";
 import { Supplier } from "../types/Supply/supplier";
-
+import { mapSupplierToForm } from "../types/Supply/supplierMapper";
 
 interface UseSupplierFormProps {
    initialData?: Supplier | null; 
@@ -52,19 +52,18 @@ export const useSupplierForm = ({
   const [activeTab, setActiveTab] = useState<SupplierTab>("supplier");
 
   // Prefill Edit Data
-useEffect(() => {
-  if (initialData) {
-    // Edit mode → keep backend date
-    setForm(initialData);
-  } else {
-    setForm({
-      ...emptySupplierForm,
-      dateOfAddition: new Date().toISOString().split("T")[0],
-    });
-  }
+  useEffect(() => {
+    if (initialData) {
+      setForm(mapSupplierToForm(initialData));
+    } else {
+      setForm({
+        ...emptySupplierForm,
+        dateOfAddition: new Date().toISOString().split("T")[0],
+      });
+    }
 
-  setActiveTab("supplier");
-}, [initialData]);
+    setActiveTab("supplier");
+  }, [initialData]);
 
 
   // Input Change
@@ -115,9 +114,15 @@ const handleSubmit = async (e?: React.FormEvent) => {
 
   // Reset Form
 const reset = () => {
-  setForm(initialData || emptySupplierForm);
+  if (initialData) {
+    setForm(mapSupplierToForm(initialData));
+  } else {
+    setForm(emptySupplierForm);
+  }
   toast("Form reset");
 };
+
+
 
   // Next Tab
   const goToNextTab = () => {

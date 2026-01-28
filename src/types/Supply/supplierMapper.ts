@@ -1,4 +1,5 @@
 import { SupplierFormData, Supplier } from "../../types/Supply/supplier";
+import { emptySupplierForm } from "./supplier";
 
 export const mapSupplierApi = (d: any): Supplier => ({
   supplierId: d.supplierId,
@@ -35,36 +36,75 @@ export const mapSupplierToApi = (
   f: SupplierFormData,
   supplierId?: string | number
 ) => ({
-  ...(supplierId ? { supplierId } : {}), 
+  ...(supplierId ? { supplierId } : {}),
 
   supplierName: f.supplierName,
   supplierCode: f.supplierCode,
   tpin: f.tpin,
   currency: f.currency,
+
   contactPerson: f.contactPerson,
   phoneNo: f.phoneNo,
   alternateNo: f.alternateNo,
   emailId: f.emailId,
+
   bankAccount: f.bankAccount,
-  billingAddressLine1: f.billingAddressLine1,
-  billingAddressLine2: f.billingAddressLine2,
-  district: f.district,
-  province: f.province,
-  city: f.billingCity,
-  billingCity: f.billingCity,
-  
- country: f.billingCountry,
-  billingCountry: f.billingCountry,
-
-postalCode: f.billingPostalCode,
-billingPostalCode: f.billingPostalCode,
-
   accountNumber: f.accountNumber,
   accountHolder: f.accountHolder,
   sortCode: f.sortCode,
   swiftCode: f.swiftCode,
   branchAddress: f.branchAddress,
+
+  billingAddressLine1: f.billingAddressLine1,
+  billingAddressLine2: f.billingAddressLine2,
+  billingCity: f.billingCity,
+  district: f.district,
+  province: f.province,
+  billingCountry: f.billingCountry,
+  billingPostalCode: f.billingPostalCode,
+
   openingBalance: Number(f.openingBalance || 0),
   paymentTerms: f.paymentTerms || "",
   dateOfAddition: f.dateOfAddition,
 });
+
+
+
+
+export const mapSupplierToForm = (s?: Supplier | null): SupplierFormData => {
+  if (!s) return emptySupplierForm;
+
+  return {
+    ...emptySupplierForm,
+
+    supplierName: s.supplierName ?? "",
+    supplierCode: s.supplierCode ?? "",
+    tpin: s.tpin ?? "",
+
+    contactPerson: s.contactPerson ?? "",
+    phoneNo: s.phoneNo ?? "",
+    alternateNo: s.alternateNo ?? "",
+    emailId: s.emailId ?? "",
+
+    currency: s.currency ?? "ZMW",
+    paymentTerms: s.paymentTerms ?? "",
+    dateOfAddition: s.dateOfAddition ?? "",
+
+    openingBalance: Number(s.openingBalance ?? 0),
+
+    bankAccount: s.bankAccount ?? "",
+    accountNumber: s.accountNumber ?? "",
+    accountHolder: s.accountHolder ?? "",
+    sortCode: s.sortCode ?? "",
+    swiftCode: s.swiftCode ?? "",
+    branchAddress: s.branchAddress ?? "",
+
+    billingAddressLine1: s.billingAddressLine1 ?? "",
+    billingAddressLine2: s.billingAddressLine2 ?? "",
+    billingCity: s.billingCity ?? "",
+    district: s.district ?? "",
+    province: s.province ?? "",
+    billingPostalCode: s.billingPostalCode ?? "",
+    billingCountry: s.billingCountry ?? "",
+  };
+};
