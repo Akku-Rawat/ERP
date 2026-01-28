@@ -48,6 +48,44 @@ const CustomerDetailView: React.FC<Props> = ({
     (c) => c.name?.toLowerCase().includes(q) || c.id?.toLowerCase().includes(q),
   );
 
+const renderActionButton = () => {
+  switch (activeTab) {
+    case "overview":
+      return (
+        <button
+          onClick={() => setCustomerModalOpen(true)}
+          className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
+        >
+          <Plus size={14} /> New Customer
+        </button>
+      );
+
+    case "quotations":
+      return (
+        <button
+          onClick={() => setShowQuotationModal(true)}
+          className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
+        >
+          <Plus size={14} /> New Quotation
+        </button>
+      );
+
+    case "invoices":
+      return (
+        <button
+          onClick={() => setShowInvoiceModal(true)}
+          className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
+        >
+          <Plus size={14} /> New Invoice
+        </button>
+      );
+
+    default:
+      return null;
+  }
+};
+
+
   return (
     <div className="flex flex-col h-full bg-app text-main overflow-hidden rounded-2xl border border-[var(--border)]">
       {/* 1. COMPACT TOP HEADER */}
@@ -74,12 +112,8 @@ const CustomerDetailView: React.FC<Props> = ({
             </p>
           </div>
         </div>
-        <button
-          onClick={() => setCustomerModalOpen(true)}
-          className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md hover:opacity-90 transition text-sm font-medium"
-        >
-          <Plus size={14} /> New Customer
-        </button>
+      {renderActionButton()}
+
       </header>
 
       <div className="flex-1 flex overflow-hidden min-h-0">
