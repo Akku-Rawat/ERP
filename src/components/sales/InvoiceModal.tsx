@@ -64,7 +64,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
         <Button variant="ghost" onClick={actions.handleReset} type="button">
           Reset
         </Button>
-        <Button variant="primary" type="submit">
+        <Button variant="primary" type="submit" onClick={handleFormSubmit}>
           Save Invoice
         </Button>
       </div>
