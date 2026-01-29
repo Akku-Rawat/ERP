@@ -11,7 +11,7 @@ const ENDPOINTS = {
   createSalesInvoice: `${base_url}.create_sales_invoice`,
   getSalesInvoices: `${base_url}.get_sales_invoice`,
   getSalesInvoiceById: `${base_url}.get_sales_invoice_by_id`,
-  updateInvoiceStatus: `${base_url}.get_sales_invoice_by_id`,
+  updateInvoiceStatus: `${base_url}.update_invoice_status`,
   deleteSalesInvoice: `${base_url}.delete_sales_invoice`,
   createCreditNote: `${creditapi}.create_credit_note_from_sales_invoice`,
   createDebitNote: `${debitapi}.create_debit_note_from_invoice`,
@@ -31,13 +31,16 @@ export async function updateInvoiceStatus(
   invoiceNumber: string,
   status: string,
 ) {
-  const url = `${ENDPOINTS.updateInvoiceStatus}?id=${encodeURIComponent(invoiceNumber)}`;
-  const resp: AxiosResponse = await api.patch(url, {
-    invoiceStatus: status,
-  });
-
+  const resp: AxiosResponse = await api.patch(
+    ENDPOINTS.updateInvoiceStatus,
+    {
+      invoiceNumber,
+      invoiceStatus: status,
+    }
+  );
   return resp.data;
 }
+
 
 export async function getAllSalesInvoices(
   page: number = 1,

@@ -22,14 +22,14 @@ import StatusBadge from "../../components/ui/Table/StatusBadge";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { Company } from "../../types/company";
 
-type InvoiceStatus = "Draft" | "Pending" | "Paid" | "Overdue" | "Approved";
+type InvoiceStatus = "Draft" | "Rejected" | "Paid" | "Cancelled" | "Approved";
 
 const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
-  Draft: ["Pending", "Approved"],
-  Pending: ["Paid", "Overdue"],
+  Draft: ["Rejected", "Approved"],
+  Rejected: ["Draft", "Approved"],
   Paid: [],
-  Overdue: ["Paid"],
-  Approved: ["Pending", "Paid", "Overdue"],
+  Cancelled: ["Draft"],
+  Approved: ["Paid", "Cancelled"],
 };
 
 const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];

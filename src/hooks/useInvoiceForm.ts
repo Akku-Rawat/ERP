@@ -38,15 +38,22 @@ export const useInvoiceForm = (
   const [sameAsBilling, setSameAsBilling] = useState(true);
 
   const shippingEditedRef = useRef(false);
-  useEffect(() => {
-    if (!isOpen) { handleReset();}return;
+useEffect(() => {
+  if (!isOpen) {
+    handleReset();
+    return;
+  }
 
-    setFormData((prev) => ({
-      ...prev,
-      invoiceStatus: mode === "proforma" ? "Draft" : prev.invoiceStatus,
-      invoiceType: mode === "proforma" ? "Non-Export" : prev.invoiceType,
-    }));
-  }, [isOpen, mode]);
+  setFormData((prev) => ({
+    ...prev,
+    invoiceStatus:
+      prev.invoiceStatus || (mode === "proforma" ? "Draft" : prev.invoiceStatus),
+    invoiceType:
+      prev.invoiceType || (mode === "proforma" ? "Non-Export" : prev.invoiceType),
+  }));
+}, [isOpen, mode]);
+;
+
   const setInvoiceFromApi = (invoice: any) => {
     setFormData((prev: any) => ({
       ...prev,

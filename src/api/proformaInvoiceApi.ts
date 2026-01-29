@@ -9,7 +9,7 @@ const ENDPOINTS = {
   createProformaInvoice: `${vite_proforma_api_url}.create_proforma_api`,
   getProformaInvoiceById: `${vite_proforma_api_url}.get_proforma_by_id`,
   getAllProformaInvoices: `${vite_proforma_api_url}.get_proforma_api`,
-  updateProformaInvoiceStatus: `${vite_proforma_api_url}.proforma.api.update_proforma_status`,
+  updateProformaInvoiceStatus: `${vite_proforma_api_url}.update_proforma_status`,
   deleteProformaInvoiceById: `${vite_proforma_api_url}.proforma.api.delete_proforma`,
 };
 
@@ -28,16 +28,20 @@ export async function getProformaInvoiceById(id: string): Promise<any | null> {
 }
 
 export async function updateProformaInvoiceStatus(
-  proformaInvoiceNumber: string,
+  proformaId: string,
   status: string,
 ) {
-  const url = `${ENDPOINTS.updateProformaInvoiceStatus}?id=${encodeURIComponent(proformaInvoiceNumber)}`;
-  const resp: AxiosResponse = await api.patch(url, {
-    invoiceStatus: status,
-  });
+  const resp = await api.patch(
+    ENDPOINTS.updateProformaInvoiceStatus,
+    {
+      proformaId: proformaId,
+      proformaStatus: status,
+    }
+  );
 
   return resp.data;
 }
+
 
 export async function getAllProformaInvoices(
   page: number = 1,

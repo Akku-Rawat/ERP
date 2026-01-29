@@ -5,6 +5,7 @@ import {
   getAllProformaInvoices,
   updateProformaInvoiceStatus,
   getProformaInvoiceById,
+  
 } from "../../api/proformaInvoiceApi";
 
 import { getCompanyById } from "../../api/companySetupApi";
@@ -24,14 +25,16 @@ import ActionButton, {
 import type { Column } from "../../components/ui/Table/type";
 import PdfPreviewModal from "./PdfPreviewModal";
 
-type InvoiceStatus = "Draft" | "Pending" | "Paid" | "Overdue";
+type InvoiceStatus = "Draft" | "Rejected" | "Paid" | "Cancelled" | "Approved";
 
 const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
-  Draft: ["Pending"],
-  Pending: ["Paid", "Overdue"],
+  Draft: ["Rejected", "Approved"],
+  Rejected: ["Draft", "Approved"],
   Paid: [],
-  Overdue: ["Paid"],
+  Cancelled: ["Draft"],
+  Approved: ["Paid", "Cancelled"],
 };
+
 
 const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
 
@@ -46,6 +49,10 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   onExportProformaInvoice,
   refreshKey,
 }) => {
+   const [openStatusMenuFor, setOpenStatusMenuFor] = useState<string | null>(
+    null,
+  );
+
   const [searchTerm, setSearchTerm] = useState("");
   const [invoices, setInvoices] = useState<ProformaInvoiceSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,31 +172,31 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
     }
   };
 
-  const handleStatusChange = async (
-    proformaId: string,
-    status: InvoiceStatus,
-  ) => {
-    if (
-      CRITICAL_STATUSES.includes(status) &&
-      !window.confirm(`Mark proforma invoice ${proformaId} as ${status}?`)
-    ) {
-      return;
-    }
+  // const handleStatusChange = async (
+  //   proformaId: string,
+  //   status: InvoiceStatus,
+  // ) => {
+  //   if (
+  //     CRITICAL_STATUSES.includes(status) &&
+  //     !window.confirm(`Mark proforma invoice ${proformaId} as ${status}?`)
+  //   ) {
+  //     return;
+  //   }
 
-    const res = await updateProformaInvoiceStatus(proformaId, status);
-    if (!res || res.status_code !== 200) {
-      toast.error("Status update failed");
-      return;
-    }
+  //   const res = await updateProformaInvoiceStatus(proformaId, status);
+  //   if (!res || res.status_code !== 200) {
+  //     toast.error("Status update failed");
+  //     return;
+  //   }
 
-    setInvoices((prev) =>
-      prev.map((inv) =>
-        inv.proformaId === proformaId ? { ...inv, status } : inv,
-      ),
-    );
+  //   setInvoices((prev) =>
+  //     prev.map((inv) =>
+  //       inv.proformaId === proformaId ? { ...inv, status } : inv,
+  //     ),
+  //   );
 
-    toast.success(`Marked as ${status}`);
-  };
+  //   toast.success(`Marked as ${status}`);
+  // };
 
   const handleDelete = async (proformaId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -205,7 +212,36 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
     setSelectedInvoice(null);
     setPdfOpen(false);
   };
+ const handleRowStatusChange = async (
+    invoiceNumber: string,
+    status: InvoiceStatus,
+  ) => {
+    if (
+      CRITICAL_STATUSES.includes(status) &&
+      !window.confirm(
+        `Mark invoice ${invoiceNumber} as ${status}? This action cannot be undone.`,
+      )
+    ) {
+      return;
+    }
 
+    const res = await updateProformaInvoiceStatus(invoiceNumber, status);
+    if (!res || res.status_code !== 200) {
+      toast.error("Failed to update invoice status");
+      return;
+    }
+
+    setInvoices((prev) =>
+      prev.map((inv) =>
+        inv.proformaId === invoiceNumber
+          ? { ...inv, invoiceStatus: status }
+          : inv,
+      ),
+    );
+
+    toast.success(`Invoice marked as ${status}`);
+    setOpenStatusMenuFor(null);
+  };
   /* ===============================
      FILTER
   ================================ */
@@ -287,7 +323,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
               (status) => ({
                 label: `Mark as ${status}`,
                 danger: status === "Paid",
-                onClick: () => handleStatusChange(inv.proformaId, status),
+                onClick: () => handleRowStatusChange(inv.proformaId, status),
               }),
             )}
           />
