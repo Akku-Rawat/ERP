@@ -1,16 +1,24 @@
-import { Plus, Trash2, FileText } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  FileText,
+  Calendar,
+  MoreVertical,
+  Save,
+  Send,
+  Printer,
+  X,
+} from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 import { useQuotationForm } from "../../hooks/useQuotationForm";
 import { Input, Select, Button } from "../../components/ui/modal/formComponent";
-
 import CustomerSelect from "../selects/CustomerSelect";
-
 import ItemSelect from "../selects/ItemSelect";
-
 import Modal from "../../components/ui/modal/modal";
-
 import toast from "react-hot-toast";
+import { User, Mail, Phone } from "lucide-react";
 
+<User size={16} className="text-muted" />;
 import {
   invoiceStatusOptions,
   currencySymbols,
@@ -30,6 +38,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
   onSubmit,
 }) => {
   if (!isOpen) return null;
+
   const {
     formData,
     customerDetails,
@@ -39,457 +48,605 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     ui,
     actions,
   } = useQuotationForm(isOpen, onClose, onSubmit);
+
   const validateForm = () => {
-  // 1️⃣ Customer
-  if (!formData.customerId) {
-    toast.error("Please select a customer");
-    return false;
-  }
-  if (!formData.dueDate) {
-    toast.error("Please enter a valid until date");
-    return false;
-  }
-
-  // 2️⃣ At least 1 item
-  if (!formData.items.length) {
-    toast.error("Please add at least one item");
-    return false;
-  }
-
-  // 3️⃣ Validate items
-  for (let i = 0; i < formData.items.length; i++) {
-    const it = formData.items[i];
-
-    if (!it.itemCode) {
-      toast.error(`Item ${i + 1}: Please select an item`);
+    // 1️⃣ Customer
+    if (!formData.customerId) {
+      toast.error("Please select a customer");
+      return false;
+    }
+    if (!formData.dueDate) {
+      toast.error("Please enter a valid until date");
       return false;
     }
 
-    if (!it.quantity || it.quantity <= 0) {
-      toast.error(`Item ${i + 1}: Quantity must be greater than 0`);
+    // 2️⃣ At least 1 item
+    if (!formData.items.length) {
+      toast.error("Please add at least one item");
       return false;
     }
 
-    if (!it.price || it.price <= 0) {
-      toast.error(`Item ${i + 1}: Unit price must be greater than 0`);
-      return false;
-    }
-  
-  }
+    // 3️⃣ Validate items
+    for (let i = 0; i < formData.items.length; i++) {
+      const it = formData.items[i];
 
-  return true;
-};
+      if (!it.itemCode) {
+        toast.error(`Item ${i + 1}: Please select an item`);
+        return false;
+      }
+
+      if (!it.quantity || it.quantity <= 0) {
+        toast.error(`Item ${i + 1}: Quantity must be greater than 0`);
+        return false;
+      }
+
+      if (!it.price || it.price <= 0) {
+        toast.error(`Item ${i + 1}: Unit price must be greater than 0`);
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-     if (!validateForm()) return;
+    if (!validateForm()) return;
     actions.handleSubmit(e);
   };
 
-  const footerContent = (
-    <>
-      <Button variant="secondary" onClick={onClose} type="button">
-        Cancel
-      </Button>
-      <div className="flex gap-2">
-        <Button variant="ghost" onClick={actions.handleReset} type="button">
-          Reset
-        </Button>
-        <Button variant="primary" onClick={handleFormSubmit}>
-          Save
-        </Button>
-      </div>
-    </>
-  );
+  const handlePrint = () => {
+    toast.success("Print functionality - Opens print dialog");
+  };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Create Quotation"
-      subtitle="Create and manage quotation details"
-      icon={FileText}
-      footer={footerContent}
-      maxWidth="6xl"
-      height="90vh"
+    <div
+      className="fixed inset-0 flex items-center justify-center z-[9999] p-5"
+      style={{
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+      }}
     >
-      <form onSubmit={actions.handleSubmit} className="h-full flex flex-col">
-        {/* Tabs */}
-        <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
-          {(["details", "terms", "address"] as const).map((tab) => (
+      <div
+        className="bg-app w-full flex flex-col overflow-hidden"
+        style={{
+          borderRadius: "12px",
+          maxWidth: "1200px",
+          maxHeight: "85vh",
+          fontFamily:
+            "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        }}
+      >
+        {/* Header */}
+        <div className="relative bg-primary border-b border-theme px-8 py-3 flex justify-between items-center shrink-0">
+          <div>
+            <h1 className="text-xl font-semibold text-main mb-0.5">
+              Create Quotation
+            </h1>
+            <p className="text-xs text-main">
+              Create and manage quotation details
+            </p>
+          </div>
+          <div className="flex gap-2">
             <button
-              key={tab}
-              type="button"
-              onClick={() => ui.setActiveTab(tab)}
-              className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${
-                ui.activeTab === tab
-                  ? "text-primary bg-card shadow-sm"
-                  : "text-muted hover:bg-card/50"
-              }`}
+              onClick={handleFormSubmit}
+              className="bg-card hover:bg-[var(--primary-600)] text-white px-4 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors"
             >
-              {tab === "details" && "Details"}
-              {tab === "terms" && "Terms & Conditions"}
-              {tab === "address" && "Additional Details"}
+              <Save size={14} />
+              Save
             </button>
-          ))}
+            <button
+              onClick={handleFormSubmit}
+              className="bg-card hover:bg-[var(--primary-600)] text-white px-4 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors"
+            >
+              <Send size={14} />
+              Send
+            </button>
+            <button
+              onClick={handlePrint}
+              className="bg-card hover:bg-[var(--row-hover)] text-main border border-theme px-4 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors"
+            >
+              <Printer size={14} />
+              Print
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-3 top-1/2 -translate-y-1/2
+             p-1.5 rounded-md
+             text-main hover:bg-danger/10 hover:text-danger
+             transition-colors"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
-        {/* Tab Content */}
-        <section className="flex-1 overflow-y-auto p-4 space-y-6">
-          {/* DETAILS */}
+        {/* Tabs */}
+        <div className="bg-card border-b border-theme px-8 shrink-0">
+          <div className="flex gap-8">
+            {[
+              { key: "details", label: "Details" },
+              { key: "terms", label: "Terms & Conditions" },
+              { key: "address", label: "Additional Details" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => ui.setActiveTab(tab.key as any)}
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${
+                  ui.activeTab === tab.key
+                    ? "text-primary border-b-[3px] border-primary"
+                    : "text-muted border-b-[3px] border-transparent hover:text-main"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto px-8 py-4">
+          {/* DETAILS TAB */}
           {ui.activeTab === "details" && (
-            <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4 mt-8">
-              <div className="col-span-2">
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  Quotation Details
-                </h3>
+            <div className="grid grid-cols-[1fr_320px] gap-6 max-w-[1600px] mx-auto">
+              {/* Left Section */}
+              <div className="flex gap-4">
+                {/* Quotation Details Sidebar */}
+                <div className="bg-card rounded-lg p-3 shadow-sm w-[200px] shrink-0 h-fit">
+                  <div className="flex items-center gap-1 mb-3">
+                    <MoreVertical size={16} className="text-muted" />
+                    <h3 className="text-[13px] font-semibold text-main">
+                      Quotation Details
+                    </h3>
+                  </div>
 
-                <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <CustomerSelect
-                      value={customerNameDisplay}
-                      onChange={actions.handleCustomerSelect}
-                      className="w-full"
-                    />
-
-                    <Input
-                      label="Date of Quotation"
-                      name="dateOfQuotation"
-                      type="date"
-                      value={formData.dateOfInvoice}
-                      onChange={actions.handleInputChange}
-                      className="w-full"
-                    />
-
-                    <div className="flex flex-col gap-1">
-                      <Input
-                        label="Valid until"
-                        name="dueDate"
-                        type="date"
-                        value={formData.dueDate}
-                        onChange={actions.handleInputChange}
-                        className="w-full col-span-3"
+                  <div className="flex flex-col gap-3">
+                    {/* Customer Select */}
+                    <div>
+                      <label className="block text-[10px] font-medium text-main mb-1">
+                        Customer Name *
+                      </label>
+                      <CustomerSelect
+                        value={customerNameDisplay}
+                        onChange={actions.handleCustomerSelect}
+                        className="w-full"
                       />
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                      <Select
-                        label="Currency"
+                    {/* Date of Quotation */}
+                    <div>
+                      <label className="block text-[10px] font-medium text-main mb-1">
+                        Date of Quotation *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="date"
+                          name="dateOfInvoice"
+                          value={formData.dateOfInvoice}
+                          onChange={actions.handleInputChange}
+                          className="w-full py-1 px-2 pl-7 border border-theme rounded text-[11px] text-main bg-card"
+                        />
+                        <Calendar
+                          size={12}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Valid Until */}
+                    <div>
+                      <label className="block text-[10px] font-medium text-main mb-1">
+                        Valid until *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="date"
+                          name="dueDate"
+                          value={formData.dueDate}
+                          onChange={actions.handleInputChange}
+                          className="w-full py-1 px-2 pl-7 border border-theme rounded text-[11px] text-main bg-card"
+                        />
+                        <Calendar
+                          size={12}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Currency */}
+                    <div>
+                      <label className="block text-[10px] font-medium text-main mb-1">
+                        Currency
+                      </label>
+                      <select
                         name="currencyCode"
                         value={formData.currencyCode}
                         onChange={actions.handleInputChange}
-                        options={currencyOptions}
-                      />
+                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                      >
+                        {currencyOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                      <Select
-                        label="Invoice Status"
+                    {/* Status */}
+                    <div>
+                      <label className="block text-[10px] font-medium text-main mb-1">
+                        Status
+                      </label>
+                      <select
                         name="invoiceStatus"
                         value={formData.invoiceStatus}
                         onChange={actions.handleInputChange}
-                        options={invoiceStatusOptions}
-                      />
+                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                      >
+                        {invoiceStatusOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
-                    {/* <div className="flex flex-col gap-1">
-                          <Select
-                            label="Invoice Type"
-                            name="invoiceType"
-                            value={formData.invoiceType}
-                            onChange={actions.handleInputChange}
-                            options={invoiceTypeOptions}
-                          />
-                        </div> */}
-
-                    <div className="flex flex-col gap-1">
-                      <Input
-                        label="Invoice Type"
-                        name="invoiceType"
+                    {/* Invoice Type */}
+                    {/* <div>
+                      <label className="block text-[10px] font-medium text-main mb-1">
+                        Invoice Type
+                      </label>
+                      <input
                         type="text"
+                        name="invoiceType"
                         disabled
                         value={formData.invoiceType}
                         onChange={actions.handleInputChange}
-                        className="w-full col-span-3"
+                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-app opacity-60"
                       />
-                    </div>
+                    </div> */}
 
-                    {ui.isExport && (
-                      // <CountrySelect
-                      //   value={formData.destnCountryCd}
-                      //   onChange={(c) =>
-                      //     actions.handleInputChange({
-                      //       target: {
-                      //         name: "destnCountryCd",
-                      //         value: c.code,
-                      //       },
-                      //     } as any)
-                      //   }
-                      // />
-
-                      <div className="flex flex-col gap-1">
-                        <Input
-                          label="Export To Country"
-                          name="destnCountryCd"
+                    {/* Export Country */}
+                    {/* {ui.isExport && (
+                      <div>
+                        <label className="block text-[10px] font-medium text-main mb-1">
+                          Export To Country
+                        </label>
+                        <input
                           type="text"
+                          name="destnCountryCd"
                           disabled
                           value={formData.destnCountryCd}
                           onChange={actions.handleInputChange}
-                          className="w-full col-span-3"
+                          className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-app opacity-60"
+                        />
+                      </div>
+                    )} */}
+
+                    {/* LPO Number */}
+                    {ui.isLocal && (
+                      <div>
+                        <label className="block text-[10px] font-medium text-main mb-1">
+                          LPO Number
+                        </label>
+                        <input
+                          type="text"
+                          name="lpoNumber"
+                          value={formData.lpoNumber}
+                          onChange={actions.handleInputChange}
+                          placeholder="Local purchase order number"
+                          className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                         />
                       </div>
                     )}
+                  </div>
+                </div>
 
-                    {ui.isLocal && (
-                      <Input
-                        label="LPO Number"
-                        name="lpoNumber"
-                        value={formData.lpoNumber}
-                        onChange={actions.handleInputChange}
-                        placeholder="local purchase order number"
-                      />
+                {/* Quoted Items Table */}
+                <div className="bg-card rounded-lg p-4 shadow-sm flex-1">
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <MoreVertical size={16} className="text-muted" />
+                    <h3 className="text-sm font-semibold text-main">
+                      Quoted Items
+                    </h3>
+                  </div>
+
+                  <div>
+                    <table className="w-full border-collapse text-[10px]">
+                      <thead>
+                        <tr className="border-b border-theme">
+                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[25px]">
+                            #
+                          </th>
+                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[130px]">
+                            Item
+                          </th>
+                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[140px]">
+                            Description
+                          </th>
+                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[45px]">
+                            Qty
+                          </th>
+                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[70px]">
+                            Unit Price
+                          </th>
+                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[55px]">
+                            Discount
+                          </th>
+                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[50px]">
+                            Tax
+                          </th>
+                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[55px]">
+                            Tax Code
+                          </th>
+                          <th className="px-1 py-1.5 text-right text-muted font-medium text-[9px] w-[70px]">
+                            Amount
+                          </th>
+                          <th className="px-1 py-1.5 text-center text-muted font-medium text-[9px] w-[35px]">
+                            -
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paginatedItems.map((it, idx) => {
+                          const i = ui.page * 5 + idx;
+                          const taxVal = parseFloat(it.vatRate || "0");
+                          const amount =
+                            it.quantity * it.price - it.discount + taxVal;
+                          return (
+                            <tr
+                              key={i}
+                              className="border-b border-theme bg-card row-hover"
+                            >
+                              <td className="px-1 py-1.5 text-[10px]">
+                                {i + 1}
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <ItemSelect
+                                  taxCategory={ui.taxCategory}
+                                  value={it.itemCode}
+                                  onChange={(item) => {
+                                    actions.handleItemSelect(i, item.id);
+                                  }}
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="text"
+                                  name="description"
+                                  value={it.description}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  placeholder="Description"
+                                  className="w-full py-0.5 px-1 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  name="quantity"
+                                  value={it.quantity}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  min="1"
+                                  className="w-[40px] py-0.5 px-1 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  name="price"
+                                  value={it.price}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  min="0"
+                                  step="0.01"
+                                  className="w-[65px] py-0.5 px-1 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  name="discount"
+                                  value={it.discount}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  min="0"
+                                  placeholder="0"
+                                  className="w-[50px] py-0.5 px-1 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  name="vatRate"
+                                  value={it.vatRate}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  min="0"
+                                  placeholder="0"
+                                  className="w-[45px] py-0.5 px-1 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="text"
+                                  name="vatCode"
+                                  value={it.vatCode}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  className="w-[50px] py-0.5 px-1 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-1 py-1.5 text-right">
+                                <span className="text-[10px] font-medium text-main">
+                                  {symbol} {amount.toFixed(2)}
+                                </span>
+                              </td>
+                              <td className="px-1 py-1.5 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => actions.removeItem(i)}
+                                  className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
+                                >
+                                  <X size={12} />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={actions.addItem}
+                    className="mt-3 px-4 py-1.5 bg-primary hover:bg-[var(--primary-600)] text-white rounded text-xs font-medium flex items-center gap-1.5 transition-colors"
+                  >
+                    <Plus size={14} />
+                    Add Item
+                  </button>
+
+                  {/* Pagination Controls */}
+                  {ui.itemCount > 5 && (
+                    <div className="mt-3 flex justify-between items-center py-2 px-3 bg-app rounded border border-theme">
+                      <div className="text-[11px] text-muted">
+                        Showing {ui.page * 5 + 1} to{" "}
+                        {Math.min((ui.page + 1) * 5, ui.itemCount)} of{" "}
+                        {ui.itemCount} items
+                      </div>
+
+                      <div className="flex gap-1.5 items-center">
+                        <button
+                          type="button"
+                          onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
+                          disabled={ui.page === 0}
+                          className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px] font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--row-hover)] transition-colors"
+                        >
+                          Previous
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => ui.setPage(ui.page + 1)}
+                          disabled={(ui.page + 1) * 5 >= ui.itemCount}
+                          className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px] font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--row-hover)] transition-colors"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Sidebar */}
+              <div className="flex flex-col gap-4">
+                {/* Customer Details */}
+                <div className="bg-card rounded-lg p-3">
+                  <h3 className="text-[13px] font-semibold text-main mb-2">
+                    Customer Details
+                  </h3>
+
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-1.5 text-xs text-main">
+                      <span className="flex items-center gap-2">
+                        <User size={16} className="text-muted" />
+                        <span className="text-sm text-main">
+                          {customerDetails?.name ?? "Customer Name"}
+                        </span>
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-[10px] text-muted">
+                      <Mail size={14} className="text-muted" />
+                      <span>
+                        {customerDetails?.email ?? "customer@gmail.com"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-[10px] text-muted">
+                      <Phone size={14} className="text-muted" />
+                      <span>
+                        {customerDetails?.mobile_no ?? "+123 4567890"}
+                      </span>
+                    </div>
+                    {customerDetails && (
+                      <div className="bg-card rounded-lg p-3">
+                        <h3 className="text-[13px] font-semibold text-main mb-2">
+                          Invoice Information
+                        </h3>
+
+                        <div className="flex flex-col gap-2">
+                          {/* Invoice Type */}
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted">Invoice Type</span>
+                            <span className="font-medium text-main">
+                              {formData.invoiceType}
+                            </span>
+                          </div>
+
+                          {/* Destination Country – only for Export */}
+                          {formData.invoiceType === "Export" && (
+                            <div className="flex justify-between text-xs">
+                              <span className="text-muted">
+                                Destination Country
+                              </span>
+                              <span className="font-medium text-main">
+                                {formData.destnCountryCd || "-"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
 
-                <div className="my-6 h-px bg-gray-600" />
+                {/* Summary */}
+                <div className="bg-card rounded-lg p-3">
+                  <h3 className="text-[13px] font-semibold text-main mb-2">
+                    Summary
+                  </h3>
 
-                {/* ITEMS */}
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  Quoted Items
-                </h3>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-gray-600">
-                    Showing {ui.page * 5 + 1}–
-                    {Math.min((ui.page + 1) * 5, ui.itemCount)} of{" "}
-                    {ui.itemCount}
-                  </span>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
-                      disabled={ui.page === 0}
-                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ← Prev
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => ui.setPage(ui.page + 1)}
-                      disabled={(ui.page + 1) * 5 >= ui.itemCount}
-                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next →
-                    </button>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto rounded-lg border border-gray-300 bg-white shadow-sm">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-100 text-gray-700 text-xs uppercase tracking-wide">
-                      <tr>
-                        <th className="px-2 py-2 text-left">#</th>
-                             <th className="w-[190px]">Item</th>
-                        <th className="w-[90px]">Description</th>
-                        <th className="w-[90px]">Quantity</th>
-                        <th className="w-[90px]">Unit Price</th>
-                        <th className="w-[90px]">Discount</th>
-                        <th className="w-[90px]">Tax</th>
-                        <th className="w-[90px]">Tax Code</th>
-                        <th className="px-2 py-2 text-right">Amount</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {paginatedItems.map((it, idx) => {
-                        const i = ui.page * 5 + idx;
-                        const taxVal = parseFloat(it.vatRate || "0");
-                        const amount =
-                          it.quantity * it.price - it.discount + taxVal;
-                        return (
-                          <tr
-                            key={i}
-                            className="hover:bg-blue-50/40 odd:bg-white even:bg-gray-50"
-                          >
-                            <td className="px-3 py-2 text-center">{i + 1}</td>
-                            <td className="px-2 py-2">
-                              {/* <ItemSelect
-                                    taxCategory={ui.taxCategory}
-                                    value={it.itemCode}
-                                    onChange={(item) => {
-                                      actions.updateItemDirectly(i, {
-                                        itemCode: item.id,
-                                        price: item.sellingPrice ?? it.price,
-                                      });
-                                    }}
-                                  /> */}
-                                 
-                              <ItemSelect
-                                taxCategory={ui.taxCategory}
-                                value={it.itemCode}
-                                onChange={(item) => {
-                                  actions.handleItemSelect(i, item.id);
-                                }}
-                              />
-                             
-                            </td>
-
-                            <td className="px-2 py-2">
-                              <input
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="description"
-                                value={it.description}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="quantity"
-                                value={it.quantity}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="price"
-                                value={it.price}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="discount"
-                                value={it.discount}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="number" // Assuming input is number for entry, stored as string in Type
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="vatRate"
-                                value={it.vatRate}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="string"
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="vatCode"
-                                value={it.vatCode}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2 text-right font-semibold text-gray-900 whitespace-nowrap">
-                              {symbol} {amount.toFixed(2)}
-                            </td>
-
-                            <td className="px-1 py-1 text-center">
-                              <button
-                                type="button"
-                                onClick={() => actions.removeItem(i)}
-                                className="p-1.5 rounded-full text-red-600 hover:bg-red-100 transition"
-                                title="Remove item"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="flex justify-between mt-3">
-                  <button
-                    type="button"
-                    onClick={actions.addItem}
-                    className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
-                  >
-                    <Plus className="w-4 h-4" /> Add Item
-                  </button>
-                  <div className="py-2 px-2" />
-                </div>
-              </div>
-
-              {/* RIGHT SIDE */}
-              <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
-                <div className="w-full max-w-sm space-y-6">
-                  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-                    <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
-                      Customer Details
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Customer Name
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {customerDetails?.name ?? "Customer Name"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Phone Number
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {customerDetails?.mobile_no ?? "+123 4567890"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-base font-semibold text-gray-700">
-                          Email Address
-                        </span>
-                        <span className="text-base font-bold text-blue-600">
-                          {customerDetails?.email ?? "customer@gmail.com"}
-                        </span>
-                      </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted">Total Items</span>
+                      <span className="font-medium text-main">
+                        {formData.items.length}
+                      </span>
                     </div>
-                  </div>
 
-                  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-                    <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
-                      Summary
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Total Items
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted">Subtotal</span>
+                      <span className="font-medium text-main">
+                        {symbol} {totals.subTotal.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted">Total Tax</span>
+                      <span className="font-medium text-main">
+                        {symbol} {totals.totalTax.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="mt-1 p-3 bg-warning rounded">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[11px] font-semibold text-white">
+                          Grand Total
                         </span>
-                        <span className="font-medium text-gray-800">
-                          {formData.items.length}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Sub Total
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {symbol} {totals.subTotal.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Total Tax
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {symbol} {totals.totalTax.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between border-t pt-2 mt-2">
-                        <span className="text-base font-semibold text-gray-700">
-                          Total Amount
-                        </span>
-                        <span className="text-base font-bold text-blue-600">
+                        <span className="text-base font-bold text-white">
                           {symbol} {totals.grandTotal.toFixed(2)}
                         </span>
                       </div>
@@ -500,9 +657,9 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
             </div>
           )}
 
-          {/* TERMS */}
+          {/* TERMS TAB */}
           {ui.activeTab === "terms" && (
-            <div className="h-full w-full mt-10">
+            <div className="w-full mt-3">
               <TermsAndCondition
                 terms={formData.terms?.selling}
                 setTerms={actions.setTerms}
@@ -510,17 +667,16 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
             </div>
           )}
 
-          {/* ADDRESS */}
+          {/* ADDRESS TAB */}
           {ui.activeTab === "address" && (
-            <div className="grid grid-cols-2 gap-10 mt-10">
-              <div className="col-span-1 shadow px-4 rounded-lg border border-gray-300 bg-white py-6">
-                <div className="flex justify-between">
-                  <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                    Billing Address
-                  </h3>
-                </div>
+            <div className="grid grid-cols-2 gap-6 mt-3">
+              {/* Billing Address */}
+              <div className="bg-card p-4 rounded-lg border border-theme shadow-sm">
+                <h3 className="text-base font-semibold text-main mb-3 border-b-2 border-primary pb-1.5">
+                  Billing Address
+                </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
+                <div className="grid grid-cols-2 gap-3">
                   <Input
                     label="Line 1"
                     name="line1"
@@ -577,35 +733,34 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                   />
                 </div>
 
-                <div className="px-4 py-4 flex items-center justify-between">
+                {/* Shipping Address Toggle */}
+                <div className="mt-4 pt-3 border-t border-theme flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => ui.setIsShippingOpen(!ui.isShippingOpen)}
-                    className="flex items-center gap-2 text-lg font-semibold text-gray-700 hover:text-gray-900"
+                    className="flex items-center gap-1.5 text-sm font-semibold text-main hover:text-primary bg-transparent border-none cursor-pointer"
                   >
                     <span className="font-bold">
                       {ui.isShippingOpen ? "−" : "+"}
-                    </span>{" "}
+                    </span>
                     Shipping Address
                   </button>
 
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-muted">
                     <input
                       type="checkbox"
                       checked={ui.sameAsBilling}
                       onChange={(e) =>
                         actions.handleSameAsBillingChange(e.target.checked)
                       }
-                      className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                      className="w-3.5 h-3.5 cursor-pointer"
                     />
-                    <span className="text-sm text-gray-600">
-                      Same as billing address
-                    </span>
+                    Same as billing address
                   </label>
                 </div>
 
                 {ui.isShippingOpen && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-2 gap-3 mt-3">
                     <Input
                       label="Line 1"
                       name="line1"
@@ -670,11 +825,13 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                 )}
               </div>
 
-              <div className="col-span-1 px-4 shadow rounded-lg border border-gray-300 bg-white py-6 sticky h-fit">
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
+              {/* Payment Information */}
+              <div className="bg-card p-4 rounded-lg border border-theme shadow-sm h-fit">
+                <h3 className="text-base font-semibold text-main mb-3 border-b-2 border-primary pb-1.5">
                   Payment Information
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
+
+                <div className="grid grid-cols-2 gap-3">
                   <Input
                     label="Payment Terms"
                     name="paymentTerms"
@@ -693,7 +850,6 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     }
                     options={paymentMethodOptions}
                   />
-
                   <Input
                     label="Bank Name"
                     name="bankName"
@@ -730,9 +886,39 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
               </div>
             </div>
           )}
-        </section>
-      </form>
-    </Modal>
+        </div>
+
+        {/* Footer */}
+        <div className="bg-primary border-t border-theme px-8 py-2.5 flex justify-between items-center shrink-0">
+          <div className="text-[11px] text-main flex items-center gap-1"></div>
+
+          <div className="flex items-center gap-2 pr-8">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-1.5 bg-card hover:bg-[var(--row-hover)] text-main border border-theme rounded text-xs font-medium cursor-pointer transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={actions.handleReset}
+              className="px-4 py-1.5 bg-card hover:bg-[var(--row-hover)] text-main border border-theme rounded text-xs font-medium cursor-pointer transition-colors"
+            >
+              Reset
+            </button>
+            <button
+              type="button"
+              onClick={handleFormSubmit}
+              className="px-4 py-1.5 bg-card hover:bg-[var(--row-hover)] text-main border border-theme rounded text-xs font-medium cursor-pointer flex items-center gap-1.5 transition-colors"
+            >
+              <Save size={14} />
+              Save Quotation
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
