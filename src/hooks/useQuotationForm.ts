@@ -64,6 +64,16 @@ const [itemMasterLoading, setItemMasterLoading] = useState(false);
     setPage(0);
   }, [isOpen]);
 
+useEffect(() => {
+  const maxPage = Math.max(0, Math.ceil(formData.items.length / ITEMS_PER_PAGE) - 1);
+
+  if (page > maxPage) {
+    setPage(maxPage);
+  }
+}, [formData.items.length, page]);
+
+
+
 
 useEffect(() => {
   if (!isOpen || !initialData) return;
@@ -310,13 +320,18 @@ useEffect(() => {
     });
   };
 
-  const removeItem = (idx: number) => {
-    setFormData((prev) => {
-      if (prev.items.length === 1) return prev;
-      const items = prev.items.filter((_, i) => i !== idx);
-      return { ...prev, items };
-    });
-  };
+const removeItem = (idx: number) => {
+  setFormData((prev) => {
+    if (prev.items.length === 1) return prev;
+
+    const items = prev.items.filter((_, i) => i !== idx);
+    const maxPage = Math.max(0, Math.ceil(items.length / ITEMS_PER_PAGE) - 1);
+
+    setPage((p) => Math.min(p, maxPage));
+
+    return { ...prev, items };
+  });
+};
 
   const setTerms = (selling: TermSection) => {
     setFormData((prev) => ({ ...prev, terms: { selling } }));

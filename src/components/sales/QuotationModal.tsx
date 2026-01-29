@@ -50,7 +50,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
   } = useQuotationForm(isOpen, onClose, onSubmit);
 
   const validateForm = () => {
-    // 1️⃣ Customer
+    // 1 Customer
     if (!formData.customerId) {
       toast.error("Please select a customer");
       return false;
@@ -60,13 +60,13 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
       return false;
     }
 
-    // 2️⃣ At least 1 item
+    // At least 1 item
     if (!formData.items.length) {
       toast.error("Please add at least one item");
       return false;
     }
 
-    // 3️⃣ Validate items
+    // Validate items
     for (let i = 0; i < formData.items.length; i++) {
       const it = formData.items[i];
 
@@ -109,11 +109,11 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
       }}
     >
       <div
-        className="bg-app w-full flex flex-col overflow-hidden"
+        className="bg-app w-full h-full flex flex-col overflow-hidden"
         style={{
           borderRadius: "12px",
           maxWidth: "1200px",
-          maxHeight: "85vh",
+          maxHeight: "75vh",
           fontFamily:
             "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         }}
@@ -154,9 +154,9 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
               type="button"
               onClick={onClose}
               className="absolute right-3 top-1/2 -translate-y-1/2
-             p-1.5 rounded-md
+             pl-1.5 rounded-md
              text-main hover:bg-danger/10 hover:text-danger
-             transition-colors"
+             transition-colors "
             >
               <X size={16} />
             </button>
@@ -191,201 +191,146 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
         <div className="flex-1 overflow-y-auto px-8 py-4">
           {/* DETAILS TAB */}
           {ui.activeTab === "details" && (
-            <div className="grid grid-cols-[1fr_320px] gap-6 max-w-[1600px] mx-auto">
-              {/* Left Section */}
-              <div className="flex gap-4">
-                {/* Quotation Details Sidebar */}
-                <div className="bg-card rounded-lg p-3 shadow-sm w-[200px] shrink-0 h-fit">
-                  <div className="flex items-center gap-1 mb-3">
-                    <MoreVertical size={16} className="text-muted" />
-                    <h3 className="text-[13px] font-semibold text-main">
-                      Quotation Details
-                    </h3>
-                  </div>
+  <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
 
-                  <div className="flex flex-col gap-3">
-                    {/* Customer Select */}
-                    <div>
-                      <label className="block text-[10px] font-medium text-main mb-1">
-                        Customer Name *
-                      </label>
-                      <CustomerSelect
-                        value={customerNameDisplay}
-                        onChange={actions.handleCustomerSelect}
-                        className="w-full"
-                      />
-                    </div>
+    {/* ================= TOP QUOTATION DETAILS BAR ================= */}
+    <div className="">
+      <div className="grid grid-cols-6 gap-3 items-end">
 
-                    {/* Date of Quotation */}
-                    <div>
-                      <label className="block text-[10px] font-medium text-main mb-1">
-                        Date of Quotation *
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="date"
-                          name="dateOfInvoice"
-                          value={formData.dateOfInvoice}
-                          onChange={actions.handleInputChange}
-                          className="w-full py-1 px-2 pl-7 border border-theme rounded text-[11px] text-main bg-card"
-                        />
-                        <Calendar
-                          size={12}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
-                        />
-                      </div>
-                    </div>
+        {/* Customer */}
+        <div>
+          <CustomerSelect
+            value={customerNameDisplay}
+            onChange={actions.handleCustomerSelect}
+            className="w-full"
+          />
+        </div>
 
-                    {/* Valid Until */}
-                    <div>
-                      <label className="block text-[10px] font-medium text-main mb-1">
-                        Valid until *
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="date"
-                          name="dueDate"
-                          value={formData.dueDate}
-                          onChange={actions.handleInputChange}
-                          className="w-full py-1 px-2 pl-7 border border-theme rounded text-[11px] text-main bg-card"
-                        />
-                        <Calendar
-                          size={12}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
-                        />
-                      </div>
-                    </div>
+        {/* Date of Quotation */}
+        <div>
+          <label className="block text-[10px] font-medium text-main mb-1">
+            Date of Quotation *
+          </label>
+          <input
+            type="date"
+            name="dateOfInvoice"
+            value={formData.dateOfInvoice}
+            onChange={actions.handleInputChange}
+            className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+          />
+        </div>
 
-                    {/* Currency */}
-                    <div>
-                      <label className="block text-[10px] font-medium text-main mb-1">
-                        Currency
-                      </label>
-                      <select
-                        name="currencyCode"
-                        value={formData.currencyCode}
-                        onChange={actions.handleInputChange}
-                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                      >
-                        {currencyOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+        {/* Valid Until */}
+        <div>
+          <label className="block text-[10px] font-medium text-main mb-1">
+            Valid Until *
+          </label>
+          <input
+            type="date"
+            name="dueDate"
+            value={formData.dueDate}
+            onChange={actions.handleInputChange}
+            className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+          />
+        </div>
 
-                    {/* Status */}
-                    <div>
-                      <label className="block text-[10px] font-medium text-main mb-1">
-                        Status
-                      </label>
-                      <select
-                        name="invoiceStatus"
-                        value={formData.invoiceStatus}
-                        onChange={actions.handleInputChange}
-                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                      >
-                        {invoiceStatusOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+        {/* Currency */}
+        <div>
+          <label className="block text-[10px] font-medium text-main mb-1">
+            Currency
+          </label>
+          <select
+            name="currencyCode"
+            value={formData.currencyCode}
+            onChange={actions.handleInputChange}
+            className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+          >
+            {currencyOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-                    {/* Invoice Type */}
-                    {/* <div>
-                      <label className="block text-[10px] font-medium text-main mb-1">
-                        Invoice Type
-                      </label>
-                      <input
-                        type="text"
-                        name="invoiceType"
-                        disabled
-                        value={formData.invoiceType}
-                        onChange={actions.handleInputChange}
-                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-app opacity-60"
-                      />
-                    </div> */}
+        {/* Status */}
+        <div>
+          <label className="block text-[10px] font-medium text-main mb-1">
+            Status
+          </label>
+          <select
+            name="invoiceStatus"
+            value={formData.invoiceStatus}
+            onChange={actions.handleInputChange}
+            className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+          >
+            {invoiceStatusOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-                    {/* Export Country */}
-                    {/* {ui.isExport && (
-                      <div>
-                        <label className="block text-[10px] font-medium text-main mb-1">
-                          Export To Country
-                        </label>
-                        <input
-                          type="text"
-                          name="destnCountryCd"
-                          disabled
-                          value={formData.destnCountryCd}
-                          onChange={actions.handleInputChange}
-                          className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-app opacity-60"
-                        />
-                      </div>
-                    )} */}
+        {/* LPO Number */}
+        {ui.isLocal && (
+          <div>
+            <label className="block text-[10px] font-medium text-main mb-1">
+              LPO Number
+            </label>
+            <input
+              type="text"
+              name="lpoNumber"
+              value={formData.lpoNumber}
+              onChange={actions.handleInputChange}
+              className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+            />
+          </div>
+        )}
+      </div>
+    </div>
 
-                    {/* LPO Number */}
-                    {ui.isLocal && (
-                      <div>
-                        <label className="block text-[10px] font-medium text-main mb-1">
-                          LPO Number
-                        </label>
-                        <input
-                          type="text"
-                          name="lpoNumber"
-                          value={formData.lpoNumber}
-                          onChange={actions.handleInputChange}
-                          placeholder="Local purchase order number"
-                          className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Quoted Items Table */}
-                <div className="bg-card rounded-lg p-4 shadow-sm flex-1">
-                  <div className="flex items-center gap-1.5 mb-3">
-                    <MoreVertical size={16} className="text-muted" />
+    {/* ================= MAIN BODY (TABLE LEFT + RIGHT SIDEBAR) ================= */}
+    <div className="grid grid-cols-[4fr_1fr] gap-4">
+      {/* LEFT: QUOTED ITEMS TABLE  */}
+        <div className="bg-card rounded-lg p-2 shadow-sm flex-1">
+                  <div className="flex items-center gap-1 ">
                     <h3 className="text-sm font-semibold text-main">
                       Quoted Items
                     </h3>
                   </div>
-
                   <div>
                     <table className="w-full border-collapse text-[10px]">
                       <thead>
                         <tr className="border-b border-theme">
-                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[25px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">
                             #
                           </th>
-                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[130px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">
                             Item
                           </th>
-                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[140px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">
                             Description
                           </th>
-                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[45px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">
                             Qty
                           </th>
-                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[70px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
                             Unit Price
                           </th>
-                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[55px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[55px]">
                             Discount
                           </th>
-                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[50px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">
                             Tax
                           </th>
-                          <th className="px-1 py-1.5 text-left text-muted font-medium text-[9px] w-[55px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[55px]">
                             Tax Code
                           </th>
-                          <th className="px-1 py-1.5 text-right text-muted font-medium text-[9px] w-[70px]">
+                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">
                             Amount
                           </th>
-                          <th className="px-1 py-1.5 text-center text-muted font-medium text-[9px] w-[35px]">
+                          <th className="px-2 py-3 text-center text-muted font-medium text-[11px] w-[35px]">
                             -
                           </th>
                         </tr>
@@ -401,7 +346,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                               key={i}
                               className="border-b border-theme bg-card row-hover"
                             >
-                              <td className="px-1 py-1.5 text-[10px]">
+                              <td className="px-3 py-2 text-[10px]">
                                 {i + 1}
                               </td>
                               <td className="px-0.5 py-1">
@@ -422,7 +367,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                     actions.handleItemChange(i, e)
                                   }
                                   placeholder="Description"
-                                  className="w-full py-0.5 px-1 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -434,7 +379,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                     actions.handleItemChange(i, e)
                                   }
                                   min="1"
-                                  className="w-[40px] py-0.5 px-1 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -447,7 +392,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   }
                                   min="0"
                                   step="0.01"
-                                  className="w-[65px] py-0.5 px-1 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -460,7 +405,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   }
                                   min="0"
                                   placeholder="0"
-                                  className="w-[50px] py-0.5 px-1 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -473,7 +418,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   }
                                   min="0"
                                   placeholder="0"
-                                  className="w-[45px] py-0.5 px-1 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -484,7 +429,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   onChange={(e) =>
                                     actions.handleItemChange(i, e)
                                   }
-                                  className="w-[50px] py-0.5 px-1 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
                               <td className="px-1 py-1.5 text-right">
@@ -508,53 +453,63 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     </table>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={actions.addItem}
-                    className="mt-3 px-4 py-1.5 bg-primary hover:bg-[var(--primary-600)] text-white rounded text-xs font-medium flex items-center gap-1.5 transition-colors"
-                  >
-                    <Plus size={14} />
-                    Add Item
-                  </button>
+                 
+                 <div className="mt-3 flex justify-between items-center gap-3">
 
-                  {/* Pagination Controls */}
-                  {ui.itemCount > 5 && (
-                    <div className="mt-3 flex justify-between items-center py-2 px-3 bg-app rounded border border-theme">
-                      <div className="text-[11px] text-muted">
-                        Showing {ui.page * 5 + 1} to{" "}
-                        {Math.min((ui.page + 1) * 5, ui.itemCount)} of{" "}
-                        {ui.itemCount} items
-                      </div>
+                    {/* Add Item Button */}
+                    <button
+                      type="button"
+                      onClick={actions.addItem}
+                      className="px-4 py-1.5 bg-primary hover:bg-[var(--primary-600)] text-white rounded text-xs font-medium flex items-center gap-1.5 transition-colors"
+                    >
+                      <Plus size={14} />
+                      Add Item
+                    </button>
 
-                      <div className="flex gap-1.5 items-center">
-                        <button
-                          type="button"
-                          onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
-                          disabled={ui.page === 0}
-                          className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px] font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--row-hover)] transition-colors"
-                        >
-                          Previous
-                        </button>
+                    {/* Pagination Controls */}
+                   {(ui.itemCount > 5 || ui.page > 0) && (
+  <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
 
-                        <button
-                          type="button"
-                          onClick={() => ui.setPage(ui.page + 1)}
-                          disabled={(ui.page + 1) * 5 >= ui.itemCount}
-                          className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px] font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--row-hover)] transition-colors"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </div>
-                  )}
+    <div className="text-[11px] text-muted whitespace-nowrap">
+      Showing {ui.page * 5 + 1} to{" "}
+      {Math.min((ui.page + 1) * 5, ui.itemCount)} of {ui.itemCount} items
+    </div>
+
+    <div className="flex gap-1.5 items-center">
+      <button
+        type="button"
+        onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
+        disabled={ui.page === 0}
+        className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+      >
+        Previous
+      </button>
+
+      <button
+        type="button"
+        onClick={() => ui.setPage(ui.page + 1)}
+        disabled={(ui.page + 1) * 5 >= ui.itemCount}
+        className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+      >
+        Next
+      </button>
+    </div>
+
+  </div>
+)}
+
+                  </div>
+
                 </div>
-              </div>
+      
 
-              {/* Right Sidebar */}
-              <div className="flex flex-col gap-4">
+      {/* RIGHT: CUSTOMER DETAILS + SUMMARY (STACKED) */}
+      <div className="flex flex-col gap-2">
+
+        <div className="flex flex-col gap-2">
                 {/* Customer Details */}
-                <div className="bg-card rounded-lg p-3">
-                  <h3 className="text-[13px] font-semibold text-main mb-2">
+                <div className="bg-card rounded-lg p-2 w-[220px]">
+                  <h3 className="text-[12px] font-semibold text-main mb-2">
                     Customer Details
                   </h3>
 
@@ -562,7 +517,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     <div className="flex items-center gap-1.5 text-xs text-main">
                       <span className="flex items-center gap-2">
                         <User size={16} className="text-muted" />
-                        <span className="text-sm text-main">
+                        <span className="text-xs text-main">
                           {customerDetails?.name ?? "Customer Name"}
                         </span>
                       </span>
@@ -582,14 +537,14 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       </span>
                     </div>
                     {customerDetails && (
-                      <div className="bg-card rounded-lg p-3">
-                        <h3 className="text-[13px] font-semibold text-main mb-2">
+                      <div className="bg-card rounded-lg ">
+                        <h3 className="text-[11px] font-semibold text-main mb-1">
                           Invoice Information
                         </h3>
 
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-1">
                           {/* Invoice Type */}
-                          <div className="flex justify-between text-xs">
+                          <div className="flex items-center gap-19 text-xs">
                             <span className="text-muted">Invoice Type</span>
                             <span className="font-medium text-main">
                               {formData.invoiceType}
@@ -598,7 +553,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 
                           {/* Destination Country – only for Export */}
                           {formData.invoiceType === "Export" && (
-                            <div className="flex justify-between text-xs">
+                            <div className="flex items-center gap-15 text-xs">
                               <span className="text-muted">
                                 Destination Country
                               </span>
@@ -614,48 +569,55 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                 </div>
 
                 {/* Summary */}
-                <div className="bg-card rounded-lg p-3">
+                <div className="bg-card rounded-lg p-3  w-[220px]">
                   <h3 className="text-[13px] font-semibold text-main mb-2">
                     Summary
                   </h3>
 
                   <div className="flex flex-col gap-2">
-                    <div className="flex justify-between text-xs">
+                     <div className="flex items-center gap-19 text-xs">
                       <span className="text-muted">Total Items</span>
                       <span className="font-medium text-main">
                         {formData.items.length}
                       </span>
                     </div>
 
-                    <div className="flex justify-between text-xs">
+                     <div className="flex items-center gap-19 text-xs">
                       <span className="text-muted">Subtotal</span>
                       <span className="font-medium text-main">
                         {symbol} {totals.subTotal.toFixed(2)}
                       </span>
                     </div>
 
-                    <div className="flex justify-between text-xs">
+                     <div className="flex items-center gap-19 text-xs">
                       <span className="text-muted">Total Tax</span>
                       <span className="font-medium text-main">
                         {symbol} {totals.totalTax.toFixed(2)}
                       </span>
                     </div>
 
-                    <div className="mt-1 p-3 bg-warning rounded">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[11px] font-semibold text-white">
-                          Grand Total
-                        </span>
-                        <span className="text-base font-bold text-white">
-                          {symbol} {totals.grandTotal.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
+                        <div className="mt-2 p-2 bg-primary rounded-lg w-full">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-semibold text-white">
+                              Grand Total
+                            </span>
+
+                            <span className="text-sm font-bold text-white">
+                              {symbol} {totals.grandTotal.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+
+      </div>
+    </div>
+  </div>
+)}
+
+        
 
           {/* TERMS TAB */}
           {ui.activeTab === "terms" && (
