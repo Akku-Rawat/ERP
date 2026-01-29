@@ -11,10 +11,13 @@ import { TermsTab } from "../procurement/purchaseorder/TermsTab";
 import { usePurchaseOrderForm } from "../../hooks/usePurchaseOrderForm";
 import type { POTab } from "../../types/Supply/purchaseOrder";
 
+
+
 interface PurchaseOrderModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (data: any) => void;
+   poId?: string | number; 
 }
 
 const tabs: { key: POTab; icon: typeof Building2; label: string }[] = [
@@ -29,6 +32,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  poId,
 }) => {
   const {
     form,
@@ -52,7 +56,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
     getCurrencySymbol,
     handleSubmit,
     reset,
-  } = usePurchaseOrderForm({ isOpen, onSuccess: onSubmit, onClose });
+} = usePurchaseOrderForm({ isOpen, onSuccess: onSubmit, onClose, poId });
 
   const footer = (
     <>
@@ -74,7 +78,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="New Purchase Order"
+      title={poId ? "Edit Purchase Order" : "New Purchase Order"}
       subtitle="Create and manage purchase order"
       icon={Building2}
       maxWidth="6xl"

@@ -10,7 +10,7 @@ interface DetailsTabProps {
   suppliers: { name: string }[];
   suppLoading: boolean;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  onSupplierChange: (name: string) => void;
+  onSupplierChange: (s: any) => void;
   onItemChange: (e: React.ChangeEvent<HTMLInputElement>, idx: number) => void;
   onAddItem: () => void;
   onRemoveItem: (idx: number) => void;
@@ -31,7 +31,7 @@ export const DetailsTab: React.FC<DetailsTabProps> = ({
 }) => {
   const symbol = getCurrencySymbol();
 
-  // ✅ Pagination Logic
+  //  Pagination Logic
   const ITEMS_PER_PAGE = 5;
   const [page, setPage] = useState(0);
 

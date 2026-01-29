@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { Textarea } from "../../ui/modal/formComponent";
 import type { PaymentRow, PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
+// import { PaymentTermsTemplateModal } from "./PaymentTermsTemplateModal";
 
 interface TermsTabProps {
   form: PurchaseOrderFormData;
@@ -22,6 +23,14 @@ export const TermsTab: React.FC<TermsTabProps> = ({
 }) => {
   const ITEMS_PER_PAGE = 5;
   const [page, setPage] = useState(0);
+  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+
+  const templates = [
+    { id: "1", name: "30% Advance 70% After Delivery" },
+    { id: "2", name: "100% After Invoice" },
+  ];
+
 
   useEffect(() => {
     const newPage = Math.floor((paymentRows.length - 1) / ITEMS_PER_PAGE);
@@ -36,7 +45,7 @@ export const TermsTab: React.FC<TermsTabProps> = ({
   return (
     <div className="space-y-8 mx-auto bg-card text-main rounded-lg p-6 mt-6 border border-theme">
       <div>
-        <h3 className="mb-2 text-lg font-semibold">Payment Terms</h3>
+
         <span className="font-medium text-muted">Payment Schedule</span>
 
         {/* Pagination */}
@@ -140,6 +149,12 @@ export const TermsTab: React.FC<TermsTabProps> = ({
           <Plus className="w-4 h-4" /> Add Row
         </button>
       </div>
+
+      {/* <PaymentTermsTemplateModal
+        open={showTemplateModal}
+        onClose={() => setShowTemplateModal(false)}
+      /> */}
+
 
       {/* Terms textarea */}
       <div className="bg-card rounded-lg border border-theme">

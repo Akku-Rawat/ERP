@@ -1,10 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 
+interface Supplier {
+  id: string;
+  code: string;
+  name: string;
+  email?: string;
+  phone?: string;
+}
+
 interface SupplierDropdownProps {
   value: string;
-  onChange: (s: string) => void;
+  onChange: (s: Supplier) => void;
   className?: string;
-  suppliers: { name: string }[];
+  suppliers: Supplier[];
   suppLoading: boolean;
 }
 
@@ -32,11 +40,14 @@ export const SupplierDropdown: React.FC<SupplierDropdownProps> = ({
   const filtered = suppliers.filter((s) =>
     s.name.toLowerCase().includes(search.toLowerCase())
   );
-  const selected = suppliers.find((s) => s.name === value);
+
+  const selected = suppliers.find(s => s.id === value);
+
 
   return (
     <div ref={ref} className={`relative w-full flex flex-col gap-1 ${className}`}>
       <span className="font-medium text-gray-600 text-sm">Supplier Name</span>
+
       <button
         type="button"
         disabled={suppLoading}
@@ -58,22 +69,27 @@ export const SupplierDropdown: React.FC<SupplierDropdownProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+
           <ul className="max-h-40 overflow-y-auto">
             {filtered.map((s) => (
               <li
-                key={s.name}
+                key={s.id}
                 className={`px-4 py-2 cursor-pointer hover:bg-indigo-100 ${
                   s.name === value ? "bg-indigo-200 font-bold" : ""
                 }`}
                 onClick={() => {
-                  onChange(s.name);
+                  onChange(s); 
                   setOpen(false);
                   setSearch("");
                 }}
               >
-                {s.name}
+                <div className="flex flex-col">
+                  <span className="font-medium">{s.name}</span>
+                  <span className="text-xs text-gray-500">{s.code}</span>
+                </div>
               </li>
             ))}
+
             {filtered.length === 0 && (
               <li className="px-4 py-2 text-gray-500">No match</li>
             )}

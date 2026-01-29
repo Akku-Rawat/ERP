@@ -38,6 +38,8 @@ export interface PurchaseOrderFormData {
   poNumber: string;
   date: string;
   supplier: string;
+  supplierId: string;
+ supplierCode: string;
   taxCategory: string;
   shippingRule: string;
   incoterm: string;
@@ -56,7 +58,6 @@ export interface PurchaseOrderFormData {
   };
 
   placeOfSupply: string;
-
   paymentTermsTemplate: string;
   termsAndConditions: string;
   totalQuantity: number;
@@ -66,7 +67,6 @@ export interface PurchaseOrderFormData {
   items: ItemRow[];
   taxRows: TaxRow[];
   paymentRows: PaymentRow[];
-
   templateName: string;
   templateType: string;
   subject: string;
@@ -135,6 +135,8 @@ export const emptyPOForm: PurchaseOrderFormData = {
   },
 
   placeOfSupply: "",
+supplierId: "",
+supplierCode: "",
 
   paymentTermsTemplate: "",
   termsAndConditions: "",

@@ -108,3 +108,20 @@ export const mapSupplierToForm = (s?: Supplier | null): SupplierFormData => {
     billingCountry: s.billingCountry ?? "",
   };
 };
+
+
+export const supplierApiToDropdown = (s: any) => ({
+  id: s.supplierId,
+  code: s.supplierCode,
+  name: s.supplierName,
+  email: s.emailId,
+  phone: s.phoneNo,
+  address: {
+    line1: s.billingAddressLine1,
+    line2: s.billingAddressLine2,
+    city: s.billingCity,
+    state: s.province,
+    country: s.billingCountry,
+    postalCode: s.billingPostalCode,
+  }
+});
