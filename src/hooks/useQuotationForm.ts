@@ -41,6 +41,9 @@ export const useQuotationForm = (
   const [taxCategory, setTaxCategory] = useState<string | undefined>("");
   const [isShippingOpen, setIsShippingOpen] = useState(false);
   const [sameAsBilling, setSameAsBilling] = useState(true);
+  const [itemMaster, setItemMaster] = useState<any[]>([]);
+const [itemMasterLoading, setItemMasterLoading] = useState(false);
+
 
   const shippingEditedRef = useRef(false);
 
@@ -219,7 +222,7 @@ useEffect(() => {
         bankName: company?.bankAccounts?.[0]?.bankName ?? "",
         accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
         routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
-        swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
+        swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "ccccv",
       };
 
       setFormData((prev) => {

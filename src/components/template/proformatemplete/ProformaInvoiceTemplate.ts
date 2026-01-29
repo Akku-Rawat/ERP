@@ -73,7 +73,7 @@ export const generateProformaInvoicePDF = async (
 
   doc.setFont("helvetica", "bold");
   doc.text(`Proforma No: ${proformaInvoice.proformaId}`, 150, 52);
-  doc.text(`Date: ${proformaInvoice.dateOfInvoice}`, 150, 56);
+  doc.text(`Date: ${proformaInvoice.dateofinvoice}`, 150, 56);
   doc.text(`Due Date: ${proformaInvoice.dueDate}`, 150, 60);
 
   /* ================= ITEMS TABLE ================= */
@@ -135,7 +135,7 @@ export const generateProformaInvoicePDF = async (
   doc.setFont("helvetica", "normal");
   doc.text(
     [
-      `Issue Date: ${proformaInvoice.dateOfInvoice}`,
+      `Issue Date: ${proformaInvoice.dateofinvoice}`,
       `Proforma ID: ${proformaInvoice.proformaId}`,
       `Status: ${proformaInvoice.status}`,
       `Currency: ${currency}`,

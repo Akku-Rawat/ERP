@@ -106,7 +106,7 @@
   .table-head { background: var(--table-head) !important; color: var(--table-head-text) !important; }
   .row-hover:hover { background: var(--row-hover) !important; }
 
-   /* OVERRIDES */
+   /* OVERRIDES 
   .bg-white { background: var(--card) !important; }
   .text-gray-900, .text-slate-900 { color: var(--text) !important; }
   .text-gray-500, .text-slate-500 { color: var(--muted) !important; }

@@ -40,49 +40,22 @@ export const useInvoiceForm = (
   const [sameAsBilling, setSameAsBilling] = useState(true);
 
   const shippingEditedRef = useRef(false);
-
-
-  //  Reset form when opening CREATE modal
 useEffect(() => {
-  if (!isOpen) return;
-  if (!initialData) {
+  if (!isOpen) {
     handleReset();
+    return;
   }
-}, [isOpen]);
 
-//  Load invoice when EDIT modal opens
-useEffect(() => {
-  if (!isOpen || !initialData) return;
-  console.log("EDIT MODE LOADING INVOICE", initialData);
-  setFormDataFromInvoice(initialData);
-}, [isOpen, initialData]);
-
-//  Set default dates
-useEffect(() => {
-  if (!isOpen) return;
-
-  const today = new Date().toISOString().split("T")[0];
   setFormData((prev) => ({
     ...prev,
-    dateOfInvoice: prev.dateOfInvoice || today,
-    dueDate: prev.dueDate || today,
+    invoiceStatus:
+      prev.invoiceStatus || (mode === "proforma" ? "Draft" : prev.invoiceStatus),
+    invoiceType:
+      prev.invoiceType || (mode === "proforma" ? "Non-Export" : prev.invoiceType),
   }));
+}, [isOpen, mode]);
+;
 
-  setPage(0);
-}, [isOpen]);
-
-  useEffect(() => {
-
-
-    setFormData((prev) => ({
-      ...prev,
-      invoiceStatus:
-  initialData?.invoiceStatus || initialData?.status ||
-  (mode === "proforma" ? "Draft" : prev.invoiceStatus),
-
-      invoiceType: mode === "proforma" ? "Non-Export" : prev.invoiceType,
-    }));
-  }, [isOpen, mode]);
   const setInvoiceFromApi = (invoice: any) => {
     setFormData((prev: any) => ({
       ...prev,
