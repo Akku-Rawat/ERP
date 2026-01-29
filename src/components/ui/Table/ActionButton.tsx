@@ -59,11 +59,12 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     }
   };
 
-  const variantStyles: Record<string, string> = {
-    primary: "text-primary hover:bg-row-hover hover:text-primary",
-    secondary: "text-muted hover:bg-row-hover hover:text-main",
-    danger: "text-red-500 hover:bg-red-50 hover:text-red-600",
-  };
+const variantStyles = {
+  primary: "text-primary hover:bg-row-hover hover:text-primary",
+  secondary: "text-muted hover:bg-row-hover hover:text-main",
+  danger: "text-red-500 hover:bg-row-hover hover:text-red-600",
+};
+
 
   const base = iconOnly
     ? `inline-flex items-center justify-center w-8 h-8 rounded-md ${variantStyles[variant]}`
@@ -164,7 +165,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
           e.stopPropagation();
           setOpen((v) => !v);
         }}
-        className="inline-flex items-center justify-center w-8 h-8 rounded-md text-muted hover:bg-row-hover hover:text-main"
+        className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-card text-muted hover:bg-row-hover hover:text-main"
       >
         <MoreVertical className="w-4 h-4" />
       </button>
@@ -173,7 +174,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
         <div
           role="menu"
           aria-label="Actions"
-          className="absolute right-0 mt-2 w-44 bg-card border border-[var(--border)] rounded-md shadow-lg z-[200] py-2"
+          className="absolute right-0 mt-2 w-48 bg-card border border-[var(--border)] rounded-lg shadow-xl z-[200] py-2"
           onClick={(e) => e.stopPropagation()}
         >
           {/* ===== CUSTOM ACTIONS (STATUS etc.) ===== */}
@@ -222,7 +223,8 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                 setOpen(false);
                 onDelete(e);
               }}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-row-hover flex items-center gap-2"
+            className="w-full text-left px-3 py-2 text-sm hover:bg-row-hover flex items-center gap-2 transition-colors"
+
               role="menuitem"
             >
               <Trash2 className="w-4 h-4 text-red-500" />

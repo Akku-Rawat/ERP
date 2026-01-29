@@ -24,8 +24,10 @@ export const useInvoiceForm = (
   isOpen: boolean,
   onClose: () => void,
   onSubmit?: (data: any) => void,
-  mode: InvoiceMode = "invoice",
+  mode?: "invoice" | "proforma",
+  initialData?: any
 ) => {
+
   const [formData, setFormData] = useState<Invoice>(DEFAULT_INVOICE_FORM);
   const [customerDetails, setCustomerDetails] = useState<any>(null);
   const [customerNameDisplay, setCustomerNameDisplay] = useState("");
@@ -94,16 +96,6 @@ useEffect(() => {
   return true;
 };
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const today = new Date().toISOString().split("T")[0];
-    setFormData((prev) => ({
-      ...prev,
-      dateOfInvoice: prev.dateOfInvoice || today,
-      dueDate: prev.dueDate || today,
-    }));
-    setPage(0);
-  }, [isOpen]);
 
   useEffect(() => {
     if (!sameAsBilling) return;
@@ -346,46 +338,39 @@ useEffect(() => {
       return { ...prev, items };
     });
   };
-  const setFormDataFromInvoice = async (invoice: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
+const setFormDataFromInvoice = async (invoice: any) => {
+  setFormData((prev: any) => ({
+    ...prev,
+    invoiceNumber: invoice.invoiceNumber,
+    invoiceType: invoice.invoiceType ?? "",
+    invoiceStatus: invoice.invoiceStatus ?? "",
+    currencyCode: invoice.currencyCode,
+    dateOfInvoice: invoice.dateOfInvoice,
+    dueDate: invoice.dueDate,
+    billingAddress: invoice.billingAddress ?? prev.billingAddress,
+    shippingAddress: invoice.shippingAddress ?? prev.shippingAddress,
+    items: invoice.items.map((it: any) => {
+      const base = Number(it.quantity) * Number(it.price) - Number(it.discount);
+      const taxAmount = Number(it.vatTaxableAmount ?? 0);
+      const taxRate = base > 0 ? Number(((taxAmount / base) * 100).toFixed(2)) : 0;
 
-      // ===== BASIC INFO =====
-      invoiceNumber: invoice.invoiceNumber,
-      invoiceType: invoice.invoiceType ?? "",
-      invoiceStatus: invoice.invoiceStatus ?? "",
-      currencyCode: invoice.currencyCode,
-      dateOfInvoice: invoice.dateOfInvoice,
-      dueDate: invoice.dueDate,
+      return {
+        itemCode: it.itemCode,
+        description: it.description ?? "",
+        quantity: Number(it.quantity),
+        price: Number(it.price),
+        discount: Number(it.discount),
+        vatRate: taxRate,
+        vatCode: it.vatCode ?? "",
+        _fromInvoice: true,
+      };
+    }),
+  }));
 
-      // ===== ADDRESSES =====
-      billingAddress: invoice.billingAddress ?? prev.billingAddress,
-      shippingAddress: invoice.shippingAddress ?? prev.shippingAddress,
+  setCustomerDetails(invoice.customer);
+  setCustomerNameDisplay(invoice.customer?.name ?? "");
+};
 
-      // ===== ITEMS =====
-      items: invoice.items.map((it: any) => {
-        const base =
-          Number(it.quantity ?? 0) * Number(it.price ?? 0) -
-          Number(it.discount ?? 0);
-
-        const taxAmount = Number(it.vatTaxableAmount ?? 0);
-        const taxRate =
-          base > 0 ? Number(((taxAmount / base) * 100).toFixed(2)) : 0;
-
-        return {
-          itemCode: it.itemCode,
-          description: it.description ?? "",
-          quantity: Number(it.quantity ?? 0),
-          price: Number(it.price ?? 0),
-          discount: Number(it.discount ?? 0),
-          vatRate: taxRate,
-          vatCode: it.vatCode ?? "",
-          _fromInvoice: true,
-        };
-      }),
-    }));
-    setCustomerDetails(invoice.customer);
-  };
 
   const setTerms = (selling: TermSection) => {
     setFormData((prev) => ({ ...prev, terms: { selling } }));

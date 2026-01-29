@@ -117,11 +117,14 @@ export default function ItemGenericSelect({
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      <span className="font-medium text-gray-600 text-sm">{label}</span>
+      <span className="font-medium text-muted text-sm">{label}</span>
+
 
       <div ref={ref} className="relative w-full">
-        <input
-          className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+<input
+  className="w-full rounded border border-theme bg-card text-main px-3 py-2 text-sm 
+  focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+
           placeholder={loading ? "Loading..." : placeholder}
           value={open ? search : displayValue}
           onChange={(e) => {
@@ -133,15 +136,13 @@ export default function ItemGenericSelect({
         />
 
         {open && !loading && (
-          <div className="absolute left-0 top-full mt-1 w-full bg-white border shadow-lg rounded z-30 max-h-60 overflow-y-auto">
+      <div className="absolute left-0 top-full mt-1 w-full bg-card border border-theme shadow-lg rounded z-30 max-h-60 overflow-y-auto">
             <ul className="text-sm">
               {filtered.length > 0 ? (
                 filtered.map((item) => (
                   <li
-                    key={getId(item)}
-                    className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
-                      getId(item) === value ? "bg-blue-50 font-medium" : ""
-                    }`}
+                    className={`px-4 py-2 cursor-pointer hover:bg-row-hover ${getId(item) === value ? "bg-primary/10 text-primary font-medium" : "text-main"
+                      }`}
                     onClick={() => {
                       setSearch("");
                       setOpen(false);
@@ -152,7 +153,7 @@ export default function ItemGenericSelect({
                   </li>
                 ))
               ) : (
-                <li className="px-4 py-2 text-gray-500">
+                <li className="px-4 py-2 text-muted">
                   {search ? "No match found" : "No items available"}
                 </li>
               )}

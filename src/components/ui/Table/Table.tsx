@@ -142,7 +142,7 @@ function Table<T extends Record<string, any>>({
                       : setSearch(e.target.value)
                   }
                   placeholder={toolbarPlaceholder}
-                  className="w-full pl-10 pr-4 py-2 bg-app border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2 bg-card border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
                 />
               </>
             )}
@@ -230,7 +230,6 @@ function Table<T extends Record<string, any>>({
                   <th
                     key={column.key}
                     className={`px-5 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted border-b border-[var(--border)] bg-card whitespace-nowrap ${getAlignment(column.align)}`}
-                    style={{ backgroundColor: "var(--card)" }}
                   >
                     {loading ? (
                       <div className="h-3 bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded" />
@@ -311,7 +310,7 @@ function Table<T extends Record<string, any>>({
                 <select
                   value={pageSize}
                   onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                  className="px-3 py-1.5 bg-app border border-[var(--border)] rounded-lg text-[10px] font-black uppercase text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
+                 className="px-3 py-1.5 bg-card border border-[var(--border)] rounded-lg text-[10px] font-black uppercase text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
                 >
                   {pageSizeOptions.map((size) => (
                     <option key={size} value={size}>

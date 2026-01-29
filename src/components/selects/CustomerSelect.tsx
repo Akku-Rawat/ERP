@@ -9,6 +9,7 @@ type Customer = {
 
 interface CustomerSelectProps {
   value?: string;
+    selectedId?: string;
   onChange: (customer: { id: string; name: string }) => void;
   className?: string;
   label?: string;
@@ -16,6 +17,7 @@ interface CustomerSelectProps {
 
 export default function CustomerSelect({
   value = "",
+    selectedId, 
   onChange,
   className = "",
   label = "Customer",
@@ -48,6 +50,17 @@ export default function CustomerSelect({
     loadCustomers();
   }, []);
 
+useEffect(() => {
+  setSearch(value);
+}, [value]);
+
+useEffect(() => {
+  if (!selectedId || customers.length === 0) return;
+  const selected = customers.find(c => c.id === selectedId);
+  if (selected) setSearch(selected.name);
+}, [selectedId, customers]);
+
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -68,11 +81,14 @@ export default function CustomerSelect({
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      <span className="font-medium text-gray-600 text-sm">{label}</span>
+      <span className="font-medium text-muted text-sm">{label}</span>
+
 
       <div ref={containerRef} className="relative w-full">
-        <input
-          className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+    <input
+  className="w-full rounded border border-theme bg-card text-main px-3 py-2 text-sm 
+  focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+
           placeholder={loading ? "Loading..." : "Search customer..."}
           value={search}
           onChange={(e) => {
@@ -83,12 +99,13 @@ export default function CustomerSelect({
         />
 
         {open && !loading && (
-          <div className="absolute left-0 top-full mt-1 w-full bg-white border shadow-lg rounded z-30">
+      <div className="absolute left-0 top-full mt-1 w-full bg-card border border-theme shadow-lg rounded z-30">
             <ul className="max-h-56 overflow-y-auto text-sm">
               {filteredCustomers.map((customer) => (
                 <li
                   key={customer.id}
-                  className="px-4 py-2 cursor-pointer hover:bg-blue-100"
+                  className="px-4 py-2 cursor-pointer hover:bg-row-hover text-main"
+
                   onClick={() => {
                     setSearch(customer.name);
                     setOpen(false);
@@ -98,7 +115,7 @@ export default function CustomerSelect({
                   <div className="flex justify-between items-center">
                     <span>{customer.name}</span>
                     {customer.customerCode && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-muted">
                         {customer.customerCode}
                       </span>
                     )}
@@ -107,7 +124,7 @@ export default function CustomerSelect({
               ))}
 
               {filteredCustomers.length === 0 && (
-                <li className="px-4 py-2 text-gray-500">No match found</li>
+                <li className="px-4 py-2 text-muted">No match found</li>
               )}
             </ul>
           </div>
