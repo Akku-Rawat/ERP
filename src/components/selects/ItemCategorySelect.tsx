@@ -71,12 +71,14 @@ export default function ItemCategorySelect({
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      <span className="font-medium text-gray-600 text-sm">{label}</span>
+      <span className="font-medium text-muted text-sm">{label}</span>
+
 
       <div ref={ref} className="relative w-full">
         {/* Search Input */}
         <input
-          className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full rounded border border-theme bg-card text-main px-3 py-2 text-sm 
+           focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           placeholder={loading ? "Loading..." : "Search category..."}
           value={search}
           onChange={(e) => {
@@ -89,13 +91,13 @@ export default function ItemCategorySelect({
 
         {/* Dropdown */}
         {open && !loading && (
-          <div className="absolute left-0 top-full mt-1 w-full bg-white border shadow-lg rounded z-30">
-            <ul className="max-h-56 overflow-y-auto text-sm">
+      <div className="absolute left-0 top-full mt-1 w-full bg-card border border-theme shadow-lg rounded z-30">
+             <ul className="max-h-56 overflow-y-auto text-sm">
               {filtered.length > 0 ? (
                 filtered.map((category) => (
-                  <li
-                    key={category.id}
-                    className="px-4 py-2 cursor-pointer hover:bg-blue-100"
+                   <li
+                     key={category.id}
+                      className="px-4 py-2 cursor-pointer hover:bg-row-hover text-main"
                     onClick={() => {
                       setSearch(category.name);
                       setOpen(false);
@@ -106,7 +108,7 @@ export default function ItemCategorySelect({
                   </li>
                 ))
               ) : (
-                <li className="px-4 py-2 text-gray-500">
+                <li className="px-4 py-2 text-muted">
                   {search ? "No match found" : "No categories available"}
                 </li>
               )}

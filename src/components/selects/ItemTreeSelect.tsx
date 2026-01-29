@@ -1,11 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 
-// ========================================
-// 🔧 DEVELOPMENT MODE TOGGLE
-// Set to false when backend is ready
-// ========================================
+
 const USE_DUMMY_DATA = false;
-// ========================================
+
 
 interface TreeItem {
   code: string;
@@ -425,12 +422,13 @@ export default function ItemTreeSelect({
   const selectedItem = findSelectedItem(value);
   const displayValue = selectedItem ? selectedItem.name : "";
 
-  const levelColors = [
-    "bg-purple-50 text-purple-700 border-purple-200",
-    "bg-blue-50 text-blue-700 border-blue-200",
-    "bg-green-50 text-green-700 border-green-200",
-    "bg-amber-50 text-amber-700 border-amber-200",
-  ];
+const levelColors = [
+  "bg-primary/10 text-primary border-primary/20",
+  "bg-primary/10 text-primary border-primary/20",
+  "bg-primary/10 text-primary border-primary/20",
+  "bg-primary/10 text-primary border-primary/20",
+];
+
 
   const renderTreeNode = (
     node: TreeItem,
@@ -444,11 +442,12 @@ export default function ItemTreeSelect({
     return (
       <div key={node.code} style={{ marginLeft: `${depth * 16}px` }}>
         <div
-          className={`flex items-center gap-2 px-3 py-2.5 cursor-pointer hover:bg-blue-50 rounded transition-colors ${
-            isSelected
-              ? "bg-blue-100 font-medium border-l-2 border-blue-500"
-              : ""
-          }`}
+      className={`flex items-center gap-2 px-3 py-2.5 cursor-pointer hover:bg-row-hover rounded transition-colors ${
+  isSelected
+    ? "bg-primary/10 font-medium border-l-2 border-primary"
+    : ""
+}`}
+
           onClick={() => {
             if (isLeaf) {
               setSearch("");
@@ -461,7 +460,7 @@ export default function ItemTreeSelect({
         >
           {hasChildren ? (
             <svg
-              className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+              className={`w-4 h-4 text-muted transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -485,13 +484,15 @@ export default function ItemTreeSelect({
           </div>
           <span className="text-sm flex-1 truncate">{node.name}</span>
           {hasChildren && (
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+            <span className="text-xs text-muted bg-app px-2 py-0.5 rounded-full border border-theme">
+
               {node.children.length}
             </span>
           )}
         </div>
         {isExpanded && hasChildren && (
-          <div className="mt-1 border-l-2 border-gray-200 ml-2">
+          <div className="mt-1 border-l-2 border-theme ml-2">
+
             {node.children.map((child) => renderTreeNode(child, depth + 1))}
           </div>
         )}
@@ -501,7 +502,7 @@ export default function ItemTreeSelect({
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      <span className="font-medium text-gray-600 text-sm">
+      <span className="font-medium text-muted text-sm">
         {label}
         {USE_DUMMY_DATA && (
           <span className="ml-2 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">
@@ -510,8 +511,10 @@ export default function ItemTreeSelect({
         )}
       </span>
       <div ref={ref} className="relative w-full">
-        <input
-          className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+<input
+  className="w-full rounded border border-theme bg-card text-main px-3 py-2 text-sm 
+  focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+
           placeholder={loading ? "Loading..." : placeholder}
           value={open ? search : displayValue}
           onChange={(e) => {
@@ -522,14 +525,15 @@ export default function ItemTreeSelect({
           disabled={loading}
         />
         {open && !loading && (
-          <div className="absolute left-0 top-full mt-1 w-full bg-white border shadow-lg rounded z-30 max-h-96 overflow-y-auto">
+         <div className="absolute left-0 top-full mt-1 w-full bg-card border border-theme shadow-lg rounded z-30 max-h-96 overflow-y-auto">
+
             <div className="py-2">
               {filteredTree.length > 0 ? (
                 filteredTree.map((node) => renderTreeNode(node, 0))
               ) : (
                 <div className="px-4 py-8 text-center">
                   <svg
-                    className="w-12 h-12 text-gray-300 mx-auto mb-2"
+                    className="w-12 h-12 text-muted mx-auto mb-2"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -541,7 +545,7 @@ export default function ItemTreeSelect({
                       d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                     />
                   </svg>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-muted text-sm">
                     {search ? "No matching items found" : "No items available"}
                   </p>
                 </div>

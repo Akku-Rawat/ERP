@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Input } from "../../ui/modal/formComponent";
 import type { PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
-import { MapPin, Truck, Building2, Plus, Minus, User } from "lucide-react";
+import { MapPin, Truck, Building2, Plus, Minus } from "lucide-react";
 
 interface AddressTabProps {
   form: PurchaseOrderFormData;
@@ -57,7 +57,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onFormChange }) =>
             <button
               type="button"
               onClick={() => toggle(keyName)}
-              className="p-1 rounded hover:bg-row-hover"
+              className="p-1 rounded row-hover"
             >
               {open[keyName] ? <Minus size={16} /> : <Plus size={16} />}
             </button>
@@ -66,7 +66,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onFormChange }) =>
 
         {/* BODY */}
         {open[keyName] && (
-          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-card text-main">
 
             <Input label="Address Title" name={`addresses.${keyName}.addressTitle`} value={data.addressTitle} onChange={onFormChange} />
             <Input label="Address Type" name={`addresses.${keyName}.addressType`} value={data.addressType} onChange={onFormChange} />
@@ -93,11 +93,10 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onFormChange }) =>
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-app text-main">
 
       {/* Supplier Contact + Place of Supply */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-card border border-theme p-4 rounded-xl mt-8">
-       
         <Input
           label="Supplier Contact"
           name="supplierContact"
@@ -118,32 +117,14 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onFormChange }) =>
 
         {/* LEFT */}
         <div className="space-y-4">
-          <Block
-            title="Supplier Address"
-            icon={MapPin}
-            keyName="supplierAddress"
-          />
-
-          <Block
-            title="Company Billing Address"
-            icon={Building2}
-            keyName="companyBillingAddress"
-          />
+          <Block title="Supplier Address" icon={MapPin} keyName="supplierAddress" />
+          <Block title="Company Billing Address" icon={Building2} keyName="companyBillingAddress" />
         </div>
 
         {/* RIGHT */}
         <div className="space-y-4">
-          <Block
-            title="Shipping Address"
-            icon={Truck}
-            keyName="shippingAddress"
-          />
-
-          <Block
-            title="Dispatch Address"
-            icon={Truck}
-            keyName="dispatchAddress"
-          />
+          <Block title="Shipping Address" icon={Truck} keyName="shippingAddress" />
+          <Block title="Dispatch Address" icon={Truck} keyName="dispatchAddress" />
         </div>
 
       </div>

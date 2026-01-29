@@ -23,7 +23,9 @@ export const useQuotationForm = (
   isOpen: boolean,
   onClose: () => void,
   onSubmit?: (data: any) => void,
+  initialData?: any,
 ) => {
+
   const [formData, setFormData] = useState<Invoice>({
     ...DEFAULT_INVOICE_FORM,
     invoiceStatus: "Draft",
@@ -58,6 +60,36 @@ export const useQuotationForm = (
 
     setPage(0);
   }, [isOpen]);
+
+
+useEffect(() => {
+  if (!isOpen || !initialData) return;
+
+  setSameAsBilling(false);
+  shippingEditedRef.current = true;
+
+  setFormData({
+    ...DEFAULT_INVOICE_FORM,
+    ...initialData,
+    dateOfInvoice: initialData.dateOfQuotation,
+    dueDate: initialData.validUntil,
+    items: (initialData.items || []).map((it: any) => ({
+      itemCode: it.itemCode,
+      description: it.description ?? "",
+      quantity: Number(it.quantity),
+      price: Number(it.price),
+      discount: Number(it.discount),
+      vatRate: Number(it.vatRate || 0),
+      vatCode: it.vatCode ?? "",
+    })),
+  });
+
+  setCustomerDetails(initialData.customer);
+  setCustomerNameDisplay(initialData.customer?.name ?? "");
+}, [isOpen, initialData]);
+
+
+
 
   // Sync shipping address with billing if sameAsBilling is true
   useEffect(() => {
@@ -314,7 +346,8 @@ export const useQuotationForm = (
 
     const tax = formData.items.reduce((sum, item) => {
       const itemSubtotal = item.quantity * item.price - item.discount;
-      const taxAmount = (itemSubtotal * parseFloat(item.vatRate || "0")) / 100;
+      const taxAmount = (itemSubtotal * Number(item.vatRate || 0)) / 100;
+
       return sum + taxAmount;
     }, 0);
 

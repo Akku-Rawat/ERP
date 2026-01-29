@@ -179,14 +179,14 @@ const ItemModal: React.FC<{
     >
       <form onSubmit={handleSubmit} className="h-full flex flex-col">
         {/* Tabs */}
-        <div className="flex border-b bg-gray-50">
+        <div className="flex border-b bg-app border-theme">
           <button
             type="button"
             onClick={() => setActiveTab("details")}
             className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
               activeTab === "details"
-                ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                : "text-gray-600 hover:text-gray-900"
+                   ?"text-primary border-b-2 border-primary bg-card"
+                :"text-muted hover:text-main"
             }`}
           >
             Item Details
@@ -196,8 +196,9 @@ const ItemModal: React.FC<{
             onClick={() => setActiveTab("taxDetails")}
             className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
               activeTab === "taxDetails"
-                ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-                : "text-gray-600 hover:text-gray-900"
+                ?"text-primary border-b-2 border-primary bg-card"
+                :"text-muted hover:text-main"
+
             }`}
           >
             Tax Details
@@ -209,8 +210,9 @@ const ItemModal: React.FC<{
             className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors
     ${
       activeTab === "inventoryDetails" && !isServiceItem
-        ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
-        : "text-gray-600 hover:text-gray-900"
+        ? "text-primary border-b-2 border-primary bg-card"
+        :"text-muted hover:text-main"
+
     }
     ${isServiceItem ? "opacity-50 cursor-not-allowed" : ""}
   `}
@@ -220,11 +222,11 @@ const ItemModal: React.FC<{
         </div>
 
         {/* Tab Content */}
-        <section className="flex-1 overflow-y-auto p-4 space-y-6">
+        <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
           <div className="gap-6 max-h-screen overflow-auto p-4">
             {activeTab === "details" && (
               <>
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
+                <h3 className="mb-4 text-lg font-semibold text-main underline">
                   Items Information
                 </h3>
                 <div className="flex flex-col gap-4">
@@ -297,14 +299,14 @@ const ItemModal: React.FC<{
                     />
 
                     <label className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-gray-600">
+                      <span className="font-medium text-muted">
                         Service Charge
                       </span>
                       <select
                         name="svcCharge"
                         value={form.svcCharge || ""}
                         onChange={handleForm}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                         required
                       >
                         <option value="Y">Y</option>
@@ -312,14 +314,14 @@ const ItemModal: React.FC<{
                       </select>
                     </label>
                     <label className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-gray-600">
+                      <span className="font-medium text-muted">
                         INSURANCE
                       </span>
                       <select
                         name="ins"
                         value={form.ins || ""}
                         onChange={handleForm}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                         required
                       >
                         <option value="Y">Y</option>
@@ -336,7 +338,7 @@ const ItemModal: React.FC<{
                   </div>
                 </div>
 
-                <h3 className="py-6 text-lg font-semibold text-gray-700 underline">
+                <h3 className="py-6 text-lg font-semibold text-main underline">
                   Sales & Purchase
                 </h3>
                 <div className="flex flex-col gap-4">
@@ -373,7 +375,7 @@ const ItemModal: React.FC<{
                       name="taxPreference"
                       value={form.taxPreference || ""}
                       onChange={handleForm}
-                      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                       required
                     >
                       <option value="Taxable">Taxable</option>
@@ -395,21 +397,21 @@ const ItemModal: React.FC<{
               <>
                 {/* Tax Category Selector */}
                 <div className="mb-8 ">
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  <label className="block text-sm font-semibold text-main mb-3">
                     Tax Category
                   </label>
                   <select
                     name="taxCategory"
                     value={form.taxCategory || "Non-Export"}
                     onChange={handleForm}
-                    className="w-full md:w-96 px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full md:w-96 px-4 py-3 text-base border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   >
                     <option value="Non-Export">Non-Export</option>
                     <option value="Export">Export</option>
                     <option value="LPO">Local Purchase Order</option>
                   </select>
 
-                  <p className="mt-2 text-sm text-gray-600">
+                  <p className="mt-2 text-sm text-muted">
                     {form.taxCategory === "Non-Export" &&
                       "Standard tax rates for domestic sales"}
                     {form.taxCategory === "Export" &&
@@ -420,9 +422,9 @@ const ItemModal: React.FC<{
                 </div>
 
                 {/* Dynamic Tax Form based on selected category */}
-                <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
+                <div className="bg-app rounded-lg p-6 border border-theme">
+                  <h3 className="text-lg font-semibold text-main mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-primary rounded-full"></span>
                     {form.taxCategory === "Non-Export" &&
                       "Non-Export Tax Details"}
                     {form.taxCategory === "Export" && "Export Tax Details"}
@@ -466,7 +468,7 @@ const ItemModal: React.FC<{
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-muted">
                         Tax Percentage (%)
                       </label>
                       <div className="relative">
@@ -477,9 +479,9 @@ const ItemModal: React.FC<{
                           value={form.taxPerct || ""}
                           onChange={handleForm}
                           placeholder="12"
-                          className="w-full px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                          className="w-full px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted font-medium">
                           %
                         </span>
                       </div>
@@ -488,11 +490,11 @@ const ItemModal: React.FC<{
                 </div>
 
                 {/* Summary Card */}
-                <div className="mt-6 bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-indigo-900 mb-2">
+                <div className="mt-6 bg-card border border-theme rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-main mb-2">
                     Current Configuration
                   </h4>
-                  <div className="text-sm text-indigo-800">
+                  <div className="text-sm text-muted">
                     <p>
                       <span className="font-medium">Category:</span>{" "}
                       {form.taxCategory === "Non-Export" && "Non-Export"}
@@ -507,7 +509,7 @@ const ItemModal: React.FC<{
 
             {activeTab === "inventoryDetails" && (
               <>
-                <h3 className=" mb-2 text-lg font-semibold text-gray-700 underline">
+                <h3 className=" mb-2 text-lg font-semibold text-main underline">
                   Inventory Details
                 </h3>
                 <div className="flex flex-col gap-4">
@@ -522,7 +524,7 @@ const ItemModal: React.FC<{
                     />
 
                     <div className="flex flex-col gap-1">
-                      <span className="font-medium text-gray-600 text-sm">
+                      <span className="font-medium text-muted text-sm">
                         Dimensions (L × W × H)
                       </span>
                       <div className="flex items-center gap-1">
@@ -535,7 +537,7 @@ const ItemModal: React.FC<{
                           className="w-full text-center text-xs"
                         />
 
-                        <span className="text-gray-500 font-medium">×</span>
+                        <span className="text-muted font-medium">×</span>
 
                         <Input
                           label=""
@@ -546,7 +548,7 @@ const ItemModal: React.FC<{
                           className="w-full text-center text-xs"
                         />
 
-                        <span className="text-gray-500 font-medium">×</span>
+                        <span className="text-muted font-medium">×</span>
 
                         <Input
                           label=""
@@ -561,7 +563,7 @@ const ItemModal: React.FC<{
                           name="dimensionUnit"
                           value={form.dimensionUnit || "cm"}
                           onChange={handleForm}
-                          className="w-16 px-1 py-1.5 text-xs border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                          className="w-16 px-1 py-1.5 text-xs border border-theme bg-card text-main rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                         >
                           <option value="cm">cm</option>
                           <option value="in">in</option>
@@ -570,7 +572,7 @@ const ItemModal: React.FC<{
                     </div>
 
                     <div className="flex flex-col gap-1">
-                      <span className="font-medium text-gray-600 text-sm">
+                      <span className="font-medium text-muted text-sm">
                         Weight
                       </span>
                       <div className="flex gap-2">
@@ -586,8 +588,8 @@ const ItemModal: React.FC<{
                           name="weightUnit"
                           value={form.weightUnit}
                           onChange={handleForm}
-                          // className="w-28 rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                          className="w-16 px-1 py-1.5 text-xs border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                          // className="w-28 rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                         className="w-16 px-1 py-1.5 text-xs border border-theme bg-card text-main rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                         >
                           <option value="gm">gm</option>
                           <option value="kg">kg</option>
@@ -599,14 +601,14 @@ const ItemModal: React.FC<{
 
                     {/* Valuation Method */}
                     <div className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-gray-600">
+                      <span className="font-medium text-muted">
                         Valuation Method
                       </span>
                       <select
                         name="valuationMethod"
                         value={form.valuationMethod}
                         onChange={handleForm}
-                        className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full"
+                        className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary w-full"
                       >
                         <option value="">Select...</option>
                         <option value="FIFO">FIFO</option>
@@ -629,11 +631,11 @@ const ItemModal: React.FC<{
                           trackInventory: e.target.checked,
                         }))
                       }
-                      className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
+                      className="w-5 h-5 accent-primary border-theme rounded cursor-pointer"
                     />
                     <label
                       htmlFor="trackInventory"
-                      className="text-sm font-medium text-gray-700 cursor-pointer select-none"
+                      className="text-sm font-medium text-main cursor-pointer select-none"
                     >
                       Track Inventory
                     </label>
@@ -641,15 +643,14 @@ const ItemModal: React.FC<{
 
                   {form.trackInventory && (
                     <div className="ml-8 max-w-md">
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <label className="block text-sm font-medium text-muted mb-1">
                         Tracking Method
                       </label>
                       <select
                         name="trackingMethod"
                         value={form.trackingMethod || ""}
                         onChange={handleForm}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        required
+                        className="w-full rounded-md border border-theme bg-card text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                       >
                         <option value="">Select tracking method...</option>
                         <option value="none">Normal (No tracking)</option>
@@ -661,7 +662,7 @@ const ItemModal: React.FC<{
                   )}
                 </div>
 
-                <h3 className=" mt-12 text-lg font-semibold text-gray-700 underline">
+                <h3 className=" mt-12 text-lg font-semibold text-main underline">
                   Stock Level Tracking
                 </h3>
                 <div className="flex flex-col gap-4">
@@ -693,8 +694,8 @@ const ItemModal: React.FC<{
             )}
           </div>
         </section>
-        {/* ✅ FOOTER INSIDE FORM */}
-        <div className="flex justify-end gap-2 border-t px-6 py-4">
+        {/*  FOOTER INSIDE FORM */}
+        <div className="flex justify-end gap-2 border-t border-theme px-6 py-4">
           <Button variant="secondary" type="button" onClick={handleClose}>
             Cancel
           </Button>
@@ -718,12 +719,12 @@ const Input = React.forwardRef<
   React.InputHTMLAttributes<HTMLInputElement> & { label: string }
 >(({ label, className = "", ...props }, ref) => (
   <label className="flex flex-col gap-1 text-sm w-full">
-    <span className="font-medium text-gray-600">{label}</span>
+    <span className="font-medium text-muted">{label}</span>
     <input
       ref={ref}
-      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-        props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
-      } ${className}`}
+      className={`rounded border border-theme px-3 py-2 bg-card text-main 
+focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${props.disabled ? "bg-app text-muted cursor-not-allowed" : ""
+        } ${className}`}
       {...props}
     />
   </label>
