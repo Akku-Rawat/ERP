@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
+import { User, Mail, Phone } from "lucide-react";
 
 interface ProformaInvoiceModalProps {
   isOpen: boolean;
@@ -123,13 +124,14 @@ const handleFormSubmit = (e: React.FormEvent) => {
       <form id="proforma-form" onSubmit={handleFormSubmit}>
 
         {/* Tabs */}
-        <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
+        <div className="bg-card border-b border-theme px-8 shrink-0">
+          <div className="flex gap-8">
           {(["details", "terms", "address"] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => ui.setActiveTab(tab)}
-              className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${
+                  className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${
                 ui.activeTab === tab
                   ? "text-primary bg-card shadow-sm"
                   : "text-muted hover:bg-card/50"
@@ -140,20 +142,18 @@ const handleFormSubmit = (e: React.FormEvent) => {
               {tab === "address" && "Additional Details"}
             </button>
           ))}
+          </div>
         </div>
 
         {/* Tab Content */}
-        <section className="flex-1 overflow-y-auto p-4 space-y-6">
+         <div className="flex-1 overflow-y-auto px-8 py-4">
           {/* ====================== DETAILS ====================== */}
           {ui.activeTab === "details" && (
-            <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4 mt-10">
-              <div className=" col-span-2">
-                {/* Invoice Information */}
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  Invoice Information
-                </h3>
-                <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+               <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
+               <div className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-6 gap-4">
+               
+            
                     <CustomerSelect
                       value={customerNameDisplay}
                       onChange={actions.handleCustomerSelect}
@@ -260,254 +260,253 @@ const handleFormSubmit = (e: React.FormEvent) => {
                   </div>
                 </div>
 
-                <div className="my-6 h-px bg-gray-600" />
-
-                {/* <Card title="Invoiced Items"> */}
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  Invoiced Items
-                </h3>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-gray-600">
-                    Showing {ui.page * 5 + 1}–
-                    {Math.min((ui.page + 1) * 5, ui.itemCount)} of{" "}
-                    {ui.itemCount}
-                  </span>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
-                      disabled={ui.page === 0}
-                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ← Prev
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => ui.setPage(ui.page + 1)}
-                      disabled={(ui.page + 1) * 5 >= ui.itemCount}
-                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next →
-                    </button>
+                
+                 {/* ITEMS */}
+              <div className="grid grid-cols-[4fr_1fr] gap-4">
+              <div className="bg-card rounded-lg p-2 shadow-sm flex-1">
+                  <div className="flex items-center gap-1 ">
+                    <h3 className="text-sm font-semibold text-main">
+                      Invoiced Items
+                    </h3>
                   </div>
-                </div>
 
-                <div className="overflow-x-auto rounded-lg border">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-gray-700">
-                      <tr>
-                        <th className="px-2 py-2 text-left">#</th>
-                        <th className="w-[190px]">Item</th>
-                        <th className="w-[90px]">Description</th>
-                        <th className="w-[90px]">Qty</th>
-                        <th className="w-[90px]">Unit Price</th>
-                        <th className="w-[90px]">Discount</th>
-                        <th className="w-[90px]">Tax</th>
-                        <th className="px-2 py-2 text-right">Amount</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {paginatedItems.map((it, idx) => {
-                        const i = ui.page * 5 + idx;
-                        const taxVal = parseFloat(it.vatRate || "0");
-                        const amount =
-                          it.quantity * it.price - it.discount + taxVal;
-                        return (
-                          <tr
-                            key={i}
-                            className="hover:bg-blue-50/40 odd:bg-white even:bg-gray-50"
-                          >
-                            <td className="px-3 py-2 text-center">{i + 1}</td>
-                            <td className="px-2 py-2">
-                              {/* <ItemSelect
-                                                        taxCategory={ui.taxCategory}
-                                                        value={it.itemCode}
-                                                        onChange={(item) => {
-                                                          actions.updateItemDirectly(i, {
-                                                            itemCode: item.id,
-                                                            price: item.sellingPrice ?? it.price,
-                                                          });
-                                                        }}
-                                                      /> */}
-                              <ItemSelect
-                                taxCategory={ui.taxCategory}
-                                value={it.itemCode}
-                                onChange={(item) => {
-                                  actions.handleItemSelect(i, item.id);
-                                }}
-                              />
-                            </td>
 
-                            <td className="px-2 py-2">
-                              <input
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="description"
-                                value={it.description}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="quantity"
-                                value={it.quantity}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="price"
-                                value={it.price}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="discount"
-                                value={it.discount}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="number" // Assuming input is number for entry, stored as string in Type
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="vatRate"
-                                value={it.vatRate}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="string"
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="vatCode"
-                                value={it.vatCode}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2 text-right font-semibold text-gray-900">
-                              {symbol} {amount.toFixed(2)}
-                            </td>
-
-                            <td className="px-1 py-1 text-center">
-                              <button
-                                type="button"
-                                onClick={() => actions.removeItem(i)}
-                                className="p-1.5 rounded-full text-red-600 hover:bg-red-100 transition"
-                                title="Remove item"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+               <div>
+                                  <table className="w-full border-collapse text-[10px]">
+                                    <thead >
+                                      <tr className="border-b border-theme">
+                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">#</th>
+                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">Item</th>
+                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">Description</th>
+                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">Quantity</th>
+                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Unit Price</th>
+                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Discount</th>
+                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax</th>
+                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax Code</th>
+                                        <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">Amount</th>
+                                        <th></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody >
+                                      {paginatedItems.map((it, idx) => {
+                                        const i = ui.page * 5 + idx;
+                                        const taxVal = parseFloat(it.vatRate || "0");
+                                        const amount =
+                                          it.quantity * it.price - it.discount + taxVal;
+                                        return (
+                                          <tr
+                                            key={i}
+                                            className="hover:bg-blue-50/40 odd:bg-white even:bg-gray-50"
+                                          >
+                                            <td className="px-3 py-2 text-center">{i + 1}</td>
+                                            <td className="px-0.5 py-1">
+                                              {/* <ItemSelect
+                                                  taxCategory={ui.taxCategory}
+                                                  value={it.itemCode}
+                                                  onChange={(item) => {
+                                                    actions.updateItemDirectly(i, {
+                                                      itemCode: item.id,
+                                                      price: item.sellingPrice ?? it.price,
+                                                    });
+                                                  }}
+                                                /> */}
+                                              <ItemSelect
+                                                taxCategory={ui.taxCategory}
+                                                value={it.itemCode}
+                                                onChange={(item) => {
+                                                  actions.handleItemSelect(i, item.id);
+                                                }}
+                                              />
+                                            </td>
+              
+                                            <td className="px-0.5 py-1">
+                                              <input
+                                                className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                                name="description"
+                                                value={it.description}
+                                                onChange={(e) => actions.handleItemChange(i, e)}
+                                              />
+                                            </td>
+                                            <td className="px-0.5 py-1">
+                                              <input
+                                                type="number"
+                                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                                name="quantity"
+                                                value={it.quantity}
+                                                onChange={(e) => actions.handleItemChange(i, e)}
+                                              />
+                                            </td>
+                                            <td className="px-0.5 py-1">
+                                              <input
+                                                type="number"
+                                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                                name="price"
+                                                value={it.price}
+                                                onChange={(e) => actions.handleItemChange(i, e)}
+                                              />
+                                            </td>
+                                            <td className="px-0.5 py-1">
+                                              <input
+                                                type="number"
+                                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                                name="discount"
+                                                value={it.discount}
+                                                onChange={(e) => actions.handleItemChange(i, e)}
+                                              />
+                                            </td>
+                                            <td className="px-0.5 py-1">
+                                              <input
+                                                type="number" // Assuming input is number for entry, stored as string in Type
+                                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                                name="vatRate"
+                                                value={it.vatRate}
+                                                onChange={(e) => actions.handleItemChange(i, e)}
+                                              />
+                                            </td>
+                                            <td className="px-0.5 py-1">
+                                              <input
+                                                type="string"
+                                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                                name="vatCode"
+                                                value={it.vatCode}
+                                                onChange={(e) => actions.handleItemChange(i, e)}
+                                              />
+                                            </td>
+                                            <td className="px-2 py-2 text-right font-semibold text-gray-900 whitespace-nowrap">
+                                              {symbol} {amount.toFixed(2)}
+                                            </td>
+              
+                                            <td className="px-1 py-1 text-center">
+                                              <button
+                                                type="button"
+                                                onClick={() => actions.removeItem(i)}
+                                               className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
+                                                title="Remove item"
+                                              >
+                                                <Trash2 className="w-4 h-4" />
+                                              </button>
+                                            </td>
+                                          </tr>
+                                        );
+                                      })}
+                                    </tbody>
+                                  </table>
+                                </div>
 
                 {/* ---------- ADD ITEM + SUBTOTAL ---------- */}
                 <div className="flex justify-between mt-3">
-                  <button
-                    type="button"
-                    onClick={actions.addItem}
-                    className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
-                  >
-                    <Plus className="w-4 h-4" /> Add Item
-                  </button>
-                  <div className="py-2 px-2"></div>
-                </div>
-              </div>
-
-              {/* ---------- Customer Details + Summary ---------- */}
-              {/* <div className="col-span-1 sticky top-4 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit"> */}
-              <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
-                <div className="w-full max-w-sm space-y-6">
-                  {/* ---------- Customer Details ---------- */}
-                  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-                    <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
-                      Customer Details
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Customer Name
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {customerDetails?.name ?? "Customer Name"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Phone Number
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {" "}
-                          {customerDetails?.mobile_no ?? "+123 4567890"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-base font-semibold text-gray-700">
-                          Email Address
-                        </span>
-                        <span className="text-base font-bold text-blue-600">
-                          {customerDetails?.email ?? "customer@gmail.com"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* ---------- Summary ---------- */}
-                  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-                    <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
-                      Summary
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Total Items
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {formData.items.length}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Sub Total
-                        </span>
-                        <span>
-                          {symbol} {totals.subTotal.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Total Tax
-                        </span>
-                        <span>
-                          {symbol} {totals.totalTax.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between border-t pt-2 mt-2">
-                        <span className="text-base font-semibold text-gray-700">
-                          Total Amount
-                        </span>
-                        <span>
-                          {symbol} {totals.grandTotal.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+                                   <button
+                                     type="button"
+                                     onClick={actions.addItem}
+                                     className="px-4 py-1.5 bg-primary hover:bg-[var(--primary-600)] text-white rounded text-xs font-medium flex items-center gap-1.5 transition-colors"
+                                   >
+                                     <Plus className="w-4 h-4" /> Add Item
+                                   </button>
+               
+               
+                                   {(ui.itemCount > 5 || ui.page > 0) && (
+                                     <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
+               
+                                       <div className="text-[11px] text-muted whitespace-nowrap">
+                                         Showing {ui.page * 5 + 1} to{" "}
+                                         {Math.min((ui.page + 1) * 5, ui.itemCount)} of {ui.itemCount} items
+                                       </div>
+               
+                                       <div className="flex gap-1.5 items-center">
+                                         <button
+                                           type="button"
+                                           onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
+                                           disabled={ui.page === 0}
+                                           className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+                                         >
+                                           Previous
+                                         </button>
+               
+                                         <button
+                                           type="button"
+                                           onClick={() => ui.setPage(ui.page + 1)}
+                                           disabled={(ui.page + 1) * 5 >= ui.itemCount}
+                                           className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+                                         >
+                                           Next
+                                         </button>
+                                       </div>
+               
+                                     </div>
+                                   )}
+                                 </div>
+               
+</div>
+           {/* RIGHT SIDE */}
+                      <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
+                                        <div className="bg-card rounded-lg p-2 w-[220px]">
+                                          <h3 className="text-[12px] font-semibold text-main mb-2">
+                                            Customer Details
+                                          </h3>
+                      
+                                          <div className="flex flex-col gap-2 text-xs">
+                                            <div className="flex items-center gap-2">
+                                              <User size={14} className="text-muted" />
+                                              {customerDetails?.name ?? "Customer Name"}
+                                            </div>
+                      
+                                            <div className="flex items-center gap-2 text-[10px] text-muted">
+                                              <Mail size={12} />
+                                              {customerDetails?.email ?? "customer@gmail.com"}
+                                            </div>
+                      
+                                            <div className="flex items-center gap-2 text-[10px] text-muted">
+                                              <Phone size={12} />
+                                              {customerDetails?.mobile_no ?? "+123 4567890"}
+                                            </div>
+                                          </div>
+                                        </div>
+                      
+                                        <div className="bg-card rounded-lg p-3 w-[220px]">
+                                          <h3 className="text-[13px] font-semibold text-main mb-2">
+                                            Summary
+                                          </h3>
+                      
+                                          <div className="flex flex-col gap-2">
+                                            <div className="flex justify-between text-xs">
+                                              <span className="text-muted">Total Items</span>
+                                              <span className="font-medium text-main">
+                                                {formData.items.length}
+                                              </span>
+                                            </div>
+                      
+                                            <div className="flex justify-between text-xs">
+                                              <span className="text-muted">Subtotal</span>
+                                              <span className="font-medium text-main">
+                                                {symbol} {totals.subTotal.toFixed(2)}
+                                              </span>
+                                            </div>
+                      
+                                            <div className="flex justify-between text-xs">
+                                              <span className="text-muted">Total Tax</span>
+                                              <span className="font-medium text-main">
+                                                {symbol} {totals.totalTax.toFixed(2)}
+                                              </span>
+                                            </div>
+                      
+                                            <div className="mt-2 p-2 bg-primary rounded-lg">
+                                              <div className="flex justify-between items-center">
+                                                <span className="text-sm font-semibold text-white">Grand Total</span>
+                                                <span className="text-sm font-bold text-white">
+                                                  {symbol} {totals.grandTotal.toFixed(2)}
+                                                </span>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                      
+                                      </div>
+                        
+                       </div>
+                     </div>
+                   
+                 )}
+       
 
           {/* === TAB: Terms & Conditions === */}
           {ui.activeTab === "terms" && (
@@ -756,7 +755,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
               </div>
             </div>
           )}
-        </section>
+        </div>
         {/* <div className="flex justify-end gap-2 mt-6">
           <Button variant="ghost" onClick={actions.handleReset}>
             Reset

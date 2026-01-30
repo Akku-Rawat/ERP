@@ -411,8 +411,10 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   onClick={() => actions.removeItem(i)}
                                   className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
                                 >
-                                  <X size={12} />
+                                    <Trash2 className="w-4 h-4" />
                                 </button>
+
+                                 
                               </td>
                             </tr>
                           );
