@@ -157,7 +157,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                         name="invoiceStatus"
                         value={formData.invoiceStatus}
                         onChange={actions.handleInputChange}
-                        options={invoiceStatusOptions}
+                        options={[...invoiceStatusOptions]}
                       />
                     </div>
 
@@ -657,7 +657,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     onChange={(e) =>
                       actions.handleInputChange(e, "paymentInformation")
                     }
-                    options={paymentMethodOptions}
+                    options={[...paymentMethodOptions]}
                   />
 
                   <Input
