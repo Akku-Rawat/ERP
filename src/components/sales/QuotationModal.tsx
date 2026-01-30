@@ -204,40 +204,32 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 
         {/* Currency */}
         <div>
-          <label className="block text-[10px] font-medium text-main mb-1">
-            Currency
-          </label>
-          <select
+          
+          <Select
+          label="Currency "
             name="currencyCode"
             value={formData.currencyCode}
             onChange={actions.handleInputChange}
+            options={[...currencyOptions]}
             className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
           >
-            {currencyOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+           
+          </Select>
         </div>
 
         {/* Status */}
         <div>
-          <label className="block text-[10px] font-medium text-main mb-1">
-            Status
-          </label>
-          <select
+          
+          <Select
+          label="Status"
             name="invoiceStatus"
             value={formData.invoiceStatus}
             onChange={actions.handleInputChange}
+            options={[...invoiceStatusOptions]}
             className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
           >
-            {invoiceStatusOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            
+          </Select>
         </div>
 
         {/* LPO Number */}

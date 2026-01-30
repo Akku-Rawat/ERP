@@ -1,9 +1,10 @@
 import React from "react";
 
 export type SelectOption = {
-  value: any;
-  label: string;
+  readonly value: string | number;
+  readonly label: string;
 };
+
 
 type SelectProps = {
   label: string;

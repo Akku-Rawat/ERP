@@ -158,7 +158,17 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     />
                   </div>
 
-                  {/* <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1">
+                      <Select
+                        label="Invoice Status"
+                        name="invoiceStatus"
+                        value={formData.invoiceStatus}
+                        onChange={actions.handleInputChange}
+                        options={[...invoiceStatusOptions]}
+                      />
+                    </div>
+
+                    {/* <div className="flex flex-col gap-1">
                           <Select
                             label="Invoice Type"
                             name="invoiceType"
@@ -656,7 +666,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     onChange={(e) =>
                       actions.handleInputChange(e, "paymentInformation")
                     }
-                    options={paymentMethodOptions}
+                    options={[...paymentMethodOptions]}
                   />
 
                   <Input

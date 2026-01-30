@@ -186,7 +186,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                         name="currencyCode"
                         value={formData.currencyCode}
                         onChange={actions.handleInputChange}
-                        options={currencyOptions}
+                        options={[...currencyOptions]}
                       />
                     </div>
 
@@ -196,7 +196,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                         name="invoiceStatus"
                         value={formData.invoiceStatus}
                         onChange={actions.handleInputChange}
-                        options={invoiceStatusOptions}
+                        options={[...invoiceStatusOptions]  }
                       />
                     </div>
 
