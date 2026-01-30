@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal";
 import toast from "react-hot-toast";
+import PurchaseOrderView from "../../views/Procurement/purchaseorderview";
 
 // Shared UI Table Components
 import Table from "../../components/ui/Table/Table";
@@ -11,7 +12,7 @@ import ActionButton, {
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
 
-// import { getPurchaseOrders } from "../../api/purchaseOrderApi"; // later
+import { getPurchaseOrders } from "../../api/procurement/PurchaseOrderApi";
 
 interface PurchaseOrder {
   id: string;
@@ -30,31 +31,52 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-
+const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null);
 
+
+
+
   // ================= FETCH ORDERS =================
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
+  const fetchOrders = async (page = 1) => {
+  try {
+    setLoading(true);
 
-      // const res = await getPurchaseOrders();
-      // setOrders(res.data);
+    const res = await getPurchaseOrders(page, 100);
+ setTotalPages(res.pagination?.total_pages || 1);
+      setTotalItems(res.pagination?.total || 1);
+    const mappedOrders: PurchaseOrder[] = res.data.map((po: any) => ({
+      id: po.poId,
+      supplier: po.supplierName,
+      date: po.poDate,
+      deliveryDate: po.deliveryDate,
+      amount: po.grandTotal,
+      status: po.status,
+    }));
 
-      setOrders([]); // temporary empty state
-    } catch (err) {
-      console.error("Failed to load Purchase Orders", err);
-      toast.error("Failed to load Purchase Orders");
-    } finally {
-      setLoading(false);
-    }
-  };
+    setOrders(mappedOrders);
+  } catch (err) {
+    console.error("Failed to load Purchase Orders", err);
+    toast.error("Failed to load Purchase Orders");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
+  const handleView = (order: PurchaseOrder) => {
+  setSelectedOrder(order);
+  setViewModalOpen(true);
+};
   // ================= FILTER =================
   const filteredOrders = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -120,8 +142,7 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
       align: "center",
       render: (o) => (
         <ActionGroup>
-          <ActionButton type="view" onClick={() => setSelectedOrder(o)} />
-
+          <ActionButton type="view" onClick={() => handleView(o)} />
           <ActionMenu
             onEdit={(e) => handleEdit(o, e as any)}
             onDelete={(e) => handleDelete(o, e as any)}
@@ -144,6 +165,15 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
         addLabel="Add Purchase Order"
         onAdd={handleAddClick}
         enableColumnSelector
+        currentPage={page}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              totalItems={totalItems}
+              onPageChange={setPage}
+              onPageSizeChange={(size) => setPageSize(size)}
+              pageSizeOptions={[10, 25, 50, 100]}
+
+
       />
 
       {/* MODAL */}
@@ -152,7 +182,18 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
         onClose={handleCloseModal}
           poId={selectedOrder?.id}  
       />
-    </div>
+      {/* VIEW MODAL */}
+    {viewModalOpen && selectedOrder && (
+      <PurchaseOrderView
+        poId={selectedOrder.id}
+        onClose={() => setViewModalOpen(false)}
+        onEdit={() => {
+          setViewModalOpen(false);
+          setModalOpen(true);
+        }}
+      />
+    )}
+  </div>  
   );
 };
 

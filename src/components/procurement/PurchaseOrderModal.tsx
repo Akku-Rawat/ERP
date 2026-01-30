@@ -10,6 +10,8 @@ import { AddressTab } from "../procurement/purchaseorder/AddressTab";
 import { TermsTab } from "../procurement/purchaseorder/TermsTab";
 import { usePurchaseOrderForm } from "../../hooks/usePurchaseOrderForm";
 import type { POTab } from "../../types/Supply/purchaseOrder";
+import { getPurchaseOrderById } from "../../api/procurement/PurchaseOrderApi";
+
 
 
 

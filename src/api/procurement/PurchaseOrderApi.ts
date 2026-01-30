@@ -7,7 +7,7 @@ const api = createAxiosInstance(base_url);
 const ENDPOINTS = {
   createPO: `${base_url}.create_purchase_order`,
   getPOList: `${base_url}.get_purchase_orders`,
-  getPOById: `${base_url}.get_purchase_order_by_id`,
+  getPOById: `${base_url}.get_purchase_order`,
   updatePO: `${base_url}.update_purchase_order`,
 };
 
@@ -30,10 +30,11 @@ export async function createPurchaseOrder(payload: any): Promise<any> {
 
 export async function getPurchaseOrderById(id: string | number): Promise<any> {
   const resp = await api.get(
-    `${ENDPOINTS.getPOById}?poId=${id}`
+    `${ENDPOINTS.getPOById}?id=${id}`
   );
   return resp.data;
 }
+
 
 
 
