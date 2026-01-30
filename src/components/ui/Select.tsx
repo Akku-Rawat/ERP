@@ -8,7 +8,7 @@ export type SelectOption = {
 type SelectProps = {
   label: string;
   name: string;
-  value: string;
+  value?: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   options: readonly SelectOption[];
 };
@@ -30,9 +30,9 @@ const Select: React.FC<SelectProps> = ({
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
+    {o.label}
+  </option>
+))}
     </select>
   </label>
 );

@@ -1,5 +1,6 @@
 export interface ItemRow {
   itemCode: string;
+  itemName?: string;
   requiredBy: string;
   quantity: number;
   uom: string;
@@ -78,6 +79,7 @@ export interface PurchaseOrderFormData {
 
 export const emptyItem: ItemRow = {
   itemCode: "",
+   itemName: "",
   requiredBy: "",
   quantity: 0,
   uom: "Unit",

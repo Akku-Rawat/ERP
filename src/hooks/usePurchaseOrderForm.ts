@@ -13,14 +13,14 @@ import {
   emptyTaxRow, 
   emptyPaymentRow 
 } from "../types/Supply/purchaseOrder";
-import { createPurchaseOrder } from "../api/PurchaseOrderApi";
+import { createPurchaseOrder } from "../api/procurement/PurchaseOrderApi";
 import { mapUIToCreatePO } from "../types/Supply/purchaseOrderMapper";
 import { validatePO } from "./poValidator";
-import { getSuppliers } from "../api/supplierApi";
-import { getPurchaseOrderById } from "../api/PurchaseOrderApi";
+import { getPurchaseOrderById } from "../api/procurement/PurchaseOrderApi";
 import { mapApiToUI } from "../types/Supply/purchaseOrderMapper";
-import { updatePurchaseOrder } from "../api/PurchaseOrderApi";
-import { supplierApiToDropdown } from "../types/Supply/supplierMapper";
+import { updatePurchaseOrder } from "../api/procurement/PurchaseOrderApi";
+
+
 
 
 interface UsePurchaseOrderFormProps {
@@ -39,38 +39,15 @@ export const usePurchaseOrderForm = ({
 }: UsePurchaseOrderFormProps) => {
   const [form, setForm] = useState<PurchaseOrderFormData>(emptyPOForm);
   const [activeTab, setActiveTab] = useState<POTab>("details");
- const [suppliers, setSuppliers] = useState<
-  { id: string; code: string; name: string; email?: string; phone?: string }[]
->([]);
+ 
 const [saving, setSaving] = useState(false);
-  const [suppLoading, setSuppLoading] = useState(true);
+
+
 const isEditMode = !!poId;
 
 
-  // Load suppliers
-  useEffect(() => {
-  if (!isOpen) return;
 
-  const loadSuppliers = async () => {
-    try {
-      setSuppLoading(true);
-      
-     const apiData = await getSuppliers();
-     const supplierList = apiData?.data?.suppliers || [];
-     const mapped = supplierList.map(supplierApiToDropdown);
-
-      setSuppliers(mapped);
-      console.log("SUPPLIERS LOADED:", mapped);
-    } catch (err) {
-      console.error("Supplier API Error:", err);
-      toast.error("Failed to load suppliers");
-    } finally {
-      setSuppLoading(false);
-    }
-  };
-
-  loadSuppliers();
-}, [isOpen]);
+    
 
 
 useEffect(() => {
@@ -105,6 +82,8 @@ useEffect(() => {
 
 
 
+
+
 // Calculate totals (Items + Taxes + Rounding)
 useEffect(() => {
   // Sub Total (Items)
@@ -133,18 +112,19 @@ useEffect(() => {
   const roundedTotal = Math.round(grandTotal);
   const roundingAdjustment = Number((roundedTotal - grandTotal).toFixed(2));
 
-  setForm((p) => ({
-    ...p,
-    totalQuantity: totalQty,
-    grandTotal,
-    roundingAdjustment,
-    roundedTotal,
-  }));
+setForm(p => ({
+  ...p,
+  totalQuantity: totalQty,
+  grandTotal,
+  roundingAdjustment,
+  roundedTotal,
+}));
 }, [form.items, form.taxRows]);
 
 
 
- 
+
+
 
   const handleFormChange = (
   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -212,6 +192,10 @@ const handleSupplierChange = (sup: any) => {
   setForm(p => ({ ...p, items: [...p.items, { ...emptyItem }] }));
   toast.success("New item row added");
 };
+
+
+
+
 
 
 const removeItem = (idx: number) => {
@@ -285,10 +269,26 @@ const removeItem = (idx: number) => {
     }
   };
 
-  
+const handleItemSelect = (item: any, idx: number) => {
+  setForm(prev => {
+    const items = [...prev.items];
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    items[idx] = {
+      ...items[idx],
+      itemCode: item.id,
+      itemName: item.itemName, 
+      uom: item.unitOfMeasureCd || "Unit",
+      rate: Number(item.sellingPrice || 0),
+    };
+
+    return { ...prev, items };
+  });
+};
+
+  
+  
+const handleSubmit = async (e?: React.FormEvent) => {
+  e?.preventDefault();
 
   const errors = validatePO(form);
   if (errors.length) {
@@ -298,19 +298,22 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   try {
     setSaving(true);
-    const payload = { ...mapUIToCreatePO(form), poId };
+
+    const payload = mapUIToCreatePO(form);
+
     let res;
     if (isEditMode) {
-      res = await updatePurchaseOrder(payload);
+  res = await updatePurchaseOrder({ poId, ...payload });
       toast.success("Purchase Order Updated");
     } else {
-      res = await createPurchaseOrder(payload);
+  res = await createPurchaseOrder(payload);
       toast.success("Purchase Order Created");
     }
 
     onSuccess?.(res);
-   if (!isEditMode) reset();
     onClose?.();
+    if (!isEditMode) reset();
+
   } catch (error: any) {
     console.error("PO ERROR", error);
     toast.error(error?.response?.data?.message || "PO save failed");
@@ -318,6 +321,8 @@ const handleSubmit = async (e: React.FormEvent) => {
     setSaving(false);
   }
 };
+
+
 
 
 
@@ -330,8 +335,6 @@ const handleSubmit = async (e: React.FormEvent) => {
     form,
     activeTab,
     setActiveTab,
-    suppliers,
-    suppLoading,
     handleFormChange,
     handleSupplierChange,
     handleItemChange,
@@ -344,6 +347,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     addPaymentRow,
     removePaymentRow,
     handleSaveTemplate,
+      handleItemSelect,
     resetTemplate,
     getCurrencySymbol,
     handleSubmit,

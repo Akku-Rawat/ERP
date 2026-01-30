@@ -1,5 +1,5 @@
 import type { AxiosResponse } from "axios";
-import { createAxiosInstance } from "./axiosInstance";
+import { createAxiosInstance } from "../axiosInstance";
 
 const base_url = import.meta.env.VITE_PO_API_URL as string;
 const api = createAxiosInstance(base_url);
@@ -10,7 +10,6 @@ const ENDPOINTS = {
   getPOById: `${base_url}.get_purchase_order_by_id`,
   updatePO: `${base_url}.update_purchase_order`,
 };
-
 
 
 export async function getPurchaseOrders(page = 1, pageSize = 10) {

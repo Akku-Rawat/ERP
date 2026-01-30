@@ -3,8 +3,7 @@ import SupplierDetailView from "./SupplierDetailView";
 import SupplierModal from "../../components/procurement/supply/SupplierModal";
 import toast from "react-hot-toast";
 
-import { getSuppliers } from "../../api/supplierApi";
-import { getSupplierById } from "../../api/supplierApi";
+import { getSupplierById , getSuppliers } from "../../api/procurement/supplierApi";
 import { mapSupplierApi } from "../../types/Supply/supplierMapper";
 
 import Table from "../../components/ui/Table/Table";

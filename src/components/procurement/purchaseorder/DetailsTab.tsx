@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { Input, Select, Card, Button } from "../../ui/modal/formComponent";
-import { SupplierDropdown } from "./SupplierDropdown";
+import { Input,  Card, Button } from "../../ui/modal/formComponent";
+import Select from "../../ui/Select";
 import type { ItemRow, PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
+import { currencyOptions } from "../../../types/Supply/supplier";
+import SupplierSelect from "../../selects/procurement/SupplierSelect";
+import POItemSelect from "../../selects/procurement/POItemSelect";
 
 interface DetailsTabProps {
   form: PurchaseOrderFormData;
   items: ItemRow[];
-  suppliers: { name: string }[];
-  suppLoading: boolean;
+
+  onItemSelect: (item: any, idx: number) => void;
+
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onSupplierChange: (s: any) => void;
   onItemChange: (e: React.ChangeEvent<HTMLInputElement>, idx: number) => void;
@@ -17,18 +21,19 @@ interface DetailsTabProps {
   getCurrencySymbol: () => string;
 }
 
-export const DetailsTab: React.FC<DetailsTabProps> = ({
+
+
+export const DetailsTab = ({
   form,
   items,
-  suppliers,
-  suppLoading,
   onFormChange,
   onSupplierChange,
   onItemChange,
+  onItemSelect, 
   onAddItem,
   onRemoveItem,
   getCurrencySymbol,
-}) => {
+}: DetailsTabProps) => {
   const symbol = getCurrencySymbol();
 
   //  Pagination Logic
@@ -45,20 +50,35 @@ export const DetailsTab: React.FC<DetailsTabProps> = ({
     (page + 1) * ITEMS_PER_PAGE
   );
 
+  const currencySelectOptions = [
+  { value: "", label: "Select Currency" },
+  ...currencyOptions.map((c) => ({
+    value: c,
+    label: c,
+  })),
+];
+
+
   return (
     <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4 mt-6 bg-app text-main">
       <div className="col-span-2 bg-card p-4 rounded-lg border border-theme">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <Input label="PO Number" name="poNumber" type="text" value={form.poNumber} onChange={onFormChange} />
-          <SupplierDropdown value={form.supplier} onChange={onSupplierChange} suppliers={suppliers} suppLoading={suppLoading} />
+          <SupplierSelect
+            selectedId={form.supplierId}
+            onChange={onSupplierChange}
+          />
+
           <Input label="Date" name="date" type="date" value={form.date} onChange={onFormChange} />
           <Input label="Required By" name="requiredBy" type="date" value={form.requiredBy} onChange={onFormChange} />
 
-          <Select label="Currency" name="currency" value={form.currency} onChange={onFormChange}>
-            <option value="INR">INR (₹)</option>
-            <option value="USD">USD ($)</option>
-            <option value="EUR">EUR (€)</option>
-          </Select>
+          <Select
+            label="Currency"
+            name="currency"
+            value={form.currency}
+            onChange={onFormChange}
+            options={currencySelectOptions}
+          />
+
 
           <div className="col-span-3 grid grid-cols-3 gap-4">
             <Select
@@ -108,7 +128,7 @@ export const DetailsTab: React.FC<DetailsTabProps> = ({
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-lg border border-theme">
+        <div className="overflow-x-auto overflow-visible rounded-lg border border-theme">
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
@@ -133,15 +153,17 @@ export const DetailsTab: React.FC<DetailsTabProps> = ({
                     <td className="px-3 py-2 text-center">{i + 1}</td>
 
                     <td className="px-1 py-1">
-                      <input
-                        className="w-full rounded border border-theme bg-app p-1 text-sm"
-                        name="itemCode"
-                        value={it.itemCode}
-                        onChange={(e) => onItemChange(e, i)}
+                      <POItemSelect
+                        value={it.itemName}
+                        selectedId={it.itemCode}
+                        onChange={(item) => {
+                          onItemSelect(item, i);
+                        }}
                       />
                     </td>
 
-                    <td className="px-1 py-1">
+
+                    <td className="px-0.5 py-0.5">
                       <input
                         type="date"
                         className="w-full rounded border border-theme bg-app p-1 text-sm"

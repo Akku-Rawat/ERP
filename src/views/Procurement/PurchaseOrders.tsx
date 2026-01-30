@@ -150,7 +150,7 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
       <PurchaseOrderModal
         isOpen={modalOpen}
         onClose={handleCloseModal}
-        order={selectedOrder}
+          poId={selectedOrder?.id}  
       />
     </div>
   );

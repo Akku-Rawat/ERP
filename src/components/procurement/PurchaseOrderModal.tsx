@@ -34,29 +34,30 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
   onSubmit,
   poId,
 }) => {
-  const {
-    form,
-    activeTab,
-    setActiveTab,
-    suppliers,
-    suppLoading,
-    handleFormChange,
-    handleSupplierChange,
-    handleItemChange,
-    addItem,
-    removeItem,
-    handleTaxRowChange,
-    addTaxRow,
-    removeTaxRow,
-    handlePaymentRowChange,
-    addPaymentRow,
-    removePaymentRow,
-    handleSaveTemplate,
-    resetTemplate,
-    getCurrencySymbol,
-    handleSubmit,
-    reset,
+const {
+  form,
+  setForm,
+  activeTab,
+  setActiveTab,
+  handleItemSelect,
+  handleFormChange,
+  handleSupplierChange,
+  handleItemChange,
+  addItem,
+  removeItem,
+  handleTaxRowChange,
+  addTaxRow,
+  removeTaxRow,
+  handlePaymentRowChange,
+  addPaymentRow,
+  removePaymentRow,
+  handleSaveTemplate,
+  resetTemplate,
+  getCurrencySymbol,
+  handleSubmit,
+  reset,
 } = usePurchaseOrderForm({ isOpen, onSuccess: onSubmit, onClose, poId });
+
 
   const footer = (
     <>
@@ -67,9 +68,14 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
         <Button variant="secondary" onClick={reset}>
           Reset
         </Button>
-        <Button variant="primary" onClick={handleSubmit}>
-          Save Purchase Order
-        </Button>
+       <Button
+  variant="primary"
+  type="submit"
+  form="purchaseOrderForm"
+>
+  Save Purchase Order
+</Button>
+
       </div>
     </>
   );
@@ -92,7 +98,12 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
         transition={{ duration: 0.25 }}
         className="h-full flex flex-col"
       >
-        <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
+        <form
+  id="purchaseOrderForm"
+  onSubmit={handleSubmit}
+  className="flex flex-col h-full overflow-hidden"
+>
+
           <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
             {tabs.map(({ key, icon: Icon, label }) => (
               <button
@@ -122,20 +133,22 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
           </div>
 
           <section className="flex-1 overflow-y-auto p-4 space-y-6">
-            {activeTab === "details" && (
-              <DetailsTab
-                form={form}
-                items={form.items}
-                suppliers={suppliers}
-                suppLoading={suppLoading}
-                onFormChange={handleFormChange}
-                onSupplierChange={handleSupplierChange}
-                onItemChange={handleItemChange}
-                onAddItem={addItem}
-                onRemoveItem={removeItem}
-                getCurrencySymbol={getCurrencySymbol}
-              />
-            )}
+           {activeTab === "details" && (
+  <DetailsTab
+    form={form}
+    items={form.items}
+    onFormChange={handleFormChange}
+    onSupplierChange={handleSupplierChange}
+    onItemChange={handleItemChange}
+    onAddItem={addItem}
+    onRemoveItem={removeItem}
+    getCurrencySymbol={getCurrencySymbol}
+   onItemSelect={handleItemSelect}
+  />
+)}
+
+
+
 
             {activeTab === "email" && (
               <EmailTab
