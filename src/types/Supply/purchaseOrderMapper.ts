@@ -4,44 +4,26 @@ import { PurchaseOrderFormData , emptyPOForm} from "../../types/Supply/purchaseO
  * UI → Backend API
  */
 export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
-  const items = form.items.map(it => {
-    const amount = it.quantity * it.rate;
-    return {
-      itemCode: it.itemCode,
-      itemName: (it as any).itemName || it.itemCode,
-      requiredBy: it.requiredBy,
-      quantity: it.quantity,
-      uom: it.uom,
-      rate: it.rate,
-      amount,
-    };
-  });
+  const items = form.items.map(it => ({
+    itemCode: it.itemCode,
+    quantity: it.quantity,
+  }));
 
-  const taxes = form.taxRows.map(t => {
-    const taxableAmount = t.amount;
-    const taxAmount = (t.taxRate * taxableAmount) / 100;
-    return {
-      type: t.type,
-      accountHead: t.accountHead,
-      taxRate: t.taxRate,
-      taxableAmount,
-      taxAmount,
-    };
-  });
+  const taxes = form.taxRows.map(t => ({
+    type: t.type,
+    accountHead: t.accountHead,
+    taxRate: t.taxRate,
+    taxableAmount: t.amount,
+    taxAmount: (t.amount * t.taxRate) / 100,
+  }));
 
-  const subTotal = items.reduce((s, i) => s + i.amount, 0);
+  const subTotal = form.items.reduce((s, i) => s + i.quantity * i.rate, 0);
   const taxTotal = taxes.reduce((s, t) => s + t.taxAmount, 0);
   const grandTotal = subTotal + taxTotal;
 
   return {
-    poNumber: form.poNumber,
-    poDate: form.date,
     requiredBy: form.requiredBy,
-
-    supplierId: form.supplierId ?? "",
-    supplierCode: form.supplierCode ?? "",
-    supplierName: form.supplier || "",
-
+    supplierId: form.supplierId,
     currency: form.currency,
     status: form.status,
 
@@ -51,9 +33,10 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     taxCategory: form.taxCategory,
     shippingRule: form.shippingRule,
     incoterm: form.incoterm,
-    taxesChargesTemplate: form.taxesChargesTemplate,
 
     placeOfSupply: form.placeOfSupply,
+    taxesChargesTemplate: form.taxesChargesTemplate,
+
     addresses: form.addresses,
 
     paymentTermsTemplate: form.paymentTermsTemplate,
@@ -61,6 +44,14 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     terms: {
       selling: {
         general: form.termsAndConditions || "",
+        payment: {
+          phases: form.paymentRows.map((p, i) => ({
+            id: i + 1,
+            name: p.paymentTerm,
+            percentage: p.invoicePortion,
+            condition: p.description,
+          })),
+        },
       },
     },
 
@@ -78,17 +69,18 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     },
 
     metadata: {
-      remarks: "",
+      remarks: "Created from UI",
     },
   };
 };
+
 
 /**
  * Backend API → UI Form
  */
 export const mapApiToUI = (api: any): PurchaseOrderFormData => {
   return {
-    ...emptyPOForm, // 🔥 fills missing UI fields automatically
+    ...emptyPOForm, 
 
     poNumber: api.poNumber ?? "",
     date: api.poDate ?? "",

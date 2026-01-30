@@ -1,5 +1,5 @@
 import type { AxiosResponse } from "axios";
-import { createAxiosInstance } from "./axiosInstance";
+import { createAxiosInstance } from "../axiosInstance";
 
 const base_url = import.meta.env.VITE_SUPPLIER_API_URL as string;
 const api = createAxiosInstance(base_url);

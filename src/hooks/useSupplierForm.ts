@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import type { SupplierFormData, SupplierTab } from "../types/Supply/supplier";
 import { emptySupplierForm } from "../types/Supply/supplier";
-import { createSupplier, updateSupplier } from "../api/supplierApi";
+import { createSupplier,updateSupplier } from "../api/procurement/supplierApi";
 import { mapSupplierToApi } from "../types/Supply/supplierMapper";
 import { Supplier } from "../types/Supply/supplier";
 import { mapSupplierToForm } from "../types/Supply/supplierMapper";

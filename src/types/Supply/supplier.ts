@@ -65,3 +65,18 @@ export type Supplier = SupplierFormData & {
   supplierId?: string;
   status?: SupplierStatus;
 };
+
+
+export interface Supplierr {
+  id: string;
+  code: string;
+  name: string;
+  email?: string;
+  phone?: string;
+}
+
+
+export const currencySelectOptions = currencyOptions.map(c => ({
+  value: c,
+  label: c,
+}));

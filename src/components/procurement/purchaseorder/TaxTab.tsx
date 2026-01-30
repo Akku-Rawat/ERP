@@ -12,6 +12,22 @@ interface TaxTabProps {
   onRemoveTaxRow: (idx: number) => void;
 }
 
+const TAX_TYPES = [
+  "Actual",
+  "On Net Total",
+  "On Previous Row Amount",
+  "On Previous Row Total",
+  "On Item Quantity",
+];
+
+const ACCOUNT_HEADS = [
+  "Expenses Included In Valuation - I",
+  "Freight and Forwarding Charges - I",
+  "Marketing Expenses - I",
+  "Miscellaneous Expenses - I",
+];
+
+
 export const TaxTab: React.FC<TaxTabProps> = ({
   form,
   taxRows,
@@ -115,13 +131,31 @@ export const TaxTab: React.FC<TaxTabProps> = ({
                       <td className="px-3 py-2 text-center">{i + 1}</td>
 
                       <td className="px-1 py-1">
-                        <input className="w-full rounded border border-theme bg-app p-1 text-sm" value={row.type}
-                          onChange={(e) => onTaxRowChange(i, "type", e.target.value)} />
+                        <select
+                          className="w-full rounded border border-theme bg-app p-1 text-sm"
+                          value={row.type}
+                          onChange={(e) => onTaxRowChange(i, "type", e.target.value)}
+                        >
+                          <option value="">Select Type</option>
+                          {TAX_TYPES.map((t) => (
+                            <option key={t} value={t}>{t}</option>
+                          ))}
+                        </select>
+
                       </td>
 
                       <td className="px-1 py-1">
-                        <input className="w-full rounded border border-theme bg-app p-1 text-sm" value={row.accountHead}
-                          onChange={(e) => onTaxRowChange(i, "accountHead", e.target.value)} />
+                        <select
+                          className="w-full rounded border border-theme bg-app p-1 text-sm"
+                          value={row.accountHead}
+                          onChange={(e) => onTaxRowChange(i, "accountHead", e.target.value)}
+                        >
+                          <option value="">Select Account Head</option>
+                          {ACCOUNT_HEADS.map((a) => (
+                            <option key={a} value={a}>{a}</option>
+                          ))}
+                        </select>
+
                       </td>
 
                       <td className="px-1 py-1">

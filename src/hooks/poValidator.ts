@@ -3,7 +3,6 @@ import { PurchaseOrderFormData } from "../types/Supply/purchaseOrder";
 export const validatePO = (form: PurchaseOrderFormData) => {
   const errors: string[] = [];
 
-  if (!form.poNumber) errors.push("PO Number is required");
   if (!form.supplierId) errors.push("Supplier is required");
   if (!form.date) errors.push("PO Date is required");
   if (!form.requiredBy) errors.push("Required By date is required");
