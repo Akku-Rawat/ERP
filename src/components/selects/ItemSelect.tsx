@@ -11,6 +11,7 @@ interface ItemSelectProps {
     itemName: string;
     sellingPrice?: number;
   }) => void;
+  onAddNew?: () => void;
   className?: string;
 }
 
@@ -18,16 +19,15 @@ export default function ItemSelect({
   taxCategory = "",
   value = "",
   onChange,
+  onAddNew,
   className = "",
 }: ItemSelectProps) {
-  const [items, setItems] = useState<
-    {
-      id: string;
-      itemCode: string;
-      itemName: string;
-      sellingPrice?: number;
-    }[]
-  >([]);
+ const [items, setItems] = useState<Array<{
+  id: string;
+  itemCode: string;
+  itemName: string;
+  sellingPrice?: number;
+}>>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -164,16 +164,29 @@ export default function ItemSelect({
                     });
                   }}
                 >
-                  <div className="flex justify-between">
-                    <span>{it.itemName}</span>
-                    <span className="text-xs text-muted">{it.itemCode}</span>
-
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{it.itemName}</span>
+                    <span className="text-xs text-muted ml-2">Code: {it.itemCode}</span>
                   </div>
                 </li>
               ))}
 
               {filtered.length === 0 && (
-                <li className="px-4 py-2 text-muted">No items found</li>
+                <li className="px-4 py-3 text-center">
+                  <p className="text-muted mb-3">No items found</p>
+                  {onAddNew && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpen(false);
+                        onAddNew();
+                      }}
+                      className="px-3 py-1.5 bg-primary text-white rounded text-sm hover:bg-primary/90"
+                    >
+                      + Add New Item
+                    </button>
+                  )}
+                </li>
               )}
             </ul>
           </div>,
