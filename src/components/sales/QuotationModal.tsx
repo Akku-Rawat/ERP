@@ -18,7 +18,7 @@ import Modal from "../../components/ui/modal/modal";
 import toast from "react-hot-toast";
 import { User, Mail, Phone } from "lucide-react";
 
-<User size={16} className="text-muted" />;
+
 import {
   invoiceStatusOptions,
   currencySymbols,
@@ -101,68 +101,36 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     toast.success("Print functionality - Opens print dialog");
   };
 
-  return (
-    <div
-      className="fixed inset-0 flex items-center justify-center z-[9999] p-5"
-      style={{
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-      }}
-    >
-      <div
-        className="bg-app w-full h-full flex flex-col overflow-hidden"
-        style={{
-          borderRadius: "12px",
-          maxWidth: "1200px",
-          maxHeight: "75vh",
-          fontFamily:
-            "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-        }}
-      >
-        {/* Header */}
-        <div className="relative bg-primary border-b border-theme px-8 py-3 flex justify-between items-center shrink-0">
-          <div>
-            <h1 className="text-xl font-semibold text-main mb-0.5">
-              Create Quotation
-            </h1>
-            <p className="text-xs text-main">
-              Create and manage quotation details
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleFormSubmit}
-              className="bg-card hover:bg-[var(--primary-600)] text-white px-4 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors"
-            >
-              <Save size={14} />
-              Save
-            </button>
-            <button
-              onClick={handleFormSubmit}
-              className="bg-card hover:bg-[var(--primary-600)] text-white px-4 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors"
-            >
-              <Send size={14} />
-              Send
-            </button>
-            <button
-              onClick={handlePrint}
-              className="bg-card hover:bg-[var(--row-hover)] text-main border border-theme px-4 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors"
-            >
-              <Printer size={14} />
-              Print
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute right-3 top-1/2 -translate-y-1/2
-             pl-1.5 rounded-md
-             text-main hover:bg-danger/10 hover:text-danger
-             transition-colors "
-            >
-              <X size={16} />
-            </button>
-          </div>
+    const footerContent = (
+      <>
+        <Button variant="secondary" onClick={onClose} type="button">
+          Cancel
+        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" onClick={actions.handleReset} type="button">
+            Reset
+          </Button>
+          <Button variant="primary" type="submit" onClick={handleFormSubmit}>
+            Save Invoice
+          </Button>
         </div>
+      </>
+    );
+  
 
+  return (
+      <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Create Quotation"
+      subtitle="Create and manage quotation details"
+      icon={FileText}
+      footer={footerContent}
+      maxWidth="6xl"
+      height="81vh"
+    >
+        
+<form onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
         <div className="bg-card border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
@@ -236,40 +204,32 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 
         {/* Currency */}
         <div>
-          <label className="block text-[10px] font-medium text-main mb-1">
-            Currency
-          </label>
-          <select
+          
+          <Select
+          label="Currency "
             name="currencyCode"
             value={formData.currencyCode}
             onChange={actions.handleInputChange}
+            options={[...currencyOptions]}
             className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
           >
-            {currencyOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+           
+          </Select>
         </div>
 
         {/* Status */}
         <div>
-          <label className="block text-[10px] font-medium text-main mb-1">
-            Status
-          </label>
-          <select
+          
+          <Select
+          label="Status"
             name="invoiceStatus"
             value={formData.invoiceStatus}
             onChange={actions.handleInputChange}
+            options={[...invoiceStatusOptions]}
             className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
           >
-            {invoiceStatusOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            
+          </Select>
         </div>
 
         {/* LPO Number */}
@@ -850,37 +810,9 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="bg-primary border-t border-theme px-8 py-2.5 flex justify-between items-center shrink-0">
-          <div className="text-[11px] text-main flex items-center gap-1"></div>
-
-          <div className="flex items-center gap-2 pr-8">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-1.5 bg-card hover:bg-[var(--row-hover)] text-main border border-theme rounded text-xs font-medium cursor-pointer transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={actions.handleReset}
-              className="px-4 py-1.5 bg-card hover:bg-[var(--row-hover)] text-main border border-theme rounded text-xs font-medium cursor-pointer transition-colors"
-            >
-              Reset
-            </button>
-            <button
-              type="button"
-              onClick={handleFormSubmit}
-              className="px-4 py-1.5 bg-card hover:bg-[var(--row-hover)] text-main border border-theme rounded text-xs font-medium cursor-pointer flex items-center gap-1.5 transition-colors"
-            >
-              <Save size={14} />
-              Save Quotation
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+        
+     </form>
+    </Modal>
   );
 };
 
