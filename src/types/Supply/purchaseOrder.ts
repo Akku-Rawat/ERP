@@ -5,6 +5,7 @@ export interface ItemRow {
   quantity: number;
   uom: string;
   rate: number;
+  vatCd?: string;
 }
 
 export interface TaxRow {
@@ -40,8 +41,9 @@ export interface PurchaseOrderFormData {
   date: string;
   supplier: string;
   supplierId: string;
- supplierCode: string;
+  supplierCode: string;
   taxCategory: string;
+  exportToCountry: string; // New field for Export country
   shippingRule: string;
   incoterm: string;
   taxesChargesTemplate: string;
@@ -76,14 +78,14 @@ export interface PurchaseOrderFormData {
   sendPrint: boolean;
 }
 
-
 export const emptyItem: ItemRow = {
   itemCode: "",
-   itemName: "",
+  itemName: "",
   requiredBy: "",
   quantity: 0,
   uom: "Unit",
   rate: 0,
+  vatCd: "", // Empty, will be set based on tax category and item
 };
 
 export const emptyTaxRow: TaxRow = {
@@ -114,7 +116,6 @@ export const emptyAddress: AddressBlock = {
   email: "",
 };
 
-
 export const emptyPOForm: PurchaseOrderFormData = {
   poNumber: "",
   date: "",
@@ -123,6 +124,7 @@ export const emptyPOForm: PurchaseOrderFormData = {
   currency: "INR",
   status: "Draft",
   taxCategory: "",
+  exportToCountry: "", // Initialize new field
   shippingRule: "",
   incoterm: "",
   taxesChargesTemplate: "",
@@ -130,15 +132,31 @@ export const emptyPOForm: PurchaseOrderFormData = {
   project: "",
 
   addresses: {
-    supplierAddress: { ...emptyAddress, addressTitle: "Supplier Main Address", addressType: "Billing" },
-    dispatchAddress: { ...emptyAddress, addressTitle: "Warehouse Dispatch", addressType: "Shipping" },
-    shippingAddress: { ...emptyAddress, addressTitle: "Customer Delivery Address", addressType: "Shipping" },
-    companyBillingAddress: { ...emptyAddress, addressTitle: "Company HQ Billing", addressType: "Billing" },
+    supplierAddress: {
+      ...emptyAddress,
+      addressTitle: "Supplier Main Address",
+      addressType: "Billing",
+    },
+    dispatchAddress: {
+      ...emptyAddress,
+      addressTitle: "Warehouse Dispatch",
+      addressType: "Shipping",
+    },
+    shippingAddress: {
+      ...emptyAddress,
+      addressTitle: "Customer Delivery Address",
+      addressType: "Shipping",
+    },
+    companyBillingAddress: {
+      ...emptyAddress,
+      addressTitle: "Company HQ Billing",
+      addressType: "Billing",
+    },
   },
 
   placeOfSupply: "",
-supplierId: "",
-supplierCode: "",
+  supplierId: "",
+  supplierCode: "",
 
   paymentTermsTemplate: "",
   termsAndConditions: "",
@@ -148,8 +166,8 @@ supplierCode: "",
   roundedTotal: 0,
 
   items: [{ ...emptyItem }],
-  taxRows: [{ ...emptyTaxRow }],
-  paymentRows: [{ ...emptyPaymentRow }],
+  taxRows: [], // Start with empty array, user can add as needed
+  paymentRows: [], // Start with empty array, user can add as needed
 
   templateName: "",
   templateType: "",
@@ -158,6 +176,5 @@ supplierCode: "",
   sendAttachedFiles: false,
   sendPrint: false,
 };
-
 
 export type POTab = "details" | "email" | "tax" | "address" | "terms";
