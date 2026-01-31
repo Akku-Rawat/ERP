@@ -160,8 +160,6 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
           {/* DETAILS TAB */}
           {ui.activeTab === "details" && (
   <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
-
-    {/* ================= TOP QUOTATION DETAILS BAR ================= */}
     <div className="">
       <div className="grid grid-cols-6 gap-3 items-end">
 

@@ -85,16 +85,17 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     >
       <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
-        <div className="bg-card border-b border-theme px-8 shrink-0">
+           <div className="bg-card border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
             {(["details", "terms", "address"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => ui.setActiveTab(tab)}
-                className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${ui.activeTab === tab
-                    ? "text-primary bg-card shadow-sm"
-                    : "text-muted hover:bg-card/50"
+             className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all 
+              ${ui.activeTab === tab
+                        ? "text-primary border-b-[3px] border-primary"
+                    : "text-muted border-b-[3px] border-transparent hover:text-main"
                   }`}
               >
                 {tab === "details" && "Details"}
@@ -110,8 +111,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
           {/* DETAILS */}
           {ui.activeTab === "details" && (
             <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
-              <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-6 gap-4">
+    <div className="">
+      <div className="grid grid-cols-6 gap-3 items-end">
                   <CustomerSelect
                     value={customerNameDisplay}
                     onChange={actions.handleCustomerSelect}
@@ -124,7 +125,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     type="date"
                     value={formData.dateOfInvoice}
                     onChange={actions.handleInputChange}
-                    className="w-full"
+                     className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                   />
 
                   <div className="flex flex-col gap-1">
@@ -134,7 +135,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       type="date"
                       value={formData.dueDate}
                       onChange={actions.handleInputChange}
-                      className="w-full col-span-3"
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   </div>
 
@@ -144,7 +145,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       name="currencyCode"
                       value={formData.currencyCode}
                       onChange={actions.handleInputChange}
-                      options={currencyOptions}
+                      options={[...currencyOptions]}
+                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   </div>
 
@@ -154,19 +156,12 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       name="invoiceStatus"
                       value={formData.invoiceStatus}
                       onChange={actions.handleInputChange}
-                      options={invoiceStatusOptions}
+                      options={[...invoiceStatusOptions]}
+                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   </div>
 
-                    <div className="flex flex-col gap-1">
-                      <Select
-                        label="Invoice Status"
-                        name="invoiceStatus"
-                        value={formData.invoiceStatus}
-                        onChange={actions.handleInputChange}
-                        options={[...invoiceStatusOptions]}
-                      />
-                    </div>
+                 
 
                     {/* <div className="flex flex-col gap-1">
                           <Select
@@ -186,7 +181,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       disabled
                       value={formData.invoiceType}
                       onChange={actions.handleInputChange}
-                      className="w-full col-span-3"
+                     className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   </div>
 
@@ -211,7 +206,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                         disabled
                         value={formData.destnCountryCd}
                         onChange={actions.handleInputChange}
-                        className="w-full col-span-3"
+                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                       />
                     </div>
                   )}
@@ -223,6 +218,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       value={formData.lpoNumber}
                       onChange={actions.handleInputChange}
                       placeholder="local purchase order number"
+                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   )}
                 </div>
