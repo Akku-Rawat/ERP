@@ -10,22 +10,18 @@ import { AddressTab } from "../procurement/purchaseorder/AddressTab";
 import { TermsTab } from "../procurement/purchaseorder/TermsTab";
 import { usePurchaseOrderForm } from "../../hooks/usePurchaseOrderForm";
 import type { POTab } from "../../types/Supply/purchaseOrder";
-import { getPurchaseOrderById } from "../../api/procurement/PurchaseOrderApi";
-
-
-
 
 interface PurchaseOrderModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (data: any) => void;
-   poId?: string | number; 
+  poId?: string | number;
 }
 
 const tabs: { key: POTab; icon: typeof Building2; label: string }[] = [
   { key: "details", icon: Building2, label: "Details" },
-  { key: "email", icon: Mail, label: "Email" },
-  { key: "tax", icon: Calculator, label: "Tax" },
+  // { key: "email", icon: Mail, label: "Email" },
+  // { key: "tax", icon: Calculator, label: "Tax" },
   { key: "address", icon: MapPin, label: "Address" },
   { key: "terms", icon: FileText, label: "Terms" },
 ];
@@ -36,30 +32,31 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
   onSubmit,
   poId,
 }) => {
-const {
-  form,
-  setForm,
-  activeTab,
-  setActiveTab,
-  handleItemSelect,
-  handleFormChange,
-  handleSupplierChange,
-  handleItemChange,
-  addItem,
-  removeItem,
-  handleTaxRowChange,
-  addTaxRow,
-  removeTaxRow,
-  handlePaymentRowChange,
-  addPaymentRow,
-  removePaymentRow,
-  handleSaveTemplate,
-  resetTemplate,
-  getCurrencySymbol,
-  handleSubmit,
-  reset,
-} = usePurchaseOrderForm({ isOpen, onSuccess: onSubmit, onClose, poId });
-
+  const {
+    form,
+    setForm,
+    activeTab,
+    setActiveTab,
+    handleItemSelect,
+    handleFormChange,
+    handleSupplierChange,
+    handleItemChange,
+    addItem,
+    removeItem,
+    handleTaxRowChange,
+    addTaxRow,
+    removeTaxRow,
+    handlePaymentRowChange,
+    addPaymentRow,
+    removePaymentRow,
+    handleSaveTemplate,
+    resetTemplate,
+    getCurrencySymbol,
+    taxCategory,
+    setTaxCategory,
+    handleSubmit,
+    reset,
+  } = usePurchaseOrderForm({ isOpen, onSuccess: onSubmit, onClose, poId });
 
   const footer = (
     <>
@@ -70,14 +67,9 @@ const {
         <Button variant="secondary" onClick={reset}>
           Reset
         </Button>
-       <Button
-  variant="primary"
-  type="submit"
-  form="purchaseOrderForm"
->
-  Save Purchase Order
-</Button>
-
+        <Button variant="primary" type="submit" form="purchaseOrderForm">
+          Save Purchase Order
+        </Button>
       </div>
     </>
   );
@@ -101,11 +93,10 @@ const {
         className="h-full flex flex-col"
       >
         <form
-  id="purchaseOrderForm"
-  onSubmit={handleSubmit}
-  className="flex flex-col h-full overflow-hidden"
->
-
+          id="purchaseOrderForm"
+          onSubmit={handleSubmit}
+          className="flex flex-col h-full overflow-hidden"
+        >
           <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
             {tabs.map(({ key, icon: Icon, label }) => (
               <button
@@ -135,22 +126,21 @@ const {
           </div>
 
           <section className="flex-1 overflow-y-auto p-4 space-y-6">
-           {activeTab === "details" && (
-  <DetailsTab
-    form={form}
-    items={form.items}
-    onFormChange={handleFormChange}
-    onSupplierChange={handleSupplierChange}
-    onItemChange={handleItemChange}
-    onAddItem={addItem}
-    onRemoveItem={removeItem}
-    getCurrencySymbol={getCurrencySymbol}
-   onItemSelect={handleItemSelect}
-  />
-)}
-
-
-
+            {activeTab === "details" && (
+              <DetailsTab
+                form={form}
+                items={form.items}
+                onFormChange={handleFormChange}
+                onSupplierChange={handleSupplierChange}
+                onItemChange={handleItemChange}
+                onAddItem={addItem}
+                onRemoveItem={removeItem}
+                getCurrencySymbol={getCurrencySymbol}
+                onItemSelect={handleItemSelect}
+                taxCategory={taxCategory}
+                setTaxCategory={setTaxCategory}
+              />
+            )}
 
             {activeTab === "email" && (
               <EmailTab
@@ -159,11 +149,21 @@ const {
                 subject={form.subject}
                 sendAttachedFiles={form.sendAttachedFiles}
                 sendPrint={form.sendPrint}
-                onTemplateNameChange={(v) => setForm((p: any) => ({ ...p, templateName: v }))}
-                onTemplateTypeChange={(v) => setForm((p: any) => ({ ...p, templateType: v }))}
-                onSubjectChange={(v) => setForm((p: any) => ({ ...p, subject: v }))}
-                onSendAttachedFilesChange={(v) => setForm((p: any) => ({ ...p, sendAttachedFiles: v }))}
-                onSendPrintChange={(v) => setForm((p: any) => ({ ...p, sendPrint: v }))}
+                onTemplateNameChange={(v) =>
+                  setForm((p: any) => ({ ...p, templateName: v }))
+                }
+                onTemplateTypeChange={(v) =>
+                  setForm((p: any) => ({ ...p, templateType: v }))
+                }
+                onSubjectChange={(v) =>
+                  setForm((p: any) => ({ ...p, subject: v }))
+                }
+                onSendAttachedFilesChange={(v) =>
+                  setForm((p: any) => ({ ...p, sendAttachedFiles: v }))
+                }
+                onSendPrintChange={(v) =>
+                  setForm((p: any) => ({ ...p, sendPrint: v }))
+                }
                 onSaveTemplate={handleSaveTemplate}
                 onResetTemplate={resetTemplate}
               />

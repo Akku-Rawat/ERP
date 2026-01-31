@@ -38,20 +38,30 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onFormChange }) =>
     const data = A[keyName];
 
     return (
+      
+      
       <div className="bg-card border border-theme rounded-xl shadow-sm overflow-hidden">
+
+
+        
+        
+
 
         {/* HEADER */}
         <div className="flex items-center justify-between px-4 py-3 bg-app border-b border-theme">
           <div className="flex items-center gap-3">
             <div className="bg-primary/10 text-primary p-2 rounded-lg">
               <Icon size={18} />
+              
             </div>
+            
             <div>
+              
               <p className="text-sm font-semibold text-main">{title}</p>
               {subtitle && <p className="text-xs text-muted">{subtitle}</p>}
             </div>
           </div>
-
+          
           <div className="flex items-center gap-3">
             {extraRight}
             <button
@@ -67,10 +77,11 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onFormChange }) =>
         {/* BODY */}
         {open[keyName] && (
           <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-card text-main">
+            
 
             <Input label="Address Title" name={`addresses.${keyName}.addressTitle`} value={data.addressTitle} onChange={onFormChange} />
             <Input label="Address Type" name={`addresses.${keyName}.addressType`} value={data.addressType} onChange={onFormChange} />
-
+             
             <Input label="Address Line 1" name={`addresses.${keyName}.addressLine1`} value={data.addressLine1} onChange={onFormChange} />
             <Input label="Address Line 2" name={`addresses.${keyName}.addressLine2`} value={data.addressLine2} onChange={onFormChange} />
 
@@ -93,41 +104,59 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onFormChange }) =>
   };
 
   return (
-    <div className="space-y-6 bg-app text-main">
-
-      {/* Supplier Contact + Place of Supply */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-card border border-theme p-4 rounded-xl mt-8">
+    <>
+      {/* SHIPPING RULE + INCOTERM */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-card border border-theme p-4 rounded-xl">
         <Input
-          label="Supplier Contact"
-          name="supplierContact"
-          value={form.supplierContact}
+          label="Shipping Rule"
+          name="shippingRule"
+          value={form.shippingRule}
           onChange={onFormChange}
         />
 
         <Input
-          label="Place of Supply"
-          name="placeOfSupply"
-          value={form.placeOfSupply}
+          label="Incoterm"
+          name="incoterm"
+          value={form.incoterm}
           onChange={onFormChange}
         />
       </div>
+      <div className=" bg-app text-main">
 
-      {/* ADDRESS GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Supplier Contact + Place of Supply */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-card border border-theme p-4 rounded-xl mt-8">
+          <Input
+            label="Supplier Contact"
+            name="supplierContact"
+            value={form.supplierContact}
+            onChange={onFormChange}
+          />
 
-        {/* LEFT */}
-        <div className="space-y-4">
-          <Block title="Supplier Address" icon={MapPin} keyName="supplierAddress" />
-          <Block title="Company Billing Address" icon={Building2} keyName="companyBillingAddress" />
+          <Input
+            label="Place of Supply"
+            name="placeOfSupply"
+            value={form.placeOfSupply}
+            onChange={onFormChange}
+          />
         </div>
 
-        {/* RIGHT */}
-        <div className="space-y-4">
-          <Block title="Shipping Address" icon={Truck} keyName="shippingAddress" />
-          <Block title="Dispatch Address" icon={Truck} keyName="dispatchAddress" />
-        </div>
+        {/* ADDRESS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+          {/* LEFT */}
+          <div className="space-y-4">
+            <Block title="Supplier Address" icon={MapPin} keyName="supplierAddress" />
+            <Block title="Company Billing Address" icon={Building2} keyName="companyBillingAddress" />
+          </div>
+
+          {/* RIGHT */}
+          <div className="space-y-4">
+            <Block title="Shipping Address" icon={Truck} keyName="shippingAddress" />
+            <Block title="Dispatch Address" icon={Truck} keyName="dispatchAddress" />
+          </div>
+
+        </div>
       </div>
-    </div>
+    </>
   );
 };

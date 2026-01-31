@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { Input,  Card, Button } from "../../ui/modal/formComponent";
+import { Input, Card, Button } from "../../ui/modal/formComponent";
 import Select from "../../ui/Select";
 import type { ItemRow, PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
 import { currencyOptions } from "../../../types/Supply/supplier";
 import SupplierSelect from "../../selects/procurement/SupplierSelect";
 import POItemSelect from "../../selects/procurement/POItemSelect";
+import CountrySelect from "../../selects/CountrySelect"; // Your existing component
 
 interface DetailsTabProps {
   form: PurchaseOrderFormData;
   items: ItemRow[];
-
   onItemSelect: (item: any, idx: number) => void;
-
+  taxCategory: string;
+  setTaxCategory: (v: "Export" | "Non-Export" | "LPO") => void;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onSupplierChange: (s: any) => void;
   onItemChange: (e: React.ChangeEvent<HTMLInputElement>, idx: number) => void;
@@ -21,24 +22,38 @@ interface DetailsTabProps {
   getCurrencySymbol: () => string;
 }
 
-
-
 export const DetailsTab = ({
   form,
   items,
   onFormChange,
   onSupplierChange,
   onItemChange,
-  onItemSelect, 
+  onItemSelect,
   onAddItem,
   onRemoveItem,
+  taxCategory,
+  setTaxCategory,
   getCurrencySymbol,
 }: DetailsTabProps) => {
   const symbol = getCurrencySymbol();
 
-  //  Pagination Logic
+  // Pagination Logic
   const ITEMS_PER_PAGE = 5;
   const [page, setPage] = useState(0);
+
+  // Helper function to get VAT description
+  const getVatDescription = (vatCd: string): string => {
+    const descriptions: Record<string, string> = {
+      A: "Standard Rate",
+      B: "Reduced Rate",
+      C: "Zero Rate",
+      C1: "Export Zero-rated",
+      D: "Exempt",
+      E: "LPO Exempt",
+      F: "Reverse Charge",
+    };
+    return descriptions[vatCd] || "Standard";
+  };
 
   useEffect(() => {
     const newPage = Math.floor((items.length - 1) / ITEMS_PER_PAGE);
@@ -51,13 +66,12 @@ export const DetailsTab = ({
   );
 
   const currencySelectOptions = [
-  { value: "", label: "Select Currency" },
-  ...currencyOptions.map((c) => ({
-    value: c,
-    label: c,
-  })),
-];
-
+    { value: "", label: "Select Currency" },
+    ...currencyOptions.map((c) => ({
+      value: c,
+      label: c,
+    })),
+  ];
 
   return (
     <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4 mt-6 bg-app text-main">
@@ -68,8 +82,20 @@ export const DetailsTab = ({
             onChange={onSupplierChange}
           />
 
-          <Input label="Date" name="date" type="date" value={form.date} onChange={onFormChange} />
-          <Input label="Required By" name="requiredBy" type="date" value={form.requiredBy} onChange={onFormChange} />
+          <Input
+            label="Date"
+            name="date"
+            type="date"
+            value={form.date}
+            onChange={onFormChange}
+          />
+          <Input
+            label="Required By"
+            name="requiredBy"
+            type="date"
+            value={form.requiredBy}
+            onChange={onFormChange}
+          />
 
           <Select
             label="Currency"
@@ -78,7 +104,6 @@ export const DetailsTab = ({
             onChange={onFormChange}
             options={currencySelectOptions}
           />
-
 
           <div className="col-span-3 grid grid-cols-3 gap-4">
             <Select
@@ -93,20 +118,81 @@ export const DetailsTab = ({
                 { value: "Cancelled", label: "Cancelled" },
               ]}
             />
-            <Input label="Cost Center" name="costCenter" value={form.costCenter} onChange={onFormChange} />
-            <Input label="Project" name="project" value={form.project} onChange={onFormChange} />
+
+            <Select
+              label="Tax Category"
+              name="taxCategory"
+              value={taxCategory}
+              options={[
+                { label: "Export", value: "Export" },
+                { label: "Non-Export", value: "Non-Export" },
+                { label: "LPO", value: "LPO" },
+              ]}
+              onChange={(e) => setTaxCategory(e.target.value as any)}
+            />
+
+            <Select
+              label="Cost Center"
+              name="costCenter"
+              value={form.costCenter}
+              onChange={onFormChange}
+              options={[
+                { value: "Main - I", label: "Main - I" },
+                { value: "Manufacturing - I", label: "Manufacturing - I" },
+                { value: "manufacturineh - I", label: "manufacturineh - I" },
+              ]}
+            />
+
+            <Input
+              label="Project"
+              name="project"
+              value={form.project}
+              onChange={onFormChange}
+            />
           </div>
+
+          {/* Export to Country - Show only when Export is selected */}
+          {taxCategory === "Export" && (
+            <div className="col-span-4">
+              <CountrySelect
+                label="Export to Country"
+                value={form.exportToCountry}
+                onChange={(country) => {
+                  // Update both exportToCountry and placeOfSupply
+                  const event = {
+                    target: {
+                      name: "exportToCountry",
+                      value: country.name,
+                    },
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  onFormChange(event);
+
+                  // Also update placeOfSupply with country code
+                  const codeEvent = {
+                    target: {
+                      name: "placeOfSupply",
+                      value: country.code,
+                    },
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  onFormChange(codeEvent);
+                }}
+              />
+            </div>
+          )}
         </div>
 
         <div className="my-6 h-px border-theme border" />
 
-        <h3 className="mb-4 text-lg font-semibold underline text-main">Order Items</h3>
+        <h3 className="mb-4 text-lg font-semibold underline text-main">
+          Order Items
+        </h3>
 
         {/* Pagination Info */}
         <div className="flex justify-between text-sm text-muted mb-2">
           <span>
             Showing {page * ITEMS_PER_PAGE + 1}–
-            {Math.min((page + 1) * ITEMS_PER_PAGE, items.length)} of {items.length}
+            {Math.min((page + 1) * ITEMS_PER_PAGE, items.length)} of{" "}
+            {items.length}
           </span>
           <div className="flex gap-2">
             <button
@@ -138,6 +224,7 @@ export const DetailsTab = ({
                 <th className="px-2 py-2 text-left">Qty</th>
                 <th className="px-2 py-2 text-left">UOM</th>
                 <th className="px-2 py-2 text-left">Rate</th>
+                <th className="px-2 py-2 text-left">VAT Code</th>
                 <th className="px-2 py-2 text-right">Amount</th>
                 <th></th>
               </tr>
@@ -161,7 +248,6 @@ export const DetailsTab = ({
                         }}
                       />
                     </td>
-
 
                     <td className="px-0.5 py-0.5">
                       <input
@@ -202,8 +288,30 @@ export const DetailsTab = ({
                       />
                     </td>
 
+                    <td className="px-1 py-1">
+                      <div className="relative">
+                        <input
+                          className="w-full rounded border border-theme bg-app/50 p-1 text-sm text-center font-semibold cursor-not-allowed"
+                          name="vatCd"
+                          value={it.vatCd || "-"}
+                          readOnly
+                          disabled
+                          title={`VAT Code: ${
+                            taxCategory === "Export"
+                              ? "C1 (Export - Zero-rated)"
+                              : taxCategory === "LPO"
+                              ? "E (LPO - Exempt)"
+                              : taxCategory === "Non-Export"
+                              ? `${it.vatCd || "A"} (${getVatDescription(it.vatCd || "A")})`
+                              : "Select Tax Category first"
+                          }`}
+                        />
+                      </div>
+                    </td>
+
                     <td className="px-1 py-1 text-right font-medium">
-                      {symbol}{amount.toFixed(2)}
+                      {symbol}
+                      {amount.toFixed(2)}
                     </td>
 
                     <td className="px-1 py-1 text-center">
@@ -230,7 +338,9 @@ export const DetailsTab = ({
             <div className="space-y-2 text-sm text-main">
               <div className="flex justify-between">
                 <span className="font-medium text-muted">Supplier Name</span>
-                <span className="font-medium">{form.supplier || "Not Selected"}</span>
+                <span className="font-medium">
+                  {form.supplier || "Not Selected"}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium text-muted">Contact</span>
@@ -238,7 +348,9 @@ export const DetailsTab = ({
               </div>
               <div className="flex justify-between">
                 <span className="text-base font-semibold">Email Address</span>
-                <span className="text-base font-bold text-primary">supplier@example.com</span>
+                <span className="text-base font-bold text-primary">
+                  supplier@example.com
+                </span>
               </div>
             </div>
           </Card>
@@ -255,15 +367,24 @@ export const DetailsTab = ({
               </div>
               <div className="flex justify-between">
                 <span className="font-medium text-muted">Grand Total</span>
-                <span className="font-medium">{symbol}{form.grandTotal.toFixed(2)}</span>
+                <span className="font-medium">
+                  {symbol}
+                  {form.grandTotal.toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium text-muted">Rounding Adj</span>
-                <span className="font-medium">{symbol}{form.roundingAdjustment.toFixed(2)}</span>
+                <span className="font-medium">
+                  {symbol}
+                  {form.roundingAdjustment.toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between border-t border-theme pt-2 mt-2">
                 <span className="text-base font-semibold">Rounded Total</span>
-                <span className="text-base font-bold text-primary">{symbol}{form.roundedTotal.toFixed(2)}</span>
+                <span className="text-base font-bold text-primary">
+                  {symbol}
+                  {form.roundedTotal.toFixed(2)}
+                </span>
               </div>
             </div>
           </Card>

@@ -56,7 +56,7 @@ export const TaxTab: React.FC<TaxTabProps> = ({
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Input label="Tax Category" name="taxCategory" value={form.taxCategory} onChange={onFormChange} />
+       
         <Input label="Shipping Rule" name="shippingRule" value={form.shippingRule} onChange={onFormChange} />
         <Input label="Incoterm" name="incoterm" value={form.incoterm} onChange={onFormChange} />
       </div>
