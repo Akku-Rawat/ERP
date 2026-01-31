@@ -428,28 +428,27 @@ const AccountingModule: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="p-6 bg-app ">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold flex items-center gap-3 text-gray-900">
-            <FaBriefcase className="text-blue-600" />
+   
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold flex items-center gap-2 text-main">
+            <FaBriefcase />
             Accounting
-          </h1>
+          </h2>
         </div>
-      </div>
+      
 
       {/* Clean Single-Row Tabs */}
-      <div className="bg-white border-b border-gray-200 px-6">
-        <div className="flex gap-1 overflow-x-auto">
+       <div className="flex border-b border-gray-200 mb-4">
           {allTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 font-medium text-sm whitespace-nowrap transition-all border-b-2 ${
+              className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors  ${
                 activeTab === tab.id
-                  ? "text-blue-600 border-blue-600"
-                  : "text-gray-600 border-transparent hover:text-gray-900 hover:border-gray-300"
+                       ? "text-primary border-b-2 border-current"
+                      : "text-muted hover:text-main"
               }`}
             >
               <span className="text-lg">{tab.icon}</span>
@@ -457,10 +456,10 @@ const AccountingModule: React.FC = () => {
             </button>
           ))}
         </div>
-      </div>
+      
 
       {/* Content */}
-      <div className="p-6">
+      <div>
         {activeTab === "gl" && (
           <GeneralLedger
             glSubTab={glSubTab}

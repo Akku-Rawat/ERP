@@ -2,16 +2,11 @@ import {
   Plus,
   Trash2,
   FileText,
-  Calendar,
-  MoreVertical,
-  Save,
-  Send,
-  Printer,
-  X,
 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 import { useQuotationForm } from "../../hooks/useQuotationForm";
-import { Input, Select, Button } from "../../components/ui/modal/formComponent";
+import {  Button } from "../../components/ui/modal/formComponent";
+import { ModalSelect,ModalInput } from "../ui/modal/modalComponent";
 import CustomerSelect from "../selects/CustomerSelect";
 import ItemSelect from "../selects/ItemSelect";
 import Modal from "../../components/ui/modal/modal";
@@ -130,9 +125,9 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
       height="81vh"
     >
         
-<form onSubmit={handleFormSubmit} className="h-full flex flex-col">
+      <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
-        <div className="bg-card border-b border-theme px-8 shrink-0">
+        <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
             {[
               { key: "details", label: "Details" },
@@ -164,13 +159,13 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
       <div className="grid grid-cols-6 gap-3 items-end">
 
         {/* Customer */}
-        <div>
+       
           <CustomerSelect
             value={customerNameDisplay}
             onChange={actions.handleCustomerSelect}
             className="w-full"
           />
-        </div>
+     
 
         {/* Date of Quotation */}
         <div>
@@ -203,8 +198,8 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
         {/* Currency */}
         <div>
           
-          <Select
-          label="Currency "
+          <ModalSelect
+            label="Currency "
             name="currencyCode"
             value={formData.currencyCode}
             onChange={actions.handleInputChange}
@@ -212,14 +207,14 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
             className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
           >
            
-          </Select>
+          </ModalSelect>
         </div>
 
         {/* Status */}
         <div>
           
-          <Select
-          label="Status"
+          <ModalSelect
+           label="Status"
             name="invoiceStatus"
             value={formData.invoiceStatus}
             onChange={actions.handleInputChange}
@@ -227,7 +222,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
             className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
           >
             
-          </Select>
+          </ModalSelect>
         </div>
 
         {/* LPO Number */}
@@ -599,7 +594,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                 </h3>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <Input
+                  <ModalInput
                     label="Line 1"
                     name="line1"
                     value={formData.billingAddress.line1}
@@ -608,7 +603,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     }
                     placeholder="Street, Apartment"
                   />
-                  <Input
+                  <ModalInput
                     label="Line 2"
                     name="line2"
                     value={formData.billingAddress.line2}
@@ -617,7 +612,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     }
                     placeholder="Landmark, City"
                   />
-                  <Input
+                  <ModalInput
                     label="Postal Code"
                     name="postalCode"
                     value={formData.billingAddress.postalCode}
@@ -626,7 +621,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     }
                     placeholder="Postal Code"
                   />
-                  <Input
+                  <ModalInput
                     label="City"
                     name="city"
                     value={formData.billingAddress.city}
@@ -635,7 +630,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     }
                     placeholder="City"
                   />
-                  <Input
+                  <ModalInput
                     label="State"
                     name="state"
                     value={formData.billingAddress.state}
@@ -644,7 +639,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     }
                     placeholder="State"
                   />
-                  <Input
+                  <ModalInput
                     label="Country"
                     name="country"
                     value={formData.billingAddress.country}
@@ -683,7 +678,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 
                 {ui.isShippingOpen && (
                   <div className="grid grid-cols-2 gap-3 mt-3">
-                    <Input
+                    <ModalInput
                       label="Line 1"
                       name="line1"
                       value={formData.shippingAddress.line1}
@@ -693,7 +688,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       placeholder="Street, Apartment"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="Line 2"
                       name="line2"
                       value={formData.shippingAddress.line2}
@@ -703,7 +698,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       placeholder="Landmark, City"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="Postal Code"
                       name="postalCode"
                       value={formData.shippingAddress.postalCode}
@@ -713,7 +708,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       placeholder="Postal Code"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="City"
                       name="city"
                       value={formData.shippingAddress.city}
@@ -723,7 +718,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       placeholder="City"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="State"
                       name="state"
                       value={formData.shippingAddress.state}
@@ -733,7 +728,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       placeholder="State"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="Country"
                       name="country"
                       value={formData.shippingAddress.country}
@@ -754,7 +749,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                 </h3>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <Input
+                  <ModalInput
                     label="Payment Terms"
                     name="paymentTerms"
                     value={formData.paymentInformation.paymentTerms}
@@ -763,16 +758,16 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     }
                     placeholder="e.g., Net 30, Due on Receipt"
                   />
-                  <Select
+                  <ModalSelect
                     label="Payment Method"
                     name="paymentMethod"
                     value={formData.paymentInformation.paymentMethod}
                     onChange={(e) =>
                       actions.handleInputChange(e, "paymentInformation")
                     }
-                    options={paymentMethodOptions}
+                    options={[...paymentMethodOptions]}
                   />
-                  <Input
+                  <ModalInput
                     label="Bank Name"
                     name="bankName"
                     value={formData.paymentInformation.bankName}
@@ -780,7 +775,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       actions.handleInputChange(e, "paymentInformation")
                     }
                   />
-                  <Input
+                  <ModalInput
                     label="Account Number"
                     name="accountNumber"
                     value={formData.paymentInformation.accountNumber}
@@ -788,7 +783,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       actions.handleInputChange(e, "paymentInformation")
                     }
                   />
-                  <Input
+                  <ModalInput
                     label="Routing Number / IBAN"
                     name="routingNumber"
                     value={formData.paymentInformation.routingNumber}
@@ -796,7 +791,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       actions.handleInputChange(e, "paymentInformation")
                     }
                   />
-                  <Input
+                  <ModalInput
                     label="SWIFT / BIC"
                     name="swiftCode"
                     value={formData.paymentInformation.swiftCode}

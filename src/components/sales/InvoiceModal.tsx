@@ -6,7 +6,8 @@ import { User, Mail, Phone } from "lucide-react";
 
 import CustomerSelect from "../selects/CustomerSelect";
 import Modal from "../../components/ui/modal/modal";
-import { Input, Select, Button } from "../../components/ui/modal/formComponent";
+import {  Button } from "../../components/ui/modal/formComponent";
+import { ModalInput,ModalSelect } from "../ui/modal/modalComponent";
 import toast from "react-hot-toast";
 import ItemSelect from "../selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
@@ -17,8 +18,8 @@ import {
   currencyOptions,
 } from "../../constants/invoice.constants";
 
-// import Input from "../ui/Input";
-// import Select from "../ui/Select";
+// import ModalInput from "../ui/ModalInput";
+// import ModalSelect from "../ui/ModalSelect";
 
 interface InvoiceModalProps {
   isOpen: boolean;
@@ -85,7 +86,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     >
       <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
-           <div className="bg-card border-b border-theme px-8 shrink-0">
+           <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
             {(["details", "terms", "address"] as const).map((tab) => (
               <button
@@ -107,19 +108,19 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
         </div>
 
         {/* Tab Content */}
-        <div className="flex-1 overflow-y-auto px-8 py-4">
+        <div className="flex-1 overflow-y-auto px-8 py-4 ">
           {/* DETAILS */}
           {ui.activeTab === "details" && (
             <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
-    <div className="">
-      <div className="grid grid-cols-6 gap-3 items-end">
+              <div className="">
+                <div className="grid grid-cols-6 gap-3 items-end">
                   <CustomerSelect
                     value={customerNameDisplay}
                     onChange={actions.handleCustomerSelect}
                     className="w-full"
                   />
 
-                  <Input
+                  <ModalInput
                     label="Date of Invoice"
                     name="dateOfInvoice"
                     type="date"
@@ -128,8 +129,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                   />
 
-                  <div className="flex flex-col gap-1">
-                    <Input
+                  <div>
+                    <ModalInput
                       label="Due Date"
                       name="dueDate"
                       type="date"
@@ -139,8 +140,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     />
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <Select
+                  <div >
+                    <ModalSelect
                       label="Currency"
                       name="currencyCode"
                       value={formData.currencyCode}
@@ -150,31 +151,23 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     />
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <Select
+                  <div>
+                    <ModalSelect
                       label="Invoice Status"
                       name="invoiceStatus"
                       value={formData.invoiceStatus}
                       onChange={actions.handleInputChange}
                       options={[...invoiceStatusOptions]}
-                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   </div>
 
                  
 
-                    {/* <div className="flex flex-col gap-1">
-                          <Select
-                            label="Invoice Type"
-                            name="invoiceType"
-                            value={formData.invoiceType}
-                            onChange={actions.handleInputChange}
-                            options={invoiceTypeOptions}
-                          />
-                        </div> */}
+                    
 
-                  <div className="flex flex-col gap-1">
-                    <Input
+                  {/* <div>
+                    <ModalInput
                       label="Invoice Type"
                       name="invoiceType"
                       type="text"
@@ -183,7 +176,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       onChange={actions.handleInputChange}
                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
-                  </div>
+                  </div> */}
 
                   {ui.isExport && (
                     // <CountrySelect
@@ -198,8 +191,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     //   }
                     // />
 
-                    <div className="flex flex-col gap-1">
-                      <Input
+                    <div>
+                      <ModalInput
                         label="Export To Country"
                         name="destnCountryCd"
                         type="text"
@@ -212,7 +205,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   )}
 
                   {ui.isLocal && (
-                    <Input
+                    <ModalInput
                       label="LPO Number"
                       name="lpoNumber"
                       value={formData.lpoNumber}
@@ -262,7 +255,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                           return (
                             <tr
                               key={i}
-                              className="hover:bg-blue-50/40 odd:bg-white even:bg-gray-50"
+                              className="border-b border-theme bg-card row-hover"
                             >
                               <td className="px-3 py-2 text-center">{i + 1}</td>
                               <td className="px-0.5 py-1">
@@ -425,6 +418,35 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                         <Phone size={12} />
                         {customerDetails?.mobile_no ?? "+123 4567890"}
                       </div>
+                      {customerDetails && (
+                      <div className="bg-card rounded-lg ">
+                        <h3 className="text-[11px] font-semibold text-main mb-1">
+                          Invoice Information
+                        </h3>
+
+                        <div className="flex flex-col gap-1">
+                          {/* Invoice Type */}
+                          <div className="flex items-center gap-19 text-xs">
+                            <span className="text-muted">Invoice Type</span>
+                            <span className="font-medium text-main">
+                              {formData.invoiceType}
+                            </span>
+                          </div>
+
+                          {/* Destination Country – only for Export */}
+                          {formData.invoiceType === "Export" && (
+                            <div className="flex items-center gap-15 text-xs">
+                              <span className="text-muted">
+                                Destination Country
+                              </span>
+                              <span className="font-medium text-main">
+                                {formData.destnCountryCd || "-"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     </div>
                   </div>
 
@@ -492,7 +514,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                  <Input
+                  <ModalInput
                     label="Line 1"
                     name="line1"
                     value={formData.billingAddress.line1}
@@ -501,7 +523,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     }
                     placeholder="Street, Apartment"
                   />
-                  <Input
+                  <ModalInput
                     label="Line 2"
                     name="line2"
                     value={formData.billingAddress.line2}
@@ -510,7 +532,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     }
                     placeholder="Landmark, City"
                   />
-                  <Input
+                  <ModalInput
                     label="Postal Code"
                     name="postalCode"
                     value={formData.billingAddress.postalCode}
@@ -519,7 +541,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     }
                     placeholder="Postal Code"
                   />
-                  <Input
+                  <ModalInput
                     label="City"
                     name="city"
                     value={formData.billingAddress.city}
@@ -528,7 +550,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     }
                     placeholder="City"
                   />
-                  <Input
+                  <ModalInput
                     label="State"
                     name="state"
                     value={formData.billingAddress.state}
@@ -537,7 +559,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     }
                     placeholder="State"
                   />
-                  <Input
+                  <ModalInput
                     label="Country"
                     name="country"
                     value={formData.billingAddress.country}
@@ -577,7 +599,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
                 {ui.isShippingOpen && (
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                    <Input
+                    <ModalInput
                       label="Line 1"
                       name="line1"
                       value={formData.shippingAddress.line1}
@@ -587,7 +609,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       placeholder="Street, Apartment"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="Line 2"
                       name="line2"
                       value={formData.shippingAddress.line2}
@@ -597,7 +619,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       placeholder="Landmark, City"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="Postal Code"
                       name="postalCode"
                       value={formData.shippingAddress.postalCode}
@@ -607,7 +629,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       placeholder="Postal Code"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="City"
                       name="city"
                       value={formData.shippingAddress.city}
@@ -617,7 +639,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       placeholder="City"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="State"
                       name="state"
                       value={formData.shippingAddress.state}
@@ -627,7 +649,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       placeholder="State"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="Country"
                       name="country"
                       value={formData.shippingAddress.country}
@@ -646,7 +668,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   Payment Information
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                  <Input
+                  <ModalInput
                     label="Payment Terms"
                     name="paymentTerms"
                     value={formData.paymentInformation.paymentTerms}
@@ -655,7 +677,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     }
                     placeholder="e.g., Net 30, Due on Receipt"
                   />
-                  <Select
+                  <ModalSelect
                     label="Payment Method"
                     name="paymentMethod"
                     value={formData.paymentInformation.paymentMethod}
@@ -665,7 +687,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     options={[...paymentMethodOptions]}
                   />
 
-                  <Input
+                  <ModalInput
                     label="Bank Name"
                     name="bankName"
                     value={formData.paymentInformation.bankName}
@@ -673,7 +695,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       actions.handleInputChange(e, "paymentInformation")
                     }
                   />
-                  <Input
+                  <ModalInput
                     label="Account Number"
                     name="accountNumber"
                     value={formData.paymentInformation.accountNumber}
@@ -681,7 +703,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       actions.handleInputChange(e, "paymentInformation")
                     }
                   />
-                  <Input
+                  <ModalInput
                     label="Routing Number / IBAN"
                     name="routingNumber"
                     value={formData.paymentInformation.routingNumber}
@@ -689,7 +711,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       actions.handleInputChange(e, "paymentInformation")
                     }
                   />
-                  <Input
+                  <ModalInput
                     label="SWIFT / BIC"
                     name="swiftCode"
                     value={formData.paymentInformation.swiftCode}

@@ -10,12 +10,9 @@ import { getAllSalesInvoices } from "../../api/salesApi";
 import { createCreditNoteFromInvoice } from "../../api/salesApi";
 
 import {
-  Input,
-  Select,
-  Button,
   Textarea,
 } from "../../components/ui/modal/formComponent";
-
+import { ModalInput,ModalSelect } from "../../components/ui/modal/modalComponent";
 import ItemSelect from "../../components/selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
@@ -25,8 +22,8 @@ import {
   currencyOptions,
 } from "../../constants/invoice.constants";
 
-// import Input from "../ui/Input";
-// import Select from "../ui/Select";
+// import ModalInput from "../ui/ModalInput";
+// import ModalSelect from "../ui/ModalSelect";
 
 interface CreditNoteInvoiceLikeFormProps {
   onSubmit?: (data: any) => void;
@@ -159,7 +156,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
 
       onSubmit?.(res);
     } catch (err) {
-      console.error("Create Credit Note failed", err);
+      console.error("Credit Note failed", err);
     }
   };
 
@@ -168,7 +165,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
   return (
     <form onSubmit={actions.handleSubmit} className="h-full flex flex-col">
       {/* Tabs */}
-        <div className="bg-card border-b border-theme px-8 shrink-0">
+        <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
         {(["details", "terms", "address"] as const).map((tab) => (
           <button
@@ -199,7 +196,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
               
              
 
-                       <Select
+                       <ModalSelect
                     label="Invoice Number"
                     options={invoiceOptions}
                     value={formData.invoiceNumber ?? ""}
@@ -216,7 +213,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
 
 
                   
-                  <Select
+                  <ModalSelect
                     label="Credit Note Reason Code"
                     required
                     options={CREDIT_NOTE_REASONS}
@@ -230,7 +227,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                   />
 
-                   <Select
+                   <ModalSelect
                     label="Transaction Progress"
                     required
                     options={TRANSACTION_PROGRESS}
@@ -261,7 +258,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   />
                 )}
                   <div >
-                    <Select
+                    <ModalSelect
                       label="Currency"
                       name="currencyCode"
                       value={formData.currencyCode}
@@ -273,7 +270,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   </div>
 
                   <div >
-                    <Select
+                    <ModalSelect
                       label="Invoice Status"
                       name="invoiceStatus"
                       disabled
@@ -284,18 +281,8 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                     />
                   </div>
 
-                  {/* <div className="flex flex-col gap-1">
-                          <Select
-                            label="Invoice Type"
-                            name="invoiceType"
-                            value={formData.invoiceType}
-                            onChange={actions.handleInputChange}
-                            options={invoiceTypeOptions}
-                          />
-                        </div> */}
-
-                  <div>
-                    <Input
+                  {/* <div>
+                    <ModalInput
                       label="Invoice Type"
                       name="invoiceType"
                       type="text"
@@ -304,23 +291,23 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                       onChange={actions.handleInputChange}
                          className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
-                  </div>
+                  </div> */}
 
-                  {ui.isExport && (
-                    // <CountrySelect
-                    //   value={formData.destnCountryCd}
-                    //   onChange={(c) =>
-                    //     actions.handleInputChange({
-                    //       target: {
-                    //         name: "destnCountryCd",
-                    //         value: c.code,
-                    //       },
-                    //     } as any)
-                    //   }
-                    // />
+                  {/* {ui.isExport && (
+                    <CountrySelect
+                      value={formData.destnCountryCd}
+                      onChange={(c) =>
+                        actions.handleInputChange({
+                          target: {
+                            name: "destnCountryCd",
+                            value: c.code,
+                          },
+                        } as any)
+                      }
+                    />
 
                     <div >
-                      <Input
+                      <ModalInput
                         label="Export To Country"
                         name="destnCountryCd"
                         type="text"
@@ -330,10 +317,10 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                            className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                       />
                     </div>
-                  )}
+                  )} */}
 
                   {ui.isLocal && (
-                    <Input
+                    <ModalInput
                       label="LPO Number"
                       name="lpoNumber"
                       value={formData.lpoNumber}
@@ -546,6 +533,36 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                         <Phone size={12} />
                         {customerDetails?.mobile_no ?? "+123 4567890"}
                       </div>
+
+                       {customerDetails && (
+                      <div className="bg-card rounded-lg ">
+                        <h3 className="text-[11px] font-semibold text-main mb-1">
+                          Invoice Information
+                        </h3>
+
+                        <div className="flex flex-col gap-1">
+                          {/* Invoice Type */}
+                          <div className="flex items-center gap-19 text-xs">
+                            <span className="text-muted">Invoice Type</span>
+                            <span className="font-medium text-main">
+                              {formData.invoiceType}
+                            </span>
+                          </div>
+
+                          {/* Destination Country – only for Export */}
+                          {formData.invoiceType === "Export" && (
+                            <div className="flex items-center gap-15 text-xs">
+                              <span className="text-muted">
+                                Destination Country
+                              </span>
+                              <span className="font-medium text-main">
+                                {formData.destnCountryCd || "-"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     </div>
                   </div>
 
@@ -613,7 +630,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                <Input
+                <ModalInput
                   label="Line 1"
                   name="line1"
                   value={formData.billingAddress.line1}
@@ -622,7 +639,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   }
                   placeholder="Street, Apartment"
                 />
-                <Input
+                <ModalInput
                   label="Line 2"
                   name="line2"
                   value={formData.billingAddress.line2}
@@ -631,7 +648,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   }
                   placeholder="Landmark, City"
                 />
-                <Input
+                <ModalInput
                   label="Postal Code"
                   name="postalCode"
                   value={formData.billingAddress.postalCode}
@@ -640,7 +657,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   }
                   placeholder="Postal Code"
                 />
-                <Input
+                <ModalInput
                   label="City"
                   name="city"
                   value={formData.billingAddress.city}
@@ -649,7 +666,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   }
                   placeholder="City"
                 />
-                <Input
+                <ModalInput
                   label="State"
                   name="state"
                   value={formData.billingAddress.state}
@@ -658,7 +675,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   }
                   placeholder="State"
                 />
-                <Input
+                <ModalInput
                   label="Country"
                   name="country"
                   value={formData.billingAddress.country}
@@ -698,7 +715,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
 
               {ui.isShippingOpen && (
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                  <Input
+                  <ModalInput
                     label="Line 1"
                     name="line1"
                     value={formData.shippingAddress.line1}
@@ -708,7 +725,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                     placeholder="Street, Apartment"
                     disabled={ui.sameAsBilling}
                   />
-                  <Input
+                  <ModalInput
                     label="Line 2"
                     name="line2"
                     value={formData.shippingAddress.line2}
@@ -718,7 +735,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                     placeholder="Landmark, City"
                     disabled={ui.sameAsBilling}
                   />
-                  <Input
+                  <ModalInput
                     label="Postal Code"
                     name="postalCode"
                     value={formData.shippingAddress.postalCode}
@@ -728,7 +745,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                     placeholder="Postal Code"
                     disabled={ui.sameAsBilling}
                   />
-                  <Input
+                  <ModalInput
                     label="City"
                     name="city"
                     value={formData.shippingAddress.city}
@@ -738,7 +755,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                     placeholder="City"
                     disabled={ui.sameAsBilling}
                   />
-                  <Input
+                  <ModalInput
                     label="State"
                     name="state"
                     value={formData.shippingAddress.state}
@@ -748,7 +765,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                     placeholder="State"
                     disabled={ui.sameAsBilling}
                   />
-                  <Input
+                  <ModalInput
                     label="Country"
                     name="country"
                     value={formData.shippingAddress.country}
@@ -767,7 +784,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                 Payment Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                <Input
+                <ModalInput
                   label="Payment Terms"
                   name="paymentTerms"
                   value={formData.paymentInformation.paymentTerms}
@@ -776,17 +793,17 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   }
                   placeholder="e.g., Net 30, Due on Receipt"
                 />
-                <Select
+                <ModalSelect
                   label="Payment Method"
                   name="paymentMethod"
                   value={formData.paymentInformation.paymentMethod}
                   onChange={(e) =>
                     actions.handleInputChange(e, "paymentInformation")
                   }
-                  options={paymentMethodOptions}
+                  options={[...paymentMethodOptions]}
                 />
 
-                <Input
+                <ModalInput
                   label="Bank Name"
                   name="bankName"
                   value={formData.paymentInformation.bankName}
@@ -794,7 +811,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                     actions.handleInputChange(e, "paymentInformation")
                   }
                 />
-                <Input
+                <ModalInput
                   label="Account Number"
                   name="accountNumber"
                   value={formData.paymentInformation.accountNumber}
@@ -802,7 +819,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                     actions.handleInputChange(e, "paymentInformation")
                   }
                 />
-                <Input
+                <ModalInput
                   label="Routing Number / IBAN"
                   name="routingNumber"
                   value={formData.paymentInformation.routingNumber}
@@ -810,7 +827,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                     actions.handleInputChange(e, "paymentInformation")
                   }
                 />
-                <Input
+                <ModalInput
                   label="SWIFT / BIC"
                   name="swiftCode"
                   value={formData.paymentInformation.swiftCode}

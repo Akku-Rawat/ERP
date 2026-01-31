@@ -19,7 +19,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           </span>
         )}
         {label}
-        {props.required && <span className="text-red-500">*</span>}
+        {props.required && <span className="text-danger">*</span>}
       </span>
       <input
         ref={ref}

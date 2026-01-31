@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ApprovalModal from "../../components/procurement/ApprovalModal"; // Make sure the path is correct
+import ApprovalModal from "../../components/procurement/ApprovalModal";
 
 interface ApprovalsSectionProps {
   onAdd: () => void;
@@ -16,19 +16,22 @@ const ApprovalsSection: React.FC<ApprovalsSectionProps> = ({ onAdd }) => {
   const handleCloseModal = () => setModalOpen(false);
 
   return (
-    <div className="text-center py-12">
-      <h3 className="text-xl font-semibold text-gray-700 mb-2">
+    <div className="text-center py-12 bg-app">
+      <h3 className="text-xl font-semibold text-main mb-2">
         Pending Approvals
       </h3>
-      <p className="text-gray-500">
+
+      <p className="text-muted">
         Approval workflow interface will be implemented here.
       </p>
+
       <button
         onClick={handleAddClick}
-        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition font-medium shadow-sm"
+        className="mt-4 bg-primary px-4 py-2 rounded-md transition font-medium shadow-sm"
       >
         + Add Approval
       </button>
+
       {/* Approval Modal */}
       <ApprovalModal
         isOpen={modalOpen}

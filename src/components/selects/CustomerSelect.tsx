@@ -81,13 +81,12 @@ useEffect(() => {
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      <span className="font-medium text-muted text-sm">{label}</span>
+      <span className="block text-[10px] font-medium text-main ">{label}</span>
 
 
       <div ref={containerRef} className="relative w-full">
     <input
-  className="w-full rounded border border-theme bg-card text-main px-3 py-2 text-sm 
-  focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+          className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
 
           placeholder={loading ? "Loading..." : "Search customer..."}
           value={search}

@@ -154,11 +154,7 @@ const SalesDashboard: React.FC = () => {
   return (
     <div className="bg-app w-full min-h-screen p-4 md:p-6 lg:p-8">
       <div className="max-w-[1600px] mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-main mb-1">Sales Dashboard</h1>
-          <p className="text-muted text-sm">Track your sales performance and customer insights</p>
-        </div>
+       
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

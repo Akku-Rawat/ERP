@@ -11,11 +11,9 @@ import toast from "react-hot-toast";
 import { createDebitNoteFromInvoice } from "../../api/salesApi";
 
 import {
-  Input,
-  Select,
-  Button,
   Textarea,
 } from "../../components/ui/modal/formComponent";
+import { ModalInput,ModalSelect } from "../../components/ui/modal/modalComponent";
 
 import ItemSelect from "../../components/selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
@@ -26,8 +24,6 @@ import {
   currencyOptions,
 } from "../../constants/invoice.constants";
 
-// import Input from "../ui/Input";
-// import Select from "../ui/Select";
 
 interface DebitNoteFormProps {
   onSubmit?: (data: any) => void;
@@ -165,7 +161,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
   return (
     <form onSubmit={actions.handleSubmit} className="h-full flex flex-col">
       {/* Tabs */}
-       <div className="bg-card border-b border-theme px-8 shrink-0">
+       <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
         {(["details", "terms", "address"] as const).map((tab) => (
           <button
@@ -195,7 +191,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
       <div className="grid grid-cols-6 gap-3 items-end">
              
       
-                  <Select
+                  <ModalSelect
                     label="Invoice Number"
                     options={invoiceOptions}
                     value={formData.invoiceNumber ?? ""}
@@ -209,7 +205,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                     }
                   />
 
-                  <Select
+                  <ModalSelect
                     label="Debit Note Reason Code"
                     required
                     options={DEBIT_NOTE_REASONS}
@@ -222,7 +218,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                     }
                   />
 
-                  <Select
+                  <ModalSelect
                     label="Transaction Progress"
                     required
                     options={TRANSACTION_PROGRESS}
@@ -255,29 +251,29 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
 
            
                   <div>
-                    <Select
+                    <ModalSelect
                       label="Currency"
                       name="currencyCode"
                       value={formData.currencyCode}
                       disabled
                       onChange={actions.handleInputChange}
-                      options={currencyOptions}
+                      options={[...currencyOptions]}
                     />
                   </div>
 
                   <div>
-                    <Select
+                    <ModalSelect
                       label="Invoice Status"
                       name="invoiceStatus"
                       disabled
                       value={formData.invoiceStatus}
                       onChange={actions.handleInputChange}
-                      options={invoiceStatusOptions}
+                      options={[...invoiceStatusOptions]}
                     />
                   </div>
 
                   {/* <div className="flex flex-col gap-1">
-                          <Select
+                          <ModalSelect
                             label="Invoice Type"
                             name="invoiceType"
                             value={formData.invoiceType}
@@ -286,8 +282,8 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                           />
                         </div> */}
 
-                  <div>
-                    <Input
+                  {/* <div>
+                    <ModalInput
                       label="Invoice Type"
                       name="invoiceType"
                       type="text"
@@ -296,23 +292,23 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                       onChange={actions.handleInputChange}
                       className="w-full col-span-3"
                     />
-                  </div>
+                  </div> */}
 
-                  {ui.isExport && (
-                    // <CountrySelect
-                    //   value={formData.destnCountryCd}
-                    //   onChange={(c) =>
-                    //     actions.handleInputChange({
-                    //       target: {
-                    //         name: "destnCountryCd",
-                    //         value: c.code,
-                    //       },
-                    //     } as any)
-                    //   }
-                    // />
+                  {/* {ui.isExport && (
+                    <CountrySelect
+                      value={formData.destnCountryCd}
+                      onChange={(c) =>
+                        actions.handleInputChange({
+                          target: {
+                            name: "destnCountryCd",
+                            value: c.code,
+                          },
+                        } as any)
+                      }
+                    />
 
                     <div>
-                      <Input
+                      <ModalInput
                         label="Export To Country"
                         name="destnCountryCd"
                         type="text"
@@ -322,10 +318,10 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                         className="w-full col-span-3"
                       />
                     </div>
-                  )}
+                  )} */}
 
                   {ui.isLocal && (
-                    <Input
+                    <ModalInput
                       label="LPO Number"
                       name="lpoNumber"
                       value={formData.lpoNumber}
@@ -534,6 +530,35 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                         <Phone size={12} />
                         {customerDetails?.mobile_no ?? "+123 4567890"}
                       </div>
+                       {customerDetails && (
+                      <div className="bg-card rounded-lg ">
+                        <h3 className="text-[11px] font-semibold text-main mb-1">
+                          Invoice Information
+                        </h3>
+
+                        <div className="flex flex-col gap-1">
+                          {/* Invoice Type */}
+                          <div className="flex items-center gap-19 text-xs">
+                            <span className="text-muted">Invoice Type</span>
+                            <span className="font-medium text-main">
+                              {formData.invoiceType}
+                            </span>
+                          </div>
+
+                          {/* Destination Country – only for Export */}
+                          {formData.invoiceType === "Export" && (
+                            <div className="flex items-center gap-15 text-xs">
+                              <span className="text-muted">
+                                Destination Country
+                              </span>
+                              <span className="font-medium text-main">
+                                {formData.destnCountryCd || "-"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     </div>
                   </div>
 
@@ -601,7 +626,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                <Input
+                <ModalInput
                   label="Line 1"
                   name="line1"
                   value={formData.billingAddress.line1}
@@ -610,7 +635,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                   }
                   placeholder="Street, Apartment"
                 />
-                <Input
+                <ModalInput
                   label="Line 2"
                   name="line2"
                   value={formData.billingAddress.line2}
@@ -619,7 +644,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                   }
                   placeholder="Landmark, City"
                 />
-                <Input
+                <ModalInput
                   label="Postal Code"
                   name="postalCode"
                   value={formData.billingAddress.postalCode}
@@ -628,7 +653,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                   }
                   placeholder="Postal Code"
                 />
-                <Input
+                <ModalInput
                   label="City"
                   name="city"
                   value={formData.billingAddress.city}
@@ -637,7 +662,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                   }
                   placeholder="City"
                 />
-                <Input
+                <ModalInput
                   label="State"
                   name="state"
                   value={formData.billingAddress.state}
@@ -646,7 +671,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                   }
                   placeholder="State"
                 />
-                <Input
+                <ModalInput
                   label="Country"
                   name="country"
                   value={formData.billingAddress.country}
@@ -686,7 +711,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
 
               {ui.isShippingOpen && (
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                  <Input
+                  <ModalInput
                     label="Line 1"
                     name="line1"
                     value={formData.shippingAddress.line1}
@@ -696,7 +721,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                     placeholder="Street, Apartment"
                     disabled={ui.sameAsBilling}
                   />
-                  <Input
+                  <ModalInput
                     label="Line 2"
                     name="line2"
                     value={formData.shippingAddress.line2}
@@ -706,7 +731,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                     placeholder="Landmark, City"
                     disabled={ui.sameAsBilling}
                   />
-                  <Input
+                  <ModalInput
                     label="Postal Code"
                     name="postalCode"
                     value={formData.shippingAddress.postalCode}
@@ -716,7 +741,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                     placeholder="Postal Code"
                     disabled={ui.sameAsBilling}
                   />
-                  <Input
+                  <ModalInput
                     label="City"
                     name="city"
                     value={formData.shippingAddress.city}
@@ -726,7 +751,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                     placeholder="City"
                     disabled={ui.sameAsBilling}
                   />
-                  <Input
+                  <ModalInput
                     label="State"
                     name="state"
                     value={formData.shippingAddress.state}
@@ -736,7 +761,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                     placeholder="State"
                     disabled={ui.sameAsBilling}
                   />
-                  <Input
+                  <ModalInput
                     label="Country"
                     name="country"
                     value={formData.shippingAddress.country}
@@ -755,7 +780,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                 Payment Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                <Input
+                <ModalInput
                   label="Payment Terms"
                   name="paymentTerms"
                   value={formData.paymentInformation.paymentTerms}
@@ -764,17 +789,17 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                   }
                   placeholder="e.g., Net 30, Due on Receipt"
                 />
-                <Select
+                <ModalSelect
                   label="Payment Method"
                   name="paymentMethod"
                   value={formData.paymentInformation.paymentMethod}
                   onChange={(e) =>
                     actions.handleInputChange(e, "paymentInformation")
                   }
-                  options={paymentMethodOptions}
+                  options={[...paymentMethodOptions]}
                 />
 
-                <Input
+                <ModalInput
                   label="Bank Name"
                   name="bankName"
                   value={formData.paymentInformation.bankName}
@@ -782,7 +807,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                     actions.handleInputChange(e, "paymentInformation")
                   }
                 />
-                <Input
+                <ModalInput
                   label="Account Number"
                   name="accountNumber"
                   value={formData.paymentInformation.accountNumber}
@@ -790,7 +815,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                     actions.handleInputChange(e, "paymentInformation")
                   }
                 />
-                <Input
+                <ModalInput
                   label="Routing Number / IBAN"
                   name="routingNumber"
                   value={formData.paymentInformation.routingNumber}
@@ -798,7 +823,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                     actions.handleInputChange(e, "paymentInformation")
                   }
                 />
-                <Input
+                <ModalInput
                   label="SWIFT / BIC"
                   name="swiftCode"
                   value={formData.paymentInformation.swiftCode}

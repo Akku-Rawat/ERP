@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 import { User, Mail, Phone } from "lucide-react";
-
+import {  Button } from "../../components/ui/modal/formComponent";
+import { ModalInput,ModalSelect } from "../ui/modal/modalComponent";
 interface ProformaInvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -10,7 +11,7 @@ interface ProformaInvoiceModalProps {
 }
 
 import Modal from "../ui/modal/modal";
-import { Button } from "../ui/modal/formComponent";
+
 
 import { getAllCustomers } from "../../api/customerApi";
 import toast from "react-hot-toast";
@@ -52,13 +53,13 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
     },
     "proforma",
   );
-const handleFormSubmit = (e: React.FormEvent) => {
-  try {
-    actions.handleSubmit(e); // hook call
-  } catch (err: any) {
-    toast.error(err.message || "Invalid form");
-  }
-};
+  const handleFormSubmit = (e: React.FormEvent) => {
+    try {
+      actions.handleSubmit(e); // hook call
+    } catch (err: any) {
+      toast.error(err.message || "Invalid form");
+    }
+  };
 
   const handleClose = () => {
     actions.handleReset();
@@ -124,84 +125,85 @@ const handleFormSubmit = (e: React.FormEvent) => {
       <form id="proforma-form" onSubmit={handleFormSubmit}>
 
         {/* Tabs */}
-           <div className="bg-card border-b border-theme px-8 shrink-0">
+        <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
-          {(["details", "terms", "address"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => ui.setActiveTab(tab)}
-                  className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${
-                ui.activeTab === tab
-                   ? "text-primary border-b-[3px] border-primary"
+            {(["details", "terms", "address"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => ui.setActiveTab(tab)}
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab
+                    ? "text-primary border-b-[3px] border-primary"
                     : "text-muted border-b-[3px] border-transparent hover:text-main"
-              }`}
-            >
-              {tab === "details" && "Details"}
-              {tab === "terms" && "Terms & Conditions"}
-              {tab === "address" && "Additional Details"}
-            </button>
-          ))}
+                  }`}
+              >
+                {tab === "details" && "Details"}
+                {tab === "terms" && "Terms & Conditions"}
+                {tab === "address" && "Additional Details"}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Tab Content */}
-         <div className="flex-1 overflow-y-auto px-8 py-4">
+        <div className="flex-1 overflow-y-auto px-8 py-4">
           {/* ====================== DETAILS ====================== */}
           {ui.activeTab === "details" && (
-               <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
-               <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-6 gap-4">
-               
-            
-                    <CustomerSelect
-                      value={customerNameDisplay}
-                      onChange={actions.handleCustomerSelect}
-                      className="w-full"
-                    />
+            <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
+              <div className="">
+                  <div className="grid grid-cols-6 gap-3 items-end">
 
-                    <Input
-                      label="Date of Invoice"
-                      name="dateOfInvoice"
+
+                  <CustomerSelect
+                    value={customerNameDisplay}
+                    onChange={actions.handleCustomerSelect}
+                    className="w-full"
+                  />
+
+                  <ModalInput
+                    label="Date of Invoice"
+                    name="dateOfInvoice"
+                    type="date"
+                    value={formData.dateOfInvoice}
+                    onChange={actions.handleInputChange}
+                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                  />
+
+                  <div >
+                    <ModalInput
+                      label="Due Date"
+                      name="dueDate"
                       type="date"
-                      value={formData.dateOfInvoice}
+                      value={formData.dueDate}
                       onChange={actions.handleInputChange}
-                      className="w-full"
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
+                  </div>
 
-                    <div className="flex flex-col gap-1">
-                      <Input
-                        label="Due Date"
-                        name="dueDate"
-                        type="date"
-                        value={formData.dueDate}
-                        onChange={actions.handleInputChange}
-                        className="w-full col-span-3"
-                      />
-                    </div>
+                  <div >
+                    <ModalSelect
+                      label="Currency"
+                      name="currencyCode"
+                      value={formData.currencyCode}
+                      onChange={actions.handleInputChange}
+                      options={[...currencyOptions]}
+                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    />
+                  </div>
 
-                    <div className="flex flex-col gap-1">
-                      <Select
-                        label="Currency"
-                        name="currencyCode"
-                        value={formData.currencyCode}
-                        onChange={actions.handleInputChange}
-                        options={[...currencyOptions]}
-                      />
-                    </div>
+                  <div >
+                    <ModalSelect
+                      label="Invoice Status"
+                      name="invoiceStatus"
+                      value={formData.invoiceStatus}
+                      onChange={actions.handleInputChange}
+                      options={[...invoiceStatusOptions]}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    />
+                  </div>
 
-                    <div className="flex flex-col gap-1">
-                      <Select
-                        label="Invoice Status"
-                        name="invoiceStatus"
-                        value={formData.invoiceStatus}
-                        onChange={actions.handleInputChange}
-                        options={[...invoiceStatusOptions]  }
-                      />
-                    </div>
-
-                    {/* <div className="flex flex-col gap-1">
-                                            <Select
+                  {/* <div >
+                                            <ModalSelect
                                               label="Invoice Type"
                                               name="invoiceType"
                                               value={formData.invoiceType}
@@ -210,97 +212,96 @@ const handleFormSubmit = (e: React.FormEvent) => {
                                             />
                                           </div> */}
 
-                    <div className="flex flex-col gap-1">
-                      <Input
-                        label="Invoice Type"
-                        name="invoiceType"
+                  {/* <div >
+                    <ModalInput
+                      label="Invoice Type"
+                      name="invoiceType"
+                      type="text"
+                      disabled
+                      value={formData.invoiceType}
+                      onChange={actions.handleInputChange}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    />
+                  </div> */}
+
+                  {ui.isExport && (
+                    // <CountrySelect
+                    //   value={formData.destnCountryCd}
+                    //   onChange={(c) =>
+                    //     actions.handleInputChange({
+                    //       target: {
+                    //         name: "destnCountryCd",
+                    //         value: c.code,
+                    //       },
+                    //     } as any)
+                    //   }
+                    // />
+
+                    <div >
+                      <ModalInput
+                        label="Export To Country"
+                        name="destnCountryCd"
                         type="text"
                         disabled
-                        value={formData.invoiceType}
+                        value={formData.destnCountryCd}
                         onChange={actions.handleInputChange}
-                        className="w-full col-span-3"
+                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                       />
                     </div>
+                  )}
 
-                    {ui.isExport && (
-                      // <CountrySelect
-                      //   value={formData.destnCountryCd}
-                      //   onChange={(c) =>
-                      //     actions.handleInputChange({
-                      //       target: {
-                      //         name: "destnCountryCd",
-                      //         value: c.code,
-                      //       },
-                      //     } as any)
-                      //   }
-                      // />
-
-                      <div className="flex flex-col gap-1">
-                        <Input
-                          label="Export To Country"
-                          name="destnCountryCd"
-                          type="text"
-                          disabled
-                          value={formData.destnCountryCd}
-                          onChange={actions.handleInputChange}
-                          className="w-full col-span-3"
-                        />
-                      </div>
-                    )}
-
-                    {ui.isLocal && (
-                      <Input
-                        label="LPO Number"
-                        name="lpoNumber"
-                        value={formData.lpoNumber}
-                        onChange={actions.handleInputChange}
-                        placeholder="local purchase order number"
-                      />
-                    )}
-                  </div>
+                  {ui.isLocal && (
+                    <ModalInput
+                      label="LPO Number"
+                      name="lpoNumber"
+                      value={formData.lpoNumber}
+                      onChange={actions.handleInputChange}
+                      placeholder="local purchase order number"
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    />
+                  )}
                 </div>
+              </div>
 
-                
-                 {/* ITEMS */}
+
+              {/* ITEMS */}
               <div className="grid grid-cols-[4fr_1fr] gap-4">
-              <div className="bg-card rounded-lg p-2 shadow-sm flex-1">
+                <div className="bg-card rounded-lg p-2 shadow-sm flex-1">
                   <div className="flex items-center gap-1 ">
                     <h3 className="text-sm font-semibold text-main">
                       Invoiced Items
                     </h3>
                   </div>
-
-
-               <div>
-                                  <table className="w-full border-collapse text-[10px]">
-                                    <thead >
-                                      <tr className="border-b border-theme">
-                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">#</th>
-                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">Item</th>
-                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">Description</th>
-                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">Quantity</th>
-                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Unit Price</th>
-                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Discount</th>
-                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax</th>
-                                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax Code</th>
-                                        <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">Amount</th>
-                                        <th></th>
-                                      </tr>
-                                    </thead>
-                                    <tbody >
-                                      {paginatedItems.map((it, idx) => {
-                                        const i = ui.page * 5 + idx;
-                                        const taxVal = parseFloat(it.vatRate || "0");
-                                        const amount =
-                                          it.quantity * it.price - it.discount + taxVal;
-                                        return (
-                                          <tr
-                                            key={i}
-                                            className="hover:bg-blue-50/40 odd:bg-white even:bg-gray-50"
-                                          >
-                                            <td className="px-3 py-2 text-center">{i + 1}</td>
-                                            <td className="px-0.5 py-1">
-                                              {/* <ItemSelect
+                  <div>
+                    <table className="w-full border-collapse text-[10px]">
+                      <thead >
+                        <tr className="border-b border-theme">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">#</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">Item</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">Description</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">Quantity</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Unit Price</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Discount</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax Code</th>
+                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">Amount</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody >
+                        {paginatedItems.map((it, idx) => {
+                          const i = ui.page * 5 + idx;
+                          const taxVal = parseFloat(it.vatRate || "0");
+                          const amount =
+                            it.quantity * it.price - it.discount + taxVal;
+                          return (
+                            <tr
+                              key={i}
+                              className="border-b border-theme bg-card row-hover"
+                            >
+                              <td className="px-3 py-2 text-center">{i + 1}</td>
+                              <td className="px-0.5 py-1">
+                                {/* <ItemSelect
                                                   taxCategory={ui.taxCategory}
                                                   value={it.itemCode}
                                                   onChange={(item) => {
@@ -310,203 +311,232 @@ const handleFormSubmit = (e: React.FormEvent) => {
                                                     });
                                                   }}
                                                 /> */}
-                                              <ItemSelect
-                                                taxCategory={ui.taxCategory}
-                                                value={it.itemCode}
-                                                onChange={(item) => {
-                                                  actions.handleItemSelect(i, item.id);
-                                                }}
-                                              />
-                                            </td>
-              
-                                            <td className="px-0.5 py-1">
-                                              <input
-                                                className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                                name="description"
-                                                value={it.description}
-                                                onChange={(e) => actions.handleItemChange(i, e)}
-                                              />
-                                            </td>
-                                            <td className="px-0.5 py-1">
-                                              <input
-                                                type="number"
-                                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                                name="quantity"
-                                                value={it.quantity}
-                                                onChange={(e) => actions.handleItemChange(i, e)}
-                                              />
-                                            </td>
-                                            <td className="px-0.5 py-1">
-                                              <input
-                                                type="number"
-                                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                                name="price"
-                                                value={it.price}
-                                                onChange={(e) => actions.handleItemChange(i, e)}
-                                              />
-                                            </td>
-                                            <td className="px-0.5 py-1">
-                                              <input
-                                                type="number"
-                                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                                name="discount"
-                                                value={it.discount}
-                                                onChange={(e) => actions.handleItemChange(i, e)}
-                                              />
-                                            </td>
-                                            <td className="px-0.5 py-1">
-                                              <input
-                                                type="number" // Assuming input is number for entry, stored as string in Type
-                                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                                name="vatRate"
-                                                value={it.vatRate}
-                                                onChange={(e) => actions.handleItemChange(i, e)}
-                                              />
-                                            </td>
-                                            <td className="px-0.5 py-1">
-                                              <input
-                                                type="string"
-                                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                                name="vatCode"
-                                                value={it.vatCode}
-                                                onChange={(e) => actions.handleItemChange(i, e)}
-                                              />
-                                            </td>
-                                            <td className="px-2 py-2 text-right font-semibold text-gray-900 whitespace-nowrap">
-                                              {symbol} {amount.toFixed(2)}
-                                            </td>
-              
-                                            <td className="px-1 py-1 text-center">
-                                              <button
-                                                type="button"
-                                                onClick={() => actions.removeItem(i)}
-                                               className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
-                                                title="Remove item"
-                                              >
-                                                <Trash2 className="w-4 h-4" />
-                                              </button>
-                                            </td>
-                                          </tr>
-                                        );
-                                      })}
-                                    </tbody>
-                                  </table>
-                                </div>
+                                <ItemSelect
+                                  taxCategory={ui.taxCategory}
+                                  value={it.itemCode}
+                                  onChange={(item) => {
+                                    actions.handleItemSelect(i, item.id);
+                                  }}
+                                />
+                              </td>
 
-                {/* ---------- ADD ITEM + SUBTOTAL ---------- */}
-                <div className="flex justify-between mt-3">
-                                   <button
-                                     type="button"
-                                     onClick={actions.addItem}
-                                     className="px-4 py-1.5 bg-primary hover:bg-[var(--primary-600)] text-white rounded text-xs font-medium flex items-center gap-1.5 transition-colors"
-                                   >
-                                     <Plus className="w-4 h-4" /> Add Item
-                                   </button>
-               
-               
-                                   {(ui.itemCount > 5 || ui.page > 0) && (
-                                     <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
-               
-                                       <div className="text-[11px] text-muted whitespace-nowrap">
-                                         Showing {ui.page * 5 + 1} to{" "}
-                                         {Math.min((ui.page + 1) * 5, ui.itemCount)} of {ui.itemCount} items
-                                       </div>
-               
-                                       <div className="flex gap-1.5 items-center">
-                                         <button
-                                           type="button"
-                                           onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
-                                           disabled={ui.page === 0}
-                                           className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
-                                         >
-                                           Previous
-                                         </button>
-               
-                                         <button
-                                           type="button"
-                                           onClick={() => ui.setPage(ui.page + 1)}
-                                           disabled={(ui.page + 1) * 5 >= ui.itemCount}
-                                           className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
-                                         >
-                                           Next
-                                         </button>
-                                       </div>
-               
-                                     </div>
-                                   )}
-                                 </div>
-               
-</div>
-           {/* RIGHT SIDE */}
-                      <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
-                                        <div className="bg-card rounded-lg p-2 w-[220px]">
-                                          <h3 className="text-[12px] font-semibold text-main mb-2">
-                                            Customer Details
-                                          </h3>
-                      
-                                          <div className="flex flex-col gap-2 text-xs">
-                                            <div className="flex items-center gap-2">
-                                              <User size={14} className="text-muted" />
-                                              {customerDetails?.name ?? "Customer Name"}
-                                            </div>
-                      
-                                            <div className="flex items-center gap-2 text-[10px] text-muted">
-                                              <Mail size={12} />
-                                              {customerDetails?.email ?? "customer@gmail.com"}
-                                            </div>
-                      
-                                            <div className="flex items-center gap-2 text-[10px] text-muted">
-                                              <Phone size={12} />
-                                              {customerDetails?.mobile_no ?? "+123 4567890"}
-                                            </div>
-                                          </div>
-                                        </div>
-                      
-                                        <div className="bg-card rounded-lg p-3 w-[220px]">
-                                          <h3 className="text-[13px] font-semibold text-main mb-2">
-                                            Summary
-                                          </h3>
-                      
-                                          <div className="flex flex-col gap-2">
-                                            <div className="flex justify-between text-xs">
-                                              <span className="text-muted">Total Items</span>
-                                              <span className="font-medium text-main">
-                                                {formData.items.length}
-                                              </span>
-                                            </div>
-                      
-                                            <div className="flex justify-between text-xs">
-                                              <span className="text-muted">Subtotal</span>
-                                              <span className="font-medium text-main">
-                                                {symbol} {totals.subTotal.toFixed(2)}
-                                              </span>
-                                            </div>
-                      
-                                            <div className="flex justify-between text-xs">
-                                              <span className="text-muted">Total Tax</span>
-                                              <span className="font-medium text-main">
-                                                {symbol} {totals.totalTax.toFixed(2)}
-                                              </span>
-                                            </div>
-                      
-                                            <div className="mt-2 p-2 bg-primary rounded-lg">
-                                              <div className="flex justify-between items-center">
-                                                <span className="text-sm font-semibold text-white">Grand Total</span>
-                                                <span className="text-sm font-bold text-white">
-                                                  {symbol} {totals.grandTotal.toFixed(2)}
-                                                </span>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                      
-                                      </div>
-                        
-                       </div>
-                     </div>
-                   
-                 )}
-       
+                              <td className="px-0.5 py-1">
+                                <input
+                                  className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="description"
+                                  value={it.description}
+                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="quantity"
+                                  value={it.quantity}
+                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="price"
+                                  value={it.price}
+                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="discount"
+                                  value={it.discount}
+                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number" // Assuming input is number for entry, stored as string in Type
+                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="vatRate"
+                                  value={it.vatRate}
+                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="string"
+                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="vatCode"
+                                  value={it.vatCode}
+                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                />
+                              </td>
+                              <td className="px-2 py-2 text-right font-semibold text-gray-900 whitespace-nowrap">
+                                {symbol} {amount.toFixed(2)}
+                              </td>
+
+                              <td className="px-1 py-1 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => actions.removeItem(i)}
+                                  className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
+                                  title="Remove item"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* ---------- ADD ITEM + SUBTOTAL ---------- */}
+                  <div className="flex justify-between mt-3">
+                    <button
+                      type="button"
+                      onClick={actions.addItem}
+                      className="px-4 py-1.5 bg-primary hover:bg-[var(--primary-600)] text-white rounded text-xs font-medium flex items-center gap-1.5 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" /> Add Item
+                    </button>
+
+
+                    {(ui.itemCount > 5 || ui.page > 0) && (
+                      <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
+
+                        <div className="text-[11px] text-muted whitespace-nowrap">
+                          Showing {ui.page * 5 + 1} to{" "}
+                          {Math.min((ui.page + 1) * 5, ui.itemCount)} of {ui.itemCount} items
+                        </div>
+
+                        <div className="flex gap-1.5 items-center">
+                          <button
+                            type="button"
+                            onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
+                            disabled={ui.page === 0}
+                            className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+                          >
+                            Previous
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => ui.setPage(ui.page + 1)}
+                            disabled={(ui.page + 1) * 5 >= ui.itemCount}
+                            className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+                          >
+                            Next
+                          </button>
+                        </div>
+
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+                {/* RIGHT SIDE */}
+                <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
+                  <div className="bg-card rounded-lg p-2 w-[220px]">
+                    <h3 className="text-[12px] font-semibold text-main mb-2">
+                      Customer Details
+                    </h3>
+
+                    <div className="flex flex-col gap-2 text-xs">
+                      <div className="flex items-center gap-2">
+                        <User size={14} className="text-muted" />
+                        {customerDetails?.name ?? "Customer Name"}
+                      </div>
+
+                      <div className="flex items-center gap-2 text-[10px] text-muted">
+                        <Mail size={12} />
+                        {customerDetails?.email ?? "customer@gmail.com"}
+                      </div>
+
+                      <div className="flex items-center gap-2 text-[10px] text-muted">
+                        <Phone size={12} />
+                        {customerDetails?.mobile_no ?? "+123 4567890"}
+                      </div>
+                       {customerDetails && (
+                      <div className="bg-card rounded-lg ">
+                        <h3 className="text-[11px] font-semibold text-main mb-1">
+                          Invoice Information
+                        </h3>
+
+                        <div className="flex flex-col gap-1">
+                          {/* Invoice Type */}
+                          <div className="flex items-center gap-19 text-xs">
+                            <span className="text-muted">Invoice Type</span>
+                            <span className="font-medium text-main">
+                              {formData.invoiceType}
+                            </span>
+                          </div>
+
+                          {/* Destination Country – only for Export */}
+                          {formData.invoiceType === "Export" && (
+                            <div className="flex items-center gap-15 text-xs">
+                              <span className="text-muted">
+                                Destination Country
+                              </span>
+                              <span className="font-medium text-main">
+                                {formData.destnCountryCd || "-"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    </div>
+                  </div>
+
+                  <div className="bg-card rounded-lg p-3 w-[220px]">
+                    <h3 className="text-[13px] font-semibold text-main mb-2">
+                      Summary
+                    </h3>
+
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted">Total Items</span>
+                        <span className="font-medium text-main">
+                          {formData.items.length}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted">Subtotal</span>
+                        <span className="font-medium text-main">
+                          {symbol} {totals.subTotal.toFixed(2)}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted">Total Tax</span>
+                        <span className="font-medium text-main">
+                          {symbol} {totals.totalTax.toFixed(2)}
+                        </span>
+                      </div>
+
+                      <div className="mt-2 p-2 bg-primary rounded-lg">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-semibold text-white">Grand Total</span>
+                          <span className="text-sm font-bold text-white">
+                            {symbol} {totals.grandTotal.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+
+          )}
+
 
           {/* === TAB: Terms & Conditions === */}
           {ui.activeTab === "terms" && (
@@ -544,7 +574,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                  <Input
+                  <ModalInput
                     label="Line 1"
                     name="billingAddressLine1"
                     value={formData.billingAddress.line1}
@@ -553,7 +583,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                     }
                     placeholder="Street, Apartment"
                   />
-                  <Input
+                  <ModalInput
                     label="Line 2"
                     name="line2"
                     value={formData.billingAddress.line2}
@@ -562,7 +592,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                     }
                     placeholder="Landmark, City"
                   />
-                  <Input
+                  <ModalInput
                     label="Postal Code"
                     name="billingPostalCode"
                     value={formData.billingAddress.postalCode}
@@ -571,7 +601,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                     }
                     placeholder="Postal Code"
                   />
-                  <Input
+                  <ModalInput
                     label="City"
                     name="billingCity"
                     value={formData.billingAddress.city}
@@ -580,7 +610,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                     }
                     placeholder="City"
                   />
-                  <Input
+                  <ModalInput
                     label="State"
                     name="billingState"
                     value={formData.billingAddress.state}
@@ -589,7 +619,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                     }
                     placeholder="State"
                   />
-                  <Input
+                  <ModalInput
                     label="Country"
                     name="billingCountry"
                     value={formData.billingAddress.country}
@@ -631,7 +661,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
 
                 {ui.isShippingOpen && (
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                    <Input
+                    <ModalInput
                       label="Line 1"
                       name="line1"
                       value={formData.shippingAddress.line1}
@@ -641,7 +671,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                       placeholder="Street, Apartment"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="Line 2"
                       name="line2"
                       value={formData.shippingAddress.line2}
@@ -651,7 +681,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                       placeholder="Landmark, City"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="Postal Code"
                       name="postalCode"
                       value={formData.shippingAddress.postalCode}
@@ -661,7 +691,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                       placeholder="Postal Code"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="City"
                       name="city"
                       value={formData.shippingAddress.city}
@@ -671,7 +701,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                       placeholder="City"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="State"
                       name="state"
                       value={formData.shippingAddress.state}
@@ -681,7 +711,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                       placeholder="State"
                       disabled={ui.sameAsBilling}
                     />
-                    <Input
+                    <ModalInput
                       label="Country"
                       name="country"
                       value={formData.shippingAddress.country}
@@ -700,7 +730,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                   Payment Information
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                  <Input
+                  <ModalInput
                     label="Payment Terms"
                     name="paymentTerms"
                     value={formData.paymentInformation.paymentTerms}
@@ -709,17 +739,17 @@ const handleFormSubmit = (e: React.FormEvent) => {
                     }
                     placeholder="e.g., Net 30, Due on Receipt"
                   />
-                  <Select
+                  <ModalSelect
                     label="Payment Method"
                     name="paymentMethod"
                     value={formData.paymentInformation.paymentMethod}
                     onChange={(e) =>
                       actions.handleInputChange(e, "paymentInformation")
                     }
-                    options={paymentMethodOptions}
+                    options={[...paymentMethodOptions]}
                   />
 
-                  <Input
+                  <ModalInput
                     label="Bank Name"
                     name="bankName"
                     value={formData.paymentInformation.bankName}
@@ -727,7 +757,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                       actions.handleInputChange(e, "paymentInformation")
                     }
                   />
-                  <Input
+                  <ModalInput
                     label="Account Number"
                     name="accountNumber"
                     value={formData.paymentInformation.accountNumber}
@@ -735,7 +765,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                       actions.handleInputChange(e, "paymentInformation")
                     }
                   />
-                  <Input
+                  <ModalInput
                     label="Routing Number / IBAN"
                     name="routingNumber"
                     value={formData.paymentInformation.routingNumber}
@@ -743,7 +773,7 @@ const handleFormSubmit = (e: React.FormEvent) => {
                       actions.handleInputChange(e, "paymentInformation")
                     }
                   />
-                  <Input
+                  <ModalInput
                     label="SWIFT / BIC"
                     name="swiftCode"
                     value={formData.paymentInformation.swiftCode}
@@ -770,45 +800,6 @@ const handleFormSubmit = (e: React.FormEvent) => {
   );
 };
 
-const Input = React.forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement> & { label: string }
->(({ label, className = "", ...props }, ref) => (
-  <label className="flex flex-col gap-1 text-sm w-full">
-    <span className="font-medium text-gray-600">{label}</span>
-    <input
-      ref={ref}
-      className={`rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-        props.disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
-      } ${className}`}
-      {...props}
-    />
-  </label>
-));
-Input.displayName = "Input";
 
-const Select: React.FC<{
-  label: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: { value: string; label: string }[];
-}> = ({ label, name, value, onChange, options }) => (
-  <label className="flex flex-col gap-1 text-sm">
-    <span className="font-medium text-gray-600">{label}</span>
-    <select
-      name={name}
-      value={value}
-      onChange={onChange}
-      className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
-  </label>
-);
 
 export default ProformaInvoiceModal;

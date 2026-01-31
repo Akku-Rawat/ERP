@@ -258,16 +258,16 @@ const CRITICAL_QUOTATION_STATUSES: QuotationStatus[] = ["Accepted"];
           searchValue={searchTerm}
           onSearch={setSearchTerm}
           enableColumnSelector
-          extraFilters={
-            <SalesFilter
-              status={status}
-              setStatus={setStatus}
-              fromDate={fromDate}
-              setFromDate={setFromDate}
-              toDate={toDate}
-              setToDate={setToDate}
-            />
-          }
+          // extraFilters={
+          //   <SalesFilter
+          //     status={status}
+          //     setStatus={setStatus}
+          //     fromDate={fromDate}
+          //     setFromDate={setFromDate}
+          //     toDate={toDate}
+          //     setToDate={setToDate}
+          //   />
+          // }
           enableAdd
           addLabel="Add Quotation"
           onAdd={onAddQuotation}
