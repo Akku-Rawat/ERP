@@ -69,7 +69,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, icon, options = [], className = "", ...props }, ref) => (
     <label className="flex flex-col gap-2 text-sm w-full group">
-      <span className="font-semibold text-muted flex items-center gap-2 group-focus-within:text-primary transition-colors">
+      <span className="font-semibold text-main flex items-center gap-2 group-focus-within:text-primary transition-colors">
         {icon && (
           <span className="text-muted group-focus-within:text-primary transition-colors">
             {icon}

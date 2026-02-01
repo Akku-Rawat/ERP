@@ -2,6 +2,7 @@ export interface SupplierFormData {
   tpin?: string;
   supplierName?: string;
   supplierCode?: string;
+  taxCategory: string;
   paymentTerms: string ;
   currency?: string;
   bankAccount?: string;
@@ -30,6 +31,7 @@ export const emptySupplierForm: SupplierFormData = {
   tpin: "",
   supplierName: "",
   supplierCode: "",
+   taxCategory: "",
   paymentTerms: "",
   currency: "",
   bankAccount: "",
@@ -79,4 +81,18 @@ export interface Supplierr {
 export const currencySelectOptions = currencyOptions.map(c => ({
   value: c,
   label: c,
+}));
+
+
+export const taxCategoryOptions = ["Export", "Non-Export", "LPO"] as const;
+export type TaxCategory = typeof taxCategoryOptions[number];
+
+export const taxCategorySelectOptions = taxCategoryOptions.map(t => ({
+  value: t,
+  label:
+    t === "Non-Export"
+      ? "Non-Export"
+      : t === "Export"
+      ? "Export"
+      : "LPO",
 }));

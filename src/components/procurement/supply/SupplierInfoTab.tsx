@@ -1,8 +1,9 @@
 import React from "react";
 import { Building2, Mail } from "lucide-react";
 import { Input, Card } from "../../ui/modal/formComponent";
-import type { SupplierFormData } from "../../../types/Supply/supplier";
+import {  taxCategorySelectOptions, type SupplierFormData } from "../../../types/Supply/supplier";
 import CountrySelect from "../../selects/CountrySelect";
+import Select from "../../ui/Select";
 
 
 interface SupplierInfoTabProps {
@@ -42,6 +43,17 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               value={form.supplierCode}
               onChange={onChange}
             />
+             <Select
+            label="Tax Category"
+            name="taxCategory"
+            value={form.taxCategory}
+            onChange={onChange}
+            options={[
+              { value: "", label: "Select Tax Category..." },
+                ...taxCategorySelectOptions,
+            ]}
+          />
+         
           </div>
         </div>
 

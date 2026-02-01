@@ -5,6 +5,7 @@ export const mapSupplierApi = (d: any): Supplier => ({
   supplierId: d.supplierId,
   supplierName: d.supplierName,
   supplierCode: d.supplierCode,
+  taxCategory: d.taxCategory,
   tpin: d.tpin,
   currency: d.currency,
   phoneNo: d.mobile_no || d.phoneNo,
@@ -42,7 +43,7 @@ export const mapSupplierToApi = (
   supplierCode: f.supplierCode,
   tpin: f.tpin,
   currency: f.currency,
-
+  taxCategory:f.taxCategory,
   contactPerson: f.contactPerson,
   phoneNo: f.phoneNo,
   alternateNo: f.alternateNo,
