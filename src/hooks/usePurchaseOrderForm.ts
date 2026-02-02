@@ -20,6 +20,7 @@ import { getPurchaseOrderById } from "../api/procurement/PurchaseOrderApi";
 import { mapApiToUI } from "../types/Supply/purchaseOrderMapper";
 import { updatePurchaseOrder } from "../api/procurement/PurchaseOrderApi";
 import { getCountryList } from "../api/lookupApi";
+import { getSupplierById } from "../../src/api/procurement/supplierApi";
 
 interface UsePurchaseOrderFormProps {
   isOpen: boolean;
@@ -41,33 +42,11 @@ export const usePurchaseOrderForm = ({
 
   const isEditMode = !!poId;
 
-  // Handle Export Country Logic
-  useEffect(() => {
-    if (taxCategory !== "Export") {
-      setForm((p) => ({ ...p, placeOfSupply: "", exportToCountry: "" }));
-      return;
-    }
 
-    const resolveCountry = async () => {
-      const list = await getCountryList();
-      const countryName = form.exportToCountry;
-      if (!countryName) return;
 
-      const code = getCountryCode(list, countryName);
-
-      setForm((p) => ({
-        ...p,
-        placeOfSupply: code,
-      }));
-    };
-
-    resolveCountry();
-  }, [taxCategory, form.exportToCountry]);
 
   // Sync taxCategory with form
-  useEffect(() => {
-    setForm((p) => ({ ...p, taxCategory }));
-  }, [taxCategory]);
+  
 
   // Update VAT codes for all items when tax category changes
   useEffect(() => {
@@ -182,36 +161,53 @@ export const usePurchaseOrderForm = ({
     });
   };
 
-  const handleSupplierChange = (sup: any) => {
-    if (!sup) {
-      toast.error("Invalid supplier selected");
-      return;
+const handleSupplierChange = async (sup: any) => {
+  if (!sup) return;
+
+  setTaxCategory(sup.taxCategory as any);
+
+  let destCode = "";
+  let billingCountry = "";
+
+  try {
+    // 🔑 REAL DATA YAHAN SE AAYEGA
+    const res = await getSupplierById(sup.id);
+    const supplier = res?.data;
+
+    billingCountry = supplier?.billingCountry || "";
+
+    if (sup.taxCategory === "Export" && billingCountry) {
+      const countryRes = await getCountryList();
+      const list = Array.isArray(countryRes)
+        ? countryRes
+        : countryRes?.data ?? [];
+
+      destCode = getCountryCode(list, billingCountry);
     }
+  } catch (e) {
+    console.error("Supplier detail fetch failed", e);
+  }
 
-    setForm((p) => ({
-      ...p,
-      supplier: sup.name,
-      supplierId: sup.id,
-      supplierCode: sup.code,
+  setForm((p) => ({
+    ...p,
+    supplier: sup.name,
+    supplierId: sup.id,
+    supplierCode: sup.code,
+    taxCategory: sup.taxCategory,
+    destnCountryCd: destCode,
+    placeOfSupply: destCode,
 
-      addresses: {
-        ...p.addresses,
-        supplierAddress: {
-          ...p.addresses.supplierAddress,
-          addressLine1: sup.address?.line1 || "",
-          addressLine2: sup.address?.line2 || "",
-          city: sup.address?.city || "",
-          state: sup.address?.state || "",
-          country: sup.address?.country || "",
-          postalCode: sup.address?.postalCode || "",
-          phone: sup.phone || "",
-          email: sup.email || "",
-        },
+    addresses: {
+      ...p.addresses,
+      supplierAddress: {
+        ...p.addresses.supplierAddress,
+        country: billingCountry,
       },
-    }));
+    },
+  }));
+};
 
-    toast.success(`Supplier selected: ${sup.name}`);
-  };
+
 
   const handleItemChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     const { name, value } = e.target;
@@ -414,12 +410,23 @@ export const usePurchaseOrderForm = ({
   };
 };
 
-function getCountryCode(list: any[], countryName: string): string {
-  if (!Array.isArray(list) || !countryName) return "";
-  const country = list.find(
-    (c: any) =>
-      c.name?.toLowerCase() === countryName.toLowerCase() ||
-      c.countryName?.toLowerCase() === countryName.toLowerCase()
+function getCountryCode(list: any[], countryName?: string): string {
+  if (!countryName || !Array.isArray(list)) return "";
+
+  const n = countryName.trim().toLowerCase();
+
+  const byCode = list.find((c: any) => c.code?.toLowerCase() === n);
+  if (byCode) return byCode.code;
+
+  const byName = list.find((c: any) =>
+    c.name?.toLowerCase().includes(n)
   );
-  return country?.code || country?.countryCode || "";
+  if (byName) return byName.code;
+
+  const reverse = list.find((c: any) =>
+    n.includes(c.name?.toLowerCase())
+  );
+  if (reverse) return reverse.code;
+
+  return "";
 }

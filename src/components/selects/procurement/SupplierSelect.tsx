@@ -1,15 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import { getSuppliers } from "../../../api/procurement/supplierApi";
+
+
 type Supplier = {
   id: string;
   name: string;
   supplierCode?: string;
+  taxCategory?: string;
+  billingCountry?: string;
+  
 };
 
 interface SupplierSelectProps {
   value?: string;
   selectedId?: string;
-  onChange: (supplier: { id: string; name: string; code?: string }) => void;
+  onChange: (supplier: { id: string; name: string; code?: string, taxCategory?: string , billingCountry?: string }) => void;
   className?: string;
   label?: string;
 }
@@ -33,13 +38,17 @@ export default function SupplierSelect({
         const res = await getSuppliers();
         const list = res?.data?.suppliers || [];
 
-        setSuppliers(
-          list.map((s: any) => ({
-            id: s.supplierId || s.id,
-            name: s.supplierName || s.name,
-            supplierCode: s.supplierCode,
-          })),
-        );
+       setSuppliers(
+  list.map((s: any) => ({
+    id: s.supplierId,
+    name: s.supplierName,
+    supplierCode: s.supplierCode,
+    taxCategory: s.taxCategory,
+
+    billingCountry: s.billingCountry
+  }))
+);
+
       } finally {
         setLoading(false);
       }
@@ -96,7 +105,7 @@ export default function SupplierSelect({
                   onClick={() => {
                     setSearch(s.name);
                     setOpen(false);
-                    onChange({ id: s.id, name: s.name, code: s.supplierCode });
+                    onChange({ id: s.id, name: s.name, code: s.supplierCode ,taxCategory: s.taxCategory,billingCountry: s.billingCountry  });
                   }}
                 >
                   <div className="flex justify-between">

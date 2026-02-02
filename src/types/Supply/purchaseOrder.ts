@@ -43,7 +43,8 @@ export interface PurchaseOrderFormData {
   supplierId: string;
   supplierCode: string;
   taxCategory: string;
-  exportToCountry: string; // New field for Export country
+  
+destnCountryCd: string; // New field for Export country
   shippingRule: string;
   incoterm: string;
   taxesChargesTemplate: string;
@@ -121,10 +122,10 @@ export const emptyPOForm: PurchaseOrderFormData = {
   date: "",
   supplier: "",
   requiredBy: "",
+  taxCategory: "",
   currency: "INR",
   status: "Draft",
-  taxCategory: "",
-  exportToCountry: "", // Initialize new field
+  destnCountryCd: "",
   shippingRule: "",
   incoterm: "",
   taxesChargesTemplate: "",

@@ -16,10 +16,8 @@ export const validatePO = (form: PurchaseOrderFormData) => {
     errors.push("Required By date is required");
   }
 
-  // Tax Category - Required Field
-  if (!form.taxCategory || form.taxCategory.trim() === "") {
-    errors.push("Tax Category is required");
-  }
+
+
 
   // Items Validation
   if (form.items.length === 0) {
@@ -38,10 +36,7 @@ export const validatePO = (form: PurchaseOrderFormData) => {
     }
   });
 
-  // Export specific validation
-  if (form.taxCategory === "Export" && !form.exportToCountry) {
-    errors.push("Export to Country is required for Export orders");
-  }
+ 
 
   return errors;
 };

@@ -36,8 +36,8 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     costCenter: form.costCenter,
     project: form.project,
 
-    taxCategory: form.taxCategory,
-    exportToCountry: form.exportToCountry, // Include export country
+   // Include export country
+    destnCountryCd: form.destnCountryCd,
     shippingRule: form.shippingRule,
     incoterm: form.incoterm,
 
@@ -89,12 +89,15 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
  */
 export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
   // Extract actual data from response
+
   const api = apiResponse.data || apiResponse;
 
   console.log("📊 Mapping API to UI:", api);
 
   // Map items from API format to UI format
   const items = (api.items || []).map((item: any) => ({
+    destination_country: api.destnCountryCd || "",
+    taxCategory: api.taxCategory || "",
     itemCode: item.item_code || "",
     itemName: item.item_name || "",
     requiredBy: item.requiredBy || api.requiredBy || "",
@@ -193,6 +196,7 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
     poNumber: api.poId || "",
     date: api.poDate || "",
     requiredBy: api.requiredBy || "",
+    taxCategory: api.invoiceType || "",
 
     // Supplier Info
     supplier: api.supplierName || "",
@@ -206,8 +210,9 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
     // Additional Fields
     costCenter: api.costCenter || "",
     project: api.project || "",
-    taxCategory: api.taxCategory || "",
-    exportToCountry: api.exportToCountry || "", // Map export country
+    // Include export country
+  
+    destnCountryCd: api.exportToCountry || "", // Map export country
     shippingRule: api.shippingRule || "",
     incoterm: api.incoterm || "",
     placeOfSupply: api.placeOfSupply || "",

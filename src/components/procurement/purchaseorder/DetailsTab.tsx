@@ -119,24 +119,19 @@ export const DetailsTab = ({
               ]}
             />
 
-            <Select
-              label="Tax Category"
-              name="taxCategory"
-              value={taxCategory}
-              options={[
-                { label: "Export", value: "Export" },
-                { label: "Non-Export", value: "Non-Export" },
-                { label: "LPO", value: "LPO" },
-              ]}
-              onChange={(e) => setTaxCategory(e.target.value as any)}
-            />
-
+            <div className="flex items-center gap-19 text-xs">
+                            <span className="text-muted">Tax Category</span>
+                            <span className="font-medium text-main">
+                              {form.taxCategory || "-"}
+                            </span>
+                          </div>
             <Select
               label="Cost Center"
               name="costCenter"
               value={form.costCenter}
               onChange={onFormChange}
               options={[
+                { value: "", label: "Select Cost Center" },
                 { value: "Main - I", label: "Main - I" },
                 { value: "Manufacturing - I", label: "Manufacturing - I" },
                 { value: "manufacturineh - I", label: "manufacturineh - I" },
@@ -152,33 +147,17 @@ export const DetailsTab = ({
           </div>
 
           {/* Export to Country - Show only when Export is selected */}
-          {taxCategory === "Export" && (
-            <div className="col-span-4">
-              <CountrySelect
-                label="Export to Country"
-                value={form.exportToCountry}
-                onChange={(country) => {
-                  // Update both exportToCountry and placeOfSupply
-                  const event = {
-                    target: {
-                      name: "exportToCountry",
-                      value: country.name,
-                    },
-                  } as React.ChangeEvent<HTMLInputElement>;
-                  onFormChange(event);
+{taxCategory === "Export" && (
+  <div className="flex items-center gap-15 text-xs">
+    <span className="text-muted">Export to Country</span>
+    <span className="font-medium text-main">
+      {form.destnCountryCd || "-"}
+    </span>
+  </div>
+)}
 
-                  // Also update placeOfSupply with country code
-                  const codeEvent = {
-                    target: {
-                      name: "placeOfSupply",
-                      value: country.code,
-                    },
-                  } as React.ChangeEvent<HTMLInputElement>;
-                  onFormChange(codeEvent);
-                }}
-              />
-            </div>
-          )}
+
+
         </div>
 
         <div className="my-6 h-px border-theme border" />
