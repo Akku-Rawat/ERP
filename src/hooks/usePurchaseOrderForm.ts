@@ -37,7 +37,6 @@ export const usePurchaseOrderForm = ({
 }: UsePurchaseOrderFormProps) => {
   const [form, setForm] = useState<PurchaseOrderFormData>(emptyPOForm);
   const [activeTab, setActiveTab] = useState<POTab>("details");
-  const [taxCategory, setTaxCategory] = useState<"Export" | "Non-Export" | "LPO" | "">("");
   const [saving, setSaving] = useState(false);
 
   const isEditMode = !!poId;
@@ -45,63 +44,47 @@ export const usePurchaseOrderForm = ({
 
 
 
-  // Sync taxCategory with form
-  
 
-  // Update VAT codes for all items when tax category changes
-  useEffect(() => {
-    if (!taxCategory) return;
+useEffect(() => {
+  if (!form.taxCategory) return;
 
-    setForm((prev) => ({
-      ...prev,
-      items: prev.items.map((item) => {
-        // Skip if item doesn't have item code yet
-        if (!item.itemCode) return item;
+  setForm((prev) => ({
+    ...prev,
+    items: prev.items.map((item) => {
+      if (!item.itemCode) return item;
 
-        // Update VAT code based on new tax category
-        let newVatCd = "A"; // default
+      let vatCd = "A";
+      if (form.taxCategory === "Export") vatCd = "C1";
+      else if (form.taxCategory === "LPO") vatCd = "E";
 
-        if (taxCategory === "Export") {
-          newVatCd = "C1";
-        } else if (taxCategory === "LPO") {
-          newVatCd = "E";
-        } else if (taxCategory === "Non-Export") {
-          // Keep the item's original tax code if available
-          newVatCd = item.vatCd || "A";
-        }
+      return { ...item, vatCd };
+    }),
+  }));
+}, [form.taxCategory]);
 
-        return {
-          ...item,
-          vatCd: newVatCd,
-        };
-      }),
-    }));
-  }, [taxCategory]);
 
   // Load PO Data in Edit Mode
-  useEffect(() => {
-    if (!isOpen || !poId) return;
+useEffect(() => {
+  if (!isOpen || !poId) return;
 
-    const loadPO = async () => {
-      try {
-        toast.loading("Loading Purchase Order...");
+  const loadPO = async () => {
+    const toastId = toast.loading("Loading Purchase Order...");
 
-        const apiData = await getPurchaseOrderById(poId);
-        const mapped = mapApiToUI(apiData);
+    try {
+      const apiData = await getPurchaseOrderById(poId);
+      const mapped = mapApiToUI(apiData);
 
-        setForm(mapped);
-        setTaxCategory(mapped.taxCategory as any);
-        toast.dismiss();
-        toast.success("Purchase Order Loaded");
-      } catch (err) {
-        console.error("PO Load Error", err);
-        toast.dismiss();
-        toast.error("Failed to load Purchase Order");
-      }
-    };
+      setForm(mapped); 
+      toast.success("Purchase Order Loaded", { id: toastId });
+    } catch (err) {
+      console.error("PO Load Error", err);
+      toast.error("Failed to load Purchase Order", { id: toastId });
+    }
+  };
 
-    loadPO();
-  }, [isOpen, poId]);
+  loadPO();
+}, [isOpen, poId]);
+
 
   // Set default date on create mode
   useEffect(() => {
@@ -164,7 +147,11 @@ export const usePurchaseOrderForm = ({
 const handleSupplierChange = async (sup: any) => {
   if (!sup) return;
 
-  setTaxCategory(sup.taxCategory as any);
+  setForm((p) => ({
+  ...p,
+  taxCategory: sup.taxCategory,
+}));
+
 
   let destCode = "";
   let billingCountry = "";
@@ -322,66 +309,72 @@ const handleSupplierChange = async (sup: any) => {
     return item.taxCode || item.vatCd || "A";
   };
 
-  const handleItemSelect = (item: any, idx: number) => {
-    setForm((prev) => {
-      const items = [...prev.items];
-      items[idx] = {
-        ...items[idx],
-        itemCode: item.id,
-        itemName: item.itemName,
-        uom: item.unitOfMeasureCd || "Unit",
-        rate: Number(item.sellingPrice || 0),
-        vatCd: getVatCode(item, taxCategory),
-      };
+const handleItemSelect = (item: any, idx: number) => {
+  setForm((prev) => {
+    const items = [...prev.items];
 
-      return { ...prev, items };
-    });
-  };
+    items[idx] = {
+      ...items[idx],
+      itemCode: item.id,
+      itemName: item.itemName,
+      uom: item.unitOfMeasureCd || "Unit",
+      rate: Number(item.sellingPrice || 0),
+      vatCd: getVatCode(item, prev.taxCategory), 
+    };
 
-  const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
+    return { ...prev, items };
+  });
+};
 
-    // Ensure taxCategory is synced with form before validation
-    const formToValidate = { ...form, taxCategory };
-    const errors = validatePO(formToValidate);
-    
-    if (errors.length) {
-      // Show only unique errors to avoid duplicates
-      const uniqueErrors = [...new Set(errors)];
-      uniqueErrors.forEach((err) => toast.error(err));
-      return;
+
+const handleSubmit = async (e?: React.FormEvent) => {
+  e?.preventDefault();
+
+  // 🔒 Mandatory tax category check
+  if (!form.taxCategory) {
+    toast.error("Tax Category is required");
+    return;
+  }
+
+  const errors = validatePO(form);
+
+  if (errors.length) {
+    const uniqueErrors = [...new Set(errors)];
+    uniqueErrors.forEach((err) => toast.error(err));
+    return;
+  }
+
+  try {
+    setSaving(true);
+
+    const payload = mapUIToCreatePO(form); 
+
+    let res;
+    if (isEditMode) {
+      res = await updatePurchaseOrder({ poId, ...payload });
+      toast.success("Purchase Order Updated");
+    } else {
+      res = await createPurchaseOrder(payload);
+      toast.success("Purchase Order Created");
     }
 
-    try {
-      setSaving(true);
+    onSuccess?.(res);
+    onClose?.();
+    if (!isEditMode) reset();
+  } catch (error: any) {
+    console.error("PO ERROR", error);
+    toast.error(error?.response?.data?.message || "PO save failed");
+  } finally {
+    setSaving(false);
+  }
+};
 
-      const payload = mapUIToCreatePO(formToValidate);
 
-      let res;
-      if (isEditMode) {
-        res = await updatePurchaseOrder({ poId, ...payload });
-        toast.success("Purchase Order Updated");
-      } else {
-        res = await createPurchaseOrder(payload);
-        toast.success("Purchase Order Created");
-      }
+const reset = () => {
+  setForm(emptyPOForm);
+  setActiveTab("details");
+};
 
-      onSuccess?.(res);
-      onClose?.();
-      if (!isEditMode) reset();
-    } catch (error: any) {
-      console.error("PO ERROR", error);
-      toast.error(error?.response?.data?.message || "PO save failed");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const reset = () => {
-    setForm(emptyPOForm);
-    setActiveTab("details");
-    setTaxCategory("");
-  };
 
   return {
     form,
@@ -402,8 +395,6 @@ const handleSupplierChange = async (sup: any) => {
     handleItemSelect,
     resetTemplate,
     getCurrencySymbol,
-    taxCategory,
-    setTaxCategory,
     handleSubmit,
     reset,
     setForm,

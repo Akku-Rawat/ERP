@@ -52,8 +52,6 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
     handleSaveTemplate,
     resetTemplate,
     getCurrencySymbol,
-    taxCategory,
-    setTaxCategory,
     handleSubmit,
     reset,
   } = usePurchaseOrderForm({ isOpen, onSuccess: onSubmit, onClose, poId });
@@ -85,13 +83,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
       height="90vh"
       footer={footer}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.98 }}
-        transition={{ duration: 0.25 }}
-        className="h-full flex flex-col"
-      >
+     
         <form
           id="purchaseOrderForm"
           onSubmit={handleSubmit}
@@ -104,10 +96,12 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                 type="button"
                 onClick={() => setActiveTab(key)}
                 className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${
-                  activeTab === key
+    activeTab === key
                     ? "text-primary bg-card shadow-sm"
                     : "text-muted hover:bg-card/50"
-                }`}
+  }`}
+
+                
               >
                 <span className="relative z-10 flex items-center gap-2">
                   <Icon className="w-4 h-4" />
@@ -137,8 +131,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                 onRemoveItem={removeItem}
                 getCurrencySymbol={getCurrencySymbol}
                 onItemSelect={handleItemSelect}
-                taxCategory={taxCategory}
-                setTaxCategory={setTaxCategory}
+
               />
             )}
 
@@ -196,7 +189,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
             )}
           </section>
         </form>
-      </motion.div>
+    
     </Modal>
   );
 };

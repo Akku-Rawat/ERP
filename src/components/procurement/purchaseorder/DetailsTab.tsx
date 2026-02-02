@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2 } from "lucide-react";
-import { Input, Card, Button } from "../../ui/modal/formComponent";
+import { Plus, Trash2, User, Mail, Phone } from "lucide-react";
+import { Button } from "../../ui/modal/formComponent";
 import Select from "../../ui/Select";
 import type { ItemRow, PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
 import { currencyOptions } from "../../../types/Supply/supplier";
 import SupplierSelect from "../../selects/procurement/SupplierSelect";
 import POItemSelect from "../../selects/procurement/POItemSelect";
-import CountrySelect from "../../selects/CountrySelect"; // Your existing component
+import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
 
 interface DetailsTabProps {
   form: PurchaseOrderFormData;
   items: ItemRow[];
   onItemSelect: (item: any, idx: number) => void;
-  taxCategory: string;
-  setTaxCategory: (v: "Export" | "Non-Export" | "LPO") => void;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onSupplierChange: (s: any) => void;
   onItemChange: (e: React.ChangeEvent<HTMLInputElement>, idx: number) => void;
@@ -31,8 +29,6 @@ export const DetailsTab = ({
   onItemSelect,
   onAddItem,
   onRemoveItem,
-  taxCategory,
-  setTaxCategory,
   getCurrencySymbol,
 }: DetailsTabProps) => {
   const symbol = getCurrencySymbol();
@@ -40,6 +36,7 @@ export const DetailsTab = ({
   // Pagination Logic
   const ITEMS_PER_PAGE = 5;
   const [page, setPage] = useState(0);
+
 
   // Helper function to get VAT description
   const getVatDescription = (vatCd: string): string => {
@@ -74,39 +71,59 @@ export const DetailsTab = ({
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4 mt-6 bg-app text-main">
-      <div className="col-span-2 bg-card p-4 rounded-lg border border-theme">
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <SupplierSelect
-            selectedId={form.supplierId}
-            onChange={onSupplierChange}
-          />
+    <div className="flex flex-col gap-4 max-h-screen overflow-auto p-4 mt-6 bg-app text-main">
+      <div className="bg-app">
+        <div className="grid grid-cols-6 gap-3 items-end">
+          {/* Supplier */}
+          <div className="col-span-1">
+            <SupplierSelect
+              selectedId={form.supplierId}
+              onChange={onSupplierChange}
+            />
+          </div>
 
-          <Input
-            label="Date"
-            name="date"
-            type="date"
-            value={form.date}
-            onChange={onFormChange}
-          />
-          <Input
-            label="Required By"
-            name="requiredBy"
-            type="date"
-            value={form.requiredBy}
-            onChange={onFormChange}
-          />
+          {/* Date */}
+          <div>
+            <label className="block text-[10px] font-medium text-main mb-1">
+              Date *
+            </label>
+            <input
+              type="date"
+              name="date"
+              value={form.date}
+              onChange={onFormChange}
+              className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+            />
+          </div>
 
-          <Select
-            label="Currency"
-            name="currency"
-            value={form.currency}
-            onChange={onFormChange}
-            options={currencySelectOptions}
-          />
+          {/* Required By */}
+          <div>
+            <label className="block text-[10px] font-medium text-main mb-1">
+              Required By *
+            </label>
+            <input
+              type="date"
+              name="requiredBy"
+              value={form.requiredBy}
+              onChange={onFormChange}
+              className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+            />
+          </div>
 
-          <div className="col-span-3 grid grid-cols-3 gap-4">
-            <Select
+          {/* Currency */}
+          <div>
+            <ModalSelect
+              label="Currency"
+              name="currency"
+              value={form.currency}
+              onChange={onFormChange}
+              options={currencySelectOptions}
+            />
+          </div>
+
+          {/* Status */}
+          <div>
+            <ModalSelect
               label="Status"
               name="status"
               value={form.status}
@@ -118,14 +135,9 @@ export const DetailsTab = ({
                 { value: "Cancelled", label: "Cancelled" },
               ]}
             />
-
-            <div className="flex items-center gap-19 text-xs">
-                            <span className="text-muted">Tax Category</span>
-                            <span className="font-medium text-main">
-                              {form.taxCategory || "-"}
-                            </span>
-                          </div>
-            <Select
+          </div>
+        <div>
+            <ModalSelect
               label="Cost Center"
               name="costCenter"
               value={form.costCenter}
@@ -134,11 +146,18 @@ export const DetailsTab = ({
                 { value: "", label: "Select Cost Center" },
                 { value: "Main - I", label: "Main - I" },
                 { value: "Manufacturing - I", label: "Manufacturing - I" },
-                { value: "manufacturineh - I", label: "manufacturineh - I" },
               ]}
             />
+          </div>
 
-            <Input
+        </div>
+
+        {/* Second Row - Only if needed (Cost Center, Project, Export Country) */}
+        <div className="grid grid-cols-6 gap-3 mt-3">
+         
+
+          <div>
+            <ModalInput
               label="Project"
               name="project"
               value={form.project}
@@ -146,229 +165,286 @@ export const DetailsTab = ({
             />
           </div>
 
-          {/* Export to Country - Show only when Export is selected */}
-{taxCategory === "Export" && (
-  <div className="flex items-center gap-15 text-xs">
-    <span className="text-muted">Export to Country</span>
-    <span className="font-medium text-main">
-      {form.destnCountryCd || "-"}
-    </span>
-  </div>
-)}
-
-
-
+       
         </div>
+      </div>
 
-        <div className="my-6 h-px border-theme border" />
+      {/* Main Body - Table LEFT + Sidebar RIGHT */}
+      <div className="grid grid-cols-[4fr_1fr] gap-4">
+        {/* LEFT: Order Items Table */}
+        <div className="bg-card rounded-lg p-2 shadow-sm flex-1">
+          {/* Simple Table Title */}
+          <div className="flex items-center gap-1 mb-2">
+            <h3 className="text-sm font-semibold text-main">Order Items</h3>
+          </div>
 
-        <h3 className="mb-4 text-lg font-semibold underline text-main">
-          Order Items
-        </h3>
 
-        {/* Pagination Info */}
-        <div className="flex justify-between text-sm text-muted mb-2">
-          <span>
-            Showing {page * ITEMS_PER_PAGE + 1}–
-            {Math.min((page + 1) * ITEMS_PER_PAGE, items.length)} of{" "}
-            {items.length}
-          </span>
-          <div className="flex gap-2">
+
+          <div>
+            <table className="w-full border-collapse text-[10px]">
+              <thead>
+                <tr className="border-b border-theme">
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">#</th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">Item Code</th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">Required By</th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">Qty</th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">UOM</th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Rate</th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">VAT Code</th>
+                  <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">Amount</th>
+                  <th className="px-2 py-3 text-center text-muted font-medium text-[11px] w-[35px]">-</th>
+                </tr>
+              </thead>
+
+              <tbody >
+                {paginatedItems.map((it, idx) => {
+                  const i = page * ITEMS_PER_PAGE + idx;
+                  const amount = it.quantity * it.rate;
+
+                  return (
+                    <tr key={i} className="border-b border-theme bg-card row-hover">
+                      <td className="px-3 py-2 text-[10px]">{i + 1}</td>
+
+                      <td className="px-0.5 py-1">
+                        <POItemSelect
+                          value={it.itemName}
+                          selectedId={it.itemCode}
+                          onChange={(item) => {
+                            onItemSelect(item, i);
+                          }}
+                        />
+                      </td>
+
+                      <td className="px-0.5 py-1">
+                        <input
+                          type="date"
+                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          name="requiredBy"
+                          value={it.requiredBy}
+                          onChange={(e) => onItemChange(e, i)}
+                        />
+                      </td>
+
+                      <td className="px-0.5 py-1">
+                        <input
+                          type="number"
+                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          name="quantity"
+                          value={it.quantity}
+                          onChange={(e) => onItemChange(e, i)}
+                        />
+                      </td>
+
+                      <td className="px-1 py-1">
+                        <input
+                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          name="uom"
+                          value={it.uom}
+                          onChange={(e) => onItemChange(e, i)}
+                        />
+                      </td>
+
+                      <td className="px-0.5 py-1">
+                        <input
+                          type="number"
+                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          name="rate"
+                          value={it.rate}
+                          onChange={(e) => onItemChange(e, i)}
+                        />
+                      </td>
+
+                      <td className="px-0.5 py-1">
+                        <div className="relative">
+                          <input
+                            className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                            name="vatCd"
+                            value={it.vatCd || "-"}
+                            readOnly
+                            disabled
+                            title={`VAT Code: ${form.taxCategory === "Export"
+                              ? "C1 (Export - Zero-rated)"
+                              : form.taxCategory === "LPO"
+                                ? "E (LPO - Exempt)"
+                                : form.taxCategory === "Non-Export"
+                                  ? `${it.vatCd || "A"} (${getVatDescription(it.vatCd || "A")})`
+                                  : "Select Tax Category first"
+                              }`}
+
+                          />
+                        </div>
+                      </td>
+
+                      <td className="px-1 py-1.5 text-right">
+                        <span className="text-[10px] font-medium text-main">
+                          {symbol} {amount.toFixed(2)}
+                        </span>
+                      </td>
+
+                      <td className="px-1 py-1.5 text-center">
+                        <button
+                          type="button"
+                          onClick={() => onRemoveItem(i)}
+                         className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+
+          <div className="mt-3 flex justify-between items-center gap-3">
+            {/* Add Item Button */}
             <button
               type="button"
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
-              disabled={page === 0}
-              className="px-2 py-1 bg-app border border-theme rounded disabled:opacity-50"
+              onClick={onAddItem}
+              className="px-4 py-1.5 bg-primary hover:bg-[var(--primary-600)] text-white rounded text-xs font-medium flex items-center gap-1.5 transition-colors"
             >
-              Prev
+              <Plus size={14} />
+              Add Item
             </button>
-            <button
-              type="button"
-              onClick={() => setPage((p) => p + 1)}
-              disabled={(page + 1) * ITEMS_PER_PAGE >= items.length}
-              className="px-2 py-1 bg-app border border-theme rounded disabled:opacity-50"
-            >
-              Next
-            </button>
+
+            {(items.length > 5 || page > 0) && (
+              <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
+                <div className="text-[11px] text-muted whitespace-nowrap">
+                  Showing {page * ITEMS_PER_PAGE + 1} to{" "}
+                  {Math.min((page + 1) * ITEMS_PER_PAGE, items.length)} of {items.length} items
+                </div>
+
+                <div className="flex gap-1.5 items-center">
+                  <button
+                    type="button"
+                    onClick={() => setPage(Math.max(0, page - 1))}
+                    disabled={page === 0}
+                    className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+                  >
+                    Previous
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPage(page + 1)}
+                    disabled={(page + 1) * ITEMS_PER_PAGE >= items.length}
+                    className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="overflow-x-auto overflow-visible rounded-lg border border-theme">
-          <table className="w-full text-sm">
-            <thead className="table-head">
-              <tr>
-                <th className="px-2 py-2 text-left">#</th>
-                <th className="px-2 py-2 text-left">Item Code</th>
-                <th className="px-2 py-2 text-left">Required By</th>
-                <th className="px-2 py-2 text-left">Qty</th>
-                <th className="px-2 py-2 text-left">UOM</th>
-                <th className="px-2 py-2 text-left">Rate</th>
-                <th className="px-2 py-2 text-left">VAT Code</th>
-                <th className="px-2 py-2 text-right">Amount</th>
-                <th></th>
-              </tr>
-            </thead>
+        {/* Right Sidebar */}
+        {/* RIGHT: Supplier Details + Summary (STACKED) */}
+        <div className="flex flex-col gap-2">
+          {/* Supplier Details */}
+          <div className="bg-card rounded-lg p-2 w-[220px]">
+            <h3 className="text-[12px] font-semibold text-main mb-2">
+              Supplier Details
+            </h3>
 
-            <tbody className="divide-y border-theme">
-              {paginatedItems.map((it, idx) => {
-                const i = page * ITEMS_PER_PAGE + idx;
-                const amount = it.quantity * it.rate;
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-1.5 text-xs text-main">
+                <span className="flex items-center gap-2">
+                  <User size={16} className="text-muted" />
+                  <span className="text-xs text-main">
+                    {form.supplier || "Supplier Name"}
+                  </span>
+                </span>
+              </div>
 
-                return (
-                  <tr key={i} className="row-hover">
-                    <td className="px-3 py-2 text-center">{i + 1}</td>
+              <div className="flex items-center gap-2 text-[10px] text-muted">
+                <Mail size={14} className="text-muted" />
+                <span>supplier@example.com</span>
+              </div>
 
-                    <td className="px-1 py-1">
-                      <POItemSelect
-                        value={it.itemName}
-                        selectedId={it.itemCode}
-                        onChange={(item) => {
-                          onItemSelect(item, i);
-                        }}
-                      />
-                    </td>
+              <div className="flex items-center gap-2 text-[10px] text-muted">
+                <Phone size={14} className="text-muted" />
+                <span>+91 9876543210</span>
+              </div>
 
-                    <td className="px-0.5 py-0.5">
-                      <input
-                        type="date"
-                        className="w-full rounded border border-theme bg-app p-1 text-sm"
-                        name="requiredBy"
-                        value={it.requiredBy}
-                        onChange={(e) => onItemChange(e, i)}
-                      />
-                    </td>
+              {/* Tax Category Info */}
+              {form.taxCategory && (
+                <div className="bg-card rounded-lg mt-1">
+                  <h3 className="text-[11px] font-semibold text-main mb-1">
+                    Order Information
+                  </h3>
 
-                    <td className="px-1 py-1">
-                      <input
-                        type="number"
-                        className="w-full rounded border border-theme bg-app p-1 text-right text-sm"
-                        name="quantity"
-                        value={it.quantity}
-                        onChange={(e) => onItemChange(e, i)}
-                      />
-                    </td>
+                  <div className="flex flex-col gap-1">
+                    {/* Tax Category */}
+                    <div className="flex items-center gap-19 text-xs">
+                      <span className="text-muted">Tax Category</span>
+                      <span className="font-medium text-main">
+                        {form.taxCategory}
+                      </span>
+                    </div>
 
-                    <td className="px-1 py-1">
-                      <input
-                        className="w-full rounded border border-theme bg-app p-1 text-sm"
-                        name="uom"
-                        value={it.uom}
-                        onChange={(e) => onItemChange(e, i)}
-                      />
-                    </td>
-
-                    <td className="px-1 py-1">
-                      <input
-                        type="number"
-                        className="w-full rounded border border-theme bg-app p-1 text-right text-sm"
-                        name="rate"
-                        value={it.rate}
-                        onChange={(e) => onItemChange(e, i)}
-                      />
-                    </td>
-
-                    <td className="px-1 py-1">
-                      <div className="relative">
-                        <input
-                          className="w-full rounded border border-theme bg-app/50 p-1 text-sm text-center font-semibold cursor-not-allowed"
-                          name="vatCd"
-                          value={it.vatCd || "-"}
-                          readOnly
-                          disabled
-                          title={`VAT Code: ${
-                            taxCategory === "Export"
-                              ? "C1 (Export - Zero-rated)"
-                              : taxCategory === "LPO"
-                              ? "E (LPO - Exempt)"
-                              : taxCategory === "Non-Export"
-                              ? `${it.vatCd || "A"} (${getVatDescription(it.vatCd || "A")})`
-                              : "Select Tax Category first"
-                          }`}
-                        />
+                    {/* Destination Country – only for Export */}
+                    {form.taxCategory === "Export" && (
+                      <div className="flex items-center gap-15 text-xs">
+                        <span className="text-muted">Destination Country</span>
+                        <span className="font-medium text-main">
+                          {form.destnCountryCd || "-"}
+                        </span>
                       </div>
-                    </td>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
-                    <td className="px-1 py-1 text-right font-medium">
-                      {symbol}
-                      {amount.toFixed(2)}
-                    </td>
+          {/* Summary */}
+          <div className="bg-card rounded-lg p-3 w-[220px]">
+            <h3 className="text-[13px] font-semibold text-main mb-2">Summary</h3>
 
-                    <td className="px-1 py-1 text-center">
-                      <Button variant="ghost" onClick={() => onRemoveItem(i)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-19 text-xs">
+                <span className="text-muted">Total Items</span>
+                <span className="font-medium text-main">{items.length}</span>
+              </div>
 
-        <Button variant="secondary" className="mt-3" onClick={onAddItem}>
-          <Plus className="w-4 h-4" /> Add Item
-        </Button>
-      </div>
+              <div className="flex items-center gap-19 text-xs">
+                <span className="text-muted">Total Quantity</span>
+                <span className="font-medium text-main">{form.totalQuantity}</span>
+              </div>
 
-      {/* Right Sidebar */}
-      <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
-        <div className="w-full max-w-sm space-y-6">
-          <Card title="Supplier Details">
-            <div className="space-y-2 text-sm text-main">
-              <div className="flex justify-between">
-                <span className="font-medium text-muted">Supplier Name</span>
-                <span className="font-medium">
-                  {form.supplier || "Not Selected"}
+              <div className="flex items-center gap-19 text-xs">
+                <span className="text-muted">Grand Total</span>
+                <span className="font-medium text-main">
+                  {symbol} {form.grandTotal.toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-medium text-muted">Contact</span>
-                <span className="font-medium">+91 9876543210</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-base font-semibold">Email Address</span>
-                <span className="text-base font-bold text-primary">
-                  supplier@example.com
+
+              <div className="flex items-center gap-19 text-xs">
+                <span className="text-muted">Rounding Adj</span>
+                <span className="font-medium text-main">
+                  {symbol} {form.roundingAdjustment.toFixed(2)}
                 </span>
+              </div>
+
+              {/* Grand Total Highlight */}
+              <div className="mt-2 p-2 bg-primary rounded-lg w-full">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-white">
+                    Rounded Total
+                  </span>
+                  <span className="text-sm font-bold text-white">
+                    {symbol} {form.roundedTotal.toFixed(2)}
+                  </span>
+                </div>
               </div>
             </div>
-          </Card>
-
-          <Card title="Order Summary">
-            <div className="space-y-2 text-sm text-main">
-              <div className="flex justify-between">
-                <span className="font-medium text-muted">Total Items</span>
-                <span className="font-medium">{items.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium text-muted">Total Quantity</span>
-                <span className="font-medium">{form.totalQuantity}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium text-muted">Grand Total</span>
-                <span className="font-medium">
-                  {symbol}
-                  {form.grandTotal.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium text-muted">Rounding Adj</span>
-                <span className="font-medium">
-                  {symbol}
-                  {form.roundingAdjustment.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between border-t border-theme pt-2 mt-2">
-                <span className="text-base font-semibold">Rounded Total</span>
-                <span className="text-base font-bold text-primary">
-                  {symbol}
-                  {form.roundedTotal.toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>
+
   );
 };

@@ -32,7 +32,7 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     supplierId: form.supplierId,
     currency: form.currency,
     status: form.status,
-
+   taxCategory: form.taxCategory,
     costCenter: form.costCenter,
     project: form.project,
 
@@ -196,7 +196,8 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
     poNumber: api.poId || "",
     date: api.poDate || "",
     requiredBy: api.requiredBy || "",
-    taxCategory: api.invoiceType || "",
+    taxCategory: api.taxCategory || api.invoiceType || "",
+
 
     // Supplier Info
     supplier: api.supplierName || "",
