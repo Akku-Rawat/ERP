@@ -185,6 +185,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                 onAddPaymentRow={addPaymentRow}
                 onRemovePaymentRow={removePaymentRow}
                 onTermsChange={handleFormChange}
+                //  onItemTermsToggle={handleItemTermsToggle} 
               />
             )}
           </section>
