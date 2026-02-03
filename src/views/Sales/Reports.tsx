@@ -10,9 +10,10 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Sector,
 } from "recharts";
 import { FaChartBar, FaFileExport, FaFileCsv } from "react-icons/fa";
+
+/* ===== TYPES & DATA (UNCHANGED) ===== */
 
 type ReportRow = {
   date: string;
@@ -104,6 +105,8 @@ const COLORS = [
   "#8B5CF6",
 ];
 
+/* ===== CSV EXPORT (UNCHANGED) ===== */
+
 function exportToCsv(rows: ReportRow[], filename: string) {
   const header = Object.keys(rows[0]).join(",") + "\n";
   const body = rows
@@ -113,8 +116,7 @@ function exportToCsv(rows: ReportRow[], filename: string) {
         .join(","),
     )
     .join("\n");
-  const csvContent = header + body;
-  const blob = new Blob([csvContent], { type: "text/csv" });
+  const blob = new Blob([header + body], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -122,95 +124,6 @@ function exportToCsv(rows: ReportRow[], filename: string) {
   a.click();
   URL.revokeObjectURL(url);
 }
-
-const renderPieLabel = (props: any) => {
-  const { cx, cy, midAngle, outerRadius, percent, payload } = props;
-  const name = payload?.name;
-  const value = payload?.value;
-  const RADIAN = Math.PI / 180;
-  // Ensure values are numbers
-  const cxNum = Number(cx),
-    cyNum = Number(cy),
-    outerNum = Number(outerRadius),
-    angleNum = Number(midAngle);
-  const x = cxNum + (outerNum + 16) * Math.cos(-angleNum * RADIAN);
-  const y = cyNum + (outerNum + 16) * Math.sin(-angleNum * RADIAN);
-
-  if (percent < 0.02) return null;
-  return (
-    <text
-      x={x}
-      y={y}
-      fill="#334155"
-      fontWeight="bold"
-      textAnchor={x > cxNum ? "start" : "end"}
-      dominantBaseline="central"
-      fontSize={13}
-      style={{ pointerEvents: "none" }}
-    >
-      {`${name}: ${value}`}
-    </text>
-  );
-};
-
-const renderActiveShape = (props: any) => {
-  const {
-    cx,
-    cy,
-    innerRadius,
-    outerRadius,
-    startAngle,
-    endAngle,
-    fill,
-    payload,
-    value,
-    percent,
-  } = props;
-  const cxNum = Number(cx),
-    cyNum = Number(cy),
-    innerNum = Number(innerRadius),
-    outerNum = Number(outerRadius);
-  return (
-    <g>
-      <Sector
-        cx={cxNum}
-        cy={cyNum}
-        fill={fill}
-        innerRadius={innerNum}
-        outerRadius={outerNum + 10}
-        startAngle={startAngle}
-        endAngle={endAngle}
-      />
-      <text
-        x={cxNum}
-        y={cyNum - 10}
-        textAnchor="middle"
-        fontWeight="bold"
-        fill="#2d3a55"
-      >
-        {payload?.name}
-      </text>
-      <text
-        x={cxNum}
-        y={cyNum + 16}
-        textAnchor="middle"
-        fontSize={14}
-        fill="#6366F1"
-      >
-        {`Qty: ${value}`}
-      </text>
-      <text
-        x={cxNum}
-        y={cyNum + 32}
-        textAnchor="middle"
-        fontSize={12}
-        fill="#64748b"
-      >
-        {`(${(percent * 100).toFixed(1)}%)`}
-      </text>
-    </g>
-  );
-};
 
 export default function ReportTable() {
   const [showChart, setShowChart] = useState(false);
@@ -246,6 +159,7 @@ export default function ReportTable() {
       )
     )
       return false;
+
     const rowDate = dateStringForInput(row.date);
     if (filters.dateFrom && rowDate < filters.dateFrom) return false;
     if (filters.dateTo && rowDate > filters.dateTo) return false;
@@ -256,6 +170,7 @@ export default function ReportTable() {
       return false;
     if (filters.salesOrder !== "All" && row.salesOrder !== filters.salesOrder)
       return false;
+
     return true;
   });
 
@@ -267,249 +182,185 @@ export default function ReportTable() {
       0,
     ),
   }));
-  const uniqueTrademarks = Array.from(new Set(data.map((d) => d.trademark)));
-  const trademarkChart = uniqueTrademarks.map((tm) => ({
-    name: tm,
-    value: filteredData.reduce(
-      (acc, curr) => (curr.trademark === tm ? acc + parseFloat(curr.qty) : acc),
-      0,
-    ),
-  }));
-  const byMonth: { [key: string]: number } = {};
+
+  const byMonth: Record<string, number> = {};
   filteredData.forEach((row) => {
-    const [d, t] = row.date.split(" ");
-    const [month, day, year] = d.split("/");
-    const label = `${year}-${month}`;
-    byMonth[label] = (byMonth[label] || 0) + parseFloat(row.qty);
+    const [d] = row.date.split(" ");
+    const [month, , year] = d.split("/");
+    const key = `${year}-${month}`;
+    byMonth[key] = (byMonth[key] || 0) + parseFloat(row.qty);
   });
+
   const monthChart = Object.entries(byMonth).map(([month, value]) => ({
     month,
     value,
   }));
 
-  const handleView = (row: ReportRow) => {
-    alert(`Viewing details for invoice: ${row.invoiceNumber}`);
-  };
-  const handleRowExport = (row: ReportRow) => {
-    exportToCsv([row], `invoice_${row.invoiceNumber}.csv`);
-  };
-  const handleExportAll = () => {
-    if (filteredData.length === 0) return;
-    exportToCsv(filteredData, "filtered_report.csv");
-  };
-
   return (
-    <div className="max-w-auto mx-auto mt-8 mb-12 p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
-      {/* Filter bar */}
-      <div className="flex flex-col sm:flex-row sm:gap-4 gap-2 justify-between items-center mb-4">
-        <div className="flex flex-wrap gap-3 items-center">
+    <div className="mx-auto mt-8 mb-12 p-6 bg-card rounded-2xl border border-theme">
+      {/* FILTER BAR */}
+      <div className="flex flex-col sm:flex-row gap-3 justify-between items-center mb-4">
+        <div className="flex flex-wrap gap-3 items-center w-full">
           <input
-            type="text"
-            placeholder="Search..."
-            className="border border-gray-300 px-4 py-2 rounded-lg w-full sm:max-w-xs focus:border-blue-400 transition"
+            className="filter-input-refined sm:max-w-xs"
+            placeholder="Search…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+
           <input
             type="date"
-            className="border border-gray-300 px-3 py-2 rounded-lg focus:border-blue-400"
+            className="filter-input-refined"
             value={filters.dateFrom}
             onChange={(e) =>
               setFilters((f) => ({ ...f, dateFrom: e.target.value }))
             }
-            title="Start Date"
           />
+
           <input
             type="date"
-            className="border border-gray-300 px-3 py-2 rounded-lg focus:border-blue-400"
+            className="filter-input-refined"
             value={filters.dateTo}
             onChange={(e) =>
               setFilters((f) => ({ ...f, dateTo: e.target.value }))
             }
-            title="End Date"
           />
+
           <select
-            className="border border-gray-300 px-3 py-2 rounded-lg focus:border-blue-400"
+            className="filter-input-refined"
             value={filters.itemCategory}
             onChange={(e) =>
               setFilters((f) => ({ ...f, itemCategory: e.target.value }))
             }
           >
             <option value="All">All Categories</option>
-            {uniqueCategories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
+            {uniqueCategories.map((c) => (
+              <option key={c}>{c}</option>
             ))}
           </select>
+
           <select
-            className="border border-gray-300 px-3 py-2 rounded-lg focus:border-blue-400"
+            className="filter-input-refined"
             value={filters.salesOrder}
             onChange={(e) =>
               setFilters((f) => ({ ...f, salesOrder: e.target.value }))
             }
           >
             <option value="All">All Sales Orders</option>
-            {uniqueSalesOrders.map((order) => (
-              <option key={order} value={order}>
-                {order}
-              </option>
+            {uniqueSalesOrders.map((o) => (
+              <option key={o}>{o}</option>
             ))}
           </select>
         </div>
+
         <div className="flex gap-2">
           <button
-            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded flex items-center gap-1 text-sm"
-            onClick={handleExportAll}
+            onClick={() =>
+              filteredData.length &&
+              exportToCsv(filteredData, "filtered_report.csv")
+            }
+            className="bg-success text-success px-3 py-2 rounded-lg text-sm flex items-center gap-1"
           >
-            <FaFileCsv className="w-4 h-4" /> Export All
+            <FaFileCsv /> Export
           </button>
+
           <button
-            className="bg-blue-600 p-2 rounded-lg hover:bg-blue-700 focus:outline-none"
-            aria-label="Toggle Charts"
-            title={showChart ? "Show Table" : "Show Charts"}
             onClick={() => setShowChart((v) => !v)}
+            className="bg-primary p-2 rounded-lg"
           >
-            <FaChartBar className="w-6 h-6 text-white" />
+            <FaChartBar className="text-white" />
           </button>
         </div>
       </div>
 
+      {/* CONTENT */}
       {showChart ? (
-        <div className="bg-gray-50 rounded-xl mb-4 py-6 px-2 flex flex-wrap gap-8 justify-evenly border border-gray-200 shadow-sm">
+        <div className="bg-app border border-theme rounded-xl p-4 flex flex-wrap gap-6 justify-evenly">
           <div className="w-80">
-            <div className="font-semibold mb-2 text-center">Item Category</div>
+            <div className="font-semibold text-center mb-2 text-main">
+              Item Category
+            </div>
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
-                <Pie
-                  data={categoryChart}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={80}
-                  isAnimationActive
-                >
-                  {categoryChart.map((entry, idx) => (
-                    <Cell key={entry.name} fill={COLORS[idx % COLORS.length]} />
+                <Pie data={categoryChart} dataKey="value" nameKey="name">
+                  {categoryChart.map((e, i) => (
+                    <Cell key={e.name} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip
-                  formatter={(val: any, name: any, props: any) => [
-                    `${val}`,
-                    `${props.payload.name}`,
-                  ]}
-                  contentStyle={{
-                    background: "#fff",
-                    borderRadius: 6,
-                    boxShadow: "0 1px 8px #0003",
-                  }}
-                />
-
+                <Tooltip />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="w-80">
-            <div className="font-semibold mb-2 text-center">Trademark</div>
-            <ResponsiveContainer width="100%" height={240}>
-              <PieChart>
-                <Pie
-                  data={trademarkChart}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={80}
-                  isAnimationActive
-                >
-                  {trademarkChart.map((entry, idx) => (
-                    <Cell key={entry.name} fill={COLORS[idx % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(val: any, name: any, props: any) => [
-                    `${val}`,
-                    `${props.payload.name}`,
-                  ]}
-                  contentStyle={{
-                    background: "#fff",
-                    borderRadius: 6,
-                    boxShadow: "0 1px 8px #0003",
-                  }}
-                />
 
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
           <div className="w-80">
-            <div className="font-semibold mb-2 text-center">Qty by Month</div>
+            <div className="font-semibold text-center mb-2 text-main">
+              Qty by Month
+            </div>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={monthChart}>
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="value" fill="#6366F1" barSize={20} />
+                <Bar dataKey="value" fill="var(--primary)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
       ) : (
-        <div className="overflow-x-auto border rounded-xl shadow-sm">
-          <table className="min-w-full border-collapse">
-            <thead className="bg-gradient-to-r from-gray-100 to-blue-50 sticky top-0 z-10">
+        <div className="overflow-x-auto border border-theme rounded-xl">
+          <table className="min-w-full">
+            <thead className="table-head sticky top-0">
               <tr>
-                <th className="p-2 text-left">Date and Time</th>
-                <th className="p-2 text-left">Sales Order</th>
-                <th className="p-2 text-left">Invoice Number</th>
-                <th className="p-2 text-left">SKU</th>
-                <th className="p-2 text-left">Item</th>
-                <th className="p-2 text-right">Qty</th>
-                <th className="p-2 text-left">UOM</th>
-                <th className="p-2 text-left">Item Category</th>
-                <th className="p-2 text-left">Trademark</th>
-                <th className="p-2 text-center">Actions</th>
+                {[
+                  "Date",
+                  "Sales Order",
+                  "Invoice",
+                  "SKU",
+                  "Item",
+                  "Qty",
+                  "UOM",
+                  "Category",
+                  "Trademark",
+                  "Actions",
+                ].map((h) => (
+                  <th key={h} className="p-2 text-left">
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {filteredData.map((row, i) => (
-                <tr key={i} className={i % 2 ? "bg-gray-50" : "bg-white"}>
+                <tr key={i} className="row-hover">
                   <td className="p-2">{row.date}</td>
-                  <td className="p-2 text-blue-600 underline cursor-pointer">
-                    {row.salesOrder}
-                  </td>
+                  <td className="p-2 text-primary">{row.salesOrder}</td>
                   <td className="p-2">{row.invoiceNumber}</td>
-                  <td className="p-2 text-center font-mono">{row.sku}</td>
+                  <td className="p-2 font-mono">{row.sku}</td>
                   <td className="p-2">{row.item}</td>
                   <td className="p-2 text-right">{row.qty}</td>
                   <td className="p-2">{row.uom}</td>
                   <td className="p-2">{row.itemCategory}</td>
                   <td className="p-2">{row.trademark}</td>
-                  <td className="p-2 flex justify-center space-x-2">
+                  <td className="p-2 text-center">
                     <button
-                      className="text-blue-600 hover:underline"
-                      onClick={() => handleView(row)}
-                      title="View Details"
+                      className="text-primary text-sm"
+                      onClick={() =>
+                        exportToCsv([row], `invoice_${row.invoiceNumber}.csv`)
+                      }
                     >
-                      View
-                    </button>
-                    <button
-                      className="text-green-600 hover:underline flex items-center gap-1"
-                      onClick={() => handleRowExport(row)}
-                      title="Export Row"
-                    >
-                      <FaFileExport className="w-4 h-4" /> Export
+                      <FaFileExport />
                     </button>
                   </td>
                 </tr>
               ))}
-              {filteredData.length === 0 && (
+              {!filteredData.length && (
                 <tr>
-                  <td colSpan={10} className="py-8 text-center text-gray-500">
-                    No records found.
+                  <td
+                    colSpan={10}
+                    className="py-8 text-center text-muted"
+                  >
+                    No records found
                   </td>
                 </tr>
               )}
