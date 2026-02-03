@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   X,
   Search,
@@ -7,11 +7,15 @@ import {
   Receipt,
   Plus,
   Building2,
+  MapPin,
+  Mail,
 } from "lucide-react";
-import type { SupplierFormData, Supplier } from "../../types/Supply/supplier";
+import type { Supplier } from "../../types/Supply/supplier";
 import SupplierStatement from "./SupplierStatement";
 import PurchaseInvoiceModal from "../../components/procurement/PurchaseInvoiceModal";
 import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal";
+
+/* ================= PROPS ================= */
 
 interface Props {
   supplier: Supplier;
@@ -20,6 +24,8 @@ interface Props {
   onSupplierSelect: (supplier: Supplier) => void;
   onEdit: (supplier: Supplier) => void;
 }
+
+/* ================= COMPONENT ================= */
 
 const SupplierDetailView: React.FC<Props> = ({
   supplier,
@@ -32,12 +38,10 @@ const SupplierDetailView: React.FC<Props> = ({
   const [activeTab, setActiveTab] = useState<
     "overview" | "purchase-orders" | "bills" | "statement"
   >("overview");
-  const supplierDetail = supplier;
-  const [loading, setLoading] = useState(false);
   const [showPOModal, setShowPOModal] = useState(false);
-const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
-
+  const supplierDetail = supplier;
 
   const filteredSuppliers = suppliers.filter(
     (s) =>
@@ -46,36 +50,30 @@ const [showInvoiceModal, setShowInvoiceModal] = useState(false);
       (s.tpin || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-
-const renderActionButton = () => {
-  switch (activeTab) {
-    case "purchase-orders":
-      return (
-        <button
-          onClick={() => setShowPOModal(true)}
-          className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
-        >
-          <Plus size={14} /> New Purchase Order
-        </button>
-      );
-
-    case "bills":
-      return (
-        <button
-          onClick={() => setShowInvoiceModal(true)}
-          className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
-        >
-          <Plus size={14} /> New Purchase Invoice
-        </button>
-      );
-
-    default:
-      return null;
-  }
-};
-
-
-
+  const renderActionButton = () => {
+    switch (activeTab) {
+      case "purchase-orders":
+        return (
+          <button
+            onClick={() => setShowPOModal(true)}
+            className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
+          >
+            <Plus size={14} /> New Purchase Order
+          </button>
+        );
+      case "bills":
+        return (
+          <button
+            onClick={() => setShowInvoiceModal(true)}
+            className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
+          >
+            <Plus size={14} /> New Purchase Invoice
+          </button>
+        );
+      default:
+        return null;
+    }
+  };
 
   const getStatusColor = (status?: string) => {
     switch (status) {
@@ -87,7 +85,6 @@ const renderActionButton = () => {
         return "bg-warning text-warning";
       default:
         return "bg-muted text-main";
-
     }
   };
 
@@ -101,336 +98,219 @@ const renderActionButton = () => {
       supplierDetail?.billingPostalCode,
       supplierDetail?.billingCountry,
     ].filter(Boolean);
-    return parts.length > 0 ? parts.join(", ") : "—";
+    return parts.length ? parts.join(", ") : "—";
   };
 
   return (
-    <div className="flex flex-col bg-app text-main">
+    <div className="flex flex-col bg-app text-main overflow-hidden">
 
-      {/* Header */}
-      <div className="bg-card px-6 py-4 flex items-center justify-between border-b border-theme">
-        <h1 className="text-2xl font-bold text-main flex items-center gap-3">
-          <Building2 className="w-7 h-7 text-primary" />
-          Supplier Details
-        </h1>
-
-        <div className="flex items-center gap-3">
-          {renderActionButton()}
+      {/* ================= HEADER ================= */}
+      <header className="bg-card px-5 py-3 flex items-center justify-between border-b border-[var(--border)] shrink-0">
+        <div className="flex items-center gap-4">
           <button
             onClick={onBack}
-            className="p-2 row-hover rounded-lg transition"
+            className="p-2 hover:bg-row-hover rounded-xl transition-all border border-[var(--border)]"
           >
-            <X className="w-6 h-6 text-muted" />
+            <X size={18} className="text-muted" />
           </button>
+
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-black tracking-tight leading-none">
+                {supplierDetail?.supplierName}
+              </h2>
+              {supplierDetail?.supplierCode && (
+                <span className="text-[9px] font-bold text-muted bg-row-hover px-1.5 py-0.5 rounded border border-[var(--border)] uppercase">
+                  {supplierDetail?.supplierCode}
+                </span>
+              )}
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
+            <p className="text-[10px] text-muted font-bold uppercase tracking-wider mt-1">
+              Supplier Insight Center
+            </p>
+          </div>
         </div>
-      </div>
 
+        {renderActionButton()}
+      </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - Supplier List */}
-        <div className="w-80 bg-sidebar border-r border-theme flex flex-col">
+      <div className="flex-1 flex overflow-hidden min-h-0">
 
-          <div className="p-4 border-b">
+        {/* ================= SIDEBAR ================= */}
+        <aside className="w-64 bg-card border-r border-[var(--border)] shrink-0">
+          <div className="p-3 border-b border-[var(--border)] bg-row-hover/10">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" />
               <input
                 type="search"
-                placeholder="Search suppliers..."
+                placeholder="Quick find..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 text-sm bg-app border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-8 pr-3 py-1.5 text-[11px] bg-app border border-[var(--border)] rounded-lg focus:ring-1 focus:ring-primary outline-none transition-all"
               />
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto custom-scrollbar mt-3 px-2">
             {filteredSuppliers.map((s) => (
-              <div
-                key={s.supplierId || s.supplierCode || s.supplierName}
+              <button
+                key={s.supplierId || s.supplierCode}
                 onClick={() => onSupplierSelect(s)}
-                className={`p-4 border-b border-theme cursor-pointer transition-all ${s.supplierName === supplierDetail?.supplierName
-                    ? "bg-primary/10 border-l-4 border-l-[var(--primary)]"
-                    : "bg-primary/5 hover:bg-primary/10"
-
-                  }`}
+                className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center gap-3 border ${
+                  s.supplierCode === supplierDetail?.supplierCode
+                    ? "bg-primary text-white border-primary shadow-sm"
+                    : "bg-transparent border-transparent hover:bg-row-hover"
+                }`}
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${s.supplierName === supplierDetail?.supplierName
-                        ? "bg-primary"
-                        : "bg-border"
-                      }`}
-                  >
-                    {(s.supplierName || "?").charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-main truncate">
-                      {s.supplierName}
-                    </p>
-                    <p className="text-xs text-muted">
-                      {s.supplierCode || s.tpin || "No code/TPIN"}
-                    </p>
-                  </div>
-                  {s.status && (
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                        s.status,
-                      )}`}
-                    >
-                      {s.status.toUpperCase()}
-                    </span>
-                  )}
+                <div
+                  className={`w-7 h-7 shrink-0 rounded-lg flex items-center justify-center font-bold text-[10px] ${
+                    s.supplierCode === supplierDetail?.supplierCode
+                      ? "bg-white/20"
+                      : "bg-muted text-white"
+                  }`}
+                >
+                  {(s.supplierName || "?").charAt(0).toUpperCase()}
                 </div>
-              </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-[11px] truncate leading-tight">
+                    {s.supplierName}
+                  </p>
+                  <p className="text-[8px] font-mono uppercase text-muted">
+                    {s.supplierCode || s.tpin || "—"}
+                  </p>
+                </div>
+
+                {s.status && (
+                  <span
+                    className={`px-2 py-0.5 text-[9px] font-bold rounded-full ${getStatusColor(
+                      s.status,
+                    )}`}
+                  >
+                    {s.status.toUpperCase()}
+                  </span>
+                )}
+              </button>
             ))}
           </div>
-        </div>
+        </aside>
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        {/* ================= MAIN ================= */}
+        <main className="flex-1 flex flex-col min-w-0 bg-app/20">
+
           {/* Tabs */}
-          <div className="bg-card border-b border-theme">
-
+          <div className="bg-card border-b border-[var(--border)] px-4 shrink-0 z-10">
             <div className="flex">
-              <button
-                onClick={() => setActiveTab("overview")}
-                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors ${activeTab === "overview"
-                    ? "border-[var(--primary)] text-primary"
-                    : "border-transparent text-gray-600 hover:text-main"
+              {[
+                { id: "overview", label: "Overview" },
+                { id: "purchase-orders", label: "Purchase Orders" },
+                { id: "bills", label: "Bills" },
+                { id: "statement", label: "Statement" },
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setActiveTab(t.id as any)}
+                  className={`px-4 py-3.5 font-bold text-[10px] uppercase tracking-widest border-b-2 transition-all ${
+                    activeTab === t.id
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted hover:text-main"
                   }`}
-              >
-                Overview
-              </button>
-              <button
-                onClick={() => setActiveTab("purchase-orders")}
-                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${activeTab === "purchase-orders"
-                    ? "border-[var(--primary)] text-primary"
-                    : "border-transparent text-gray-600 hover:text-main"
-                  }`}
-              >
-                <FileText className="w-4 h-4" />
-                Purchase Orders
-              </button>
-              <button
-                onClick={() => setActiveTab("bills")}
-                className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${activeTab === "bills"
-                    ? "border-[var(--primary)] text-primary"
-                    : "border-transparent text-gray-600 hover:text-main"
-                  }`}
-              >
-                <Receipt className="w-4 h-4" />
-                Bills
-              </button>
-              <button
-  onClick={() => setActiveTab("statement")}
-  className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${
-    activeTab === "statement"
-      ? "border-[var(--primary)] text-primary"
-      : "border-transparent text-gray-600 hover:text-main"
-  }`}
->
-  <FileText className="w-4 h-4" />
-  Statement
-</button>
-
+                >
+                  {t.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Tab Content */}
-          <div className="flex-1 overflow-y-auto p-8 bg-app">
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto">
 
             {activeTab === "overview" && (
-              <div className="max-w-5xl mx-auto">
-                <div className="bg-card rounded-xl border border-theme p-8">
+              <div className="max-w-6xl mx-auto space-y-4 animate-in fade-in duration-500 p-5">
 
-                  <div className="flex justify-between items-start mb-8">
-                    <div>
-                      <h2 className="text-3xl font-bold text-main">
-                        {supplierDetail?.supplierName}
-                      </h2>
-                      {supplierDetail?.supplierCode && (
-                        <p className="text-sm text-muted font-mono mt-1">
-                          Code: {supplierDetail?.supplierCode}
-                        </p>
-                      )}
+                {/* Info Strips */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <InfoStrip label="Currency" value={supplierDetail?.currency} icon={<Building2 />} />
+                  <InfoStrip label="TPIN" value={supplierDetail?.tpin} icon={<FileText />} />
+                  <InfoStrip label="Opening Balance" value={supplierDetail?.openingBalance} icon={<Receipt />} />
+                </div>
+
+                {/* Contact + Address */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="bg-card rounded-2xl border border-[var(--border)] p-5 shadow-sm">
+                    <h4 className="text-[10px] font-black text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <Mail size={12} className="text-primary" /> Contact Channels
+                    </h4>
+                    <div className="space-y-3">
+                      <DataRow label="Email Address" value={supplierDetail?.emailId} />
+                      <DataRow label="Phone Number" value={supplierDetail?.phoneNo} />
                     </div>
-                    <button
-                      onClick={() => onEdit(supplierDetail!)}
-                      className="p-3 hover:bg-gray-100 rounded-lg transition"
-                      title="Edit Supplier"
-                    >
-                      <Edit className="w-5 h-5 text-gray-600" />
-                    </button>
                   </div>
 
-                  {/* Quick Info Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <div className="flex items-start gap-3">
-                      <div>
-                        <p className="text-xs font-semibold text-muted uppercase tracking-wider">
-                          Currency
-                        </p>
-                        <p className="mt-1 font-medium">
-                          {supplierDetail?.currency || "—"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div>
-                        <p className="text-xs font-semibold text-muted uppercase tracking-wider">
-                          Phone
-                        </p>
-                        <p className="mt-1 font-medium">
-                          {supplierDetail?.phoneNo || "—"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div>
-                        <p className="text-xs font-semibold text-muted uppercase tracking-wider">
-                          Email
-                        </p>
-                        <p className="mt-1 font-medium">
-                          {supplierDetail?.emailId || "—"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div>
-                        <p className="text-xs font-semibold text-muted uppercase tracking-wider">
-                          TPIN
-                        </p>
-                        <p className="mt-1 font-medium">
-                          {supplierDetail?.tpin || "—"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div>
-                        <p className="text-xs font-semibold text-muted uppercase tracking-wider">
-                          Opening Balance
-                        </p>
-                        <p className="mt-1 font-medium">
-                          {Number(supplierDetail?.openingBalance || 0).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                    {supplierDetail?.status && (
-                      <div>
-                        <p className="text-xs font-semibold text-muted uppercase tracking-wider">
-                          Status
-                        </p>
-                        <span
-                          className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(supplierDetail?.status)}`}
-                        >
-                          {supplierDetail?.status.toUpperCase()}
-                        </span>
-                      </div>
-                    )}
+                  <div className="bg-card rounded-2xl border border-[var(--border)] p-5 shadow-sm">
+                    <h4 className="text-[10px] font-black text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <MapPin size={12} className="text-primary" /> Physical Location
+                    </h4>
+                    <DataRow label="Billing Address" value={formatAddress()} />
                   </div>
+                </div>
 
-                  <hr className="my-8 border-gray-200" />
-
-                  {/* Address & Bank Details */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Address */}
-                    <div className="bg-card border border-theme rounded-xl p-6">
-                      <h4 className="font-semibold text-main mb-4 flex items-center gap-2">
-                        Billing Address
-                      </h4>
-                      <p className="text-sm text-main leading-relaxed whitespace-pre-line">
-                        {formatAddress()}
-                      </p>
-                    </div>
-
-                    {/* Bank Details */}
-                    {(supplierDetail?.accountNumber || supplierDetail?.accountHolder) && (
-                      <div className="bg-card border border-theme rounded-xl p-6 shadow-sm">
-                        <h4 className="font-semibold text-main mb-4">
-                          Bank Details
-                        </h4>
-                        <div className="space-y-3 text-sm">
-                          {supplierDetail?.accountHolder && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Account Holder:</span>
-                              <span className="font-medium">
-                                {supplierDetail?.accountHolder}
-                              </span>
-                            </div>
-                          )}
-
-                          {supplierDetail?.bankAccount && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Bank Account:</span>
-                              <span className="font-medium">
-                                {supplierDetail?.bankAccount}
-                              </span>
-                            </div>
-                          )}
-
-                          {supplierDetail?.accountNumber && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Account No:</span>
-                              <span className="font-medium font-mono">
-                                {supplierDetail?.accountNumber}
-                              </span>
-                            </div>
-                          )}
-
-                          {supplierDetail?.swiftCode && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">SWIFT:</span>
-                              <span className="font-medium uppercase">
-                                {supplierDetail?.swiftCode}
-                              </span>
-                            </div>
-                          )}
-
-                          {supplierDetail?.sortCode && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Sort Code:</span>
-                              <span className="font-medium">
-                                {supplierDetail?.sortCode}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                      </div>
-                    )}
-                  </div>
+                <div className="p-4 border-2 border-dashed border-[var(--border)] rounded-2xl flex items-center justify-center opacity-40">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted">
+                    Additional ledger data will load here
+                  </p>
                 </div>
               </div>
             )}
 
-       
             {activeTab === "statement" && (
-  <SupplierStatement supplier={supplierDetail} />
-)}
-
+              <SupplierStatement supplier={supplierDetail} />
+            )}
           </div>
-        </div>
+        </main>
       </div>
+
       <PurchaseOrderModal
-  isOpen={showPOModal}
-  onClose={() => setShowPOModal(false)}
-  onSubmit={(data) => {
-    console.log("PO created:", data);
-    setShowPOModal(false);
-  }}
-/>
+        isOpen={showPOModal}
+        onClose={() => setShowPOModal(false)}
+      />
 
-<PurchaseInvoiceModal
-  isOpen={showInvoiceModal}
-  onClose={() => setShowInvoiceModal(false)}
-  onSubmit={(data) => {
-    console.log("Invoice created:", data);
-    setShowInvoiceModal(false);
-  }}
-/>
-
+      <PurchaseInvoiceModal
+        isOpen={showInvoiceModal}
+        onClose={() => setShowInvoiceModal(false)}
+      />
     </div>
   );
 };
+
+/* ================= SUB COMPONENTS ================= */
+
+const InfoStrip = ({ icon, label, value }: any) => (
+  <div className="bg-card rounded-xl border border-[var(--border)] p-3 flex items-center gap-3 shadow-sm">
+    <div className="p-2 rounded-lg bg-row-hover text-primary border border-[var(--border)]">
+      {React.cloneElement(icon, { size: 16 })}
+    </div>
+    <div>
+      <p className="text-[8px] font-black text-muted uppercase tracking-wider">
+        {label}
+      </p>
+      <p className="text-xs font-bold text-main">
+        {value || "—"}
+      </p>
+    </div>
+  </div>
+);
+
+const DataRow = ({ label, value }: any) => (
+  <div className="flex justify-between items-center gap-2 py-1 px-3 bg-app/30 rounded-xl">
+    <span className="text-[9px] font-bold text-muted uppercase tracking-widest">
+      {label}
+    </span>
+    <span className="text-xs font-semibold text-main truncate max-w-[220px]">
+      {value || "Not provided"}
+    </span>
+  </div>
+);
 
 export default SupplierDetailView;

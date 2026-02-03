@@ -87,8 +87,7 @@ const renderActionButton = () => {
 
 
   return (
-    <div className="flex flex-col h-full bg-app text-main overflow-hidden rounded-2xl border border-[var(--border)]">
-      {/* 1. COMPACT TOP HEADER */}
+    <div className="flex flex-col  bg-app text-main overflow-hidden">
       <header className="bg-card px-5 py-3 flex items-center justify-between border-b border-[var(--border)] shrink-0">
         <div className="flex items-center gap-4">
           <button
@@ -118,7 +117,7 @@ const renderActionButton = () => {
 
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* 2. TIGHT SIDEBAR */}
-        <aside className="w-64 bg-card border-r border-[var(--border)] flex flex-col shrink-0">
+        <aside className="w-64 bg-card border-r border-[var(--border)] h-129 rounded-2xl">
           <div className="p-3 border-b border-[var(--border)] bg-row-hover/10">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" />
@@ -132,7 +131,7 @@ const renderActionButton = () => {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-0.5">
+          <div className=" overflow-y-auto custom-scrollbar h-100 mt-5 ">
             {filteredCustomers.map((c) => (
               <button
                 key={c.id}
@@ -191,9 +190,9 @@ const renderActionButton = () => {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
+          <div>
             {activeTab === "overview" && (
-              <div className="max-w-6xl mx-auto space-y-4 animate-in fade-in duration-500 pb-10">
+              <div className="max-w-6xl mx-auto space-y-4 animate-in fade-in duration-500 p-5">
                 {/* REFINED QUICK INFO ROW */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <InfoStrip

@@ -39,6 +39,8 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [allCustomers, setAllCustomers] = useState<CustomerSummary[]>([]);
+
 
   const fetchCustomers = async () => {
     try {
@@ -57,6 +59,22 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   useEffect(() => {
     fetchCustomers();
   }, [page, pageSize]);
+
+
+  const fetchAllCustomers = async () => {
+  try {
+    const resp = await getAllCustomers(1, 1000);
+    setAllCustomers(resp.data || []);
+  } catch (err) {
+    console.error("Error loading all customers:", err);
+  }
+};
+
+
+useEffect(() => {
+  fetchAllCustomers();
+}, []);
+
 
   const handleDelete = async (customerId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -202,7 +220,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
       ) : selectedCustomer ? (
         <CustomerDetailView
           customer={selectedCustomer}
-          customers={customers}
+          customers={allCustomers}
           onBack={handleBack}
           onCustomerSelect={handleRowClick}
           onAdd={onAdd}

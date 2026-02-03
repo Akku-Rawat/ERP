@@ -42,14 +42,16 @@ const [page, setPage] = useState(1);
 
 
 
-  // ================= FETCH ORDERS =================
-  const fetchOrders = async (page = 1) => {
+  //  FETCH ORDERS 
+const fetchOrders = async () => {
   try {
     setLoading(true);
 
-    const res = await getPurchaseOrders(page, 100);
- setTotalPages(res.pagination?.total_pages || 1);
-      setTotalItems(res.pagination?.total || 1);
+    const res = await getPurchaseOrders(page, pageSize);
+
+    setTotalPages(res.pagination?.total_pages || 1);
+    setTotalItems(res.pagination?.total || 0);
+
     const mappedOrders: PurchaseOrder[] = res.data.map((po: any) => ({
       id: po.poId,
       supplier: po.supplierName,
@@ -61,23 +63,21 @@ const [page, setPage] = useState(1);
 
     setOrders(mappedOrders);
   } catch (err) {
-    console.error("Failed to load Purchase Orders", err);
     toast.error("Failed to load Purchase Orders");
   } finally {
     setLoading(false);
   }
 };
 
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+useEffect(() => {
+  fetchOrders();
+}, [page, pageSize]);
 
   const handleView = (order: PurchaseOrder) => {
   setSelectedOrder(order);
   setViewModalOpen(true);
 };
-  // ================= FILTER =================
+  //  FILTER 
   const filteredOrders = useMemo(() => {
     const term = searchTerm.toLowerCase();
     return orders.filter(
@@ -88,7 +88,7 @@ const [page, setPage] = useState(1);
     );
   }, [orders, searchTerm]);
 
-  // ================= MODAL HANDLERS =================
+  //  MODAL HANDLERS 
   const handleAddClick = () => {
     setSelectedOrder(null);
     setModalOpen(true);
@@ -110,7 +110,7 @@ const [page, setPage] = useState(1);
 
   const handleCloseModal = () => setModalOpen(false);
 
-  // ================= TABLE COLUMNS =================
+  //  TABLE COLUMNS 
   const columns: Column<PurchaseOrder>[] = [
     { key: "id", header: "PO ID", align: "left" },
     { key: "supplier", header: "Supplier", align: "left" },
