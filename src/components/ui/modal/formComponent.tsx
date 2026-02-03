@@ -160,38 +160,51 @@ Textarea.displayName = "Textarea";
 // ============================================================
 // Checkbox Component
 // ============================================================
-interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface CheckboxProps {
   label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  className?: string;
 }
 
 export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ label, className = "", ...props }, ref) => (
-    <label className="flex items-center gap-2 cursor-pointer group">
-      <div className="relative">
-        <input ref={ref} type="checkbox" {...props} className="peer sr-only" />
-        <div className="w-5 h-5 border-2 border-[var(--border)] rounded peer-checked:border-primary peer-checked:bg-primary transition-all bg-card" />
-        <svg
-          className="w-3 h-3 text-white absolute top-1 left-1 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={3}
-            d="M5 13l4 4L19 7"
+  ({ label, checked, onChange, className = "" }, ref) => {
+    return (
+      <label className="flex items-center gap-2 cursor-pointer group">
+        <div className="relative">
+          <input
+            ref={ref}
+            type="checkbox"
+            checked={checked}
+            onChange={(e) => onChange(e.target.checked)} 
+            className="peer sr-only"
           />
-        </svg>
-      </div>
-      <span
-        className={`text-sm font-semibold text-main group-hover:text-primary transition-colors ${className}`}
-      >
-        {label}
-      </span>
-    </label>
-  ),
+
+          <div className="w-5 h-5 border-2 border-[var(--border)] rounded peer-checked:border-primary peer-checked:bg-primary transition-all bg-card" />
+
+          <svg
+            className="w-3 h-3 text-white absolute top-1 left-1 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={3}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+
+        <span className={`text-sm font-semibold text-main ${className}`}>
+          {label}
+        </span>
+      </label>
+    );
+  }
 );
+
 Checkbox.displayName = "Checkbox";
 
 // ============================================================

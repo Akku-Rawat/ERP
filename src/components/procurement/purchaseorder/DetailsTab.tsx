@@ -63,7 +63,7 @@ export const DetailsTab = ({
   );
 
   const currencySelectOptions = [
-    { value: "", label: "Select Currency" },
+    
     ...currencyOptions.map((c) => ({
       value: c,
       label: c,
@@ -143,9 +143,10 @@ export const DetailsTab = ({
               value={form.costCenter}
               onChange={onFormChange}
               options={[
-                { value: "", label: "Select Cost Center" },
+               
                 { value: "Main - I", label: "Main - I" },
                 { value: "Manufacturing - I", label: "Manufacturing - I" },
+                { value: "manufacturineh - I", label: "manufacturineh - I" },
               ]}
             />
           </div>
@@ -218,7 +219,7 @@ export const DetailsTab = ({
                       <td className="px-0.5 py-1">
                         <input
                           type="date"
-                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="py-1 px-2 border border-theme rounded  bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                           name="requiredBy"
                           value={it.requiredBy}
                           onChange={(e) => onItemChange(e, i)}
@@ -361,12 +362,12 @@ export const DetailsTab = ({
 
               <div className="flex items-center gap-2 text-[10px] text-muted">
                 <Mail size={14} className="text-muted" />
-                <span>supplier@example.com</span>
+                <span>{form.supplierEmail || "supplier@example.com"}</span>
               </div>
 
               <div className="flex items-center gap-2 text-[10px] text-muted">
                 <Phone size={14} className="text-muted" />
-                <span>+91 9876543210</span>
+                <span>{form.supplierPhone || "+91 9876543210"}</span>
               </div>
 
               {/* Tax Category Info */}

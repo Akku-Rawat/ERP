@@ -35,6 +35,8 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
    taxCategory: form.taxCategory,
     costCenter: form.costCenter,
     project: form.project,
+    email: form.supplierEmail,
+    phone: form.supplierPhone,
 
    // Include export country
     destnCountryCd: form.destnCountryCd,
@@ -49,21 +51,9 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     paymentTermsTemplate: form.paymentTermsTemplate,
 
     terms: {
-      selling: {
-        general: form.termsAndConditions || "",
-        payment: {
-          phases: form.paymentRows
-            .filter((p) => p.paymentTerm && p.paymentTerm.trim() !== "")
-            .map((p, i) => ({
-              id: i + 1,
-              name: p.paymentTerm,
-              percentage: p.invoicePortion,
-              condition: p.description,
-            })),
-        },
-      },
-    },
-
+  buying: form.terms?.buying,
+}
+,
     items,
     taxes,
     payments: form.paymentRows.filter((p) => p.paymentTerm && p.paymentTerm.trim() !== ""),
@@ -92,7 +82,7 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
 
   const api = apiResponse.data || apiResponse;
 
-  console.log("📊 Mapping API to UI:", api);
+  console.log(" Mapping API to UI:", api);
 
   // Map items from API format to UI format
   const items = (api.items || []).map((item: any) => ({
@@ -119,15 +109,7 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
       taxAmount: Number(tax.taxAmount || 0),
     }));
 
-  // Map payment terms from API payment phases
-  const paymentPhases = api.terms?.terms?.selling?.payment?.phases || [];
-  const paymentRows = paymentPhases.map((phase: any) => ({
-    paymentTerm: phase.name || "",
-    description: phase.condition || "",
-    dueDate: "",
-    invoicePortion: Number(phase.percentage || 0),
-    paymentAmount: (api.grandTotal * Number(phase.percentage || 0)) / 100,
-  }));
+
 
   // Extract addresses - API has nested structure
   const addresses = {
@@ -178,8 +160,19 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
     },
   };
 
-  // Extract terms and conditions from nested structure
-  const termsAndConditions = api.terms?.terms?.selling?.general || "";
+const buyingTerms = api.terms?.terms?.buying;
+
+const paymentPhases = buyingTerms?.payment?.phases || [];
+
+const paymentRows = paymentPhases.map((phase: any) => ({
+  paymentTerm: phase.name || "",
+  description: phase.condition || "",
+  dueDate: "",
+  invoicePortion: Number(phase.percentage || 0),
+  paymentAmount:
+    (api.grandTotal * Number(phase.percentage || 0)) / 100,
+}));
+
 
   // Calculate totals
   const totalQuantity = items.reduce((sum: number, item: any) => sum + item.quantity, 0);
@@ -203,6 +196,9 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
     supplier: api.supplierName || "",
     supplierId: api.supplierId || "",
     supplierCode: api.supplierCode || "",
+    supplierEmail: api.emailId || "",
+    supplierPhone: api.phone || "",
+    supplierContact: api.contactPerson || "",
 
     // Currency & Status
     currency: api.currency || "ZMW",
@@ -220,8 +216,8 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
     taxesChargesTemplate: api.taxesChargesTemplate || "",
     paymentTermsTemplate: api.paymentTermsTemplate || "",
 
-    // Terms
-    termsAndConditions: termsAndConditions,
+ terms: buyingTerms ? { buying: buyingTerms } : undefined,
+ 
 
     // Addresses
     addresses: addresses,

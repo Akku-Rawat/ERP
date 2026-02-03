@@ -1,3 +1,5 @@
+import { TermSection } from "../termsAndCondition";
+
 export interface ItemRow {
   itemCode: string;
   itemName?: string;
@@ -46,6 +48,9 @@ export interface PurchaseOrderFormData {
   date: string;
   supplier: string;
   supplierId: string;
+  supplierEmail?: string;
+  supplierPhone?: string;
+ 
   supplierCode: string;
   taxCategory: string;
   supplierContact: string;
@@ -84,7 +89,9 @@ destnCountryCd: string; // New field for Export country
   sendAttachedFiles: boolean;
   sendPrint: boolean;
 
-   termsAndConditions: string;
+  terms?: {
+  buying: TermSection;
+};
   itemTerms: ItemTerms[];  
   acceptedTerms: Record<string, boolean>; 
   paymentRows: PaymentRow[];
@@ -187,7 +194,7 @@ export const emptyPOForm: PurchaseOrderFormData = {
   messageHtml: "",
   sendAttachedFiles: false,
   sendPrint: false,
-  termsAndConditions: "",
+terms: undefined,
   itemTerms: [],  
   acceptedTerms: {},
 };

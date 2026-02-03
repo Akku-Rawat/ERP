@@ -7,7 +7,7 @@ import { DetailsTab } from "../procurement/purchaseorder/DetailsTab";
 import { EmailTab } from "../procurement/purchaseorder/EmailTab";
 import { TaxTab } from "../procurement/purchaseorder/TaxTab";
 import { AddressTab } from "../procurement/purchaseorder/AddressTab";
-import { TermsTab } from "../procurement/purchaseorder/TermsTab";
+import  TermsAndCondition  from "../TermsAndCondition";
 import { usePurchaseOrderForm } from "../../hooks/usePurchaseOrderForm";
 import type { POTab } from "../../types/Supply/purchaseOrder";
 
@@ -178,15 +178,13 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
             )}
 
             {activeTab === "terms" && (
-              <TermsTab
-                form={form}
-                paymentRows={form.paymentRows}
-                onPaymentRowChange={handlePaymentRowChange}
-                onAddPaymentRow={addPaymentRow}
-                onRemovePaymentRow={removePaymentRow}
-                onTermsChange={handleFormChange}
-                //  onItemTermsToggle={handleItemTermsToggle} 
-              />
+   <TermsAndCondition
+  terms={form.terms?.buying ?? null}
+  setTerms={(buying) =>
+    setForm((p) => ({ ...p, terms: { buying } }))
+  }
+/>
+
             )}
           </section>
         </form>
