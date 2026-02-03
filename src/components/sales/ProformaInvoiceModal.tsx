@@ -343,6 +343,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                                   className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="price"
                                   value={it.price}
+                                  disabled
                                   onChange={(e) => actions.handleItemChange(i, e)}
                                 />
                               </td>
@@ -361,6 +362,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                                   className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="vatRate"
                                   value={it.vatRate}
+                                  disabled
                                   onChange={(e) => actions.handleItemChange(i, e)}
                                 />
                               </td>
@@ -370,6 +372,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                                   className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="vatCode"
                                   value={it.vatCode}
+                                  disabled
                                   onChange={(e) => actions.handleItemChange(i, e)}
                                 />
                               </td>

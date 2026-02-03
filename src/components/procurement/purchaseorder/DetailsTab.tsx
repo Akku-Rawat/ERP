@@ -71,7 +71,7 @@ export const DetailsTab = ({
   ];
 
   return (
-    <div className="flex flex-col gap-4 max-h-screen overflow-auto p-4 mt-6 bg-app text-main">
+    <div className="flex flex-col gap-4 max-h-screen overflow-auto p-4 bg-app text-main">
       <div className="bg-app">
         <div className="grid grid-cols-6 gap-3 items-end">
           {/* Supplier */}

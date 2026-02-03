@@ -345,6 +345,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   }
                                   min="0"
                                   step="0.01"
+                                  disabled
                                   className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
@@ -371,6 +372,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   }
                                   min="0"
                                   placeholder="0"
+                                  disabled
                                   className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
@@ -382,6 +384,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   onChange={(e) =>
                                     actions.handleItemChange(i, e)
                                   }
+                                  disabled
                                   className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
