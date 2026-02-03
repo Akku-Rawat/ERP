@@ -1,3 +1,5 @@
+import { TermSection } from "../termsAndCondition";
+
 export interface ItemRow {
   itemCode: string;
   itemName?: string;
@@ -14,7 +16,12 @@ export interface TaxRow {
   taxRate: number;
   amount: number;
 }
-
+export interface ItemTerms {
+  termName: string;
+  description: string;
+  isMandatory: boolean;
+  itemCode?: string; // Track which item this term came from
+}
 export interface PaymentRow {
   paymentTerm: string;
   description: string;
@@ -41,8 +48,12 @@ export interface PurchaseOrderFormData {
   date: string;
   supplier: string;
   supplierId: string;
+  supplierEmail?: string;
+  supplierPhone?: string;
+ 
   supplierCode: string;
   taxCategory: string;
+  supplierContact: string;
   
 destnCountryCd: string; // New field for Export country
   shippingRule: string;
@@ -63,20 +74,27 @@ destnCountryCd: string; // New field for Export country
 
   placeOfSupply: string;
   paymentTermsTemplate: string;
-  termsAndConditions: string;
+
   totalQuantity: number;
   grandTotal: number;
   roundingAdjustment: number;
   roundedTotal: number;
   items: ItemRow[];
   taxRows: TaxRow[];
-  paymentRows: PaymentRow[];
+
   templateName: string;
   templateType: string;
   subject: string;
   messageHtml: string;
   sendAttachedFiles: boolean;
   sendPrint: boolean;
+
+  terms?: {
+  buying: TermSection;
+};
+  itemTerms: ItemTerms[];  
+  acceptedTerms: Record<string, boolean>; 
+  paymentRows: PaymentRow[];
 }
 
 export const emptyItem: ItemRow = {
@@ -122,6 +140,7 @@ export const emptyPOForm: PurchaseOrderFormData = {
   date: "",
   supplier: "",
   requiredBy: "",
+  supplierContact: "",
   taxCategory: "",
   currency: "INR",
   status: "Draft",
@@ -160,7 +179,6 @@ export const emptyPOForm: PurchaseOrderFormData = {
   supplierCode: "",
 
   paymentTermsTemplate: "",
-  termsAndConditions: "",
   totalQuantity: 0,
   grandTotal: 0,
   roundingAdjustment: 0,
@@ -176,6 +194,9 @@ export const emptyPOForm: PurchaseOrderFormData = {
   messageHtml: "",
   sendAttachedFiles: false,
   sendPrint: false,
+terms: undefined,
+  itemTerms: [],  
+  acceptedTerms: {},
 };
 
 export type POTab = "details" | "email" | "tax" | "address" | "terms";

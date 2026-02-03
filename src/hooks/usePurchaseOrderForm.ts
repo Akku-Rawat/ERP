@@ -21,6 +21,9 @@ import { mapApiToUI } from "../types/Supply/purchaseOrderMapper";
 import { updatePurchaseOrder } from "../api/procurement/PurchaseOrderApi";
 import { getCountryList } from "../api/lookupApi";
 import { getSupplierById } from "../../src/api/procurement/supplierApi";
+import { getCompanyById } from "../api/companySetupApi";
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
+
 
 interface UsePurchaseOrderFormProps {
   isOpen: boolean;
@@ -42,7 +45,27 @@ export const usePurchaseOrderForm = ({
   const isEditMode = !!poId;
 
 
+useEffect(() => {
+  if (!isOpen) return;
 
+  const loadCompanyBuyingTerms = async () => {
+    try {
+      const res = await getCompanyById(COMPANY_ID);
+      const buyingTerms = res?.data?.terms?.buying;
+
+      if (!buyingTerms) return;
+
+      setForm((prev) => ({
+        ...prev,
+        terms: { buying: buyingTerms },
+      }));
+    } catch (e) {
+      console.error("Failed to load company buying terms", e);
+    }
+  };
+
+  loadCompanyBuyingTerms();
+}, [isOpen]);
 
 
 useEffect(() => {
@@ -124,74 +147,90 @@ useEffect(() => {
     }));
   }, [form.items, form.taxRows]);
 
-  const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
+ const handleFormChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+) => {
+  const { name, value } = e.target;
 
-    setForm((prev) => {
-      const keys = name.split(".");
-      const updated = { ...prev } as any;
-      let obj = updated;
+  // Handle address fields
+  if (name.startsWith('addresses.')) {
+    const parts = name.split('.');
+    const addressKey = parts[1];
+    const fieldName = parts[2];
+    
+    setForm((prev) => ({
+      ...prev,
+      addresses: {
+        ...prev.addresses,
+        [addressKey]: {
+          ...(prev.addresses as any)[addressKey],
+          [fieldName]: value
+        }
+      }
+    }));
+    return;
+  }
 
-      keys.slice(0, -1).forEach((k) => {
-        obj[k] = { ...obj[k] };
-        obj = obj[k];
-      });
-
-      obj[keys[keys.length - 1]] = value;
-      return updated;
-    });
-  };
-
+  // Simple fields
+  setForm((prev) => ({ ...prev, [name]: value }));
+};
 const handleSupplierChange = async (sup: any) => {
   if (!sup) return;
 
-  setForm((p) => ({
-  ...p,
-  taxCategory: sup.taxCategory,
-}));
-
-
-  let destCode = "";
-  let billingCountry = "";
-
   try {
-    // 🔑 REAL DATA YAHAN SE AAYEGA
     const res = await getSupplierById(sup.id);
     const supplier = res?.data;
+    if (!supplier) return;
 
-    billingCountry = supplier?.billingCountry || "";
+    let destCode = "";
 
-    if (sup.taxCategory === "Export" && billingCountry) {
+    if (supplier.taxCategory === "Export" && supplier.billingCountry) {
       const countryRes = await getCountryList();
       const list = Array.isArray(countryRes)
         ? countryRes
         : countryRes?.data ?? [];
 
-      destCode = getCountryCode(list, billingCountry);
+      destCode = getCountryCode(list, supplier.billingCountry);
     }
+
+    setForm((p) => ({
+      ...p,
+
+      /* ===== BASIC SUPPLIER INFO ===== */
+      supplier: supplier.supplierName,
+      supplierId: supplier.supplierId,
+      supplierCode: supplier.supplierCode,
+      supplierEmail: supplier.emailId,
+      supplierPhone: supplier.phoneNo,
+      taxCategory: supplier.taxCategory,
+
+      /* ===== 🔑 AUTO FETCHED FIELDS ===== */
+      currency: supplier.currency || p.currency,
+      supplierContact: supplier.contactPerson || "",
+
+      /* ===== EXPORT HANDLING ===== */
+      destnCountryCd: destCode,
+      placeOfSupply: destCode,
+
+      /* ===== ADDRESS AUTO FILL ===== */
+      addresses: {
+        ...p.addresses,
+        supplierAddress: {
+          ...p.addresses.supplierAddress,
+          addressLine1: supplier.billingAddressLine1 || "",
+          addressLine2: supplier.billingAddressLine2 || "",
+          city: supplier.billingCity || "",
+          state: supplier.province || "",
+          country: supplier.billingCountry || "",
+          postalCode: supplier.billingPostalCode || "",
+          phone: supplier.phoneNo || "",
+          email: supplier.emailId || "",
+        },
+      },
+    }));
   } catch (e) {
     console.error("Supplier detail fetch failed", e);
   }
-
-  setForm((p) => ({
-    ...p,
-    supplier: sup.name,
-    supplierId: sup.id,
-    supplierCode: sup.code,
-    taxCategory: sup.taxCategory,
-    destnCountryCd: destCode,
-    placeOfSupply: destCode,
-
-    addresses: {
-      ...p.addresses,
-      supplierAddress: {
-        ...p.addresses.supplierAddress,
-        country: billingCountry,
-      },
-    },
-  }));
 };
 
 
