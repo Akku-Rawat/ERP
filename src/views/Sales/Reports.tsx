@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { FaChartBar, FaFileExport, FaFileCsv } from "react-icons/fa";
 
-/* ===== TYPES & DATA (UNCHANGED) ===== */
+/*  TYPES & DATA  */
 
 type ReportRow = {
   date: string;
@@ -105,7 +105,7 @@ const COLORS = [
   "#8B5CF6",
 ];
 
-/* ===== CSV EXPORT (UNCHANGED) ===== */
+/*  CSV EXPORT  */
 
 function exportToCsv(rows: ReportRow[], filename: string) {
   const header = Object.keys(rows[0]).join(",") + "\n";
