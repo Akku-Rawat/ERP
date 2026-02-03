@@ -34,6 +34,8 @@ const SupplierManagement: React.FC<Props> = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [allSuppliers, setAllSuppliers] = useState<Supplier[]>([]);
+
   
 
 
@@ -78,6 +80,25 @@ const fetchSuppliers = async () => {
 useEffect(() => {
   fetchSuppliers();
 }, [page, pageSize]);
+
+
+
+const fetchAllSuppliers = async () => {
+  try {
+    const res = await getSuppliers(1, 1000); 
+    const list = res.data.suppliers.map((s: any) => ({
+      ...s,
+      status: normalizeStatus(s.status),
+    }));
+    setAllSuppliers(list);
+  } catch (e) {
+    console.error(e);
+  }
+};
+useEffect(() => {
+  fetchAllSuppliers();
+}, []);
+
 
 
   //  SEARCH FILTER 
@@ -228,7 +249,7 @@ const handleEditFromDetail = (supplier: Supplier) => {
       ) : selectedSupplier ? (
         <SupplierDetailView
           supplier={selectedSupplier}
-          suppliers={suppliers}
+          suppliers={allSuppliers} 
           onBack={handleBack}
           onSupplierSelect={handleRowClick}
           onEdit={handleEditFromDetail}

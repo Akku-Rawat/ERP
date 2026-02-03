@@ -22,6 +22,10 @@ import { updatePurchaseOrder } from "../api/procurement/PurchaseOrderApi";
 import { getCountryList } from "../api/lookupApi";
 import { getSupplierById } from "../../src/api/procurement/supplierApi";
 import { getCompanyById } from "../api/companySetupApi";
+import {mapSupplierToAddress} from "../types/Supply/purchaseOrderMapper"
+import type { AddressBlock } from "../types/Supply/purchaseOrder";
+
+
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 
@@ -147,33 +151,50 @@ useEffect(() => {
     }));
   }, [form.items, form.taxRows]);
 
- const handleFormChange = (
+
+type AddressKey = keyof PurchaseOrderFormData["addresses"];
+
+const updateAddress = (
+  key: AddressKey,
+  field: keyof AddressBlock,
+  value: string
+) => {
+  setForm(prev => ({
+    ...prev,
+    addresses: {
+      ...prev.addresses,
+      [key]: {
+        ...prev.addresses[key],
+        [field]: value,
+      },
+    },
+  }));
+};
+
+
+
+const handleFormChange = (
   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
 ) => {
   const { name, value } = e.target;
 
-  // Handle address fields
-  if (name.startsWith('addresses.')) {
-    const parts = name.split('.');
-    const addressKey = parts[1];
-    const fieldName = parts[2];
-    
-    setForm((prev) => ({
-      ...prev,
-      addresses: {
-        ...prev.addresses,
-        [addressKey]: {
-          ...(prev.addresses as any)[addressKey],
-          [fieldName]: value
-        }
-      }
-    }));
-    return;
-  }
+if (name.startsWith("addresses.")) {
+  const parts = name.split(".") as [
+    "addresses",
+    AddressKey,
+    keyof AddressBlock
+  ];
 
-  // Simple fields
-  setForm((prev) => ({ ...prev, [name]: value }));
+  const [, key, field] = parts;
+  updateAddress(key, field, value);
+  return;
+}
+
+
+  setForm(prev => ({ ...prev, [name]: value }));
 };
+
+
 const handleSupplierChange = async (sup: any) => {
   if (!sup) return;
 
@@ -196,7 +217,7 @@ const handleSupplierChange = async (sup: any) => {
     setForm((p) => ({
       ...p,
 
-      /* ===== BASIC SUPPLIER INFO ===== */
+      /*  BASIC SUPPLIER INFO  */
       supplier: supplier.supplierName,
       supplierId: supplier.supplierId,
       supplierCode: supplier.supplierCode,
@@ -204,29 +225,23 @@ const handleSupplierChange = async (sup: any) => {
       supplierPhone: supplier.phoneNo,
       taxCategory: supplier.taxCategory,
 
-      /* ===== 🔑 AUTO FETCHED FIELDS ===== */
+      /*   AUTO FETCHED FIELDS  */
       currency: supplier.currency || p.currency,
       supplierContact: supplier.contactPerson || "",
 
-      /* ===== EXPORT HANDLING ===== */
+      /*  EXPORT HANDLING  */
       destnCountryCd: destCode,
       placeOfSupply: destCode,
 
-      /* ===== ADDRESS AUTO FILL ===== */
-      addresses: {
-        ...p.addresses,
-        supplierAddress: {
-          ...p.addresses.supplierAddress,
-          addressLine1: supplier.billingAddressLine1 || "",
-          addressLine2: supplier.billingAddressLine2 || "",
-          city: supplier.billingCity || "",
-          state: supplier.province || "",
-          country: supplier.billingCountry || "",
-          postalCode: supplier.billingPostalCode || "",
-          phone: supplier.phoneNo || "",
-          email: supplier.emailId || "",
-        },
-      },
+      /*  ADDRESS AUTO FILL  */
+addresses: {
+  ...p.addresses,
+  supplierAddress: mapSupplierToAddress(
+    supplier,
+    p.addresses.supplierAddress
+  ),
+},
+
     }));
   } catch (e) {
     console.error("Supplier detail fetch failed", e);
@@ -324,10 +339,7 @@ const handleSupplierChange = async (sup: any) => {
     }
   };
 
-  /**
-   * Determine VAT Code based on Tax Category and Item
-   * Like Invoice system
-   */
+  
   const getVatCode = (item: any, category: string): string => {
     // Export Category → Always C1
     if (category === "Export") {
@@ -369,7 +381,7 @@ const handleItemSelect = (item: any, idx: number) => {
 const handleSubmit = async (e?: React.FormEvent) => {
   e?.preventDefault();
 
-  // 🔒 Mandatory tax category check
+  //  Mandatory tax category check
   if (!form.taxCategory) {
     toast.error("Tax Category is required");
     return;

@@ -1,5 +1,5 @@
 import { PurchaseOrderFormData, emptyPOForm } from "./purchaseOrder";
-
+import type { AddressBlock } from "./purchaseOrder";
 /**
  * UI → Backend API (Create/Update)
  */
@@ -248,3 +248,19 @@ const paymentRows = paymentPhases.map((phase: any) => ({
 
   return mappedForm;
 };
+
+
+export const mapSupplierToAddress = (
+  supplier: any,
+  prev: AddressBlock
+): AddressBlock => ({
+  ...prev,
+  addressLine1: supplier?.billingAddressLine1 ?? "",
+  addressLine2: supplier?.billingAddressLine2 ?? "",
+  city: supplier?.billingCity ?? "",
+  state: supplier?.province ?? "",
+  country: supplier?.billingCountry ?? "",
+  postalCode: supplier?.billingPostalCode ?? "",
+  phone: supplier?.phoneNo ?? "",
+  email: supplier?.emailId ?? "",
+});

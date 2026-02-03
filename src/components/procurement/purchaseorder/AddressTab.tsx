@@ -10,13 +10,13 @@ interface AddressTabProps {
 
 type AddressKey = keyof PurchaseOrderFormData["addresses"];
 
-/* ---------------- Address Block ---------------- */
+/*  Address Block  */
 
 const AddressBlock: React.FC<{
   title: string;
   icon: any;
   keyName: AddressKey;
-  data: any;
+  data: PurchaseOrderFormData["addresses"][AddressKey];
   isOpen: boolean;
   onToggle: () => void;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -84,7 +84,7 @@ const AddressBlock: React.FC<{
   );
 };
 
-/* ---------------- Address Tab ---------------- */
+/*  Address Tab  */
 
 export const AddressTab: React.FC<AddressTabProps> = ({ form, onFormChange }) => {
   const [open, setOpen] = useState<Record<AddressKey, boolean>>({
@@ -101,31 +101,21 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onFormChange }) =>
     setOpen((p) => ({ ...p, [key]: !p[key] }));
   }, []);
 
-  /* ---------- reusable copy helper ---------- */
-  const copyAddress = useCallback(
-    (from: any, toKey: AddressKey) => {
-      const fields = [
-        "addressTitle",
-        "addressType",
-        "addressLine1",
-        "addressLine2",
-        "postalCode",
-        "city",
-        "state",
-        "country",
-      ];
+  /*  reusable copy helper  */
+const copyAddress = useCallback(
+  (from: PurchaseOrderFormData["addresses"][AddressKey], toKey: AddressKey) => {
+    Object.entries(from).forEach(([field, value]) => {
+      onFormChange({
+        target: {
+          name: `addresses.${toKey}.${field}`,
+          value: value ?? "",
+        },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+  },
+  [onFormChange]
+);
 
-      fields.forEach((field) => {
-        onFormChange({
-          target: {
-            name: `addresses.${toKey}.${field}`,
-            value: from?.[field] || "",
-          },
-        } as React.ChangeEvent<HTMLInputElement>);
-      });
-    },
-    [onFormChange]
-  );
 
   const handleCopySupplierToDispatch = useCallback(
     (checked: boolean) => {

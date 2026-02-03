@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   X,
   Search,
-  Edit,
   FileText,
   Receipt,
   Plus,
@@ -14,8 +13,10 @@ import type { Supplier } from "../../types/Supply/supplier";
 import SupplierStatement from "./SupplierStatement";
 import PurchaseInvoiceModal from "../../components/procurement/PurchaseInvoiceModal";
 import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal";
+import { getSuppliers } from "../../api/procurement/supplierApi";
 
-/* ================= PROPS ================= */
+
+/*  PROPS  */
 
 interface Props {
   supplier: Supplier;
@@ -25,7 +26,7 @@ interface Props {
   onEdit: (supplier: Supplier) => void;
 }
 
-/* ================= COMPONENT ================= */
+/*  COMPONENT  */
 
 const SupplierDetailView: React.FC<Props> = ({
   supplier,
@@ -40,15 +41,23 @@ const SupplierDetailView: React.FC<Props> = ({
   >("overview");
   const [showPOModal, setShowPOModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  
+
+
+
 
   const supplierDetail = supplier;
 
-  const filteredSuppliers = suppliers.filter(
-    (s) =>
-      (s.supplierName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (s.supplierCode || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (s.tpin || "").toLowerCase().includes(searchTerm.toLowerCase())
-  );
+const filteredSuppliers = suppliers.filter(
+  (s) =>
+    (s.supplierName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.supplierCode || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.tpin || "").toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+
+
+
 
   const renderActionButton = () => {
     switch (activeTab) {
@@ -102,9 +111,10 @@ const SupplierDetailView: React.FC<Props> = ({
   };
 
   return (
-    <div className="flex flex-col bg-app text-main overflow-hidden">
+    <div className="flex flex-col bg-app text-main overflow-hidden h-screen">
 
-      {/* ================= HEADER ================= */}
+
+      {/*  HEADER  */}
       <header className="bg-card px-5 py-3 flex items-center justify-between border-b border-[var(--border)] shrink-0">
         <div className="flex items-center gap-4">
           <button
@@ -137,8 +147,9 @@ const SupplierDetailView: React.FC<Props> = ({
 
       <div className="flex-1 flex overflow-hidden min-h-0">
 
-        {/* ================= SIDEBAR ================= */}
-        <aside className="w-64 bg-card border-r border-[var(--border)] shrink-0">
+        {/*  SIDEBAR  */}
+        <aside className="w-64 bg-card border-r border-[var(--border)] h-135 rounded-2xl">
+
           <div className="p-3 border-b border-[var(--border)] bg-row-hover/10">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" />
@@ -152,7 +163,7 @@ const SupplierDetailView: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar mt-3 px-2">
+          <div className=" overflow-y-auto custom-scrollbar mt-3 px-2 h-110">
             {filteredSuppliers.map((s) => (
               <button
                 key={s.supplierId || s.supplierCode}
@@ -196,7 +207,7 @@ const SupplierDetailView: React.FC<Props> = ({
           </div>
         </aside>
 
-        {/* ================= MAIN ================= */}
+        {/*  MAIN  */}
         <main className="flex-1 flex flex-col min-w-0 bg-app/20">
 
           {/* Tabs */}
@@ -284,7 +295,7 @@ const SupplierDetailView: React.FC<Props> = ({
   );
 };
 
-/* ================= SUB COMPONENTS ================= */
+/*  SUB COMPONENTS  */
 
 const InfoStrip = ({ icon, label, value }: any) => (
   <div className="bg-card rounded-xl border border-[var(--border)] p-3 flex items-center gap-3 shadow-sm">
