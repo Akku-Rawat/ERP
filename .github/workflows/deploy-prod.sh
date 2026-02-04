@@ -4,7 +4,7 @@ set -euo pipefail
 
 IMAGE_NAME="akhileshrawat7/rolaface-erp-frontend:latest"
 CONTAINER_NAME="rolaface-erp-frontend"
-PORT_MAPPING="3002:3003"
+PORT_MAPPING="3005:3003"
 
 log() {
     echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"
