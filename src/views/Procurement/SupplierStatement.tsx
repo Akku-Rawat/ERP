@@ -7,7 +7,7 @@ import {
 import Table from "../../components/ui/Table/Table";
 import type { Supplier } from "../../types/Supply/supplier";
 
-/* ================= TYPES ================= */
+/*  TYPES  */
 
 interface LedgerEntry {
   date: string;
@@ -23,7 +23,7 @@ interface Props {
   supplier: Supplier;
 }
 
-/* ================= COMPONENT ================= */
+/*  COMPONENT  */
 
 const SupplierStatement = ({ supplier }: Props) => {
   /* UI STATE ONLY */
@@ -47,7 +47,7 @@ const SupplierStatement = ({ supplier }: Props) => {
     "90_plus": 0,
   };
 
-  /* ================= TABLE COLUMNS ================= */
+  /*  TABLE COLUMNS  */
 
   const columns = [
     {
@@ -143,7 +143,7 @@ const SupplierStatement = ({ supplier }: Props) => {
     },
   ];
 
-  /* ================= TOTALS ================= */
+  /*  TOTALS  */
 
   const totalDebit = useMemo(
     () => ledger.reduce((s, r) => s + r.debit, 0),
@@ -155,17 +155,17 @@ const SupplierStatement = ({ supplier }: Props) => {
     [ledger],
   );
 
-  /* ================= UI ================= */
+  /*  UI  */
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-5 p-6">
+    <div className="max-w-[1400px] mx-auto ">
 
     
       {/* KPI + AGING */}
       <div className="flex gap-4 items-stretch">
 
         {/* KPI */}
-        <div className="grid grid-cols-3 gap-4 flex-[3]">
+        <div className="grid grid-cols-3 gap-2 ">
           <SummaryCard
             label="Total Purchases"
             value={totalDebit}
@@ -197,7 +197,7 @@ const SupplierStatement = ({ supplier }: Props) => {
       </div>
 
       {/* TABLE */}
-      <div className="bg-card border border-theme rounded-2xl overflow-hidden">
+      <div className="bg-card border border-theme rounded-2xl overflow-hidden mt-4">
         <Table
           columns={columns}
           data={ledger}
@@ -219,7 +219,7 @@ const SupplierStatement = ({ supplier }: Props) => {
   );
 };
 
-/* ================= SUB COMPONENTS ================= */
+/*  SUB COMPONENTS  */
 
 const AgingCell = ({
   label,

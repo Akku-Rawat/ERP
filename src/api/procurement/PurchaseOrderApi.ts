@@ -49,22 +49,25 @@ export async function updatePurchaseOrder(payload: any): Promise<any> {
 export async function getPurchaseOrdersBySupplier(
   supplierName: string,
   page = 1,
-  pageSize = 100,
+  pageSize = 5,
   status = ""
 ) {
-  const resp = await api.get(ENDPOINTS.getPurchaseOrders,
-    
-    {
-      params: {
-        page,
-        page_size: pageSize,
-        status,
-        supplier: supplierName,
-      },
-    }
-  );
+  const resp = await api.get(ENDPOINTS.getPurchaseOrders, {
+    params: {
+      supplier: supplierName,
+      page,
+      page_size: pageSize,
+      status,
+    },
+  });
 
-  return resp.data?.data || [];
+  return {
+    data: resp.data?.data || [],
+    pagination: resp.data?.pagination || {
+      total: 0,
+      total_pages: 1,
+    },
+  };
 }
 
 

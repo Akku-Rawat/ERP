@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   FileText,
   ClipboardList,
@@ -6,8 +6,10 @@ import {
   Clock,
 } from "lucide-react";
 import Table from "../../components/ui/Table/Table";
+import { getPurchaseOrdersBySupplier } from "../../api/procurement/PurchaseOrderApi";
 
-/* ================= TYPES ================= */
+
+/*  TYPES  */
 
 export interface PurchaseOrder {
   poId: string;
@@ -19,17 +21,52 @@ export interface PurchaseOrder {
 }
 
 interface Props {
-  purchaseOrders: PurchaseOrder[];
-  loading: boolean;
+  supplierName: string;
 }
 
-/* ================= COMPONENT ================= */
 
-const SupplierPurchaseOrders = ({ purchaseOrders, loading }: Props) => {
+/*  COMPONENT  */
+
+const SupplierPurchaseOrders = ({ supplierName }: Props) => {
+  const [purchaseOrders, setPurchaseOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  /* ================= SUMMARY ================= */
+  useEffect(() => {
+    if (!supplierName) return;
+
+    const loadPOs = async () => {
+      setLoading(true);
+      try {
+        const resp = await getPurchaseOrdersBySupplier(
+          supplierName,
+          page,
+          pageSize
+        );
+
+        setPurchaseOrders(resp.data);
+        setTotalPages(resp.pagination.total_pages || 1);
+        setTotalItems(resp.pagination.total || 0);
+      } catch (e) {
+        console.error("PO fetch failed", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPOs();
+  }, [supplierName, page, pageSize]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [supplierName]);
+
+
+  /*  SUMMARY  */
 
   const summary = useMemo(() => {
     const total = purchaseOrders.length;
@@ -40,7 +77,7 @@ const SupplierPurchaseOrders = ({ purchaseOrders, loading }: Props) => {
     return { total, draft, submitted, totalValue };
   }, [purchaseOrders]);
 
-  /* ================= TABLE COLUMNS ================= */
+  /*  TABLE COLUMNS  */
 
   const columns = [
     {
@@ -76,13 +113,12 @@ const SupplierPurchaseOrders = ({ purchaseOrders, loading }: Props) => {
       header: "Status",
       render: (row: PurchaseOrder) => (
         <span
-          className={`px-2 py-1 rounded-full text-[9px] font-black uppercase ${
-            row.status === "Submitted"
-              ? "bg-success/10 text-success"
-              : row.status === "Draft"
+          className={`px-2 py-1 rounded-full text-[9px] font-black uppercase ${row.status === "Submitted"
+            ? "bg-success/10 text-success"
+            : row.status === "Draft"
               ? "bg-warning/10 text-warning"
               : "bg-muted/10 text-muted"
-          }`}
+            }`}
         >
           {row.status}
         </span>
@@ -100,13 +136,12 @@ const SupplierPurchaseOrders = ({ purchaseOrders, loading }: Props) => {
     },
   ];
 
-  /* ================= UI ================= */
+  /*  UI  */
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-5 p-6">
-
+    <div className="max-w-[1400px] mx-auto ">
       {/* SUMMARY */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-2">
         <SummaryCard
           icon={<ClipboardList size={14} />}
           label="Total POs"
@@ -130,16 +165,16 @@ const SupplierPurchaseOrders = ({ purchaseOrders, loading }: Props) => {
       </div>
 
       {/* TABLE */}
-      <div className="bg-card border border-theme rounded-2xl overflow-hidden">
-        
+      <div className="bg-card border border-theme rounded-2xl overflow-hidden mt-4">
+
         <Table
           columns={columns}
           data={purchaseOrders}
           loading={loading}
           showToolbar={false}
           currentPage={page}
-          totalPages={1}
-          totalItems={purchaseOrders.length}
+          totalPages={totalPages}
+          totalItems={totalItems}
           pageSize={pageSize}
           onPageChange={setPage}
           onPageSizeChange={(size) => {
@@ -149,13 +184,14 @@ const SupplierPurchaseOrders = ({ purchaseOrders, loading }: Props) => {
           pageSizeOptions={[5, 10, 25]}
           emptyMessage="No purchase orders found"
         />
+
       </div>
 
     </div>
   );
 };
 
-/* ================= SUB COMPONENT ================= */
+/*  SUB COMPONENT  */
 
 const SummaryCard = ({
   icon,
@@ -166,7 +202,7 @@ const SummaryCard = ({
   label: string;
   value: string | number;
 }) => (
-  <div className="bg-card border border-theme rounded-xl p-4 flex items-center gap-3">
+  <div className="bg-card border border-theme rounded-xl p-3 flex items-center gap-3">
     <div className="p-2 rounded-lg bg-row-hover text-primary">
       {icon}
     </div>
