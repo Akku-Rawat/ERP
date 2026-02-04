@@ -9,6 +9,7 @@ const ENDPOINTS = {
   getPOList: `${base_url}.get_purchase_orders`,
   getPOById: `${base_url}.get_purchase_order`,
   updatePO: `${base_url}.update_purchase_order`,
+   updatePOStatus: `${base_url}.update_purchase_order_status`,
 };
 
 
@@ -45,3 +46,17 @@ export async function updatePurchaseOrder(payload: any): Promise<any> {
 
 
 
+
+export async function updatePurchaseOrderStatus(
+  id: string,
+  status: string,
+): Promise<any> {
+  const resp: AxiosResponse = await api.patch(
+    ENDPOINTS.updatePOStatus,
+    {
+      id,
+      status: status.toLowerCase(), 
+    }
+  );
+  return resp.data;
+}
