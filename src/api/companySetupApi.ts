@@ -13,6 +13,7 @@ const ENDPOINTS = {
   updateCompanyById: `${vite_company_api_url}.update_company_api`,
   deleteCompany: `${base_url}.company_setup.setup.delete_company_api`,
   updateAccountsCompanyInfo: `${base_url}.company_setup.setup.update_accounts_company_info`,
+   updateCompanyFiles: `${vite_company_api_url}.update_company_files`,
 };
 
 export async function createCompany(payload: any): Promise<any> {
@@ -52,5 +53,41 @@ export async function updateAccountsCompany(payload: any): Promise<any> {
     ENDPOINTS.updateAccountsCompanyInfo,
     payload,
   );
+  return resp.data;
+}
+/**
+ * Update company files (logo and signature)
+ */
+export async function updateCompanyFiles(
+  companyId: string,
+  logoFile?: File | null,
+  signatureFile?: File | null
+): Promise<any> {
+  const formData = new FormData();
+  
+  
+  formData.append("id", companyId);
+  
+ 
+  if (logoFile) {
+    formData.append("documents[companyLogoUrl]", logoFile);
+  }
+  
+
+  if (signatureFile) {
+    formData.append("documents[authorizedSignatureUrl]", signatureFile);
+  }
+  
+  
+  const resp: AxiosResponse = await api.patch(
+    ENDPOINTS.updateCompanyFiles,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  
   return resp.data;
 }

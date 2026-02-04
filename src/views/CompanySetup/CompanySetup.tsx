@@ -195,7 +195,7 @@ const CompanySetup: React.FC = () => {
         {tab === "buyingSelling" && <BuyingSelling terms={terms} />}
         {tab === "subscribed" && <SubscribedModules />}
         {/* {tab === "Templates" && <Templates templates={companyTemplates} />} */}
-        {tab === "logo" && <Upload />}
+      {tab === "logo" && <Upload COMPANY_ID={COMPANY_ID} onUploadSuccess={fetchCompanyDetail} />}
       </div>
     </div>
   );
