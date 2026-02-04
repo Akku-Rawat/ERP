@@ -12,7 +12,7 @@ import ActionButton, {
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
 
-import { getPurchaseOrders } from "../../api/procurement/PurchaseOrderApi";
+import { getPurchaseOrders ,updatePurchaseOrderStatus } from "../../api/procurement/PurchaseOrderApi";
 
 interface PurchaseOrder {
   id: string;
@@ -26,6 +26,26 @@ interface PurchaseOrder {
 interface PurchaseOrdersTableProps {
   onAdd?: () => void;
 }
+
+type POStatus =
+  | "Draft"
+  | "Approved"
+  | "Rejected"
+  | "Cancelled"
+  | "Completed";
+
+
+const STATUS_TRANSITIONS: Record<POStatus, POStatus[]> = {
+  Draft: ["Approved", "Rejected"],
+  Approved: ["Cancelled", "Completed"],
+  Rejected: [],
+  Cancelled: [],
+  Completed: [],
+};
+
+const CRITICAL_STATUSES: POStatus[] = ["Completed"];
+
+
 
 const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
@@ -110,6 +130,36 @@ useEffect(() => {
 
   const handleCloseModal = () => setModalOpen(false);
 
+const handleStatusChange = async (
+  poId: string,
+  newStatus: POStatus,
+) => {
+  try {
+    const res = await updatePurchaseOrderStatus(
+      poId,
+      newStatus.toLowerCase(),
+    );
+
+    if (!res || res.status_code !== 200) {
+      toast.error("Failed to update Purchase Order status");
+      return;
+    }
+
+    // OPTIMISTIC UPDATE
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === poId ? { ...o, status: newStatus } : o,
+      ),
+    );
+
+    toast.success(`Purchase Order marked as ${newStatus}`);
+  } catch {
+    toast.error("Failed to update Purchase Order status");
+  }
+};
+
+
+
   //  TABLE COLUMNS 
   const columns: Column<PurchaseOrder>[] = [
     { key: "id", header: "PO ID", align: "left" },
@@ -137,19 +187,29 @@ useEffect(() => {
     { key: "deliveryDate", header: "Delivery Date", align: "left" },
 
     {
-      key: "actions",
-      header: "Actions",
-      align: "center",
-      render: (o) => (
-        <ActionGroup>
-          <ActionButton type="view" onClick={() => handleView(o)} />
-          <ActionMenu
-            onEdit={(e) => handleEdit(o, e as any)}
-            onDelete={(e) => handleDelete(o, e as any)}
-          />
-        </ActionGroup>
-      ),
-    },
+  key: "actions",
+  header: "Actions",
+  align: "center",
+  render: (o) => (
+    <ActionGroup>
+      <ActionButton type="view" onClick={() => handleView(o)} />
+
+<ActionMenu
+  // onEdit={(e) => handleEdit(o, e as any)}
+  onDelete={(e) => handleDelete(o, e as any)}
+  customActions={(
+    STATUS_TRANSITIONS[o.status as POStatus] ?? []
+  ).map((status) => ({
+    label: `Mark as ${status}`,
+    danger: status === "Completed",
+    onClick: () => handleStatusChange(o.id, status),
+  }))}
+/>
+
+    </ActionGroup>
+  ),
+},
+
   ];
 
   return (
