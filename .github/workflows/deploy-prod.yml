@@ -70,6 +70,6 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            SCRIPT_PATH="/root/deploy-scripts/erp-frontend/deploy.sh"
+            SCRIPT_PATH="/root/deploy-scripts/erp-frontend/deploy-prod.sh"
             chmod +x $SCRIPT_PATH
             $SCRIPT_PATH
