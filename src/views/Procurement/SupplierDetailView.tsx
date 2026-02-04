@@ -14,6 +14,7 @@ import SupplierStatement from "./SupplierStatement";
 import PurchaseInvoiceModal from "../../components/procurement/PurchaseInvoiceModal";
 import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal";
 import { getPurchaseOrdersBySupplier } from "../../api/procurement/PurchaseOrderApi";
+import SupplierPurchaseOrders from "./SupplierPurchaseOrders";
 
 
 
@@ -308,35 +309,14 @@ useEffect(() => {
                 </div>
               </div>
             )}
-           {activeTab === "purchase-orders" && (
-  <div className="p-5 space-y-3">
-    {poLoading && (
-      <p className="text-xs text-muted">Loading purchase orders...</p>
-    )}
 
-    {!poLoading && purchaseOrders.length === 0 && (
-      <p className="text-xs text-muted">No purchase orders found</p>
-    )}
-
-    {purchaseOrders.map((po) => (
-      <div
-        key={po.name}
-        className="bg-card border border-[var(--border)] rounded-xl p-4 flex justify-between items-center"
-      >
-        <div>
-          <p className="text-xs font-bold">{po.name}</p>
-          <p className="text-[10px] text-muted">
-            {po.transaction_date} • {po.status}
-          </p>
-        </div>
-
-        <p className="text-sm font-black">
-          {po.grand_total}
-        </p>
-      </div>
-    ))}
-  </div>
+{activeTab === "purchase-orders" && (
+  <SupplierPurchaseOrders
+    purchaseOrders={purchaseOrders}
+    loading={poLoading}
+  />
 )}
+
 
             {activeTab === "statement" && (
               <SupplierStatement supplier={supplierDetail} />
