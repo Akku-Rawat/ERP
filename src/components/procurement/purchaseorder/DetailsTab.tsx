@@ -63,7 +63,7 @@ export const DetailsTab = ({
   );
 
   const currencySelectOptions = [
-    
+
     ...currencyOptions.map((c) => ({
       value: c,
       label: c,
@@ -136,14 +136,14 @@ export const DetailsTab = ({
               ]}
             />
           </div>
-        <div>
+          <div>
             <ModalSelect
               label="Cost Center"
               name="costCenter"
               value={form.costCenter}
               onChange={onFormChange}
               options={[
-               
+
                 { value: "Main - I", label: "Main - I" },
                 { value: "Manufacturing - I", label: "Manufacturing - I" },
                 { value: "manufacturineh - I", label: "manufacturineh - I" },
@@ -155,7 +155,7 @@ export const DetailsTab = ({
 
         {/* Second Row - Only if needed (Cost Center, Project, Export Country) */}
         <div className="grid grid-cols-6 gap-3 mt-3">
-         
+
 
           <div>
             <ModalInput
@@ -166,7 +166,7 @@ export const DetailsTab = ({
             />
           </div>
 
-       
+
         </div>
       </div>
 
@@ -191,7 +191,8 @@ export const DetailsTab = ({
                   <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">Qty</th>
                   <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">UOM</th>
                   <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Rate</th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">VAT Code</th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax </th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]">Tax Code</th>
                   <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">Amount</th>
                   <th className="px-2 py-3 text-center text-muted font-medium text-[11px] w-[35px]">-</th>
                 </tr>
@@ -200,20 +201,23 @@ export const DetailsTab = ({
               <tbody >
                 {paginatedItems.map((it, idx) => {
                   const i = page * ITEMS_PER_PAGE + idx;
-                  const amount = it.quantity * it.rate;
+                  const base = it.quantity * it.rate;
+                  const tax = (base * (it.vatRate || 0)) / 100;
+                  const amount = base + tax;
+
 
                   return (
                     <tr key={i} className="border-b border-theme bg-card row-hover">
                       <td className="px-3 py-2 text-[10px]">{i + 1}</td>
 
                       <td className="px-0.5 py-1">
-                        <POItemSelect
-                          value={it.itemName}
-                          selectedId={it.itemCode}
-                          onChange={(item) => {
-                            onItemSelect(item, i);
-                          }}
-                        />
+                       <POItemSelect
+  value={it.itemName}
+  selectedId={it.itemCode}
+  taxCategory={form.taxCategory}
+  onChange={(item) => onItemSelect(item.id, idx)}  
+/>
+
                       </td>
 
                       <td className="px-0.5 py-1">
@@ -254,6 +258,14 @@ export const DetailsTab = ({
                           onChange={(e) => onItemChange(e, i)}
                         />
                       </td>
+                      <td className="px-0.5 py-1">
+                        <input
+                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card"
+                          value={it.vatRate}
+                          disabled
+                        />
+                      </td>
+
 
                       <td className="px-0.5 py-1">
                         <div className="relative">
@@ -286,7 +298,7 @@ export const DetailsTab = ({
                         <button
                           type="button"
                           onClick={() => onRemoveItem(i)}
-                         className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
+                          className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

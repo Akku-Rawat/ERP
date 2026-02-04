@@ -32,13 +32,13 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     supplierId: form.supplierId,
     currency: form.currency,
     status: form.status,
-   taxCategory: form.taxCategory,
+    taxCategory: form.taxCategory,
     costCenter: form.costCenter,
     project: form.project,
     email: form.supplierEmail,
     phone: form.supplierPhone,
 
-   // Include export country
+    // Include export country
     destnCountryCd: form.destnCountryCd,
     shippingRule: form.shippingRule,
     incoterm: form.incoterm,
@@ -51,9 +51,9 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     paymentTermsTemplate: form.paymentTermsTemplate,
 
     terms: {
-  buying: form.terms?.buying,
-}
-,
+      buying: form.terms?.buying,
+    }
+    ,
     items,
     taxes,
     payments: form.paymentRows.filter((p) => p.paymentTerm && p.paymentTerm.trim() !== ""),
@@ -85,18 +85,25 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
   console.log(" Mapping API to UI:", api);
 
   // Map items from API format to UI format
-  const items = (api.items || []).map((item: any) => ({
-    destination_country: api.destnCountryCd || "",
-    taxCategory: api.taxCategory || "",
-    itemCode: item.item_code || "",
-    itemName: item.item_name || "",
-    requiredBy: item.requiredBy || api.requiredBy || "",
-    quantity: Number(item.qty || 0),
+const items = (api.items || []).map((item: any) => {
+  const qty = Number(item.qty || 0);
+  const rate = Number(item.rate || 0);
+  const vatRate = Number(item.vatRate || item.taxPerct || 0);
+
+  const base = qty * rate;
+  const tax = (base * vatRate) / 100;
+
+  return {
+    itemCode: item.item_code,
+    itemName: item.item_name,
+    quantity: qty,
+    rate,
     uom: item.uom || "Unit",
-    rate: Number(item.rate || 0),
-    amount: Number(item.amount || 0),
     vatCd: item.vatCd || "A",
-  }));
+    vatRate,
+    amount: base + tax, 
+  };
+});
 
   // Map tax rows from API format to UI format
   const taxRows = (api.taxes || [])
@@ -160,18 +167,18 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
     },
   };
 
-const buyingTerms = api.terms?.terms?.buying;
+  const buyingTerms = api.terms?.terms?.buying;
 
-const paymentPhases = buyingTerms?.payment?.phases || [];
+  const paymentPhases = buyingTerms?.payment?.phases || [];
 
-const paymentRows = paymentPhases.map((phase: any) => ({
-  paymentTerm: phase.name || "",
-  description: phase.condition || "",
-  dueDate: "",
-  invoicePortion: Number(phase.percentage || 0),
-  paymentAmount:
-    (api.grandTotal * Number(phase.percentage || 0)) / 100,
-}));
+  const paymentRows = paymentPhases.map((phase: any) => ({
+    paymentTerm: phase.name || "",
+    description: phase.condition || "",
+    dueDate: "",
+    invoicePortion: Number(phase.percentage || 0),
+    paymentAmount:
+      (api.grandTotal * Number(phase.percentage || 0)) / 100,
+  }));
 
 
   // Calculate totals
@@ -208,7 +215,7 @@ const paymentRows = paymentPhases.map((phase: any) => ({
     costCenter: api.costCenter || "",
     project: api.project || "",
     // Include export country
-  
+
     destnCountryCd: api.exportToCountry || "", // Map export country
     shippingRule: api.shippingRule || "",
     incoterm: api.incoterm || "",
@@ -216,8 +223,8 @@ const paymentRows = paymentPhases.map((phase: any) => ({
     taxesChargesTemplate: api.taxesChargesTemplate || "",
     paymentTermsTemplate: api.paymentTermsTemplate || "",
 
- terms: buyingTerms ? { buying: buyingTerms } : undefined,
- 
+    terms: buyingTerms ? { buying: buyingTerms } : undefined,
+
 
     // Addresses
     addresses: addresses,

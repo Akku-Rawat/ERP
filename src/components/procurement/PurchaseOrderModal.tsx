@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Building2, Mail, Calculator, MapPin, FileText } from "lucide-react";
+import { Building2, MapPin, FileText } from "lucide-react";
 import Modal from "../ui/modal/modal";
 import { Button } from "../ui/modal/formComponent";
 import { DetailsTab } from "../procurement/purchaseorder/DetailsTab";
@@ -46,9 +46,6 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
     handleTaxRowChange,
     addTaxRow,
     removeTaxRow,
-    handlePaymentRowChange,
-    addPaymentRow,
-    removePaymentRow,
     handleSaveTemplate,
     resetTemplate,
     getCurrencySymbol,

@@ -4,11 +4,15 @@ export interface ItemRow {
   itemCode: string;
   itemName?: string;
   requiredBy: string;
+
   quantity: number;
   uom: string;
   rate: number;
-  vatCd?: string;
+
+  vatCd: string;   
+  vatRate: number; 
 }
+
 
 export interface TaxRow {
   type: string;
@@ -104,8 +108,10 @@ export const emptyItem: ItemRow = {
   quantity: 0,
   uom: "Unit",
   rate: 0,
-  vatCd: "", // Empty, will be set based on tax category and item
+  vatCd: "",
+  vatRate: 0,
 };
+
 
 export const emptyTaxRow: TaxRow = {
   type: "",

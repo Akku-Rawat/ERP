@@ -24,6 +24,7 @@ import { getSupplierById } from "../../src/api/procurement/supplierApi";
 import { getCompanyById } from "../api/companySetupApi";
 import {mapSupplierToAddress} from "../types/Supply/purchaseOrderMapper"
 import type { AddressBlock } from "../types/Supply/purchaseOrder";
+import { getItemByItemCode } from "../api/itemApi";
 
 
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
@@ -45,6 +46,13 @@ export const usePurchaseOrderForm = ({
   const [form, setForm] = useState<PurchaseOrderFormData>(emptyPOForm);
   const [activeTab, setActiveTab] = useState<POTab>("details");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+  if (!isOpen) {
+    setForm(emptyPOForm);
+    setActiveTab("details");
+  }
+}, [isOpen]);
 
   const isEditMode = !!poId;
 
@@ -121,35 +129,41 @@ useEffect(() => {
   }, [isOpen, poId]);
 
   // Calculate totals (Items + Taxes + Rounding)
-  useEffect(() => {
-    const subTotal = form.items.reduce(
-      (sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.rate) || 0),
-      0
-    );
+useEffect(() => {
+  const subTotal = form.items.reduce(
+    (sum, item) => sum + item.quantity * item.rate,
+    0
+  );
 
-    const totalQty = form.items.reduce(
-      (sum, item) => sum + (Number(item.quantity) || 0),
-      0
-    );
+  const itemTaxTotal = form.items.reduce((sum, item) => {
+    const base = item.quantity * item.rate;
+    return sum + (base * (item.vatRate || 0)) / 100;
+  }, 0);
 
-    const taxTotal = form.taxRows.reduce((sum, t) => {
-      const taxableAmount = Number(t.amount) || 0;
-      const taxRate = Number(t.taxRate) || 0;
-      return sum + (taxableAmount * taxRate) / 100;
-    }, 0);
+  const taxRowTotal = form.taxRows.reduce((sum, t) => {
+    return sum + (t.amount * t.taxRate) / 100;
+  }, 0);
 
-    const grandTotal = subTotal + taxTotal;
-    const roundedTotal = Math.round(grandTotal);
-    const roundingAdjustment = Number((roundedTotal - grandTotal).toFixed(2));
+  const grandTotal = subTotal + itemTaxTotal + taxRowTotal;
 
-    setForm((p) => ({
-      ...p,
-      totalQuantity: totalQty,
-      grandTotal,
-      roundingAdjustment,
-      roundedTotal,
-    }));
-  }, [form.items, form.taxRows]);
+  const totalQuantity = form.items.reduce(
+    (sum, item) => sum + (Number(item.quantity) || 0),
+    0
+  );
+
+  const roundedTotal = Math.round(grandTotal);
+  const roundingAdjustment = Number(
+    (roundedTotal - grandTotal).toFixed(2)
+  );
+
+  setForm((p) => ({
+    ...p,
+    totalQuantity,
+    grandTotal,
+    roundingAdjustment,
+    roundedTotal,
+  }));
+}, [form.items, form.taxRows]);
 
 
 type AddressKey = keyof PurchaseOrderFormData["addresses"];
@@ -360,21 +374,39 @@ addresses: {
     return item.taxCode || item.vatCd || "A";
   };
 
-const handleItemSelect = (item: any, idx: number) => {
-  setForm((prev) => {
-    const items = [...prev.items];
+const handleItemSelect = async (itemId: string, idx: number) => {
+  try {
+    const res = await getItemByItemCode(itemId);
+    if (!res || res.status_code !== 200) return;
 
-    items[idx] = {
-      ...items[idx],
-      itemCode: item.id,
-      itemName: item.itemName,
-      uom: item.unitOfMeasureCd || "Unit",
-      rate: Number(item.sellingPrice || 0),
-      vatCd: getVatCode(item, prev.taxCategory), 
-    };
+    const data = res.data;
 
-    return { ...prev, items };
-  });
+    setForm((prev) => {
+      const items = [...prev.items];
+
+      items[idx] = {
+        ...items[idx],
+        itemCode: data.id,
+        itemName: data.itemName,
+        uom: data.unitOfMeasureCd || "Unit",
+        rate: Number(data.sellingPrice || 0),
+
+      
+        vatRate: Number(data.taxPerct || 0),
+        vatCd:
+          prev.taxCategory === "Export"
+            ? "C1"
+            : prev.taxCategory === "LPO"
+            ? "E"
+            : data.taxCode || "A",
+      };
+
+      return { ...prev, items };
+    });
+  } catch (err) {
+    console.error("Failed to fetch item details", err);
+    toast.error("Failed to load item details");
+  }
 };
 
 
