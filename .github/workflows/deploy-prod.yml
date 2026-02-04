@@ -59,7 +59,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: ".github/workflows/deploy.sh"
+          source: ".github/workflows/deploy-prod.sh"
           target: "/root/deploy-scripts/erp-frontend"
           strip_components: 2
 
