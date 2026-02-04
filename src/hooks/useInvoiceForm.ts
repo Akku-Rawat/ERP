@@ -258,7 +258,7 @@ useEffect(() => {
   const handleItemSelect = async (index: number, itemId: string) => {
     const currentItem = formData.items[index];
 
-    // 🔒 Invoice-loaded item → do NOT auto override
+    // Invoice-loaded item → do NOT auto override
     if (currentItem?._fromInvoice) {
       setFormData((prev) => {
         const items = [...prev.items];

@@ -39,4 +39,3 @@ export async function updateSupplier(payload: any): Promise<any> {
   return resp.data;
 }
 
-

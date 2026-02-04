@@ -13,7 +13,8 @@ import type { Supplier } from "../../types/Supply/supplier";
 import SupplierStatement from "./SupplierStatement";
 import PurchaseInvoiceModal from "../../components/procurement/PurchaseInvoiceModal";
 import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal";
-import { getSuppliers } from "../../api/procurement/supplierApi";
+import { getPurchaseOrdersBySupplier } from "../../api/procurement/PurchaseOrderApi";
+
 
 
 /*  PROPS  */
@@ -43,10 +44,20 @@ const SupplierDetailView: React.FC<Props> = ({
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   
 
+const [purchaseOrders, setPurchaseOrders] = useState<any[]>([]);
+const [poLoading, setPoLoading] = useState(false);
 
 
+  const supplierDetail = suppliers.find((s) =>
+    supplier.supplierId
+      ? s.supplierId === supplier.supplierId
+      : s.supplierCode === supplier.supplierCode,
+  );
+  const supplierName = supplierDetail?.supplierName;
 
-  const supplierDetail = supplier;
+
+const supplierCode = supplierDetail?.supplierCode;
+
 
 const filteredSuppliers = suppliers.filter(
   (s) =>
@@ -109,6 +120,29 @@ const filteredSuppliers = suppliers.filter(
     ].filter(Boolean);
     return parts.length ? parts.join(", ") : "—";
   };
+
+
+useEffect(() => {
+  if (activeTab !== "purchase-orders") return;
+  if (!supplierName) return;
+
+  const loadPOs = async () => {
+    setPoLoading(true);
+    try {
+      const data = await getPurchaseOrdersBySupplier(supplierName);
+      setPurchaseOrders(data);
+    } catch (e) {
+      console.error("PO fetch failed", e);
+    } finally {
+      setPoLoading(false);
+    }
+  };
+
+  loadPOs();
+}, [activeTab, supplierName]);
+
+
+
 
   return (
     <div className="flex flex-col bg-app text-main overflow-hidden h-screen">
@@ -274,6 +308,35 @@ const filteredSuppliers = suppliers.filter(
                 </div>
               </div>
             )}
+           {activeTab === "purchase-orders" && (
+  <div className="p-5 space-y-3">
+    {poLoading && (
+      <p className="text-xs text-muted">Loading purchase orders...</p>
+    )}
+
+    {!poLoading && purchaseOrders.length === 0 && (
+      <p className="text-xs text-muted">No purchase orders found</p>
+    )}
+
+    {purchaseOrders.map((po) => (
+      <div
+        key={po.name}
+        className="bg-card border border-[var(--border)] rounded-xl p-4 flex justify-between items-center"
+      >
+        <div>
+          <p className="text-xs font-bold">{po.name}</p>
+          <p className="text-[10px] text-muted">
+            {po.transaction_date} • {po.status}
+          </p>
+        </div>
+
+        <p className="text-sm font-black">
+          {po.grand_total}
+        </p>
+      </div>
+    ))}
+  </div>
+)}
 
             {activeTab === "statement" && (
               <SupplierStatement supplier={supplierDetail} />

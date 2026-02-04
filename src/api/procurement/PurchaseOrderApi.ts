@@ -9,6 +9,7 @@ const ENDPOINTS = {
   getPOList: `${base_url}.get_purchase_orders`,
   getPOById: `${base_url}.get_purchase_order`,
   updatePO: `${base_url}.update_purchase_order`,
+  getPurchaseOrders: `${base_url}.get_purchase_orders`,
 };
 
 
@@ -44,4 +45,24 @@ export async function updatePurchaseOrder(payload: any): Promise<any> {
 }
 
 
+export async function getPurchaseOrdersBySupplier(
+  supplierName: string,
+  page = 1,
+  pageSize = 100,
+  status = ""
+) {
+  const resp = await api.get(ENDPOINTS.getPurchaseOrders,
+    
+    {
+      params: {
+        page,
+        page_size: pageSize,
+        status,
+        supplier: supplierName,
+      },
+    }
+  );
+
+  return resp.data?.data || [];
+}
 
