@@ -61,7 +61,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-
+const [initialLoad, setInitialLoad] = useState(true);
   const [selectedInvoice, setSelectedInvoice] =
     useState<ProformaInvoice | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -110,6 +110,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
       setTotalItems(res.pagination?.total || mapped.length);
     } finally {
       setLoading(false);
+       setInitialLoad(false);
     }
   };
   useEffect(() => {
@@ -337,14 +338,8 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   ================================ */
   return (
     <div className="p-8">
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          <p className="mt-2 text-muted">Loading proforma invoices…</p>
-        </div>
-      ) : (
         <Table
-          loading={loading}
+          loading={loading || initialLoad}
           serverSide
           columns={columns}
           data={filteredInvoices}
@@ -369,7 +364,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
           }}
           onPageChange={setPage}
         />
-      )}
+      
 
       <PdfPreviewModal
         open={pdfOpen}

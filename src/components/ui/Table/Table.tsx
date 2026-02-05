@@ -41,7 +41,7 @@ const SkeletonRow: React.FC<{ columnsCount: number }> = ({ columnsCount }) => (
   <tr className="bg-transparent">
     {Array.from({ length: columnsCount }).map((_, idx) => (
       <td key={idx} className="px-5 py-3.5 border-b border-[var(--border)]/20">
-        <div className="h-4 bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded" />
+        <div className="h-4 bg-gray-300 animate-pulse rounded"/>
       </td>
     ))}
   </tr>

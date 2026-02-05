@@ -20,7 +20,7 @@ const CreditNotesTable: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
+  const [initialLoad, setInitialLoad] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -65,6 +65,7 @@ const CreditNotesTable: React.FC = () => {
       console.error("Failed to load credit notes", error);
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
 
@@ -74,16 +75,10 @@ const CreditNotesTable: React.FC = () => {
 
   return (
     <div className="p-8">
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="mt-2 text-muted">Loading invoices…</p>
-        </div>
-      ) : (
         <Table
           columns={columns}
           data={data}
-          loading={loading}
+          loading={loading || initialLoad}
           showToolbar
           enableAdd
           addLabel="Add Credit Note"
@@ -101,7 +96,7 @@ const CreditNotesTable: React.FC = () => {
           }}
           onPageChange={setPage}
         />
-      )}
+
 
       <CreateCreditNoteModal
         isOpen={openCreateModal}

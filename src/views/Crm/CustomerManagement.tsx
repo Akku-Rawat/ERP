@@ -34,7 +34,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [custLoading, setCustLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editCustomer, setEditCustomer] = useState<CustomerDetail | null>(null);
-
+  const [initialLoad, setInitialLoad] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -53,6 +53,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
       console.error("Error loading customers:", err);
     } finally {
       setCustLoading(false);
+      setInitialLoad(false);
     }
   };
 
@@ -62,19 +63,19 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
 
 
   const fetchAllCustomers = async () => {
-  try {
-    const resp = await getAllCustomers(1, 1000);
-    setAllCustomers(resp.data || []);
-  } catch (err) {
-    console.error("Error loading all customers:", err);
-  }
-};
+    try {
+      const resp = await getAllCustomers(1, 1000);
+      setAllCustomers(resp.data || []);
+    } catch (err) {
+      console.error("Error loading all customers:", err);
+    }
+  };
 
-const ensureAllCustomers = async () => {
-  if (!allCustomers.length) {
-    await fetchAllCustomers();
-  }
-};
+  const ensureAllCustomers = async () => {
+    if (!allCustomers.length) {
+      await fetchAllCustomers();
+    }
+  };
 
 
   const handleDelete = async (customerId: string, e: React.MouseEvent) => {
@@ -119,26 +120,26 @@ const ensureAllCustomers = async () => {
     toast.success(editCustomer ? "Customer updated!" : "Customer created!");
   };
 
-const handleRowClick = async (customer: CustomerSummary) => {
-  try {
-    setCustLoading(true);
+  const handleRowClick = async (customer: CustomerSummary) => {
+    try {
+      setCustLoading(true);
 
-    //  Ensure sidebar data loaded
-    await ensureAllCustomers();
+      //  Ensure sidebar data loaded
+      await ensureAllCustomers();
 
-    //  Fetch full customer detail
-    const res = await getCustomerByCustomerCode(customer.id);
-    const fullCustomer = res.data ?? res;
+      //  Fetch full customer detail
+      const res = await getCustomerByCustomerCode(customer.id);
+      const fullCustomer = res.data ?? res;
 
-    setSelectedCustomer(fullCustomer);
-    setViewMode("detail");
-  } catch (err) {
-    console.error("Failed to load customer detail:", err);
-    toast.error("Unable to load customer detail");
-  } finally {
-    setCustLoading(false);
-  }
-};
+      setSelectedCustomer(fullCustomer);
+      setViewMode("detail");
+    } catch (err) {
+      console.error("Failed to load customer detail:", err);
+      toast.error("Unable to load customer detail");
+    } finally {
+      setCustLoading(false);
+    }
+  };
 
 
   const handleBack = () => {
@@ -208,32 +209,25 @@ const handleRowClick = async (customer: CustomerSummary) => {
     <div className="p-8">
       {viewMode === "table" ? (
         <>
-          {custLoading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="mt-2 text-muted">Loading customers…</p>
-            </div>
-          ) : (
-            <Table
-              columns={columns}
-              data={customers}
-              showToolbar
-              loading={custLoading}
-              onPageSizeChange={(size) => setPageSize(size)}
-              pageSizeOptions={[10, 25, 50, 100]}
-              searchValue={searchTerm}
-              onSearch={setSearchTerm}
-              enableAdd
-              addLabel="Add Customer"
-              onAdd={handleAddCustomer}
-              enableColumnSelector
-              currentPage={page}
-              totalPages={totalPages}
-              pageSize={pageSize}
-              totalItems={totalItems}
-              onPageChange={setPage}
-            />
-          )}
+          <Table
+            columns={columns}
+            data={customers}
+            showToolbar
+            loading={custLoading || initialLoad}
+            onPageSizeChange={(size) => setPageSize(size)}
+            pageSizeOptions={[10, 25, 50, 100]}
+            searchValue={searchTerm}
+            onSearch={setSearchTerm}
+            enableAdd
+            addLabel="Add Customer"
+            onAdd={handleAddCustomer}
+            enableColumnSelector
+            currentPage={page}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            onPageChange={setPage}
+          />
         </>
       ) : selectedCustomer ? (
         <CustomerDetailView

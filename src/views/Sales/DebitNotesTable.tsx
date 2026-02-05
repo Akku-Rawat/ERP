@@ -22,7 +22,7 @@ const DebitNotesTable: React.FC = () => {
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
+  const [initialLoad, setInitialLoad] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -68,6 +68,7 @@ const DebitNotesTable: React.FC = () => {
       console.error("Failed to load debit notes", error);
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
 
@@ -77,12 +78,6 @@ const DebitNotesTable: React.FC = () => {
 
   return (
     <div className="p-8">
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="mt-2 text-muted">Loading invoices…</p>
-        </div>
-      ) : (
         <Table
           columns={columns}
           data={data}
@@ -90,7 +85,7 @@ const DebitNotesTable: React.FC = () => {
           enableAdd
           searchValue={searchTerm}
           onSearch={setSearchTerm}
-          loading={loading}
+          loading={loading || initialLoad}
           addLabel="Add Debit Note"
           onAdd={() => setOpenCreateModal(true)}
           emptyMessage="No debit notes found"
@@ -106,7 +101,7 @@ const DebitNotesTable: React.FC = () => {
           }}
           onPageChange={setPage}
         />
-      )}
+      
 
       <CreateDebitNoteModal
         isOpen={openCreateModal}
