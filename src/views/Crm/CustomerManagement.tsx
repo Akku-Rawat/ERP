@@ -40,12 +40,13 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [allCustomers, setAllCustomers] = useState<CustomerSummary[]>([]);
+const [taxCategory, setTaxCategory] = useState<string>("");
 
 
   const fetchCustomers = async () => {
     try {
       setCustLoading(true);
-      const response = await getAllCustomers(page, pageSize);
+      const response = await getAllCustomers(page, pageSize,taxCategory);
       setCustomers(response.data);
       setTotalPages(response.pagination?.total_pages || 1);
       setTotalItems(response.pagination?.total || 1);
@@ -59,7 +60,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
 
   useEffect(() => {
     fetchCustomers();
-  }, [page, pageSize]);
+  }, [page, pageSize,taxCategory]);
 
 
   const fetchAllCustomers = async () => {
@@ -227,6 +228,23 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
             pageSize={pageSize}
             totalItems={totalItems}
             onPageChange={setPage}
+            extraFilters={
+    <div className="flex gap-3">
+      <select
+        value={taxCategory}
+        onChange={(e) => {
+          setPage(1);
+          setTaxCategory(e.target.value);
+        }}
+        className="border px-3 py-2 rounded"
+      >
+        <option value="">ALL</option>
+        <option value="Export">Export</option>
+        <option value="Non-Export">Non-Export</option>
+        <option value="LPO">LPO</option>
+      </select>
+    </div>
+  }
           />
         </>
       ) : selectedCustomer ? (

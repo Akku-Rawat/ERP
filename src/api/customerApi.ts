@@ -15,9 +15,10 @@ const ENDPOINTS = {
 export async function getAllCustomers(
   page: number = 1,
   page_size: number = 5,
+  taxCategory?: string,
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(ENDPOINTS.getAllCustomers, {
-    params: { page, page_size },
+    params: { page, page_size, taxCategory },
   });
   return resp.data;
 }
