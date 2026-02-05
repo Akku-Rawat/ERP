@@ -26,7 +26,7 @@ jobs:
           tags: akhileshrawat7/rolaface-erp-frontend:staging
           build-args: |
             VITE_API_BASE_URL=https://erp.izyanehub.com/api
-            VITE_ZRA_CODES_API_URL=https://zra-codes.izyanehub.com/api
+            VITE_ZRA_CODES_BASE_URL=https://zra-codes.izyanehub.com/api
             VITE_API_AUTH_TOKEN=token 1e329714a6374c6:812f742ecb4aa0d
             VITE_COMPANY_ID=COMP-00003
 
