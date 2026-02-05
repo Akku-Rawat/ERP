@@ -2,28 +2,12 @@
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
 
-const base_url = import.meta.env.VITE_INVOICE_API_URL as string;
-const api = createAxiosInstance(base_url);
-const creditapi = import.meta.env.VITE_CREDIT_NOTE_API_URL as string;
-const debitapi = import.meta.env.VITE_DEBIT_NOTE_API_URL as string;
-
-const ENDPOINTS = {
-  createSalesInvoice: `${base_url}.create_sales_invoice`,
-  getSalesInvoices: `${base_url}.get_sales_invoice`,
-  getSalesInvoiceById: `${base_url}.get_sales_invoice_by_id`,
-  updateInvoiceStatus: `${base_url}.update_invoice_status`,
-  deleteSalesInvoice: `${base_url}.delete_sales_invoice`,
-  createCreditNote: `${creditapi}.create_credit_note_from_sales_invoice`,
-  createDebitNote: `${debitapi}.create_debit_note_from_invoice`,
-  getAllDebitNotes: `${debitapi}.get_debit_notes`,
-  getAllCreditNotes: `${creditapi}.get_credit_notes`,
-};
+import { API, ERP_BASE } from "../config/api";
+const api = createAxiosInstance(ERP_BASE);
+export const InvoiceAPI = API.invoice;
 
 export async function createSalesInvoice(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(
-    ENDPOINTS.createSalesInvoice,
-    payload,
-  );
+  const resp: AxiosResponse = await api.post(InvoiceAPI.create, payload);
   return resp.data;
 }
 
@@ -31,35 +15,31 @@ export async function updateInvoiceStatus(
   invoiceNumber: string,
   status: string,
 ) {
-  const resp: AxiosResponse = await api.patch(
-    ENDPOINTS.updateInvoiceStatus,
-    {
-      invoiceNumber,
-      invoiceStatus: status,
-    }
-  );
+  const resp: AxiosResponse = await api.patch(InvoiceAPI.updateStatus, {
+    invoiceNumber,
+    invoiceStatus: status,
+  });
   return resp.data;
 }
-
 
 export async function getAllSalesInvoices(
   page: number = 1,
   page_size: number = 10,
 ): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getSalesInvoices, {
+  const resp: AxiosResponse = await api.get(InvoiceAPI.getAll, {
     params: { page, page_size },
   });
   return resp.data;
 }
 
 export async function getSalesInvoiceById(id: string): Promise<any | null> {
-  const url = `${ENDPOINTS.getSalesInvoiceById}?id=${encodeURIComponent(id)}`;
+  const url = `${InvoiceAPI.getById}?id=${encodeURIComponent(id)}`;
   const resp: AxiosResponse = await api.get(url);
   return resp.data ?? null;
 }
 
 export async function deleteSalesInvoiceById(id: string): Promise<any> {
-  const url = `${ENDPOINTS.deleteSalesInvoice}?id=${encodeURIComponent(id)}`;
+  const url = `${InvoiceAPI.delete}?id=${encodeURIComponent(id)}`;
   const resp: AxiosResponse = await api.delete(url);
   return resp.data;
 }
@@ -76,7 +56,7 @@ export async function createCreditNoteFromInvoice(payload: {
   }[];
 }): Promise<any> {
   const resp: AxiosResponse = await api.post(
-    ENDPOINTS.createCreditNote,
+    InvoiceAPI.createCreditNote,
     payload,
   );
   return resp.data;
@@ -93,7 +73,7 @@ export async function createDebitNoteFromInvoice(payload: {
     price: number;
   }[];
 }): Promise<any> {
-  const resp = await api.post(ENDPOINTS.createDebitNote, payload);
+  const resp = await api.post(InvoiceAPI.createDebitNote, payload);
   return resp.data;
 }
 
@@ -101,7 +81,7 @@ export async function getAllDebitNotes(
   page: number = 1,
   page_size: number = 10,
 ): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllDebitNotes, {
+  const resp: AxiosResponse = await api.get(InvoiceAPI.getDebitNotes, {
     params: { page, page_size },
   });
   return resp.data;
@@ -110,7 +90,7 @@ export async function getAllCreditNotes(
   page: number = 1,
   page_size: number = 10,
 ): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllCreditNotes, {
+  const resp: AxiosResponse = await api.get(InvoiceAPI.getCreditNotes, {
     params: { page, page_size },
   });
   return resp.data;

@@ -1,37 +1,28 @@
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
 
-const base_url = import.meta.env.VITE_BASE_URL as string;
-const api = createAxiosInstance(base_url);
-
-const ENDPOINTS = {
-  createItemStock: `${base_url}.stock.stock.create_item_stock_api`,
-  getAllStockEntries: `${base_url}.stock.stock.get_all_stock_entries`,
-  deleteStockEntry: `${base_url}.stock.stock.delete_stock_entry`,
-  correctStock: `${base_url}.stock.stock.correct_stock`,
-};
+import { API, ERP_BASE } from "../config/api";
+const api = createAxiosInstance(ERP_BASE);
+export const StockAPI = API.stock;
 
 export async function createItemStock(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(
-    ENDPOINTS.createItemStock,
-    payload,
-  );
+  const resp: AxiosResponse = await api.post(StockAPI.create, payload);
   return resp.data;
 }
 
 export async function getAllStockEntries(): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllStockEntries);
+  const resp: AxiosResponse = await api.get(StockAPI.getAll);
   return resp.data?.data || [];
 }
 
 export async function deleteStockEntry(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.delete(ENDPOINTS.deleteStockEntry, {
+  const resp: AxiosResponse = await api.delete(StockAPI.delete, {
     data: payload,
   });
   return resp.data;
 }
 
 export async function correctStock(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(ENDPOINTS.correctStock, payload);
+  const resp: AxiosResponse = await api.post(StockAPI.correct, payload);
   return resp.data;
 }

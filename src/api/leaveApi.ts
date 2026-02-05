@@ -12,26 +12,12 @@ import type {
   LeaveAllocationListResponse,
 } from "../types/leave/leave";
 
-const base_url = import.meta.env.VITE_HRMS_API_URL as string;
-const api = createAxiosInstance(base_url);
-
-const ENDPOINTS = {
-  applyLeave: `${base_url}.leave.api.create_leave_application`,
-  allLeaveHistory: `${base_url}.leave.api.get_all_leaves`,
-  pendingLeaves: `${base_url}.leave.api.get_all_pending_leaves`,
-  updateLeaveStatus: `${base_url}.leave.api.update_leave_status`,
-  leaveHistoryByEmployee: `${base_url}.leave.api.get_leaves_by_employee_id`,
-  leaveById: `${base_url}.leave.api.get_leave_by_id`,
-  cancelLeave: `${base_url}.leave.api.cancel_leave`,
-  updateLeaveApplication: `${base_url}.leave.api.update_leave_application`,
-  createLeaveAllocation: `${base_url}.leave_allocation.api.create_leave_allocation`,
-  getLeaveAllocationsByEmployee: `${base_url}.leave_allocation.api.get_leave_allocations_by_employee_id`,
-  getLeaveBalance: `${base_url}.leave_balance.api.get_employee_leave_balance_report`,
-  getHolidays: `${base_url}.holidays.api.get_holidays`,
-};
+import { API, ERP_BASE } from "../config/api";
+const api = createAxiosInstance(ERP_BASE);
+export const LeaveAPI = API.leave;
 
 export async function applyLeave(payload: ApplyLeavePayload): Promise<any> {
-  const resp: AxiosResponse = await api.post(ENDPOINTS.applyLeave, payload);
+  const resp: AxiosResponse = await api.post(LeaveAPI.create, payload);
   return resp.data;
 }
 
@@ -39,7 +25,7 @@ export async function getAllEmployeeLeaveHistory(
   page: number = 1,
   pageSize: number = 100,
 ): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.allLeaveHistory, {
+  const resp: AxiosResponse = await api.get(LeaveAPI.getAll, {
     params: {
       page,
       page_size: pageSize,
@@ -52,7 +38,7 @@ export async function getAllEmployeeLeaveHistory(
 export async function updateLeaveStatus(
   payload: UpdateLeaveStatusPayload,
 ): Promise<UpdateLeaveStatusResponse> {
-  const resp = await api.patch(ENDPOINTS.updateLeaveStatus, payload);
+  const resp = await api.patch(LeaveAPI.update, payload);
 
   return resp.data.data;
 }
@@ -61,7 +47,7 @@ export async function getPendingLeaveRequests(
   page: number = 1,
   pageSize: number = 100,
 ): Promise<PendingLeaveResponse> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.pendingLeaves, {
+  const resp: AxiosResponse = await api.get(LeaveAPI.getPending, {
     params: {
       page,
       page_size: pageSize,
@@ -76,7 +62,7 @@ export async function getLeaveHistoryByEmployee(
   page: number = 1,
   pageSize: number = 10,
 ) {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.leaveHistoryByEmployee, {
+  const resp: AxiosResponse = await api.get(LeaveAPI.getByEmployee, {
     params: {
       employeeId,
       page,
@@ -88,7 +74,7 @@ export async function getLeaveHistoryByEmployee(
 }
 
 export async function getLeaveById(leaveId: string) {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.leaveById, {
+  const resp: AxiosResponse = await api.get(LeaveAPI.getById, {
     params: { leaveId },
   });
 
@@ -96,7 +82,7 @@ export async function getLeaveById(leaveId: string) {
 }
 
 export async function cancelLeave(leaveId: string) {
-  const resp = await api.patch(ENDPOINTS.cancelLeave, { leaveId });
+  const resp = await api.patch(LeaveAPI.cancel, { leaveId });
 
   return resp.data;
 }
@@ -104,7 +90,7 @@ export async function cancelLeave(leaveId: string) {
 export async function updateLeaveApplication(
   payload: UpdateLeaveApplicationPayload,
 ): Promise<UpdateLeaveApplicationResponse> {
-  const resp = await api.patch(ENDPOINTS.updateLeaveApplication, payload);
+  const resp = await api.patch(LeaveAPI.update, payload);
 
   return resp.data;
 }
@@ -112,7 +98,7 @@ export async function updateLeaveApplication(
 export async function createLeaveAllocation(
   payload: CreateLeaveAllocationPayload,
 ): Promise<CreateLeaveAllocationResponse> {
-  const resp = await api.post(ENDPOINTS.createLeaveAllocation, payload);
+  const resp = await api.post(LeaveAPI.createAllocation, payload);
 
   return resp.data;
 }
@@ -122,7 +108,7 @@ export async function getLeaveAllocationsByEmployee(
   page = 1,
   pageSize = 10,
 ): Promise<LeaveAllocationListResponse> {
-  const resp = await api.get(ENDPOINTS.getLeaveAllocationsByEmployee, {
+  const resp = await api.get(LeaveAPI.getAllocationsByEmployee, {
     params: {
       employeeId,
       page,
@@ -140,7 +126,7 @@ export async function getEmployeeLeaveBalanceReport(params: {
   page?: number;
   page_size?: number;
 }) {
-  const resp = await api.get(ENDPOINTS.getLeaveBalance, {
+  const resp = await api.get(LeaveAPI.getBalance, {
     params: {
       page: params.page ?? 1,
       page_size: params.page_size ?? 100,
@@ -157,7 +143,7 @@ export async function getHolidays(params?: {
   page?: number;
   page_size?: number;
 }) {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getHolidays, {
+  const resp: AxiosResponse = await api.get(LeaveAPI.getHolidays, {
     params: {
       page: params?.page ?? 1,
       page_size: params?.page_size ?? 20,

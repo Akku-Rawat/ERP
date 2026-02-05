@@ -1,27 +1,16 @@
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
 
-const base_url = import.meta.env.VITE_HRMS_API_URL as string;
-const napsa_member_url = import.meta.env.VITE_NAPSA_MEMBER_API_URL as string;
-
-const api = createAxiosInstance(base_url);
-
-const ENDPOINTS = {
-  getAllEmployees: `${base_url}.employee.api.get_all_employees`,
-  getEmployeeById: `${base_url}.employee.api.get_employee`,
-  createEmployee: `${base_url}.employee.api.create_employee`,
-  deleteEmployee: `${base_url}.employee.api.delete_employee`,
-  updateEmployee: `${base_url}.employee.api.update_employee`,
-  updateEmployeeDocuments: `${base_url}.employee.api.manage_employee_documents`,
-  fetchEmployeeByNrc: `${napsa_member_url}.member.api.get_napsa_member`,
-};
+import { API, ERP_BASE } from "../config/api";
+const api = createAxiosInstance(ERP_BASE);
+export const EmployeeAPI = API.employee;
 
 export async function getAllEmployees(
   page: number = 1,
   page_size: number = 200,
   status: string = "Active",
 ): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllEmployees, {
+  const resp: AxiosResponse = await api.get(EmployeeAPI.getAll, {
     params: {
       page,
       page_size,
@@ -33,30 +22,30 @@ export async function getAllEmployees(
 }
 
 export async function getEmployeeById(id: string): Promise<any> {
-  const url = `${ENDPOINTS.getEmployeeById}?id=${id}`;
+  const url = `${EmployeeAPI.getById}?id=${id}`;
   const resp: AxiosResponse = await api.get(url);
   return resp.data || null;
 }
 
 export async function createEmployee(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(ENDPOINTS.createEmployee, payload);
+  const resp: AxiosResponse = await api.post(EmployeeAPI.create, payload);
   return resp.data;
 }
 
 export async function updateEmployeeById(payload: any): Promise<any> {
-  const resp = await api.patch(ENDPOINTS.updateEmployee, payload);
+  const resp = await api.patch(EmployeeAPI.update, payload);
   return resp.data;
 }
 
 export async function deleteEmployeeById(id: string): Promise<any> {
-  const url = `${ENDPOINTS.deleteEmployee}?id=${id}`;
+  const url = `${EmployeeAPI.delete}?id=${id}`;
   const resp: AxiosResponse = await api.delete(url);
   return resp.data;
 }
 
 export async function updateEmployeeDocuments(payload: FormData): Promise<any> {
   const resp: AxiosResponse = await api.put(
-    ENDPOINTS.updateEmployeeDocuments,
+    EmployeeAPI.updateDocuments,
     payload,
     {
       headers: {
@@ -75,10 +64,7 @@ export async function verifyEmployeeIdentity(
 ): Promise<any> {
   const payload = type === "NRC" ? { nrc: value } : { ssn: value };
 
-  const resp: AxiosResponse = await api.post(
-    ENDPOINTS.fetchEmployeeByNrc,
-    payload,
-  );
+  const resp: AxiosResponse = await api.post(EmployeeAPI.getByNrc, payload);
 
   return resp.data;
 }
