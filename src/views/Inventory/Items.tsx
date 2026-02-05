@@ -57,9 +57,8 @@ const Items: React.FC = () => {
     fetchItems();
   }, [page, pageSize]);
 
-  /* ===============================
-     HANDLERS
-  ================================ */
+  /*      HANDLERS
+   */
 
   const handleAdd = () => {
     setEditItem(null);
@@ -110,9 +109,8 @@ const Items: React.FC = () => {
     toast.success(wasEdit ? "Item updated" : "Item created");
   };
 
-  /* ===============================
-     FILTER
-  ================================ */
+  /*      FILTER
+   */
 
   const filteredItems = items.filter((i) =>
     [
@@ -128,9 +126,8 @@ const Items: React.FC = () => {
       .includes(searchTerm.toLowerCase()),
   );
 
-  /* ===============================
-     COLUMNS
-  ================================ */
+  /*      COLUMNS
+   */
 
   const columns: Column<ItemSummary>[] = [
     { key: "id", header: "Item Code", align: "left" },
@@ -174,9 +171,8 @@ const Items: React.FC = () => {
     },
   ];
 
-  /* ===============================
-     RENDER
-  ================================ */
+  /*      RENDER
+   */
 
   return (
     <div className="p-8">
