@@ -97,3 +97,46 @@ export const ModalInput = React.forwardRef<HTMLInputElement, InputProps>(
   ),
 );
 ModalInput.displayName = "ModalInput";
+
+
+/*  FILTER SELECT  */
+
+interface FilterSelectProps
+  extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  options?: SelectOption[];
+}
+
+export const FilterSelect = React.forwardRef<
+  HTMLSelectElement,
+  FilterSelectProps
+>(({ options = [], className = "", ...props }, ref) => {
+  return (
+    <select
+      ref={ref}
+      {...props}
+      value={props.value ?? ""}
+      className={[
+        "h-10 min-w-[140px]",
+        "px-4 py-2",
+        "bg-card border border-[var(--border)]",
+        "rounded-xl",
+        "text-xs font-medium text-main",
+        "focus:ring-2 focus:ring-primary/10",
+        "focus:border-primary outline-none transition-all",
+        className,
+      ].join(" ")}
+    >
+      <option value="">ALL</option>
+
+      {options.map((opt, idx) => (
+        <option key={`${opt.value}-${idx}`} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  );
+});
+
+
+FilterSelect.displayName = "FilterSelect";
+
