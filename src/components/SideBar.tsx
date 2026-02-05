@@ -16,6 +16,7 @@ import {
   FaChevronUp,
 } from "react-icons/fa";
 import { getCompanyById } from "../api/companySetupApi";
+import LogoutConfirmModal from "./LogoutConfirmModal";
 
 const menuItems = [
   { name: "Dashboard", to: "/dashboard", icon: <FaChartBar /> },
@@ -41,6 +42,7 @@ const [company, setCompany] = useState<{
   name: string;
   logo?: string;
 } | null>(null);
+const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
 
 
@@ -71,15 +73,24 @@ useEffect(() => {
 }, []);
 
 
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    navigate("/login");
-  };
+  // const handleLogout = () => {
+  //   localStorage.removeItem("authToken");
+  //   navigate("/login");
+  // };
 
   const settingsRoutes = ["/settings", "/companySetup", "/userManagement"];
   const isSettingsRoute = settingsRoutes.some((p) =>
     location.pathname.startsWith(p),
   );
+
+  const handleLogout = () => {
+  setLogoutModalOpen(true);
+};
+
+const confirmLogout = () => {
+  localStorage.removeItem("authToken");
+  navigate("/login");
+};
 
   return (
     <div
@@ -282,13 +293,19 @@ useEffect(() => {
           {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="w-10 h-10 shrink-0 rounded-xl bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg active:scale-90 transition-all"
+            className="w-10 h-10 shrink-0 rounded-xl bg-danger text-white flex items-center justify-center shadow-lg active:scale-90 transition-all"
             title="Logout"
           >
             <FaSignOutAlt />
           </button>
         </div>
       </div>
+      <LogoutConfirmModal
+  open={logoutModalOpen}
+  onClose={() => setLogoutModalOpen(false)}
+  onConfirm={confirmLogout}
+/>
+
     </div>
   );
 };
