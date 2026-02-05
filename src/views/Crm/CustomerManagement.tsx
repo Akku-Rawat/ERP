@@ -41,13 +41,13 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [allCustomers, setAllCustomers] = useState<CustomerSummary[]>([]);
-const [taxCategory, setTaxCategory] = useState<string>("");
+  const [taxCategory, setTaxCategory] = useState<string>("");
 
 
   const fetchCustomers = async () => {
     try {
       setCustLoading(true);
-      const response = await getAllCustomers(page, pageSize,taxCategory);
+      const response = await getAllCustomers(page, pageSize, taxCategory);
       setCustomers(response.data);
       setTotalPages(response.pagination?.total_pages || 1);
       setTotalItems(response.pagination?.total || 1);
@@ -61,7 +61,7 @@ const [taxCategory, setTaxCategory] = useState<string>("");
 
   useEffect(() => {
     fetchCustomers();
-  }, [page, pageSize,taxCategory]);
+  }, [page, pageSize, taxCategory]);
 
 
   const fetchAllCustomers = async () => {
@@ -230,22 +230,21 @@ const [taxCategory, setTaxCategory] = useState<string>("");
             totalItems={totalItems}
             onPageChange={setPage}
             extraFilters={
-    <div className="flex gap-3">
-   <FilterSelect
-  value={taxCategory}
-  onChange={(e) => {
-    setPage(1);
-    setTaxCategory(e.target.value);
-  }}
-  options={[
-    { label: "Export", value: "Export" },
-    { label: "Non-Export", value: "Non-Export" },
-    { label: "LPO", value: "LPO" },
-  ]}
-/>
-
-    </div>
-  }
+              <div>
+                <FilterSelect
+                  value={taxCategory}
+                  onChange={(e) => {
+                    setPage(1);
+                    setTaxCategory(e.target.value);
+                  }}
+                  options={[
+                    { label: "Export", value: "Export" },
+                    { label: "Non-Export", value: "Non-Export" },
+                    { label: "LPO", value: "LPO" },
+                  ]}
+                />
+              </div>
+            }
           />
         </>
       ) : selectedCustomer ? (
