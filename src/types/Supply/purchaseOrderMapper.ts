@@ -26,18 +26,8 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     const rate = Number(it.rate);
     const vatRate = Number(it.vatRate || 0);
 
-    console.log(`📦 Item ${idx}:`, {
-      itemCode: it.itemCode,
-      itemName: it.itemName,
-      quantity_original: it.quantity,
-      quantity_converted: quantity,
-      rate_original: it.rate,
-      rate_converted: rate,
-      vatRate_original: it.vatRate,
-      vatRate_converted: vatRate,
-    });
 
-    // Match invoice pattern - simple structure
+   
     return {
       itemCode: it.itemCode,
       itemName: it.itemName || "",
