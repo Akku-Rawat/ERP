@@ -3,7 +3,7 @@
 set -euo pipefail
 
 IMAGE_NAME="akhileshrawat7/rolaface-erp-frontend:staging"
-CONTAINER_NAME="rolaface-erp-frontend"
+CONTAINER_NAME="rolaface-erp-frontend-staging"
 PORT_MAPPING="3006:3003"
 
 log() {
