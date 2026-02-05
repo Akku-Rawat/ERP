@@ -70,10 +70,11 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   }
 };
 
-
-useEffect(() => {
-  fetchAllCustomers();
-}, []);
+const ensureAllCustomers = async () => {
+  if (!allCustomers.length) {
+    await fetchAllCustomers();
+  }
+};
 
 
   const handleDelete = async (customerId: string, e: React.MouseEvent) => {
@@ -118,10 +119,27 @@ useEffect(() => {
     toast.success(editCustomer ? "Customer updated!" : "Customer created!");
   };
 
-  const handleRowClick = (customer: CustomerDetail) => {
-    setSelectedCustomer(customer);
+const handleRowClick = async (customer: CustomerSummary) => {
+  try {
+    setCustLoading(true);
+
+    //  Ensure sidebar data loaded
+    await ensureAllCustomers();
+
+    //  Fetch full customer detail
+    const res = await getCustomerByCustomerCode(customer.id);
+    const fullCustomer = res.data ?? res;
+
+    setSelectedCustomer(fullCustomer);
     setViewMode("detail");
-  };
+  } catch (err) {
+    console.error("Failed to load customer detail:", err);
+    toast.error("Unable to load customer detail");
+  } finally {
+    setCustLoading(false);
+  }
+};
+
 
   const handleBack = () => {
     setViewMode("table");
@@ -174,7 +192,7 @@ useEffect(() => {
         <ActionGroup>
           <ActionButton
             type="view"
-            onClick={() => handleRowClick(c as unknown as CustomerDetail)}
+            onClick={() => handleRowClick(c)}
             iconOnly={false}
           />
           <ActionMenu

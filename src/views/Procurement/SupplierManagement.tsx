@@ -95,9 +95,7 @@ const fetchAllSuppliers = async () => {
     console.error(e);
   }
 };
-useEffect(() => {
-  fetchAllSuppliers();
-}, []);
+
 
 
 
@@ -114,19 +112,36 @@ const filteredSuppliers = useMemo(() => {
 }, [suppliers, searchTerm]);
 
 
-  
-const handleRowClick = async (supplier: Supplier) => {
-  if (!supplier.supplierId) return; 
 
-  setLoading(true);
-  const res = await getSupplierById(supplier.supplierId);
-  const mapped = mapSupplierApi(res.data || res);
-
-  setSelectedSupplier(mapped);
-  setViewMode("detail");
-  setLoading(false);
+const ensureAllSuppliers = async () => {
+  if (!allSuppliers.length) {
+    await fetchAllSuppliers();
+  }
 };
 
+  
+const handleRowClick = async (supplier: Supplier) => {
+  if (!supplier.supplierId) return;
+
+  try {
+    setLoading(true);
+
+    // Ensure sidebar suppliers loaded
+    await ensureAllSuppliers();
+
+    //  Fetch selected supplier detail
+    const res = await getSupplierById(supplier.supplierId);
+    const mapped = mapSupplierApi(res.data || res);
+
+    setSelectedSupplier(mapped);
+    setViewMode("detail");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to load supplier detail");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleBack = () => {
     setViewMode("table");
