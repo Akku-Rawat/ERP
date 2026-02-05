@@ -1,13 +1,20 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import Modal from "../ui/modal/modal";
+import { Button, Input, Select, Card } from "../ui/modal/formComponent";
+import { Building2 } from "lucide-react";
 import type { BankAccount } from "../../types/company";
 
 interface Props {
+  isOpen: boolean;
   onClose: () => void;
   onSubmit: (newAccount: BankAccount) => void;
 }
-const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
+
+const AddBankAccountModal: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+}) => {
   const [form, setForm] = useState<BankAccount>({
     accountNo: "",
     accountHolderName: "",
@@ -20,6 +27,7 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
     openingBalance: 0.0,
   });
 
+  // ================= CHANGE =================
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -27,6 +35,7 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ================= RESET =================
   const handleReset = () => {
     setForm({
       accountNo: "",
@@ -41,8 +50,10 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
     });
   };
 
+  // ================= SUBMIT =================
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (
       !form.accountNo ||
       !form.accountHolderName ||
@@ -52,203 +63,135 @@ const AddBankAccountModal: React.FC<Props> = ({ onClose, onSubmit }) => {
       alert("Please fill in all required fields.");
       return;
     }
+
     onSubmit(form);
     handleReset();
     onClose();
   };
 
+  // ================= FOOTER =================
+  const footer = (
+    <>
+      <Button variant="secondary" onClick={onClose}>
+        Cancel
+      </Button>
+
+      <div className="flex gap-3">
+        <Button variant="secondary" onClick={handleReset}>
+          Reset
+        </Button>
+
+        <Button variant="primary" type="submit" form="bankAccountForm">
+          Save Account
+        </Button>
+      </div>
+    </>
+  );
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="w-[90vw] h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl flex flex-col"
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Add New Bank Account"
+      subtitle="Enter bank account details"
+      icon={Building2}
+      footer={footer}
+      maxWidth="4xl"
+      height="90vh"
+    >
+      <form
+        id="bankAccountForm"
+        onSubmit={handleSubmit}
+        className="space-y-6"
+      >
+        <Card
+          title="Bank Account Information"
+          subtitle="Enter account and banking details"
+          icon={<Building2 className="w-5 h-5 text-primary" />}
         >
-          <form onSubmit={handleSubmit} className="flex flex-col h-full">
-            {/* Header */}
-            <header className="flex items-center justify-between px-6 py-3 bg-indigo-50/70 border-b">
-              <h2 className="text-2xl font-semibold text-indigo-700">
-                Add New Bank Account
-              </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-1 rounded-full hover:bg-gray-200"
-              >
-                <X className="w-6 h-6 text-gray-600" />
-              </button>
-            </header>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-            {/* Scrollable Content */}
-            <section className="flex-1 overflow-y-auto p-6 space-y-8">
-              {/* Fields - 3 Columns */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* First Row */}
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">
-                    Account No <span className="text-red-500">*</span>
-                  </span>
-                  <input
-                    type="text"
-                    name="accountNo"
-                    value={form.accountNo}
-                    onChange={handleChange}
-                    required
-                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="1234567890"
-                  />
-                </label>
+            <Input
+              label="Account No"
+              name="accountNo"
+              value={form.accountNo}
+              onChange={handleChange}
+              required
+            />
 
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">
-                    Account Holder Name <span className="text-red-500">*</span>
-                  </span>
-                  <input
-                    type="text"
-                    name="accountHolderName"
-                    value={form.accountHolderName}
-                    onChange={handleChange}
-                    required
-                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="John Doe"
-                  />
-                </label>
+            <Input
+              label="Account Holder Name"
+              name="accountHolderName"
+              value={form.accountHolderName}
+              onChange={handleChange}
+              required
+            />
 
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">
-                    Bank Name <span className="text-red-500">*</span>
-                  </span>
-                  <input
-                    type="text"
-                    name="bankName"
-                    value={form.bankName}
-                    onChange={handleChange}
-                    required
-                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="HDFC Bank"
-                  />
-                </label>
-                {/* Second Row */}
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">Sort Code</span>
-                  <input
-                    type="text"
-                    name="sortCode"
-                    value={form.sortCode}
-                    onChange={handleChange}
-                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="12-34-56"
-                  />
-                </label>
+            <Input
+              label="Bank Name"
+              name="bankName"
+              value={form.bankName}
+              onChange={handleChange}
+              required
+            />
 
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">SWIFT Code</span>
-                  <input
-                    type="text"
-                    name="swiftCode"
-                    value={form.swiftCode}
-                    onChange={handleChange}
-                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="HDFCINBBXXX"
-                  />
-                </label>
+            <Input
+              label="Sort Code"
+              name="sortCode"
+              value={form.sortCode}
+              onChange={handleChange}
+            />
 
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">
-                    Branch Address
-                  </span>
-                  <input
-                    type="text"
-                    name="branchAddress"
-                    value={form.branchAddress}
-                    onChange={handleChange}
-                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="123 MG Road, Mumbai"
-                  />
-                </label>
-                {/* Third Row */}
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">
-                    Currency <span className="text-red-500">*</span>
-                  </span>
-                  <select
-                    name="currency"
-                    value={form.currency}
-                    onChange={handleChange}
-                    required
-                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  >
-                    <option value="">Select Currency</option>
-                    <option value="USD">USD - US Dollar</option>
-                    <option value="EUR">EUR - Euro</option>
-                    <option value="GBP">GBP - British Pound</option>
-                    <option value="INR">INR - Indian Rupee</option>
-                    <option value="ZAR">ZAR - South African Rand</option>
-                    <option value="AUD">AUD - Australian Dollar</option>
-                  </select>
-                </label>
+            <Input
+              label="SWIFT Code"
+              name="swiftCode"
+              value={form.swiftCode}
+              onChange={handleChange}
+            />
 
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">
-                    Date of Addition
-                  </span>
-                  <input
-                    type="date"
-                    name="dateAdded"
-                    value={form.dateAdded}
-                    onChange={handleChange}
-                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  />
-                </label>
+            <Input
+              label="Branch Address"
+              name="branchAddress"
+              value={form.branchAddress}
+              onChange={handleChange}
+            />
 
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-gray-600">
-                    Opening Balance
-                  </span>
-                  <input
-                    type="number"
-                    name="openingBalance"
-                    value={form.openingBalance}
-                    onChange={handleChange}
-                    step="0.01"
-                    className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    placeholder="0.00"
-                  />
-                </label>
-              </div>
-            </section>
+            <Select
+              label="Currency"
+              name="currency"
+              value={form.currency}
+              onChange={handleChange}
+              required
+              options={[
+                { value: "USD", label: "USD - US Dollar" },
+                { value: "EUR", label: "EUR - Euro" },
+                { value: "GBP", label: "GBP - British Pound" },
+                { value: "INR", label: "INR - Indian Rupee" },
+                {value: "ZAR", label: "ZAR - South African Rand"},
+                {value: "AUD", label: "AUD - Australian Dollar"},
+              ]}
+            />
 
-            {/* Footer */}
-            <footer className="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-full bg-gray-200 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="rounded-full bg-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
-                >
-                  Reset
-                </button>
-                <button
-                  type="submit"
-                  className="flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                >
-                  Save Account
-                </button>
-              </div>
-            </footer>
-          </form>
-        </motion.div>
-      </AnimatePresence>
-    </div>
+            <Input
+              label="Date of Addition"
+              type="date"
+              name="dateAdded"
+              value={form.dateAdded}
+              onChange={handleChange}
+            />
+
+            <Input
+              label="Opening Balance"
+              type="number"
+              name="openingBalance"
+              value={form.openingBalance}
+              onChange={handleChange}
+            />
+
+          </div>
+        </Card>
+      </form>
+    </Modal>
   );
 };
 

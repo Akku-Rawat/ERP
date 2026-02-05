@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   FaChartBar,
@@ -15,6 +15,7 @@ import {
   FaChevronDown,
   FaChevronUp,
 } from "react-icons/fa";
+import { getCompanyById } from "../api/companySetupApi";
 
 const menuItems = [
   { name: "Dashboard", to: "/dashboard", icon: <FaChartBar /> },
@@ -36,6 +37,39 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+const [company, setCompany] = useState<{
+  name: string;
+  logo?: string;
+} | null>(null);
+
+
+
+useEffect(() => {
+  const loadCompany = async () => {
+    try {
+       const COMPANY_ID = import.meta.env.VITE_COMPANY_ID as string;
+      if (!COMPANY_ID) {
+        console.warn("No COMPANY_ID in env");
+        return;
+      }
+      const res = await getCompanyById(COMPANY_ID);
+      const data = res?.data;
+      const FILE_BASE_URL = import.meta.env.VITE_FILE_BASE_URL;
+
+      setCompany({
+        name: data?.companyName || "Company",
+        logo: data?.documents?.companyLogoUrl
+          ? `${FILE_BASE_URL}${data.documents.companyLogoUrl}`
+          : undefined,
+      });
+    } catch (err) {
+      console.error("Failed to load company:", err);
+    }
+  };
+
+  loadCompany();
+}, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -53,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
         open ? "w-64" : "w-20"
       }`}
     >
-      {/* 1. HEADER - FIXED HEIGHT */}
+      {/* 1. HEADER */}
       <div className="flex items-center justify-between p-4 h-16 shrink-0 border-b border-[var(--border)]">
         <div className="flex items-center overflow-hidden">
           {open && (
@@ -68,6 +102,45 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
           <FaBars />
         </button>
       </div>
+      
+      {company && (
+  <div className="px-4 py-3 border-b border-[var(--border)]">
+    <div
+      className={`flex items-center gap-3 ${
+        open ? "justify-start" : "justify-center"
+      }`}
+    >
+      {/* Logo */}
+      <div className="w-15 h-15 rounded-full border border-[var(--border)] flex items-center justify-center overflow-hidden">
+        {company.logo ? (
+          <img
+            src={company.logo}
+            alt="Company Logo"
+            className="w-full h-full object-contain"
+          />
+        ) : (
+          <span className="text-sm font-bold text-primary">
+            {company.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .slice(0, 2)}
+          </span>
+        )}
+      </div>
+
+      {/* Name */}
+      {open && (
+        <div className="flex flex-col min-w-0">
+          <span className="text-lg font-bold text-main truncate">
+            {company.name}
+          </span>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
 
       {/* 2. MIDDLE - SCROLLABLE AREA */}
       <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 space-y-1 custom-scrollbar">
@@ -81,7 +154,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
               }`
             }
           >
-            {/* Center Icon in 48px space */}
+            {/* Center Icon */}
             <div className="flex items-center justify-center min-w-[48px] shrink-0">
               <span className="text-xl nav-icon">{item.icon}</span>
             </div>

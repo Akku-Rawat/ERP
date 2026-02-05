@@ -16,9 +16,7 @@ import {
 
 import { updateCompanyFiles, getCompanyById } from "../../api/companySetupApi";
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 type UploadedFile = {
   id: string;
@@ -40,17 +38,13 @@ interface UploadProps {
   onUploadSuccess?: () => void;
 }
 
-// ============================================================================
 // CONSTANTS
-// ============================================================================
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_FILE_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/svg+xml"];
 const ACCEPTED_EXTENSIONS = ["PNG", "JPG", "JPEG", "SVG"];
 
-// ============================================================================
 // UTILITY FUNCTIONS
-// ============================================================================
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return "0 B";
@@ -79,14 +73,12 @@ const getFileExtension = (filename: string): string => {
   return filename.split(".").pop()?.toUpperCase() || "UNKNOWN";
 };
 
-// ============================================================================
 // MAIN COMPONENT
-// ============================================================================
 
 const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
-  // ============================================================================
+
   // STATE
-  // ============================================================================
+
 
   const [logo, setLogo] = useState<UploadedFile | null>(null);
   const [signature, setSignature] = useState<UploadedFile | null>(null);
@@ -103,9 +95,9 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingExisting, setIsLoadingExisting] = useState(true);
 
-  // ============================================================================
+
   // LOAD EXISTING FILES
-  // ============================================================================
+
 
   const loadExistingFiles = useCallback(async () => {
     if (!COMPANY_ID) {
@@ -161,9 +153,9 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     }
   }, [COMPANY_ID]);
 
-  // ============================================================================
+
   // EFFECTS
-  // ============================================================================
+
 
   useEffect(() => {
     loadExistingFiles();
@@ -184,9 +176,9 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     }
   }, [showError]);
 
-  // ============================================================================
+
   // HELPER FUNCTIONS
-  // ============================================================================
+
 
   const showErrorMessage = useCallback((message: string) => {
     setErrorMessage(message);
@@ -213,9 +205,9 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     return null;
   };
 
-  // ============================================================================
+
   // FILE UPLOAD SIMULATION
-  // ============================================================================
+
 
   const simulateUpload = useCallback(
     (file: File, type: "logo" | "signature"): Promise<string> => {
@@ -252,9 +244,9 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     []
   );
 
-  // ============================================================================
+
   // FILE PROCESSING
-  // ============================================================================
+
 
   const processFile = useCallback(
     async (file: File, type: "logo" | "signature") => {
@@ -290,9 +282,9 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     [simulateUpload, showErrorMessage]
   );
 
-  // ============================================================================
+
   // EVENT HANDLERS
-  // ============================================================================
+
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "signature") => {
@@ -365,9 +357,9 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     }
   }, []);
 
-  // ============================================================================
+
   // SAVE HANDLER
-  // ============================================================================
+
 
   const handleSave = useCallback(async () => {
     // Check if there are files to upload (only new files, not existing ones)
@@ -418,18 +410,18 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     showSuccessMessage,
   ]);
 
-  // ============================================================================
+
   // DERIVED STATE
-  // ============================================================================
+
 
   const currentFile = selectedType === "logo" ? logo : signature;
   const isUploading = uploadProgress?.type === selectedType && uploadProgress.isUploading;
   const progress = uploadProgress?.type === selectedType ? uploadProgress.progress : 0;
   const hasNewFiles = (logo && !logo.isExisting) || (signature && !signature.isExisting);
 
-  // ============================================================================
+
   // RENDER
-  // ============================================================================
+
 
   if (isLoadingExisting) {
     return (
@@ -771,7 +763,7 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                   {/* Preview Image */}
                   <div className="flex justify-center">
                     <div className="relative group">
-                      <div className="w-64 h-64 bg-app border-2 border-theme rounded-lg overflow-hidden flex items-center justify-center shadow-sm">
+                     <div className="w-64 h-64 flex items-center justify-center">
                         <img
                           src={currentFile.preview}
                           alt={`${selectedType} preview`}

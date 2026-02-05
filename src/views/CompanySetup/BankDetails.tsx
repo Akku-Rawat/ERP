@@ -190,9 +190,11 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
       {/* ADD MODAL */}
       {showBankModal && (
         <AddBankAccountModal
+          isOpen={showBankModal}
           onClose={() => setShowBankModal(false)}
           onSubmit={handleAddSubmit}
         />
+
       )}
 
       <div className="mx-auto">
