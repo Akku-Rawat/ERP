@@ -35,7 +35,7 @@ export default function SupplierSelect({
   useEffect(() => {
     const loadSuppliers = async () => {
       try {
-        const res = await getSuppliers();
+        const res = await getSuppliers(1, 1000);
         const list = res?.data?.suppliers || [];
 
        setSuppliers(
