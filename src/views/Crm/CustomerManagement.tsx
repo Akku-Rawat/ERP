@@ -20,6 +20,7 @@ import ActionButton, {
 } from "../../components/ui/Table/ActionButton";
 
 import type { Column } from "../../components/ui/Table/type";
+import { FilterSelect } from "../../components/ui/modal/modalComponent";
 
 interface Props {
   onAdd: () => void;
@@ -230,19 +231,19 @@ const [taxCategory, setTaxCategory] = useState<string>("");
             onPageChange={setPage}
             extraFilters={
     <div className="flex gap-3">
-      <select
-        value={taxCategory}
-        onChange={(e) => {
-          setPage(1);
-          setTaxCategory(e.target.value);
-        }}
-        className="border px-3 py-2 rounded"
-      >
-        <option value="">ALL</option>
-        <option value="Export">Export</option>
-        <option value="Non-Export">Non-Export</option>
-        <option value="LPO">LPO</option>
-      </select>
+   <FilterSelect
+  value={taxCategory}
+  onChange={(e) => {
+    setPage(1);
+    setTaxCategory(e.target.value);
+  }}
+  options={[
+    { label: "Export", value: "Export" },
+    { label: "Non-Export", value: "Non-Export" },
+    { label: "LPO", value: "LPO" },
+  ]}
+/>
+
     </div>
   }
           />
