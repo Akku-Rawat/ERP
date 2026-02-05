@@ -132,7 +132,7 @@ useEffect(() => {
       {/* Name */}
       {open && (
         <div className="flex flex-col min-w-0">
-          <span className="text-lg font-bold text-main truncate">
+          <span className="text-lg font-bold text-primary truncate">
             {company.name}
           </span>
         </div>
