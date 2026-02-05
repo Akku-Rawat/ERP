@@ -384,22 +384,21 @@ const handleItemSelect = async (itemId: string, idx: number) => {
     setForm((prev) => {
       const items = [...prev.items];
 
-      items[idx] = {
-        ...items[idx],
-        itemCode: data.id,
-        itemName: data.itemName,
-        uom: data.unitOfMeasureCd || "Unit",
-        rate: Number(data.sellingPrice || 0),
+    items[idx] = {
+  ...items[idx],
+  itemCode: data.id,
+  itemName: data.itemName,
+  uom: data.unitOfMeasureCd || "Unit",
+  rate: Number(data.sellingPrice || 0),
+  vatRate: Number(data.taxPerct || 0), 
+  vatCd:
+    prev.taxCategory === "Export"
+      ? "C1"
+      : prev.taxCategory === "LPO"
+      ? "E"
+      : data.taxCode || "A",
+};
 
-      
-        vatRate: Number(data.taxPerct || 0),
-        vatCd:
-          prev.taxCategory === "Export"
-            ? "C1"
-            : prev.taxCategory === "LPO"
-            ? "E"
-            : data.taxCode || "A",
-      };
 
       return { ...prev, items };
     });

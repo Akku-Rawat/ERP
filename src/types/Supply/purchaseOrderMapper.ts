@@ -1,124 +1,158 @@
 import { PurchaseOrderFormData, emptyPOForm } from "./purchaseOrder";
 import type { AddressBlock } from "./purchaseOrder";
+
 /**
  * UI → Backend API (Create/Update)
+ * FINAL VERSION - Based on Invoice pattern analysis
  */
 export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
-  const items = form.items.map((it) => ({
-    itemCode: it.itemCode,
-    quantity: it.quantity,
-    rate: it.rate,
-    uom: it.uom,
-    vatCd: it.vatCd,
-  }));
+  console.log("MAPPING PO TO BACKEND - Form items:", form.items);
+  
+  // Filter and map items - CRITICAL: Filter empty items FIRST
+  const validItems = form.items.filter((it) => {
+    const hasCode = it.itemCode && it.itemCode.trim() !== "";
+    const hasQty = it.quantity && Number(it.quantity) > 0;
+    const hasRate = it.rate && Number(it.rate) > 0;
+    
+    console.log(`Item ${it.itemCode}: hasCode=${hasCode}, hasQty=${hasQty}, hasRate=${hasRate}`);
+    
+    return hasCode && hasQty && hasRate; // Only include complete items
+  });
 
-  // Only include valid tax rows (with type and accountHead)
+
+  const items = validItems.map((it, idx) => {
+    // Force number conversion
+    const quantity = Number(it.quantity);
+    const rate = Number(it.rate);
+    const vatRate = Number(it.vatRate || 0);
+
+    console.log(`📦 Item ${idx}:`, {
+      itemCode: it.itemCode,
+      itemName: it.itemName,
+      quantity_original: it.quantity,
+      quantity_converted: quantity,
+      rate_original: it.rate,
+      rate_converted: rate,
+      vatRate_original: it.vatRate,
+      vatRate_converted: vatRate,
+    });
+
+    // Match invoice pattern - simple structure
+    return {
+      itemCode: it.itemCode,
+      itemName: it.itemName || "",
+      quantity: quantity,
+      rate: rate,
+      uom: it.uom || "Unit",
+      vatCd: it.vatCd || "A",
+      vatRate: vatRate,
+    };
+  });
+
+
+
+  // Tax rows - only valid ones
   const taxes = form.taxRows
     .filter((t) => t.type && t.type.trim() !== "" && t.accountHead && t.accountHead.trim() !== "")
     .map((t) => ({
       type: t.type,
       accountHead: t.accountHead,
-      taxRate: t.taxRate,
-      taxableAmount: t.amount,
-      taxAmount: (t.amount * t.taxRate) / 100,
+      taxRate: Number(t.taxRate || 0),
+      taxableAmount: Number(t.amount || 0),
     }));
 
-  const subTotal = form.items.reduce((s, i) => s + i.quantity * i.rate, 0);
-  const taxTotal = taxes.reduce((s, t) => s + t.taxAmount, 0);
-  const grandTotal = subTotal + taxTotal;
+  // Payment rows
+  const payments = form.paymentRows
+    .filter((p) => p.paymentTerm && p.paymentTerm.trim() !== "")
+    .map((p) => ({
+      paymentTerm: p.paymentTerm,
+      description: p.description,
+      dueDate: p.dueDate,
+      invoicePortion: Number(p.invoicePortion || 0),
+      paymentAmount: Number(p.paymentAmount || 0),
+    }));
 
-  return {
+  // Build base payload
+  const payload: any = {
     requiredBy: form.requiredBy,
     supplierId: form.supplierId,
     currency: form.currency,
     status: form.status,
     taxCategory: form.taxCategory,
-    costCenter: form.costCenter,
-    project: form.project,
-    email: form.supplierEmail,
-    phone: form.supplierPhone,
-
-    // Include export country
-    destnCountryCd: form.destnCountryCd,
-    shippingRule: form.shippingRule,
-    incoterm: form.incoterm,
-
-    placeOfSupply: form.placeOfSupply,
-    taxesChargesTemplate: form.taxesChargesTemplate,
+    
+    // Optional fields
+    ...(form.costCenter && { costCenter: form.costCenter }),
+    ...(form.project && { project: form.project }),
+    ...(form.destnCountryCd && { destnCountryCd: form.destnCountryCd }),
+    ...(form.shippingRule && { shippingRule: form.shippingRule }),
+    ...(form.incoterm && { incoterm: form.incoterm }),
+    ...(form.placeOfSupply && { placeOfSupply: form.placeOfSupply }),
+    ...(form.paymentTermsTemplate && { paymentTermsTemplate: form.paymentTermsTemplate }),
+    ...(form.taxesChargesTemplate && { taxesChargesTemplate: form.taxesChargesTemplate }),
 
     addresses: form.addresses,
 
-    paymentTermsTemplate: form.paymentTermsTemplate,
+    // Terms - backend expects "selling" structure
+    ...(form.terms?.buying && {
+      terms: {
+        selling: form.terms.buying
+      }
+    }),
 
-    terms: {
-      buying: form.terms?.buying,
-    }
-    ,
-    items,
-    taxes,
-    payments: form.paymentRows.filter((p) => p.paymentTerm && p.paymentTerm.trim() !== ""),
-
-    summary: {
-      totalQuantity: form.totalQuantity,
-      subTotal,
-      taxTotal,
-      grandTotal,
-      roundingAdjustment: form.roundingAdjustment,
-      roundedTotal: form.roundedTotal,
-    },
+    items: items, // Already filtered and mapped
+    
+    ...(taxes.length > 0 && { taxes }),
+    ...(payments.length > 0 && { payments }),
 
     metadata: {
       remarks: "Created from UI",
     },
   };
+
+  
+
+  return payload;
 };
 
 /**
  * Backend API → UI Form
- * Properly extracts data from nested response structure
  */
 export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
-  // Extract actual data from response
-
   const api = apiResponse.data || apiResponse;
 
-  console.log(" Mapping API to UI:", api);
+  console.log("📥 Mapping API to UI:", api);
 
-  // Map items from API format to UI format
-const items = (api.items || []).map((item: any) => {
-  const qty = Number(item.qty || 0);
-  const rate = Number(item.rate || 0);
-  const vatRate = Number(item.vatRate || item.taxPerct || 0);
+  // Map items - handle both field name variations
+  const items = (api.items || []).map((item: any) => {
+    const qty = Number(item.qty || item.quantity || 0);
+    const rate = Number(item.rate || item.price || 0); // Try both rate and price
+    const vatRate = Number(item.vatRate || item.taxPerct || 0);
 
-  const base = qty * rate;
-  const tax = (base * vatRate) / 100;
+  
 
-  return {
-    itemCode: item.item_code,
-    itemName: item.item_name,
-    quantity: qty,
-    rate,
-    uom: item.uom || "Unit",
-    vatCd: item.vatCd || "A",
-    vatRate,
-    amount: base + tax, 
-  };
-});
+    return {
+      itemCode: item.item_code || item.itemCode || "",
+      itemName: item.item_name || item.itemName || "",
+      quantity: qty,
+      rate: rate,
+      uom: item.uom || "Unit",
+      vatCd: item.vatCd || item.VatCd || "A",
+      vatRate: vatRate,
+      requiredBy: item.requiredBy || "",
+    };
+  });
 
-  // Map tax rows from API format to UI format
+  // Tax rows
   const taxRows = (api.taxes || [])
-    .filter((tax: any) => tax.type && tax.accountHead) // Only include valid tax rows
+    .filter((tax: any) => tax.type && tax.accountHead)
     .map((tax: any) => ({
       type: tax.type || "On Net Total",
       accountHead: tax.accountHead || "",
       taxRate: Number(tax.taxRate || 0),
       amount: Number(tax.taxableAmount || 0),
-      taxAmount: Number(tax.taxAmount || 0),
     }));
 
-
-
-  // Extract addresses - API has nested structure
+  // Addresses
   const addresses = {
     supplierAddress: {
       addressTitle: "Supplier Main Address",
@@ -167,56 +201,58 @@ const items = (api.items || []).map((item: any) => {
     },
   };
 
-  const buyingTerms = api.terms?.terms?.buying;
+  // Terms
+  const sellingTerms = api.terms?.terms?.selling || api.terms?.selling;
+  const buyingTerms = sellingTerms;
 
   const paymentPhases = buyingTerms?.payment?.phases || [];
-
   const paymentRows = paymentPhases.map((phase: any) => ({
     paymentTerm: phase.name || "",
     description: phase.condition || "",
     dueDate: "",
     invoicePortion: Number(phase.percentage || 0),
-    paymentAmount:
-      (api.grandTotal * Number(phase.percentage || 0)) / 100,
+    paymentAmount: (api.grandTotal * Number(phase.percentage || 0)) / 100,
   }));
 
-
-  // Calculate totals
+  // Totals
   const totalQuantity = items.reduce((sum: number, item: any) => sum + item.quantity, 0);
-  const subTotal = items.reduce((sum: number, item: any) => sum + item.amount, 0);
-  const taxTotal = taxRows.reduce((sum: number, tax: any) => sum + tax.taxAmount, 0);
-  const grandTotal = api.grandTotal || subTotal + taxTotal;
+  const subTotal = items.reduce((sum: number, item: any) => sum + (item.quantity * item.rate), 0);
+  const itemTaxTotal = items.reduce((sum: number, item: any) => {
+    const base = item.quantity * item.rate;
+    return sum + (base * (item.vatRate || 0)) / 100;
+  }, 0);
+  const taxRowTotal = taxRows.reduce((sum: number, tax: any) => {
+    return sum + (tax.amount * tax.taxRate) / 100;
+  }, 0);
+  
+  const grandTotal = api.grandTotal || (subTotal + itemTaxTotal + taxRowTotal);
   const roundedTotal = Math.round(grandTotal);
   const roundingAdjustment = Number((roundedTotal - grandTotal).toFixed(2));
+
+  console.log("📊 Calculated totals:", { subTotal, itemTaxTotal, taxRowTotal, grandTotal });
 
   const mappedForm: PurchaseOrderFormData = {
     ...emptyPOForm,
 
-    // Basic Info
     poNumber: api.poId || "",
     date: api.poDate || "",
-    requiredBy: api.requiredBy || "",
-    taxCategory: api.taxCategory || api.invoiceType || "",
+    requiredBy: api.requiredBy || api.deliveryDate || "",
+    taxCategory: api.taxCategory || "",
 
-
-    // Supplier Info
     supplier: api.supplierName || "",
     supplierId: api.supplierId || "",
     supplierCode: api.supplierCode || "",
-    supplierEmail: api.emailId || "",
+    supplierEmail: api.emailId || api.email || "",
     supplierPhone: api.phone || "",
     supplierContact: api.contactPerson || "",
 
-    // Currency & Status
     currency: api.currency || "ZMW",
     status: api.status || "Draft",
 
-    // Additional Fields
     costCenter: api.costCenter || "",
     project: api.project || "",
-    // Include export country
-
-    destnCountryCd: api.exportToCountry || "", // Map export country
+    
+    destnCountryCd: api.destnCountryCd || api.exportToCountry || "",
     shippingRule: api.shippingRule || "",
     incoterm: api.incoterm || "",
     placeOfSupply: api.placeOfSupply || "",
@@ -225,37 +261,29 @@ const items = (api.items || []).map((item: any) => {
 
     terms: buyingTerms ? { buying: buyingTerms } : undefined,
 
-
-    // Addresses
     addresses: addresses,
-
-    // Items
     items: items.length > 0 ? items : [{ ...emptyPOForm.items[0] }],
+    taxRows: taxRows.length > 0 ? taxRows : [],
+    paymentRows: paymentRows.length > 0 ? paymentRows : [],
 
-    // Tax Rows
-    taxRows: taxRows.length > 0 ? taxRows : [], // Empty array if no valid tax rows
-
-    // Payment Rows
-    paymentRows: paymentRows.length > 0 ? paymentRows : [], // Empty array if no payment terms
-
-    // Totals
     totalQuantity: totalQuantity,
     grandTotal: grandTotal,
     roundingAdjustment: roundingAdjustment,
     roundedTotal: roundedTotal,
 
-    // Email fields (keep existing if any)
     templateName: "",
     templateType: "",
     subject: "",
     messageHtml: "",
     sendAttachedFiles: false,
     sendPrint: false,
+    itemTerms: [],
+    acceptedTerms: {},
   };
+
 
   return mappedForm;
 };
-
 
 export const mapSupplierToAddress = (
   supplier: any,

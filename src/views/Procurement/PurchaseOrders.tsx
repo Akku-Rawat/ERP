@@ -171,9 +171,9 @@ const handleStatusChange = async (
       header: "Amount",
       align: "right",
       render: (o) => (
-        <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
-          ${o.amount?.toLocaleString()}
-        </code>
+          <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
+    ${Number(o.amount || 0).toFixed(2)}
+  </code>
       ),
     },
 
