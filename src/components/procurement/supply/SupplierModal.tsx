@@ -6,14 +6,14 @@ import { Button } from "../../ui/modal/formComponent";
 import { SupplierInfoTab } from "./SupplierInfoTab";
 import { PaymentInfoTab } from "./PaymentInfoTab";
 import { useSupplierForm } from "../../../hooks/useSupplierForm";
-import type {  SupplierTab , SupplierFormData , Supplier } from "../../../types/Supply/supplier";
+import type { SupplierTab, SupplierFormData, Supplier } from "../../../types/Supply/supplier";
 
 
 
 interface SupplierModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (data: SupplierFormData) => void; 
+  onSubmit?: (data: SupplierFormData) => void;
   initialData?: Supplier | null;
   isEditMode?: boolean;
 }
@@ -92,63 +92,47 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
       maxWidth="6xl"
       height="90vh"
     >
-      <div className="h-full flex flex-col">
-        <form
-          id="supplierForm"
-          onSubmit={handleSubmit}
-          className="flex-1 flex flex-col min-h-0"
-        >
+      <form
+        id="supplierForm"
+        onSubmit={handleSubmit}
+        className="h-full flex flex-col"
+      >
 
-          {/* Tabs */}
-          <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
+        {/* Tabs */}
+        <div className="bg-app border-b border-theme px-8 shrink-0">
+          <div className="flex gap-8">
             {tabs.map(({ key, icon: Icon, label }) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setActiveTab(key)}
-                className={`relative px-6 py-3 font-semibold text-sm capitalize transition-all duration-200 rounded-t-lg ${
-                  activeTab === key
-                    ? "text-primary bg-card shadow-sm"
-                    : "text-muted hover:text-main hover:bg-card/50"
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2
+          ${activeTab === key
+                    ? "text-primary border-b-[3px] border-primary"
+                    : "text-muted border-b-[3px] border-transparent hover:text-main"
                   }`}
               >
-                <span className="relative z-10 flex items-center gap-2">
-                  <Icon className="w-4 h-4" />
-                  {label}
-                </span>
-                {activeTab === key && (
-                  <motion.div
-                    layoutId="activeSupplierTab"
-                    className="absolute inset-0 bg-card rounded-t-lg shadow-sm"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    style={{ zIndex: -1 }}
-                  />
-                )}
+                
+                {/* LABEL */}
+                {label}
               </button>
             ))}
           </div>
+        </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto px-1 py-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.2 }}
-              >
-                {activeTab === "supplier" && (
-                  <SupplierInfoTab form={form} onChange={handleChange} />
-                )}
-                {activeTab === "payment" && (
-                  <PaymentInfoTab form={form} onChange={handleChange} />
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </form>
-      </div>
+        {/* Content */}
+        <div>
+
+          {activeTab === "supplier" && (
+            <SupplierInfoTab form={form} onChange={handleChange} />
+          )}
+          {activeTab === "payment" && (
+            <PaymentInfoTab form={form} onChange={handleChange} />
+          )}
+
+        </div>
+      </form>
+
     </Modal>
   );
 };

@@ -179,7 +179,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
             }`}
           >
             {tab === "details" && "Details"}
-            {tab === "terms" && "Terms & Conditions"}
+            {/* {tab === "terms" && "Terms & Conditions"} */}
             {tab === "address" && "Additional Details"}
           </button>
         ))}

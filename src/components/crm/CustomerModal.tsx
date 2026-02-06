@@ -238,54 +238,43 @@ const CustomerModal: React.FC<{
       maxWidth="6xl"
       height="90vh"
     >
-      <div className="h-full flex flex-col">
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+      
+        <form onSubmit={handleSubmit} className="h-full flex flex-col">
           {/* Tabs - Sticky Header */}
-          <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
-            {(["details", "terms", "address"] as const).map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setActiveTab(tab)}
-                className={`relative px-6 py-3 font-semibold text-sm capitalize transition-all duration-200 rounded-t-lg ${
-                  activeTab === tab
-                    ? "text-primary bg-card shadow-sm"
-                    : "text-muted hover:text-main hover:bg-card/50"
-                }`}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  {tab === "details" && <User className="w-4 h-4" />}
-                  {tab === "terms" && <FileText className="w-4 h-4" />}
-                  {tab === "address" && <MapPin className="w-4 h-4" />}
-                  {tab === "details"
-                    ? "Details"
-                    : tab === "terms"
-                      ? "Terms"
-                      : "Address"}
-                </span>
-                {activeTab === tab && (
-                  <motion.div
-                    layoutId="activeCustomerTab"
-                    className="absolute inset-0 bg-card rounded-t-lg shadow-sm"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    style={{ zIndex: -1 }}
-                  />
-                )}
-              </button>
-            ))}
-          </div>
+         <div className="bg-app border-b border-theme px-8 shrink-0">
+  <div className="flex gap-8">
+    {(["details", "terms", "address"] as const).map((tab) => (
+      <button
+        key={tab}
+        type="button"
+        onClick={() => setActiveTab(tab)}
+        className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2
+          ${
+            activeTab === tab
+              ? "text-primary border-b-[3px] border-primary"
+              : "text-muted border-b-[3px] border-transparent hover:text-main"
+          }`}
+      >
+        {/* ICONS KEPT FROM LOGIC 1 */}
+        {tab === "details" && <User className="w-4 h-4" />}
+        {tab === "terms" && <FileText className="w-4 h-4" />}
+        {tab === "address" && <MapPin className="w-4 h-4" />}
+
+        {/* LABELS */}
+        {tab === "details"
+          ? "Details"
+          : tab === "terms"
+          ? "Terms"
+          : "Address"}
+      </button>
+    ))}
+  </div>
+</div>
+
 
           {/* Scrollable Content Area */}
-          <div className="flex-1 overflow-y-auto px-1 py-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.2 }}
-              >
-                {activeTab === "details" && (
+          <div className="flex-1 overflow-y-auto px-8 py-4 bg-app">
+          {activeTab === "details" && (
                   <Card
                     title="Basic Information"
                     subtitle="Essential customer details"
@@ -561,11 +550,11 @@ const CustomerModal: React.FC<{
                     </Card>
                   </div>
                 )}
-              </motion.div>
-            </AnimatePresence>
+              
+           
           </div>
         </form>
-      </div>
+      
     </Modal>
   );
 };

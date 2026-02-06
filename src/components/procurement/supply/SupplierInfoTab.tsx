@@ -4,6 +4,7 @@ import { Input, Card } from "../../ui/modal/formComponent";
 import {  taxCategorySelectOptions, type SupplierFormData } from "../../../types/Supply/supplier";
 import CountrySelect from "../../selects/CountrySelect";
 import Select from "../../ui/Select";
+import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
 
 
 interface SupplierInfoTabProps {
@@ -57,7 +58,6 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
           </div>
         </div>
 
-        <div className="border-t border-gray-200" />
 
         {/* Contact Details */}
         <div className="space-y-3">
@@ -89,7 +89,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               value={form.emailId}
               onChange={onChange}
               type="email"
-              icon={<Mail className="w-4 h-4" />}
+             
             />
           </div>
         </div>

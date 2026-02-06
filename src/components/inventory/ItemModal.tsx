@@ -121,7 +121,7 @@ const ItemModal: React.FC<{
               })
               .filter(Boolean)
               .join("\n");
-          } catch {}
+          } catch { }
         } else if (data.message) {
           errorMessage = data.message;
         }
@@ -179,46 +179,43 @@ const ItemModal: React.FC<{
     >
       <form onSubmit={handleSubmit} className="h-full flex flex-col">
         {/* Tabs */}
-        <div className="flex border-b bg-app border-theme">
-          <button
-            type="button"
-            onClick={() => setActiveTab("details")}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
-              activeTab === "details"
-                   ?"text-primary border-b-2 border-primary bg-card"
-                :"text-muted hover:text-main"
-            }`}
-          >
-            Item Details
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("taxDetails")}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
-              activeTab === "taxDetails"
-                ?"text-primary border-b-2 border-primary bg-card"
-                :"text-muted hover:text-main"
-
-            }`}
-          >
-            Tax Details
-          </button>
-          <button
-            type="button"
-            disabled={isServiceItem}
-            onClick={() => !isServiceItem && setActiveTab("inventoryDetails")}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors
-    ${
-      activeTab === "inventoryDetails" && !isServiceItem
-        ? "text-primary border-b-2 border-primary bg-card"
-        :"text-muted hover:text-main"
-
-    }
+        <div className="bg-app border-b border-theme px-8 shrink-0">
+          <div className="flex gap-8">
+            <button
+              type="button"
+              onClick={() => setActiveTab("details")}
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === "details"
+                   ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
+                }`}
+            >
+              Item Details
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("taxDetails")}
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === "taxDetails"
+                    ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
+                }`}
+            >
+              Tax Details
+            </button>
+            <button
+              type="button"
+              disabled={isServiceItem}
+              onClick={() => !isServiceItem && setActiveTab("inventoryDetails")}
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2
+    ${activeTab === "inventoryDetails" && !isServiceItem
+                  ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
+                }
     ${isServiceItem ? "opacity-50 cursor-not-allowed" : ""}
   `}
-          >
-            Inventory Details
-          </button>
+            >
+              Inventory Details
+            </button>
+          </div>
         </div>
 
         {/* Tab Content */}
@@ -589,7 +586,7 @@ const ItemModal: React.FC<{
                           value={form.weightUnit}
                           onChange={handleForm}
                           // className="w-28 rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                         className="w-16 px-1 py-1.5 text-xs border border-theme bg-card text-main rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                          className="w-16 px-1 py-1.5 text-xs border border-theme bg-card text-main rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                         >
                           <option value="gm">gm</option>
                           <option value="kg">kg</option>
