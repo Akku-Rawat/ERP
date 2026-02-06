@@ -82,45 +82,32 @@ export const DetailsTab = ({
             />
           </div>
 
+  
           {/* Date */}
           <div>
-            <label className="block text-[10px] font-medium text-main mb-1">
-              Date *
-            </label>
-            <input
+            <ModalInput
+              label="Date"
               type="date"
               name="date"
               value={form.date}
               onChange={onFormChange}
-              className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+              required
             />
           </div>
 
           {/* Required By */}
           <div>
-            <label className="block text-[10px] font-medium text-main mb-1">
-              Required By *
-            </label>
-            <input
+            <ModalInput
+              label="Required By"
               type="date"
               name="requiredBy"
               value={form.requiredBy}
               onChange={onFormChange}
-              className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+              required
             />
           </div>
 
-          {/* Currency */}
-          <div>
-            <ModalSelect
-              label="Currency"
-              name="currency"
-              value={form.currency}
-              onChange={onFormChange}
-              options={currencySelectOptions}
-            />
-          </div>
-
+      
           {/* Status */}
           <div>
             <ModalSelect
@@ -151,13 +138,7 @@ export const DetailsTab = ({
             />
           </div>
 
-        </div>
-
-        {/* Second Row - Only if needed (Cost Center, Project, Export Country) */}
-        <div className="grid grid-cols-6 gap-3 mt-3">
-
-
-          <div>
+            <div>
             <ModalInput
               label="Project"
               name="project"
@@ -165,9 +146,8 @@ export const DetailsTab = ({
               onChange={onFormChange}
             />
           </div>
-
-
         </div>
+
       </div>
 
       {/* Main Body - Table LEFT + Sidebar RIGHT */}
@@ -211,13 +191,12 @@ export const DetailsTab = ({
                       <td className="px-3 py-2 text-[10px]">{i + 1}</td>
 
                       <td className="px-0.5 py-1">
-                       <POItemSelect
-  value={it.itemName}
-  selectedId={it.itemCode}
-  taxCategory={form.taxCategory}
-  onChange={(item) => onItemSelect(item.id, idx)}  
-/>
-
+                        <POItemSelect
+                          value={it.itemName}
+                          selectedId={it.itemCode}
+                          taxCategory={form.taxCategory}
+                          onChange={(item) => onItemSelect(item.id, idx)}
+                        />
                       </td>
 
                       <td className="px-0.5 py-1">
@@ -353,8 +332,8 @@ export const DetailsTab = ({
           </div>
         </div>
 
-        {/* Right Sidebar */}
-        {/* RIGHT: Supplier Details + Summary (STACKED) */}
+       
+        {/* RIGHT: Supplier Details + Summary */}
         <div className="flex flex-col gap-2">
           {/* Supplier Details */}
           <div className="bg-card rounded-lg p-2 w-[220px]">
@@ -379,9 +358,10 @@ export const DetailsTab = ({
 
               <div className="flex items-center gap-2 text-[10px] text-muted">
                 <Phone size={14} className="text-muted" />
-                <span>{form.supplierPhone || "+91 9876543210"}</span>
+                <span>{form.supplierPhone || "-"}</span>
               </div>
 
+              
               {/* Tax Category Info */}
               {form.taxCategory && (
                 <div className="bg-card rounded-lg mt-1">
@@ -390,17 +370,26 @@ export const DetailsTab = ({
                   </h3>
 
                   <div className="flex flex-col gap-1">
+
                     {/* Tax Category */}
-                    <div className="flex items-center gap-19 text-xs">
+                    <div className="flex items-center gap-15 text-xs">
                       <span className="text-muted">Tax Category</span>
                       <span className="font-medium text-main">
                         {form.taxCategory}
                       </span>
                     </div>
 
+                    {/* Currency  */}
+                    <div className="flex items-center gap-21 text-xs">
+                      <span className="text-muted">Currency</span>
+                      <span className="font-medium text-main">
+                        {form.currency || "-"}
+                      </span>
+                    </div>
+
                     {/* Destination Country – only for Export */}
                     {form.taxCategory === "Export" && (
-                      <div className="flex items-center gap-15 text-xs">
+                      <div className="flex items-center gap-10 text-xs">
                         <span className="text-muted">Destination Country</span>
                         <span className="font-medium text-main">
                           {form.destnCountryCd || "-"}
@@ -410,6 +399,7 @@ export const DetailsTab = ({
                   </div>
                 </div>
               )}
+
             </div>
           </div>
 
