@@ -149,22 +149,24 @@ const ItemsCategoryModal: React.FC<{
     >
       <form onSubmit={handleSubmit} className="h-full flex flex-col">
         {/* Tabs */}
-        <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10">
+        <div className="bg-app border-b border-theme px-8 shrink-0">
+          <div className="flex gap-8">
           {(["type", "tax"] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className={`relative px-6 py-3 font-semibold text-sm rounded-t-lg ${
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
                 activeTab === tab
-                  ? "text-primary bg-card shadow-sm"
-                  : "text-muted hover:bg-card/50"
+                  ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
               }`}
             >
               {tab === "type" && "Category Details"}
               {tab === "tax" && "Payment & Pricing"}
             </button>
           ))}
+        </div>
         </div>
 
         {/* Tab Content */}
