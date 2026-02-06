@@ -160,12 +160,12 @@
 
 /* WARNING */
 .bg-warning {
-  background: #b90e0e !important;   /* dark amber */
+  background: #f59e0b !important;   /* dark amber */
   color: #fef3c7 !important;
 }
 
 /* INFO */
 .bg-info {
-  background: #44568a !important;   /* dark blue */
+  background: #4780db !important;   /* dark blue */
   color: #dbeafe !important;
 }
