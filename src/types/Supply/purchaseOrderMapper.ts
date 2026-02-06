@@ -84,9 +84,10 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     // Terms - backend expects "selling" structure
     ...(form.terms?.buying && {
       terms: {
-        selling: form.terms.buying
+        buying: form.terms.buying
       }
     }),
+
 
     items: items, // Already filtered and mapped
     
@@ -189,9 +190,9 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
     },
   };
 
-  // Terms
-  const sellingTerms = api.terms?.terms?.selling || api.terms?.selling;
-  const buyingTerms = sellingTerms;
+  // TermS
+
+  const buyingTerms = api.terms?.terms?.buying || api.terms?.buying;
 
   const paymentPhases = buyingTerms?.payment?.phases || [];
   const paymentRows = paymentPhases.map((phase: any) => ({

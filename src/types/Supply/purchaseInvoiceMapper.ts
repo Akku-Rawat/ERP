@@ -1,4 +1,4 @@
-import { PurchaseInvoiceFormData, emptyPOForm } from "./purchaseInvoice";
+import { PurchaseInvoiceFormData, emptyPOForm , TaxRow} from "./purchaseInvoice";
 import type { AddressBlock } from "./purchaseInvoice";
 
 /**
@@ -8,6 +8,7 @@ import type { AddressBlock } from "./purchaseInvoice";
 export const mapUIToCreatePI = (form: PurchaseInvoiceFormData) => {
   console.log("MAPPING PI TO BACKEND - Form items:", form.items);
   
+
   // Filter and map items - CRITICAL: Filter empty items FIRST
   const validItems = form.items.filter((it) => {
     const hasCode = it.itemCode && it.itemCode.trim() !== "";
@@ -115,7 +116,6 @@ export const mapUIToCreatePI = (form: PurchaseInvoiceFormData) => {
 export const mapApiToUI = (apiResponse: any): PurchaseInvoiceFormData => {
   const api = apiResponse.data || apiResponse;
 
-  console.log("📥 Mapping API to UI:", api);
 
   // Map items - handle both field name variations
   const items = (api.items || []).map((item: any) => {
@@ -137,8 +137,11 @@ export const mapApiToUI = (apiResponse: any): PurchaseInvoiceFormData => {
     };
   });
 
-  // Tax rows
-  const taxRows = (api.taxes || [])
+ 
+let taxRows: TaxRow[] = [];
+
+if (Array.isArray(api.taxes) && api.taxes.length > 0) {
+  taxRows = api.taxes
     .filter((tax: any) => tax.type && tax.accountHead)
     .map((tax: any) => ({
       type: tax.type || "On Net Total",
@@ -146,6 +149,18 @@ export const mapApiToUI = (apiResponse: any): PurchaseInvoiceFormData => {
       taxRate: Number(tax.taxRate || 0),
       amount: Number(tax.taxableAmount || 0),
     }));
+}
+
+else if (api.tax) {
+  taxRows = [
+    {
+      type: api.tax.type || "On Net Total",
+      accountHead: api.tax.accountHead || "Tax",
+      taxRate: parseFloat(api.tax.taxRate || "0"),
+      amount: Number(api.tax.taxableAmount || 0),
+    },
+  ];
+}
 
   // Addresses
   const addresses = {
@@ -197,8 +212,10 @@ export const mapApiToUI = (apiResponse: any): PurchaseInvoiceFormData => {
   };
 
   // Terms
-  const sellingTerms = api.terms?.terms?.selling || api.terms?.selling;
-  const buyingTerms = sellingTerms;
+  const buyingTerms =
+    api.terms?.terms?.buying ||
+    api.terms?.buying ||
+    api.terms?.selling;
 
   const paymentPhases = buyingTerms?.payment?.phases || [];
   const paymentRows = paymentPhases.map((phase: any) => ({

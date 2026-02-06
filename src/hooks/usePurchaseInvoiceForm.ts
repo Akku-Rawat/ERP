@@ -16,7 +16,7 @@ import {
 import { createPurchaseInvoice } from "../api/procurement/PurchaseInvoiceApi";
 import { mapUIToCreatePI } from "../types/Supply/purchaseInvoiceMapper";
 import { validatePO } from "./poValidator";
-// import { getPurchaseInvoiceById } from "../api/procurement/PurchaseInvoiceApi";
+ import { getPurchaseInvoiceById } from "../api/procurement/PurchaseInvoiceApi";
 import { mapApiToUI } from "../types/Supply/purchaseInvoiceMapper";
 // import { updatePurchaseInvoice } from "../api/procurement/PurchaseInvoiceApi";
 import { getCountryList } from "../api/lookupApi";
@@ -27,6 +27,7 @@ import type { AddressBlock } from "../types/Supply/purchaseInvoice";
 import { getItemByItemCode } from "../api/itemApi";
 
 
+
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 
@@ -34,14 +35,14 @@ interface UsePurchaseInvoiceFormProps {
   isOpen: boolean;
   onSuccess?: (data: any) => void;
   onClose?: () => void;
-  poId?: string | number;
+  pId?: string | number;
 }
 
 export const usePurchaseInvoiceForm = ({
   isOpen,
   onSuccess,
   onClose,
-  poId,
+  pId,
 }: UsePurchaseInvoiceFormProps) => {
   const [form, setForm] = useState<PurchaseInvoiceFormData>(emptyPOForm);
   const [activeTab, setActiveTab] = useState<POTab>("details");
@@ -54,7 +55,7 @@ export const usePurchaseInvoiceForm = ({
   }
 }, [isOpen]);
 
-  const isEditMode = !!poId;
+  const isEditMode = !!pId;
 
 
 useEffect(() => {
@@ -98,35 +99,26 @@ useEffect(() => {
 }, [form.taxCategory]);
 
 
-  // Load PO Data in Edit Mode
-// useEffect(() => {
-//   if (!isOpen || !poId) return;
+useEffect(() => {
+  if (!isOpen || !pId) return;
 
-//   const loadPO = async () => {
-//     const toastId = toast.loading("Loading Purchase Invoice...");
+  const loadPI = async () => {
+    const res = await getPurchaseInvoiceById(pId);
+    const mapped = mapApiToUI(res.data);
+    setForm(mapped);
+  };
 
-//     try {
-//       const apiData = await getPurchaseInvoiceById(poId);
-//       const mapped = mapApiToUI(apiData);
+  loadPI();
+}, [isOpen, pId]);
 
-//       setForm(mapped); 
-//       toast.success("Purchase Invoice Loaded", { id: toastId });
-//     } catch (err) {
-//       console.error("PO Load Error", err);
-//       toast.error("Failed to load Purchase Invoice", { id: toastId });
-//     }
-//   };
-
-//   loadPO();
-// }, [isOpen, poId]);
 
 
   // Set default date on create mode
   useEffect(() => {
-    if (!isOpen || poId) return;
+    if (!isOpen || pId) return;
     const today = new Date().toISOString().split("T")[0];
     setForm((prev) => ({ ...prev, date: today, requiredBy: today }));
-  }, [isOpen, poId]);
+  }, [isOpen, pId]);
 
   // Calculate totals (Items + Taxes + Rounding)
 useEffect(() => {
@@ -432,9 +424,12 @@ const handleSubmit = async (e?: React.FormEvent) => {
     const payload = mapUIToCreatePI(form); 
 
     let res;
+
     if (isEditMode) {
-      res = await updatePurchaseInvoice({ poId, ...payload });
-      toast.success("Purchase Invoice Updated");
+      toast.error(
+        "Editing Purchase Invoice is not supported. Only status update is allowed."
+      );
+      return;
     } else {
       res = await createPurchaseInvoice(payload);
       toast.success("Purchase Invoice Created");

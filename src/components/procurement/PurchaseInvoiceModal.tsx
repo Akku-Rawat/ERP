@@ -7,7 +7,7 @@ import { DetailsTab } from "../procurement/purchaseinvoice/DetailsTab";
 // import { EmailTab } from "../procurement/purchaseorder/EmailTab";
 // import { TaxTab } from "../procurement/purchaseorder/TaxTab";
 import { AddressTab } from "../procurement/purchaseinvoice/AddressTab";
-import  TermsAndCondition  from "../TermsAndCondition";
+import TermsAndCondition from "../TermsAndCondition";
 import { usePurchaseInvoiceForm } from "../../hooks/usePurchaseInvoiceForm";
 import type { POTab } from "../../types/Supply/purchaseOrder";
 
@@ -16,7 +16,7 @@ interface PurchaseInvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (data: any) => void;
-  poId?: string | number;
+  pId?: string | number;
 }
 
 const tabs: { key: POTab; icon: typeof Building2; label: string }[] = [
@@ -31,7 +31,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  poId,
+  pId,
 }) => {
   const {
     form,
@@ -44,15 +44,10 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
     handleItemChange,
     addItem,
     removeItem,
-    handleTaxRowChange,
-    addTaxRow,
-    removeTaxRow,
-    handleSaveTemplate,
-    resetTemplate,
     getCurrencySymbol,
     handleSubmit,
     reset,
-  } = usePurchaseInvoiceForm({ isOpen, onSuccess: onSubmit, onClose, poId });
+  } = usePurchaseInvoiceForm({ isOpen, onSuccess: onSubmit, onClose, pId });
 
   const footer = (
     <>
@@ -74,119 +69,118 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={poId ? "Edit Purchase Invoice" : "New Purchase Invoice"}
+      title={pId ? "Edit Purchase Invoice" : "New Purchase Invoice"}
       subtitle="Create and manage purchase invoice"
       icon={Building2}
       maxWidth="6xl"
       height="90vh"
       footer={footer}
     >
-     
-        <form
-          id="purchaseOrderForm"
-          onSubmit={handleSubmit}
-          className="flex flex-col h-full overflow-hidden"
-        >
-          <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
-            {tabs.map(({ key, icon: Icon, label }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setActiveTab(key)}
-                className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${
-    activeTab === key
-                    ? "text-primary bg-card shadow-sm"
-                    : "text-muted hover:bg-card/50"
-  }`}
 
-                
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  <Icon className="w-4 h-4" />
-                  {label}
-                </span>
-                {activeTab === key && (
-                  <motion.div
-                    layoutId="activePoTab"
-                    className="absolute inset-0 bg-card rounded-t-lg shadow-sm"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    style={{ zIndex: -1 }}
-                  />
-                )}
-              </button>
-            ))}
-          </div>
+      <form
+        id="purchaseOrderForm"
+        onSubmit={handleSubmit}
+        className="flex flex-col h-full overflow-hidden"
+      >
+        <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
+          {tabs.map(({ key, icon: Icon, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveTab(key)}
+              className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${activeTab === key
+                  ? "text-primary bg-card shadow-sm"
+                  : "text-muted hover:bg-card/50"
+                }`}
 
-          <section className="flex-1 overflow-y-auto p-4 space-y-6 mt-5">
-            {activeTab === "details" && (
-              <DetailsTab
-                form={form}
-                items={form.items}
-                onFormChange={handleFormChange}
-                onSupplierChange={handleSupplierChange}
-                onItemChange={handleItemChange}
-                onAddItem={addItem}
-                onRemoveItem={removeItem}
-                getCurrencySymbol={getCurrencySymbol}
-                onItemSelect={handleItemSelect}
 
-              />
-            )}
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                <Icon className="w-4 h-4" />
+                {label}
+              </span>
+              {activeTab === key && (
+                <motion.div
+                  layoutId="activePoTab"
+                  className="absolute inset-0 bg-card rounded-t-lg shadow-sm"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  style={{ zIndex: -1 }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
 
-            {activeTab === "email" && (
-              <EmailTab
-                templateName={form.templateName}
-                templateType={form.templateType}
-                subject={form.subject}
-                sendAttachedFiles={form.sendAttachedFiles}
-                sendPrint={form.sendPrint}
-                onTemplateNameChange={(v) =>
-                  setForm((p: any) => ({ ...p, templateName: v }))
-                }
-                onTemplateTypeChange={(v) =>
-                  setForm((p: any) => ({ ...p, templateType: v }))
-                }
-                onSubjectChange={(v) =>
-                  setForm((p: any) => ({ ...p, subject: v }))
-                }
-                onSendAttachedFilesChange={(v) =>
-                  setForm((p: any) => ({ ...p, sendAttachedFiles: v }))
-                }
-                onSendPrintChange={(v) =>
-                  setForm((p: any) => ({ ...p, sendPrint: v }))
-                }
-                onSaveTemplate={handleSaveTemplate}
-                onResetTemplate={resetTemplate}
-              />
-            )}
+        <section className="flex-1 overflow-y-auto p-4 space-y-6 mt-5">
+          {activeTab === "details" && (
+            <DetailsTab
+              form={form}
+              items={form.items}
+              onFormChange={handleFormChange}
+              onSupplierChange={handleSupplierChange}
+              onItemChange={handleItemChange}
+              onAddItem={addItem}
+              onRemoveItem={removeItem}
+              getCurrencySymbol={getCurrencySymbol}
+              onItemSelect={handleItemSelect}
 
-            {activeTab === "tax" && (
-              <TaxTab
-                form={form}
-                taxRows={form.taxRows}
-                onFormChange={handleFormChange}
-                onTaxRowChange={handleTaxRowChange}
-                onAddTaxRow={addTaxRow}
-                onRemoveTaxRow={removeTaxRow}
-              />
-            )}
+            />
+          )}
 
-            {activeTab === "address" && (
-              <AddressTab form={form} onFormChange={handleFormChange} />
-            )}
+          {/* {activeTab === "email" && (
+            <EmailTab
+              templateName={form.templateName}
+              templateType={form.templateType}
+              subject={form.subject}
+              sendAttachedFiles={form.sendAttachedFiles}
+              sendPrint={form.sendPrint}
+              onTemplateNameChange={(v) =>
+                setForm((p: any) => ({ ...p, templateName: v }))
+              }
+              onTemplateTypeChange={(v) =>
+                setForm((p: any) => ({ ...p, templateType: v }))
+              }
+              onSubjectChange={(v) =>
+                setForm((p: any) => ({ ...p, subject: v }))
+              }
+              onSendAttachedFilesChange={(v) =>
+                setForm((p: any) => ({ ...p, sendAttachedFiles: v }))
+              }
+              onSendPrintChange={(v) =>
+                setForm((p: any) => ({ ...p, sendPrint: v }))
+              }
+              onSaveTemplate={handleSaveTemplate}
+              onResetTemplate={resetTemplate}
+            />
+        )}
 
-            {activeTab === "terms" && (
-   <TermsAndCondition
-  terms={form.terms?.buying ?? null}
-  setTerms={(buying) =>
-    setForm((p) => ({ ...p, terms: { buying } }))
-  }
-/>
+          {/* {activeTab === "tax" && (
+            <TaxTab
+              form={form}
+              taxRows={form.taxRows}
+              onFormChange={handleFormChange}
+              onTaxRowChange={handleTaxRowChange}
+              onAddTaxRow={addTaxRow}
+              onRemoveTaxRow={removeTaxRow}
+            />
+          )} */}
 
-            )}
-          </section>
-        </form>
-    
+          {activeTab === "address" && (
+            <AddressTab form={form} onFormChange={handleFormChange} />
+          )}
+
+          {activeTab === "terms" && (
+            <TermsAndCondition
+              terms={form.terms?.buying ?? null}
+              setTerms={(buying) =>
+                setForm((p) => ({ ...p, terms: { buying } }))
+              }
+            />
+
+          )}
+        </section>
+      </form>
+
     </Modal>
   );
 };
