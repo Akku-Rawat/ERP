@@ -5,8 +5,8 @@ import type { AddressBlock } from "./purchaseInvoice";
  * UI → Backend API (Create/Update)
  * FINAL VERSION - Based on Invoice pattern analysis
  */
-export const mapUIToCreatePO = (form: PurchaseInvoiceFormData) => {
-  console.log("MAPPING PO TO BACKEND - Form items:", form.items);
+export const mapUIToCreatePI = (form: PurchaseInvoiceFormData) => {
+  console.log("MAPPING PI TO BACKEND - Form items:", form.items);
   
   // Filter and map items - CRITICAL: Filter empty items FIRST
   const validItems = form.items.filter((it) => {
@@ -64,12 +64,17 @@ export const mapUIToCreatePO = (form: PurchaseInvoiceFormData) => {
 
   // Build base payload
   const payload: any = {
+    rcptTyCd: "Local", // Assuming local for now, could be dynamic
     requiredBy: form.requiredBy,
     supplierId: form.supplierId,
     currency: form.currency,
     status: form.status,
     taxCategory: form.taxCategory,
-    
+    lpoNumber: form.poNumber, // Assuming PO number is sent as lpoNumber in API
+    spplrInvcNo: form.supplierInvoiceNumber, // Assuming supplier invoice number is sent as spplrInvcNo in API,
+    paymentType: form.paymentType,
+    transactionProgress: form.transactionProgress,
+    // Assuming PI number is sent as spplrInvcNo in API
     // Optional fields
     ...(form.costCenter && { costCenter: form.costCenter }),
     ...(form.project && { project: form.project }),

@@ -3,13 +3,14 @@ import { motion } from "framer-motion";
 import { Building2, MapPin, FileText } from "lucide-react";
 import Modal from "../ui/modal/modal";
 import { Button } from "../ui/modal/formComponent";
-import { DetailsTab } from "../procurement/purchaseorder/DetailsTab";
-import { EmailTab } from "../procurement/purchaseorder/EmailTab";
-import { TaxTab } from "../procurement/purchaseorder/TaxTab";
-import { AddressTab } from "../procurement/purchaseorder/AddressTab";
+import { DetailsTab } from "../procurement/purchaseinvoice/DetailsTab";
+// import { EmailTab } from "../procurement/purchaseorder/EmailTab";
+// import { TaxTab } from "../procurement/purchaseorder/TaxTab";
+import { AddressTab } from "../procurement/purchaseinvoice/AddressTab";
 import  TermsAndCondition  from "../TermsAndCondition";
 import { usePurchaseInvoiceForm } from "../../hooks/usePurchaseInvoiceForm";
 import type { POTab } from "../../types/Supply/purchaseOrder";
+
 
 interface PurchaseInvoiceModalProps {
   isOpen: boolean;

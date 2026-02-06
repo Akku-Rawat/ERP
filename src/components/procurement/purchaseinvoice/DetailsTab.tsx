@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Plus, Trash2, User, Mail, Phone } from "lucide-react";
 import { Button } from "../../ui/modal/formComponent";
 import Select from "../../ui/Select";
-import type { ItemRow, PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
+import type { ItemRow, PurchaseInvoiceFormData } from "../../../types/Supply/purchaseInvoice";
 import { currencyOptions } from "../../../types/Supply/supplier";
 import SupplierSelect from "../../selects/procurement/SupplierSelect";
 import POItemSelect from "../../selects/procurement/POItemSelect";
 import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
+import Modal from "../../ui/modal/modal";
 
 interface DetailsTabProps {
-  form: PurchaseOrderFormData;
+  form: PurchaseInvoiceFormData;
   items: ItemRow[];
   onItemSelect: (item: any, idx: number) => void;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
@@ -73,7 +74,7 @@ export const DetailsTab = ({
   return (
     <div className="flex flex-col gap-4 max-h-screen overflow-auto p-4 bg-app text-main">
       <div className="bg-app">
-        <div className="grid grid-cols-6 gap-3 items-end">
+        <div className="grid grid-cols-7 gap-3 items-end">
           {/* Supplier */}
           <div className="col-span-1">
             <SupplierSelect
@@ -146,8 +147,18 @@ export const DetailsTab = ({
               onChange={onFormChange}
             />
           </div>
+
+
+<div>
+
+  
+</div>
+          
+
+          
         </div>
 
+ 
       </div>
 
       {/* Main Body - Table LEFT + Sidebar RIGHT */}

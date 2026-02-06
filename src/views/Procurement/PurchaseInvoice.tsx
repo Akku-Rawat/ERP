@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
-import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal";
+import PurchaseinvoiceModal from "../../components/procurement/PurchaseInvoiceModal";
 import toast from "react-hot-toast";
-import PurchaseOrderView from "../../views/Procurement/purchaseorderview";
+import PurchaseinvoiceView from "../../views/Procurement/purchaseorderview";
 import PurchaseInvoiceModal from "../../components/procurement/PurchaseInvoiceModal";
 // Shared UI Table Components
 import Table from "../../components/ui/Table/Table";
@@ -11,10 +11,11 @@ import ActionButton, {
   ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
+import { getPurchaseInvoices } from "../../api/procurement/PurchaseInvoiceApi";
 
 
 
-interface PurchaseOrder {
+interface Purchaseinvoice {
   id: string;
   supplier: string;
   date: string;
@@ -23,7 +24,7 @@ interface PurchaseOrder {
   deliveryDate: string;
 }
 
-interface PurchaseOrdersTableProps {
+interface PurchaseinvoicesTableProps {
   onAdd?: () => void;
 }
 
@@ -47,8 +48,8 @@ const CRITICAL_STATUSES: POStatus[] = ["Completed"];
 
 
 
-const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
-  const [orders, setOrders] = useState<PurchaseOrder[]>([]);
+const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) => {
+  const [orders, setOrders] = useState<Purchaseinvoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 const [page, setPage] = useState(1);
@@ -57,7 +58,7 @@ const [page, setPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Purchaseinvoice | null>(null);
 
 
 
@@ -67,23 +68,24 @@ const fetchOrders = async () => {
   try {
     setLoading(true);
 
-    const res = await getPurchaseOrders(page, pageSize);
+    const res = await getPurchaseInvoices(page, pageSize);
 
     setTotalPages(res.pagination?.total_pages || 1);
     setTotalItems(res.pagination?.total || 0);
 
-    const mappedOrders: PurchaseOrder[] = res.data.map((po: any) => ({
-      id: po.poId,
-      supplier: po.supplierName,
-      date: po.poDate,
-      deliveryDate: po.deliveryDate,
-      amount: po.grandTotal,
-      status: po.status,
+    const mappedOrders: Purchaseinvoice[] = res.data.map((pi: any) => ({
+      piId: pi.pId,
+      supplier: pi.supplierName,
+      podate: pi.poDate,
+      deliveryDate: pi.deliveryDate,
+      amount: pi.grandTotal,
+      status: pi.status,
+      registrationType:pi.registrationType
     }));
 
     setOrders(mappedOrders);
   } catch (err) {
-    toast.error("Failed to load Purchase s");
+    toast.error("Failed to load Purchase Invoices");
   } finally {
     setLoading(false);
   }
@@ -93,37 +95,28 @@ useEffect(() => {
   fetchOrders();
 }, [page, pageSize]);
 
-  const handleView = (order: PurchaseOrder) => {
-  setSelectedOrder(order);
+  const handleView = (Invoice: Purchaseinvoice) => {
+  setSelectedInvoice(Invoice);
   setViewModalOpen(true);
 };
-  //  FILTER 
-  const filteredOrders = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    return orders.filter(
-      (o) =>
-        o.id.toLowerCase().includes(term) ||
-        o.supplier.toLowerCase().includes(term) ||
-        o.status.toLowerCase().includes(term),
-    );
-  }, [orders, searchTerm]);
+ 
 
   //  MODAL HANDLERS 
   const handleAddClick = () => {
-    setSelectedOrder(null);
+    setSelectedInvoice(null);
     setModalOpen(true);
     onAdd?.();
   };
 
-  const handleEdit = (order: PurchaseOrder, e: React.MouseEvent) => {
+  const handleEdit = (Invoice: Purchaseinvoice, e: React.MouseEvent) => {
     e.stopPropagation();
-    setSelectedOrder(order);
+    setSelectedInvoice(Invoice);
     setModalOpen(true);
   };
 
-  const handleDelete = (order: PurchaseOrder, e: React.MouseEvent) => {
+  const handleDelete = (Invoice: Purchaseinvoice, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm(`Delete Purchase Invoice "${order.id}"?`)) {
+    if (window.confirm(`Delete Purchase Invoice "${Invoice.id}"?`)) {
       toast.success("Delete API ready — connect backend later");
     }
   };
@@ -135,7 +128,7 @@ const handleStatusChange = async (
   newStatus: POStatus,
 ) => {
   try {
-    const res = await updatePurchaseOrderStatus(
+    const res = await updatePurchaseinvoiceStatus(
       poId,
       newStatus.toLowerCase(),
     );
@@ -161,11 +154,14 @@ const handleStatusChange = async (
 
 
   //  TABLE COLUMNS 
-  const columns: Column<PurchaseOrder>[] = [
-    { key: "id", header: "PO ID", align: "left" },
+  const columns: Column<Purchaseinvoice>[] = [
+    { key: "piId", header: " PI ID", align: "left" },
     { key: "supplier", header: "Supplier", align: "left" },
-    { key: "date", header: "Date", align: "left" },
-
+    { key: "podate", header: "po Date", align: "left" },
+    {key:"registrationType"
+    ,header:"Registration Type"
+    ,align:"left"
+    },
     {
       key: "amount",
       header: "Amount",
@@ -216,7 +212,7 @@ const handleStatusChange = async (
     <div className="p-6">
       <Table
         columns={columns}
-        data={filteredOrders}
+        data={orders}
         showToolbar
         loading={loading}
         searchValue={searchTerm}
@@ -240,11 +236,11 @@ const handleStatusChange = async (
       <PurchaseInvoiceModal
         isOpen={modalOpen}
         onClose={handleCloseModal}
-          poId={selectedOrder?.id}  
+          poId={selectedInvoice?.id}  
       />
  
   </div>  
   );
 };
 
-export default PurchaseOrdersTable;
+export default PurchaseinvoicesTable;
