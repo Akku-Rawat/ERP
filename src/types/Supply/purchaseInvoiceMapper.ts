@@ -1,11 +1,11 @@
-import { PurchaseOrderFormData, emptyPOForm } from "./purchaseOrder";
-import type { AddressBlock } from "./purchaseOrder";
+import { PurchaseInvoiceFormData, emptyPOForm } from "./purchaseInvoice";
+import type { AddressBlock } from "./purchaseInvoice";
 
 /**
  * UI → Backend API (Create/Update)
  * FINAL VERSION - Based on Invoice pattern analysis
  */
-export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
+export const mapUIToCreatePO = (form: PurchaseInvoiceFormData) => {
   console.log("MAPPING PO TO BACKEND - Form items:", form.items);
   
   // Filter and map items - CRITICAL: Filter empty items FIRST
@@ -107,9 +107,10 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
 /**
  * Backend API → UI Form
  */
-export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
+export const mapApiToUI = (apiResponse: any): PurchaseInvoiceFormData => {
   const api = apiResponse.data || apiResponse;
 
+  console.log("📥 Mapping API to UI:", api);
 
   // Map items - handle both field name variations
   const items = (api.items || []).map((item: any) => {
@@ -218,8 +219,9 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
   const roundedTotal = Math.round(grandTotal);
   const roundingAdjustment = Number((roundedTotal - grandTotal).toFixed(2));
 
+ 
 
-  const mappedForm: PurchaseOrderFormData = {
+  const mappedForm: PurchaseInvoiceFormData = {
     ...emptyPOForm,
 
     poNumber: api.poId || "",

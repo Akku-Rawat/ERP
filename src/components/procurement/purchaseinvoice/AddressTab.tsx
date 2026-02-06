@@ -1,0 +1,167 @@
+import React, { useState, useCallback, useMemo } from "react";
+import { Input, Checkbox } from "../../ui/modal/formComponent";
+import type { PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
+import { MapPin, Truck, Building2, Plus, Minus } from "lucide-react";
+
+interface AddressTabProps {
+  form: PurchaseOrderFormData;
+  onFormChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+type AddressKey = keyof PurchaseOrderFormData["addresses"];
+
+/*  Address Block  */
+
+const AddressBlock: React.FC<{
+  title: string;
+  icon: any;
+  keyName: AddressKey;
+  data: PurchaseOrderFormData["addresses"][AddressKey];
+  isOpen: boolean;
+  onToggle: () => void;
+  onFormChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  showCopyCheckbox?: boolean;
+  copyCheckboxLabel?: string;
+  copyChecked?: boolean;
+  onCopyToggle?: (checked: boolean) => void;
+}> = ({
+  title,
+  icon: Icon,
+  keyName,
+  data,
+  isOpen,
+  onToggle,
+  onFormChange,
+  showCopyCheckbox,
+  copyCheckboxLabel,
+  copyChecked,
+  onCopyToggle,
+}) => {
+  return (
+    <div className="bg-card border border-theme rounded-xl shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 bg-app border-b border-theme">
+        <div className="flex items-center gap-3">
+          <div className="bg-primary/10 text-primary p-2 rounded-lg">
+            <Icon size={18} />
+          </div>
+          <p className="text-sm font-semibold text-main">{title}</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {showCopyCheckbox && (
+            <Checkbox
+              label={copyCheckboxLabel || "Copy"}
+                checked={copyChecked ?? false} 
+              onChange={(checked) => onCopyToggle?.(checked)}
+            />
+          )}
+          <button type="button" onClick={onToggle} className="p-1 rounded row-hover">
+            {isOpen ? <Minus size={16} /> : <Plus size={16} />}
+          </button>
+        </div>
+      </div>
+
+      {isOpen && (
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-card text-main">
+          <Input label="Address Title" name={`addresses.${keyName}.addressTitle`} value={data?.addressTitle || ""} onChange={onFormChange} />
+          <Input label="Address Type" name={`addresses.${keyName}.addressType`} value={data?.addressType || ""} onChange={onFormChange} />
+          <Input label="Address Line 1" name={`addresses.${keyName}.addressLine1`} value={data?.addressLine1 || ""} onChange={onFormChange} />
+          <Input label="Address Line 2" name={`addresses.${keyName}.addressLine2`} value={data?.addressLine2 || ""} onChange={onFormChange} />
+          <Input label="Postal Code" name={`addresses.${keyName}.postalCode`} value={data?.postalCode || ""} onChange={onFormChange} />
+          <Input label="City" name={`addresses.${keyName}.city`} value={data?.city || ""} onChange={onFormChange} />
+          <Input label="State" name={`addresses.${keyName}.state`} value={data?.state || ""} onChange={onFormChange} />
+          <Input label="Country" name={`addresses.${keyName}.country`} value={data?.country || ""} onChange={onFormChange} />
+
+          {keyName === "supplierAddress" && (
+            <>
+              <Input label="Phone" name={`addresses.${keyName}.phone`} value={data?.phone || ""} onChange={onFormChange} />
+              <Input label="Email" name={`addresses.${keyName}.email`} value={data?.email || ""} onChange={onFormChange} />
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/*  Address Tab  */
+
+export const AddressTab: React.FC<AddressTabProps> = ({ form, onFormChange }) => {
+  const [open, setOpen] = useState<Record<AddressKey, boolean>>({
+    supplierAddress: true,
+    dispatchAddress: false,
+    shippingAddress: false,
+    companyBillingAddress: true,
+  });
+
+  const [copyBillingToShipping, setCopyBillingToShipping] = useState(false);
+  const [copySupplierToDispatch, setCopySupplierToDispatch] = useState(false);
+
+  const toggle = useCallback((key: AddressKey) => {
+    setOpen((p) => ({ ...p, [key]: !p[key] }));
+  }, []);
+
+  /*  reusable copy helper  */
+const copyAddress = useCallback(
+  (from: PurchaseOrderFormData["addresses"][AddressKey], toKey: AddressKey) => {
+    Object.entries(from).forEach(([field, value]) => {
+      onFormChange({
+        target: {
+          name: `addresses.${toKey}.${field}`,
+          value: value ?? "",
+        },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+  },
+  [onFormChange]
+);
+
+
+  const handleCopySupplierToDispatch = useCallback(
+    (checked: boolean) => {
+      setCopySupplierToDispatch(checked);
+      if (checked) {
+        copyAddress(form.addresses.supplierAddress, "dispatchAddress");
+      }
+    },
+    [form.addresses.supplierAddress, copyAddress]
+  );
+
+  const handleCopyBillingToShipping = useCallback(
+    (checked: boolean) => {
+      setCopyBillingToShipping(checked);
+      if (checked) {
+        copyAddress(form.addresses.companyBillingAddress, "shippingAddress");
+      }
+    },
+    [form.addresses.companyBillingAddress, copyAddress]
+  );
+
+  const supplierData = useMemo(() => form.addresses.supplierAddress, [form.addresses.supplierAddress]);
+  const companyBillingData = useMemo(() => form.addresses.companyBillingAddress, [form.addresses.companyBillingAddress]);
+  const shippingData = useMemo(() => form.addresses.shippingAddress, [form.addresses.shippingAddress]);
+  const dispatchData = useMemo(() => form.addresses.dispatchAddress, [form.addresses.dispatchAddress]);
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-4 gap-4 bg-card border border-theme p-4 rounded-xl">
+        <Input label="Shipping Rule" name="shippingRule" value={form.shippingRule || ""} onChange={onFormChange} />
+        <Input label="Incoterm" name="incoterm" value={form.incoterm || ""} onChange={onFormChange} />
+        <Input label="Supplier Contact" name="supplierContact" value={form.supplierContact || ""} onChange={onFormChange} />
+        <Input label="Place of Supply" name="placeOfSupply" value={form.placeOfSupply || ""} onChange={onFormChange} />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <AddressBlock title="Company Billing Address" icon={Building2} keyName="companyBillingAddress" data={companyBillingData} isOpen={open.companyBillingAddress} onToggle={() => toggle("companyBillingAddress")} onFormChange={onFormChange} />
+          <AddressBlock title="Supplier Address" icon={MapPin} keyName="supplierAddress" data={supplierData} isOpen={open.supplierAddress} onToggle={() => toggle("supplierAddress")} onFormChange={onFormChange} />
+        </div>
+
+        <div className="space-y-4">
+          <AddressBlock title="Shipping Address" icon={Truck} keyName="shippingAddress" data={shippingData} isOpen={open.shippingAddress} onToggle={() => toggle("shippingAddress")} onFormChange={onFormChange} showCopyCheckbox copyCheckboxLabel="Same as Billing" copyChecked={copyBillingToShipping} onCopyToggle={handleCopyBillingToShipping} />
+          <AddressBlock title="Dispatch Address" icon={Truck} keyName="dispatchAddress" data={dispatchData} isOpen={open.dispatchAddress} onToggle={() => toggle("dispatchAddress")} onFormChange={onFormChange} showCopyCheckbox copyCheckboxLabel="Same as Supplier" copyChecked={copySupplierToDispatch} onCopyToggle={handleCopySupplierToDispatch} />
+        </div>
+      </div>
+    </div>
+  );
+};
