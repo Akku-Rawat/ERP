@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, User, Mail, Phone } from "lucide-react";
-import { Button } from "../../ui/modal/formComponent";
+import { Button, Card } from "../../ui/modal/formComponent";
 import Select from "../../ui/Select";
-import type { ItemRow, PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
+import type { ItemRow, PurchaseInvoiceFormData } from "../../../types/Supply/purchaseInvoice";
 import { currencyOptions } from "../../../types/Supply/supplier";
 import SupplierSelect from "../../selects/procurement/SupplierSelect";
 import POItemSelect from "../../selects/procurement/POItemSelect";
 import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
+import Modal from "../../ui/modal/modal";
 
 interface DetailsTabProps {
-  form: PurchaseOrderFormData;
+  form: PurchaseInvoiceFormData;
   items: ItemRow[];
   onItemSelect: (item: any, idx: number) => void;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
@@ -73,7 +74,7 @@ export const DetailsTab = ({
   return (
     <div className="flex flex-col gap-4 max-h-screen overflow-auto p-4 bg-app text-main">
       <div className="bg-app">
-        <div className="grid grid-cols-6 gap-3 items-end">
+        <div className="grid grid-cols-7 gap-3 items-end">
           {/* Supplier */}
           <div className="col-span-1">
             <SupplierSelect
@@ -82,7 +83,7 @@ export const DetailsTab = ({
             />
           </div>
 
-  
+
           {/* Date */}
           <div>
             <ModalInput
@@ -107,7 +108,7 @@ export const DetailsTab = ({
             />
           </div>
 
-      
+
           {/* Status */}
           <div>
             <ModalSelect
@@ -116,10 +117,15 @@ export const DetailsTab = ({
               value={form.status}
               onChange={onFormChange}
               options={[
-                { value: "Draft", label: "Draft" },
+                {value: "Draft", label: "Draft"},
+                { value: "Return", label: "Return" },
                 { value: "Submitted", label: "Submitted" },
-                { value: "Approved", label: "Approved" },
+                { value: "Paid", label: "Paid" },
                 { value: "Cancelled", label: "Cancelled" },
+                { value: "Internal Transfer", label: "Internal Transfer" },
+                { value: "Debit Note Issued", label: "Debit Note Issued" },
+                {value : "Party Paid", label:"Party Paid"}
+                
               ]}
             />
           </div>
@@ -138,7 +144,7 @@ export const DetailsTab = ({
             />
           </div>
 
-            <div>
+          <div>
             <ModalInput
               label="Project"
               name="project"
@@ -146,8 +152,50 @@ export const DetailsTab = ({
               onChange={onFormChange}
             />
           </div>
-        </div>
 
+          <div>
+            <ModalSelect
+              label="Transaction Progress"
+              name="transactionProgress"
+              value={form.transactionProgress}
+              onChange={onFormChange} 
+              options={[
+                { value: "APPROVED", label: "Approved" },
+                { value: "REFUNDED", label: "Refunded" },
+                {value:"TRANSFERED", label:"Transfered"},
+                {value:"REJECTED", label:"Rejected"},
+              ]}
+            />
+          </div>
+
+          <div>
+              <ModalSelect
+                label="Payment Type"
+                name="paymentType"
+                value={form.paymentType}
+                onChange={onFormChange} 
+                options={[
+                  { value: "CASH", label: "CASH" },
+                  { value: "CREDIT", label: "CREDIT" },
+                  { value: "Bank Transfer", label: "Bank Transfer" },
+                  { value: "CASH/CREDIT", label: "CASH/CREDIT" },
+                  {value:"BANK CHECK", label:"BANK CHECK"},
+                  {value:"MOBILE MONEY", label:"Any Transaction Using Mobile Money System"},
+                  {value:"DEBIT & CREDIT CARD", label:"PAYMENT USING CARD"},
+                  {value:"OTHER", label:"Other Payment Methods"}
+                ]}
+              />  
+          </div>
+
+          <div>
+                <ModalInput
+                  label="Supplier Invoice No"
+                  name="supplierInvoiceNumber"
+                  value={form.supplierInvoiceNumber}
+                  onChange={onFormChange}
+                />
+          </div>
+        </div>
       </div>
 
       {/* Main Body - Table LEFT + Sidebar RIGHT */}
@@ -332,7 +380,7 @@ export const DetailsTab = ({
           </div>
         </div>
 
-       
+
         {/* RIGHT: Supplier Details + Summary */}
         <div className="flex flex-col gap-2">
           {/* Supplier Details */}
@@ -361,7 +409,7 @@ export const DetailsTab = ({
                 <span>{form.supplierPhone || "-"}</span>
               </div>
 
-              
+
               {/* Tax Category Info */}
               {form.taxCategory && (
                 <div className="bg-card rounded-lg mt-1">

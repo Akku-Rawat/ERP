@@ -75,23 +75,23 @@ export default function Pagination({
         <nav className="flex items-center gap-2">
           {range.map((r, i) =>
             typeof r === "string" ? (
-              <span key={i} className="px-3 py-1 text-sm text-muted">
+              <span key={`dots-${i}`} className="px-3 py-1 text-sm text-muted">
                 {r}
               </span>
             ) : (
               <button
-                key={r}
+                key={`page-${r}-${i}`}
                 onClick={() => goto(r)}
-                className={`min-w-[36px] h-8 flex items-center justify-center px-2 rounded-md text-sm border border-theme transition-all ${
-                  r === currentPage
+                className={`min-w-[36px] h-8 flex items-center justify-center px-2 rounded-md text-sm border border-theme transition-all ${r === currentPage
                     ? "bg-primary text-white shadow"
                     : "bg-app text-main hover:bg-row-hover"
-                }`}
+                  }`}
               >
                 {r}
               </button>
-            ),
+            )
           )}
+
         </nav>
 
         {/* Next */}

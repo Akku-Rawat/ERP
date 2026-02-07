@@ -190,9 +190,11 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
       {/* ADD MODAL */}
       {showBankModal && (
         <AddBankAccountModal
+          isOpen={showBankModal}
           onClose={() => setShowBankModal(false)}
           onSubmit={handleAddSubmit}
         />
+
       )}
 
       <div className="mx-auto">
@@ -248,7 +250,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
                       onClick={() => !isEditing && setSelectedAccount(i)}
                       className={`p-3 rounded-lg border cursor-pointer transition-all ${
                         selectedAccount === i
-                          ? "table-head text-table-head-text"
+                          ? " text-primary"
                           : "border bg-card hover:row-hover text-main"
                       } ${isEditing ? "cursor-not-allowed opacity-60" : ""}`}
                     >

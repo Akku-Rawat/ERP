@@ -35,7 +35,7 @@ export default function SupplierSelect({
   useEffect(() => {
     const loadSuppliers = async () => {
       try {
-        const res = await getSuppliers();
+        const res = await getSuppliers(1, 1000);
         const list = res?.data?.suppliers || [];
 
        setSuppliers(
@@ -81,11 +81,11 @@ export default function SupplierSelect({
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      <span className="text-sm font-medium text-muted">{label}</span>
+      <span className="block text-[10px] font-medium text-main">{label}</span>
 
       <div ref={containerRef} className="relative">
         <input
-          className="w-full border border-theme bg-card px-3 py-2 rounded text-sm"
+          className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
           placeholder={loading ? "Loading..." : "Search supplier..."}
           value={search}
           onChange={(e) => {

@@ -1,19 +1,21 @@
-import { PurchaseOrderFormData, emptyPOForm } from "./purchaseOrder";
-import type { AddressBlock } from "./purchaseOrder";
+import { PurchaseInvoiceFormData, emptyPOForm , TaxRow} from "./purchaseInvoice";
+import type { AddressBlock } from "./purchaseInvoice";
 
 /**
  * UI → Backend API (Create/Update)
  * FINAL VERSION - Based on Invoice pattern analysis
  */
-export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
-  console.log("MAPPING PO TO BACKEND - Form items:", form.items);
+export const mapUIToCreatePI = (form: PurchaseInvoiceFormData) => {
+  console.log("MAPPING PI TO BACKEND - Form items:", form.items);
   
+
   // Filter and map items - CRITICAL: Filter empty items FIRST
   const validItems = form.items.filter((it) => {
     const hasCode = it.itemCode && it.itemCode.trim() !== "";
     const hasQty = it.quantity && Number(it.quantity) > 0;
     const hasRate = it.rate && Number(it.rate) > 0;
-  
+    
+    console.log(`Item ${it.itemCode}: hasCode=${hasCode}, hasQty=${hasQty}, hasRate=${hasRate}`);
     
     return hasCode && hasQty && hasRate; // Only include complete items
   });
@@ -63,12 +65,17 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
 
   // Build base payload
   const payload: any = {
+    rcptTyCd: "Local", // Assuming local for now, could be dynamic
     requiredBy: form.requiredBy,
     supplierId: form.supplierId,
     currency: form.currency,
     status: form.status,
     taxCategory: form.taxCategory,
-    
+    lpoNumber: form.poNumber, // Assuming PO number is sent as lpoNumber in API
+    spplrInvcNo: form.supplierInvoiceNumber, // Assuming supplier invoice number is sent as spplrInvcNo in API,
+    paymentType: form.paymentType,
+    transactionProgress: form.transactionProgress,
+    // Assuming PI number is sent as spplrInvcNo in API
     // Optional fields
     ...(form.costCenter && { costCenter: form.costCenter }),
     ...(form.project && { project: form.project }),
@@ -84,10 +91,9 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     // Terms - backend expects "selling" structure
     ...(form.terms?.buying && {
       terms: {
-        buying: form.terms.buying
+        selling: form.terms.buying
       }
     }),
-
 
     items: items, // Already filtered and mapped
     
@@ -107,7 +113,7 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
 /**
  * Backend API → UI Form
  */
-export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
+export const mapApiToUI = (apiResponse: any): PurchaseInvoiceFormData => {
   const api = apiResponse.data || apiResponse;
 
 
@@ -131,8 +137,11 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
     };
   });
 
-  // Tax rows
-  const taxRows = (api.taxes || [])
+ 
+let taxRows: TaxRow[] = [];
+
+if (Array.isArray(api.taxes) && api.taxes.length > 0) {
+  taxRows = api.taxes
     .filter((tax: any) => tax.type && tax.accountHead)
     .map((tax: any) => ({
       type: tax.type || "On Net Total",
@@ -140,6 +149,18 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
       taxRate: Number(tax.taxRate || 0),
       amount: Number(tax.taxableAmount || 0),
     }));
+}
+
+else if (api.tax) {
+  taxRows = [
+    {
+      type: api.tax.type || "On Net Total",
+      accountHead: api.tax.accountHead || "Tax",
+      taxRate: parseFloat(api.tax.taxRate || "0"),
+      amount: Number(api.tax.taxableAmount || 0),
+    },
+  ];
+}
 
   // Addresses
   const addresses = {
@@ -190,9 +211,11 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
     },
   };
 
-  // TermS
-
-  const buyingTerms = api.terms?.terms?.buying || api.terms?.buying;
+  // Terms
+  const buyingTerms =
+    api.terms?.terms?.buying ||
+    api.terms?.buying ||
+    api.terms?.selling;
 
   const paymentPhases = buyingTerms?.payment?.phases || [];
   const paymentRows = paymentPhases.map((phase: any) => ({
@@ -218,8 +241,9 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
   const roundedTotal = Math.round(grandTotal);
   const roundingAdjustment = Number((roundedTotal - grandTotal).toFixed(2));
 
+ 
 
-  const mappedForm: PurchaseOrderFormData = {
+  const mappedForm: PurchaseInvoiceFormData = {
     ...emptyPOForm,
 
     poNumber: api.poId || "",

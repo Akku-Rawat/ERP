@@ -49,7 +49,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
+  const [initialLoad, setInitialLoad] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -95,6 +95,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       setTotalItems(res.pagination?.total || mapped.length);
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
   useEffect(() => {
@@ -302,18 +303,12 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
   return (
     <div className="p-8">
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="mt-2 text-muted">Loading invoices…</p>
-        </div>
-      ) : (
         <Table
           columns={columns}
           data={filteredInvoices}
           rowKey={(row) => row.invoiceNumber}
           showToolbar
-          loading={loading}
+          loading={loading || initialLoad}
           serverSide
           enableAdd
           addLabel="Add Invoice"
@@ -334,7 +329,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
           }}
           onPageChange={setPage}
         />
-      )}
 
       <PdfPreviewModal
         open={pdfOpen}

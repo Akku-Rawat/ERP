@@ -19,9 +19,9 @@ import ActionButton, {
 import type { Column } from "../../components/ui/Table/type";
 import type { ItemGroupSummary, ItemGroup } from "../../types/itemCategory";
 
-/* ===============================
+/* 
    COMPONENT
-================================ */
+ */
 
 const ItemsCategory: React.FC = () => {
   const [groups, setGroups] = useState<ItemGroupSummary[]>([]);
@@ -32,7 +32,7 @@ const ItemsCategory: React.FC = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-
+  const [initialLoad, setInitialLoad] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editGroup, setEditGroup] = useState<ItemGroup | null>(null);
 
@@ -42,9 +42,9 @@ const ItemsCategory: React.FC = () => {
   );
   const [deleting, setDeleting] = useState(false);
 
-  /* ===============================
+  /* 
      FETCH
-  ================================ */
+   */
 
   const fetchGroups = async () => {
     try {
@@ -58,6 +58,7 @@ const ItemsCategory: React.FC = () => {
       toast.error("Failed to load item categories");
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
 
@@ -65,9 +66,9 @@ const ItemsCategory: React.FC = () => {
     fetchGroups();
   }, [page, pageSize]);
 
-  /* ===============================
+  /* 
      HANDLERS
-  ================================ */
+   */
 
   const handleAdd = () => {
     setEditGroup(null);
@@ -119,9 +120,9 @@ const ItemsCategory: React.FC = () => {
     toast.success(wasEdit ? "Category updated" : "Category created");
   };
 
-  /* ===============================
+  /* 
      FILTER
-  ================================ */
+   */
 
   const filteredGroups = groups.filter((g) =>
     [g.id, g.groupName, g.description, g.unitOfMeasurement, g.salesAccount]
@@ -130,9 +131,9 @@ const ItemsCategory: React.FC = () => {
       .includes(searchTerm.toLowerCase()),
   );
 
-  /* ===============================
+  /* 
      TABLE COLUMNS
-  ================================ */
+   */
 
   const columns: Column<ItemGroupSummary>[] = [
     { key: "id", header: "ID", align: "left" },
@@ -170,20 +171,14 @@ const ItemsCategory: React.FC = () => {
     },
   ];
 
-  /* ===============================
+  /* 
      RENDER
-  ================================ */
+   */
 
   return (
     <div className="p-8">
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="mt-2 text-muted">Loading invoices…</p>
-        </div>
-      ) : (
         <Table
-          loading={loading}
+          loading={loading || initialLoad}
           serverSide
           columns={columns}
           data={filteredGroups}
@@ -204,7 +199,7 @@ const ItemsCategory: React.FC = () => {
           }}
           onPageChange={setPage}
         />
-      )}
+      
       {/* CATEGORY MODAL */}
       <ItemsCategoryModal
         isOpen={showModal}

@@ -168,14 +168,14 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
             key={tab}
             type="button"
             onClick={() => ui.setActiveTab(tab)}
-            className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${
+            className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${
               ui.activeTab === tab
-                ? "text-primary bg-card shadow-sm"
-                : "text-muted hover:bg-card/50"
+                ? "text-primary border-b-[3px] border-primary"
+                : "text-muted border-b-[3px] border-transparent hover:text-main"
             }`}
           >
             {tab === "details" && "Details"}
-            {tab === "terms" && "Terms & Conditions"}
+            {/* {tab === "terms" && "Terms & Conditions"} */}
             {tab === "address" && "Additional Details"}
           </button>
         ))}

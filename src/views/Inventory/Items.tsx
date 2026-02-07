@@ -32,7 +32,7 @@ const Items: React.FC = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [editItem, setEditItem] = useState<Item | null>(null);
-
+  const [initialLoad, setInitialLoad] = useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<ItemSummary | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -49,6 +49,7 @@ const Items: React.FC = () => {
       toast.error("Failed to load items");
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
 
@@ -56,9 +57,8 @@ const Items: React.FC = () => {
     fetchItems();
   }, [page, pageSize]);
 
-  /* ===============================
-     HANDLERS
-  ================================ */
+  /*      HANDLERS
+   */
 
   const handleAdd = () => {
     setEditItem(null);
@@ -109,9 +109,8 @@ const Items: React.FC = () => {
     toast.success(wasEdit ? "Item updated" : "Item created");
   };
 
-  /* ===============================
-     FILTER
-  ================================ */
+  /*      FILTER
+   */
 
   const filteredItems = items.filter((i) =>
     [
@@ -127,9 +126,8 @@ const Items: React.FC = () => {
       .includes(searchTerm.toLowerCase()),
   );
 
-  /* ===============================
-     COLUMNS
-  ================================ */
+  /*      COLUMNS
+   */
 
   const columns: Column<ItemSummary>[] = [
     { key: "id", header: "Item Code", align: "left" },
@@ -173,41 +171,33 @@ const Items: React.FC = () => {
     },
   ];
 
-  /* ===============================
-     RENDER
-  ================================ */
+  /*      RENDER
+   */
 
   return (
     <div className="p-8">
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="mt-2 text-muted">Loading invoices…</p>
-        </div>
-      ) : (
-        <Table
-          loading={loading}
-          serverSide
-          columns={columns}
-          data={filteredItems}
-          showToolbar
-          searchValue={searchTerm}
-          onSearch={setSearchTerm}
-          enableAdd
-          addLabel="Add Item"
-          onAdd={handleAdd}
-          currentPage={page}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={totalItems}
-          pageSizeOptions={[10, 25, 50, 100]}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1); // reset page
-          }}
-          onPageChange={setPage}
-        />
-      )}
+      <Table
+        loading={loading || initialLoad}
+        serverSide
+        columns={columns}
+        data={filteredItems}
+        showToolbar
+        searchValue={searchTerm}
+        onSearch={setSearchTerm}
+        enableAdd
+        addLabel="Add Item"
+        onAdd={handleAdd}
+        currentPage={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        pageSizeOptions={[10, 25, 50, 100]}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1); // reset page
+        }}
+        onPageChange={setPage}
+      />
 
       {/* ITEM MODAL */}
       <ItemModal

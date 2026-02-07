@@ -5,12 +5,12 @@ const base_url = import.meta.env.VITE_PO_API_URL as string;
 const api = createAxiosInstance(base_url);
 
 const ENDPOINTS = {
-  createPO: `${base_url}.create_purchase_order`,
-  getPOList: `${base_url}.get_purchase_orders`,
-  getPOById: `${base_url}.get_purchase_order`,
-  updatePO: `${base_url}.update_purchase_order`,
-  getPurchaseOrders: `${base_url}.get_purchase_orders`,
-   updatePOStatus: `${base_url}.update_purchase_order_status`,
+  createPO: `${base_url}.order.create_purchase_order`,
+  getPOList: `${base_url}.order.get_purchase_orders`,
+  getPOById: `${base_url}.order.get_purchase_order`,
+  updatePO: `${base_url}.order.update_purchase_order`,
+  getPurchaseOrders: `${base_url}.order.get_purchase_orders`,
+   updatePOStatus: `${base_url}.order.update_purchase_order_status`,
 };
 
 
@@ -49,22 +49,25 @@ export async function updatePurchaseOrder(payload: any): Promise<any> {
 export async function getPurchaseOrdersBySupplier(
   supplierName: string,
   page = 1,
-  pageSize = 100,
+  pageSize = 5,
   status = ""
 ) {
-  const resp = await api.get(ENDPOINTS.getPurchaseOrders,
-    
-    {
-      params: {
-        page,
-        page_size: pageSize,
-        status,
-        supplier: supplierName,
-      },
-    }
-  );
+  const resp = await api.get(ENDPOINTS.getPurchaseOrders, {
+    params: {
+      supplier: supplierName,
+      page,
+      page_size: pageSize,
+      status,
+    },
+  });
 
-  return resp.data?.data || [];
+  return {
+    data: resp.data?.data || [],
+    pagination: resp.data?.pagination || {
+      total: 0,
+      total_pages: 1,
+    },
+  };
 }
 
 

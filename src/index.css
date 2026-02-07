@@ -137,12 +137,35 @@
 }
 
 
+/* TEXT COLORS (Keep as is — already solid) */
 .text-success { color: var(--success) !important; }
-.text-danger { color: var(--danger) !important; }
+.text-danger  { color: var(--danger) !important; }
 .text-warning { color: #f59e0b !important; }
-.text-info { color: #3b82f6 !important; }
+.text-info    { color: #3b82f6 !important; }
 
-.bg-success { background: color-mix(in srgb, var(--success) 12%, transparent) !important; }
-.bg-danger { background: color-mix(in srgb, var(--danger) 12%, transparent) !important; }
-.bg-warning { background: color-mix(in srgb, #f59e0b 12%, transparent) !important; }
-.bg-info { background: color-mix(in srgb, #3b82f6 12%, transparent) !important; }
+
+/* DARK BACKGROUND VARIANTS */
+
+/* SUCCESS */
+.bg-success {
+  background: #24b35b !important;   /* dark green */
+  color: #dcfce7 !important;
+}
+
+/* DANGER */
+.bg-danger {
+  background: #d74343 !important;   /* dark red */
+  color: #fee2e2 !important;
+}
+
+/* WARNING */
+.bg-warning {
+  background: #f59e0b !important;   /* dark amber */
+  color: #fef3c7 !important;
+}
+
+/* INFO */
+.bg-info {
+  background: #4780db !important;   /* dark blue */
+  color: #dbeafe !important;
+}

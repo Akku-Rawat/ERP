@@ -41,6 +41,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
 
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   const [selectedQuotation, setSelectedQuotation] =
     useState<QuotationData | null>(null);
@@ -51,13 +52,13 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
   const [company, setCompany] = useState<any>(null);
 
   const QUOTATION_STATUS_TRANSITIONS: Record<QuotationStatus, QuotationStatus[]> = {
-  Draft: ["Sent", "Pending"],
-  Sent: ["Pending", "Accepted", "Rejected"],
-  Pending: ["Accepted", "Rejected"],
-  Accepted: [],
-  Rejected: [],
-};
-const CRITICAL_QUOTATION_STATUSES: QuotationStatus[] = ["Accepted"];
+    Draft: ["Sent", "Pending"],
+    Sent: ["Pending", "Accepted", "Rejected"],
+    Pending: ["Accepted", "Rejected"],
+    Accepted: [],
+    Rejected: [],
+  };
+  const CRITICAL_QUOTATION_STATUSES: QuotationStatus[] = ["Accepted"];
 
 
 
@@ -83,6 +84,7 @@ const CRITICAL_QUOTATION_STATUSES: QuotationStatus[] = ["Accepted"];
   const fetchQuotations = async () => {
     try {
       setLoading(true);
+
       const res = await getAllQuotations(page, pageSize, {
         search: searchTerm,
         status,
@@ -120,6 +122,7 @@ const CRITICAL_QUOTATION_STATUSES: QuotationStatus[] = ["Accepted"];
       setQuotations([]);
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
   useEffect(() => {
@@ -242,49 +245,33 @@ const CRITICAL_QUOTATION_STATUSES: QuotationStatus[] = ["Accepted"];
   ================================ */
   return (
     <div className="p-8">
-      {loading && quotations.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          <p className="mt-2 text-muted">Loading quotations…</p>
-        </div>
-      ) : (
-        <Table
-          loading={loading}
-          serverSide={true}
-          columns={columns}
-          data={quotations}
-          rowKey={(row) => row.quotationNumber}
-          showToolbar
-          searchValue={searchTerm}
-          onSearch={setSearchTerm}
-          enableColumnSelector
-          // extraFilters={
-          //   <SalesFilter
-          //     status={status}
-          //     setStatus={setStatus}
-          //     fromDate={fromDate}
-          //     setFromDate={setFromDate}
-          //     toDate={toDate}
-          //     setToDate={setToDate}
-          //   />
-          // }
-          enableAdd
-          addLabel="Add Quotation"
-          onAdd={onAddQuotation}
-          enableExport
-          onExport={onExportQuotation}
-          currentPage={page}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={totalItems}
-          pageSizeOptions={[10, 25, 50, 100]}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
-          onPageChange={setPage}
-        />
-      )}
+      <Table
+        loading={loading || initialLoad}
+        serverSide={true}
+        columns={columns}
+        data={quotations}
+        rowKey={(row) => row.quotationNumber}
+        showToolbar
+        searchValue={searchTerm}
+        onSearch={setSearchTerm}
+        enableColumnSelector
+        enableAdd
+        addLabel="Add Quotation"
+        onAdd={onAddQuotation}
+        enableExport
+        onExport={onExportQuotation}
+        currentPage={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        pageSizeOptions={[10, 25, 50, 100]}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        onPageChange={setPage}
+      />
+
 
       <PdfPreviewModal
         open={pdfOpen}

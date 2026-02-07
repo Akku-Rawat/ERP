@@ -20,6 +20,7 @@ import ActionButton, {
 } from "../../components/ui/Table/ActionButton";
 
 import type { Column } from "../../components/ui/Table/type";
+import { FilterSelect } from "../../components/ui/modal/modalComponent";
 
 interface Props {
   onAdd: () => void;
@@ -34,18 +35,19 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [custLoading, setCustLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editCustomer, setEditCustomer] = useState<CustomerDetail | null>(null);
-
+  const [initialLoad, setInitialLoad] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [allCustomers, setAllCustomers] = useState<CustomerSummary[]>([]);
+  const [taxCategory, setTaxCategory] = useState<string>("");
 
 
   const fetchCustomers = async () => {
     try {
       setCustLoading(true);
-      const response = await getAllCustomers(page, pageSize);
+      const response = await getAllCustomers(page, pageSize, taxCategory);
       setCustomers(response.data);
       setTotalPages(response.pagination?.total_pages || 1);
       setTotalItems(response.pagination?.total || 1);
@@ -53,27 +55,29 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
       console.error("Error loading customers:", err);
     } finally {
       setCustLoading(false);
+      setInitialLoad(false);
     }
   };
 
   useEffect(() => {
     fetchCustomers();
-  }, [page, pageSize]);
+  }, [page, pageSize, taxCategory]);
 
 
   const fetchAllCustomers = async () => {
-  try {
-    const resp = await getAllCustomers(1, 1000);
-    setAllCustomers(resp.data || []);
-  } catch (err) {
-    console.error("Error loading all customers:", err);
-  }
-};
+    try {
+      const resp = await getAllCustomers(1, 1000);
+      setAllCustomers(resp.data || []);
+    } catch (err) {
+      console.error("Error loading all customers:", err);
+    }
+  };
 
-
-useEffect(() => {
-  fetchAllCustomers();
-}, []);
+  const ensureAllCustomers = async () => {
+    if (!allCustomers.length) {
+      await fetchAllCustomers();
+    }
+  };
 
 
   const handleDelete = async (customerId: string, e: React.MouseEvent) => {
@@ -118,10 +122,27 @@ useEffect(() => {
     toast.success(editCustomer ? "Customer updated!" : "Customer created!");
   };
 
-  const handleRowClick = (customer: CustomerDetail) => {
-    setSelectedCustomer(customer);
-    setViewMode("detail");
+  const handleRowClick = async (customer: CustomerSummary) => {
+    try {
+      setCustLoading(true);
+
+      //  Ensure sidebar data loaded
+      await ensureAllCustomers();
+
+      //  Fetch full customer detail
+      const res = await getCustomerByCustomerCode(customer.id);
+      const fullCustomer = res.data ?? res;
+
+      setSelectedCustomer(fullCustomer);
+      setViewMode("detail");
+    } catch (err) {
+      console.error("Failed to load customer detail:", err);
+      toast.error("Unable to load customer detail");
+    } finally {
+      setCustLoading(false);
+    }
   };
+
 
   const handleBack = () => {
     setViewMode("table");
@@ -174,7 +195,7 @@ useEffect(() => {
         <ActionGroup>
           <ActionButton
             type="view"
-            onClick={() => handleRowClick(c as unknown as CustomerDetail)}
+            onClick={() => handleRowClick(c)}
             iconOnly={false}
           />
           <ActionMenu
@@ -190,32 +211,41 @@ useEffect(() => {
     <div className="p-8">
       {viewMode === "table" ? (
         <>
-          {custLoading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="mt-2 text-muted">Loading customers…</p>
-            </div>
-          ) : (
-            <Table
-              columns={columns}
-              data={customers}
-              showToolbar
-              loading={custLoading}
-              onPageSizeChange={(size) => setPageSize(size)}
-              pageSizeOptions={[10, 25, 50, 100]}
-              searchValue={searchTerm}
-              onSearch={setSearchTerm}
-              enableAdd
-              addLabel="Add Customer"
-              onAdd={handleAddCustomer}
-              enableColumnSelector
-              currentPage={page}
-              totalPages={totalPages}
-              pageSize={pageSize}
-              totalItems={totalItems}
-              onPageChange={setPage}
-            />
-          )}
+          <Table
+            columns={columns}
+            data={customers}
+            showToolbar
+            loading={custLoading || initialLoad}
+            onPageSizeChange={(size) => setPageSize(size)}
+            pageSizeOptions={[10, 25, 50, 100]}
+            searchValue={searchTerm}
+            onSearch={setSearchTerm}
+            enableAdd
+            addLabel="Add Customer"
+            onAdd={handleAddCustomer}
+            enableColumnSelector
+            currentPage={page}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            onPageChange={setPage}
+            extraFilters={
+              <div>
+                <FilterSelect
+                  value={taxCategory}
+                  onChange={(e) => {
+                    setPage(1);
+                    setTaxCategory(e.target.value);
+                  }}
+                  options={[
+                    { label: "Export", value: "Export" },
+                    { label: "Non-Export", value: "Non-Export" },
+                    { label: "LPO", value: "LPO" },
+                  ]}
+                />
+              </div>
+            }
+          />
         </>
       ) : selectedCustomer ? (
         <CustomerDetailView

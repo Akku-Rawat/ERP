@@ -47,7 +47,7 @@ export type AddressBlock = {
   email?: string;
 };
 
-export interface PurchaseOrderFormData {
+export interface PurchaseInvoiceFormData {
   poNumber: string;
   date: string;
   supplier: string;
@@ -58,6 +58,9 @@ export interface PurchaseOrderFormData {
   supplierCode: string;
   taxCategory: string;
   supplierContact: string;
+  paymentType: string;
+  transactionProgress: string;
+  supplierInvoiceNumber: string;
   
 destnCountryCd: string; // New field for Export country
   shippingRule: string;
@@ -141,7 +144,7 @@ export const emptyAddress: AddressBlock = {
   email: "",
 };
 
-export const emptyPOForm: PurchaseOrderFormData = {
+export const emptyPOForm: PurchaseInvoiceFormData = {
   poNumber: "",
   date: "",
   supplier: "",
@@ -154,6 +157,10 @@ export const emptyPOForm: PurchaseOrderFormData = {
   shippingRule: "",
   incoterm: "",
   taxesChargesTemplate: "",
+  supplierInvoiceNumber: "",
+  paymentType: "",
+  transactionProgress: "",
+
   costCenter: "",
   project: "",
 

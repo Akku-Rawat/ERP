@@ -6,18 +6,27 @@ type Item = {
   itemName: string;
   unitOfMeasureCd?: string;
   sellingPrice?: number;
+
+  taxPerct?: number;
+  vatRate?: number;
+  vatCd?: string;
+  taxCode?: string;
 };
+
 
 interface ItemSelectProps {
   value?: string;
   selectedId?: string;
-  onChange: (item: Item) => void;
+  taxCategory?: string;
   className?: string;
+  onChange: (item: Item) => void;
 }
+
 
 export default function POItemSelect({
   value = "",
   selectedId,
+  taxCategory,
   onChange,
   className = "",
 }: ItemSelectProps) {
@@ -31,13 +40,14 @@ const inputRef = useRef<HTMLInputElement>(null);
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
 
   // Load items
-  useEffect(() => {
-    const loadItems = async () => {
-      const res = await getAllItems(1, 1000);
-      setItems(res?.data?.data ?? res?.data ?? []);
-    };
-    loadItems();
-  }, []);
+useEffect(() => {
+  const loadItems = async () => {
+    const res = await getAllItems(1, 1000, taxCategory || undefined);
+    setItems(res?.data?.data ?? res?.data ?? []);
+  };
+
+  loadItems();
+}, [taxCategory]);
 
   // Set selected name
   useEffect(() => {

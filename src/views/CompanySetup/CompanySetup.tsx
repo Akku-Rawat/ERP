@@ -18,6 +18,7 @@ import BankDetails from "./BankDetails";
 import Upload from "./upload";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID as string;
 
+
 import type {
   CompanyDocuments,
   AccountingSetup,
@@ -193,8 +194,8 @@ const CompanySetup: React.FC = () => {
         )}
         {tab === "buyingSelling" && <BuyingSelling terms={terms} />}
         {tab === "subscribed" && <SubscribedModules />}
-        {tab === "Templates" && <Templates />}
-        {tab === "logo" && <Upload />}
+        {/* {tab === "Templates" && <Templates templates={companyTemplates} />} */}
+      {tab === "logo" && <Upload COMPANY_ID={COMPANY_ID} onUploadSuccess={fetchCompanyDetail} />}
       </div>
     </div>
   );

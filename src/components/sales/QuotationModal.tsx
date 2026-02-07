@@ -5,8 +5,8 @@ import {
 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 import { useQuotationForm } from "../../hooks/useQuotationForm";
-import {  Button } from "../../components/ui/modal/formComponent";
-import { ModalSelect,ModalInput } from "../ui/modal/modalComponent";
+import { Button } from "../../components/ui/modal/formComponent";
+import { ModalSelect, ModalInput } from "../ui/modal/modalComponent";
 import CustomerSelect from "../selects/CustomerSelect";
 import ItemSelect from "../selects/ItemSelect";
 import Modal from "../../components/ui/modal/modal";
@@ -96,25 +96,25 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     toast.success("Print functionality - Opens print dialog");
   };
 
-    const footerContent = (
-      <>
-        <Button variant="secondary" onClick={onClose} type="button">
-          Cancel
+  const footerContent = (
+    <>
+      <Button variant="secondary" onClick={onClose} type="button">
+        Cancel
+      </Button>
+      <div className="flex gap-2">
+        <Button variant="ghost" onClick={actions.handleReset} type="button">
+          Reset
         </Button>
-        <div className="flex gap-2">
-          <Button variant="ghost" onClick={actions.handleReset} type="button">
-            Reset
-          </Button>
-          <Button variant="primary" type="submit" onClick={handleFormSubmit}>
-            Save Invoice
-          </Button>
-        </div>
-      </>
-    );
-  
+        <Button variant="primary" type="submit" onClick={handleFormSubmit}>
+          Save Invoice
+        </Button>
+      </div>
+    </>
+  );
+
 
   return (
-      <Modal
+    <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Create Quotation"
@@ -124,7 +124,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
       maxWidth="6xl"
       height="81vh"
     >
-        
+
       <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
@@ -138,11 +138,10 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                 key={tab.key}
                 type="button"
                 onClick={() => ui.setActiveTab(tab.key as any)}
-                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${
-                  ui.activeTab === tab.key
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab.key
                     ? "text-primary border-b-[3px] border-primary"
                     : "text-muted border-b-[3px] border-transparent hover:text-main"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -154,99 +153,97 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
         <div className="flex-1 overflow-y-auto px-8 py-4">
           {/* DETAILS TAB */}
           {ui.activeTab === "details" && (
-  <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
-    <div className="">
-      <div className="grid grid-cols-6 gap-3 items-end">
+            <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
+              <div className="">
+                <div className="grid grid-cols-6 gap-3 items-end">
 
-        {/* Customer */}
-       
-          <CustomerSelect
-            value={customerNameDisplay}
-            onChange={actions.handleCustomerSelect}
-            className="w-full"
-          />
-     
+                  {/* Customer */}
 
-        {/* Date of Quotation */}
-        <div>
-          <label className="block text-[10px] font-medium text-main mb-1">
-            Date of Quotation *
-          </label>
-          <input
-            type="date"
-            name="dateOfInvoice"
-            value={formData.dateOfInvoice}
-            onChange={actions.handleInputChange}
-            className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-          />
-        </div>
+                  <CustomerSelect
+                    value={customerNameDisplay}
+                    onChange={actions.handleCustomerSelect}
+                    className="w-full"
+                  />
 
-        {/* Valid Until */}
-        <div>
-          <label className="block text-[10px] font-medium text-main mb-1">
-            Valid Until *
-          </label>
-          <input
-            type="date"
-            name="dueDate"
-            value={formData.dueDate}
-            onChange={actions.handleInputChange}
-            className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-          />
-        </div>
 
-        {/* Currency */}
-        <div>
-          
-          <ModalSelect
-            label="Currency "
-            name="currencyCode"
-            value={formData.currencyCode}
-            onChange={actions.handleInputChange}
-            options={[...currencyOptions]}
-            className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-          >
-           
-          </ModalSelect>
-        </div>
+         
+                  {/* Date of Quotation */}
+                  <div>
+                    <ModalInput
+                      label="Date of Quotation"
+                      type="date"
+                      name="dateOfInvoice"
+                      value={formData.dateOfInvoice}
+                      onChange={actions.handleInputChange}
+                      required
+                    />
+                  </div>
 
-        {/* Status */}
-        <div>
-          
-          <ModalSelect
-           label="Status"
-            name="invoiceStatus"
-            value={formData.invoiceStatus}
-            onChange={actions.handleInputChange}
-            options={[...invoiceStatusOptions]}
-            className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-          >
-            
-          </ModalSelect>
-        </div>
+                  {/* Valid Until */}
+                  <div>
+                    <ModalInput
+                      label="Valid Until"
+                      type="date"
+                      name="dueDate"
+                      value={formData.dueDate}
+                      onChange={actions.handleInputChange}
+                      required
+                    />
+                  </div>
 
-        {/* LPO Number */}
-        {ui.isLocal && (
-          <div>
-            <label className="block text-[10px] font-medium text-main mb-1">
-              LPO Number
-            </label>
-            <input
-              type="text"
-              name="lpoNumber"
-              value={formData.lpoNumber}
-              onChange={actions.handleInputChange}
-              className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-            />
-          </div>
-        )}
-      </div>
-    </div>
 
-    {/* ================= MAIN BODY (TABLE LEFT + RIGHT SIDEBAR) ================= */}
-    <div className="grid grid-cols-[4fr_1fr] gap-4">
-      {/* LEFT: QUOTED ITEMS TABLE  */}
-        <div className="bg-card rounded-lg p-2 shadow-sm flex-1">
+                  {/* Currency */}
+                  <div>
+
+                    <ModalSelect
+                      label="Currency "
+                      name="currencyCode"
+                      value={formData.currencyCode}
+                      onChange={actions.handleInputChange}
+                      options={[...currencyOptions]}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    >
+
+                    </ModalSelect>
+                  </div>
+
+                  {/* Status */}
+                  <div>
+
+                    <ModalSelect
+                      label="Status"
+                      name="invoiceStatus"
+                      value={formData.invoiceStatus}
+                      onChange={actions.handleInputChange}
+                      options={[...invoiceStatusOptions]}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    >
+
+                    </ModalSelect>
+                  </div>
+
+                  {/* LPO Number */}
+                  {ui.isLocal && (
+                    <div>
+                      <label className="block text-[10px] font-medium text-main mb-1">
+                        LPO Number
+                      </label>
+                      <input
+                        type="text"
+                        name="lpoNumber"
+                        value={formData.lpoNumber}
+                        onChange={actions.handleInputChange}
+                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ================= MAIN BODY (TABLE LEFT + RIGHT SIDEBAR) ================= */}
+              <div className="grid grid-cols-[4fr_1fr] gap-4">
+                {/* LEFT: QUOTED ITEMS TABLE  */}
+                <div className="bg-card rounded-lg p-2 shadow-sm flex-1">
                   <div className="flex items-center gap-1 ">
                     <h3 className="text-sm font-semibold text-main">
                       Quoted Items
@@ -399,10 +396,10 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   onClick={() => actions.removeItem(i)}
                                   className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
                                 >
-                                    <Trash2 className="w-4 h-4" />
+                                  <Trash2 className="w-4 h-4" />
                                 </button>
 
-                                 
+
                               </td>
                             </tr>
                           );
@@ -411,8 +408,8 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     </table>
                   </div>
 
-                 
-                 <div className="mt-3 flex justify-between items-center gap-3">
+
+                  <div className="mt-3 flex justify-between items-center gap-3">
 
                     {/* Add Item Button */}
                     <button
@@ -425,134 +422,134 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     </button>
 
                     {/* Pagination Controls */}
-                   {(ui.itemCount > 5 || ui.page > 0) && (
-  <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
+                    {(ui.itemCount > 5 || ui.page > 0) && (
+                      <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
 
-    <div className="text-[11px] text-muted whitespace-nowrap">
-      Showing {ui.page * 5 + 1} to{" "}
-      {Math.min((ui.page + 1) * 5, ui.itemCount)} of {ui.itemCount} items
-    </div>
-
-    <div className="flex gap-1.5 items-center">
-      <button
-        type="button"
-        onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
-        disabled={ui.page === 0}
-        className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
-      >
-        Previous
-      </button>
-
-      <button
-        type="button"
-        onClick={() => ui.setPage(ui.page + 1)}
-        disabled={(ui.page + 1) * 5 >= ui.itemCount}
-        className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
-      >
-        Next
-      </button>
-    </div>
-
-  </div>
-)}
-
-                  </div>
-
-                </div>
-      
-
-      {/* RIGHT: CUSTOMER DETAILS + SUMMARY (STACKED) */}
-      <div className="flex flex-col gap-2">
-
-        <div className="flex flex-col gap-2">
-                {/* Customer Details */}
-                <div className="bg-card rounded-lg p-2 w-[220px]">
-                  <h3 className="text-[12px] font-semibold text-main mb-2">
-                    Customer Details
-                  </h3>
-
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-1.5 text-xs text-main">
-                      <span className="flex items-center gap-2">
-                        <User size={16} className="text-muted" />
-                        <span className="text-xs text-main">
-                          {customerDetails?.name ?? "Customer Name"}
-                        </span>
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-[10px] text-muted">
-                      <Mail size={14} className="text-muted" />
-                      <span>
-                        {customerDetails?.email ?? "customer@gmail.com"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-[10px] text-muted">
-                      <Phone size={14} className="text-muted" />
-                      <span>
-                        {customerDetails?.mobile_no ?? "+123 4567890"}
-                      </span>
-                    </div>
-                    {customerDetails && (
-                      <div className="bg-card rounded-lg ">
-                        <h3 className="text-[11px] font-semibold text-main mb-1">
-                          Invoice Information
-                        </h3>
-
-                        <div className="flex flex-col gap-1">
-                          {/* Invoice Type */}
-                          <div className="flex items-center gap-19 text-xs">
-                            <span className="text-muted">Invoice Type</span>
-                            <span className="font-medium text-main">
-                              {formData.invoiceType}
-                            </span>
-                          </div>
-
-                          {/* Destination Country – only for Export */}
-                          {formData.invoiceType === "Export" && (
-                            <div className="flex items-center gap-15 text-xs">
-                              <span className="text-muted">
-                                Destination Country
-                              </span>
-                              <span className="font-medium text-main">
-                                {formData.destnCountryCd || "-"}
-                              </span>
-                            </div>
-                          )}
+                        <div className="text-[11px] text-muted whitespace-nowrap">
+                          Showing {ui.page * 5 + 1} to{" "}
+                          {Math.min((ui.page + 1) * 5, ui.itemCount)} of {ui.itemCount} items
                         </div>
+
+                        <div className="flex gap-1.5 items-center">
+                          <button
+                            type="button"
+                            onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
+                            disabled={ui.page === 0}
+                            className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+                          >
+                            Previous
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => ui.setPage(ui.page + 1)}
+                            disabled={(ui.page + 1) * 5 >= ui.itemCount}
+                            className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+                          >
+                            Next
+                          </button>
+                        </div>
+
                       </div>
                     )}
+
                   </div>
+
                 </div>
 
-                {/* Summary */}
-                <div className="bg-card rounded-lg p-3  w-[220px]">
-                  <h3 className="text-[13px] font-semibold text-main mb-2">
-                    Summary
-                  </h3>
+
+                {/* RIGHT: CUSTOMER DETAILS + SUMMARY (STACKED) */}
+                <div className="flex flex-col gap-2">
 
                   <div className="flex flex-col gap-2">
-                     <div className="flex items-center gap-19 text-xs">
-                      <span className="text-muted">Total Items</span>
-                      <span className="font-medium text-main">
-                        {formData.items.length}
-                      </span>
+                    {/* Customer Details */}
+                    <div className="bg-card rounded-lg p-2 w-[220px]">
+                      <h3 className="text-[12px] font-semibold text-main mb-2">
+                        Customer Details
+                      </h3>
+
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-1.5 text-xs text-main">
+                          <span className="flex items-center gap-2">
+                            <User size={16} className="text-muted" />
+                            <span className="text-xs text-main">
+                              {customerDetails?.name ?? "Customer Name"}
+                            </span>
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-[10px] text-muted">
+                          <Mail size={14} className="text-muted" />
+                          <span>
+                            {customerDetails?.email ?? "customer@gmail.com"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-[10px] text-muted">
+                          <Phone size={14} className="text-muted" />
+                          <span>
+                            {customerDetails?.mobile_no ?? "+123 4567890"}
+                          </span>
+                        </div>
+                        {customerDetails && (
+                          <div className="bg-card rounded-lg ">
+                            <h3 className="text-[11px] font-semibold text-main mb-1">
+                              Invoice Information
+                            </h3>
+
+                            <div className="flex flex-col gap-1">
+                              {/* Invoice Type */}
+                              <div className="flex items-center gap-19 text-xs">
+                                <span className="text-muted">Invoice Type</span>
+                                <span className="font-medium text-main">
+                                  {formData.invoiceType}
+                                </span>
+                              </div>
+
+                              {/* Destination Country – only for Export */}
+                              {formData.invoiceType === "Export" && (
+                                <div className="flex items-center gap-15 text-xs">
+                                  <span className="text-muted">
+                                    Destination Country
+                                  </span>
+                                  <span className="font-medium text-main">
+                                    {formData.destnCountryCd || "-"}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                     <div className="flex items-center gap-19 text-xs">
-                      <span className="text-muted">Subtotal</span>
-                      <span className="font-medium text-main">
-                        {symbol} {totals.subTotal.toFixed(2)}
-                      </span>
-                    </div>
+                    {/* Summary */}
+                    <div className="bg-card rounded-lg p-3  w-[220px]">
+                      <h3 className="text-[13px] font-semibold text-main mb-2">
+                        Summary
+                      </h3>
 
-                     <div className="flex items-center gap-19 text-xs">
-                      <span className="text-muted">Total Tax</span>
-                      <span className="font-medium text-main">
-                        {symbol} {totals.totalTax.toFixed(2)}
-                      </span>
-                    </div>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-19 text-xs">
+                          <span className="text-muted">Total Items</span>
+                          <span className="font-medium text-main">
+                            {formData.items.length}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-19 text-xs">
+                          <span className="text-muted">Subtotal</span>
+                          <span className="font-medium text-main">
+                            {symbol} {totals.subTotal.toFixed(2)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-19 text-xs">
+                          <span className="text-muted">Total Tax</span>
+                          <span className="font-medium text-main">
+                            {symbol} {totals.totalTax.toFixed(2)}
+                          </span>
+                        </div>
 
                         <div className="mt-2 p-2 bg-primary rounded-lg w-full">
                           <div className="flex justify-between items-center">
@@ -566,16 +563,16 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                           </div>
                         </div>
 
+                      </div>
+                    </div>
                   </div>
+
                 </div>
               </div>
+            </div>
+          )}
 
-      </div>
-    </div>
-  </div>
-)}
 
-        
 
           {/* TERMS TAB */}
           {ui.activeTab === "terms" && (
@@ -808,8 +805,8 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
           )}
         </div>
 
-        
-     </form>
+
+      </form>
     </Modal>
   );
 };

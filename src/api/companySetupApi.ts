@@ -38,3 +38,39 @@ export async function updateAccountsCompany(payload: any): Promise<any> {
   const resp: AxiosResponse = await api.put(CompanyAPI.updateAccounts, payload);
   return resp.data;
 }
+/**
+ * Update company files (logo and signature)
+ */
+export async function updateCompanyFiles(
+  companyId: string,
+  logoFile?: File | null,
+  signatureFile?: File | null
+): Promise<any> {
+  const formData = new FormData();
+  
+  
+  formData.append("id", companyId);
+  
+ 
+  if (logoFile) {
+    formData.append("documents[companyLogoUrl]", logoFile);
+  }
+  
+
+  if (signatureFile) {
+    formData.append("documents[authorizedSignatureUrl]", signatureFile);
+  }
+  
+  
+  const resp: AxiosResponse = await api.patch(
+    ENDPOINTS.updateCompanyFiles,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  
+  return resp.data;
+}
