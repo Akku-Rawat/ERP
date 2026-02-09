@@ -127,9 +127,10 @@ export const API = {
   invoice: {
     getAll: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.get_sales_invoice`,
     getById: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.get_sales_invoice_by_id`,
-    create: `${ERP_BASE}/api/method/erpnext.zra_client..sales.api.create_sales_invoice`,
-    updateStatus: `${ERP_BASE}/api/method/erpnext.zra_client..sales.api.update_invoice_status`,
-    delete: `${ERP_BASE}/api/method/erpnext.zra_client..sales.api.delete_sales_invoice`,
+    create: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.create_sales_invoice`,
+
+    updateStatus: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.update_invoice_status`,
+    delete: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.delete_sales_invoice`,
     createCreditNote: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.create_credit_note_from_sales_invoice`,
     createDebitNote: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.create_debit_note_from_invoice`,
     getCreditNotes: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.get_credit_notes`,

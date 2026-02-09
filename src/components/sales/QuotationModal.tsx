@@ -106,7 +106,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
           Reset
         </Button>
         <Button variant="primary" type="submit" onClick={handleFormSubmit}>
-          Save Invoice
+          Save Quotation
         </Button>
       </div>
     </>

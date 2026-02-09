@@ -6,7 +6,7 @@ import { Plus, Trash2 ,User , Mail , Phone } from "lucide-react";
 import { useEffect } from "react";
 import { getSalesInvoiceById } from "../../api/salesApi";
 import { getAllSalesInvoices } from "../../api/salesApi";
-
+import { Button } from "../../components/ui/modal/formComponent";
 import { createCreditNoteFromInvoice } from "../../api/salesApi";
 
 import {
@@ -27,6 +27,9 @@ import {
 
 interface CreditNoteInvoiceLikeFormProps {
   onSubmit?: (data: any) => void;
+  isOpen: boolean;
+  onClose: () => void;  
+
   invoiceId: string;
 }
 const CREDIT_NOTE_REASONS = [
@@ -48,7 +51,10 @@ const TRANSACTION_PROGRESS = [
 
 const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
   onSubmit,
-  invoiceId,
+ invoiceId,
+ isOpen,
+  onClose,
+ 
 }) => {
   const {
     formData,
@@ -163,7 +169,12 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
 
   return (
-    <form onSubmit={actions.handleSubmit} className="h-full flex flex-col">
+<form
+  id="credit-note-form"
+  onSubmit={actions.handleSubmit}
+  className="flex flex-col"
+>
+
       {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
@@ -844,6 +855,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
         )}
       </div>
     </form>
+    
   );
 };
 

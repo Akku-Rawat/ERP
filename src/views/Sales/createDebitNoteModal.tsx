@@ -2,6 +2,9 @@ import React from "react";
 import Modal from "../../components/ui/modal/modal";
 import DebitNoteForm from "./debitNoteform";
 import { FileMinus } from "lucide-react";
+import { Button } from "../../components/ui/modal/formComponent";
+
+
 
 interface Props {
   isOpen: boolean;
@@ -16,11 +19,28 @@ const CreateDebitNoteModal: React.FC<Props> = ({
   onSubmit,
   invoiceId,
 }) => {
+  const footerContent = (
+  <>
+    <Button variant="secondary" onClick={onClose} type="button">
+      Cancel
+    </Button>
+
+    <Button
+      variant="primary"
+      type="submit"
+      form="debit-note-form"
+    >
+      Create Debit Note
+    </Button>
+  </>
+);
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Create Debit Note"
+      footer={footerContent}
       subtitle="Sales Invoice Adjustment"
       icon={FileMinus}
       maxWidth="6xl"

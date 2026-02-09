@@ -159,7 +159,16 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
 
   return (
-    <form onSubmit={actions.handleSubmit} className="h-full flex flex-col">
+   <form
+  id="debit-note-form"
+  onSubmit={(e) => {
+    e.preventDefault();
+    handleCreateDebitNote();   
+  }}
+  className="flex flex-col"
+>
+
+
       {/* Tabs */}
        <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
