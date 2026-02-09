@@ -1,41 +1,46 @@
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "../axiosInstance";
 
-const base_url = import.meta.env.VITE_SUPPLIER_API_URL as string;
-const api = createAxiosInstance(base_url);
+
+import { API, ERP_BASE } from "../../config/api";
+const api = createAxiosInstance(ERP_BASE);
+
+export const SupplierAPI = API.supplier;
 
 
-const ENDPOINTS = {
-  getSuppliers: `${base_url}.get_suppliers`,
-  createSupplier: `${base_url}.create_supplier`,
-  getSupplierById: `${base_url}.get_supplier_details_id`,
-  updateSupplier: `${base_url}.update_supplier`,
-};
 
 
 export async function getSuppliers(page = 1, pageSize = 10) {
-  const resp = await api.get(
-    `${ENDPOINTS.getSuppliers}?page=${page}&page_size=${pageSize}`
+  const resp = await await api.get(SupplierAPI.getAll,
+    {
+    params: {
+      page,
+      pageSize
+      
+    },
+  }
+    
   );
+  return resp.data;
   return resp.data;
 }
 
 
 export async function createSupplier(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(ENDPOINTS.createSupplier, payload);
+  const resp: AxiosResponse = await api.post(SupplierAPI.create, payload);
   return resp.data;
 }
 
 export async function getSupplierById(id: string | number): Promise<any> {
   const resp = await api.get(
-    `${ENDPOINTS.getSupplierById}?supplierId=${id}`
+    `${SupplierAPI.getById}?supplierId=${id}`
   );
   return resp.data;
 }
 
 
 export async function updateSupplier(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.patch(ENDPOINTS.updateSupplier, payload);
+  const resp: AxiosResponse = await api.patch(SupplierAPI.update, payload);
   return resp.data;
 }
 

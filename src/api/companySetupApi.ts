@@ -63,7 +63,7 @@ export async function updateCompanyFiles(
   
   
   const resp: AxiosResponse = await api.patch(
-    ENDPOINTS.updateCompanyFiles,
+    CompanyAPI.updateCompanyFiles,
     formData,
     {
       headers: {

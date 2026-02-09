@@ -1,3 +1,4 @@
+import { updateCompanyFiles } from "../api/companySetupApi";
 import { ENV } from "./env";
 
 export const ERP_BASE = ENV.apiBaseUrl;
@@ -15,6 +16,8 @@ export const API = {
     updateById: `${ERP_BASE}/method/erpnext.company-setup.setup.update_company_api`,
     delete: `${ERP_BASE}/method/erpnext.company-setup.setup.delete_company_api`,
     updateAccounts: `${ERP_BASE}/method/erpnext.company-setup.setup.update_accounts_company_info`,
+    updateCompanyFiles:`${ERP_BASE}/method/erpnext.company-setup.setup.update_company_files`,
+    
   },
 
   /* =========================
@@ -157,22 +160,33 @@ export const API = {
    * PURCHASE ORDER
    * ========================= */
   purchaseOrder: {
-    getAll: `${ERP_BASE}/method/erpnext.zra_client.get_purchase_orders`,
+    getAll: `${ERP_BASE}/method/erpnext.zra_client.purchase.order.get_purchase_orders`,
+    
     getById: `${ERP_BASE}/method/erpnext.zra_client.get_purchase_order`,
     create: `${ERP_BASE}/method/erpnext.zra_client.create_purchase_order`,
     update: `${ERP_BASE}/method/erpnext.zra_client.update_purchase_order`,
     updateStatus: `${ERP_BASE}/method/erpnext.zra_client.update_purchase_order_status`,
+  },
+  //purchase invoice
+ purchaseIvoice: {
+    getAll: `${ERP_BASE}/method/erpnext.zra_client.purchase.invoice.get_all_purchase_invoices`,
+    
+    getById: `${ERP_BASE}/method/erpnext.zra_client.purchase.invoice.get_purchase_order`,
+    create: `${ERP_BASE}/method/erpnext.zra_client.purcahse.invoice.create_purchase_order`,
+    update: `${ERP_BASE}/method/erpnext.zra_client.purchase.invoice.update_purchase_order`,
+    updateStatus: `${ERP_BASE}/method/erpnext.zra_client.purchase.invoice.update_purchase_order_status`,
   },
 
   /* =========================
    * SUPPLIER
    * ========================= */
   supplier: {
-    getAll: `${ERP_BASE}/method/erpnext.zra_client.get_suppliers`,
-    getById: `${ERP_BASE}/method/erpnext.zra_client.get_supplier_details_id`,
-    create: `${ERP_BASE}/method/erpnext.zra_client.create_supplier`,
-    update: `${ERP_BASE}/method/erpnext.zra_client.update_supplier`,
-    delete: `${ERP_BASE}/method/erpnext.zra_client.delete_supplier`,
+
+    getAll: `${ERP_BASE}/method/erpnext.supplier.api.get_suppliers`,
+    getById: `${ERP_BASE}/method/erpnext.supplier.api.get_supplier_details_id`,
+    create: `${ERP_BASE}/method/erpnext.supplier.api.create_supplier`,
+    update: `${ERP_BASE}/method/erpnext.supplier.api.update_supplier`,
+    delete: `${ERP_BASE}/method/erpnext.supplier.api.delete_supplier`,
   },
 
   /* =========================

@@ -13,6 +13,7 @@ import ActionButton, {
 import type { Column } from "../../components/ui/Table/type";
 
 import { getPurchaseOrders ,updatePurchaseOrderStatus } from "../../api/procurement/PurchaseOrderApi";
+import { data } from "react-router-dom";
 
 interface PurchaseOrder {
   id: string;
@@ -98,15 +99,15 @@ useEffect(() => {
   setViewModalOpen(true);
 };
   //  FILTER 
-  const filteredOrders = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    return orders.filter(
-      (o) =>
-        o.id.toLowerCase().includes(term) ||
-        o.supplier.toLowerCase().includes(term) ||
-        o.status.toLowerCase().includes(term),
-    );
-  }, [orders, searchTerm]);
+  // const filteredOrders = useMemo(() => {
+  //   const term = searchTerm.toLowerCase();
+  //   return orders.filter(
+  //     (o) =>
+  //       o.id.toLowerCase().includes(term) ||
+  //       o.supplier.toLowerCase().includes(term) ||
+  //       o.status.toLowerCase().includes(term),
+  //   );
+  // }, [orders, searchTerm]);
 
   //  MODAL HANDLERS 
   const handleAddClick = () => {
@@ -216,7 +217,7 @@ const handleStatusChange = async (
     <div className="p-6">
       <Table
         columns={columns}
-        data={filteredOrders}
+        data={orders}
         showToolbar
         loading={loading}
         searchValue={searchTerm}
