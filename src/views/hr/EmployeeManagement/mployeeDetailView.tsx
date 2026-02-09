@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { updateEmployeeDocuments } from "../../../api/employeeapi";
+import { ERP_BASE } from "../../../config/api";
 
 // Props matching your original structure
 type Props = {
@@ -21,10 +22,9 @@ type Props = {
   onDocumentUploaded: () => Promise<void>;
 };
 
-const FILE_BASE_URL = "http://41.60.191.7:8081";
 const getFileUrl = (file?: string | null) => {
   if (!file) return null;
-  return `${FILE_BASE_URL}${file}`;
+  return `${ERP_BASE}${file}`;
 };
 
 // Document Upload Modal Component
