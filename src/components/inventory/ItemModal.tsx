@@ -57,10 +57,11 @@ const emptyForm: Record<string, any> = {
 };
 
 const itemTypeCodeOptions = [
-  { value: 1, label: "Raw Material" },
-  { value: 2, label: "Finished Product" },
-  { value: 3, label: "Service" },
-] as const;
+  { value: "1", label: "Raw Material" },
+  { value: "2", label: "Finished Product" },
+  { value: "3", label: "Service" },
+];
+
 
 const ItemModal: React.FC<{
   isOpen: boolean;
@@ -80,12 +81,14 @@ const ItemModal: React.FC<{
     "details" | "taxDetails" | "inventoryDetails"
   >("details");
 
-  useEffect(() => {
-    if (isOpen) {
-      setForm(initialData || emptyForm);
-      setActiveTab("details");
-    }
-  }, [isOpen, initialData]);
+useEffect(() => {
+  if (!isOpen) return;
+
+  setForm(isEditMode && initialData ? initialData : emptyForm);
+  setActiveTab("details");
+}, [isOpen]);
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
