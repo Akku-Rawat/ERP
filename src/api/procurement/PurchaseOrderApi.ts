@@ -4,7 +4,7 @@ import { createAxiosInstance } from "../axiosInstance";
 
 import { API, ERP_BASE } from "../../config/api";
 const api = createAxiosInstance(ERP_BASE);
-export const purchaseorderapi = API.company;
+export const purchaseorderapi = API.purchaseOrder;
 
 
 
@@ -46,7 +46,7 @@ export async function getPurchaseOrdersBySupplier(
   pageSize = 5,
   status = ""
 ) {
-  const resp = await api.get(ENDPOINTS.getPurchaseOrders, {
+  const resp = await api.get(purchaseorderapi.getAll, {
     params: {
       supplier: supplierName,
       page,
@@ -70,7 +70,7 @@ export async function updatePurchaseOrderStatus(
   status: string,
 ): Promise<any> {
   const resp: AxiosResponse = await api.patch(
-    ENDPOINTS.updatePOStatus,
+    purchaseorderapi.updateStatus,
     {
       id,
       status: status.toLowerCase(), 

@@ -1,4 +1,5 @@
 import { updateCompanyFiles } from "../api/companySetupApi";
+import { getPurchaseInvoiceById } from "../api/procurement/PurchaseInvoiceApi";
 import { ENV } from "./env";
 
 export const ERP_BASE = ENV.apiBaseUrl;
@@ -162,19 +163,28 @@ export const API = {
   purchaseOrder: {
     getAll: `${ERP_BASE}/method/erpnext.zra_client.purchase.order.get_purchase_orders`,
     
-    getById: `${ERP_BASE}/method/erpnext.zra_client.get_purchase_order`,
-    create: `${ERP_BASE}/method/erpnext.zra_client.create_purchase_order`,
+    getById: `${ERP_BASE}/method/erpnext.zra_client.purchase.order.get_purchase_order`,
+
+    create: `${ERP_BASE}/method/erpnext.zra_client.purchase.order.create_purchase_order`,
+   
     update: `${ERP_BASE}/method/erpnext.zra_client.update_purchase_order`,
-    updateStatus: `${ERP_BASE}/method/erpnext.zra_client.update_purchase_order_status`,
+    updateStatus: `${ERP_BASE}/method/erpnext.zra_client.purchase.order.update_purchase_order_status`,
+
+    
   },
   //purchase invoice
  purchaseIvoice: {
     getAll: `${ERP_BASE}/method/erpnext.zra_client.purchase.invoice.get_all_purchase_invoices`,
     
-    getById: `${ERP_BASE}/method/erpnext.zra_client.purchase.invoice.get_purchase_order`,
-    create: `${ERP_BASE}/method/erpnext.zra_client.purcahse.invoice.create_purchase_order`,
-    update: `${ERP_BASE}/method/erpnext.zra_client.purchase.invoice.update_purchase_order`,
-    updateStatus: `${ERP_BASE}/method/erpnext.zra_client.purchase.invoice.update_purchase_order_status`,
+    getById: `${ERP_BASE}/method/erpnext.zra_client.purchase.invoice.get_purchase_invoice_by_id`,
+    create: `${ERP_BASE}/method/erpnext.zra_client.purchase.invoice.create_purchase_invoice`,
+    
+
+    
+    update: `${ERP_BASE}/method/erpnext.zra_client.purchase.invoice.update_purchase_invoice`,
+    
+    updateStatus: `${ERP_BASE}/method/erpnext.zra_client.purchase.invoice.update_purchase_invoices_status`,
+    
   },
 
   /* =========================

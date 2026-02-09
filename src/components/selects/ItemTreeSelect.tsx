@@ -437,7 +437,8 @@ const levelColors = [
     const isExpanded = expanded[node.code];
     const hasChildren = node.children.length > 0;
     const isSelected = node.code === value;
-    const isLeaf = node.level === 4 || !hasChildren;
+   const isLeaf = !hasChildren;
+
 
     return (
       <div key={node.code} style={{ marginLeft: `${depth * 16}px` }}>

@@ -5,7 +5,7 @@ import { createAxiosInstance } from "../axiosInstance";
 
 import { API, ERP_BASE } from "../../config/api";
 const api = createAxiosInstance(ERP_BASE);
-export const purchaseinvoiceapi = API.company;
+export const purchaseinvoiceapi = API.purchaseIvoice;
 
 
 export async function createPurchaseInvoice(payload: any): Promise<any> {
@@ -42,7 +42,8 @@ export async function updatePurchaseinvoiceStatus(
   };
 
   const resp: AxiosResponse = await api.patch(
-    purchaseinvoiceapi.update,
+    purchaseinvoiceapi.updateStatus,
+    
     payload
   );
 

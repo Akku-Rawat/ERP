@@ -69,6 +69,8 @@ const fetchOrders = async () => {
     setLoading(true);
 
     const res = await getPurchaseOrders(page, pageSize);
+    console.log("RAW PO:", res.data[0]);
+
 
     setTotalPages(res.pagination?.total_pages || 1);
     setTotalItems(res.pagination?.total || 0);
@@ -81,6 +83,8 @@ const fetchOrders = async () => {
       amount: po.grandTotal,
       status: po.status,
     }));
+  
+
 
     setOrders(mappedOrders);
   } catch (err) {
@@ -99,15 +103,16 @@ useEffect(() => {
   setViewModalOpen(true);
 };
   //  FILTER 
-  // const filteredOrders = useMemo(() => {
-  //   const term = searchTerm.toLowerCase();
-  //   return orders.filter(
-  //     (o) =>
-  //       o.id.toLowerCase().includes(term) ||
-  //       o.supplier.toLowerCase().includes(term) ||
-  //       o.status.toLowerCase().includes(term),
-  //   );
-  // }, [orders, searchTerm]);
+ const filteredOrders = useMemo(() => {
+  const term = searchTerm.toLowerCase();
+
+  return orders.filter((o) =>
+    (o.id ?? "").toLowerCase().includes(term) ||
+    (o.supplier ?? "").toLowerCase().includes(term) ||
+    (o.status ?? "").toLowerCase().includes(term)
+  );
+}, [orders, searchTerm]);
+
 
   //  MODAL HANDLERS 
   const handleAddClick = () => {
@@ -217,7 +222,7 @@ const handleStatusChange = async (
     <div className="p-6">
       <Table
         columns={columns}
-        data={orders}
+        data={filteredOrders}
         showToolbar
         loading={loading}
         searchValue={searchTerm}
