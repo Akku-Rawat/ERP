@@ -9,6 +9,7 @@ import { getAllSalesInvoices } from "../../api/salesApi";
 import { Button } from "../../components/ui/modal/formComponent";
 import { createCreditNoteFromInvoice } from "../../api/salesApi";
 
+
 import {
   Textarea,
 } from "../../components/ui/modal/formComponent";
@@ -155,10 +156,10 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
         })),
       };
 
-      console.log("FINAL CREDIT NOTE PAYLOAD", payload);
+     
 
       const res = await createCreditNoteFromInvoice(payload);
-      console.log("Credit Note Created", res);
+      
 
       onSubmit?.(res);
     } catch (err) {
@@ -171,9 +172,12 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
   return (
 <form
   id="credit-note-form"
-  onSubmit={actions.handleSubmit}
-  className="flex flex-col"
+  onSubmit={(e) => {
+    e.preventDefault();
+    handleCreateCreditNote();
+  }}
 >
+
 
       {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
