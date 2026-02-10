@@ -29,6 +29,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               name="tpin"
               value={form.tpin}
               onChange={onChange}
+              placeholder="maximum 10 digit"
               required
             />
             <Input

@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Modal from "../ui/modal/modal";
+import { getCompanyById } from "../../api/companySetupApi";
+const companyId  = import.meta.env.VITE_COMPANY_ID;
+
 import {
   Input,
   Select,
@@ -69,6 +72,8 @@ const customerTaxCategoryOptions = ["Export", "Non-Export", "LPO"];
 
 const CustomerModal: React.FC<{
   isOpen: boolean;
+
+
   onClose: () => void;
   onSubmit?: (data: CustomerDetail) => void;
   initialData?: CustomerDetail | null;
@@ -82,6 +87,43 @@ const CustomerModal: React.FC<{
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
     "details",
   );
+
+
+useEffect(() => {
+  if (!isOpen || !companyId || isEditMode) return;
+
+  const loadCompanyTerms = async () => {
+    try {
+      const res = await getCompanyById(companyId);
+
+      const sellingTerms = res?.data?.terms?.selling;
+
+      if (!sellingTerms) {
+        console.warn("Company selling terms not found");
+        return;
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        terms: {
+          ...prev.terms,
+          selling: sellingTerms,
+        },
+      }));
+    } catch (err) {
+      console.error("Failed to load company terms", err);
+    }
+  };
+
+  loadCompanyTerms();
+}, [companyId, isOpen, isEditMode]);
+
+
+
+
+
+
+
 
   useEffect(() => {
     if (initialData) {
