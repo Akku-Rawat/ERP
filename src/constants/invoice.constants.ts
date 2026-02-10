@@ -47,7 +47,7 @@ export const DEFAULT_INVOICE_FORM = {
   dateOfInvoice: "",
   dueDate: "",
   invoiceStatus: "Draft",
-  invoiceType: "lpo",
+  invoiceType: "LPO",
   destnCountryCd: "",
   lpoNumber: "",
 
@@ -79,8 +79,15 @@ export const DEFAULT_INVOICE_FORM = {
   },
 
   items: [{ ...EMPTY_ITEM }],
-  terms: EMPTY_TERMS,
+  terms: {
+    selling: {
+      payment: {
+        phases: [],
+      },
+    },
+  },
 };
+
 
 /* =========================
    INVOICE STATUS
