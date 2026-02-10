@@ -13,7 +13,7 @@ export const API = {
     getAll: `${ERP_BASE}/api/method/erpnext.company-setup.setup.get_companies_api`,
     getById: `${ERP_BASE}/api/method/erpnext.company-setup.setup.get_company_api`,
     create: `${ERP_BASE}/api/method/erpnext.company-setup.setup.create_company_api`,
-    update: `${ERP_BASE}/api/method/erpnext.company-setup.setup.update_company_info`,
+    // update: `${ERP_BASE}/api/method/erpnext.company-setup.setup.update_company_info`,
     updateById: `${ERP_BASE}/api/method/erpnext.company-setup.setup.update_company_api`,
     delete: `${ERP_BASE}/api/method/erpnext.company-setup.setup.delete_company_api`,
     updateAccounts: `${ERP_BASE}/api/method/erpnext.company-setup.setup.update_accounts_company_info`,
@@ -127,9 +127,10 @@ export const API = {
   invoice: {
     getAll: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.get_sales_invoice`,
     getById: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.get_sales_invoice_by_id`,
-    create: `${ERP_BASE}/api/method/erpnext.zra_client..sales.api.create_sales_invoice`,
-    updateStatus: `${ERP_BASE}/api/method/erpnext.zra_client..sales.api.update_invoice_status`,
-    delete: `${ERP_BASE}/api/method/erpnext.zra_client..sales.api.delete_sales_invoice`,
+    create: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.create_sales_invoice`,
+
+    updateStatus: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.update_invoice_status`,
+    delete: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.delete_sales_invoice`,
     createCreditNote: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.create_credit_note_from_sales_invoice`,
     createDebitNote: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.create_debit_note_from_invoice`,
     getCreditNotes: `${ERP_BASE}/api/method/erpnext.zra_client.sales.api.get_credit_notes`,

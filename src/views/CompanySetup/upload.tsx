@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa";
 
 import { updateCompanyFiles, getCompanyById } from "../../api/companySetupApi";
-
+import { ERP_BASE } from "../../config/api";
 // TYPES
 
 type UploadedFile = {
@@ -41,7 +41,12 @@ interface UploadProps {
 // CONSTANTS
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_FILE_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/svg+xml"];
+const ACCEPTED_FILE_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/svg+xml",
+];
 const ACCEPTED_EXTENSIONS = ["PNG", "JPG", "JPEG", "SVG"];
 
 // UTILITY FUNCTIONS
@@ -54,10 +59,8 @@ const formatFileSize = (bytes: number): string => {
 };
 
 const getFullImageUrl = (path: string): string => {
-  const FILE_BASE_URL = import.meta.env.VITE_FILE_BASE_URL as string;
-  return `${FILE_BASE_URL}${path}`;
+  return `${ERP_BASE}${path}`;
 };
-
 
 const formatDate = (date: Date): string => {
   return date.toLocaleDateString("en-US", {
@@ -76,13 +79,13 @@ const getFileExtension = (filename: string): string => {
 // MAIN COMPONENT
 
 const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
-
   // STATE
-
 
   const [logo, setLogo] = useState<UploadedFile | null>(null);
   const [signature, setSignature] = useState<UploadedFile | null>(null);
-  const [dragActive, setDragActive] = useState<"logo" | "signature" | null>(null);
+  const [dragActive, setDragActive] = useState<"logo" | "signature" | null>(
+    null,
+  );
   const [previewModal, setPreviewModal] = useState<{
     type: "logo" | "signature";
     url: string;
@@ -90,14 +93,16 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
-  const [selectedType, setSelectedType] = useState<"logo" | "signature">("logo");
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(
+    null,
+  );
+  const [selectedType, setSelectedType] = useState<"logo" | "signature">(
+    "logo",
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingExisting, setIsLoadingExisting] = useState(true);
 
-
   // LOAD EXISTING FILES
-
 
   const loadExistingFiles = useCallback(async () => {
     if (!COMPANY_ID) {
@@ -117,34 +122,32 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
 
       const documents = response.data.documents;
 
-     if (documents?.companyLogoUrl) {
-  const logoUrl = getFullImageUrl(documents.companyLogoUrl);
+      if (documents?.companyLogoUrl) {
+        const logoUrl = getFullImageUrl(documents.companyLogoUrl);
 
-  setLogo({
-    id: "existing-logo",
-    file: new File([], "company-logo"), // dummy
-    preview: logoUrl,
-    uploadedAt: new Date(),
-    size: "—",
-    isExisting: true,
-  });
-}
-
+        setLogo({
+          id: "existing-logo",
+          file: new File([], "company-logo"), // dummy
+          preview: logoUrl,
+          uploadedAt: new Date(),
+          size: "—",
+          isExisting: true,
+        });
+      }
 
       // Load existing signature
-    if (documents?.authorizedSignatureUrl) {
-  const signatureUrl = getFullImageUrl(documents.authorizedSignatureUrl);
+      if (documents?.authorizedSignatureUrl) {
+        const signatureUrl = getFullImageUrl(documents.authorizedSignatureUrl);
 
-  setSignature({
-    id: "existing-signature",
-    file: new File([], "signature"), // dummy
-    preview: signatureUrl,
-    uploadedAt: new Date(),
-    size: "—",
-    isExisting: true,
-  });
-}
-
+        setSignature({
+          id: "existing-signature",
+          file: new File([], "signature"), // dummy
+          preview: signatureUrl,
+          uploadedAt: new Date(),
+          size: "—",
+          isExisting: true,
+        });
+      }
     } catch (error) {
       console.error("Error loading company files:", error);
       showErrorMessage("Failed to load existing files");
@@ -153,9 +156,7 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     }
   }, [COMPANY_ID]);
 
-
   // EFFECTS
-
 
   useEffect(() => {
     loadExistingFiles();
@@ -176,9 +177,7 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     }
   }, [showError]);
 
-
   // HELPER FUNCTIONS
-
 
   const showErrorMessage = useCallback((message: string) => {
     setErrorMessage(message);
@@ -205,9 +204,7 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     return null;
   };
 
-
   // FILE UPLOAD SIMULATION
-
 
   const simulateUpload = useCallback(
     (file: File, type: "logo" | "signature"): Promise<string> => {
@@ -241,12 +238,10 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
         reader.readAsDataURL(file);
       });
     },
-    []
+    [],
   );
 
-
   // FILE PROCESSING
-
 
   const processFile = useCallback(
     async (file: File, type: "logo" | "signature") => {
@@ -279,12 +274,10 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
         showErrorMessage("Failed to process file. Please try again.");
       }
     },
-    [simulateUpload, showErrorMessage]
+    [simulateUpload, showErrorMessage],
   );
 
-
   // EVENT HANDLERS
-
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "signature") => {
@@ -295,14 +288,19 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
       // Reset input value to allow selecting the same file again
       e.target.value = "";
     },
-    [processFile]
+    [processFile],
   );
 
-  const handleDrag = useCallback((e: React.DragEvent, type: "logo" | "signature") => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(e.type === "dragenter" || e.type === "dragover" ? type : null);
-  }, []);
+  const handleDrag = useCallback(
+    (e: React.DragEvent, type: "logo" | "signature") => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragActive(
+        e.type === "dragenter" || e.type === "dragover" ? type : null,
+      );
+    },
+    [],
+  );
 
   const handleDrop = useCallback(
     (e: React.DragEvent, type: "logo" | "signature") => {
@@ -315,7 +313,7 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
         processFile(file, type);
       }
     },
-    [processFile]
+    [processFile],
   );
 
   const removeFile = useCallback((type: "logo" | "signature") => {
@@ -326,21 +324,24 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     }
   }, []);
 
-  const downloadFile = useCallback((uploadedFile: UploadedFile) => {
-    try {
-      const link = document.createElement("a");
-      link.href = uploadedFile.preview;
-      link.download = uploadedFile.file.name;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error downloading file:", error);
-      showErrorMessage("Failed to download file");
-    }
-  }, [showErrorMessage]);
+  const downloadFile = useCallback(
+    (uploadedFile: UploadedFile) => {
+      try {
+        const link = document.createElement("a");
+        link.href = uploadedFile.preview;
+        link.download = uploadedFile.file.name;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (error) {
+        console.error("Error downloading file:", error);
+        showErrorMessage("Failed to download file");
+      }
+    },
+    [showErrorMessage],
+  );
 
   const openPreview = useCallback((type: "logo" | "signature", url: string) => {
     setPreviewModal({ type, url });
@@ -357,9 +358,7 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     }
   }, []);
 
-
   // SAVE HANDLER
-
 
   const handleSave = useCallback(async () => {
     // Check if there are files to upload (only new files, not existing ones)
@@ -377,7 +376,7 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
       const response = await updateCompanyFiles(
         COMPANY_ID,
         hasNewLogo ? logo.file : null,
-        hasNewSignature ? signature.file : null
+        hasNewSignature ? signature.file : null,
       );
 
       console.log("Upload successful:", response);
@@ -410,18 +409,17 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
     showSuccessMessage,
   ]);
 
-
   // DERIVED STATE
 
-
   const currentFile = selectedType === "logo" ? logo : signature;
-  const isUploading = uploadProgress?.type === selectedType && uploadProgress.isUploading;
-  const progress = uploadProgress?.type === selectedType ? uploadProgress.progress : 0;
-  const hasNewFiles = (logo && !logo.isExisting) || (signature && !signature.isExisting);
-
+  const isUploading =
+    uploadProgress?.type === selectedType && uploadProgress.isUploading;
+  const progress =
+    uploadProgress?.type === selectedType ? uploadProgress.progress : 0;
+  const hasNewFiles =
+    (logo && !logo.isExisting) || (signature && !signature.isExisting);
 
   // RENDER
-
 
   if (isLoadingExisting) {
     return (
@@ -445,7 +443,9 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
             aria-live="polite"
           >
             <FaCheckCircle className="w-5 h-5 text-success flex-shrink-0" />
-            <p className="text-success font-medium text-sm">Documents uploaded successfully!</p>
+            <p className="text-success font-medium text-sm">
+              Documents uploaded successfully!
+            </p>
           </div>
         )}
 
@@ -490,13 +490,19 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                       <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center"
                         style={{
-                          background: selectedType === "logo" ? "var(--primary-20)" : "var(--bg)",
+                          background:
+                            selectedType === "logo"
+                              ? "var(--primary-20)"
+                              : "var(--bg)",
                         }}
                       >
                         <FaImage
                           className="w-5 h-5"
                           style={{
-                            color: selectedType === "logo" ? "var(--primary)" : "var(--muted)",
+                            color:
+                              selectedType === "logo"
+                                ? "var(--primary)"
+                                : "var(--muted)",
                           }}
                         />
                       </div>
@@ -504,12 +510,17 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                         <p
                           className="font-semibold"
                           style={{
-                            color: selectedType === "logo" ? "var(--text)" : "var(--main)",
+                            color:
+                              selectedType === "logo"
+                                ? "var(--text)"
+                                : "var(--main)",
                           }}
                         >
                           Company Logo
                         </p>
-                        <p className="text-xs text-muted">{ACCEPTED_EXTENSIONS.join(", ")}</p>
+                        <p className="text-xs text-muted">
+                          {ACCEPTED_EXTENSIONS.join(", ")}
+                        </p>
                       </div>
                     </div>
                     {logo && (
@@ -520,13 +531,18 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                   </div>
                   {logo && (
                     <div className="mt-3 pt-3 border-t border-theme">
-                      <p className="text-xs text-main truncate" title={logo.file.name}>
+                      <p
+                        className="text-xs text-main truncate"
+                        title={logo.file.name}
+                      >
                         {logo.file.name}
                       </p>
                       <div className="flex items-center justify-between mt-1">
                         <p className="text-xs text-muted">{logo.size}</p>
                         {logo.isExisting && (
-                          <span className="text-xs text-primary-600 font-medium">Current</span>
+                          <span className="text-xs text-primary-600 font-medium">
+                            Current
+                          </span>
                         )}
                       </div>
                     </div>
@@ -549,14 +565,18 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                         className="w-10 h-10 rounded-lg flex items-center justify-center"
                         style={{
                           background:
-                            selectedType === "signature" ? "var(--primary-20)" : "var(--bg)",
+                            selectedType === "signature"
+                              ? "var(--primary-20)"
+                              : "var(--bg)",
                         }}
                       >
                         <FaFileSignature
                           className="w-5 h-5"
                           style={{
                             color:
-                              selectedType === "signature" ? "var(--primary)" : "var(--muted)",
+                              selectedType === "signature"
+                                ? "var(--primary)"
+                                : "var(--muted)",
                           }}
                         />
                       </div>
@@ -564,12 +584,17 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                         <p
                           className="font-semibold"
                           style={{
-                            color: selectedType === "signature" ? "var(--text)" : "var(--main)",
+                            color:
+                              selectedType === "signature"
+                                ? "var(--text)"
+                                : "var(--main)",
                           }}
                         >
                           Authorized Signature
                         </p>
-                        <p className="text-xs text-muted">{ACCEPTED_EXTENSIONS.join(", ")}</p>
+                        <p className="text-xs text-muted">
+                          {ACCEPTED_EXTENSIONS.join(", ")}
+                        </p>
                       </div>
                     </div>
                     {signature && (
@@ -580,13 +605,18 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                   </div>
                   {signature && (
                     <div className="mt-3 pt-3 border-t border-theme">
-                      <p className="text-xs text-main truncate" title={signature.file.name}>
+                      <p
+                        className="text-xs text-main truncate"
+                        title={signature.file.name}
+                      >
                         {signature.file.name}
                       </p>
                       <div className="flex items-center justify-between mt-1">
                         <p className="text-xs text-muted">{signature.size}</p>
                         {signature.isExisting && (
-                          <span className="text-xs text-primary-600 font-medium">Current</span>
+                          <span className="text-xs text-primary-600 font-medium">
+                            Current
+                          </span>
                         )}
                       </div>
                     </div>
@@ -615,11 +645,15 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                   </li>
                   <li className="text-xs flex items-start gap-2">
                     <span className="text-primary-700 font-bold mt-0.5">•</span>
-                    <span className="text-muted">Use transparent background for logos</span>
+                    <span className="text-muted">
+                      Use transparent background for logos
+                    </span>
                   </li>
                   <li className="text-xs flex items-start gap-2">
                     <span className="text-primary-700 font-bold mt-0.5">•</span>
-                    <span className="text-muted">Ensure signatures are clear and legible</span>
+                    <span className="text-muted">
+                      Ensure signatures are clear and legible
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -657,12 +691,16 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
           <div className="lg:col-span-3 bg-card rounded-lg shadow-sm border border-theme overflow-hidden">
             <div className="px-4 py-3 flex justify-between items-center bg-primary-600">
               <h2 className="text-lg font-semibold text-white">
-                {selectedType === "logo" ? "Company Logo" : "Authorized Signature"}
+                {selectedType === "logo"
+                  ? "Company Logo"
+                  : "Authorized Signature"}
               </h2>
               {currentFile && (
                 <div className="flex gap-2">
                   <button
-                    onClick={() => openPreview(selectedType, currentFile.preview)}
+                    onClick={() =>
+                      openPreview(selectedType, currentFile.preview)
+                    }
                     className="px-3 py-1.5 rounded-md transition-all text-sm font-medium flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white"
                     aria-label="Preview file"
                   >
@@ -688,8 +726,12 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                   <div className="inline-block p-6 rounded-full mb-4 bg-primary/10">
                     <FaUpload className="w-12 h-12 animate-pulse text-primary-700" />
                   </div>
-                  <h3 className="text-lg font-semibold text-main mb-2">Processing...</h3>
-                  <p className="text-muted mb-4">Please wait while we prepare your file</p>
+                  <h3 className="text-lg font-semibold text-main mb-2">
+                    Processing...
+                  </h3>
+                  <p className="text-muted mb-4">
+                    Please wait while we prepare your file
+                  </p>
 
                   <div className="max-w-md mx-auto space-y-2">
                     <div className="bg-app rounded-full h-3 overflow-hidden">
@@ -705,7 +747,9 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                         aria-valuemax={100}
                       />
                     </div>
-                    <p className="text-sm font-semibold text-primary-700">{progress}% Complete</p>
+                    <p className="text-sm font-semibold text-primary-700">
+                      {progress}% Complete
+                    </p>
                   </div>
                 </div>
               ) : !currentFile ? (
@@ -718,9 +762,15 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                   className="relative border-2 border-dashed rounded-lg p-12 transition-all"
                   style={{
                     borderColor:
-                      dragActive === selectedType ? "var(--primary-700)" : "var(--border)",
-                    background: dragActive === selectedType ? "var(--row-hover)" : "var(--card)",
-                    transform: dragActive === selectedType ? "scale(1.02)" : undefined,
+                      dragActive === selectedType
+                        ? "var(--primary-700)"
+                        : "var(--border)",
+                    background:
+                      dragActive === selectedType
+                        ? "var(--row-hover)"
+                        : "var(--card)",
+                    transform:
+                      dragActive === selectedType ? "scale(1.02)" : undefined,
                   }}
                 >
                   <input
@@ -751,8 +801,8 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
 
                     <div className="mt-8 pt-6 border-t border-theme w-full">
                       <p className="text-xs text-muted">
-                        Supported formats: {ACCEPTED_EXTENSIONS.join(", ")} • Maximum size:{" "}
-                        {formatFileSize(MAX_FILE_SIZE)}
+                        Supported formats: {ACCEPTED_EXTENSIONS.join(", ")} •
+                        Maximum size: {formatFileSize(MAX_FILE_SIZE)}
                       </p>
                     </div>
                   </div>
@@ -763,20 +813,26 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                   {/* Preview Image */}
                   <div className="flex justify-center">
                     <div className="relative group">
-                     <div className="w-64 h-64 flex items-center justify-center">
+                      <div className="w-64 h-64 flex items-center justify-center">
                         <img
                           src={currentFile.preview}
                           alt={`${selectedType} preview`}
                           className="max-w-full max-h-full object-contain"
                           onError={(e) => {
-                            console.error("Image failed to load:", currentFile.preview);
-                            e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999'%3ENo Preview%3C/text%3E%3C/svg%3E";
+                            console.error(
+                              "Image failed to load:",
+                              currentFile.preview,
+                            );
+                            e.currentTarget.src =
+                              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999'%3ENo Preview%3C/text%3E%3C/svg%3E";
                           }}
                         />
                       </div>
                       <div className="absolute inset-0 bg-black/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                         <button
-                          onClick={() => openPreview(selectedType, currentFile.preview)}
+                          onClick={() =>
+                            openPreview(selectedType, currentFile.preview)
+                          }
                           className="bg-white text-main p-3 rounded-lg hover:bg-gray-100 transition"
                           aria-label="Preview full size"
                         >
@@ -814,7 +870,9 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
                         File Size
                       </label>
                       <div className="bg-app border border-theme rounded-lg px-4 py-3 flex items-center justify-between">
-                        <p className="font-medium text-sm text-main">{currentFile.size}</p>
+                        <p className="font-medium text-sm text-main">
+                          {currentFile.size}
+                        </p>
                         <span className="text-success">✓</span>
                       </div>
                     </div>
@@ -920,8 +978,14 @@ const Upload: React.FC<UploadProps> = ({ COMPANY_ID, onUploadSuccess }) => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-theme">
-              <h3 id="preview-modal-title" className="text-lg font-semibold text-main">
-                {previewModal.type === "logo" ? "Company Logo" : "Authorized Signature"} Preview
+              <h3
+                id="preview-modal-title"
+                className="text-lg font-semibold text-main"
+              >
+                {previewModal.type === "logo"
+                  ? "Company Logo"
+                  : "Authorized Signature"}{" "}
+                Preview
               </h3>
               <button
                 onClick={closePreview}
