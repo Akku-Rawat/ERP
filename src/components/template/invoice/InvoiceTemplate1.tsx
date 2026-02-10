@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { getPaymentMethodLabel } from "../../../constants/invoice.constants";
-import { ERP_BASE } from "../../config/api";
+import { ERP_BASE } from "../../../config/api";
 
 const loadImageFromUrl = async (url: string): Promise<string> => {
   console.log("Url: ", url);
@@ -23,18 +23,15 @@ export const generateInvoicePDF = async (
   company: any,
   resultType: "save" | "bloburl" = "save",
 ) => {
-
-
-const getFullImageUrl = (path: string): string => {
-  if (!path) return "";
-  // If already a full URL, return as is
-  if (path.startsWith("http://") || path.startsWith("https://")) {
-    return path;
-  }
-  // Otherwise, prepend the base URL
-  return `${ERP_BASE}${path}`;
-};
-
+  const getFullImageUrl = (path: string): string => {
+    if (!path) return "";
+    // If already a full URL, return as is
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      return path;
+    }
+    // Otherwise, prepend the base URL
+    return `${ERP_BASE}${path}`;
+  };
 
   const doc = new jsPDF("p", "mm", "a4");
   const currency = invoice.currencyCode === "ZMW" ? "ZMW" : "USD";
@@ -51,23 +48,22 @@ const getFullImageUrl = (path: string): string => {
   doc.text(`Email: ${company.contactInfo.companyEmail}`, 15, 28);
 
   /* ================= LOGO ================= */
-/* ================= LOGO ================= */
-if (company.documents.companyLogoUrl) {
-  try {
-    console.log(
-      "company.documents.companyLogoUrl",
-      company.documents.companyLogoUrl,
-    );
-    const logoBase64 = await loadImageFromUrl(
-      company.documents.companyLogoUrl,
-    );
-    const format = logoBase64.includes("image/png") ? "PNG" : "JPEG";
-    doc.addImage(logoBase64, format, 150, 10, 30, 15);
-
-  } catch (e) {
-    console.warn("Logo load failed", e);
+  /* ================= LOGO ================= */
+  if (company.documents.companyLogoUrl) {
+    try {
+      console.log(
+        "company.documents.companyLogoUrl",
+        company.documents.companyLogoUrl,
+      );
+      const logoBase64 = await loadImageFromUrl(
+        company.documents.companyLogoUrl,
+      );
+      const format = logoBase64.includes("image/png") ? "PNG" : "JPEG";
+      doc.addImage(logoBase64, format, 150, 10, 30, 15);
+    } catch (e) {
+      console.warn("Logo load failed", e);
+    }
   }
-}
 
   // doc.addImage(logoImage, "PNG", 150, 10, 30, 10);
 
