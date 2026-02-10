@@ -22,7 +22,7 @@ export async function getCompanyById(id: string): Promise<any> {
 }
 
 export async function updateCompanyById(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(CompanyAPI.update, payload);
+  const resp: AxiosResponse = await api.post(CompanyAPI.updateById, payload);
 
   return resp.data;
 }

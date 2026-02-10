@@ -13,7 +13,7 @@ export const API = {
     getAll: `${ERP_BASE}/api/method/erpnext.company-setup.setup.get_companies_api`,
     getById: `${ERP_BASE}/api/method/erpnext.company-setup.setup.get_company_api`,
     create: `${ERP_BASE}/api/method/erpnext.company-setup.setup.create_company_api`,
-    update: `${ERP_BASE}/api/method/erpnext.company-setup.setup.update_company_info`,
+    // update: `${ERP_BASE}/api/method/erpnext.company-setup.setup.update_company_info`,
     updateById: `${ERP_BASE}/api/method/erpnext.company-setup.setup.update_company_api`,
     delete: `${ERP_BASE}/api/method/erpnext.company-setup.setup.delete_company_api`,
     updateAccounts: `${ERP_BASE}/api/method/erpnext.company-setup.setup.update_accounts_company_info`,

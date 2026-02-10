@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Modal from "../../components/ui/modal/modal";
 import CreditNoteInvoiceLikeForm from "./CreditNoteForm";
 import { FileMinus } from "lucide-react";
@@ -17,35 +17,42 @@ const CreateCreditNoteModal: React.FC<Props> = ({
   onSubmit,
   invoiceId,
 }) => {
-const footerContent = (
-  <>
-    <Button variant="secondary" onClick={onClose} type="button">
-      Cancel
-    </Button>
+  const [saving, setSaving] = useState(false); 
 
-    <Button
-      variant="primary"
-      type="submit"
-      form="credit-note-form"
-    >
-      Create Credit Note
-    </Button>
-  </>
-);
+  const footerContent = (
+    <>
+      <Button variant="secondary" onClick={onClose} type="button">
+        Cancel
+      </Button>
+
+      <Button
+        variant="primary"
+        type="submit"
+        form="credit-note-form"
+        disabled={saving}
+      >
+        {saving ? "Saving..." : "Create Credit Note"}
+      </Button>
+    </>
+  );
 
   return (
-    
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Create Credit Note"
       subtitle="Sales Invoice Adjustment"
-  footer={footerContent} 
+      footer={footerContent}
       icon={FileMinus}
       maxWidth="6xl"
       height="90vh"
     >
-      <CreditNoteInvoiceLikeForm onSubmit={onSubmit} invoiceId={invoiceId} />
+      <CreditNoteInvoiceLikeForm
+        onSubmit={onSubmit}
+        invoiceId={invoiceId}
+        saving={saving}
+        setSaving={setSaving}
+      />
     </Modal>
   );
 };

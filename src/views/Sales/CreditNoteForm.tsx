@@ -8,6 +8,7 @@ import { getSalesInvoiceById } from "../../api/salesApi";
 import { getAllSalesInvoices } from "../../api/salesApi";
 import { Button } from "../../components/ui/modal/formComponent";
 import { createCreditNoteFromInvoice } from "../../api/salesApi";
+import toast from "react-hot-toast";
 
 
 import {
@@ -28,11 +29,11 @@ import {
 
 interface CreditNoteInvoiceLikeFormProps {
   onSubmit?: (data: any) => void;
-  isOpen: boolean;
-  onClose: () => void;  
-
   invoiceId: string;
+  saving: boolean;
+  setSaving: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
 const CREDIT_NOTE_REASONS = [
   { value: "01", label: "Wrong product(s)" },
   { value: "02", label: "Wrong price" },
@@ -50,13 +51,15 @@ const TRANSACTION_PROGRESS = [
   { value: "06", label: "Transferred" },
 ];
 
+
+
 const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
   onSubmit,
- invoiceId,
- isOpen,
-  onClose,
- 
+  invoiceId,
+  saving,
+  setSaving,
 }) => {
+  
   const {
     formData,
     customerDetails,
@@ -125,47 +128,54 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
     )?.label;
   };
 
-  const handleCreateCreditNote = async () => {
-    try {
-      if (!formData.invoiceNumber) {
-        console.error("Invoice number missing");
-        return;
-      }
+const handleCreateCreditNote = async () => {
+  if (saving) return; 
 
-      if (!creditMeta.creditNoteReasonCode) {
-        console.error("Credit note reason missing");
-        return;
-      }
-
-      const invcAdjustReason = getInvoiceAdjustReason();
-
-      if (!invcAdjustReason) {
-        console.error("Invoice adjustment reason is required");
-        return;
-      }
-
-      const payload = {
-        originalSalesInvoiceNumber: formData.invoiceNumber,
-        CreditNoteReasonCode: creditMeta.creditNoteReasonCode,
-        invcAdjustReason, // ALWAYS NON-EMPTY
-        transactionProgress: creditMeta.transactionProgress,
-        items: formData.items.map((it: any) => ({
-          itemCode: it.itemCode,
-          quantity: Number(it.quantity),
-          price: Number(it.price),
-        })),
-      };
-
-     
-
-      const res = await createCreditNoteFromInvoice(payload);
-      
-
-      onSubmit?.(res);
-    } catch (err) {
-      console.error("Credit Note failed", err);
+  try {
+    if (!formData.invoiceNumber) {
+      toast.error("Invoice number missing");
+      return;
     }
-  };
+
+    if (!creditMeta.creditNoteReasonCode) {
+      toast.error("Credit note reason missing");
+      return;
+    }
+
+    const invcAdjustReason = getInvoiceAdjustReason();
+
+    if (!invcAdjustReason) {
+      toast.error("Invoice adjustment reason is required");
+      return;
+    }
+
+    const payload = {
+      originalSalesInvoiceNumber: formData.invoiceNumber,
+      CreditNoteReasonCode: creditMeta.creditNoteReasonCode,
+      invcAdjustReason,
+      transactionProgress: creditMeta.transactionProgress,
+      items: formData.items.map((it: any) => ({
+        itemCode: it.itemCode,
+        quantity: Number(it.quantity),
+        price: Number(it.price),
+      })),
+    };
+
+    setSaving(true); 
+
+    const res = await createCreditNoteFromInvoice(payload);
+
+    toast.success("Credit note created successfully");
+
+    onSubmit?.(res);
+  } catch (err) {
+    toast.error("Failed to create credit note");
+    console.error("Credit Note failed", err);
+  } finally {
+    setSaving(false); 
+  }
+};
+
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
 
