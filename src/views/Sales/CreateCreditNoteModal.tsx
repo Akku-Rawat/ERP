@@ -45,7 +45,7 @@ const CreateCreditNoteModal: React.FC<Props> = ({
       footer={footerContent}
       icon={FileMinus}
       maxWidth="6xl"
-      height="90vh"
+      height="74vh"
     >
       <CreditNoteInvoiceLikeForm
         onSubmit={onSubmit}

@@ -122,7 +122,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
       icon={FileText}
       footer={footerContent}
       maxWidth="6xl"
-      height="81vh"
+      height="70vh"
     >
 
       <form onSubmit={handleFormSubmit} className="h-full flex flex-col">

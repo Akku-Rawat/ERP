@@ -77,7 +77,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
       subtitle="Create and manage purchase order"
       icon={Building2}
       maxWidth="6xl"
-      height="90vh"
+      height="75vh"
       footer={footer}
     >
 
@@ -106,7 +106,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
           </div>
         </div>
 
-        <section className="flex-1 overflow-y-auto p-4 space-y-6 mt-5">
+        <section className="flex-1 overflow-y-auto p-4 space-y-6 ">
           {activeTab === "details" && (
             <DetailsTab
               form={form}

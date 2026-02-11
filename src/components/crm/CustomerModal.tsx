@@ -268,7 +268,7 @@ const CustomerModal: React.FC<{
       icon={isEditMode ? Building2 : User}
       footer={footer}
       maxWidth="6xl"
-      height="90vh"
+      height="80vh"
     >
       <form onSubmit={handleSubmit} className="h-full flex flex-col">
         {/* Tabs - Sticky Header */}

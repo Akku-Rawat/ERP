@@ -82,7 +82,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
       icon={FileText}
       footer={footerContent}
       maxWidth="6xl"
-      height="90vh"
+      height="70vh"
     >
       <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
@@ -498,7 +498,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
           {/* TERMS */}
           {ui.activeTab === "terms" && (
-            <div className="h-full w-full mt-10">
+            <div className="h-full w-full">
               <TermsAndCondition
                 terms={formData.terms?.selling}
                 setTerms={actions.setTerms}

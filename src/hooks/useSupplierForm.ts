@@ -125,13 +125,19 @@ const reset = () => {
 
 
   // Next Tab
-  const goToNextTab = () => {
-    const tabs: SupplierTab[] = ["supplier", "payment"];
-    const currentIndex = tabs.indexOf(activeTab);
-    if (currentIndex < tabs.length - 1) {
-      setActiveTab(tabs[currentIndex + 1]);
-    }
-  };
+const goToNextTab = () => {
+  const tabs: SupplierTab[] = [
+    "supplier",
+    "payment",
+    "address",
+  ];
+
+  const currentIndex = tabs.indexOf(activeTab);
+
+  if (currentIndex < tabs.length - 1) {
+    setActiveTab(tabs[currentIndex + 1]);
+  }
+};
 
   return {
     form,

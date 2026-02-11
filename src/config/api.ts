@@ -30,7 +30,6 @@ export const API = {
     update: `${ERP_BASE}/api/method/erpnext.zra_client.customer.customer.update_customer_by_id`,
     delete: `${ERP_BASE}/api/method/erpnext.zra_client.customer.customer.delete_customer_by_id`,
     getStatement: `${ERP_BASE}/api/method/erpnext.zra_client.customer.statement.api.get_customer_statement`,
-    
   },
 
   /* =========================
