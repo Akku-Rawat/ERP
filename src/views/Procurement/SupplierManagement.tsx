@@ -70,7 +70,6 @@ const fetchSuppliers = async () => {
 
   } catch (err) {
     console.error("Error loading suppliers:", err);
-    toast.error("Failed to load suppliers");
   } finally {
     setLoading(false);
   }
@@ -137,7 +136,7 @@ const handleRowClick = async (supplier: Supplier) => {
     setViewMode("detail");
   } catch (err) {
     console.error(err);
-    toast.error("Failed to load supplier detail");
+    console.error("Failed to load supplier detail");
   } finally {
     setLoading(false);
   }

@@ -99,7 +99,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     }
   };
   useEffect(() => {
-    fetchCompany().catch(() => toast.error("Failed to load company data"));
+    fetchCompany().catch(() => console.error("Failed to load company data"));
   }, []);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
     try {
       if (!company) {
-        toast.error("Company data not loaded");
+        console.error("Company data not loaded");
         return;
       }
 
