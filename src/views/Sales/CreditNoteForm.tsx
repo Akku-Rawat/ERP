@@ -175,51 +175,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
     } finally {
       setSaving(false);
     }
-<<<<<<< HEAD
-
-    if (!creditMeta.creditNoteReasonCode) {
-      toast.error("Credit note reason missing");
-      return;
-    }
-
-    const invcAdjustReason = getInvoiceAdjustReason();
-
-    if (!invcAdjustReason) {
-      toast.error("Invoice adjustment reason is required");
-      return;
-    }
-
-    const payload = {
-      originalSalesInvoiceNumber: formData.invoiceNumber,
-      CreditNoteReasonCode: creditMeta.creditNoteReasonCode,
-      invcAdjustReason,
-      transactionProgress: creditMeta.transactionProgress,
-      invoiceStatus: creditMeta.invoiceStatus,
-      items: formData.items.map((it: any) => ({
-        itemCode: it.itemCode,
-        quantity: Number(it.quantity),
-        price: Number(it.price),
-        
-      })),
-    };
-
-    setSaving(true); 
-
-    const res = await createCreditNoteFromInvoice(payload);
-
-    toast.success("Credit note created successfully");
-
-    onSubmit?.(res);
-  } catch (err) {
-    toast.error("Failed to create credit note");
-    console.error("Credit Note failed", err);
-  } finally {
-    setSaving(false); 
-  }
-};
-=======
   };
->>>>>>> dc9349fc6cdc97b7ae2001366f46c1adcdcf14d5
 
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
