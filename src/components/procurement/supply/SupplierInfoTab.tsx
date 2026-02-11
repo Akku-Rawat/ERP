@@ -16,7 +16,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
   return (
     <Card
       title="Supplier Information"
-      subtitle="Supplier, contact and address details"
+      subtitle="Supplier, contact details"
       icon={<Building2 className="w-5 h-5 text-primary" />}
     >
       <div className="space-y-6">
@@ -94,69 +94,6 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
           </div>
         </div>
 
-        <div className="border-t border-gray-200" />
-
-        {/* Address Details */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-gray-700">Address Details</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-            <Input
-              label="Address Line 1"
-              name="billingAddressLine1"
-              value={form.billingAddressLine1}
-              onChange={onChange}
-            />
-
-            <Input
-              label="Address Line 2"
-              name="billingAddressLine2"
-              value={form.billingAddressLine2}
-              onChange={onChange}
-            />
-
-            <Input
-              label="City"
-              name="billingCity"
-              value={form.billingCity}
-              onChange={onChange}
-            />
-
-            <CountrySelect
-              value={form.billingCountry}
-              label="Country"
-              onChange={(country: { code: string; name: string }) =>
-                onChange({
-                  target: { name: "billingCountry", value: country.name },
-                } as any)
-              }
-            />
-
-
-            <Input
-              label="District"
-              name="district"
-              value={form.district}
-              onChange={onChange}
-            />
-
-            <Input
-              label="Province"
-              name="province"
-              value={form.province}
-              onChange={onChange}
-            />
-
-          
-
-            <Input
-              label="Postal Code"
-              name="billingPostalCode"
-              value={form.billingPostalCode}
-              onChange={onChange}
-            />
-          </div>
-
-        </div>
       </div>
     </Card>
   );

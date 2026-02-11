@@ -1,13 +1,13 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Building2, DollarSign } from "lucide-react";
+import { Building2, DollarSign , MapPin} from "lucide-react";
 import Modal from "../../ui/modal/modal";
 import { Button } from "../../ui/modal/formComponent";
 import { SupplierInfoTab } from "./SupplierInfoTab";
 import { PaymentInfoTab } from "./PaymentInfoTab";
 import { useSupplierForm } from "../../../hooks/useSupplierForm";
 import type { SupplierTab, SupplierFormData, Supplier } from "../../../types/Supply/supplier";
-
+import { AddressTab } from "./AddressTab";
 
 
 interface SupplierModalProps {
@@ -20,6 +20,7 @@ interface SupplierModalProps {
 const tabs: { key: SupplierTab; icon: typeof Building2; label: string }[] = [
   { key: "supplier", icon: Building2, label: "Supplier" },
   { key: "payment", icon: DollarSign, label: "Payment" },
+   {key : "address",icon: MapPin, label: "Address"}
 ];
 
 const SupplierModal: React.FC<SupplierModalProps> = ({
@@ -58,7 +59,9 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         <Button
           variant="secondary"
           onClick={goToNextTab}
-          disabled={activeTab === "payment"}
+          disabled={activeTab === "address"}
+
+
           type="button"
         >
           Next →
@@ -71,6 +74,7 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         >
           {isEditMode ? "Update Supplier" : "Save Supplier"}
         </Button>
+
 
 
       </div>
@@ -90,7 +94,7 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
       icon={Building2}
       footer={footer}
       maxWidth="6xl"
-      height="90vh"
+      height="78vh"
     >
       <form
         id="supplierForm"
@@ -128,6 +132,9 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
           )}
           {activeTab === "payment" && (
             <PaymentInfoTab form={form} onChange={handleChange} />
+          )}
+          {activeTab === "address" && (
+            <AddressTab form={form} onChange={handleChange} />
           )}
 
         </div>

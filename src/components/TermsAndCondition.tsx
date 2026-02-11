@@ -306,7 +306,7 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
       value={(currentTerms[field] as string) ?? ""}
       onChange={(e) => updateTopField(field, e.target.value)}
       placeholder={`Enter ${selectedTemplate.toLowerCase()}...`}
-      className="w-full h-64 bg-card border border-theme rounded-lg px-4 py-3 text-sm text-main focus:ring-2 outline-none"
+      className="w-full h-55 bg-card border border-theme rounded-lg px-4 py-3 text-sm text-main focus:ring-2 outline-none"
     />
   );
 
@@ -338,7 +338,7 @@ const TermsAndCondition: React.FC<Props> = ({ title, terms, setTerms }) => {
       </div>
 
       {/* CONTENT AREA */}
-      <div className="p-5 rounded-lg border bg-white shadow-inner min-h-[240px]">
+      <div className="p-5 rounded-lg border bg-white shadow-inner min-h-[100px]">
         {activeKey === "payment"
           ? renderPaymentTable()
           : renderTextSection(activeKey)}

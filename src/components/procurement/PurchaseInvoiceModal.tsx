@@ -73,45 +73,37 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
       subtitle="Create and manage purchase invoice"
       icon={Building2}
       maxWidth="6xl"
-      height="90vh"
+      height="75vh"
       footer={footer}
     >
 
       <form
         id="purchaseOrderForm"
         onSubmit={handleSubmit}
-        className="flex flex-col h-full overflow-hidden"
+       className="h-full flex flex-col"
       >
-        <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
+        <div className=" sticky  bg-app border-b border-theme px-8 shrink-0">
+          <div className="flex gap-8">
           {tabs.map(({ key, icon: Icon, label }) => (
             <button
               key={key}
               type="button"
               onClick={() => setActiveTab(key)}
-              className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${activeTab === key
-                  ? "text-primary bg-card shadow-sm"
-                  : "text-muted hover:bg-card/50"
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === key
+                     ? "text-primary border-b-[3px] border-primary"
+                    : "text-muted border-b-[3px] border-transparent hover:text-main"
                 }`}
 
 
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                <Icon className="w-4 h-4" />
+            >           
                 {label}
-              </span>
-              {activeTab === key && (
-                <motion.div
-                  layoutId="activePoTab"
-                  className="absolute inset-0 bg-card rounded-t-lg shadow-sm"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  style={{ zIndex: -1 }}
-                />
-              )}
             </button>
           ))}
         </div>
+        </div>
 
-        <section className="flex-1 overflow-y-auto p-4 space-y-6 mt-5">
+        
+        <section className="flex-1 overflow-y-auto p-4 space-y-6 ">
           {activeTab === "details" && (
             <DetailsTab
               form={form}
