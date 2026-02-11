@@ -35,18 +35,15 @@ export const generateInvoicePDF = async (
   company: any,
   resultType: "save" | "bloburl" = "save",
 ) => {
-
-
-const getFullImageUrl = (path: string): string => {
-  if (!path) return "";
-  // If already a full URL, return as is
-  if (path.startsWith("http://") || path.startsWith("https://")) {
-    return path;
-  }
-  // Otherwise, prepend the base URL
-  return `${ERP_BASE}${path}`;
-};
-
+  const getFullImageUrl = (path: string): string => {
+    if (!path) return "";
+    // If already a full URL, return as is
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      return path;
+    }
+    // Otherwise, prepend the base URL
+    return `${ERP_BASE}${path}`;
+  };
 
   const doc = new jsPDF("p", "mm", "a4");
   const currency = invoice.currencyCode === "ZMW" ? "ZMW" : "USD";
@@ -92,7 +89,6 @@ if (company.documents.companyLogoUrl) {
     doc.setTextColor(150);
     doc.text("[Logo]", 165, 18, { align: "center" });
   }
-}
 
   // doc.addImage(logoImage, "PNG", 150, 10, 30, 10);
 
@@ -219,3 +215,4 @@ if (company.documents.companyLogoUrl) {
     ? doc.save(`Invoice_${invoice.invoiceNumber}.pdf`)
     : doc.output("bloburl");
 };
+}
