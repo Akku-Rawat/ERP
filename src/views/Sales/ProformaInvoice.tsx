@@ -70,9 +70,8 @@ const [initialLoad, setInitialLoad] = useState(true);
   // Company data state
   const [company, setCompany] = useState<any>(null);
 
-  /* ===============================
-     FETCH COMPANY DATA
-  ================================ */
+  /*    FETCH COMPANY DATA
+*/
 
   const fetchCompany = async () => {
     const res = await getCompanyById(COMPANY_ID);
@@ -85,9 +84,8 @@ const [initialLoad, setInitialLoad] = useState(true);
     return res.data;
   };
 
-  /* ===============================
-     FETCH INVOICES
-  ================================ */
+  /*    FETCH INVOICES
+*/
   const fetchInvoices = async () => {
     try {
       setLoading(true);
@@ -114,28 +112,27 @@ const [initialLoad, setInitialLoad] = useState(true);
     }
   };
   useEffect(() => {
-    fetchCompany().catch(() => toast.error("Failed to load company data"));
+    fetchCompany().catch(() => console.error("Failed to load company data"));
   }, []);
 
   useEffect(() => {
     fetchInvoices();
   }, [page, pageSize, refreshKey]);
 
-  /* ===============================
-     ACTIONS
-  ================================ */
+  /*    ACTIONS
+*/
   const handleView = async (proformaId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
 
     try {
       const res = await getProformaInvoiceById(proformaId);
       if (!res || res.status_code !== 200) {
-        toast.error("Failed to load invoice");
+        console.error("Failed to load invoice");
         return;
       }
 
       if (!company) {
-        toast.error("Company data not loaded");
+        console.error("Company data not loaded");
         return;
       }
 
@@ -159,7 +156,7 @@ const [initialLoad, setInitialLoad] = useState(true);
 
     try {
       if (!company) {
-        toast.error("Company data not loaded");
+        console.error("Company data not loaded");
         return;
       }
 
@@ -243,18 +240,16 @@ const [initialLoad, setInitialLoad] = useState(true);
     toast.success(`Invoice marked as ${status}`);
     setOpenStatusMenuFor(null);
   };
-  /* ===============================
-     FILTER
-  ================================ */
+  /*    FILTER
+*/
   const filteredInvoices = invoices.filter(
     (inv) =>
       inv.proformaId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       inv.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  /* ===============================
-     COLUMNS
-  ================================ */
+  /*    COLUMNS
+*/
   const columns: Column<ProformaInvoiceSummary>[] = [
     {
       key: "proformaId",
@@ -333,9 +328,8 @@ const [initialLoad, setInitialLoad] = useState(true);
     },
   ];
 
-  /* ===============================
-     RENDER
-  ================================ */
+  /*    RENDER
+*/
   return (
     <div className="p-8">
         <Table

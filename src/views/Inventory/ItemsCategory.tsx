@@ -55,7 +55,6 @@ const ItemsCategory: React.FC = () => {
       setTotalItems(res.pagination?.total || 0);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load item categories");
     } finally {
       setLoading(false);
       setInitialLoad(false);
@@ -82,7 +81,7 @@ const ItemsCategory: React.FC = () => {
       setEditGroup(res.data);
       setShowModal(true);
     } catch {
-      toast.error("Unable to fetch item category");
+      console.error("Unable to fetch item category");
     }
   };
 
