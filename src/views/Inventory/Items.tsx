@@ -46,7 +46,6 @@ const Items: React.FC = () => {
       setTotalItems(res.pagination?.total || 0);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load items");
     } finally {
       setLoading(false);
       setInitialLoad(false);
@@ -72,7 +71,7 @@ const Items: React.FC = () => {
       setEditItem(res.data);
       setShowModal(true);
     } catch {
-      toast.error("Unable to fetch item details");
+      console.error("Unable to fetch item details");
     }
   };
 
