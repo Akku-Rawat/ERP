@@ -140,14 +140,21 @@ const ItemsCategoryModal: React.FC<{
             <Button variant="ghost" onClick={reset}>
               Reset
             </Button>
-            <Button variant="primary" loading={loading} type="submit">
-              {isEditMode ? "Update" : "Save"} Category
-            </Button>
+           <Button
+  variant="primary"
+  loading={loading}
+  type="submit"
+  form="item-category-form"  
+>
+  {isEditMode ? "Update" : "Save"} Category
+</Button>
+
           </div>
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="h-full flex flex-col">
+     <form id="item-category-form" onSubmit={handleSubmit} className="h-full flex flex-col">
+
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">

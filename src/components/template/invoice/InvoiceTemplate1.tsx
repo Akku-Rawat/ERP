@@ -1,23 +1,35 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { getPaymentMethodLabel } from "../../../constants/invoice.constants";
-import { ERP_BASE } from "../../config/api";
+import { ERP_BASE } from "../../../config/api";
 
 const loadImageFromUrl = async (url: string): Promise<string> => {
-  console.log("Url: ", url);
+  console.log("Fetching image from URL:", url);
 
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Image fetch failed");
+  try {
+    const res = await fetch(url, {
+      mode: 'cors', // Handle CORS
+      credentials: 'include' // Include credentials if needed
+    });
+    
+    if (!res.ok) {
+      throw new Error(`Image fetch failed: ${res.status} ${res.statusText}`);
+    }
 
-  const blob = await res.blob();
+    const blob = await res.blob();
+    console.log("Image blob type:", blob.type);
 
-  return await new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.readAsDataURL(blob);
-  });
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("FileReader failed"));
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error("Error loading image:", error);
+    throw error;
+  }
 };
-
 export const generateInvoicePDF = async (
   invoice: any,
   company: any,
@@ -50,22 +62,35 @@ const getFullImageUrl = (path: string): string => {
   doc.text(`Phone: ${company.contactInfo.companyPhone}`, 15, 24);
   doc.text(`Email: ${company.contactInfo.companyEmail}`, 15, 28);
 
-  /* ================= LOGO ================= */
+ 
 /* ================= LOGO ================= */
 if (company.documents.companyLogoUrl) {
   try {
-    console.log(
-      "company.documents.companyLogoUrl",
-      company.documents.companyLogoUrl,
-    );
-    const logoBase64 = await loadImageFromUrl(
-      company.documents.companyLogoUrl,
-    );
-    const format = logoBase64.includes("image/png") ? "PNG" : "JPEG";
+    // Convert to full URL
+    const fullLogoUrl = getFullImageUrl(company.documents.companyLogoUrl);
+    
+    console.log("Original path:", company.documents.companyLogoUrl);
+    console.log("Full URL:", fullLogoUrl);
+    
+    const logoBase64 = await loadImageFromUrl(fullLogoUrl);
+    
+    // Better format detection
+    let format: "PNG" | "JPEG" | "JPG" = "PNG";
+    if (logoBase64.includes("image/jpeg") || logoBase64.includes("image/jpg")) {
+      format = "JPEG";
+    } else if (logoBase64.includes("image/png")) {
+      format = "PNG";
+    }
+    
     doc.addImage(logoBase64, format, 150, 10, 30, 15);
+    console.log("Logo added successfully");
 
   } catch (e) {
-    console.warn("Logo load failed", e);
+    console.error("Logo load failed:", e);
+    // Optional: Add placeholder text if logo fails
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text("[Logo]", 165, 18, { align: "center" });
   }
 }
 

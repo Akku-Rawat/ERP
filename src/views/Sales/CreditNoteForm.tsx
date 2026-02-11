@@ -74,6 +74,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
     creditNoteReasonCode: "",
     invcAdjustReason: "",
     transactionProgress: "02",
+    invoiceStatus: "Approved",
   });
   const [invoiceOptions, setInvoiceOptions] = useState<
     { value: string; label: string }[]
@@ -154,10 +155,12 @@ const handleCreateCreditNote = async () => {
       CreditNoteReasonCode: creditMeta.creditNoteReasonCode,
       invcAdjustReason,
       transactionProgress: creditMeta.transactionProgress,
+      invoiceStatus: creditMeta.invoiceStatus,
       items: formData.items.map((it: any) => ({
         itemCode: it.itemCode,
         quantity: Number(it.quantity),
         price: Number(it.price),
+        
       })),
     };
 
