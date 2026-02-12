@@ -47,7 +47,6 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
             value={form.taxCategory}
             onChange={onChange}
             options={[
-              { value: "", label: "Select Tax Category..." },
                 ...taxCategorySelectOptions,
             ]}
           />

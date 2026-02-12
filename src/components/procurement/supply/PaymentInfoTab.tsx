@@ -30,7 +30,6 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
             value={form.currency}
             onChange={onChange}
             options={[
-              { value: "", label: "Select currency..." },
               ...currencySelectOptions,
             ]}
           />
