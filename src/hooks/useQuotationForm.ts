@@ -63,6 +63,26 @@ export const useQuotationForm = (
   }, [isOpen]);
 
   useEffect(() => {
+  if (!isOpen) return;
+
+  getCompanyById(COMPANY_ID).then((res) => {
+    const company = res?.data;
+
+    setFormData((prev) => ({
+      ...prev,
+      paymentInformation: {
+        ...prev.paymentInformation,
+        bankName: company?.bankAccounts?.[0]?.bankName ?? "",
+        accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
+        routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
+        swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
+      },
+    }));
+  });
+}, [isOpen]);
+
+
+  useEffect(() => {
     const maxPage = Math.max(
       0,
       Math.ceil(formData.items.length / ITEMS_PER_PAGE) - 1,

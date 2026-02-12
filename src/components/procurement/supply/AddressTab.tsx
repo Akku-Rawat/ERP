@@ -3,6 +3,7 @@ import { MapPin } from "lucide-react";
 import { Input, Card } from "../../ui/modal/formComponent";
 import CountrySelect from "../../selects/CountrySelect";
 import type { SupplierFormData } from "../../../types/Supply/supplier";
+import { ModalInput } from "../../ui/modal/modalComponent";
 
 interface AddressTabProps {
   form: SupplierFormData;
@@ -22,21 +23,21 @@ export const AddressTab: React.FC<AddressTabProps> = ({
           <div className="space-y-3">
           <h3 className="text-sm font-semibold text-gray-700">Address Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-            <Input
+            <ModalInput
               label="Address Line 1"
               name="billingAddressLine1"
               value={form.billingAddressLine1}
               onChange={onChange}
             />
 
-            <Input
+            <ModalInput
               label="Address Line 2"
               name="billingAddressLine2"
               value={form.billingAddressLine2}
               onChange={onChange}
             />
 
-            <Input
+            <ModalInput
               label="City"
               name="billingCity"
               value={form.billingCity}
@@ -54,14 +55,14 @@ export const AddressTab: React.FC<AddressTabProps> = ({
             />
 
 
-            <Input
+            <ModalInput
               label="District"
               name="district"
               value={form.district}
               onChange={onChange}
             />
 
-            <Input
+            <ModalInput
               label="Province"
               name="province"
               value={form.province}
@@ -70,7 +71,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({
 
           
 
-            <Input
+            <ModalInput
               label="Postal Code"
               name="billingPostalCode"
               value={form.billingPostalCode}

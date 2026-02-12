@@ -4,6 +4,7 @@ import { Input, Card } from "../../ui/modal/formComponent";
 import Select from "../../ui/Select";
 import type { SupplierFormData } from "../../../types/Supply/supplier";
 import { currencyOptions } from "../../../types/Supply/supplier";
+import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
 
 interface PaymentInfoTabProps {
   form: SupplierFormData;
@@ -23,7 +24,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
         <h3 className="text-sm font-semibold text-gray-700">Payment Details</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          <Select
+          <ModalSelect
             label="Currency"
             name="currency"
             value={form.currency}
@@ -34,7 +35,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
             ]}
           />
 
-          <Input
+          <ModalInput
             label="Payment Terms "
             name="paymentTerms"
             min={0}        // UI block
@@ -43,7 +44,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
           />
 
 
-          <Input
+          <ModalInput
             label="Date of Addition"
             name="dateOfAddition"
             type="date"
@@ -51,7 +52,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
             onChange={onChange}
           />
 
-          <Input
+          <ModalInput
             label="Opening Balance"
             name="openingBalance"
             type="number"
@@ -69,7 +70,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
 
-            <Input
+            <ModalInput
             label="Bank Account"
             name="bankAccount"
             value={form.bankAccount}
@@ -77,7 +78,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
             required
           />
 
-          <Input
+          <ModalInput
             label="Account No"
             name="accountNumber"
             value={form.accountNumber}
@@ -85,7 +86,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
             required
           />
 
-          <Input
+          <ModalInput
             label="Account Holder Name"
             name="accountHolder"
             value={form.accountHolder}
@@ -93,21 +94,21 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
             required
           />
 
-          <Input
+          <ModalInput
             label="Sort Code"
             name="sortCode"
             value={form.sortCode}
             onChange={onChange}
           />
 
-          <Input
+          <ModalInput
             label="SWIFT Code"
             name="swiftCode"
             value={form.swiftCode}
             onChange={onChange}
           />
 
-          <Input
+          <ModalInput
             label="Branch Address"
             name="branchAddress"
             value={form.branchAddress}

@@ -20,7 +20,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-gray-700">Supplier Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-            <Input
+            <ModalInput
               label="Tax Id / TPIN"
               name="tpin"
               value={form.tpin}
@@ -28,20 +28,20 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               placeholder="maximum 10 digit"
               required
             />
-            <Input
+            <ModalInput
               label="Supplier Name"
               name="supplierName"
               value={form.supplierName}
               onChange={onChange}
               required
             />
-            <Input
+            <ModalInput
               label="Supplier Code"
               name="supplierCode"
               value={form.supplierCode}
               onChange={onChange}
             />
-             <Select
+             <ModalSelect
             label="Tax Category"
             name="taxCategory"
             value={form.taxCategory}
@@ -60,27 +60,27 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-gray-700">Contact Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-            <Input
+            <ModalInput
               label="Contact Person Name"
               name="contactPerson"
               value={form.contactPerson}
               onChange={onChange}
               required
             />
-            <Input
+            <ModalInput
               label="Phone No"
               name="phoneNo"
               value={form.phoneNo}
               onChange={onChange}
               type="tel"
             />
-            <Input
+            <ModalInput
               label="Alternate No"
               name="alternateNo"
               value={form.alternateNo}
               onChange={onChange}
             />
-            <Input
+            <ModalInput
               label="Email Id"
               name="emailId"
               value={form.emailId}

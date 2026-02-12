@@ -12,7 +12,7 @@ import {
   Button,
   Checkbox,
 } from "../ui/modal/formComponent";
-import TermsAndCondition from "../../views/termandcondition";
+import TermsAndCondition from "../TermsAndCondition";
 import type { TermSection } from "../../types/termsAndCondition";
 import {
   Mail,
@@ -29,8 +29,9 @@ import {
   createCustomer,
   updateCustomerByCustomerCode,
 } from "../../api/customerApi";
-
+import AddressBlock from "../ui/modal/AddressBlock";
 import type { CustomerDetail } from "../../types/customer";
+import { ModalInput, ModalSelect } from "../ui/modal/modalComponent";
 
 const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   id: "",
@@ -268,7 +269,7 @@ const CustomerModal: React.FC<{
       icon={isEditMode ? Building2 : User}
       footer={footer}
       maxWidth="6xl"
-      height="87vh"
+      height="75vh"
     >
       <form onSubmit={handleSubmit} className="h-full flex flex-col">
         {/* Tabs - Sticky Header */}
@@ -280,11 +281,10 @@ const CustomerModal: React.FC<{
                 type="button"
                 onClick={() => setActiveTab(tab)}
                 className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2
-          ${
-            activeTab === tab
-              ? "text-primary border-b-[3px] border-primary"
-              : "text-muted border-b-[3px] border-transparent hover:text-main"
-          }`}
+          ${activeTab === tab
+                    ? "text-primary border-b-[3px] border-primary"
+                    : "text-muted border-b-[3px] border-transparent hover:text-main"
+                  }`}
               >
                 {/* ICONS KEPT FROM LOGIC 1 */}
                 {tab === "details" && <User className="w-4 h-4" />}
@@ -304,7 +304,7 @@ const CustomerModal: React.FC<{
 
 
         {/* Scrollable Content Area */}
-        <div className=" px-4 py-2 bg-app">
+        <div className=" px-4 py-2 bg-app mt-5">
           {activeTab === "details" && (
             <Card
               title="Basic Information"
@@ -312,7 +312,7 @@ const CustomerModal: React.FC<{
               icon={<User className="w-5 h-5 text-primary" />}
             >
               <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                <Select
+                <ModalSelect
                   label="Type"
                   name="type"
                   value={form.type}
@@ -323,26 +323,24 @@ const CustomerModal: React.FC<{
                   ]}
                 />
 
-                <Input
+                <ModalInput
                   label="Customer Name"
                   name="name"
                   value={form.name}
                   onChange={handleChange}
                   required
-                  icon={<User className="w-4 h-4" />}
                   placeholder="Enter full name"
                 />
 
-                <Input
+                <ModalInput
                   label="Contact Person"
                   name="contactPerson"
                   value={form.contactPerson}
                   onChange={handleChange}
-                  icon={<User className="w-4 h-4" />}
                   placeholder="Primary contact"
                 />
 
-                <Select
+                <ModalSelect
                   label="Display Name"
                   name="displayName"
                   value={form.displayName}
@@ -360,17 +358,16 @@ const CustomerModal: React.FC<{
                   ].filter((o) => o.value)} // removes empty invalid options
                 />
 
-                <Input
+                <ModalInput
                   label="TPIN"
                   name="tpin"
                   value={form.tpin}
                   onChange={handleChange}
                   required
-                  icon={<CreditCard className="w-4 h-4" />}
                   placeholder="Tax identification"
                 />
 
-                <Select
+                <ModalSelect
                   label="Tax Category"
                   name="customerTaxCategory"
                   value={form.customerTaxCategory}
@@ -382,7 +379,7 @@ const CustomerModal: React.FC<{
                   ]}
                 />
 
-                <Select
+                <ModalSelect
                   label="Currency"
                   name="currency"
                   value={form.currency}
@@ -394,42 +391,38 @@ const CustomerModal: React.FC<{
                   ]}
                 />
 
-                <Input
+                <ModalInput
                   label="Bank Account"
                   name="accountNumber"
                   value={form.accountNumber}
                   onChange={handleChange}
-                  icon={<CreditCard className="w-4 h-4" />}
                   placeholder="Account number"
                 />
 
-                <Input
+                <ModalInput
                   label="Onboard Balance"
                   name="onboardingBalance"
                   type="number"
                   value={form.onboardingBalance}
                   onChange={handleChange}
-                  icon={<DollarSign className="w-4 h-4" />}
                   placeholder="0.00"
                 />
 
-                <Input
+                <ModalInput
                   label="Email"
                   name="email"
                   type="email"
                   value={form.email}
                   onChange={handleChange}
-                  icon={<Mail className="w-4 h-4" />}
                   placeholder="email@example.com"
                 />
 
-                <Input
+                <ModalInput
                   label="Mobile"
                   name="mobile"
                   type="tel"
                   value={form.mobile}
                   onChange={handleChange}
-                  icon={<Phone className="w-4 h-4" />}
                   placeholder="+1234567890"
                 />
               </div>
@@ -450,135 +443,83 @@ const CustomerModal: React.FC<{
 
           {activeTab === "address" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
               {/* Billing Address */}
-              <Card
+              <AddressBlock
+                type="billing"
                 title="Billing Address"
                 subtitle="Invoice and payment details"
-                icon={<MapPin className="w-5 h-5 text-primary" />}
-              >
-                <div className="space-y-4">
-                  <Input
-                    label="Address Line 1"
-                    name="billingAddressLine1"
-                    value={form.billingAddressLine1}
-                    onChange={handleChange}
-                    placeholder="Street address"
-                  />
-                  <Input
-                    label="Address Line 2"
-                    name="billingAddressLine2"
-                    value={form.billingAddressLine2}
-                    onChange={handleChange}
-                    placeholder="Apt, suite, etc."
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label="Postal Code"
-                      name="billingPostalCode"
-                      value={form.billingPostalCode}
-                      onChange={handleChange}
-                      placeholder="ZIP"
-                    />
-                    <Input
-                      label="City"
-                      name="billingCity"
-                      value={form.billingCity}
-                      onChange={handleChange}
-                      placeholder="City"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label="State"
-                      name="billingState"
-                      value={form.billingState}
-                      onChange={handleChange}
-                      placeholder="State"
-                    />
-                    <Input
-                      label="Country"
-                      name="billingCountry"
-                      value={form.billingCountry}
-                      onChange={handleChange}
-                      placeholder="Country"
-                    />
-                  </div>
-                </div>
-              </Card>
+                data={{
+                  line1: form.billingAddressLine1 ?? "",
+                  line2: form.billingAddressLine2 ?? "",
+                  postalCode: form.billingPostalCode ?? "",
+                  city: form.billingCity ?? "",
+                  state: form.billingState ?? "",
+                  country: form.billingCountry ?? "",
+                }}
+                onChange={(e) => {
+                  const { name, value } = e.target;
+
+                  const map: Record<string, keyof typeof form> = {
+                    line1: "billingAddressLine1",
+                    line2: "billingAddressLine2",
+                    postalCode: "billingPostalCode",
+                    city: "billingCity",
+                    state: "billingState",
+                    country: "billingCountry",
+                  };
+
+                  setForm((prev) => ({
+                    ...prev,
+                    [map[name]]: value,
+                  }));
+                }}
+              />
+
 
               {/* Shipping Address */}
-              <Card
+              <AddressBlock
+                type="shipping"
                 title="Shipping Address"
                 subtitle="Delivery location"
-                icon={<MapPin className="w-5 h-5 text-primary" />}
-                className="relative"
-              >
-                <div className="absolute top-6 right-6">
-                  <Checkbox
-                    label="Same as billing"
-                    name="sameAsBilling"
-                    checked={form.sameAsBilling}
-                    onChange={handleChange}
-                  />
-                </div>
+                data={{
+                  line1: form.shippingAddressLine1 ?? "",
+                  line2: form.shippingAddressLine2 ?? "",
+                  postalCode: form.shippingPostalCode ?? "",
+                  city: form.shippingCity ?? "",
+                  state: form.shippingState ?? "",
+                  country: form.shippingCountry ?? "",
+                }}
+                sameAsBilling={form.sameAsBilling}
+                onSameAsBillingChange={(checked) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    sameAsBilling: checked,
+                  }))
+                }
+                onChange={(e) => {
+                  const { name, value } = e.target;
 
-                <div className="space-y-4 mt-8">
-                  <Input
-                    label="Address Line 1"
-                    name="shippingAddressLine1"
-                    value={form.shippingAddressLine1}
-                    onChange={handleChange}
-                    disabled={form.sameAsBilling}
-                    placeholder="Street address"
-                  />
-                  <Input
-                    label="Address Line 2"
-                    name="shippingAddressLine2"
-                    value={form.shippingAddressLine2}
-                    onChange={handleChange}
-                    disabled={form.sameAsBilling}
-                    placeholder="Apt, suite, etc."
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label="Postal Code"
-                      name="shippingPostalCode"
-                      value={form.shippingPostalCode}
-                      onChange={handleChange}
-                      disabled={form.sameAsBilling}
-                      placeholder="ZIP"
-                    />
-                    <Input
-                      label="City"
-                      name="shippingCity"
-                      value={form.shippingCity}
-                      onChange={handleChange}
-                      disabled={form.sameAsBilling}
-                      placeholder="City"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label="State"
-                      name="shippingState"
-                      value={form.shippingState}
-                      onChange={handleChange}
-                      disabled={form.sameAsBilling}
-                      placeholder="State"
-                    />
-                    <Input
-                      label="Country"
-                      name="shippingCountry"
-                      value={form.shippingCountry}
-                      onChange={handleChange}
-                      disabled={form.sameAsBilling}
-                      placeholder="Country"
-                    />
-                  </div>
-                </div>
-              </Card>
+                  const map: Record<string, keyof typeof form> = {
+                    line1: "shippingAddressLine1",
+                    line2: "shippingAddressLine2",
+                    postalCode: "shippingPostalCode",
+                    city: "shippingCity",
+                    state: "shippingState",
+                    country: "shippingCountry",
+                  };
+
+                  setForm((prev) => ({
+                    ...prev,
+                    [map[name]]: value,
+                  }));
+                }}
+              />
+
+
             </div>
           )}
+
         </div>
       </form>
     </Modal>

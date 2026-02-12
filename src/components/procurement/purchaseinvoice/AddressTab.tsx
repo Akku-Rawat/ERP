@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from "react";
 import { Input, Checkbox } from "../../ui/modal/formComponent";
 import type { PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
 import { MapPin, Truck, Building2, Plus, Minus } from "lucide-react";
-
+import { ModalInput } from "../../ui/modal/modalComponent";
 interface AddressTabProps {
   form: PurchaseOrderFormData;
   onFormChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -63,19 +63,19 @@ const AddressBlock: React.FC<{
 
       {isOpen && (
         <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-card text-main">
-          <Input label="Address Title" name={`addresses.${keyName}.addressTitle`} value={data?.addressTitle || ""} onChange={onFormChange} />
-          <Input label="Address Type" name={`addresses.${keyName}.addressType`} value={data?.addressType || ""} onChange={onFormChange} />
-          <Input label="Address Line 1" name={`addresses.${keyName}.addressLine1`} value={data?.addressLine1 || ""} onChange={onFormChange} />
-          <Input label="Address Line 2" name={`addresses.${keyName}.addressLine2`} value={data?.addressLine2 || ""} onChange={onFormChange} />
-          <Input label="Postal Code" name={`addresses.${keyName}.postalCode`} value={data?.postalCode || ""} onChange={onFormChange} />
-          <Input label="City" name={`addresses.${keyName}.city`} value={data?.city || ""} onChange={onFormChange} />
-          <Input label="State" name={`addresses.${keyName}.state`} value={data?.state || ""} onChange={onFormChange} />
-          <Input label="Country" name={`addresses.${keyName}.country`} value={data?.country || ""} onChange={onFormChange} />
+          <ModalInput label="Address Title" name={`addresses.${keyName}.addressTitle`} value={data?.addressTitle || ""} onChange={onFormChange} />
+          <ModalInput label="Address Type" name={`addresses.${keyName}.addressType`} value={data?.addressType || ""} onChange={onFormChange} />
+          <ModalInput label="Address Line 1" name={`addresses.${keyName}.addressLine1`} value={data?.addressLine1 || ""} onChange={onFormChange} />
+          <ModalInput label="Address Line 2" name={`addresses.${keyName}.addressLine2`} value={data?.addressLine2 || ""} onChange={onFormChange} />
+          <ModalInput label="Postal Code" name={`addresses.${keyName}.postalCode`} value={data?.postalCode || ""} onChange={onFormChange} />
+          <ModalInput label="City" name={`addresses.${keyName}.city`} value={data?.city || ""} onChange={onFormChange} />
+          <ModalInput label="State" name={`addresses.${keyName}.state`} value={data?.state || ""} onChange={onFormChange} />
+          <ModalInput label="Country" name={`addresses.${keyName}.country`} value={data?.country || ""} onChange={onFormChange} />
 
           {keyName === "supplierAddress" && (
             <>
-              <Input label="Phone" name={`addresses.${keyName}.phone`} value={data?.phone || ""} onChange={onFormChange} />
-              <Input label="Email" name={`addresses.${keyName}.email`} value={data?.email || ""} onChange={onFormChange} />
+              <ModalInput label="Phone" name={`addresses.${keyName}.phone`} value={data?.phone || ""} onChange={onFormChange} />
+              <ModalInput label="Email" name={`addresses.${keyName}.email`} value={data?.email || ""} onChange={onFormChange} />
             </>
           )}
         </div>
@@ -144,11 +144,11 @@ const copyAddress = useCallback(
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-4 gap-4 bg-card border border-theme p-4 rounded-xl">
-        <Input label="Shipping Rule" name="shippingRule" value={form.shippingRule || ""} onChange={onFormChange} />
-        <Input label="Incoterm" name="incoterm" value={form.incoterm || ""} onChange={onFormChange} />
-        <Input label="Supplier Contact" name="supplierContact" value={form.supplierContact || ""} onChange={onFormChange} />
-        <Input label="Place of Supply" name="placeOfSupply" value={form.placeOfSupply || ""} onChange={onFormChange} />
+      <div className="grid grid-cols-4 gap-4  p-4 ">
+        <ModalInput label="Shipping Rule" name="shippingRule" value={form.shippingRule || ""} onChange={onFormChange} />
+        <ModalInput label="Incoterm" name="incoterm" value={form.incoterm || ""} onChange={onFormChange} />
+        <ModalInput label="Supplier Contact" name="supplierContact" value={form.supplierContact || ""} onChange={onFormChange} />
+        <ModalInput label="Place of Supply" name="placeOfSupply" value={form.placeOfSupply || ""} onChange={onFormChange} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
