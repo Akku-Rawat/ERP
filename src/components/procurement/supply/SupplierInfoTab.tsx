@@ -14,11 +14,7 @@ interface SupplierInfoTabProps {
 
 export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange }) => {
   return (
-    <Card
-      title="Supplier Information"
-      subtitle="Supplier, contact details"
-      icon={<Building2 className="w-5 h-5 text-primary" />}
-    >
+     <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
       <div className="space-y-6">
         {/* Supplier Details */}
         <div className="space-y-3">
@@ -95,6 +91,6 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
         </div>
 
       </div>
-    </Card>
+    </section>
   );
 };

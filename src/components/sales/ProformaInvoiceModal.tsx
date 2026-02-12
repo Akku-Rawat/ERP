@@ -120,7 +120,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
         </>
       }
       maxWidth="6xl"
-      height="70vh"
+      height="79vh"
     >
       <form id="proforma-form" onSubmit={handleFormSubmit}>
 

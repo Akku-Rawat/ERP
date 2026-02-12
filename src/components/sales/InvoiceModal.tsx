@@ -82,7 +82,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
       icon={FileText}
       footer={footerContent}
       maxWidth="6xl"
-      height="70vh"
+      height="79vh"
     >
       <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}

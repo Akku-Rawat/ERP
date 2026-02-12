@@ -73,7 +73,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
       subtitle="Create and manage purchase invoice"
       icon={Building2}
       maxWidth="6xl"
-      height="75vh"
+      height="87vh"
       footer={footer}
     >
 

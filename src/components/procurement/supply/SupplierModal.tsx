@@ -125,7 +125,7 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         </div>
 
         {/* Content */}
-        <div>
+        <div className="gap-6 max-h-screen overflow-auto p-4">
 
           {activeTab === "supplier" && (
             <SupplierInfoTab form={form} onChange={handleChange} />

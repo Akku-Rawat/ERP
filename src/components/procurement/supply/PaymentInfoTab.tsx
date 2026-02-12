@@ -17,11 +17,7 @@ const currencySelectOptions = currencyOptions.map((c) => ({
 
 export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }) => {
   return (
-    <Card
-      title="Payment & Bank Details"
-      subtitle="Payment terms and bank information"
-      icon={<DollarSign className="w-5 h-5 text-primary" />}
-    >
+    <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
       {/* Payment Details */}
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-gray-700">Payment Details</h3>
@@ -119,6 +115,6 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
           />
         </div>
       </div>
-    </Card>
+    </section>
   );
 };

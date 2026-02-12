@@ -44,7 +44,7 @@ const CreateDebitNoteModal: React.FC<Props> = ({
       subtitle="Sales Invoice Adjustment"
       icon={FileMinus}
       maxWidth="6xl"
-      height="74vh"
+      height="84vh"
     >
       <DebitNoteForm onSubmit={onSubmit} invoiceId={invoiceId} />
     </Modal>
