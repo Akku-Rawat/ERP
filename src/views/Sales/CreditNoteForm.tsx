@@ -74,6 +74,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
     creditNoteReasonCode: "",
     invcAdjustReason: "",
     transactionProgress: "02",
+    invoiceStatus: "Approved",
   });
   const [invoiceOptions, setInvoiceOptions] = useState<
     { value: string; label: string }[]

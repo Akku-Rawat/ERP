@@ -9,6 +9,7 @@ import { getItemByItemCode } from "../api/itemApi";
 import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
+  EMPTY_TERMS,
 } from "../constants/invoice.constants";
 type InvoiceMode = "invoice" | "proforma";
 
@@ -25,10 +26,13 @@ export const useInvoiceForm = (
   onClose: () => void,
   onSubmit?: (data: any) => void,
   mode?: "invoice" | "proforma",
-  initialData?: any
+  initialData?: any,
 ) => {
+  const [formData, setFormData] = useState<Invoice>({
+    ...DEFAULT_INVOICE_FORM,
+    terms: { ...EMPTY_TERMS },
+  });
 
-  const [formData, setFormData] = useState<Invoice>(DEFAULT_INVOICE_FORM);
   const [customerDetails, setCustomerDetails] = useState<any>(null);
   const [customerNameDisplay, setCustomerNameDisplay] = useState("");
   const [page, setPage] = useState(0);
@@ -41,20 +45,35 @@ export const useInvoiceForm = (
 
   const shippingEditedRef = useRef(false);
 useEffect(() => {
-  if (!isOpen) {
-    handleReset();
-    return;
-  }
+  if (!isOpen) return;
 
-  setFormData((prev) => ({
-    ...prev,
-    invoiceStatus:
-      prev.invoiceStatus || (mode === "proforma" ? "Draft" : prev.invoiceStatus),
-    invoiceType:
-      prev.invoiceType || (mode === "proforma" ? "Non-Export" : prev.invoiceType),
-  }));
+  const loadCompanyData = async () => {
+    try {
+      const companyRes = await getCompanyById(COMPANY_ID);
+      const company = companyRes?.data;
+      
+      setFormData((prev) => ({
+        ...prev,
+        invoiceStatus: prev.invoiceStatus || (mode === "proforma" ? "Draft" : prev.invoiceStatus),
+        invoiceType: prev.invoiceType || (mode === "proforma" ? "Non-Export" : prev.invoiceType),
+        terms: {
+          selling: company?.terms?.selling ?? EMPTY_TERMS.selling,
+        },
+        paymentInformation: {
+          ...prev.paymentInformation,
+          bankName: company?.bankAccounts?.[0]?.bankName ?? "",
+          accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
+          routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
+          swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
+        },
+      }));
+    } catch (err) {
+      console.error("Failed to load company data", err);
+    }
+  };
+
+  loadCompanyData();
 }, [isOpen, mode]);
-;
 
   const setInvoiceFromApi = (invoice: any) => {
     setFormData((prev: any) => ({
@@ -67,35 +86,34 @@ useEffect(() => {
   };
 
   const validateForm = (): boolean => {
-  if (!formData.customerId) {
-    throw new Error("Please select a customer");
-  }
-
-  if (!formData.dueDate) {
-    throw new Error("Please select due date");
-  }
-
-  if (!formData.items.length) {
-    throw new Error("Please add at least one item");
-  }
-
-  formData.items.forEach((it, idx) => {
-    if (!it.itemCode) {
-      throw new Error(`Item ${idx + 1}: Please select item`);
+    if (!formData.customerId) {
+      throw new Error("Please select a customer");
     }
 
-    if (!it.quantity || it.quantity <= 0) {
-      throw new Error(`Item ${idx + 1}: Quantity must be greater than 0`);
+    if (!formData.dueDate) {
+      throw new Error("Please select due date");
     }
 
-    if (!it.price || it.price <= 0) {
-      throw new Error(`Item ${idx + 1}: Price must be greater than 0`);
+    if (!formData.items.length) {
+      throw new Error("Please add at least one item");
     }
-  });
 
-  return true;
-};
+    formData.items.forEach((it, idx) => {
+      if (!it.itemCode) {
+        throw new Error(`Item ${idx + 1}: Please select item`);
+      }
 
+      if (!it.quantity || it.quantity <= 0) {
+        throw new Error(`Item ${idx + 1}: Quantity must be greater than 0`);
+      }
+
+      if (!it.price || it.price <= 0) {
+        throw new Error(`Item ${idx + 1}: Price must be greater than 0`);
+      }
+    });
+
+    return true;
+  };
 
   useEffect(() => {
     if (!sameAsBilling) return;
@@ -169,13 +187,10 @@ useEffect(() => {
         getCustomerByCustomerCode(id),
         getCompanyById(COMPANY_ID),
       ]);
-      console.log("Submitting customerId:", id);
 
       if (!customerRes || customerRes.status_code !== 200) return;
 
       const data = customerRes.data;
-      console.log("RAW billingCountry:", data.billingCountry);
-      console.log("RAW shippingCountry:", data.shippingCountry);
 
       const company = companyRes?.data;
       const invoiceType = data.customerTaxCategory as
@@ -189,10 +204,6 @@ useEffect(() => {
       const countryLookupList = Array.isArray(countryLookupRes)
         ? countryLookupRes
         : (countryLookupRes?.data ?? []);
-
-      console.log("countryLookupResponse: ", countryLookupList);
-
-      console.log("FULL country API response:", countryLookupRes);
 
       const countryCode = getCountryCode(
         countryLookupList,
@@ -220,7 +231,8 @@ useEffect(() => {
       };
 
       const paymentInformation = {
-        paymentTerms: company?.terms?.selling?.payment?.dueDates ?? "",
+        paymentTerms: "",
+
         paymentMethod: "01",
         bankName: company?.bankAccounts?.[0]?.bankName ?? "",
         accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
@@ -236,9 +248,6 @@ useEffect(() => {
         } else if (!shippingEditedRef.current) {
           shipping = shippingFromCustomer;
         }
-        console.log("invoiceType: ", invoiceType);
-        console.log("taxCategory: ", taxCategory);
-        console.log("countryCode: ", countryCode);
 
         return {
           ...prev,
@@ -247,7 +256,9 @@ useEffect(() => {
           billingAddress: billing,
           shippingAddress: shipping,
           paymentInformation,
-          terms: { selling: data.terms?.selling },
+          terms: {
+  selling: company?.terms?.selling ?? prev.terms?.selling ?? EMPTY_TERMS.selling,
+},
         };
       });
     } catch (err) {
@@ -338,39 +349,40 @@ useEffect(() => {
       return { ...prev, items };
     });
   };
-const setFormDataFromInvoice = async (invoice: any) => {
-  setFormData((prev: any) => ({
-    ...prev,
-    invoiceNumber: invoice.invoiceNumber,
-    invoiceType: invoice.invoiceType ?? "",
-    invoiceStatus: invoice.invoiceStatus ?? "",
-    currencyCode: invoice.currencyCode,
-    dateOfInvoice: invoice.dateOfInvoice,
-    dueDate: invoice.dueDate,
-    billingAddress: invoice.billingAddress ?? prev.billingAddress,
-    shippingAddress: invoice.shippingAddress ?? prev.shippingAddress,
-    items: invoice.items.map((it: any) => {
-      const base = Number(it.quantity) * Number(it.price) - Number(it.discount);
-      const taxAmount = Number(it.vatTaxableAmount ?? 0);
-      const taxRate = base > 0 ? Number(((taxAmount / base) * 100).toFixed(2)) : 0;
+  const setFormDataFromInvoice = async (invoice: any) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      invoiceNumber: invoice.invoiceNumber,
+      invoiceType: invoice.invoiceType ?? "",
+      invoiceStatus: invoice.invoiceStatus ?? "",
+      currencyCode: invoice.currencyCode,
+      dateOfInvoice: invoice.dateOfInvoice,
+      dueDate: invoice.dueDate,
+      billingAddress: invoice.billingAddress ?? prev.billingAddress,
+      shippingAddress: invoice.shippingAddress ?? prev.shippingAddress,
+      items: invoice.items.map((it: any) => {
+        const base =
+          Number(it.quantity) * Number(it.price) - Number(it.discount);
+        const taxAmount = Number(it.vatTaxableAmount ?? 0);
+        const taxRate =
+          base > 0 ? Number(((taxAmount / base) * 100).toFixed(2)) : 0;
 
-      return {
-        itemCode: it.itemCode,
-        description: it.description ?? "",
-        quantity: Number(it.quantity),
-        price: Number(it.price),
-        discount: Number(it.discount),
-        vatRate: taxRate,
-        vatCode: it.vatCode ?? "",
-        _fromInvoice: true,
-      };
-    }),
-  }));
+        return {
+          itemCode: it.itemCode,
+          description: it.description ?? "",
+          quantity: Number(it.quantity),
+          price: Number(it.price),
+          discount: Number(it.discount),
+          vatRate: taxRate,
+          vatCode: it.vatCode ?? "",
+          _fromInvoice: true,
+        };
+      }),
+    }));
 
-  setCustomerDetails(invoice.customer);
-  setCustomerNameDisplay(invoice.customer?.name ?? "");
-};
-
+    setCustomerDetails(invoice.customer);
+    setCustomerNameDisplay(invoice.customer?.name ?? "");
+  };
 
   const setTerms = (selling: TermSection) => {
     setFormData((prev) => ({ ...prev, terms: { selling } }));
@@ -381,11 +393,26 @@ const setFormDataFromInvoice = async (invoice: any) => {
     if (!checked) shippingEditedRef.current = false;
   };
 
-  const handleReset = () => {
+const handleReset = async () => {
+  try {
+    const companyRes = await getCompanyById(COMPANY_ID);
+    const company = companyRes?.data;
+    
     setFormData({
       ...DEFAULT_INVOICE_FORM,
+      terms: {
+        selling: company?.terms?.selling ?? EMPTY_TERMS.selling,
+      },
       shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
     });
+  } catch (err) {
+    setFormData({
+      ...DEFAULT_INVOICE_FORM,
+      terms: { ...EMPTY_TERMS },
+      shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
+    });
+  }
+
     setCustomerDetails(null);
     setCustomerNameDisplay("");
     setTaxCategory("");
@@ -398,27 +425,26 @@ const setFormDataFromInvoice = async (invoice: any) => {
     shippingEditedRef.current = false;
   };
 
-const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
 
-  try {
-    validateForm();
+    try {
+      validateForm();
 
-    const payload = {
-      ...formData,
-      subTotal,
-      totalTax,
-      grandTotal,
-    };
+      const payload = {
+        ...formData,
+        subTotal,
+        totalTax,
+        grandTotal,
+      };
 
-    onSubmit?.(payload);
-    handleReset();
-    onClose();
-  } catch (err: any) {
-    throw err; 
-  }
-};
-
+      onSubmit?.(payload);
+      handleReset();
+      onClose();
+    } catch (err: any) {
+      throw err;
+    }
+  };
 
   const { subTotal, totalTax, grandTotal } = useMemo(() => {
     let sub = 0;

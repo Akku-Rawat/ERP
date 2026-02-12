@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Modal from "../ui/modal/modal";
+import { getCompanyById } from "../../api/companySetupApi";
+const companyId = import.meta.env.VITE_COMPANY_ID;
+
 import {
   Input,
   Select,
@@ -59,7 +62,6 @@ const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
 
   terms: {
     selling: { payment: { phases: [] } },
-
   },
   sameAsBilling: false,
 };
@@ -69,6 +71,7 @@ const customerTaxCategoryOptions = ["Export", "Non-Export", "LPO"];
 
 const CustomerModal: React.FC<{
   isOpen: boolean;
+
   onClose: () => void;
   onSubmit?: (data: CustomerDetail) => void;
   initialData?: CustomerDetail | null;
@@ -82,6 +85,35 @@ const CustomerModal: React.FC<{
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
     "details",
   );
+
+  useEffect(() => {
+    if (!isOpen || !companyId || isEditMode) return;
+
+    const loadCompanyTerms = async () => {
+      try {
+        const res = await getCompanyById(companyId);
+
+        const sellingTerms = res?.data?.terms?.selling;
+
+        if (!sellingTerms) {
+          console.warn("Company selling terms not found");
+          return;
+        }
+
+        setForm((prev) => ({
+          ...prev,
+          terms: {
+            ...prev.terms,
+            selling: sellingTerms,
+          },
+        }));
+      } catch (err) {
+        console.error("Failed to load company terms", err);
+      }
+    };
+
+    loadCompanyTerms();
+  }, [companyId, isOpen, isEditMode]);
 
   useEffect(() => {
     if (initialData) {
@@ -238,7 +270,6 @@ const CustomerModal: React.FC<{
       maxWidth="6xl"
       height="87vh"
     >
-
       <form onSubmit={handleSubmit} className="h-full flex flex-col">
         {/* Tabs - Sticky Header */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
@@ -249,10 +280,11 @@ const CustomerModal: React.FC<{
                 type="button"
                 onClick={() => setActiveTab(tab)}
                 className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2
-          ${activeTab === tab
-                    ? "text-primary border-b-[3px] border-primary"
-                    : "text-muted border-b-[3px] border-transparent hover:text-main"
-                  }`}
+          ${
+            activeTab === tab
+              ? "text-primary border-b-[3px] border-primary"
+              : "text-muted border-b-[3px] border-transparent hover:text-main"
+          }`}
               >
                 {/* ICONS KEPT FROM LOGIC 1 */}
                 {tab === "details" && <User className="w-4 h-4" />}
@@ -344,7 +376,6 @@ const CustomerModal: React.FC<{
                   value={form.customerTaxCategory}
                   onChange={handleChange}
                   options={[
-
                     { value: "Export", label: "Export" },
                     { value: "Non-Export", label: "Non-Export" },
                     { value: "LPO", label: "LPO" },
@@ -357,7 +388,6 @@ const CustomerModal: React.FC<{
                   value={form.currency}
                   onChange={handleChange}
                   options={[
-
                     { value: "ZMW", label: "ZMW" },
                     { value: "USD", label: "USD" },
                     { value: "INR", label: "INR" },
@@ -549,11 +579,8 @@ const CustomerModal: React.FC<{
               </Card>
             </div>
           )}
-
-
         </div>
       </form>
-
     </Modal>
   );
 };

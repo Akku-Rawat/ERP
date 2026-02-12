@@ -25,7 +25,6 @@ export const useQuotationForm = (
   onSubmit?: (data: any) => void,
   initialData?: any,
 ) => {
-
   const [formData, setFormData] = useState<Invoice>({
     ...DEFAULT_INVOICE_FORM,
     invoiceStatus: "Draft",
@@ -42,8 +41,7 @@ export const useQuotationForm = (
   const [isShippingOpen, setIsShippingOpen] = useState(false);
   const [sameAsBilling, setSameAsBilling] = useState(true);
   const [itemMaster, setItemMaster] = useState<any[]>([]);
-const [itemMasterLoading, setItemMasterLoading] = useState(false);
-
+  const [itemMasterLoading, setItemMasterLoading] = useState(false);
 
   const shippingEditedRef = useRef(false);
 
@@ -52,11 +50,11 @@ const [itemMasterLoading, setItemMasterLoading] = useState(false);
     if (!isOpen) return;
 
     const today = new Date().toISOString().split("T")[0];
+
     setFormData((prev) => ({
       ...prev,
       dateOfInvoice: prev.dateOfInvoice || today,
       validUntil: "",
-
       invoiceStatus: "Draft",
       invoiceType: "Non-Export",
     }));
@@ -64,45 +62,42 @@ const [itemMasterLoading, setItemMasterLoading] = useState(false);
     setPage(0);
   }, [isOpen]);
 
-useEffect(() => {
-  const maxPage = Math.max(0, Math.ceil(formData.items.length / ITEMS_PER_PAGE) - 1);
+  useEffect(() => {
+    const maxPage = Math.max(
+      0,
+      Math.ceil(formData.items.length / ITEMS_PER_PAGE) - 1,
+    );
 
-  if (page > maxPage) {
-    setPage(maxPage);
-  }
-}, [formData.items.length, page]);
+    if (page > maxPage) {
+      setPage(maxPage);
+    }
+  }, [formData.items.length, page]);
 
+  useEffect(() => {
+    if (!isOpen || !initialData) return;
 
+    setSameAsBilling(false);
+    shippingEditedRef.current = true;
 
+    setFormData({
+      ...DEFAULT_INVOICE_FORM,
+      ...initialData,
+      dateOfInvoice: initialData.dateOfQuotation,
+      dueDate: initialData.validUntil,
+      items: (initialData.items || []).map((it: any) => ({
+        itemCode: it.itemCode,
+        description: it.description ?? "",
+        quantity: Number(it.quantity),
+        price: Number(it.price),
+        discount: Number(it.discount),
+        vatRate: Number(it.vatRate || 0),
+        vatCode: it.vatCode ?? "",
+      })),
+    });
 
-useEffect(() => {
-  if (!isOpen || !initialData) return;
-
-  setSameAsBilling(false);
-  shippingEditedRef.current = true;
-
-  setFormData({
-    ...DEFAULT_INVOICE_FORM,
-    ...initialData,
-    dateOfInvoice: initialData.dateOfQuotation,
-    dueDate: initialData.validUntil,
-    items: (initialData.items || []).map((it: any) => ({
-      itemCode: it.itemCode,
-      description: it.description ?? "",
-      quantity: Number(it.quantity),
-      price: Number(it.price),
-      discount: Number(it.discount),
-      vatRate: Number(it.vatRate || 0),
-      vatCode: it.vatCode ?? "",
-    })),
-  });
-
-  setCustomerDetails(initialData.customer);
-  setCustomerNameDisplay(initialData.customer?.name ?? "");
-}, [isOpen, initialData]);
-
-
-
+    setCustomerDetails(initialData.customer);
+    setCustomerNameDisplay(initialData.customer?.name ?? "");
+  }, [isOpen, initialData]);
 
   // Sync shipping address with billing if sameAsBilling is true
   useEffect(() => {
@@ -176,13 +171,10 @@ useEffect(() => {
         getCustomerByCustomerCode(id),
         getCompanyById(COMPANY_ID),
       ]);
-      console.log("Submitting customerId:", id);
 
       if (!customerRes || customerRes.status_code !== 200) return;
 
       const data = customerRes.data;
-      console.log("RAW billingCountry:", data.billingCountry);
-      console.log("RAW shippingCountry:", data.shippingCountry);
 
       const company = companyRes?.data;
       const invoiceType = data.customerTaxCategory as
@@ -196,10 +188,6 @@ useEffect(() => {
       const countryLookupList = Array.isArray(countryLookupRes)
         ? countryLookupRes
         : (countryLookupRes?.data ?? []);
-
-      console.log("countryLookupResponse: ", countryLookupList);
-
-      console.log("FULL country API response:", countryLookupRes);
 
       const countryCode = getCountryCode(
         countryLookupList,
@@ -243,9 +231,6 @@ useEffect(() => {
         } else if (!shippingEditedRef.current) {
           shipping = shippingFromCustomer;
         }
-        console.log("invoiceType: ", invoiceType);
-        console.log("taxCategory: ", taxCategory);
-        console.log("countryCode: ", countryCode);
 
         return {
           ...prev,
@@ -254,7 +239,10 @@ useEffect(() => {
           billingAddress: billing,
           shippingAddress: shipping,
           paymentInformation,
-          terms: { selling: data.terms?.selling },
+          terms: {
+            selling: company?.terms?.selling ??
+              data?.terms?.selling ?? { payment: { phases: [] } },
+          },
         };
       });
     } catch (err) {
@@ -320,18 +308,18 @@ useEffect(() => {
     });
   };
 
-const removeItem = (idx: number) => {
-  setFormData((prev) => {
-    if (prev.items.length === 1) return prev;
+  const removeItem = (idx: number) => {
+    setFormData((prev) => {
+      if (prev.items.length === 1) return prev;
 
-    const items = prev.items.filter((_, i) => i !== idx);
-    const maxPage = Math.max(0, Math.ceil(items.length / ITEMS_PER_PAGE) - 1);
+      const items = prev.items.filter((_, i) => i !== idx);
+      const maxPage = Math.max(0, Math.ceil(items.length / ITEMS_PER_PAGE) - 1);
 
-    setPage((p) => Math.min(p, maxPage));
+      setPage((p) => Math.min(p, maxPage));
 
-    return { ...prev, items };
-  });
-};
+      return { ...prev, items };
+    });
+  };
 
   const setTerms = (selling: TermSection) => {
     setFormData((prev) => ({ ...prev, terms: { selling } }));

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import PurchaseInvoiceView from "../../views/Procurement/PurchaseInvoiceView";
 import PurchaseInvoiceModal from "../../components/procurement/PurchaseInvoiceModal";
@@ -106,7 +106,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
 
 
   //  FETCH ORDERS 
-  const fetchOrders = async () => {
+  const fetchInvoice = async () => {
     try {
       setLoading(true);
 
@@ -115,7 +115,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
       setTotalPages(res.pagination?.total_pages || 1);
       setTotalItems(res.pagination?.total || 0);
 
-      const mappedOrders: Purchaseinvoice[] = res.data.map((pi: any) => ({
+      const mappedInvoice: Purchaseinvoice[] = res.data.map((pi: any) => ({
         pId: pi.pId,
         supplier: pi.supplierName,
         podate: pi.poDate,
@@ -125,7 +125,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
         registrationType: pi.registrationType
       }));
 
-      setOrders(mappedOrders);
+      setOrders(mappedInvoice);
     } catch (err) {
       console.error("Failed to load Purchase Invoices");
     } finally {
@@ -134,7 +134,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
   };
 
   useEffect(() => {
-    fetchOrders();
+    fetchInvoice();
   }, [page, pageSize]);
 
   const handleView = (Invoice: Purchaseinvoice) => {
