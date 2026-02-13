@@ -14,6 +14,10 @@ import {
 import Select from "../../components/ui/Select";
 import Modal from "../ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
+import { useCompanySelection } from "../../hooks/useCompanySelection";
+import { getItemFieldConfigs } from "../../config/companyConfigResolver";
+import { DynamicField } from "../DynamicField";
+
 
 type FormState = Record<string, any>;
 
@@ -76,6 +80,14 @@ const ItemModal: React.FC<{
   const [fetchingItem, setFetchingItem] = useState(false);
   const [itemCategoryDetails, setItemCategoryDetails] = useState<any>(null);
   const isServiceItem = Number(form.itemTypeCode) === 3;
+  const { companyCode } = useCompanySelection();
+  const fieldConfigs = getItemFieldConfigs(companyCode);
+   console.log('=== ITEM MODAL DEBUG ===');
+  console.log('Company Code:', companyCode);
+  console.log('Field Configs:', fieldConfigs);
+  console.log('First 3 fields:', fieldConfigs.slice(0, 3));
+  
+  
 
   const [activeTab, setActiveTab] = useState<
     "details" | "taxDetails" | "inventoryDetails"
@@ -164,6 +176,14 @@ useEffect(() => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+  const handleDynamicFieldChange = (name: string, value: any) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCategoryChange = async (data: { name: string; id: string }) => {
+    setForm((prev) => ({ ...prev, itemGroup: data.name }));
+    await loadItemCategoryDetailsById(data.id);
+  };
 
   const reset = () => {
     setForm(emptyForm);
@@ -231,110 +251,19 @@ useEffect(() => {
                 </h3>
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <Select
-                      label="Item Type"
-                      name="itemTypeCode"
-                      value={form.itemTypeCode || ""}
-                      onChange={handleForm}
-                      options={itemTypeCodeOptions}
-                    ></Select>
-
-                    <ItemCategorySelect
-                      value={form.itemGroup}
-                      onChange={async ({ name, id }) => {
-                        setForm((p) => ({ ...p, itemGroup: name }));
-                        await loadItemCategoryDetailsById(id);
-                      }}
-                      className="w-full"
-                    />
-
-                    <Input
-                      label="Items Name"
-                      name="itemName"
-                      value={form.itemName || ""}
-                      onChange={handleForm}
-                      className="w-full col-span-3"
-                      required
-                    />
-                    <Input
-                      label="Description"
-                      name="description"
-                      value={form.description || ""}
-                      onChange={handleForm}
-                      className="w-full col-span-3"
-                    />
-                    <ItemTreeSelect
-                      label="Item Class"
-                      value={form.itemClassCode}
-                      fetchData={getItemClasses}
-                      onChange={({ id }) =>
-                        setForm((p) => ({ ...p, itemClassCode: id }))
-                      }
-                    />
-                    <ItemGenericSelect
-                      label="Packaging Unit"
-                      value={form.packagingUnitCode}
-                      fetchData={getPackagingUnits}
-                      onChange={({ id }) =>
-                        setForm((p) => ({ ...p, packagingUnitCode: id }))
-                      }
-                    />
-
-                    <ItemGenericSelect
-                      label="Country Code"
-                      value={form.originNationCode}
-                      fetchData={getCountries}
-                      onChange={({ id }) =>
-                        setForm((p) => ({ ...p, originNationCode: id }))
-                      }
-                    />
-
-                    <ItemGenericSelect
-                      label="Unit of Measurement  "
-                      value={form.unitOfMeasureCd}
-                      fetchData={getUOMs}
-                      onChange={({ id }) =>
-                        setForm((p) => ({ ...p, unitOfMeasureCd: id }))
-                      }
-                    />
-
-                    <label className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-muted">
-                        Service Charge
-                      </span>
-                      <select
-                        name="svcCharge"
-                        value={form.svcCharge || ""}
-                        onChange={handleForm}
-                        className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                        required
-                      >
-                        <option value="Y">Y</option>
-                        <option value="N">N</option>
-                      </select>
-                    </label>
-                    <label className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-muted">
-                        INSURANCE
-                      </span>
-                      <select
-                        name="ins"
-                        value={form.ins || ""}
-                        onChange={handleForm}
-                        className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                        required
-                      >
-                        <option value="Y">Y</option>
-                        <option value="N">N</option>
-                      </select>
-                    </label>
-                    <Input
-                      label="SKU"
-                      name="sku"
-                      value={form.sku || ""}
-                      onChange={handleForm}
-                      className="w-full col-span-3"
-                    />
+                 {fieldConfigs.map((fieldConfig) => (
+                      <DynamicField
+                        key={fieldConfig.fieldName}
+                        config={fieldConfig}
+                        value={form[fieldConfig.fieldName]}
+                        onChange={handleDynamicFieldChange}
+                        onApiChange={
+                          fieldConfig.fieldName === 'itemGroup' 
+                            ? handleCategoryChange 
+                            : undefined
+                        }
+                      />
+                    ))}
                   </div>
                 </div>
 

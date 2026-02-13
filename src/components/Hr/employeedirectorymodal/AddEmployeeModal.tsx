@@ -15,6 +15,10 @@ import { getAllEmployees } from "../../../api/employeeapi";
 
 import { createEmployee, updateEmployeeById } from "../../../api/employeeapi";
 
+import { useCompanySelection } from "../../../hooks/useCompanySelection";
+import { getEmployeeFeatures } from "../../../config/employeeFeatures";
+
+
 const DEFAULT_FORM_DATA = {
   // Personal
   firstName: "",
@@ -116,7 +120,7 @@ type AddEmployeeModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  departments: string[];
+ 
   level?: string[];
   verifiedData?: any;
   editData?: any;
@@ -127,12 +131,19 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  departments,
+ 
   editData,
   level,
   mode = "add",
 }) => {
-  const [step, setStep] = useState<"verification" | "form">("verification");
+  //   - Conditional based on company
+const { companyCode } = useCompanySelection();
+const features = getEmployeeFeatures(companyCode);
+const departments = features.departments;
+
+const [step, setStep] = useState<"verification" | "form">(
+  features.requireIdentityVerification ? "verification" : "form"
+);
   const [verifiedData, setVerifiedData] = useState<any>(null);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const activeTab = TAB_ORDER[currentTabIndex];
@@ -146,6 +157,7 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
 
   const [reportingManagers, setReportingManagers] = useState<EmployeeLite[]>(
     [],
+    
   );
   const [hrManagers, setHrManagers] = useState<EmployeeLite[]>([]);
 
@@ -530,25 +542,25 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
 
   if (!isOpen) return null;
 
-  if (step === "verification") {
-    return (
-      <IdentityVerificationModal
-        onVerified={(data) => {
-          setVerifiedData(data);
-          setIsPreFilled(true);
-          setStep("form");
-        }}
-        onManualEntry={() => {
-          setVerifiedData(null);
-          setIsPreFilled(false);
-          setVerifiedFields({});
-          setStep("form");
-        }}
-        onClose={onClose}
-      />
-    );
-  }
-
+// Add this condition check
+if (step === "verification" && features.requireIdentityVerification) {
+  return (
+    <IdentityVerificationModal
+      onVerified={(data) => {
+        setVerifiedData(data);
+        setIsPreFilled(true);
+        setStep("form");
+      }}
+      onManualEntry={() => {
+        setVerifiedData(null);
+        setIsPreFilled(false);
+        setVerifiedFields({});
+        setStep("form");
+      }}
+      onClose={onClose}
+    />
+  );
+}
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-start justify-center z-50 overflow-y-auto pt-4 pb-4">
       <div

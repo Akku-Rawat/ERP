@@ -4,6 +4,7 @@ import { createAxiosInstance } from "./axiosInstance";
 import { API, ERP_BASE } from "../config/api";
 const api = createAxiosInstance(ERP_BASE);
 export const LookupAPI = API.lookup;
+export const RolaLookupAPI = API.rolaLookup;
 
 export async function getUnitOfMeasureList(): Promise<any> {
   const resp: AxiosResponse = await api.get(LookupAPI.getUnitOfMeasure);
@@ -22,5 +23,26 @@ export async function getPackagingUnitCodes(): Promise<any> {
 
 export async function getCountryList(): Promise<any> {
   const resp: AxiosResponse = await api.get(LookupAPI.getCountries);
+  return resp.data || [];
+}
+
+// ROLAFACE LOOKUPS
+export async function getRolaUnitOfMeasureList(): Promise<any> {
+  const resp: AxiosResponse = await api.get(RolaLookupAPI.getUnitOfMeasure);
+  return resp.data || [];
+}
+
+export async function getRolaItemClassList(): Promise<any> {
+  const resp: AxiosResponse = await api.get(RolaLookupAPI.getItemClasses);
+  return resp.data || [];
+}
+
+export async function getRolaPackagingUnitCodes(): Promise<any> {
+  const resp: AxiosResponse = await api.get(RolaLookupAPI.getPackagingUnits);
+  return resp.data || [];
+}
+
+export async function getRolaCountryList(): Promise<any> {
+  const resp: AxiosResponse = await api.get(RolaLookupAPI.getCountries);
   return resp.data || [];
 }
