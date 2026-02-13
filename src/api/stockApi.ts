@@ -24,6 +24,12 @@ export async function getAllStockEntries(): Promise<any> {
   return resp.data?.data || [];
 }
 
+export async function getStockById(id: string): Promise<any> {
+  const url = `${base_url}.stock.stock.get_stock_by_id?id=${id}`;
+  const resp: AxiosResponse = await api.get(url);
+  return resp.data;
+}
+
 export async function deleteStockEntry(payload: any): Promise<any> {
   const resp: AxiosResponse = await api.delete(ENDPOINTS.deleteStockEntry, {
     data: payload,

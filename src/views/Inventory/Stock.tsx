@@ -1,12 +1,20 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-
 import {
   getAllStockEntries,
+  getStockById,
+  deleteStockEntry,
 } from "../../api/stockApi";
 
-import ItemModal from "../../components/inventory/StockModal";
+import StockModal from "../../components/inventory/StockModal";
+import ViewStockModal from "../../components/inventory/ViewStockModal";
 import DeleteModal from "../../components/actionModal/DeleteModal";
 
 import Table from "../../components/ui/Table/Table";
@@ -30,12 +38,13 @@ const Items: React.FC = () => {
   const [totalItems, setTotalItems] = useState(0);
 
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [editItem, setEditItem] = useState<Item | null>(null);
+  const [viewStockData, setViewStockData] = useState<any>(null);
   const [initialLoad, setInitialLoad] = useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<ItemSummary | null>(null);
   const [deleting, setDeleting] = useState(false);
-
 
   const fetchItems = async () => {
     try {
@@ -55,10 +64,27 @@ const Items: React.FC = () => {
             maxStockLevel: entry.max_stock_level || "",
             taxCategory: entry.tax_category || "",
             date: entry.date || entry.posting_date || "",
-            orgSarNo: entry.orgSarNo || entry.org_sar_no || entry.org_sarNo || entry.orgsarno || "",
-            registrationType: entry.registrationType || entry.registration_type || entry.registrationtype || "",
-            stockEntryType: entry.stockEntryType || entry.stock_entry_type || entry.stockentrytype || "",
-            totalTaxableAmount: entry.totalTaxableAmount || entry.total_taxable_amount || entry.totaltaxableamount || 0,
+            orgSarNo:
+              entry.orgSarNo ||
+              entry.org_sar_no ||
+              entry.org_sarNo ||
+              entry.orgsarno ||
+              "",
+            registrationType:
+              entry.registrationType ||
+              entry.registration_type ||
+              entry.registrationtype ||
+              "",
+            stockEntryType:
+              entry.stockEntryType ||
+              entry.stock_entry_type ||
+              entry.stockentrytype ||
+              "",
+            totalTaxableAmount:
+              entry.totalTaxableAmount ||
+              entry.total_taxable_amount ||
+              entry.totaltaxableamount ||
+              0,
             warehouse: entry.warehouse || "",
           }))
         : [];
@@ -86,14 +112,14 @@ const Items: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleEdit = async (itemCode: string, e: React.MouseEvent) => {
+  const handleEdit = async (stockId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      const res = await getItemByItemCode(itemCode);
-      setEditItem(res.data);
-      setShowModal(true);
+      const res = await getStockById(stockId);
+      setViewStockData(res.data);
+      setShowViewModal(true);
     } catch {
-      toast.error("Unable to fetch item details");
+      toast.error("Unable to fetch stock entry details");
     }
   };
 
@@ -108,14 +134,17 @@ const Items: React.FC = () => {
 
     try {
       setDeleting(true);
-      await deleteItemByItemCode(itemToDelete.id);
+      await deleteStockEntry({ id: itemToDelete.id });
       setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
-      toast.success("Item deleted successfully");
+      toast.success("Stock entry deleted successfully");
       setDeleteModalOpen(false);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete item", {
-        duration: 6000,
-      });
+      toast.error(
+        err.response?.data?.message || "Failed to delete stock entry",
+        {
+          duration: 6000,
+        },
+      );
     } finally {
       setDeleting(false);
       setItemToDelete(null);
@@ -127,7 +156,7 @@ const Items: React.FC = () => {
     setShowModal(false);
     setEditItem(null);
     await fetchItems();
-    toast.success(wasEdit ? "Item updated" : "Item created");
+    toast.success(wasEdit ? "Stock entry updated" : "Stock entry created");
   };
 
   /*      FILTER
@@ -157,7 +186,11 @@ const Items: React.FC = () => {
     { key: "orgSarNo", header: "orgSarNo", align: "left" },
     { key: "registrationType", header: "Registration Type", align: "left" },
     { key: "stockEntryType", header: "Stock Entry Type", align: "left" },
-    { key: "totalTaxableAmount", header: "Total Taxable Amount", align: "left"},
+    {
+      key: "totalTaxableAmount",
+      header: "Total Taxable Amount",
+      align: "left",
+    },
     { key: "warehouse", header: "Warehouse", align: "left" },
     {
       key: "actions",
@@ -189,7 +222,7 @@ const Items: React.FC = () => {
         searchValue={searchTerm}
         onSearch={setSearchTerm}
         enableAdd
-        addLabel="Add Item"
+        addLabel="Add Stock Entry"
         onAdd={handleAdd}
         currentPage={page}
         totalPages={totalPages}
@@ -203,8 +236,18 @@ const Items: React.FC = () => {
         onPageChange={setPage}
       />
 
-      {/* ITEM MODAL */}
-      <ItemModal
+      {/* VIEW STOCK MODAL */}
+      <ViewStockModal
+        isOpen={showViewModal}
+        onClose={() => {
+          setShowViewModal(false);
+          setViewStockData(null);
+        }}
+        stockData={viewStockData}
+      />
+
+      {/* STOCK MODAL (for creating stock entries) */}
+      <StockModal
         isOpen={showModal}
         onClose={() => {
           setShowModal(false);

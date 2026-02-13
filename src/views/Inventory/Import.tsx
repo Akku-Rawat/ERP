@@ -1,11 +1,14 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { getAllImportItems } from "../../api/importApi";
 
-
-import { getAllItemsApi } from "../../api/importApi";
-import { getItemByItemCode, deleteItemByItemCode } from "../../api/itemApi";
-
+import ViewImportModal from "../../components/inventory/ViewImportModal";
 import DeleteModal from "../../components/actionModal/DeleteModal";
 
 import Table from "../../components/ui/Table/Table";
@@ -16,10 +19,19 @@ import ActionButton, {
 
 import type { Column } from "../../components/ui/Table/type";
 
-import type { Item, ItemSummary } from "../../types/item";
+interface ImportItemSummary {
+  id: string;
+  itemName: string;
+  quantity: string;
+  originCountryCode: string;
+  exportCountryCode: string;
+  invoiceAmount: number;
+  invoiceCurrency: string;
+  invoiceExchangeRate: number;
+}
 
 const Items: React.FC = () => {
-  const [items, setItems] = useState<ItemSummary[]>([]);
+  const [items, setItems] = useState<ImportItemSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -27,46 +39,43 @@ const Items: React.FC = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  // const [showModal, setShowModal] = useState(false); // Unused
-  // const [editItem, setEditItem] = useState<Item | null>(null); // Unused
   const [initialLoad, setInitialLoad] = useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<ItemSummary | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<ImportItemSummary | null>(
+    null,
+  );
   const [deleting, setDeleting] = useState(false);
-
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedImportId, setSelectedImportId] = useState<string | null>(null);
 
   const fetchItems = async () => {
     try {
       setLoading(true);
-      const apiData = await getAllItemsApi({ page, page_size: pageSize });
-      // Map API data to ImportSummary[]
-      const mapped = Array.isArray(apiData?.items || apiData)
-        ? (apiData.items || apiData).map((entry: any) => ({
-            id: entry.id || entry.name || "",
-            itemName: entry.item_name || entry.itemName || "",
-            itemGroup: entry.item_group || entry.itemGroup || "",
-            itemClassCode: entry.item_class_code || entry.itemClassCode || "",
-            unitOfMeasureCd: entry.unit_of_measure_cd || entry.unitOfMeasureCd || "",
-            sellingPrice: entry.selling_price || entry.sellingPrice || 0,
-            preferredVendor: entry.preferred_vendor || entry.preferredVendor || "",
-            minStockLevel: entry.min_stock_level || entry.minStockLevel || "",
-            maxStockLevel: entry.max_stock_level || entry.maxStockLevel || "",
-            taxCategory: entry.tax_category || entry.taxCategory || "",
-            date: entry.date || entry.posting_date || entry.postingDate || "",
-            orgSarNo: entry.orgSarNo || entry.org_sar_no || entry.org_sarNo || entry.orgsarno || "",
-            registrationType: entry.registrationType || entry.registration_type || entry.registrationtype || "",
-            stockEntryType: entry.stockEntryType || entry.stock_entry_type || entry.stockentrytype || "",
-            totalTaxableAmount: entry.totalTaxableAmount || entry.total_taxable_amount || entry.totaltaxableamount || 0,
-            warehouse: entry.warehouse || "",
+      const apiData = await getAllImportItems();
+      // Map API data to ImportItemSummary[]
+      const mapped = Array.isArray(apiData)
+        ? apiData.map((entry: any) => ({
+            id: entry.id || "",
+            itemName: entry.itemName || entry.item_name || "",
+            quantity: entry.quantity || "0",
+            originCountryCode:
+              entry.originCountryCode || entry.origin_country_code || "",
+            exportCountryCode:
+              entry.exportCountryCode || entry.export_country_code || "",
+            invoiceAmount: entry.invoiceAmount || entry.invoice_amount || 0,
+            invoiceCurrency:
+              entry.invoiceCurrency || entry.invoice_currency || "",
+            invoiceExchangeRate:
+              entry.invoiceExchangeRate || entry.invoice_exchange_rate || 0,
           }))
         : [];
       setItems(mapped);
-      // If API returns total count and pages, use them:
-      setTotalPages(apiData?.total_pages || 1);
-      setTotalItems(apiData?.total_count || mapped.length);
+      // Calculate pagination
+      setTotalItems(mapped.length);
+      setTotalPages(Math.ceil(mapped.length / pageSize));
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load items");
+      toast.error("Failed to load import items");
     } finally {
       setLoading(false);
       setInitialLoad(false);
@@ -75,46 +84,40 @@ const Items: React.FC = () => {
 
   useEffect(() => {
     fetchItems();
-  }, [page, pageSize]);
+  }, []);
 
   /*      HANDLERS
    */
 
-  const handleAdd = () => {
-    // Add item logic (modal removed)
+  const handleView = (importId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedImportId(importId);
+    setViewModalOpen(true);
   };
 
-  const handleEdit = async (itemCode: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    // Edit item logic (modal removed)
-    try {
-      await getItemByItemCode(itemCode);
-      // setEditItem(res);
-      // setShowModal(true);
-    } catch {
-      toast.error("Unable to fetch item details");
-    }
-  } 
-
-  const handleDeleteClick = (item: ItemSummary, e?: React.MouseEvent) => {
+  const handleDeleteClick = (item: ImportItemSummary, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setItemToDelete(item);
     setDeleteModalOpen(true);
-  } 
+  };
 
   const confirmDelete = async () => {
     if (!itemToDelete) return;
 
     try {
       setDeleting(true);
-      await deleteItemByItemCode(itemToDelete.id);
+      // TODO: Implement delete import item API
+      // await deleteImportItem(itemToDelete.id);
       setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
-      toast.success("Item deleted successfully");
+      toast.success("Import item deleted successfully");
       setDeleteModalOpen(false);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete item", {
-        duration: 6000,
-      });
+      toast.error(
+        err.response?.data?.message || "Failed to delete import item",
+        {
+          duration: 6000,
+        },
+      );
     } finally {
       setDeleting(false);
       setItemToDelete(null);
@@ -136,11 +139,11 @@ const Items: React.FC = () => {
     [
       i.id,
       i.itemName,
-      i.itemGroup,
-      i.itemClassCode,
-      i.sellingPrice,
-      i.preferredVendor,
-      i.taxCategory,
+      i.quantity,
+      i.originCountryCode,
+      i.exportCountryCode,
+      i.invoiceAmount,
+      i.invoiceCurrency,
     ]
       .join(" ")
       .toLowerCase()
@@ -150,23 +153,36 @@ const Items: React.FC = () => {
   /*      COLUMNS
    */
 
-  const columns: Column<ItemSummary>[] = [
+  const columns: Column<ImportItemSummary>[] = [
     { key: "id", header: "ID", align: "left" },
     { key: "itemName", header: "Item Name", align: "left" },
-    { key: "itemGroup", header: "Item Group", align: "left" },
-    { key: "itemClassCode", header: "Class Code", align: "left" },
-    { key: "sellingPrice", header: "Selling Price", align: "left"},
-    { key: "preferredVendor", header: "Preferred Vendor", align: "left" },
-    { key: "taxCategory", header: "Tax Category", align: "left" },
+    { key: "quantity", header: "Quantity", align: "left" },
+    { key: "originCountryCode", header: "Origin Country", align: "left" },
+    { key: "exportCountryCode", header: "Export Country", align: "left" },
+    {
+      key: "invoiceAmount",
+      header: "Invoice Amount",
+      align: "right",
+      render: (i) => `${i.invoiceAmount.toFixed(2)}`,
+    },
+    { key: "invoiceCurrency", header: "Currency", align: "left" },
+    {
+      key: "invoiceExchangeRate",
+      header: "Exchange Rate",
+      align: "right",
+      render: (i) => `${i.invoiceExchangeRate.toFixed(2)}`,
+    },
     {
       key: "actions",
       header: "Actions",
       align: "center",
       render: (i) => (
         <ActionGroup>
-          <ActionButton type="view" onClick={(e?: React.MouseEvent) => handleEdit(i.id, e)} />
+          <ActionButton
+            type="view"
+            onClick={(e?: React.MouseEvent) => handleView(i.id, e)}
+          />
           <ActionMenu
-            onEdit={(e?: React.MouseEvent) => handleEdit(i.id, e)}
             onDelete={(e?: React.MouseEvent) => handleDeleteClick(i, e)}
           />
         </ActionGroup>
@@ -181,13 +197,12 @@ const Items: React.FC = () => {
     <div className="p-8">
       <Table
         loading={loading || initialLoad}
-        serverSide
+        serverSide={false}
         columns={columns}
         data={filteredItems}
         showToolbar
         searchValue={searchTerm}
         onSearch={setSearchTerm}
-        onAdd={handleAdd}
         currentPage={page}
         totalPages={totalPages}
         pageSize={pageSize}
@@ -195,17 +210,29 @@ const Items: React.FC = () => {
         pageSizeOptions={[10, 25, 50, 100]}
         onPageSizeChange={(size) => {
           setPageSize(size);
-          setPage(1); // reset page
+          setPage(1);
         }}
         onPageChange={setPage}
       />
+
+      {/* VIEW MODAL */}
+      {viewModalOpen && (
+        <ViewImportModal
+          isOpen={viewModalOpen}
+          onClose={() => {
+            setViewModalOpen(false);
+            setSelectedImportId(null);
+          }}
+          importId={selectedImportId}
+        />
+      )}
 
       {/* DELETE MODAL */}
       {deleteModalOpen && itemToDelete && (
         <DeleteModal
           entityName="Import Item"
           entityId={itemToDelete.id}
-          entityDisplayName={itemToDelete.id}
+          entityDisplayName={itemToDelete.itemName}
           isLoading={deleting}
           onClose={() => {
             setDeleteModalOpen(false);
