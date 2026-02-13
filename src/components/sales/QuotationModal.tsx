@@ -10,7 +10,7 @@ import { ModalSelect, ModalInput } from "../ui/modal/modalComponent";
 import CustomerSelect from "../selects/CustomerSelect";
 import ItemSelect from "../selects/ItemSelect";
 import Modal from "../../components/ui/modal/modal";
-import toast from "react-hot-toast";
+import { showApiError,showSuccess } from "../alert";
 import { User, Mail, Phone, } from "lucide-react";
 import AddressBlock from "../ui/modal/AddressBlock";
 import PaymentInfoBlock from "./PaymentInfoBlock";
@@ -44,56 +44,79 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     actions,
   } = useQuotationForm(isOpen, onClose, onSubmit);
 
-  const validateForm = () => {
-    // 1 Customer
-    if (!formData.customerId) {
-      toast.error("Please select a customer");
+ const validateForm = () => {
+  // Customer
+  if (!formData.customerId) {
+    showApiError("Please select a customer");
+    return false;
+  }
+
+  // Valid until
+  if (!formData.dueDate) {
+    showApiError("Please enter a valid until date");
+    return false;
+  }
+
+  //  Payment Terms validation 
+  if (!formData.paymentInformation?.paymentTerms) {
+    showApiError("Please select payment terms");
+    return false;
+  }
+
+  // At least 1 item
+  if (!formData.items.length) {
+    showApiError("Please add at least one item");
+    return false;
+  }
+
+  // Items validation
+  for (let i = 0; i < formData.items.length; i++) {
+    const it = formData.items[i];
+
+    if (!it.itemCode) {
+      showApiError(`Item ${i + 1}: Please select an item`);
       return false;
     }
-    if (!formData.dueDate) {
-      toast.error("Please enter a valid until date");
+
+    if (!it.quantity || it.quantity <= 0) {
+      showApiError(
+        `Item ${i + 1}: Quantity must be greater than 0`,
+      );
       return false;
     }
 
-    // At least 1 item
-    if (!formData.items.length) {
-      toast.error("Please add at least one item");
+    if (!it.price || it.price <= 0) {
+      showApiError(
+        `Item ${i + 1}: Unit price must be greater than 0`,
+      );
       return false;
     }
+  }
 
-    // Validate items
-    for (let i = 0; i < formData.items.length; i++) {
-      const it = formData.items[i];
+  return true;
+};
 
-      if (!it.itemCode) {
-        toast.error(`Item ${i + 1}: Please select an item`);
-        return false;
-      }
-
-      if (!it.quantity || it.quantity <= 0) {
-        toast.error(`Item ${i + 1}: Quantity must be greater than 0`);
-        return false;
-      }
-
-      if (!it.price || it.price <= 0) {
-        toast.error(`Item ${i + 1}: Unit price must be greater than 0`);
-        return false;
-      }
-    }
-
-    return true;
-  };
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
 
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    actions.handleSubmit(e);
-  };
+ const handleFormSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!validateForm()) return;
+
+  try {
+    await actions.handleSubmit(e);
+
+    showSuccess("Quotation saved successfully");
+
+  } catch (error: any) {
+    showApiError(error);
+  }
+};
+
 
   const handlePrint = () => {
-    toast.success("Print functionality - Opens print dialog");
+    showSuccess("Print functionality - Opens print dialog");
   };
 
   const footerContent = (

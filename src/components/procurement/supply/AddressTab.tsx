@@ -1,6 +1,4 @@
 import React from "react";
-import { MapPin } from "lucide-react";
-import { Input, Card } from "../../ui/modal/formComponent";
 import CountrySelect from "../../selects/CountrySelect";
 import type { SupplierFormData } from "../../../types/Supply/supplier";
 import { ModalInput } from "../../ui/modal/modalComponent";

@@ -12,6 +12,7 @@ import ActionButton, {
 import type { Column } from "../../components/ui/Table/type";
 import { getPurchaseInvoices } from "../../api/procurement/PurchaseInvoiceApi";
 import { updatePurchaseinvoiceStatus } from "../../api/procurement/PurchaseInvoiceApi";
+import { showApiError , showSuccess } from "../../components/alert";
 
 
 interface Purchaseinvoice {
@@ -165,6 +166,10 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
 
   const handleCloseModal = () => setModalOpen(false);
 
+  const handlePISaved = async () => {
+  await fetchInvoice();
+};
+
   const handleStatusChange = async (
     pId: string,
     newStatus: PIStatus,
@@ -177,7 +182,10 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
 
 
       if (!res || res.status_code !== 200) {
-        toast.error("Failed to update Purchase Invoice status");
+        showApiError({
+  message: "Failed to update Purchase Invoice status",
+});
+
         return;
       }
 
@@ -188,7 +196,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
         ),
       );
 
-      toast.success(`Purchase Invoice marked as ${newStatus}`);
+      showSuccess(`Purchase Invoice marked as ${newStatus}`);
     } catch (err) {
       toast.error("Failed to update Purchase Invoice status");
     }
@@ -284,6 +292,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
         isOpen={modalOpen}
         onClose={handleCloseModal}
         pId={selectedInvoice?.pId}
+        onSubmit={handlePISaved} 
       />
 
 

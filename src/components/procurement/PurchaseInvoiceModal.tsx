@@ -9,8 +9,7 @@ import { DetailsTab } from "../procurement/purchaseinvoice/DetailsTab";
 import { AddressTab } from "../procurement/purchaseinvoice/AddressTab";
 import TermsAndCondition from "../TermsAndCondition";
 import { usePurchaseInvoiceForm } from "../../hooks/usePurchaseInvoiceForm";
-import type { POTab } from "../../types/Supply/purchaseOrder";
-
+import type { POTab } from "../../types/Supply/purchaseInvoice";
 
 interface PurchaseInvoiceModalProps {
   isOpen: boolean;

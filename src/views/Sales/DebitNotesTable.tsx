@@ -5,6 +5,7 @@ import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import CreateDebitNoteModal from "./createDebitNoteModal";
 import { getAllDebitNotes } from "../../api/salesApi";
+import { showApiError } from "../../components/alert";
 
 type DebitNote = {
   noteNo: string;
@@ -13,6 +14,7 @@ type DebitNote = {
   date: string;
   amount: number;
   status: "Draft" | "Approved" | "Rejected";
+  currency: string;
 };
 
 const DebitNotesTable: React.FC = () => {
@@ -36,8 +38,13 @@ const DebitNotesTable: React.FC = () => {
       key: "amount",
       header: "Amount",
       align: "right",
-      render: (r) => `₹${r.amount.toLocaleString()}`,
+      render: (r) => (
+        <code className="text-xs px-2 py-1 rounded bg-row-hover text-main font-semibold whitespace-nowrap">
+          {r.amount.toLocaleString()} {r.currency}
+        </code>
+      ),
     },
+
     { key: "date", header: "Date" },
     {
       key: "status",
@@ -58,15 +65,22 @@ const DebitNotesTable: React.FC = () => {
         customer: item.customerName,
         date: item.dateOfInvoice,
         amount: item.totalAmount,
+        currency:
+          item.currency ||
+          item.currencyCode ||
+          item.currCd ||
+          "",
         status: item.invoiceStatus ?? "Draft",
       }));
 
       setData(mappedData);
       setTotalPages(resp.pagination.total_pages);
       setTotalItems(resp.pagination.total);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to load debit notes", error);
-    } finally {
+      showApiError(error);
+    }
+    finally {
       setLoading(false);
       setInitialLoad(false);
     }
@@ -78,30 +92,30 @@ const DebitNotesTable: React.FC = () => {
 
   return (
     <div className="p-8">
-        <Table
-          columns={columns}
-          data={data}
-          showToolbar
-          enableAdd
-          searchValue={searchTerm}
-          onSearch={setSearchTerm}
-          loading={loading || initialLoad}
-          addLabel="Add Debit Note"
-          onAdd={() => setOpenCreateModal(true)}
-          emptyMessage="No debit notes found"
-          enableColumnSelector
-          currentPage={page}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={totalItems}
-          pageSizeOptions={[10, 25, 50, 100]}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1); // reset page
-          }}
-          onPageChange={setPage}
-        />
-      
+      <Table
+        columns={columns}
+        data={data}
+        showToolbar
+        enableAdd
+        searchValue={searchTerm}
+        onSearch={setSearchTerm}
+        loading={loading || initialLoad}
+        addLabel="Add Debit Note"
+        onAdd={() => setOpenCreateModal(true)}
+        emptyMessage="No debit notes found"
+        enableColumnSelector
+        currentPage={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        pageSizeOptions={[10, 25, 50, 100]}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1); // reset page
+        }}
+        onPageChange={setPage}
+      />
+
 
       <CreateDebitNoteModal
         isOpen={openCreateModal}

@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { Input, Checkbox } from "../../ui/modal/formComponent";
+import { Checkbox } from "../../ui/modal/formComponent";
 import type { PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
 import { MapPin, Truck, Building2, Plus, Minus } from "lucide-react";
-import { ModalInput } from "../../ui/modal/modalComponent";
+import { ModalInput ,ModalSelect } from "../../ui/modal/modalComponent";
 interface AddressTabProps {
   form: PurchaseOrderFormData;
-  onFormChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
 }
 
 type AddressKey = keyof PurchaseOrderFormData["addresses"];
@@ -145,7 +145,23 @@ const copyAddress = useCallback(
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-4 gap-4  p-4 ">
-        <ModalInput label="Shipping Rule" name="shippingRule" value={form.shippingRule || ""} onChange={onFormChange} />
+        <ModalSelect
+               label="Shipping Rule"
+                name="shippingRule" 
+                value={form.shippingRule || ""} 
+                onChange={onFormChange} 
+                options={[    { value: "STANDARD", label: "Standard Shipping" },
+                               { value: "EXPRESS", label: "Express Shipping" },
+                               { value: "OVERNIGHT", label: "Overnight Shipping" },
+                               { value: "SAME_DAY", label: "Same Day Delivery" },
+                               { value: "ECONOMY", label: "Economy Shipping" },
+                               { value: "FREIGHT", label: "Freight" },
+                               { value: "SEA", label: "Sea Freight" },
+                               { value: "AIR", label: "Air Freight" },
+                               { value: "ROAD", label: "Road Transport" },
+                               { value: "PICKUP", label: "Self Pickup" },
+                             ]}
+                             />
         <ModalInput label="Incoterm" name="incoterm" value={form.incoterm || ""} onChange={onFormChange} />
         <ModalInput label="Supplier Contact" name="supplierContact" value={form.supplierContact || ""} onChange={onFormChange} />
         <ModalInput label="Place of Supply" name="placeOfSupply" value={form.placeOfSupply || ""} onChange={onFormChange} />

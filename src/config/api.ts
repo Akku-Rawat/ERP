@@ -177,8 +177,6 @@ export const API = {
     getById: `${ERP_BASE}/api/method/erpnext.zra_client.purchase.invoice.get_purchase_invoice_by_id`,
     create: `${ERP_BASE}/api/method/erpnext.zra_client.purchase.invoice.create_purchase_invoice`,
 
-    update: `${ERP_BASE}/api/method/erpnext.zra_client.purchase.invoice.update_purchase_invoice`,
-
     updateStatus: `${ERP_BASE}/api/method/erpnext.zra_client.purchase.invoice.update_purchase_invoices_status`,
   },
 

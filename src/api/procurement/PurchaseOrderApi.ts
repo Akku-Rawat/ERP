@@ -34,10 +34,6 @@ export async function getPurchaseOrderById(id: string | number): Promise<any> {
 
 
 
-export async function updatePurchaseOrder(): Promise<any> {
-  const resp: AxiosResponse = await api.patch(purchaseorderapi.update );
-  return resp.data;
-}
 
 
 export async function getPurchaseOrdersBySupplier(
@@ -73,7 +69,7 @@ export async function updatePurchaseOrderStatus(
     purchaseorderapi.updateStatus,
     {
       id,
-      status: status.toLowerCase(), 
+      status,
     }
   );
   return resp.data;

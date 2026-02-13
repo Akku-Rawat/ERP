@@ -11,7 +11,7 @@ import ActionButton, {
   ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
-
+import { showApiError,showSuccess } from "../../components/alert";
 import { getPurchaseOrders ,updatePurchaseOrderStatus } from "../../api/procurement/PurchaseOrderApi";
 import { data } from "react-router-dom";
 
@@ -98,6 +98,7 @@ useEffect(() => {
   fetchOrders();
 }, [page, pageSize]);
 
+
   const handleView = (order: PurchaseOrder) => {
   setSelectedOrder(order);
   setViewModalOpen(true);
@@ -135,6 +136,10 @@ useEffect(() => {
   };
 
   const handleCloseModal = () => setModalOpen(false);
+  const handlePOSaved = async () => {
+  await fetchOrders();   //  Refresh table
+};
+
 
 const handleStatusChange = async (
   poId: string,
@@ -143,26 +148,35 @@ const handleStatusChange = async (
   try {
     const res = await updatePurchaseOrderStatus(
       poId,
-      newStatus.toLowerCase(),
+      newStatus
     );
 
+    // ❌ Backend error
     if (!res || res.status_code !== 200) {
-      toast.error("Failed to update Purchase Order status");
+      showApiError(res);
       return;
     }
 
-    // OPTIMISTIC UPDATE
+    // ✅ Update UI instantly
     setOrders((prev) =>
       prev.map((o) =>
-        o.id === poId ? { ...o, status: newStatus } : o,
+        o.id === poId
+          ? { ...o, status: res.data?.status || newStatus }
+          : o,
       ),
     );
 
-    toast.success(`Purchase Order marked as ${newStatus}`);
-  } catch {
-    toast.error("Failed to update Purchase Order status");
+    // ✅ Show backend message
+    showSuccess(
+      res.message ||
+        `Purchase Order marked as ${newStatus}`,
+    );
+
+  } catch (error: any) {
+    showApiError(error);
   }
 };
+
 
 
 
@@ -247,6 +261,7 @@ const handleStatusChange = async (
         isOpen={modalOpen}
         onClose={handleCloseModal}
           poId={selectedOrder?.id}  
+          onSubmit={handlePOSaved} 
       />
       {/* VIEW MODAL */}
     {viewModalOpen && selectedOrder && (

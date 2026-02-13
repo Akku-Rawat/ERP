@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-
 import {
   getAllProformaInvoices,
   updateProformaInvoiceStatus,
   getProformaInvoiceById,
-  
+
 } from "../../api/proformaInvoiceApi";
 
 import { getCompanyById } from "../../api/companySetupApi";
@@ -24,6 +22,7 @@ import ActionButton, {
 
 import type { Column } from "../../components/ui/Table/type";
 import PdfPreviewModal from "./PdfPreviewModal";
+import { showApiError, showSuccess } from "../../components/alert";
 
 type InvoiceStatus = "Draft" | "Rejected" | "Paid" | "Cancelled" | "Approved";
 
@@ -49,7 +48,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   onExportProformaInvoice,
   refreshKey,
 }) => {
-   const [openStatusMenuFor, setOpenStatusMenuFor] = useState<string | null>(
+  const [openStatusMenuFor, setOpenStatusMenuFor] = useState<string | null>(
     null,
   );
 
@@ -61,7 +60,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-const [initialLoad, setInitialLoad] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [selectedInvoice, setSelectedInvoice] =
     useState<ProformaInvoice | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -108,7 +107,7 @@ const [initialLoad, setInitialLoad] = useState(true);
       setTotalItems(res.pagination?.total || mapped.length);
     } finally {
       setLoading(false);
-       setInitialLoad(false);
+      setInitialLoad(false);
     }
   };
   useEffect(() => {
@@ -146,8 +145,8 @@ const [initialLoad, setInitialLoad] = useState(true);
 
       setPdfUrl(url as string);
       setPdfOpen(true);
-    } catch {
-      toast.error("Failed to generate preview");
+    } catch (err: any) {
+      showApiError(err);
     }
   };
 
@@ -164,9 +163,9 @@ const [initialLoad, setInitialLoad] = useState(true);
       if (!res || res.status_code !== 200) return;
 
       await generateProformaInvoicePDF(res.data, company, "save");
-      toast.success("Proforma invoice downloaded");
-    } catch {
-      toast.error("Download failed");
+      showSuccess("Proforma invoice downloaded");
+    } catch (err: any) {
+      showApiError(err);
     }
   };
 
@@ -201,7 +200,7 @@ const [initialLoad, setInitialLoad] = useState(true);
     if (!window.confirm(`Delete proforma invoice ${proformaId}?`)) return;
 
     // TODO: Hook delete API later
-    toast.success("Proforma invoice deleted");
+    showSuccess("Proforma invoice deleted");
   };
 
   const handleClosePdf = () => {
@@ -210,7 +209,7 @@ const [initialLoad, setInitialLoad] = useState(true);
     setSelectedInvoice(null);
     setPdfOpen(false);
   };
- const handleRowStatusChange = async (
+  const handleRowStatusChange = async (
     invoiceNumber: string,
     status: InvoiceStatus,
   ) => {
@@ -225,7 +224,7 @@ const [initialLoad, setInitialLoad] = useState(true);
 
     const res = await updateProformaInvoiceStatus(invoiceNumber, status);
     if (!res || res.status_code !== 200) {
-      toast.error("Failed to update invoice status");
+      showApiError(res?.message || "Failed to update proforma invoice status");
       return;
     }
 
@@ -237,7 +236,7 @@ const [initialLoad, setInitialLoad] = useState(true);
       ),
     );
 
-    toast.success(`Invoice marked as ${status}`);
+    showSuccess(`Invoice marked as ${status}`);
     setOpenStatusMenuFor(null);
   };
   /*    FILTER
@@ -332,33 +331,33 @@ const [initialLoad, setInitialLoad] = useState(true);
 */
   return (
     <div className="p-8">
-        <Table
-          loading={loading || initialLoad}
-          serverSide
-          columns={columns}
-          data={filteredInvoices}
-          rowKey={(row) => row.proformaId}
-          showToolbar
-          searchValue={searchTerm}
-          onSearch={setSearchTerm}
-          enableAdd
-          addLabel=" Add Proforma Invoice"
-          onAdd={onAddProformaInvoice}
-          enableExport
-          onExport={onExportProformaInvoice}
-          enableColumnSelector
-          currentPage={page}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={totalItems}
-          pageSizeOptions={[10, 25, 50, 100]}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
-          onPageChange={setPage}
-        />
-      
+      <Table
+        loading={loading || initialLoad}
+        serverSide
+        columns={columns}
+        data={filteredInvoices}
+        rowKey={(row) => row.proformaId}
+        showToolbar
+        searchValue={searchTerm}
+        onSearch={setSearchTerm}
+        enableAdd
+        addLabel=" Add Proforma Invoice"
+        onAdd={onAddProformaInvoice}
+        enableExport
+        onExport={onExportProformaInvoice}
+        enableColumnSelector
+        currentPage={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        pageSizeOptions={[10, 25, 50, 100]}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        onPageChange={setPage}
+      />
+
 
       <PdfPreviewModal
         open={pdfOpen}
