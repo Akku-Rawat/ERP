@@ -10,6 +10,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     required: true,
     colSpan: 1,
     options: [
+      { value: '', label: 'select type' },
       { value: '1', label: 'Raw Material' },
       { value: '2', label: 'Finished Product' },
       { value: '3', label: 'Service' },
@@ -33,7 +34,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     fieldType: 'text-input',
     label: 'Items Name',
     required: true,
-    colSpan: 3,
+    colSpan: 1,
   },
 
   // Description
@@ -41,7 +42,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     fieldName: 'description',
     fieldType: 'textarea',
     label: 'Description',
-    colSpan: 3,
+    colSpan: 1,
   },
 
   // Item Class - API driven
@@ -115,6 +116,6 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     fieldName: 'sku',
     fieldType: 'text-input',
     label: 'SKU',
-    colSpan: 3,
+    colSpan: 1,
   },
 ];
