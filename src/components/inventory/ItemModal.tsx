@@ -1,17 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { updateItemByItemCode, createItem } from "../../api/itemApi";
-import ItemCategorySelect from "../selects/ItemCategorySelect";
+
 import { getItemGroupById } from "../../api/itemCategoryApi";
-import ItemGenericSelect from "../selects/ItemGenericSelect";
-import ItemTreeSelect from "../selects/ItemTreeSelect";
-import {
-  getPackagingUnits,
-  getCountries,
-  getUOMs,
-  getItemClasses,
-} from "../../api/itemZraApi";
-import Select from "../../components/ui/Select";
+
+
 import Modal from "../ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
 import { useCompanySelection } from "../../hooks/useCompanySelection";
@@ -29,18 +22,18 @@ const emptyForm: Record<string, any> = {
   itemTypeCode: "",
   originNationCode: "",
   packagingUnitCode: "",
-  svcCharge: "Y",
-  ins: "Y",
+  svcCharge: "",
+  ins: "",
   sellingPrice: 0,
   buyingPrice: 0,
-  unitOfMeasureCd: "Nos",
+  unitOfMeasureCd: "",
   description: "",
   sku: "",
   taxPreference: "",
   preferredVendor: "",
   salesAccount: "",
   purchaseAccount: "",
-  taxCategory: "Non-Export",
+  taxCategory: " ",
   taxType: "",
   taxCode: "",
   taxName: "",
@@ -65,6 +58,27 @@ const itemTypeCodeOptions = [
   { value: "2", label: "Finished Product" },
   { value: "3", label: "Service" },
 ];
+
+const TAX_CONFIGS = {
+  "Non-Export": {
+    taxType: "Standard Rated",
+    taxPerct: "16",
+    taxCode: "A",
+    taxDescription: "Applies to products and services subject to VAT at 16% by default.",
+  },
+  "LPO": {
+    taxType: "Zero-Rated",
+    taxPerct: "0",
+    taxCode: "C2",
+    taxDescription: "Applies to transactions involving customers or projects granted exemption from paying taxes.",
+  },
+  "Export": {
+    taxType: "Export",
+    taxPerct: "0",
+    taxCode: "C1",
+    taxDescription: "Applies to goods or services exported outside the country and exempt from VAT.",
+  },
+};
 
 
 const ItemModal: React.FC<{
@@ -174,8 +188,26 @@ useEffect(() => {
     >,
   ) => {
     const { name, value } = e.target;
+    
+    // Auto-populate tax details when tax category changes
+    if (name === "taxCategory") {
+      const taxConfig = TAX_CONFIGS[value as keyof typeof TAX_CONFIGS];
+      if (taxConfig) {
+        setForm((prev) => ({
+          ...prev,
+          [name]: value,
+          taxType: taxConfig.taxType,
+          taxPerct: taxConfig.taxPerct,
+          taxCode: taxConfig.taxCode,
+          taxDescription: taxConfig.taxDescription,
+        }));
+        return;
+      }
+    }
+    
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+  
   const handleDynamicFieldChange = (name: string, value: any) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -331,10 +363,11 @@ useEffect(() => {
                   </label>
                   <select
                     name="taxCategory"
-                    value={form.taxCategory || "Non-Export"}
+                    value={form.taxCategory }
                     onChange={handleForm}
                     className="w-full md:w-96 px-4 py-3 text-base border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                  >
+                  > 
+                    <option value="">Select...</option>
                     <option value="Non-Export">Non-Export</option>
                     <option value="Export">Export</option>
                     <option value="LPO">Local Purchase Order</option>
@@ -357,7 +390,7 @@ useEffect(() => {
                     {form.taxCategory === "Non-Export" &&
                       "Non-Export Tax Details"}
                     {form.taxCategory === "Export" && "Export Tax Details"}
-                    {form.taxCategory === "local-purchase" &&
+                    {form.taxCategory === "LPO" &&
                       "Local Purchase Order Tax Details"}
                   </h3>
 
@@ -369,6 +402,7 @@ useEffect(() => {
                       onChange={handleForm}
                       placeholder="e.g. VAT"
                       className="w-full"
+                      disabled
                     />
                     <Input
                       label="Tax Code"
@@ -377,6 +411,7 @@ useEffect(() => {
                       onChange={handleForm}
                       placeholder="V001"
                       className="w-full"
+                      disabled
                     />
                     <Input
                       label="Tax Name"
@@ -394,6 +429,7 @@ useEffect(() => {
                         onChange={handleForm}
                         placeholder="12% VAT on Non-Export"
                         className="w-full"
+                        disabled
                       />
                     </div>
                     <div className="flex flex-col gap-1">
@@ -408,7 +444,8 @@ useEffect(() => {
                           value={form.taxPerct || ""}
                           onChange={handleForm}
                           placeholder="12"
-                          className="w-full px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                          className="w-full px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-app text-muted cursor-not-allowed"
+                          disabled
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted font-medium">
                           %
@@ -423,13 +460,24 @@ useEffect(() => {
                   <h4 className="text-sm font-semibold text-main mb-2">
                     Current Configuration
                   </h4>
-                  <div className="text-sm text-muted">
+                  <div className="text-sm text-muted space-y-1">
                     <p>
                       <span className="font-medium">Category:</span>{" "}
                       {form.taxCategory === "Non-Export" && "Non-Export"}
                       {form.taxCategory === "Export" && "Export"}
-                      {form.taxCategory === "local-purchase" &&
-                        "Local Purchase Order"}
+                      {form.taxCategory === "LPO" && "Local Purchase Order"}
+                    </p>
+                    <p>
+                      <span className="font-medium">Tax Type:</span>{" "}
+                      {form.taxType || "N/A"}
+                    </p>
+                    <p>
+                      <span className="font-medium">Tax Code:</span>{" "}
+                      {form.taxCode || "N/A"}
+                    </p>
+                    <p>
+                      <span className="font-medium">Tax Rate:</span>{" "}
+                      {form.taxPerct ? `${form.taxPerct}%` : "N/A"}
                     </p>
                   </div>
                 </div>

@@ -17,8 +17,14 @@ const emptyForm: Record<string, any> = {
   salesAccount: "",
   customSellingPrice: "",
   unitOfMeasurement: "",
+  itemType: "",
 };
-
+const itemTypeOptions = [
+  { value: "", label: "Select Item Type..." },
+  { value: "1", label: "Raw Material" },
+  { value: "2", label: "Finished Product" },
+  { value: "3", label: "Service" },
+];
 const ItemsCategoryModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -149,13 +155,15 @@ const ItemsCategoryModal: React.FC<{
             >
               {isEditMode ? "Update" : "Save"} Category
             </Button>
-
           </div>
         </>
       }
     >
-      <form id="item-category-form" onSubmit={handleSubmit} className="h-full flex flex-col">
-
+      <form
+        id="item-category-form"
+        onSubmit={handleSubmit}
+        className="h-full flex flex-col"
+      >
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
@@ -164,10 +172,11 @@ const ItemsCategoryModal: React.FC<{
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
-                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === tab
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
+                  activeTab === tab
                     ? "text-primary border-b-[3px] border-primary"
                     : "text-muted border-b-[3px] border-transparent hover:text-main"
-                  }`}
+                }`}
               >
                 {tab === "type" && "Category Details"}
                 {tab === "tax" && "Payment & Pricing"}
@@ -186,6 +195,25 @@ const ItemsCategoryModal: React.FC<{
                   Category Type
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                  <div className="flex flex-col gap-1 text-sm w-full">
+                    <span className="font-medium text-gray-600">
+                      Item Type
+                      <span className="text-red-500 ml-1">*</span>
+                    </span>
+                    <select
+                      name="itemType"
+                      value={form.itemType || ""}
+                      onChange={handleChange}
+                      required
+                      className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+                    >
+                      {itemTypeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <ModalInput
                     label="Id"
                     name="id"
@@ -198,7 +226,7 @@ const ItemsCategoryModal: React.FC<{
                     name="groupName"
                     value={form.groupName}
                     onChange={handleChange}
-                  // required
+                    // required
                   />
                   <ModalInput
                     label="Category Description"
