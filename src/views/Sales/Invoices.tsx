@@ -7,7 +7,6 @@ import {
 import type { InvoiceSummary, Invoice } from "../../types/invoice";
 import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTemplate1";
 import PdfPreviewModal from "./PdfPreviewModal";
-import toast from "react-hot-toast";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 import Table from "../../components/ui/Table/Table";
@@ -21,6 +20,7 @@ import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { Company } from "../../types/company";
+import { showApiError, showSuccess } from "../../components/alert";
 
 type InvoiceStatus = "Draft" | "Rejected" | "Paid" | "Cancelled" | "Approved";
 
@@ -126,8 +126,8 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       const url = await generateInvoicePDF(invoice, company, "bloburl");
       setPdfUrl(url as string);
       setPdfOpen(true);
-    } catch {
-      toast.error("Failed to generate preview");
+    } catch (err: any) {
+      showApiError(err);
     }
   };
 
@@ -136,7 +136,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
     try {
       if (!company) {
-        toast.error("Company data not loaded");
+        showApiError("Company data not loaded");
         return;
       }
 
@@ -144,9 +144,9 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       const invoice = invoiceRes.data as Invoice;
 
       await generateInvoicePDF(invoice, company, "save");
-      toast.success("Invoice downloaded successfully!");
-    } catch {
-      toast.error("Failed to download invoice");
+      showSuccess("Invoice downloaded successfully!");
+    } catch (err: any) {
+      showApiError(err);
     }
   };
 
@@ -172,7 +172,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
     const res = await updateInvoiceStatus(invoiceNumber, status);
     if (!res || res.status_code !== 200) {
-      toast.error("Failed to update invoice status");
+      showApiError(res?.message || "Failed to update invoice status");
       return;
     }
 
@@ -184,7 +184,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       ),
     );
 
-    toast.success(`Invoice marked as ${status}`);
+    showSuccess(`Invoice marked as ${status}`);
     setOpenStatusMenuFor(null);
   };
 
@@ -193,7 +193,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     if (!window.confirm(`Delete invoice ${invoiceNumber}?`)) return;
 
     // Add your delete API call here
-    toast.success("Invoice deleted successfully");
+    showSuccess("Invoice deleted successfully");
     console.log("Delete invoice:", invoiceNumber);
   };
 
@@ -303,32 +303,32 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
   return (
     <div className="p-8">
-        <Table
-          columns={columns}
-          data={filteredInvoices}
-          rowKey={(row) => row.invoiceNumber}
-          showToolbar
-          loading={loading || initialLoad}
-          serverSide
-          enableAdd
-          addLabel="Add Invoice"
-          onAdd={onAddInvoice}
-          enableColumnSelector
-          enableExport
-          onExport={onExportInvoice}
-          currentPage={page}
-          searchValue={searchTerm}
-          onSearch={setSearchTerm}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={totalItems}
-          pageSizeOptions={[10, 25, 50, 100]}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1); // reset page
-          }}
-          onPageChange={setPage}
-        />
+      <Table
+        columns={columns}
+        data={filteredInvoices}
+        rowKey={(row) => row.invoiceNumber}
+        showToolbar
+        loading={loading || initialLoad}
+        serverSide
+        enableAdd
+        addLabel="Add Invoice"
+        onAdd={onAddInvoice}
+        enableColumnSelector
+        enableExport
+        onExport={onExportInvoice}
+        currentPage={page}
+        searchValue={searchTerm}
+        onSearch={setSearchTerm}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        pageSizeOptions={[10, 25, 50, 100]}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1); // reset page
+        }}
+        onPageChange={setPage}
+      />
 
       <PdfPreviewModal
         open={pdfOpen}

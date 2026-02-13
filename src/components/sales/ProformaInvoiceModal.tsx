@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
+import { showApiError, showSuccess } from "../alert";
 import { User, Mail, Phone } from "lucide-react";
 import {  Button  } from "../../components/ui/modal/formComponent";
 import { ModalInput,ModalSelect } from "../ui/modal/modalComponent";
@@ -13,7 +14,6 @@ import PaymentInfoBlock from "./PaymentInfoBlock";
 import Modal from "../ui/modal/modal";
 import AddressBlock from "../ui/modal/AddressBlock";
 import { getAllCustomers } from "../../api/customerApi";
-import toast from "react-hot-toast";
 import CustomerSelect from "../selects/CustomerSelect";
 import ItemSelect from "../selects/ItemSelect";
 import { createProformaInvoice } from "../../api/proformaInvoiceApi";
@@ -30,35 +30,50 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const {
-    formData,
-    customerDetails,
-    customerNameDisplay,
-    paginatedItems,
-    totals,
-    ui,
-    actions,
-  } = useInvoiceForm(
-    isOpen,
-    onClose,
-    async (payload) => {
-      const res = await createProformaInvoice(payload);
-      if (res.status_code !== 200) {
-        alert(res.message || "Failed to create proforma invoice");
-        return;
-      }
-      alert("Proforma Invoice created successfully");
-      onSubmit?.();
-    },
-    "proforma",
-  );
-  const handleFormSubmit = (e: React.FormEvent) => {
-    try {
-      actions.handleSubmit(e); // hook call
-    } catch (err: any) {
-      toast.error(err.message || "Invalid form");
+const {
+  formData,
+  customerDetails,
+  customerNameDisplay,
+  paginatedItems,
+  totals,
+  ui,
+  actions,
+} = useInvoiceForm(
+  isOpen,
+  onClose,
+  undefined,   
+  "proforma",
+);
+
+const handleFormSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    const payload = await actions.handleSubmit(e);
+    if (!payload) return;
+
+    const res = await createProformaInvoice(payload);
+
+    if (!res || ![200, 201].includes(res.status_code)) {
+      showApiError(res);
+      return;
     }
-  };
+
+    showSuccess(
+      res.message ||
+        "Proforma invoice created successfully"
+    );
+
+    actions.handleReset();
+    onSubmit?.();
+    onClose();
+
+  } catch (error: any) {
+    showApiError(error);
+  }
+};
+
+
 
   const handleClose = () => {
     actions.handleReset();

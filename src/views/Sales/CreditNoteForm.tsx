@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 
 import { Plus, Trash2, User, Mail, Phone } from "lucide-react";
-
+import { showApiError, showSuccess } from "../../components/alert";
 // import TermsAndCondition from "../TermsAndCondition";
 import { useEffect } from "react";
 import { getSalesInvoiceById } from "../../api/salesApi";
 import { getAllSalesInvoices } from "../../api/salesApi";
 import { createCreditNoteFromInvoice } from "../../api/salesApi";
-import toast from "react-hot-toast";
 import PaymentInfoBlock from "../../components/sales/PaymentInfoBlock";
 import AddressBlock from "../../components/ui/modal/AddressBlock";
 import {
@@ -131,20 +130,28 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
     if (saving) return;
 
     try {
+      // Invoice check
       if (!formData.invoiceNumber) {
-        toast.error("Invoice number missing");
+        showApiError("Invoice number missing");
         return;
       }
 
+      // Reason code
       if (!creditMeta.creditNoteReasonCode) {
-        toast.error("Credit note reason missing");
+        showApiError("Credit note reason missing");
         return;
       }
 
       const invcAdjustReason = getInvoiceAdjustReason();
 
       if (!invcAdjustReason) {
-        toast.error("Invoice adjustment reason is required");
+        showApiError("Invoice adjustment reason is required");
+        return;
+      }
+
+      // Payment Terms validation 
+      if (!formData.paymentInformation?.paymentTerms) {
+        showApiError("Please select payment terms");
         return;
       }
 
@@ -164,12 +171,21 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
 
       const res = await createCreditNoteFromInvoice(payload);
 
-      toast.success("Credit note created successfully");
+      if (!res || ![200, 201].includes(res.status_code)) {
+        showApiError(res);
+        return;
+      }
+
+      showSuccess(
+        res.message || "Credit note created successfully"
+      );
 
       onSubmit?.(res);
-    } catch (err) {
-      toast.error("Failed to create credit note");
+
+
+    } catch (err: any) {
       console.error("Credit Note failed", err);
+      showApiError(err);
     } finally {
       setSaving(false);
     }
@@ -197,8 +213,8 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
               type="button"
               onClick={() => ui.setActiveTab(tab)}
               className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab
-                  ? "text-primary border-b-[3px] border-primary"
-                  : "text-muted border-b-[3px] border-transparent hover:text-main"
+                ? "text-primary border-b-[3px] border-primary"
+                : "text-muted border-b-[3px] border-transparent hover:text-main"
                 }`}
             >
               {tab === "details" && "Details"}
@@ -645,56 +661,56 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
           </div>
         )} */}
 
-       {ui.activeTab === "address" && (
-  <div className="space-y-6 overflow-hidden">
+        {ui.activeTab === "address" && (
+          <div className="space-y-6 overflow-hidden">
 
-    {/*  PAYMENT INFO  */}
-    <PaymentInfoBlock
-      data={formData.paymentInformation}
-      onChange={(
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-      ) =>
-        actions.handleInputChange(e, "paymentInformation")
-      }
-      paymentMethodOptions={paymentMethodOptions}
-    />
+            {/*  PAYMENT INFO  */}
+            <PaymentInfoBlock
+              data={formData.paymentInformation}
+              onChange={(
+                e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+              ) =>
+                actions.handleInputChange(e, "paymentInformation")
+              }
+              paymentMethodOptions={paymentMethodOptions}
+            />
 
-    {/*  BILLING + SHIPPING  */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/*  BILLING + SHIPPING  */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-      {/* Billing */}
-      <AddressBlock
-        type="billing"
-        title="Billing Address"
-        subtitle="Invoice and payment details"
-        data={formData.billingAddress}
-        onChange={(
-          e: React.ChangeEvent<HTMLInputElement>
-        ) =>
-          actions.handleInputChange(e, "billingAddress")
-        }
-      />
+              {/* Billing */}
+              <AddressBlock
+                type="billing"
+                title="Billing Address"
+                subtitle="Invoice and payment details"
+                data={formData.billingAddress}
+                onChange={(
+                  e: React.ChangeEvent<HTMLInputElement>
+                ) =>
+                  actions.handleInputChange(e, "billingAddress")
+                }
+              />
 
-      {/* Shipping */}
-      <AddressBlock
-        type="shipping"
-        title="Shipping Address"
-        subtitle="Delivery location"
-        data={formData.shippingAddress}
-        sameAsBilling={ui.sameAsBilling}
-        onSameAsBillingChange={
-          actions.handleSameAsBillingChange
-        }
-        onChange={(
-          e: React.ChangeEvent<HTMLInputElement>
-        ) =>
-          actions.handleInputChange(e, "shippingAddress")
-        }
-      />
+              {/* Shipping */}
+              <AddressBlock
+                type="shipping"
+                title="Shipping Address"
+                subtitle="Delivery location"
+                data={formData.shippingAddress}
+                sameAsBilling={ui.sameAsBilling}
+                onSameAsBillingChange={
+                  actions.handleSameAsBillingChange
+                }
+                onChange={(
+                  e: React.ChangeEvent<HTMLInputElement>
+                ) =>
+                  actions.handleInputChange(e, "shippingAddress")
+                }
+              />
 
-    </div>
-  </div>
-)}
+            </div>
+          </div>
+        )}
 
       </div>
     </form>

@@ -63,47 +63,47 @@ export const mapUIToCreatePI = (form: PurchaseInvoiceFormData) => {
       paymentAmount: Number(p.paymentAmount || 0),
     }));
 
-  // Build base payload
-  const payload: any = {
-    rcptTyCd: "Local", // Assuming local for now, could be dynamic
-    requiredBy: form.requiredBy,
-    supplierId: form.supplierId,
-    currency: form.currency,
-    status: form.status,
-    taxCategory: form.taxCategory,
-    lpoNumber: form.poNumber, // Assuming PO number is sent as lpoNumber in API
-    spplrInvcNo: form.supplierInvoiceNumber, // Assuming supplier invoice number is sent as spplrInvcNo in API,
-    paymentType: form.paymentType,
-    transactionProgress: form.transactionProgress,
-    // Assuming PI number is sent as spplrInvcNo in API
-    // Optional fields
-    ...(form.costCenter && { costCenter: form.costCenter }),
-    ...(form.project && { project: form.project }),
-    ...(form.destnCountryCd && { destnCountryCd: form.destnCountryCd }),
-    ...(form.shippingRule && { shippingRule: form.shippingRule }),
-    ...(form.incoterm && { incoterm: form.incoterm }),
-    ...(form.placeOfSupply && { placeOfSupply: form.placeOfSupply }),
-    ...(form.paymentTermsTemplate && { paymentTermsTemplate: form.paymentTermsTemplate }),
-    ...(form.taxesChargesTemplate && { taxesChargesTemplate: form.taxesChargesTemplate }),
+;
 
-    addresses: form.addresses,
+const payload: any = {
+  rcptTyCd: "Local",
+  requiredBy: form.requiredBy,
+  supplierId: form.supplierId,
+  currency: form.currency,
+  status: form.status,
 
-    // Terms - backend expects "selling" structure
-    ...(form.terms?.buying && {
-      terms: {
-        selling: form.terms.buying
-      }
-    }),
+  taxCategory: "Non-Export",   
 
-    items: items, // Already filtered and mapped
-    
-    ...(taxes.length > 0 && { taxes }),
-    ...(payments.length > 0 && { payments }),
+  spplrInvcNo: form.supplierInvoiceNumber,
+  paymentType: form.paymentType,
+  transactionProgress: form.transactionProgress,
 
-    metadata: {
-      remarks: "Created from UI",
+  ...(form.costCenter && { costCenter: form.costCenter }),
+  ...(form.project && { project: form.project }),
+
+  ...(form.shippingRule && { shippingRule: form.shippingRule }),
+  ...(form.incoterm && { incoterm: form.incoterm }),
+  ...(form.placeOfSupply && { placeOfSupply: form.placeOfSupply }),
+  ...(form.paymentTermsTemplate && { paymentTermsTemplate: form.paymentTermsTemplate }),
+  ...(form.taxesChargesTemplate && { taxesChargesTemplate: form.taxesChargesTemplate }),
+
+  addresses: form.addresses,
+
+  ...(form.terms?.buying && {
+    terms: {
+      selling: form.terms.buying,
     },
-  };
+  }),
+
+  items,
+
+  ...(taxes.length > 0 && { taxes }),
+  ...(payments.length > 0 && { payments }),
+
+  metadata: {
+    remarks: "Created from UI",
+  },
+};
 
   
 

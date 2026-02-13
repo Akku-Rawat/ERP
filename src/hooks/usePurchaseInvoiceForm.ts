@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { showApiError,showSuccess } from "../components/alert";
 import type {
   PurchaseInvoiceFormData,
   POTab,
@@ -82,21 +83,21 @@ useEffect(() => {
 
 
 useEffect(() => {
-  if (!form.taxCategory) return;
+  if (!isOpen) return;
 
   setForm((prev) => ({
     ...prev,
-    items: prev.items.map((item) => {
-      if (!item.itemCode) return item;
-
-      let vatCd = "A";
-      if (form.taxCategory === "Export") vatCd = "C1";
-      else if (form.taxCategory === "LPO") vatCd = "E";
-
-      return { ...item, vatCd };
-    }),
+    taxCategory: "Non-Export",
+    destnCountryCd: "",
+    placeOfSupply: "",
+    items: prev.items.map((item) => ({
+      ...item,
+      vatCd: "A",
+    })),
   }));
-}, [form.taxCategory]);
+}, [isOpen]);
+
+
 
 
 useEffect(() => {
@@ -211,15 +212,6 @@ const handleSupplierChange = async (sup: any) => {
 
     let destCode = "";
 
-    if (supplier.taxCategory === "Export" && supplier.billingCountry) {
-      const countryRes = await getCountryList();
-      const list = Array.isArray(countryRes)
-        ? countryRes
-        : countryRes?.data ?? [];
-
-      destCode = getCountryCode(list, supplier.billingCountry);
-    }
-
     setForm((p) => ({
       ...p,
 
@@ -229,15 +221,16 @@ const handleSupplierChange = async (sup: any) => {
       supplierCode: supplier.supplierCode,
       supplierEmail: supplier.emailId,
       supplierPhone: supplier.phoneNo,
-      taxCategory: supplier.taxCategory,
+      taxCategory: "Non-Export",
+
 
       /*   AUTO FETCHED FIELDS  */
       currency: supplier.currency || p.currency,
       supplierContact: supplier.contactPerson || "",
 
       /*  EXPORT HANDLING  */
-      destnCountryCd: destCode,
-      placeOfSupply: destCode,
+ destnCountryCd: "",
+        placeOfSupply: "",
 
       /*  ADDRESS AUTO FILL  */
 addresses: {
@@ -271,7 +264,10 @@ addresses: {
 
   const removeItem = (idx: number) => {
     if (form.items.length === 1) {
-      toast.error("At least one item is required");
+      showApiError({
+  message: "At least one item is required",
+});
+
       return;
     }
     setForm((p) => ({ ...p, items: p.items.filter((_, i) => i !== idx) }));
@@ -346,25 +342,6 @@ addresses: {
   };
 
   
-  const getVatCode = (item: any, category: string): string => {
-    // Export Category → Always C1
-    if (category === "Export") {
-      return "C1";
-    }
-
-    // LPO Category → Always E (Exempt)
-    if (category === "LPO") {
-      return "E";
-    }
-
-    // Non-Export → Use item's tax code or default to A (Standard)
-    if (category === "Non-Export") {
-      return item.taxCode || item.vatCd || "A";
-    }
-
-    // Default fallback
-    return item.taxCode || item.vatCd || "A";
-  };
 
 const handleItemSelect = async (itemId: string, idx: number) => {
   try {
@@ -383,12 +360,8 @@ const handleItemSelect = async (itemId: string, idx: number) => {
   uom: data.unitOfMeasureCd || "Unit",
   rate: Number(data.sellingPrice || 0),
   vatRate: Number(data.taxPerct || 0), 
-  vatCd:
-    prev.taxCategory === "Export"
-      ? "C1"
-      : prev.taxCategory === "LPO"
-      ? "E"
-      : data.taxCode || "A",
+vatCd: "A",
+
 };
 
 
@@ -396,7 +369,10 @@ const handleItemSelect = async (itemId: string, idx: number) => {
     });
   } catch (err) {
     console.error("Failed to fetch item details", err);
-    toast.error("Failed to load item details");
+    showApiError({
+  message: "Failed to load item details",
+});
+
   }
 };
 
@@ -404,9 +380,10 @@ const handleItemSelect = async (itemId: string, idx: number) => {
 const handleSubmit = async (e?: React.FormEvent) => {
   e?.preventDefault();
 
-  //  Mandatory tax category check
   if (!form.taxCategory) {
-    toast.error("Tax Category is required");
+    showApiError({
+      message: "Tax Category is required",
+    });
     return;
   }
 
@@ -414,37 +391,48 @@ const handleSubmit = async (e?: React.FormEvent) => {
 
   if (errors.length) {
     const uniqueErrors = [...new Set(errors)];
-    uniqueErrors.forEach((err) => toast.error(err));
+
+    showApiError({
+      message: uniqueErrors.join("\n"),
+    });
+
     return;
   }
 
   try {
     setSaving(true);
 
-    const payload = mapUIToCreatePI(form); 
+    const payload = mapUIToCreatePI(form);
 
     let res;
 
     if (isEditMode) {
-      toast.error(
-        "Editing Purchase Invoice is not supported. Only status update is allowed."
-      );
+      showApiError({
+        message:
+          "Editing Purchase Invoice is not supported. Only status update is allowed.",
+      });
       return;
     } else {
       res = await createPurchaseInvoice(payload);
-      toast.success("Purchase Invoice Created");
+
+      if (!res || ![200, 201].includes(res.status_code)) {
+        showApiError(res);
+        return;
+      }
+
+      showSuccess("Purchase Invoice Created");
     }
 
     onSuccess?.(res);
     onClose?.();
-    if (!isEditMode) reset();
+    reset();
   } catch (error: any) {
-    console.error("PO ERROR", error);
-    toast.error(error?.response?.data?.message || "PO save failed");
+    showApiError(error);
   } finally {
     setSaving(false);
   }
 };
+
 
 
 const reset = () => {

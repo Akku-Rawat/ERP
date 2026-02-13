@@ -14,7 +14,7 @@ import ActionButton, {
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
 import type { Supplier} from "../../types/Supply/supplier";
-
+import { showSuccess } from "../../components/alert";
 
 interface Props {}
 
@@ -167,12 +167,11 @@ const handleEditSupplier = async (supplier: Supplier) => {
 
 
 const handleSupplierSaved = async () => {
-  setShowModal(false);
+  await fetchSuppliers();     
+  setShowModal(false);        
   setEditSupplier(null);
-  await fetchSuppliers();
-
-  toast.success(editSupplier ? "Supplier updated successfully" : "Supplier created successfully");
 };
+
 
 const handleEditFromDetail = (supplier: Supplier) => {
   handleEditSupplier(supplier);

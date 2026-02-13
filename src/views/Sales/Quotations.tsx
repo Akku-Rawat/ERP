@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-
+import { showApiError, showSuccess } from "../../components/alert";
 import { getAllQuotations, getQuotationById } from "../../api/quotationApi";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { QuotationSummary, QuotationData } from "../../types/quotation";
-
-
 import Table from "../../components/ui/Table/Table";
 import ActionButton, {
   ActionGroup,
@@ -156,7 +153,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
       setPdfUrl(url as string);
       setPdfOpen(true);
     } catch (error) {
-      toast.error("Failed to generate preview");
+      showApiError(error);
     }
   };
 
@@ -177,10 +174,10 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
       getCompanyById(COMPANY_ID);
 
       await generateQuotationPDF(res.data, company, "save");
-      toast.success("Quotation downloaded");
+      showSuccess("Quotation downloaded");
     } catch (error) {
       console.error("Download error:", error);
-      toast.error("Download failed");
+      showApiError(error);
     }
   };
 

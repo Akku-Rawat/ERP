@@ -67,15 +67,13 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     supplierId: form.supplierId,
     currency: form.currency,
     status: form.status,
-    taxCategory: form.taxCategory,
+    taxCategory: "Non-Export",
     
     // Optional fields
     ...(form.costCenter && { costCenter: form.costCenter }),
     ...(form.project && { project: form.project }),
-    ...(form.destnCountryCd && { destnCountryCd: form.destnCountryCd }),
     ...(form.shippingRule && { shippingRule: form.shippingRule }),
     ...(form.incoterm && { incoterm: form.incoterm }),
-    ...(form.placeOfSupply && { placeOfSupply: form.placeOfSupply }),
     ...(form.paymentTermsTemplate && { paymentTermsTemplate: form.paymentTermsTemplate }),
     ...(form.taxesChargesTemplate && { taxesChargesTemplate: form.taxesChargesTemplate }),
 

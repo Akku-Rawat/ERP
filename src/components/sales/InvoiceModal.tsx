@@ -3,12 +3,10 @@ import { Plus, Trash2 } from "lucide-react";
 import { FileText } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 import { User, Mail, Phone } from "lucide-react";
-
 import CustomerSelect from "../selects/CustomerSelect";
 import Modal from "../../components/ui/modal/modal";
 import {  Button } from "../../components/ui/modal/formComponent";
 import { ModalInput,ModalSelect } from "../ui/modal/modalComponent";
-import toast from "react-hot-toast";
 import ItemSelect from "../selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
@@ -19,6 +17,7 @@ import {
 } from "../../constants/invoice.constants";
 import PaymentInfoBlock from "./PaymentInfoBlock";
 import AddressBlock from "../ui/modal/AddressBlock";
+import { showApiError } from "../alert";
 
 // import ModalInput from "../ui/ModalInput";
 // import ModalSelect from "../ui/ModalSelect";
@@ -46,15 +45,21 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   } = useInvoiceForm(isOpen, onClose, onSubmit);
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleFormSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    try {
-      actions.handleSubmit(e);
-    } catch (err: any) {
-      toast.error(err.message || "Invalid invoice data");
-    }
-  };
+  try {
+    const payload = await actions.handleSubmit(e);
+
+    if (!payload) return;
+
+    // ❗ Wait for parent API response
+    await onSubmit?.(payload);
+
+  } catch (err: any) {
+    showApiError(err);
+  }
+};
 
 
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);

@@ -1,5 +1,4 @@
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Building2, DollarSign , MapPin} from "lucide-react";
 import Modal from "../../ui/modal/modal";
 import { Button } from "../../ui/modal/formComponent";
@@ -43,7 +42,7 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
     initialData,
     isEditMode,
     onSuccess: onSubmit,
-    onClose,
+    isOpen,
   });
 
   const footer = (

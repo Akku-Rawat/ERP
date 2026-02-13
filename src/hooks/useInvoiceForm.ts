@@ -103,6 +103,12 @@ useEffect(() => {
         throw new Error(`Item ${idx + 1}: Please select item`);
       }
 
+
+
+if (!formData.paymentInformation?.paymentTerms) {
+  throw new Error("Please select payment terms");
+}
+
       if (!it.quantity || it.quantity <= 0) {
         throw new Error(`Item ${idx + 1}: Quantity must be greater than 0`);
       }
@@ -425,26 +431,21 @@ const handleReset = async () => {
     shippingEditedRef.current = false;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    try {
-      validateForm();
+  validateForm();
 
-      const payload = {
-        ...formData,
-        subTotal,
-        totalTax,
-        grandTotal,
-      };
-
-      onSubmit?.(payload);
-      handleReset();
-      onClose();
-    } catch (err: any) {
-      throw err;
-    }
+  const payload = {
+    ...formData,
+    subTotal,
+    totalTax,
+    grandTotal,
   };
+
+  return payload;
+};
+
 
   const { subTotal, totalTax, grandTotal } = useMemo(() => {
     let sub = 0;

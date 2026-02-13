@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
 import type { SupplierFormData, SupplierTab } from "../types/Supply/supplier";
 import { emptySupplierForm } from "../types/Supply/supplier";
 import { createSupplier,updateSupplier } from "../api/procurement/supplierApi";
 import { mapSupplierToApi } from "../types/Supply/supplierMapper";
 import { Supplier } from "../types/Supply/supplier";
 import { mapSupplierToForm } from "../types/Supply/supplierMapper";
+import { showApiError,showSuccess } from "../components/alert";
+
 
 interface UseSupplierFormProps {
    initialData?: Supplier | null; 
   isEditMode?: boolean;
   onSuccess?: (data: SupplierFormData) => void;
-  onClose?: () => void;
+  isOpen?: boolean;
 }
 
 const validateSupplier = (form: SupplierFormData) => {
@@ -40,30 +41,32 @@ const validateSupplier = (form: SupplierFormData) => {
 };
 
 
-
 export const useSupplierForm = ({
   initialData,
   isEditMode = false,
   onSuccess,
-  onClose,
+  isOpen,
 }: UseSupplierFormProps) => {
   const [form, setForm] = useState<SupplierFormData>(emptySupplierForm);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<SupplierTab>("supplier");
 
   // Prefill Edit Data
-  useEffect(() => {
-    if (initialData) {
-      setForm(mapSupplierToForm(initialData));
-    } else {
-      setForm({
-        ...emptySupplierForm,
-        dateOfAddition: new Date().toISOString().split("T")[0],
-      });
-    }
+useEffect(() => {
+  if (!isOpen) return;  
 
-    setActiveTab("supplier");
-  }, [initialData]);
+  if (initialData) {
+    setForm(mapSupplierToForm(initialData));
+  } else {
+    setForm({
+      ...emptySupplierForm,
+      dateOfAddition: new Date().toISOString().split("T")[0],
+    });
+  }
+
+  setActiveTab("supplier");
+}, [initialData, isOpen]);
+
 
 
   // Input Change
@@ -84,30 +87,49 @@ const handleSubmit = async (e?: React.FormEvent) => {
   e?.preventDefault();
 
   const error = validateSupplier(form);
-  if (error) {
-    toast.error(error);
+ if (error) {
+  showApiError({ message: error });
+  return;
+}
+
+
+try {
+  setLoading(true);
+
+  const payload = mapSupplierToApi(
+    form,
+    initialData?.supplierId,
+  );
+
+  let res;
+
+  if (isEditMode) {
+    res = await updateSupplier(payload);
+  } else {
+    res = await createSupplier(payload);
+  }
+
+  /* Backend failure */
+  if (!res || ![200, 201].includes(res.status_code)) {
+    showApiError(res);
     return;
   }
 
-  try {
-    setLoading(true);
-    const payload = mapSupplierToApi(form, initialData?.supplierId);
+  /* Success */
+  showSuccess(
+    res.message ||
+      (isEditMode
+        ? "Supplier Updated"
+        : "Supplier Created"),
+  );
 
-    if (isEditMode) {
-      await updateSupplier(payload);
-    } else {
-      await createSupplier(payload);
-    }
-
-    onSuccess?.(form); 
-    onClose?.();
-  } catch (err: any) {
-  console.error("Supplier Save Error:", err);
-
-  toast.error(err.message);
+  onSuccess?.(form);
+} catch (err: any) {
+  showApiError(err);
 } finally {
-    setLoading(false);
-  }
+  setLoading(false);
+}
+
 };
 
 
@@ -115,12 +137,16 @@ const handleSubmit = async (e?: React.FormEvent) => {
 
   // Reset Form
 const reset = () => {
-  if (initialData) {
+  if (initialData && isEditMode) {
     setForm(mapSupplierToForm(initialData));
   } else {
-    setForm(emptySupplierForm);
+    setForm({
+      ...emptySupplierForm,
+      dateOfAddition: new Date().toISOString().split("T")[0],
+    });
   }
-  toast("Form reset");
+
+  showSuccess("Form reset");
 };
 
 

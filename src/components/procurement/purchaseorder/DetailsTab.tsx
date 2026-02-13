@@ -40,15 +40,10 @@ export const DetailsTab = ({
 
   // Helper function to get VAT description
   const getVatDescription = (vatCd: string): string => {
-    const descriptions: Record<string, string> = {
-      A: "Standard Rate",
-      B: "Reduced Rate",
-      C: "Zero Rate",
-      C1: "Export Zero-rated",
-      D: "Exempt",
-      E: "LPO Exempt",
-      F: "Reverse Charge",
-    };
+   const descriptions: Record<string, string> = {
+  A: "Standard Rate",
+};
+
     return descriptions[vatCd] || "Standard";
   };
 
@@ -198,7 +193,6 @@ export const DetailsTab = ({
                         <POItemSelect
                           value={it.itemName}
                           selectedId={it.itemCode}
-                          taxCategory={form.taxCategory}
                           onChange={(item) => onItemSelect(item.id, idx)}
                         />
                       </td>
@@ -258,15 +252,7 @@ export const DetailsTab = ({
                             value={it.vatCd || "-"}
                             readOnly
                             disabled
-                            title={`VAT Code: ${form.taxCategory === "Export"
-                              ? "C1 (Export - Zero-rated)"
-                              : form.taxCategory === "LPO"
-                                ? "E (LPO - Exempt)"
-                                : form.taxCategory === "Non-Export"
-                                  ? `${it.vatCd || "A"} (${getVatDescription(it.vatCd || "A")})`
-                                  : "Select Tax Category first"
-                              }`}
-
+                            title="VAT Code: A (Standard Rate)"
                           />
                         </div>
                       </td>
@@ -391,15 +377,7 @@ export const DetailsTab = ({
                       </span>
                     </div>
 
-                    {/* Destination Country – only for Export */}
-                    {form.taxCategory === "Export" && (
-                      <div className="flex items-center gap-10 text-xs">
-                        <span className="text-muted">Destination Country</span>
-                        <span className="font-medium text-main">
-                          {form.destnCountryCd || "-"}
-                        </span>
-                      </div>
-                    )}
+                   
                   </div>
                 </div>
               )}
