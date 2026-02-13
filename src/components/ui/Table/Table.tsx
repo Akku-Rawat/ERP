@@ -76,7 +76,7 @@ function Table<T extends Record<string, any>>({
   columns,
   data,
   onRowClick,
-   extraFilters,
+  extraFilters,
   rowKey,
   loading = false,
   emptyMessage = "No records found.",
@@ -106,7 +106,7 @@ function Table<T extends Record<string, any>>({
     setVisibleKeys,
     allKeys,
     toggleColumn,
- 
+
     sortOrder,
     setSortOrder,
     processedData,
@@ -127,7 +127,7 @@ function Table<T extends Record<string, any>>({
 
 
   const displayData = serverSide ? data : (processedData ?? []);
- const visibleColumns = loading ? columns : columns.filter((col) => visibleKeys.includes(col.key));
+  const visibleColumns = loading ? columns : columns.filter((col) => visibleKeys.includes(col.key));
 
   return (
     <div className="bg-card rounded-2xl border border-[var(--border)] flex flex-col shadow-sm transition-all relative z-10 w-full overflow-hidden">
@@ -155,15 +155,11 @@ function Table<T extends Record<string, any>>({
             )}
           </div>
 
-      {extraFilters && (
-  <div className="flex items-center gap-4 shrink-0">
-    {extraFilters}
-  </div>
-)}
-
-
-
-         
+          {extraFilters && (
+            <div className="flex items-center gap-4 shrink-0">
+              {extraFilters}
+            </div>
+          )}
           
           <div className="flex items-center gap-2 shrink-0">
             {loading ? (
@@ -183,9 +179,8 @@ function Table<T extends Record<string, any>>({
                   onClick={() =>
                     setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
                   }
-                  className={`p-2 rounded-xl border border-[var(--border)] bg-app text-muted hover:text-primary hover:border-primary transition-all flex items-center gap-2 px-3 whitespace-nowrap ${
-                    sortOrder ? "border-primary text-primary" : ""
-                  }`}
+                  className={`p-2 rounded-xl border border-[var(--border)] bg-app text-muted hover:text-primary hover:border-primary transition-all flex items-center gap-2 px-3 whitespace-nowrap ${sortOrder ? "border-primary text-primary" : ""
+                    }`}
                 >
                   {sortOrder === "asc" ? (
                     <FaSortAmountUp size={12} />
@@ -197,7 +192,7 @@ function Table<T extends Record<string, any>>({
                   </span>
                 </button>
 
-              
+
 
 
                 {enableColumnSelector && (
@@ -278,9 +273,8 @@ function Table<T extends Record<string, any>>({
                   <tr
                     key={rowKey ? rowKey(item) : JSON.stringify(item)}
                     onClick={() => onRowClick?.(item)}
-                    className={`group transition-none cursor-pointer ${
-                      idx % 2 === 0 ? "bg-transparent" : "bg-row-hover/10"
-                    } hover:bg-row-hover`}
+                    className={`group transition-none cursor-pointer ${idx % 2 === 0 ? "bg-transparent" : "bg-row-hover/10"
+                      } hover:bg-row-hover`}
                   >
                     {visibleColumns.map((column) => (
                       <td
@@ -316,34 +310,34 @@ function Table<T extends Record<string, any>>({
                 Total: {totalItems}
               </div>
 
-             
+
             </div>
-             {/* Action Buttons */}
-          {onPageSizeChange && (
-                <div className="flex items-center gap-2">
-                  <label className="text-[9px] font-black uppercase text-muted tracking-[0.2em] opacity-50">
-                    Show:
-                  </label>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                    className="px-3 py-1.5 bg-app border border-[var(--border)] rounded-lg text-[10px] font-black uppercase text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
-                  >
-                    {pageSizeOptions.map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+            {/* Action Buttons */}
+            {onPageSizeChange && (
+              <div className="flex items-center gap-2">
+                <label className="text-[9px] font-black uppercase text-muted tracking-[0.2em] opacity-50">
+                  Show:
+                </label>
+                <select
+                  value={pageSize}
+                  onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                  className="px-3 py-1.5 bg-app border border-[var(--border)] rounded-lg text-[10px] font-black uppercase text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
+                >
+                  {pageSizeOptions.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <Pagination
               currentPage={currentPage || 1}
               totalPages={totalPages || 1}
               pageSize={pageSize}
               totalItems={totalItems}
-              onPageChange={onPageChange || (() => {})}
+              onPageChange={onPageChange || (() => { })}
             />
           </>
         )}

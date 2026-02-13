@@ -48,4 +48,10 @@ export interface ItemSummary {
   minStockLevel: string;
   maxStockLevel: string;
   taxCategory: string;
+  date: string;
+  orgSarNo: string;
+  registrationType: string;
+  stockEntryType: string;
+  totalTaxableAmount: number;
+  warehouse: string;
 }

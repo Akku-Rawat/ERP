@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { FaBoxOpen, FaBoxes } from "react-icons/fa";
 
 import Items from "./Items";
-import Warehouses from "./Warehouses";
 import Movements from "./Movements";
 import ItemsCategory from "./ItemsCategory";
 import Stock from "./Stock";
+import Import from "./Import";
 
 const inventory = {
   name: "Inventory",
@@ -17,8 +17,6 @@ const inventory = {
     { id: "stock", name: "Stock", icon: <FaBoxOpen /> },
     { id: "import", name: "Import", icon: <FaBoxOpen /> },
 
-    // { id: "warehouses", name: "Warehouses", icon: <FaWarehouse /> },
-    // { id: "movements", name: "Movements", icon: <FaTruckMoving /> },
   ],
   products: [
     {
@@ -136,9 +134,9 @@ const Inventory: React.FC = () => {
             onAdd={() => { }}
           />
         )}
-        {activeTab === "warehouses" && (
-          <Warehouses
-            warehouses={inventory.warehouses}
+        {activeTab === "import" && (
+          <Import
+            products={inventory.products}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             onAdd={() => { }}

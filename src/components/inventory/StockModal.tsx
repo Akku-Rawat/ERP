@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { updateItemByItemCode, createItem } from "../../api/itemApi";
-import ItemCategorySelect from "../selects/ItemCategorySelect";
-import { getItemGroupById } from "../../api/itemCategoryApi";
-import ItemGenericSelect from "../selects/ItemGenericSelect";
-import ItemTreeSelect from "../selects/ItemTreeSelect";
-import {
-  getPackagingUnits,
-  getCountries,
-  getUOMs,
-  getItemClasses,
-} from "../../api/itemZraApi";
-import Select from "../../components/ui/Select";
+import { getStockById, getAllStockItems } from "../../api/stockItemApi";
 import Modal from "../ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
 
@@ -56,12 +46,6 @@ const emptyForm: Record<string, any> = {
   dimensionHeight: "",
 };
 
-const itemTypeCodeOptions = [
-  { value: "1", label: "Raw Material" },
-  { value: "2", label: "Finished Product" },
-  { value: "3", label: "Service" },
-];
-
 
 const ItemModal: React.FC<{
   isOpen: boolean;
@@ -73,9 +57,34 @@ const ItemModal: React.FC<{
 }> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [loading, setLoading] = useState(false);
-  const [fetchingItem, setFetchingItem] = useState(false);
-  const [itemCategoryDetails, setItemCategoryDetails] = useState<any>(null);
-  const isServiceItem = Number(form.itemTypeCode) === 3;
+  const [itemOptions, setItemOptions] = useState<Array<{ label: string; value: string }>>([]);
+    // Fetch all available items for dropdown on open
+    useEffect(() => {
+      if (!isOpen) return;
+      (async () => {
+        try {
+          const items = await getAllStockItems();
+          const itemOptions = items.map((item: any) => ({
+            label: item.item_code || item.itemName || item.item_name || item.name || item.id || "",
+            value: item.item_code || item.itemName || item.id || item.name || ""
+          })).filter(opt => !!opt.value);
+          setItemOptions(itemOptions);
+        } catch (err) {
+          setItemOptions([]);
+        }
+      })();
+    }, [isOpen]);
+    useEffect(() => {
+      if (!form.itemCode) return;
+      getStockById(form.itemCode)
+        .then((data) => {
+          setForm((prev) => ({
+            ...prev,
+            itemCode: data.item_code || data.itemCode || prev.itemCode,
+            warehouse: data.id || prev.id,
+          }));
+        })
+    }, [form.itemCode]);
   
 
   const [activeTab, setActiveTab] = useState<
@@ -146,17 +155,6 @@ useEffect(() => {
     onClose();
   };
 
-  const loadItemCategoryDetailsById = async (id: string) => {
-    try {
-      const response = await getItemGroupById(id);
-      if (!response || response.status_code !== 200) return;
-      setForm((p) => ({ ...p, item_group: response.data.name }));
-      setItemCategoryDetails(response.data);
-    } catch (err) {
-      toast.error("Error loading item category details:");
-    }
-  };
-
   const handleForm = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -193,19 +191,41 @@ useEffect(() => {
           <div className="gap-6 max-h-screen overflow-auto p-4">
             {activeTab === "details" && (
               <>
-              <ItemGenericSelect
-                      label="Search Item"
-                      value={form.unitOfMeasureCd}
-                      fetchData={getUOMs}
-                      onChange={({ id }) =>
-                        setForm((p) => ({ ...p, unitOfMeasureCd: id }))
-                      }
-                    />
+              
+                <div className="mb-4">
+                  <label className="text-sm font-medium text-muted mb-1 block">Select Item</label>
+                  <select
+                    className="w-full px-3 py-2 rounded border border-theme bg-white"
+                    value={form.id || ""}
+                    onChange={e => {
+                      const selectedId = e.target.value;
+                      const selectedOption = itemOptions.find(opt => opt.value === selectedId);
+                      setForm(p => ({
+                        ...p,
+                        id: selectedId,
+                        itemName: selectedOption ? selectedOption.label : ""
+                      }));
+                    }}
+                  >
+                    <option value="">Select an item</option>
+                    {itemOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
                 <h3 className="mb-4 text-lg font-semibold text-main underline">
                   Items Information
                 </h3>
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <Input
+                      label="Item Name"
+                      name="itemName"
+                      value={form.itemName || ""}
+                      onChange={handleForm}
+                      className="w-full col-span-3"
+                      readOnly
+                    />
                     <div className="flex flex-col gap-1">
                       <label className="text-sm font-medium text-muted">
                         Item Quantity
@@ -214,8 +234,8 @@ useEffect(() => {
                         <input
                           type="number"
                           step="1"
-                          name="taxPerct"
-                          value={form.itemQuantity || ""}
+                          name="quantity"
+                          value={form.quantity || ""}
                           onChange={handleForm}
                           placeholder="Enter Item quantity"
                           className="w-full px-3 py-2 pr-10 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-white"
@@ -231,8 +251,8 @@ useEffect(() => {
                         <input
                           type="number"
                           step="1"
-                          name="taxPerct"
-                          value={form.taxPerct || ""}
+                          name="rate"
+                          value={form.rate || ""}
                           onChange={handleForm}
                           placeholder="enter Item price"
                           className="w-full px-3 py-2 pr-10 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-white"
@@ -241,20 +261,15 @@ useEffect(() => {
                     </div>
 
                     <Input
-                      label="Items Name"
-                      name="itemName"
-                      value={form.itemName || ""}
+                      label="Item Code"
+                      name="id"
+                      value={form.id || ""}
                       onChange={handleForm}
                       className="w-full col-span-3"
                       required
+                      readOnly
                     />
-                    <Input
-                      label="Description"
-                      name="description"
-                      value={form.description || ""}
-                      onChange={handleForm}
-                      className="w-full col-span-3"
-                    />
+                    
                   </div>
                 </div>
               </>

@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 
-import {
-  getAllStockEntries,
-} from "../../api/stockApi";
 
-import ItemModal from "../../components/inventory/StockModal";
+import { getAllItemsApi } from "../../api/importApi";
+import { getItemByItemCode, deleteItemByItemCode } from "../../api/itemApi";
+
 import DeleteModal from "../../components/actionModal/DeleteModal";
 
 import Table from "../../components/ui/Table/Table";
@@ -17,7 +16,7 @@ import ActionButton, {
 
 import type { Column } from "../../components/ui/Table/type";
 
-import type { ItemSummary, Item } from "../../types/item";
+import type { Item, ItemSummary } from "../../types/item";
 
 const Items: React.FC = () => {
   const [items, setItems] = useState<ItemSummary[]>([]);
@@ -28,9 +27,8 @@ const Items: React.FC = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-
-  const [showModal, setShowModal] = useState(false);
-  const [editItem, setEditItem] = useState<Item | null>(null);
+  // const [showModal, setShowModal] = useState(false); // Unused
+  // const [editItem, setEditItem] = useState<Item | null>(null); // Unused
   const [initialLoad, setInitialLoad] = useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<ItemSummary | null>(null);
@@ -40,21 +38,21 @@ const Items: React.FC = () => {
   const fetchItems = async () => {
     try {
       setLoading(true);
-      const apiData = await getAllStockEntries();
-      // Map API data to ItemSummary[]
-      const mapped = Array.isArray(apiData)
-        ? apiData.map((entry: any) => ({
+      const apiData = await getAllItemsApi({ page, page_size: pageSize });
+      // Map API data to ImportSummary[]
+      const mapped = Array.isArray(apiData?.items || apiData)
+        ? (apiData.items || apiData).map((entry: any) => ({
             id: entry.id || entry.name || "",
-            itemName: entry.item_name || "",
-            itemGroup: entry.item_group || "",
-            itemClassCode: entry.item_class_code || "",
-            unitOfMeasureCd: entry.unit_of_measure_cd || "",
-            sellingPrice: entry.selling_price || 0,
-            preferredVendor: entry.preferred_vendor || "",
-            minStockLevel: entry.min_stock_level || "",
-            maxStockLevel: entry.max_stock_level || "",
-            taxCategory: entry.tax_category || "",
-            date: entry.date || entry.posting_date || "",
+            itemName: entry.item_name || entry.itemName || "",
+            itemGroup: entry.item_group || entry.itemGroup || "",
+            itemClassCode: entry.item_class_code || entry.itemClassCode || "",
+            unitOfMeasureCd: entry.unit_of_measure_cd || entry.unitOfMeasureCd || "",
+            sellingPrice: entry.selling_price || entry.sellingPrice || 0,
+            preferredVendor: entry.preferred_vendor || entry.preferredVendor || "",
+            minStockLevel: entry.min_stock_level || entry.minStockLevel || "",
+            maxStockLevel: entry.max_stock_level || entry.maxStockLevel || "",
+            taxCategory: entry.tax_category || entry.taxCategory || "",
+            date: entry.date || entry.posting_date || entry.postingDate || "",
             orgSarNo: entry.orgSarNo || entry.org_sar_no || entry.org_sarNo || entry.orgsarno || "",
             registrationType: entry.registrationType || entry.registration_type || entry.registrationtype || "",
             stockEntryType: entry.stockEntryType || entry.stock_entry_type || entry.stockentrytype || "",
@@ -63,11 +61,12 @@ const Items: React.FC = () => {
           }))
         : [];
       setItems(mapped);
-      setTotalPages(1); // Adjust if API supports pagination
-      setTotalItems(mapped.length);
+      // If API returns total count and pages, use them:
+      setTotalPages(apiData?.total_pages || 1);
+      setTotalItems(apiData?.total_count || mapped.length);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load stock entries");
+      toast.error("Failed to load items");
     } finally {
       setLoading(false);
       setInitialLoad(false);
@@ -82,26 +81,26 @@ const Items: React.FC = () => {
    */
 
   const handleAdd = () => {
-    setEditItem(null);
-    setShowModal(true);
+    // Add item logic (modal removed)
   };
 
-  const handleEdit = async (itemCode: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleEdit = async (itemCode: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    // Edit item logic (modal removed)
     try {
-      const res = await getItemByItemCode(itemCode);
-      setEditItem(res.data);
-      setShowModal(true);
+      await getItemByItemCode(itemCode);
+      // setEditItem(res);
+      // setShowModal(true);
     } catch {
       toast.error("Unable to fetch item details");
     }
-  };
+  } 
 
-  const handleDeleteClick = (item: ItemSummary, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDeleteClick = (item: ItemSummary, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     setItemToDelete(item);
     setDeleteModalOpen(true);
-  };
+  } 
 
   const confirmDelete = async () => {
     if (!itemToDelete) return;
@@ -122,13 +121,13 @@ const Items: React.FC = () => {
     }
   };
 
-  const handleSaved = async () => {
-    const wasEdit = !!editItem;
-    setShowModal(false);
-    setEditItem(null);
-    await fetchItems();
-    toast.success(wasEdit ? "Item updated" : "Item created");
-  };
+  // const handleSaved = async () => {
+  //   const wasEdit = !!editItem;
+  //   setShowModal(false);
+  //   setEditItem(null);
+  //   await fetchItems();
+  //   toast.success(wasEdit ? "Item updated" : "Item created");
+  // };
 
   /*      FILTER
    */
@@ -136,12 +135,12 @@ const Items: React.FC = () => {
   const filteredItems = items.filter((i) =>
     [
       i.id,
-      i.date,
-      i.orgSarNo,
-      i.registrationType,
-      i.stockEntryType,
-      i.totalTaxableAmount,
-      i.warehouse,
+      i.itemName,
+      i.itemGroup,
+      i.itemClassCode,
+      i.sellingPrice,
+      i.preferredVendor,
+      i.taxCategory,
     ]
       .join(" ")
       .toLowerCase()
@@ -152,23 +151,23 @@ const Items: React.FC = () => {
    */
 
   const columns: Column<ItemSummary>[] = [
-    { key: "id", header: "Stock ID", align: "left" },
-    { key: "date", header: "Date", align: "left" },
-    { key: "orgSarNo", header: "orgSarNo", align: "left" },
-    { key: "registrationType", header: "Registration Type", align: "left" },
-    { key: "stockEntryType", header: "Stock Entry Type", align: "left" },
-    { key: "totalTaxableAmount", header: "Total Taxable Amount", align: "left"},
-    { key: "warehouse", header: "Warehouse", align: "left" },
+    { key: "id", header: "ID", align: "left" },
+    { key: "itemName", header: "Item Name", align: "left" },
+    { key: "itemGroup", header: "Item Group", align: "left" },
+    { key: "itemClassCode", header: "Class Code", align: "left" },
+    { key: "sellingPrice", header: "Selling Price", align: "left"},
+    { key: "preferredVendor", header: "Preferred Vendor", align: "left" },
+    { key: "taxCategory", header: "Tax Category", align: "left" },
     {
       key: "actions",
       header: "Actions",
       align: "center",
       render: (i) => (
         <ActionGroup>
-          <ActionButton type="view" onClick={(e) => handleEdit(i.id, e)} />
+          <ActionButton type="view" onClick={(e?: React.MouseEvent) => handleEdit(i.id, e)} />
           <ActionMenu
-            onEdit={(e) => handleEdit(i.id, e as any)}
-            onDelete={(e) => handleDeleteClick(i, e as any)}
+            onEdit={(e?: React.MouseEvent) => handleEdit(i.id, e)}
+            onDelete={(e?: React.MouseEvent) => handleDeleteClick(i, e)}
           />
         </ActionGroup>
       ),
@@ -188,8 +187,6 @@ const Items: React.FC = () => {
         showToolbar
         searchValue={searchTerm}
         onSearch={setSearchTerm}
-        enableAdd
-        addLabel="Add Item"
         onAdd={handleAdd}
         currentPage={page}
         totalPages={totalPages}
@@ -203,22 +200,10 @@ const Items: React.FC = () => {
         onPageChange={setPage}
       />
 
-      {/* ITEM MODAL */}
-      <ItemModal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setEditItem(null);
-        }}
-        onSubmit={handleSaved}
-        initialData={editItem}
-        isEditMode={!!editItem}
-      />
-
       {/* DELETE MODAL */}
       {deleteModalOpen && itemToDelete && (
         <DeleteModal
-          entityName="Stock Item"
+          entityName="Import Item"
           entityId={itemToDelete.id}
           entityDisplayName={itemToDelete.id}
           isLoading={deleting}
