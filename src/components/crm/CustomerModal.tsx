@@ -1,26 +1,18 @@
 // components/modals/CustomerModal.tsx
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import Modal from "../ui/modal/modal";
+import { showApiError,showSuccess,closeSwal,showLoading } from "../alert";
 import { getCompanyById } from "../../api/companySetupApi";
 const companyId = import.meta.env.VITE_COMPANY_ID;
-
 import {
-  Input,
-  Select,
   Card,
   Button,
-  Checkbox,
 } from "../ui/modal/formComponent";
 import TermsAndCondition from "../TermsAndCondition";
 import type { TermSection } from "../../types/termsAndCondition";
 import {
-  Mail,
-  Phone,
   User,
   Building2,
-  CreditCard,
-  DollarSign,
   MapPin,
   FileText,
 } from "lucide-react";
@@ -32,6 +24,7 @@ import {
 import AddressBlock from "../ui/modal/AddressBlock";
 import type { CustomerDetail } from "../../types/customer";
 import { ModalInput, ModalSelect } from "../ui/modal/modalComponent";
+
 
 const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   id: "",
@@ -116,17 +109,21 @@ const CustomerModal: React.FC<{
     loadCompanyTerms();
   }, [companyId, isOpen, isEditMode]);
 
-  useEffect(() => {
-    if (initialData) {
-      setForm({
-        ...initialData,
-        sameAsBilling: false,
-      });
-    } else {
-      setForm(emptyForm);
-    }
-    setActiveTab("details");
-  }, [initialData, isOpen]);
+useEffect(() => {
+  if (initialData) {
+    setForm({
+      ...initialData,
+      sameAsBilling: false,
+    });
+  } else {
+    setForm(emptyForm);
+  }
+
+  setActiveTab("details");
+  setLoading(false);
+}, [initialData, isOpen]);
+
+
   useEffect(() => {
     if (!form.displayName) {
       if (form.name) {
@@ -184,41 +181,65 @@ const CustomerModal: React.FC<{
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const payload: CustomerDetail = { ...form };
-      delete (payload as any).sameAsBilling;
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-      let response;
-      console.log("payload: ", payload);
+  if (loading) return; // prevent double submit
 
-      if (isEditMode && initialData?.id) {
-        response = await updateCustomerByCustomerCode(initialData.id, payload);
-      } else {
-        response = await createCustomer(payload);
-      }
+  setLoading(true);
 
-      alert(
-        isEditMode
-          ? "Customer updated successfully!"
-          : "Customer created successfully!",
+  const payload: CustomerDetail = { ...form };
+  delete (payload as any).sameAsBilling;
+
+  try {
+    //  Loading
+    showLoading(
+      isEditMode
+        ? "Updating Customer..."
+        : "Creating Customer..."
+    );
+
+    if (isEditMode && initialData?.id) {
+      await updateCustomerByCustomerCode(
+        initialData.id,
+        payload
       );
-
-      onSubmit?.(payload);
-      handleClose();
-    } catch (err) {
-      console.error("Save customer error:", err);
-    } finally {
-      setLoading(false);
+    } else {
+      await createCustomer(payload);
     }
-  };
 
-  const handleClose = () => {
-    setForm(emptyForm);
-    onClose();
-  };
+    //  Success
+    closeSwal();
+
+    showSuccess(
+      isEditMode
+        ? "Customer updated successfully!"
+        : "Customer created successfully!"
+    );
+
+    onSubmit?.(payload);
+    handleClose();
+
+  } catch (error) {
+    console.error("Customer save error:", error);
+
+    closeSwal();        
+    showApiError(error); 
+
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+const handleClose = () => {
+  if (loading) return;
+
+  setForm(emptyForm);
+  onClose();
+};
+
 
   const reset = () => {
     setForm(initialData ? { ...initialData, sameAsBilling: false } : emptyForm);
@@ -246,9 +267,9 @@ const CustomerModal: React.FC<{
         </Button>
         <Button
           variant="primary"
-          onClick={handleSubmit}
           loading={loading}
           type="submit"
+          form="customerForm"
         >
           {isEditMode ? "Update Customer" : "Save Customer"}
         </Button>
@@ -271,7 +292,7 @@ const CustomerModal: React.FC<{
       maxWidth="6xl"
       height="75vh"
     >
-      <form onSubmit={handleSubmit} className="h-full flex flex-col">
+      <form id="customerForm" onSubmit={handleSubmit} className="h-full flex flex-col">
         {/* Tabs - Sticky Header */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">

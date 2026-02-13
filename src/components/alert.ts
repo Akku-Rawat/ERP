@@ -33,3 +33,22 @@ export const showSuccess = (message: string) => {
     confirmButtonColor: "#22c55e",
   });
 };
+
+
+export const showLoading = (title = "Processing...") => {
+  Swal.fire({
+    title,
+    text: "Please wait while we complete your request.",
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    showConfirmButton: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
+};
+
+
+export const closeSwal = () => {
+  Swal.close();
+};
