@@ -177,7 +177,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             type="checkbox"
             checked={checked}
             onChange={(e) => onChange(e.target.checked)} 
-            className="peer sr-only"
+            className="peer absolute inset-0 opacity-0 cursor-pointer"
           />
 
           <div className="w-5 h-5 border-2 border-[var(--border)] rounded peer-checked:border-primary peer-checked:bg-primary transition-all bg-card" />
@@ -227,7 +227,7 @@ export const Card: React.FC<CardProps> = ({
 }) => (
   <div
     className={[
-      "bg-card/80 backdrop-blur-sm border rounded-xl p-6 mt-8 shadow-sm hover:shadow-md transition-shadow",
+      "bg-card/80 backdrop-blur-sm border rounded-b-md p-5 shadow-sm hover:shadow-md transition-shadow",
       "border-[var(--border)]",
       className,
     ].join(" ")}

@@ -23,8 +23,8 @@ const tabs: { key: POTab; icon: typeof Building2; label: string }[] = [
   { key: "details", icon: Building2, label: "Details" },
   // { key: "email", icon: Mail, label: "Email" },
   // { key: "tax", icon: Calculator, label: "Tax" },
+    { key: "terms", icon: FileText, label: "Terms" },
   { key: "address", icon: MapPin, label: "Address" },
-  { key: "terms", icon: FileText, label: "Terms" },
 ];
 
 const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
@@ -73,7 +73,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
       subtitle="Create and manage purchase invoice"
       icon={Building2}
       maxWidth="6xl"
-      height="75vh"
+      height="87vh"
       footer={footer}
     >
 

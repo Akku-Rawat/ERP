@@ -101,10 +101,11 @@ const handleSubmit = async (e?: React.FormEvent) => {
 
     onSuccess?.(form); 
     onClose?.();
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to save supplier");
-  } finally {
+  } catch (err: any) {
+  console.error("Supplier Save Error:", err);
+
+  toast.error(err.message);
+} finally {
     setLoading(false);
   }
 };

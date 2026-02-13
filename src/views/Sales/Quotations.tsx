@@ -94,7 +94,6 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
 
       if (!res || res.status_code !== 200) {
         console.error("Invalid response:", res);
-        toast.error("Failed to load quotations");
         setQuotations([]);
         return;
       }
@@ -118,7 +117,6 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
       setTotalItems(res.data?.pagination?.total || mapped.length);
     } catch (error) {
       console.error("Error fetching quotations:", error);
-      toast.error("Failed to load quotations");
       setQuotations([]);
     } finally {
       setLoading(false);
@@ -126,7 +124,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
     }
   };
   useEffect(() => {
-    fetchCompany("1").catch(() => toast.error("Failed to load company data"));
+    fetchCompany("1").catch(() => console.error("Failed to load company data"));
   }, []);
 
   useEffect(() => {
@@ -142,12 +140,12 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
     try {
       const quotationRes = await getQuotationById(quotationNumber);
       if (!quotationRes || quotationRes.status_code !== 200) {
-        toast.error("Failed to load quotation");
+        console.error("Failed to load quotation");
         return;
       }
 
       if (!company) {
-        toast.error("Company data not loaded");
+        console.error("Company data not loaded");
         return;
       }
 
@@ -169,7 +167,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
     e?.stopPropagation();
 
     if (!company) {
-      toast.error("Company data not loaded");
+      console.error("Company data not loaded");
       return;
     }
 

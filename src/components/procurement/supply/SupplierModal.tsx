@@ -94,7 +94,7 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
       icon={Building2}
       footer={footer}
       maxWidth="6xl"
-      height="78vh"
+      height="65vh"
     >
       <form
         id="supplierForm"
@@ -125,7 +125,7 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         </div>
 
         {/* Content */}
-        <div>
+        <div className="gap-6  p-4">
 
           {activeTab === "supplier" && (
             <SupplierInfoTab form={form} onChange={handleChange} />

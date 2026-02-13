@@ -11,9 +11,9 @@ import CustomerSelect from "../selects/CustomerSelect";
 import ItemSelect from "../selects/ItemSelect";
 import Modal from "../../components/ui/modal/modal";
 import toast from "react-hot-toast";
-import { User, Mail, Phone } from "lucide-react";
-
-
+import { User, Mail, Phone, } from "lucide-react";
+import AddressBlock from "../ui/modal/AddressBlock";
+import PaymentInfoBlock from "./PaymentInfoBlock";
 import {
   invoiceStatusOptions,
   currencySymbols,
@@ -122,7 +122,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
       icon={FileText}
       footer={footerContent}
       maxWidth="6xl"
-      height="70vh"
+      height="79vh"
     >
 
       <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
@@ -139,8 +139,8 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                 type="button"
                 onClick={() => ui.setActiveTab(tab.key as any)}
                 className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab.key
-                    ? "text-primary border-b-[3px] border-primary"
-                    : "text-muted border-b-[3px] border-transparent hover:text-main"
+                  ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
                   }`}
               >
                 {tab.label}
@@ -166,7 +166,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                   />
 
 
-         
+
                   {/* Date of Quotation */}
                   <div>
                     <ModalInput
@@ -584,228 +584,54 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
             </div>
           )}
 
-          {/* ADDRESS TAB */}
+
+
+
           {ui.activeTab === "address" && (
-            <div className="grid grid-cols-2 gap-6 mt-3">
-              {/* Billing Address */}
-              <div className="bg-card p-4 rounded-lg border border-theme shadow-sm">
-                <h3 className="text-base font-semibold text-main mb-3 border-b-2 border-primary pb-1.5">
-                  Billing Address
-                </h3>
+            <div className="space-y-6 overflow-hidden">
 
-                <div className="grid grid-cols-2 gap-3">
-                  <ModalInput
-                    label="Line 1"
-                    name="line1"
-                    value={formData.billingAddress.line1}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "billingAddress")
-                    }
-                    placeholder="Street, Apartment"
-                  />
-                  <ModalInput
-                    label="Line 2"
-                    name="line2"
-                    value={formData.billingAddress.line2}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "billingAddress")
-                    }
-                    placeholder="Landmark, City"
-                  />
-                  <ModalInput
-                    label="Postal Code"
-                    name="postalCode"
-                    value={formData.billingAddress.postalCode}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "billingAddress")
-                    }
-                    placeholder="Postal Code"
-                  />
-                  <ModalInput
-                    label="City"
-                    name="city"
-                    value={formData.billingAddress.city}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "billingAddress")
-                    }
-                    placeholder="City"
-                  />
-                  <ModalInput
-                    label="State"
-                    name="state"
-                    value={formData.billingAddress.state}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "billingAddress")
-                    }
-                    placeholder="State"
-                  />
-                  <ModalInput
-                    label="Country"
-                    name="country"
-                    value={formData.billingAddress.country}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "billingAddress")
-                    }
-                    placeholder="Country"
-                  />
-                </div>
+              {/* PAYMENT INFO */}
+              <PaymentInfoBlock
+                data={formData.paymentInformation}
+                onChange={(e) =>
+                  actions.handleInputChange(e, "paymentInformation")
+                }
+                paymentMethodOptions={paymentMethodOptions}
+              />
 
-                {/* Shipping Address Toggle */}
-                <div className="mt-4 pt-3 border-t border-theme flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => ui.setIsShippingOpen(!ui.isShippingOpen)}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-main hover:text-primary bg-transparent border-none cursor-pointer"
-                  >
-                    <span className="font-bold">
-                      {ui.isShippingOpen ? "−" : "+"}
-                    </span>
-                    Shipping Address
-                  </button>
+              {/* BILLING + SHIPPING */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                  <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-muted">
-                    <input
-                      type="checkbox"
-                      checked={ui.sameAsBilling}
-                      onChange={(e) =>
-                        actions.handleSameAsBillingChange(e.target.checked)
-                      }
-                      className="w-3.5 h-3.5 cursor-pointer"
-                    />
-                    Same as billing address
-                  </label>
-                </div>
+                {/* Billing */}
+                <AddressBlock
+                  type="billing"
+                  title="Billing Address"
+                  subtitle="Invoice and payment details"
+                  data={formData.billingAddress}
+                  onChange={(e) =>
+                    actions.handleInputChange(e, "billingAddress")
+                  }
+                />
 
-                {ui.isShippingOpen && (
-                  <div className="grid grid-cols-2 gap-3 mt-3">
-                    <ModalInput
-                      label="Line 1"
-                      name="line1"
-                      value={formData.shippingAddress.line1}
-                      onChange={(e) =>
-                        actions.handleInputChange(e, "shippingAddress")
-                      }
-                      placeholder="Street, Apartment"
-                      disabled={ui.sameAsBilling}
-                    />
-                    <ModalInput
-                      label="Line 2"
-                      name="line2"
-                      value={formData.shippingAddress.line2}
-                      onChange={(e) =>
-                        actions.handleInputChange(e, "shippingAddress")
-                      }
-                      placeholder="Landmark, City"
-                      disabled={ui.sameAsBilling}
-                    />
-                    <ModalInput
-                      label="Postal Code"
-                      name="postalCode"
-                      value={formData.shippingAddress.postalCode}
-                      onChange={(e) =>
-                        actions.handleInputChange(e, "shippingAddress")
-                      }
-                      placeholder="Postal Code"
-                      disabled={ui.sameAsBilling}
-                    />
-                    <ModalInput
-                      label="City"
-                      name="city"
-                      value={formData.shippingAddress.city}
-                      onChange={(e) =>
-                        actions.handleInputChange(e, "shippingAddress")
-                      }
-                      placeholder="City"
-                      disabled={ui.sameAsBilling}
-                    />
-                    <ModalInput
-                      label="State"
-                      name="state"
-                      value={formData.shippingAddress.state}
-                      onChange={(e) =>
-                        actions.handleInputChange(e, "shippingAddress")
-                      }
-                      placeholder="State"
-                      disabled={ui.sameAsBilling}
-                    />
-                    <ModalInput
-                      label="Country"
-                      name="country"
-                      value={formData.shippingAddress.country}
-                      onChange={(e) =>
-                        actions.handleInputChange(e, "shippingAddress")
-                      }
-                      placeholder="Country"
-                      disabled={ui.sameAsBilling}
-                    />
-                  </div>
-                )}
-              </div>
+                {/* Shipping */}
+                <AddressBlock
+                  type="shipping"
+                  title="Shipping Address"
+                  subtitle="Delivery location"
+                  data={formData.shippingAddress}
+                  sameAsBilling={ui.sameAsBilling}
+                  onSameAsBillingChange={
+                    actions.handleSameAsBillingChange
+                  }
+                  onChange={(e) =>
+                    actions.handleInputChange(e, "shippingAddress")
+                  }
+                />
 
-              {/* Payment Information */}
-              <div className="bg-card p-4 rounded-lg border border-theme shadow-sm h-fit">
-                <h3 className="text-base font-semibold text-main mb-3 border-b-2 border-primary pb-1.5">
-                  Payment Information
-                </h3>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <ModalInput
-                    label="Payment Terms"
-                    name="paymentTerms"
-                    value={formData.paymentInformation.paymentTerms}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "paymentInformation")
-                    }
-                    placeholder="e.g., Net 30, Due on Receipt"
-                  />
-                  <ModalSelect
-                    label="Payment Method"
-                    name="paymentMethod"
-                    value={formData.paymentInformation.paymentMethod}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "paymentInformation")
-                    }
-                    options={[...paymentMethodOptions]}
-                  />
-                  <ModalInput
-                    label="Bank Name"
-                    name="bankName"
-                    value={formData.paymentInformation.bankName}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "paymentInformation")
-                    }
-                  />
-                  <ModalInput
-                    label="Account Number"
-                    name="accountNumber"
-                    value={formData.paymentInformation.accountNumber}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "paymentInformation")
-                    }
-                  />
-                  <ModalInput
-                    label="Routing Number / IBAN"
-                    name="routingNumber"
-                    value={formData.paymentInformation.routingNumber}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "paymentInformation")
-                    }
-                  />
-                  <ModalInput
-                    label="SWIFT / BIC"
-                    name="swiftCode"
-                    value={formData.paymentInformation.swiftCode}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "paymentInformation")
-                    }
-                  />
-                </div>
               </div>
             </div>
           )}
         </div>
-
-
       </form>
     </Modal>
   );

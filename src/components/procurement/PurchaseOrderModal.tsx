@@ -77,7 +77,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
       subtitle="Create and manage purchase order"
       icon={Building2}
       maxWidth="6xl"
-      height="75vh"
+      height="81vh"
       footer={footer}
     >
 

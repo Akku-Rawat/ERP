@@ -127,7 +127,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
 
       setOrders(mappedInvoice);
     } catch (err) {
-      toast.error("Failed to load Purchase Invoices");
+      console.error("Failed to load Purchase Invoices");
     } finally {
       setLoading(false);
     }
@@ -159,7 +159,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
   const handleDelete = (Invoice: Purchaseinvoice, e: React.MouseEvent) => {
     e.stopPropagation();
     if (window.confirm(`Delete Purchase Invoice "${Invoice.pId}"?`)) {
-      toast.success("Delete API ready — connect backend later");
+      toast.success("Delete");
     }
   };
 

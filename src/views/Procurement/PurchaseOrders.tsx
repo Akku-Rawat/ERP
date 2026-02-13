@@ -88,7 +88,7 @@ const fetchOrders = async () => {
 
     setOrders(mappedOrders);
   } catch (err) {
-    toast.error("Failed to load Purchase Orders");
+    console.error("Failed to load Purchase Orders");
   } finally {
     setLoading(false);
   }
