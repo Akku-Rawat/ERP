@@ -224,6 +224,7 @@ const Items: React.FC = () => {
             setSelectedImportId(null);
           }}
           importId={selectedImportId}
+          onSuccess={fetchItems}
         />
       )}
 

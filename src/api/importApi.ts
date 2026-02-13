@@ -15,6 +15,7 @@ const ENDPOINTS = {
   getAllItemsApi: `${base_url}.zra_client.item.item.get_all_items_api`,
   getAllImportItems: `${base_url}.item.imports.api.get_all_import_items`,
   getImportItemById: `${base_url}.item.imports.api.get_import_item_by_id`,
+  updateStockAutomatic: `${base_url}.item.imports.api.update_stock_automatic`,
 };
 
 export async function createItemStock(payload: any): Promise<any> {
@@ -65,4 +66,17 @@ export async function getImportItemById(id: string): Promise<any> {
   const url = `${ENDPOINTS.getImportItemById}?id=${id}`;
   const resp: AxiosResponse = await api.get(url);
   return resp.data?.data || null;
+}
+
+// Update stock automatic (approve/reject import item)
+export async function updateStockAutomatic(payload: {
+  id: string;
+  status: string;
+  itemClassCd: string;
+}): Promise<any> {
+  const resp: AxiosResponse = await api.put(
+    ENDPOINTS.updateStockAutomatic,
+    payload,
+  );
+  return resp.data;
 }
