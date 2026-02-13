@@ -4,6 +4,7 @@ import { ENV } from "./env";
 
 export const ERP_BASE = ENV.apiBaseUrl;
 export const CODES_BASE = ENV.zraCodesBaseUrl;
+export const ROLA_CODES_BASE = ENV.rolaCodesBaseUrl; 
 
 export const API = {
   /* =========================
@@ -201,5 +202,11 @@ export const API = {
     getCountries: `${CODES_BASE}/country-list/`,
     getUnitOfMeasure: `${CODES_BASE}/unit-of-measure-list/`,
     getItemClasses: `${CODES_BASE}/item-class-list/`,
+  },
+  rolaLookup: {
+    getPackagingUnits: `${ROLA_CODES_BASE}/api/packaging-unit-codes/`,
+    getCountries: `${ROLA_CODES_BASE}/api/country-list/`,
+    getUnitOfMeasure: `${ROLA_CODES_BASE}/api/unit-of-measure-list/`,
+    getItemClasses  : `${ROLA_CODES_BASE}/api/item-class-list/`,
   },
 } as const;

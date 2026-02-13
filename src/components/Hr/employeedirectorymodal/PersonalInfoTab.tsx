@@ -1,5 +1,9 @@
-// PersonalInfoTab.tsx
 import React from "react";
+import { useCompanySelection } from "../../../hooks/useCompanySelection";
+import { getEmployeeFeatures } from "../../../config/employeeFeatures";
+
+
+
 
 type PersonalInfoTabProps = {
   formData: any;
@@ -13,87 +17,96 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
   verifiedFields,
 }) => {
   const [dobError, setDobError] = React.useState<string | null>(null);
+  const { companyCode } = useCompanySelection();
+  const features = getEmployeeFeatures(companyCode);
 
   const verifiedInputStyle =
     "bg-gray-100 text-gray-600 cursor-not-allowed border-gray-300";
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      {/* Identity & Statutory Information - TOP */}
-      <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-4">
-        <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">
-          Identity & Statutory Information
-        </h4>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs text-gray-600 mb-1 font-medium">
-              NRC Number <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.nrcId}
-              disabled={verifiedFields.nrcId}
-              onChange={(e) => handleInputChange("nrcId", e.target.value)}
-              className={`w-full px-3 py-2 text-sm rounded-lg border focus:outline-none
-    ${
-      verifiedFields.nrcId
-        ? verifiedInputStyle
-        : "border-gray-300 focus:ring-2 focus:ring-purple-500"
-    }`}
-            />
-            {verifiedFields.nrcId && (
-              <p className="text-[10px] text-green-600 mt-1 font-medium">
-                ✓ Verified from NAPSA
-              </p>
-            )}
-          </div>
-          <div>
-            <label className="block text-xs text-gray-600 mb-1 font-medium">
-              SSN
-            </label>
-            <input
-              type="text"
-              value={formData.socialSecurityNapsa}
-              disabled={verifiedFields.socialSecurityNapsa}
-              onChange={(e) =>
-                handleInputChange("socialSecurityNapsa", e.target.value)
-              }
-              className={`w-full px-3 py-2 text-sm rounded-lg border
-    ${
-      verifiedFields.socialSecurityNapsa
-        ? verifiedInputStyle
-        : "border-gray-300 focus:ring-2 focus:ring-purple-500"
-    }`}
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-600 mb-1 font-medium">
-              NHIMA Number
-            </label>
-            <input
-              type="text"
-              value={formData.nhimaHealthInsurance}
-              onChange={(e) =>
-                handleInputChange("nhimaHealthInsurance", e.target.value)
-              }
-              placeholder="e.g., 91897177171"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-600 mb-1 font-medium">
-              TPIN
-            </label>
-            <input
-              type="text"
-              value={formData.tpinId}
-              onChange={(e) => handleInputChange("tpinId", e.target.value)}
-              placeholder="e.g., 10000000000"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
+      {/* ✅ CONDITIONAL RENDERING - Only show for companies with statutory fields */}
+      {features.showStatutoryFields && (
+        <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-4">
+          <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">
+            Identity & Statutory Information
+          </h4>
+          <div className="grid grid-cols-2 gap-4">
+            {/* NRC Field */}
+            <div>
+              <label className="block text-xs text-gray-600 mb-1 font-medium">
+                NRC Number {features.statutoryFieldsRequired && <span className="text-red-500">*</span>}
+              </label>
+              <input
+                type="text"
+                value={formData.nrcId}
+                disabled={verifiedFields.nrcId}
+                onChange={(e) => handleInputChange("nrcId", e.target.value)}
+                className={`w-full px-3 py-2 text-sm rounded-lg border focus:outline-none
+                  ${verifiedFields.nrcId
+                    ? verifiedInputStyle
+                    : "border-gray-300 focus:ring-2 focus:ring-purple-500"
+                  }`}
+              />
+              {verifiedFields.nrcId && (
+                <p className="text-[10px] text-green-600 mt-1 font-medium">
+                  ✓ Verified from NAPSA
+                </p>
+              )}
+            </div>
+
+            {/* SSN Field */}
+            <div>
+              <label className="block text-xs text-gray-600 mb-1 font-medium">
+                SSN {features.statutoryFieldsRequired && <span className="text-red-500">*</span>}
+              </label>
+              <input
+                type="text"
+                value={formData.socialSecurityNapsa}
+                disabled={verifiedFields.socialSecurityNapsa}
+                onChange={(e) =>
+                  handleInputChange("socialSecurityNapsa", e.target.value)
+                }
+                className={`w-full px-3 py-2 text-sm rounded-lg border
+                  ${verifiedFields.socialSecurityNapsa
+                    ? verifiedInputStyle
+                    : "border-gray-300 focus:ring-2 focus:ring-purple-500"
+                  }`}
+              />
+            </div>
+
+            {/* NHIMA Field */}
+            <div>
+              <label className="block text-xs text-gray-600 mb-1 font-medium">
+                NHIMA Number
+              </label>
+              <input
+                type="text"
+                value={formData.nhimaHealthInsurance}
+                onChange={(e) =>
+                  handleInputChange("nhimaHealthInsurance", e.target.value)
+                }
+                placeholder="e.g., 91897177171"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+
+            {/* TPIN Field */}
+            <div>
+              <label className="block text-xs text-gray-600 mb-1 font-medium">
+                TPIN
+              </label>
+              <input
+                type="text"
+                value={formData.tpinId}
+                onChange={(e) => handleInputChange("tpinId", e.target.value)}
+                placeholder="e.g., 10000000000"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Personal Information */}
       <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-4">
