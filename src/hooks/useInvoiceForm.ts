@@ -45,7 +45,8 @@ export const useInvoiceForm = (
 
   const shippingEditedRef = useRef(false);
 useEffect(() => {
-  if (!isOpen) return;
+  if (!isOpen || initialData) return;
+
 
   const loadCompanyData = async () => {
     try {
@@ -61,6 +62,9 @@ useEffect(() => {
         },
         paymentInformation: {
           ...prev.paymentInformation,
+           paymentTerms:
+            company?.terms?.selling?.payment?.dueDates ?? "",
+
           bankName: company?.bankAccounts?.[0]?.bankName ?? "",
           accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
           routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
@@ -236,8 +240,11 @@ if (!formData.paymentInformation?.paymentTerms) {
         country: data.shippingCountry ?? "",
       };
 
-      const paymentInformation = {
-        paymentTerms: "",
+     const paymentInformation = {
+  paymentTerms:
+    company?.terms?.selling?.payment?.dueDates ??
+    data.paymentInformation?.paymentTerms ??
+    "",
 
         paymentMethod: "01",
         bankName: company?.bankAccounts?.[0]?.bankName ?? "",
@@ -366,6 +373,9 @@ if (!formData.paymentInformation?.paymentTerms) {
       dueDate: invoice.dueDate,
       billingAddress: invoice.billingAddress ?? prev.billingAddress,
       shippingAddress: invoice.shippingAddress ?? prev.shippingAddress,
+       paymentInformation:
+      invoice.paymentInformation ?? prev.paymentInformation,
+    terms: invoice.terms ?? prev.terms,
       items: invoice.items.map((it: any) => {
         const base =
           Number(it.quantity) * Number(it.price) - Number(it.discount);

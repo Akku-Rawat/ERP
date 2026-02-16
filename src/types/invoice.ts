@@ -15,7 +15,7 @@ export interface Invoice {
   billingAddress: Address;
   shippingAddress: Address;
   paymentInformation: PaymentInformation;
-
+industryBases?: string;
   items: InvoiceItem[];
   terms: InvoiceTerms;
 }

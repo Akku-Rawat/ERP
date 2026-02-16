@@ -7,6 +7,7 @@ import { getCountryList } from "../api/lookupApi";
 import { getItemByItemCode } from "../api/itemApi";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
+
 import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
@@ -30,6 +31,8 @@ export const useQuotationForm = (
     invoiceStatus: "Draft",
     invoiceType: "Non-Export",
   });
+const companyLoadedRef = useRef(false);
+const [companyData, setCompanyData] = useState<any>(null);
 
   const [customerDetails, setCustomerDetails] = useState<any>(null);
   const [customerNameDisplay, setCustomerNameDisplay] = useState("");
@@ -62,16 +65,21 @@ export const useQuotationForm = (
     setPage(0);
   }, [isOpen]);
 
-  useEffect(() => {
-  if (!isOpen) return;
+useEffect(() => {
+  if (!isOpen || companyLoadedRef.current) return;
+
+  companyLoadedRef.current = true;
 
   getCompanyById(COMPANY_ID).then((res) => {
     const company = res?.data;
+    setCompanyData(company);   // store it
 
     setFormData((prev) => ({
       ...prev,
       paymentInformation: {
         ...prev.paymentInformation,
+        paymentTerms:
+          company?.terms?.selling?.payment?.dueDates ?? "",
         bankName: company?.bankAccounts?.[0]?.bankName ?? "",
         accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
         routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
@@ -82,6 +90,11 @@ export const useQuotationForm = (
 }, [isOpen]);
 
 
+useEffect(() => {
+  if (!isOpen) {
+    companyLoadedRef.current = false;
+  }
+}, [isOpen]);
   useEffect(() => {
     const maxPage = Math.max(
       0,
@@ -187,16 +200,16 @@ export const useQuotationForm = (
     setFormData((p) => ({ ...p, customerId: id }));
 
     try {
-      const [customerRes, companyRes] = await Promise.all([
-        getCustomerByCustomerCode(id),
-        getCompanyById(COMPANY_ID),
-      ]);
+     const customerRes = await getCustomerByCustomerCode(id);
+const company = companyData;
+if (!company) return;
+
 
       if (!customerRes || customerRes.status_code !== 200) return;
 
       const data = customerRes.data;
 
-      const company = companyRes?.data;
+  
       const invoiceType = data.customerTaxCategory as
         | "Export"
         | "Non-Export"
@@ -350,19 +363,35 @@ export const useQuotationForm = (
     if (!checked) shippingEditedRef.current = false;
   };
 
-  const handleReset = () => {
-    setFormData({
-      ...DEFAULT_INVOICE_FORM,
-      invoiceStatus: "Draft",
-      invoiceType: "Non-Export",
-      shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
-    });
-    setSameAsBilling(true);
-    shippingEditedRef.current = false;
-    setPage(0);
-    setCustomerNameDisplay("");
-    setCustomerDetails(null);
-  };
+const handleReset = () => {
+  if (!companyData) return;
+
+  const company = companyData;
+
+  setFormData({
+    ...DEFAULT_INVOICE_FORM,
+    invoiceStatus: "Draft",
+    invoiceType: "Non-Export",
+    shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
+
+    paymentInformation: {
+      paymentTerms:
+        company?.terms?.selling?.payment?.dueDates ?? "",
+      paymentMethod: "",
+      bankName: company?.bankAccounts?.[0]?.bankName ?? "",
+      accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
+      routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
+      swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
+    },
+  });
+
+  setSameAsBilling(true);
+  shippingEditedRef.current = false;
+  setPage(0);
+  setCustomerNameDisplay("");
+  setCustomerDetails(null);
+};
+
 
   const { subTotal, totalTax, grandTotal } = useMemo(() => {
     const sub = formData.items.reduce((sum, item) => {

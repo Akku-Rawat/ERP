@@ -73,6 +73,21 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
     transactionProgress: "02",
     invoiceStatus: "Approved",
   });
+  const mapStatusToTransactionProgress = (status?: string) => {
+  switch (status) {
+    case "Approved":
+      return "02";
+    case "Rejected":
+      return "04";
+    case "Refunded":
+      return "05";
+    case "Transferred":
+      return "06";
+    default:
+      return "02";
+  }
+};
+
   const [invoiceOptions, setInvoiceOptions] = useState<
     { value: string; label: string }[]
   >([]);
@@ -96,25 +111,37 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
 
     fetchInvoices();
   }, []);
-  useEffect(() => {
-    if (!formData.invoiceNumber) return;
+ useEffect(() => {
+  if (!formData.invoiceNumber) return;
 
-    const invoiceNumber = formData.invoiceNumber;
+  const invoiceNumber = formData.invoiceNumber;
 
-    const fetchInvoice = async () => {
-      try {
-        const res = await getSalesInvoiceById(invoiceNumber);
+  const fetchInvoice = async () => {
+    try {
+      const res = await getSalesInvoiceById(invoiceNumber);
 
-        if (res?.status_code === 200) {
-          actions.setFormDataFromInvoice(res.data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch invoice", err);
+      if (res?.status_code === 200) {
+        const data = res.data;
+
+        
+        actions.setFormDataFromInvoice(data);
+
+       
+        setCreditMeta((prev) => ({
+          ...prev,
+          transactionProgress: mapStatusToTransactionProgress(
+            data.invoiceStatus
+          ),
+        }));
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch invoice", err);
+    }
+  };
 
-    fetchInvoice();
-  }, [formData.invoiceNumber]);
+  fetchInvoice();
+}, [formData.invoiceNumber]);
+
 
   const getInvoiceAdjustReason = () => {
     if (creditMeta.creditNoteReasonCode === "07") {

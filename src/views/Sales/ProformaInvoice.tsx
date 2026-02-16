@@ -297,7 +297,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
       key: "status",
       header: "Status",
       align: "left",
-      render: (inv) => <StatusBadge status={inv.status} />,
+      render: (inv) => <StatusBadge status={inv.invoiceStatus} />,
     },
     {
       key: "actions",
@@ -314,7 +314,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
             showDownload
             onDownload={(e) => handleDownload(inv.proformaId, e)}
             onDelete={(e) => handleDelete(inv.proformaId, e)}
-            customActions={(STATUS_TRANSITIONS[inv.status] ?? []).map(
+            customActions={(STATUS_TRANSITIONS[inv.invoiceStatus] ?? []).map(
               (status) => ({
                 label: `Mark as ${status}`,
                 danger: status === "Paid",
