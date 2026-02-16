@@ -1,5 +1,3 @@
-// PayrollManagement.tsx - Main comprehensive payroll management component
-
 import React, { useState, useMemo } from "react";
 import {
   Plus,
@@ -18,13 +16,16 @@ import { generatePayrollRecord, recalculatePayroll } from "./utils";
 import { KPICards } from "./KPICards";
 import { FilterBar } from "./FilterBar";
 import { PayrollTable } from "./PayrollTable";
-import { QuickCreateModal, EditModal, PayslipModal } from "./Modals";
+import { QuickCreateModal } from "../../../components/Hr/payrollmodal/QuickCreatePayrollModal";
+import { EditModal } from "../../../components/Hr/payrollmodal/EditModal";
+import { PayslipModal } from "../../../components/Hr/payrollmodal/PayslipModal";
 import { OverviewTab, EmployeesTab, AccountingTab } from "./EntryFormTabs";
 // import { AttendanceManager, LeaveManager } from './AttendanceLeaves';
 import { LoanManager, AdvanceManager } from "./LoansAdvances";
 import { PayrollReports, ApprovalWorkflowManager } from "./ReportsApprovals";
 import TaxDeduction from "./TaxDeduction";
 import type { Employee } from "./types";
+import { PayrollConfirmationModal } from "../../../components/Hr/payrollmodal/PayrollConfirmationModal";
 
 export default function PayrollManagement() {
   const [view, setView] = useState<
@@ -50,11 +51,13 @@ export default function PayrollManagement() {
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [tableTab, setTableTab] = useState<"summary" | "tax">("summary");
   const [editEmployee, setEditEmployee] = useState<Employee | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // New Entry State
   const [activeTab, setActiveTab] = useState(0);
   const [saved, setSaved] = useState(false);
   const [formData, setFormData] = useState<PayrollEntry>({
+    payrollName: "",
     postingDate: "2026-01-18",
     currency: "INR",
     company: "Izyane",
@@ -127,13 +130,16 @@ export default function PayrollManagement() {
   const handleRunPayroll = () => {
     const pending = payrollRecords.filter((r) => r.status === "Pending");
     if (pending.length === 0) return alert("No pending payroll");
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmPayroll = () => {
     setPayrollRecords((prev) =>
       prev.map((rec) =>
-        rec.status === "Pending"
-          ? { ...rec, status: "Processing" as const }
-          : rec,
+        rec.status === "Pending" ? { ...rec, status: "Processing" as const } : rec,
       ),
     );
+    setShowConfirmModal(false);
     setTimeout(() => {
       setPayrollRecords((prev) =>
         prev.map((rec) =>
@@ -234,41 +240,31 @@ export default function PayrollManagement() {
 
   // Navigation Header
   const NavHeader = () => (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+    <div className="bg-card rounded-xl shadow-sm border border-theme p-6 mb-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">
+          <h1 className="text-3xl font-bold text-main">
             Payroll Management System
           </h1>
-          <p className="text-slate-600 mt-1">
+          <p className="text-muted mt-1">
             Complete payroll processing with attendance & compliance
           </p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => setView("dashboard")}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 ${view === "dashboard" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
+            className={`px-4 py-2 rounded-lg flex items-center gap-2 ${view === "dashboard" ? "bg-primary text-white" : "bg-app text-main row-hover"}`}
           >
             <BarChart3 className="w-4 h-4" />
             Dashboard
           </button>
-          {/* <button onClick={() => setView('attendance')} className={`px-4 py-2 rounded-lg flex items-center gap-2 ${view === 'attendance' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
-            <Calendar className="w-4 h-4" />Attendance
-          </button>
-          <button onClick={() => setView('loans')} className={`px-4 py-2 rounded-lg flex items-center gap-2 ${view === 'loans' ? 'bg-orange-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
-            <CreditCard className="w-4 h-4" />Loans
-          </button> */}
           <button
             onClick={() => setView("reports")}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 ${view === "reports" ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
+            className={`px-4 py-2 rounded-lg flex items-center gap-2 ${view === "reports" ? "bg-primary text-white" : "bg-app text-main row-hover"}`}
           >
             <FileText className="w-4 h-4" />
             Reports
           </button>
-          {/* <button onClick={() => setView('approvals')} className={`px-4 py-2 rounded-lg flex items-center gap-2 ${view === 'approvals' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
-            <Clock className="w-4 h-4" />Approvals
-            {stats.pending > 0 && <span className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">{stats.pending}</span>}
-          </button> */}
         </div>
       </div>
     </div>
@@ -277,22 +273,22 @@ export default function PayrollManagement() {
   // New Entry View
   if (view === "newEntry") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+      <div className="min-h-screen bg-app p-6">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 mb-6">
+          <div className="bg-card rounded-xl shadow-lg border border-theme p-6 mb-6">
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-slate-800">
+                  <h1 className="text-3xl font-bold text-main">
                     New Payroll Entry
                   </h1>
                   {saved ? (
-                    <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full flex items-center gap-1">
+                    <span className="px-3 py-1 bg-success text-white text-sm font-semibold rounded-full flex items-center gap-1">
                       <CheckCircle className="w-4 h-4" />
                       Saved
                     </span>
                   ) : (
-                    <span className="px-3 py-1 bg-amber-100 text-amber-700 text-sm font-semibold rounded-full">
+                    <span className="px-3 py-1 bg-warning text-white text-sm font-semibold rounded-full">
                       Not Saved
                     </span>
                   )}
@@ -301,13 +297,13 @@ export default function PayrollManagement() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setView("dashboard")}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+                  className="px-4 py-2 border border-theme text-main rounded-lg row-hover"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleSaveEntry}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 flex items-center gap-2 shadow-lg"
+                  className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-[var(--primary-600)] flex items-center gap-2 shadow-lg"
                 >
                   <Save className="w-5 h-5" />
                   Save
@@ -316,8 +312,8 @@ export default function PayrollManagement() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg border border-slate-200 mb-6">
-            <div className="flex border-b border-slate-200">
+          <div className="bg-card rounded-xl shadow-lg border border-theme mb-6">
+            <div className="flex border-b border-theme">
               {tabs.map((tab, index) => {
                 const Icon = tab.icon;
                 return (
@@ -326,8 +322,8 @@ export default function PayrollManagement() {
                     onClick={() => setActiveTab(index)}
                     className={`flex-1 px-6 py-4 font-semibold transition-all flex items-center justify-center gap-2 ${
                       activeTab === index
-                        ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                        : "text-slate-600 hover:bg-slate-50"
+                        ? "text-primary border-b-2 border-primary bg-app"
+                        : "text-muted row-hover"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -358,14 +354,14 @@ export default function PayrollManagement() {
               )}
             </div>
 
-            <div className="border-t border-slate-200 p-6 bg-slate-50 flex justify-between">
+            <div className="border-t border-theme p-6 bg-app flex justify-between">
               <button
                 onClick={() => setActiveTab((prev) => Math.max(0, prev - 1))}
                 disabled={activeTab === 0}
                 className={`px-6 py-3 rounded-lg font-semibold flex items-center gap-2 ${
                   activeTab === 0
-                    ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                    : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-100"
+                    ? "bg-app text-muted cursor-not-allowed"
+                    : "bg-card border border-theme text-main row-hover"
                 }`}
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -377,8 +373,8 @@ export default function PayrollManagement() {
                   disabled={formData.selectedEmployees.length === 0}
                   className={`px-6 py-3 rounded-lg font-semibold flex items-center gap-2 ${
                     formData.selectedEmployees.length === 0
-                      ? "bg-slate-300 text-slate-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800"
+                      ? "bg-app text-muted cursor-not-allowed"
+                      : "bg-success text-white hover:bg-[var(--success)]"
                   }`}
                 >
                   <CheckCircle className="w-5 h-5" />
@@ -389,7 +385,7 @@ export default function PayrollManagement() {
                   onClick={() =>
                     setActiveTab((prev) => Math.min(tabs.length - 1, prev + 1))
                   }
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 flex items-center gap-2"
+                  className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-[var(--primary-600)] flex items-center gap-2"
                 >
                   Next
                   <ChevronRight className="w-5 h-5" />
@@ -405,12 +401,12 @@ export default function PayrollManagement() {
   // Attendance View
   if (view === "attendance") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-app p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <NavHeader />
           <div className="grid grid-cols-1 gap-6">
-            <AttendanceManager employees={demoEmployees} />
-            <LeaveManager employees={demoEmployees} />
+            {/* <AttendanceManager employees={demoEmployees} />
+            <LeaveManager employees={demoEmployees} /> */}
           </div>
         </div>
       </div>
@@ -420,7 +416,7 @@ export default function PayrollManagement() {
   // Loans View
   if (view === "loans") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-app p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <NavHeader />
           <div className="grid grid-cols-1 gap-6">
@@ -435,7 +431,7 @@ export default function PayrollManagement() {
   // Reports View
   if (view === "reports") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-app p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <NavHeader />
           <PayrollReports records={payrollRecords} />
@@ -447,7 +443,7 @@ export default function PayrollManagement() {
   // Approvals View
   if (view === "approvals") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-app p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <NavHeader />
           <ApprovalWorkflowManager
@@ -462,21 +458,21 @@ export default function PayrollManagement() {
 
   // Dashboard View
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-app p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <NavHeader />
 
         <div className="flex gap-3 justify-end">
           <button
             onClick={() => setView("newEntry")}
-            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 flex items-center gap-2 shadow-lg"
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-[var(--primary-600)] flex items-center gap-2 shadow-lg"
           >
             <Plus className="w-4 h-4" />
             New Entry Form
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 flex items-center gap-2 shadow-lg"
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-[var(--primary-600)] flex items-center gap-2 shadow-lg"
           >
             <Plus className="w-4 h-4" />
             Quick Create
@@ -501,15 +497,14 @@ export default function PayrollManagement() {
           pendingCount={stats.pending}
           onRunPayroll={handleRunPayroll}
         />
-        {/* Table Tabs */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-          <div className="flex border-b border-slate-200">
+        <div className="bg-card rounded-xl shadow-sm border border-theme">
+          <div className="flex border-b border-theme">
             <button
               onClick={() => setTableTab("summary")}
               className={`flex-1 px-6 py-3 text-sm font-semibold transition ${
                 tableTab === "summary"
-                  ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                  : "text-slate-600 hover:bg-slate-50"
+                  ? "text-primary border-b-2 border-primary bg-app"
+                  : "text-muted row-hover"
               }`}
             >
               Employee Summary
@@ -519,8 +514,8 @@ export default function PayrollManagement() {
               onClick={() => setTableTab("tax")}
               className={`flex-1 px-6 py-3 text-sm font-semibold transition ${
                 tableTab === "tax"
-                  ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                  : "text-slate-600 hover:bg-slate-50"
+                  ? "text-primary border-b-2 border-primary bg-app"
+                  : "text-muted row-hover"
               }`}
             >
               Tax Deduction
@@ -534,10 +529,6 @@ export default function PayrollManagement() {
             onToggleRow={toggleRow}
             onViewPayslip={(record) => setSelectedRecord(record)}
             onEditRecord={(record) => setEditingRecord({ ...record })}
-            onViewRunDetails={(record) => {
-              setSelectedPayrollRun(record.id);
-              setView("runDetails");
-            }}
           />
         )}
 
@@ -564,9 +555,16 @@ export default function PayrollManagement() {
           }
         />
 
+        <PayrollConfirmationModal
+          show={showConfirmModal}
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={handleConfirmPayroll}
+          records={payrollRecords.filter((r) => r.status === "Pending")}
+        />
+
         <PayslipModal
           record={selectedRecord}
-          onClose={() => setSelectedRecord(null)} // ✅ THIS IS THE FIX
+          onClose={() => setSelectedRecord(null)}
           onDownload={() => alert("Downloaded")}
           onEmail={() => alert(`Email sent to ${selectedRecord?.email}`)}
         />
