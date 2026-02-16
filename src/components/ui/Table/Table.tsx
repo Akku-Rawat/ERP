@@ -172,9 +172,8 @@ function Table<T extends Record<string, any>>({
                   onClick={() =>
                     setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
                   }
-                  className={`p-2 rounded-xl border border-[var(--border)] bg-app text-muted hover:text-primary hover:border-primary transition-all flex items-center gap-2 px-3 whitespace-nowrap ${
-                    sortOrder ? "border-primary text-primary" : ""
-                  }`}
+                  className={`p-2 rounded-xl border border-[var(--border)] bg-app text-muted hover:text-primary hover:border-primary transition-all flex items-center gap-2 px-3 whitespace-nowrap ${sortOrder ? "border-primary text-primary" : ""
+                    }`}
                 >
                   {sortOrder === "asc" ? (
                     <FaSortAmountUp size={12} />
@@ -263,9 +262,8 @@ function Table<T extends Record<string, any>>({
                   <tr
                     key={rowKey ? rowKey(item) : JSON.stringify(item)}
                     onClick={() => onRowClick?.(item)}
-                    className={`group transition-none cursor-pointer ${
-                      idx % 2 === 0 ? "bg-transparent" : "bg-row-hover/10"
-                    } hover:bg-row-hover`}
+                    className={`group transition-none cursor-pointer ${idx % 2 === 0 ? "bg-transparent" : "bg-row-hover/10"
+                      } hover:bg-row-hover`}
                   >
                     {visibleColumns.map((column) => (
                       <td
@@ -326,7 +324,7 @@ function Table<T extends Record<string, any>>({
               totalPages={totalPages || 1}
               pageSize={pageSize}
               totalItems={totalItems}
-              onPageChange={onPageChange || (() => {})}
+              onPageChange={onPageChange || (() => { })}
             />
           </>
         )}
