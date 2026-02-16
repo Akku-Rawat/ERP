@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
+
+import { showApiError, showSuccess } from "../../components/alert";
 
 import {
   getAllItemGroups,
@@ -91,32 +92,38 @@ const ItemsCategory: React.FC = () => {
     setDeleteModalOpen(true);
   };
 
-  const confirmDelete = async () => {
-    if (!groupToDelete) return;
+const confirmDelete = async () => {
+  if (!groupToDelete) return;
 
-    try {
-      setDeleting(true);
-      await deleteItemGroupById(groupToDelete.id);
-      setGroups((prev) => prev.filter((g) => g.id !== groupToDelete.id));
-      toast.success("Item category deleted");
-      setDeleteModalOpen(false);
-    } catch (err: any) {
-      toast.error(
-        err.response?.data?.message || "Failed to delete item category",
-        { duration: 8000 },
-      );
-    } finally {
-      setDeleting(false);
-      setGroupToDelete(null);
+  try {
+    setDeleting(true);
+
+    const res = await deleteItemGroupById(groupToDelete.id);
+
+    if (!res || ![200, 201].includes(res.status_code)) {
+      showApiError(res);
+      return;
     }
-  };
+
+    setGroups((prev) => prev.filter((g) => g.id !== groupToDelete.id));
+    showSuccess(res.message || "Item category deleted");
+
+    setDeleteModalOpen(false);
+  } catch (err: any) {
+    showApiError(err);
+  } finally {
+    setDeleting(false);
+    setGroupToDelete(null);
+  }
+};
+
 
   const handleSaved = async () => {
     const wasEdit = !!editGroup;
     setShowModal(false);
     setEditGroup(null);
     await fetchGroups();
-    toast.success(wasEdit ? "Category updated" : "Category created");
+    showSuccess(wasEdit ? "Category updated" : "Category created");
   };
 
   /* 

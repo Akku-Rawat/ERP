@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
+
+import { showApiError, showSuccess } from "../../components/alert";
 
 import {
   getAllItems,
@@ -81,32 +82,47 @@ const Items: React.FC = () => {
     setDeleteModalOpen(true);
   };
 
-  const confirmDelete = async () => {
-    if (!itemToDelete) return;
+const confirmDelete = async () => {
+  if (!itemToDelete) return;
 
-    try {
-      setDeleting(true);
-      await deleteItemByItemCode(itemToDelete.id);
-      setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
-      toast.success("Item deleted successfully");
-      setDeleteModalOpen(false);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete item", {
-        duration: 6000,
-      });
-    } finally {
-      setDeleting(false);
-      setItemToDelete(null);
+  try {
+    setDeleting(true);
+
+    const res = await deleteItemByItemCode(itemToDelete.id);
+
+    if (!res || ![200, 201].includes(res.status_code)) {
+      showApiError(res);
+      return;
     }
-  };
 
-  const handleSaved = async () => {
-    const wasEdit = !!editItem;
-    setShowModal(false);
-    setEditItem(null);
-    await fetchItems();
-    toast.success(wasEdit ? "Item updated" : "Item created");
-  };
+    setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
+
+    showSuccess(res.message || "Item deleted successfully");
+
+    setDeleteModalOpen(false);
+  } catch (err: any) {
+    showApiError(err);
+  } finally {
+    setDeleting(false);
+    setItemToDelete(null);
+  }
+};
+
+
+const handleSaved = async (res: any) => {
+  const wasEdit = !!editItem;
+
+  setShowModal(false);
+  setEditItem(null);
+
+  await fetchItems();
+
+  showSuccess(
+    res?.message ||
+      (wasEdit ? "Item updated successfully" : "Item created successfully")
+  );
+};
+
 
   /*      FILTER
    */

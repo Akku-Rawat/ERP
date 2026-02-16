@@ -5,13 +5,13 @@ import "./index.css";
 import App from "./App.tsx";
 import { initTheme } from "../src/themes.ts";
 initTheme();
-import { Toaster } from "sonner";
+
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <App />
-      <Toaster position="top-right" richColors duration={2000} />
+     
     </BrowserRouter>
   </StrictMode>,
 );

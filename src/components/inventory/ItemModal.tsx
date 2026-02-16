@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { toast } from "sonner";
+import { showApiError, showSuccess } from "../../components/alert";
+
 import { updateItemByItemCode, createItem } from "../../api/itemApi";
 
 import { getItemGroupById } from "../../api/itemCategoryApi";
@@ -85,7 +86,8 @@ const ItemModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   // onSubmit?: (data: Record<string, any>) => void;
-  onSubmit?: () => void;
+ onSubmit?: (res: any) => void;
+
   initialData?: Record<string, any> | null;
   isEditMode?: boolean;
 }> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
@@ -116,56 +118,39 @@ useEffect(() => {
 
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const payload = { ...form, itemTypeCode: Number(form.itemTypeCode) };
+  try {
+    const payload = { ...form, itemTypeCode: Number(form.itemTypeCode) };
 
-      let response;
+    let response;
 
-      if (isEditMode && initialData?.id) {
-        response = await updateItemByItemCode(initialData.id, payload);
-      } else {
-        response = await createItem(payload);
-      }
-      onSubmit?.();
-    } catch (err: any) {
-      let errorMessage = "Something went wrong while saving the item.";
-
-      if (err.response?.data) {
-        const data = err.response.data;
-
-        if (data._server_messages) {
-          try {
-            const msgs = JSON.parse(data._server_messages);
-            errorMessage = msgs
-              .map((m: string) => {
-                try {
-                  return JSON.parse(m).message || "";
-                } catch {
-                  return m;
-                }
-              })
-              .filter(Boolean)
-              .join("\n");
-          } catch { }
-        } else if (data.message) {
-          errorMessage = data.message;
-        }
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-
-      toast.error(errorMessage, {
-        duration: 8000,
-        style: { whiteSpace: "pre-line" },
-      });
-    } finally {
-      setLoading(false);
+    if (isEditMode && initialData?.id) {
+      response = await updateItemByItemCode(initialData.id, payload);
+    } else {
+      response = await createItem(payload);
     }
-  };
+
+    if (!response || ![200, 201].includes(response.status_code)) {
+      showApiError(response);
+      return;
+    }
+
+    
+
+    onSubmit?.(response);
+    handleClose();
+
+  } catch (err: any) {
+    console.error("Item save failed:", err);
+    showApiError(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
   const handleClose = () => {
     setForm(emptyForm);
     onClose();
@@ -178,7 +163,8 @@ useEffect(() => {
       setForm((p) => ({ ...p, item_group: response.data.name }));
       setItemCategoryDetails(response.data);
     } catch (err) {
-      toast.error("Error loading item category details:");
+     showApiError("Error loading item category details");
+
     }
   };
 
