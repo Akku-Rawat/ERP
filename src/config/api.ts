@@ -202,9 +202,9 @@ export const API = {
     getItemClasses: `${CODES_BASE}/item-class-list/`,
   },
   rolaLookup: {
-    getPackagingUnits: `${ROLA_CODES_BASE}/api/packaging-unit-codes/`,
+    getPackagingUnits: `${ROLA_CODES_BASE}/api//`,
     getCountries: `${ROLA_CODES_BASE}/api/country-list/`,
-    getUnitOfMeasure: `${ROLA_CODES_BASE}/api/unit-of-measure-list/`,
+    getUnitOfMeasure: `${ROLA_CODES_BASE}/api/resource/UOM'`,
     getItemClasses  : `${ROLA_CODES_BASE}/api/item-class-list/`,
   },
 } as const;
