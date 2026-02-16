@@ -74,10 +74,7 @@ const LeaveAllocationForm: React.FC<Props> = ({ onClose, onSuccess }) => {
       toast.error("From and To dates are required");
       return false;
     }
-    if (formData.totalLeavesAllocated <= 0) {
-      toast.error("Allocated leaves must be greater than 0");
-      return false;
-    }
+   
     return true;
   };
 
@@ -216,19 +213,7 @@ const LeaveAllocationForm: React.FC<Props> = ({ onClose, onSuccess }) => {
 
         {/* Allocation */}
         <div className="pt-4 border-t border-theme space-y-4">
-          <div>
-            <label className="text-sm font-medium text-main mb-2 block">
-              New Leaves Allocated *
-            </label>
-            <input
-              type="number"
-              name="totalLeavesAllocated"
-              value={formData.totalLeavesAllocated}
-              onChange={handleChange}
-              min={1}
-              className="w-full px-4 py-3 rounded-xl border bg-app"
-            />
-          </div>
+     
 
           <label className="flex items-center gap-3 text-sm">
             <input
