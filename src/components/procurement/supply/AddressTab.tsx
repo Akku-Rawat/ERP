@@ -1,0 +1,83 @@
+import React from "react";
+import CountrySelect from "../../selects/CountrySelect";
+import type { SupplierFormData } from "../../../types/Supply/supplier";
+import { ModalInput } from "../../ui/modal/modalComponent";
+
+interface AddressTabProps {
+  form: SupplierFormData;
+  onChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => void;
+}
+
+export const AddressTab: React.FC<AddressTabProps> = ({
+  form,
+  onChange,
+}) => {
+  return (
+     <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
+          <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-gray-700">Address Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+            <ModalInput
+              label="Address Line 1"
+              name="billingAddressLine1"
+              value={form.billingAddressLine1}
+              onChange={onChange}
+            />
+
+            <ModalInput
+              label="Address Line 2"
+              name="billingAddressLine2"
+              value={form.billingAddressLine2}
+              onChange={onChange}
+            />
+
+            <ModalInput
+              label="City"
+              name="billingCity"
+              value={form.billingCity}
+              onChange={onChange}
+            />
+
+            <CountrySelect
+              value={form.billingCountry}
+              label="Country"
+              onChange={(country: { code: string; name: string }) =>
+                onChange({
+                  target: { name: "billingCountry", value: country.name },
+                } as any)
+              }
+            />
+
+
+            <ModalInput
+              label="District"
+              name="district"
+              value={form.district}
+              onChange={onChange}
+            />
+
+            <ModalInput
+              label="Province"
+              name="province"
+              value={form.province}
+              onChange={onChange}
+            />
+
+          
+
+            <ModalInput
+              label="Postal Code"
+              name="billingPostalCode"
+              value={form.billingPostalCode}
+              onChange={onChange}
+            />
+          </div>
+
+        </div>
+    </section>
+  );
+};

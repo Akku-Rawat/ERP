@@ -5,12 +5,14 @@ import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
 import { getCountryList } from "../api/lookupApi";
 import { getItemByItemCode } from "../api/itemApi";
-const COMPANY_ID= import.meta.env.VITE_COMPANY_ID;
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
+
 
 import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
 } from "../constants/invoice.constants";
+import { showApiError, showLoading ,showSuccess,closeSwal } from "../components/alert";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -22,23 +24,28 @@ type NestedSection =
 export const useQuotationForm = (
   isOpen: boolean,
   onClose: () => void,
-  onSubmit?: (data: any) => void
+  onSubmit?: (data: any) => void,
+  initialData?: any,
 ) => {
   const [formData, setFormData] = useState<Invoice>({
     ...DEFAULT_INVOICE_FORM,
     invoiceStatus: "Draft",
     invoiceType: "Non-Export",
   });
+const companyLoadedRef = useRef(false);
+const [companyData, setCompanyData] = useState<any>(null);
 
   const [customerDetails, setCustomerDetails] = useState<any>(null);
   const [customerNameDisplay, setCustomerNameDisplay] = useState("");
   const [page, setPage] = useState(0);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
-    "details"
+    "details",
   );
   const [taxCategory, setTaxCategory] = useState<string | undefined>("");
   const [isShippingOpen, setIsShippingOpen] = useState(false);
   const [sameAsBilling, setSameAsBilling] = useState(true);
+  const [itemMaster, setItemMaster] = useState<any[]>([]);
+  const [itemMasterLoading, setItemMasterLoading] = useState(false);
 
   const shippingEditedRef = useRef(false);
 
@@ -47,17 +54,84 @@ export const useQuotationForm = (
     if (!isOpen) return;
 
     const today = new Date().toISOString().split("T")[0];
+
     setFormData((prev) => ({
       ...prev,
       dateOfInvoice: prev.dateOfInvoice || today,
       validUntil: "",
-
       invoiceStatus: "Draft",
       invoiceType: "Non-Export",
     }));
 
     setPage(0);
   }, [isOpen]);
+
+useEffect(() => {
+  if (!isOpen || companyLoadedRef.current) return;
+
+  companyLoadedRef.current = true;
+
+  getCompanyById(COMPANY_ID).then((res) => {
+    const company = res?.data;
+    setCompanyData(company);   // store it
+
+    setFormData((prev) => ({
+      ...prev,
+      paymentInformation: {
+        ...prev.paymentInformation,
+        paymentTerms:
+          company?.terms?.selling?.payment?.dueDates ?? "",
+        bankName: company?.bankAccounts?.[0]?.bankName ?? "",
+        accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
+        routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
+        swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
+      },
+    }));
+  });
+}, [isOpen]);
+
+
+useEffect(() => {
+  if (!isOpen) {
+    companyLoadedRef.current = false;
+  }
+}, [isOpen]);
+  useEffect(() => {
+    const maxPage = Math.max(
+      0,
+      Math.ceil(formData.items.length / ITEMS_PER_PAGE) - 1,
+    );
+
+    if (page > maxPage) {
+      setPage(maxPage);
+    }
+  }, [formData.items.length, page]);
+
+  useEffect(() => {
+    if (!isOpen || !initialData) return;
+
+    setSameAsBilling(false);
+    shippingEditedRef.current = true;
+
+    setFormData({
+      ...DEFAULT_INVOICE_FORM,
+      ...initialData,
+      dateOfInvoice: initialData.dateOfQuotation,
+      dueDate: initialData.validUntil,
+      items: (initialData.items || []).map((it: any) => ({
+        itemCode: it.itemCode,
+        description: it.description ?? "",
+        quantity: Number(it.quantity),
+        price: Number(it.price),
+        discount: Number(it.discount),
+        vatRate: Number(it.vatRate || 0),
+        vatCode: it.vatCode ?? "",
+      })),
+    });
+
+    setCustomerDetails(initialData.customer);
+    setCustomerNameDisplay(initialData.customer?.name ?? "");
+  }, [isOpen, initialData]);
 
   // Sync shipping address with billing if sameAsBilling is true
   useEffect(() => {
@@ -72,7 +146,7 @@ export const useQuotationForm = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
-    section?: NestedSection
+    section?: NestedSection,
   ) => {
     const { name, value } = e.target;
 
@@ -95,7 +169,7 @@ export const useQuotationForm = (
 
   const getCountryCode = (
     countries: { code: string; name: string }[],
-    countryName?: string
+    countryName?: string,
   ): string => {
     if (!countryName || !countries.length) return "";
 
@@ -127,19 +201,16 @@ export const useQuotationForm = (
     setFormData((p) => ({ ...p, customerId: id }));
 
     try {
-      const [customerRes, companyRes] = await Promise.all([
-        getCustomerByCustomerCode(id),
-        getCompanyById(COMPANY_ID),
-      ]);
-      console.log("Submitting customerId:", id);
+     const customerRes = await getCustomerByCustomerCode(id);
+const company = companyData;
+if (!company) return;
+
 
       if (!customerRes || customerRes.status_code !== 200) return;
 
       const data = customerRes.data;
-      console.log("RAW billingCountry:", data.billingCountry);
-      console.log("RAW shippingCountry:", data.shippingCountry);
 
-      const company = companyRes?.data;
+  
       const invoiceType = data.customerTaxCategory as
         | "Export"
         | "Non-Export"
@@ -152,13 +223,9 @@ export const useQuotationForm = (
         ? countryLookupRes
         : (countryLookupRes?.data ?? []);
 
-      console.log("countryLookupResponse: ", countryLookupList);
-
-      console.log("FULL country API response:", countryLookupRes);
-
       const countryCode = getCountryCode(
         countryLookupList,
-        data.shippingCountry || data.billingCountry
+        data.shippingCountry || data.billingCountry,
       );
 
       setCustomerDetails(data);
@@ -187,7 +254,7 @@ export const useQuotationForm = (
         bankName: company?.bankAccounts?.[0]?.bankName ?? "",
         accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
         routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
-        swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
+        swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "ccccv",
       };
 
       setFormData((prev) => {
@@ -198,9 +265,6 @@ export const useQuotationForm = (
         } else if (!shippingEditedRef.current) {
           shipping = shippingFromCustomer;
         }
-        console.log("invoiceType: ", invoiceType);
-        console.log("taxCategory: ", taxCategory);
-        console.log("countryCode: ", countryCode);
 
         return {
           ...prev,
@@ -209,7 +273,10 @@ export const useQuotationForm = (
           billingAddress: billing,
           shippingAddress: shipping,
           paymentInformation,
-          terms: { selling: data.terms?.selling },
+          terms: {
+            selling: company?.terms?.selling ??
+              data?.terms?.selling ?? { payment: { phases: [] } },
+          },
         };
       });
     } catch (err) {
@@ -245,7 +312,7 @@ export const useQuotationForm = (
 
   const handleItemChange = (
     idx: number,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
     const isNum = ["quantity", "price", "discount", "vatRate"].includes(name);
@@ -278,7 +345,12 @@ export const useQuotationForm = (
   const removeItem = (idx: number) => {
     setFormData((prev) => {
       if (prev.items.length === 1) return prev;
+
       const items = prev.items.filter((_, i) => i !== idx);
+      const maxPage = Math.max(0, Math.ceil(items.length / ITEMS_PER_PAGE) - 1);
+
+      setPage((p) => Math.min(p, maxPage));
+
       return { ...prev, items };
     });
   };
@@ -292,19 +364,35 @@ export const useQuotationForm = (
     if (!checked) shippingEditedRef.current = false;
   };
 
-  const handleReset = () => {
-    setFormData({
-      ...DEFAULT_INVOICE_FORM,
-      invoiceStatus: "Draft",
-      invoiceType: "Non-Export",
-      shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
-    });
-    setSameAsBilling(true);
-    shippingEditedRef.current = false;
-    setPage(0);
-    setCustomerNameDisplay("");
-    setCustomerDetails(null);
-  };
+const handleReset = () => {
+  if (!companyData) return;
+
+  const company = companyData;
+
+  setFormData({
+    ...DEFAULT_INVOICE_FORM,
+    invoiceStatus: "Draft",
+    invoiceType: "Non-Export",
+    shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
+
+    paymentInformation: {
+      paymentTerms:
+        company?.terms?.selling?.payment?.dueDates ?? "",
+      paymentMethod: "",
+      bankName: company?.bankAccounts?.[0]?.bankName ?? "",
+      accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
+      routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
+      swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
+    },
+  });
+
+  setSameAsBilling(true);
+  shippingEditedRef.current = false;
+  setPage(0);
+  setCustomerNameDisplay("");
+  setCustomerDetails(null);
+};
+
 
   const { subTotal, totalTax, grandTotal } = useMemo(() => {
     const sub = formData.items.reduce((sum, item) => {
@@ -314,7 +402,8 @@ export const useQuotationForm = (
 
     const tax = formData.items.reduce((sum, item) => {
       const itemSubtotal = item.quantity * item.price - item.discount;
-      const taxAmount = (itemSubtotal * parseFloat(item.vatRate || "0")) / 100;
+      const taxAmount = (itemSubtotal * Number(item.vatRate || 0)) / 100;
+
       return sum + taxAmount;
     }, 0);
 
@@ -325,31 +414,41 @@ export const useQuotationForm = (
     };
   }, [formData.items]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // Validation
+  try {
+    //  VALIDATION 
     if (!formData.customerId) {
-      alert("Please select a customer");
-      return;
+      throw new Error("Please select a customer");
     }
 
     if (!formData.dateOfInvoice) {
-      alert("Please select quotation date");
-      return;
+      throw new Error("Please select quotation date");
     }
 
     if (!formData.dueDate) {
-      alert("Please select valid until date");
-      return;
-    }
+  throw new Error("Please select valid until date");
+}
+
+   if (formData.dueDate < formData.dateOfInvoice) {
+  throw new Error("Valid until date cannot be before quotation date");
+}
+
+
+    if (!formData.paymentInformation?.paymentTerms) {
+  throw new Error("Please select payment terms");
+}
+
 
     if (formData.items.length === 0 || !formData.items[0].itemCode) {
-      alert("Please add at least one item");
-      return;
+      throw new Error("Please add at least one item");
     }
 
-    // Map to backend format for quotation
+    //  LOADING 
+    showLoading("Saving quotation...");
+
+    //  PAYLOAD 
     const payload = {
       customerId: formData.customerId,
       currencyCode: formData.currencyCode,
@@ -357,15 +456,13 @@ export const useQuotationForm = (
       dateOfQuotation: formData.dateOfInvoice,
       validUntil: formData.dueDate,
       industryBases: formData.industryBases || "Service",
-      invoiceType: formData.invoiceType, //
+      invoiceType: formData.invoiceType,
       invoiceStatus: formData.invoiceStatus,
 
-      // Only include if export quotation
       ...(formData.invoiceType === "Export" && {
         destnCountryCd: formData.destnCountryCd,
       }),
 
-      // Only include if LPO
       ...(formData.invoiceType === "Lpo" && {
         lpoNumber: formData.lpoNumber,
       }),
@@ -387,29 +484,39 @@ export const useQuotationForm = (
         })),
 
       terms: formData.terms,
-
-      // Additional fields for tracking
       subTotal,
       totalTax,
       grandTotal,
       documentType: "quotation",
     };
 
-    // Call the onSubmit callback
+    //  API CALL 
     if (onSubmit) {
-      try {
-        await onSubmit(payload);
-      } catch (error) {}
+      await onSubmit(payload);
     } else {
-      alert(
-        "No onSubmit handler provided. Please check your QuotationModal usage."
+      throw new Error(
+        "No onSubmit handler provided. Please check QuotationModal usage.",
       );
     }
-  };
+
+    //  SUCCESS 
+    closeSwal();
+
+    showSuccess("Quotation saved successfully");
+
+    onClose?.();
+
+  } catch (error: any) {
+  closeSwal();
+  showApiError(error);
+}
+
+};
+
 
   const paginatedItems = formData.items.slice(
     page * ITEMS_PER_PAGE,
-    (page + 1) * ITEMS_PER_PAGE
+    (page + 1) * ITEMS_PER_PAGE,
   );
 
   return {

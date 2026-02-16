@@ -43,9 +43,7 @@ export const LeaveType: React.FC<LeaveTypeProps> = ({ onAdd, onClose }) => {
 
       {/* Meta Info */}
       <div className="px-6 py-3 border-b border-theme flex items-center justify-between">
-        <span className="text-sm text-muted">
-          {rows.length} Leave Types
-        </span>
+        <span className="text-sm text-muted">{rows.length} Leave Types</span>
         <span className="text-xs text-muted">
           Last Updated On: Jan 15, 2026
         </span>
@@ -81,9 +79,7 @@ export const LeaveType: React.FC<LeaveTypeProps> = ({ onAdd, onClose }) => {
                 </td>
                 <td className="px-6 py-4">
                   <div className="font-medium text-main">{row.name}</div>
-                  <div className="text-xs text-muted mt-1">
-                    {row.name}
-                  </div>
+                  <div className="text-xs text-muted mt-1">{row.name}</div>
                 </td>
                 <td className="px-6 py-4 text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-card border border-theme text-sm font-semibold text-main">

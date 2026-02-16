@@ -9,7 +9,6 @@ export interface InvoiceItem {
   listPrice: number;
   discount: number;
   tax: number;
-  
 }
 
 export interface InvoiceData {

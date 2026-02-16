@@ -1,6 +1,5 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { getPaymentMethodLabel } from "../../../constants/invoice.constants";
 
 const loadImageFromUrl = async (url: string): Promise<string> => {
   console.log("Url: ", url);
@@ -20,7 +19,7 @@ const loadImageFromUrl = async (url: string): Promise<string> => {
 export const generateProformaInvoicePDF = async (
   proformaInvoice: any,
   company: any,
-  resultType: "save" | "bloburl" = "save"
+  resultType: "save" | "bloburl" = "save",
 ) => {
   const doc = new jsPDF("p", "mm", "a4");
   const currency = proformaInvoice.currency || "ZMW";
@@ -41,10 +40,10 @@ export const generateProformaInvoicePDF = async (
     try {
       console.log(
         "company.documents.companyLogoUrl",
-        company.documents.companyLogoUrl
+        company.documents.companyLogoUrl,
       );
       const logoBase64 = await loadImageFromUrl(
-        company.documents.companyLogoUrl
+        company.documents.companyLogoUrl,
       );
       doc.addImage(logoBase64, "JPEG", 150, 10, 30, 10);
     } catch (e) {
@@ -69,12 +68,12 @@ export const generateProformaInvoicePDF = async (
       proformaInvoice.billingAddress?.line2,
     ].filter(Boolean),
     15,
-    56
+    56,
   );
 
   doc.setFont("helvetica", "bold");
   doc.text(`Proforma No: ${proformaInvoice.proformaId}`, 150, 52);
-  doc.text(`Date: ${proformaInvoice.createdAt}`, 150, 56);
+  doc.text(`Date: ${proformaInvoice.dateofinvoice}`, 150, 56);
   doc.text(`Due Date: ${proformaInvoice.dueDate}`, 150, 60);
 
   /* ================= ITEMS TABLE ================= */
@@ -86,9 +85,9 @@ export const generateProformaInvoicePDF = async (
     body: proformaInvoice.items.map((i: any, idx: number) => [
       idx + 1,
       i.description,
-      Number(i.qty).toFixed(1),
+      Number(i.quantity).toFixed(1),
       Number(i.price).toFixed(2),
-      (Number(i.qty) * Number(i.price)).toFixed(2),
+      (Number(i.quantity) * Number(i.price)).toFixed(2),
       i.vatCode,
     ]),
     styles: {
@@ -112,8 +111,8 @@ export const generateProformaInvoicePDF = async (
 
   /* ================= TAX SUMMARY ================= */
   const total = proformaInvoice.items.reduce(
-    (s: number, i: any) => s + Number(i.qty) * Number(i.price),
-    0
+    (s: number, i: any) => s + Number(i.quantity) * Number(i.price),
+    0,
   );
 
   doc.setFont("helvetica", "bold");
@@ -136,14 +135,14 @@ export const generateProformaInvoicePDF = async (
   doc.setFont("helvetica", "normal");
   doc.text(
     [
-      `Issue Date: ${proformaInvoice.createdAt}`,
+      `Issue Date: ${proformaInvoice.dateofinvoice}`,
       `Proforma ID: ${proformaInvoice.proformaId}`,
       `Status: ${proformaInvoice.status}`,
       `Currency: ${currency}`,
       `Exchange Rate: ${proformaInvoice.exchangeRate}`,
     ],
     15,
-    y + 38
+    y + 38,
   );
 
   /* ================= BANK DETAILS ================= */
@@ -163,7 +162,7 @@ export const generateProformaInvoicePDF = async (
       `SWIFTCODE ${bankAccount.swiftCode || "N/A"}`,
     ],
     110,
-    y + 38
+    y + 38,
   );
 
   /* ================= FOOTER ================= */

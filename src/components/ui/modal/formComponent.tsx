@@ -19,7 +19,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           </span>
         )}
         {label}
-        {props.required && <span className="text-red-500">*</span>}
+        {props.required && <span className="text-danger">*</span>}
       </span>
       <input
         ref={ref}
@@ -69,7 +69,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, icon, options = [], className = "", ...props }, ref) => (
     <label className="flex flex-col gap-2 text-sm w-full group">
-      <span className="font-semibold text-muted flex items-center gap-2 group-focus-within:text-primary transition-colors">
+      <span className="font-semibold text-main flex items-center gap-2 group-focus-within:text-primary transition-colors">
         {icon && (
           <span className="text-muted group-focus-within:text-primary transition-colors">
             {icon}
@@ -93,20 +93,15 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           className,
         ].join(" ")}
       >
-      
         <option value="" disabled>
           Select
         </option>
 
-       {options.map((opt, idx) => (
-  <option
-    key={`${opt.value}-${idx}`}   
-    value={opt.value}
-  >
-    {opt.label}
-  </option>
-))}
-
+        {options.map((opt, idx) => (
+          <option key={`${opt.value}-${idx}`} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
       </select>
     </label>
   ),
@@ -165,38 +160,51 @@ Textarea.displayName = "Textarea";
 // ============================================================
 // Checkbox Component
 // ============================================================
-interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface CheckboxProps {
   label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  className?: string;
 }
 
 export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ label, className = "", ...props }, ref) => (
-    <label className="flex items-center gap-2 cursor-pointer group">
-      <div className="relative">
-        <input ref={ref} type="checkbox" {...props} className="peer sr-only" />
-        <div className="w-5 h-5 border-2 border-[var(--border)] rounded peer-checked:border-primary peer-checked:bg-primary transition-all bg-card" />
-        <svg
-          className="w-3 h-3 text-white absolute top-1 left-1 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={3}
-            d="M5 13l4 4L19 7"
+  ({ label, checked, onChange, className = "" }, ref) => {
+    return (
+      <label className="flex items-center gap-2 cursor-pointer group">
+        <div className="relative">
+          <input
+            ref={ref}
+            type="checkbox"
+            checked={checked}
+            onChange={(e) => onChange(e.target.checked)} 
+            className="peer absolute inset-0 opacity-0 cursor-pointer"
           />
-        </svg>
-      </div>
-      <span
-        className={`text-sm font-semibold text-main group-hover:text-primary transition-colors ${className}`}
-      >
-        {label}
-      </span>
-    </label>
-  ),
+
+          <div className="w-5 h-5 border-2 border-[var(--border)] rounded peer-checked:border-primary peer-checked:bg-primary transition-all bg-card" />
+
+          <svg
+            className="w-3 h-3 text-white absolute top-1 left-1 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={3}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+
+        <span className={`text-sm font-semibold text-main ${className}`}>
+          {label}
+        </span>
+      </label>
+    );
+  }
 );
+
 Checkbox.displayName = "Checkbox";
 
 // ============================================================
@@ -219,7 +227,7 @@ export const Card: React.FC<CardProps> = ({
 }) => (
   <div
     className={[
-      "bg-card/80 backdrop-blur-sm border rounded-xl p-6 mt-8 shadow-sm hover:shadow-md transition-shadow",
+      "bg-card/80 backdrop-blur-sm border rounded-b-md p-5 shadow-sm hover:shadow-md transition-shadow",
       "border-[var(--border)]",
       className,
     ].join(" ")}
@@ -253,7 +261,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { variant = "primary", icon, loading, children, className = "", ...props },
+    { variant = "primary", icon, loading, children, className = "", type = "button",...props },
     ref,
   ) => {
     const baseClasses =
@@ -273,6 +281,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
+         type={type} 
         {...props}
         className={`${baseClasses} ${variantClasses[variant]} ${className}`}
         disabled={loading || props.disabled}

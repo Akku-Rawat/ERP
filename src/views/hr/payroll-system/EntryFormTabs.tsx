@@ -1,7 +1,7 @@
 // EntryFormTabs.tsx - New Payroll Entry Form Tab Components
 
-import React from 'react';
-import type { PayrollEntry, Employee } from './types';
+import React from "react";
+import type { PayrollEntry, Employee } from "./types";
 import { Edit2 } from "lucide-react";
 
 interface OverviewTabProps {
@@ -15,24 +15,22 @@ interface EmployeesTabProps {
   onEditEmployee?: (employee: Employee) => void;
 }
 
-
-
 export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
   <div className="space-y-6">
     <div className="grid grid-cols-2 gap-6">
       <div>
-  <label className="block text-sm font-semibold text-slate-700 mb-2">
-    Payroll Name <span className="text-red-500">*</span>
-  </label>
-  <input
-    type="text"
-    value={data.payrollName}
-    onChange={(e) => onChange("payrollName", e.target.value)}
-    placeholder="e.g. March Payroll"
-    className="w-full px-4 py-3 border border-slate-300 rounded-lg
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          Payroll Name <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          value={data.payrollName}
+          onChange={(e) => onChange("payrollName", e.target.value)}
+          placeholder="e.g. March Payroll"
+          className="w-full px-4 py-3 border border-slate-300 rounded-lg
       focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-  />
-</div>
+        />
+      </div>
 
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -41,7 +39,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
         <input
           type="date"
           value={data.postingDate}
-          onChange={(e) => onChange('postingDate', e.target.value)}
+          onChange={(e) => onChange("postingDate", e.target.value)}
           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
         />
       </div>
@@ -51,7 +49,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
         </label>
         <select
           value={data.currency}
-          onChange={(e) => onChange('currency', e.target.value)}
+          onChange={(e) => onChange("currency", e.target.value)}
           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
         >
           <option value="INR">INR</option>
@@ -65,7 +63,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
         <input
           type="text"
           value={data.company}
-          onChange={(e) => onChange('company', e.target.value)}
+          onChange={(e) => onChange("company", e.target.value)}
           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
         />
       </div>
@@ -75,7 +73,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
         </label>
         <select
           value={data.payrollPayableAccount}
-          onChange={(e) => onChange('payrollPayableAccount', e.target.value)}
+          onChange={(e) => onChange("payrollPayableAccount", e.target.value)}
           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
         >
           <option value="Payroll Payable - I">Payroll Payable - I</option>
@@ -83,7 +81,9 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
         </select>
       </div>
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">Status</label>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          Status
+        </label>
         <input
           type="text"
           value={data.status}
@@ -97,7 +97,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
         </label>
         <select
           value={data.payrollFrequency}
-          onChange={(e) => onChange('payrollFrequency', e.target.value)}
+          onChange={(e) => onChange("payrollFrequency", e.target.value)}
           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
         >
           <option value="">Select</option>
@@ -111,19 +111,23 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
         <input
           type="checkbox"
           checked={data.salarySlipTimesheet}
-          onChange={(e) => onChange('salarySlipTimesheet', e.target.checked)}
+          onChange={(e) => onChange("salarySlipTimesheet", e.target.checked)}
           className="w-5 h-5 text-blue-600 rounded"
         />
-        <span className="text-sm font-medium">Salary Slip Based on Timesheet</span>
+        <span className="text-sm font-medium">
+          Salary Slip Based on Timesheet
+        </span>
       </label>
       <label className="flex items-center gap-3 p-4 border border-slate-300 rounded-lg hover:bg-slate-50 cursor-pointer">
         <input
           type="checkbox"
           checked={data.deductTaxForProof}
-          onChange={(e) => onChange('deductTaxForProof', e.target.checked)}
+          onChange={(e) => onChange("deductTaxForProof", e.target.checked)}
           className="w-5 h-5 text-blue-600 rounded"
         />
-        <span className="text-sm font-medium">Deduct Tax For Unsubmitted Proof</span>
+        <span className="text-sm font-medium">
+          Deduct Tax For Unsubmitted Proof
+        </span>
       </label>
     </div>
     <div className="grid grid-cols-2 gap-6">
@@ -134,7 +138,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
         <input
           type="date"
           value={data.startDate}
-          onChange={(e) => onChange('startDate', e.target.value)}
+          onChange={(e) => onChange("startDate", e.target.value)}
           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
         />
       </div>
@@ -145,7 +149,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
         <input
           type="date"
           value={data.endDate}
-          onChange={(e) => onChange('endDate', e.target.value)}
+          onChange={(e) => onChange("endDate", e.target.value)}
           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
         />
       </div>
@@ -153,145 +157,154 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
   </div>
 );
 
-
-
 export const EmployeesTab: React.FC<EmployeesTabProps> = ({
   data,
   onChange,
   employees,
-  onEditEmployee
+  onEditEmployee,
 }) => {
   const toggleEmployee = (empId: string) => {
     const current = data.selectedEmployees || [];
-    const updated = current.includes(empId) 
-      ? current.filter(id => id !== empId) 
+    const updated = current.includes(empId)
+      ? current.filter((id) => id !== empId)
       : [...current, empId];
-    onChange('selectedEmployees', updated);
+    onChange("selectedEmployees", updated);
   };
   const filteredEmployees = employees.filter((e) => {
-  if (!e.isActive) return false;
+    if (!e.isActive) return false;
 
-  if (data.branch && e.branch !== data.branch) return false;
-  if (data.department && e.department !== data.department) return false;
-  if (data.designation && e.designation !== data.designation) return false;
-  if (data.grade && e.grade !== data.grade) return false;
+    if (data.branch && e.branch !== data.branch) return false;
+    if (data.department && e.department !== data.department) return false;
+    if (data.designation && e.designation !== data.designation) return false;
+    if (data.grade && e.grade !== data.grade) return false;
 
-  return true;
-});
-
+    return true;
+  });
 
   const selectAll = () => {
-    const allIds = filteredEmployees.map(e => e.id);
+    const allIds = filteredEmployees.map((e) => e.id);
 
-    onChange('selectedEmployees', 
-      data.selectedEmployees?.length === allIds.length ? [] : allIds
+    onChange(
+      "selectedEmployees",
+      data.selectedEmployees?.length === allIds.length ? [] : allIds,
     );
   };
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg bg-slate-50">
-  <input
-    placeholder="Branch"
-    value={data.branch || ""}
-    onChange={(e) => onChange("branch", e.target.value)}
-    className="px-4 py-2 border rounded-lg"
-  />
-  <input
-    placeholder="Designation"
-    value={data.designation || ""}
-    onChange={(e) => onChange("designation", e.target.value)}
-    className="px-4 py-2 border rounded-lg"
-  />
-  <input
-    placeholder="Department"
-    value={data.department || ""}
-    onChange={(e) => onChange("department", e.target.value)}
-    className="px-4 py-2 border rounded-lg"
-  />
-  <input
-    placeholder="Grade"
-    value={data.grade || ""}
-    onChange={(e) => onChange("grade", e.target.value)}
-    className="px-4 py-2 border rounded-lg"
-  />
-  <span className="text-sm font-medium text-blue-700">
-  {filteredEmployees.length} employees
-</span>
-</div>
+        <input
+          placeholder="Branch"
+          value={data.branch || ""}
+          onChange={(e) => onChange("branch", e.target.value)}
+          className="px-4 py-2 border rounded-lg"
+        />
+        <input
+          placeholder="Designation"
+          value={data.designation || ""}
+          onChange={(e) => onChange("designation", e.target.value)}
+          className="px-4 py-2 border rounded-lg"
+        />
+        <input
+          placeholder="Department"
+          value={data.department || ""}
+          onChange={(e) => onChange("department", e.target.value)}
+          className="px-4 py-2 border rounded-lg"
+        />
+        <input
+          placeholder="Grade"
+          value={data.grade || ""}
+          onChange={(e) => onChange("grade", e.target.value)}
+          className="px-4 py-2 border rounded-lg"
+        />
+        <span className="text-sm font-medium text-blue-700">
+          {filteredEmployees.length} employees
+        </span>
+      </div>
 
       <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
-            checked={data.selectedEmployees?.length === employees.filter(e => e.isActive).length}
+            checked={
+              data.selectedEmployees?.length ===
+              employees.filter((e) => e.isActive).length
+            }
             onChange={selectAll}
             className="w-5 h-5 text-blue-600 rounded"
           />
-          <span className="font-semibold text-blue-900">Select All Employees</span>
+          <span className="font-semibold text-blue-900">
+            Select All Employees
+          </span>
         </label>
         <span className="text-sm font-medium text-blue-700">
           {data.selectedEmployees?.length || 0} selected
         </span>
       </div>
-   <div className="space-y-3 max-h-96 overflow-y-auto">
-  {employees.filter(e => e.isActive).map(emp => {
-    const isSelected = data.selectedEmployees?.includes(emp.id);
+      <div className="space-y-3 max-h-96 overflow-y-auto">
+        {employees
+          .filter((e) => e.isActive)
+          .map((emp) => {
+            const isSelected = data.selectedEmployees?.includes(emp.id);
 
-    return (
-      <div
-        key={emp.id}
-        className={`border-2 rounded-xl p-4 transition-all ${
-          isSelected
-            ? "border-blue-500 bg-blue-50"
-            : "border-slate-200 hover:border-blue-300"
-        }`}
-      >
-        <div className="flex items-center justify-between">
-          
-          {/* LEFT: Selection */}
-          <div
-            className="flex items-center gap-4 cursor-pointer"
-            onClick={() => toggleEmployee(emp.id)}
-          >
-            <input
-              type="checkbox"
-              checked={isSelected}
-              readOnly
-              className="w-5 h-5 text-blue-600 rounded"
-            />
-            <div>
-              <p className="font-semibold text-slate-800">{emp.name}</p>
-              <p className="text-sm text-slate-600">
-                {emp.id} • {emp.designation}
-              </p>
-            </div>
-          </div>
+            return (
+              <div
+                key={emp.id}
+                className={`border-2 rounded-xl p-4 transition-all ${
+                  isSelected
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-slate-200 hover:border-blue-300"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  {/* LEFT: Selection */}
+                  <div
+                    className="flex items-center gap-4 cursor-pointer"
+                    onClick={() => toggleEmployee(emp.id)}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      readOnly
+                      className="w-5 h-5 text-blue-600 rounded"
+                    />
+                    <div>
+                      <p className="font-semibold text-slate-800">{emp.name}</p>
+                      <p className="text-sm text-slate-600">
+                        {emp.id} • {emp.designation}
+                      </p>
+                    </div>
+                  </div>
 
-          {/* RIGHT: Salary + Edit */}
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="font-bold text-slate-800">
-                ₹{(emp.basicSalary + emp.hra + emp.allowances).toLocaleString()}
-              </p>
-              <p className="text-xs text-slate-500">Gross</p>
-            </div>
+                  {/* RIGHT: Salary + Edit */}
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="font-bold text-slate-800">
+                        ₹
+                        {(
+                          emp.basicSalary +
+                          emp.hra +
+                          emp.allowances
+                        ).toLocaleString()}
+                      </p>
+                      <p className="text-xs text-slate-500">Gross</p>
+                    </div>
 
-            {/* EDIT BUTTON */}
-           <button onClick={(e) => {
-  e.stopPropagation();
-  onEditEmployee?.(emp);
-}}>
-
-              <Edit2 className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+                    {/* EDIT BUTTON */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditEmployee?.(emp);
+                      }}
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
       </div>
-    );
-  })}
-</div>
-
     </div>
   );
 };
@@ -302,7 +315,11 @@ interface AccountingTabProps {
   employees: Employee[];
 }
 
-export const AccountingTab: React.FC<AccountingTabProps> = ({ data, onChange, employees }) => (
+export const AccountingTab: React.FC<AccountingTabProps> = ({
+  data,
+  onChange,
+  employees,
+}) => (
   <div className="space-y-6">
     <div className="grid grid-cols-2 gap-6">
       <div>
@@ -311,7 +328,7 @@ export const AccountingTab: React.FC<AccountingTabProps> = ({ data, onChange, em
         </label>
         <select
           value={data.paymentAccount}
-          onChange={(e) => onChange('paymentAccount', e.target.value)}
+          onChange={(e) => onChange("paymentAccount", e.target.value)}
           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
         >
           <option value="">Select</option>
@@ -320,10 +337,12 @@ export const AccountingTab: React.FC<AccountingTabProps> = ({ data, onChange, em
         </select>
       </div>
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">Cost Center</label>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          Cost Center
+        </label>
         <select
           value={data.costCenter}
-          onChange={(e) => onChange('costCenter', e.target.value)}
+          onChange={(e) => onChange("costCenter", e.target.value)}
           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
         >
           <option value="">Select</option>
@@ -332,10 +351,12 @@ export const AccountingTab: React.FC<AccountingTabProps> = ({ data, onChange, em
         </select>
       </div>
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">Project</label>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          Project
+        </label>
         <select
           value={data.project}
-          onChange={(e) => onChange('project', e.target.value)}
+          onChange={(e) => onChange("project", e.target.value)}
           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
         >
           <option value="">Select</option>
@@ -343,10 +364,12 @@ export const AccountingTab: React.FC<AccountingTabProps> = ({ data, onChange, em
         </select>
       </div>
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">Letter Head</label>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          Letter Head
+        </label>
         <select
           value={data.letterHead}
-          onChange={(e) => onChange('letterHead', e.target.value)}
+          onChange={(e) => onChange("letterHead", e.target.value)}
           className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
         >
           <option value="">Select</option>
@@ -359,12 +382,16 @@ export const AccountingTab: React.FC<AccountingTabProps> = ({ data, onChange, em
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white rounded-lg p-4">
           <p className="text-xs text-slate-600 mb-1">Employees</p>
-          <p className="text-2xl font-bold text-slate-800">{data.selectedEmployees?.length || 0}</p>
+          <p className="text-2xl font-bold text-slate-800">
+            {data.selectedEmployees?.length || 0}
+          </p>
         </div>
         <div className="bg-white rounded-lg p-4">
           <p className="text-xs text-slate-600 mb-1">Est. Gross</p>
           <p className="text-2xl font-bold text-green-600">
-            ₹{employees.filter(e => data.selectedEmployees?.includes(e.id))
+            ₹
+            {employees
+              .filter((e) => data.selectedEmployees?.includes(e.id))
               .reduce((sum, e) => sum + e.basicSalary + e.hra + e.allowances, 0)
               .toLocaleString()}
           </p>
@@ -372,9 +399,14 @@ export const AccountingTab: React.FC<AccountingTabProps> = ({ data, onChange, em
         <div className="bg-white rounded-lg p-4">
           <p className="text-xs text-slate-600 mb-1">Est. Net</p>
           <p className="text-2xl font-bold text-blue-600">
-            ₹{Math.round(
-              employees.filter(e => data.selectedEmployees?.includes(e.id))
-                .reduce((sum, e) => sum + e.basicSalary + e.hra + e.allowances, 0) * 0.76
+            ₹
+            {Math.round(
+              employees
+                .filter((e) => data.selectedEmployees?.includes(e.id))
+                .reduce(
+                  (sum, e) => sum + e.basicSalary + e.hra + e.allowances,
+                  0,
+                ) * 0.76,
             ).toLocaleString()}
           </p>
         </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
+
+import { showApiError, showSuccess } from "../../components/alert";
 
 import {
   getAllItems,
@@ -26,13 +27,13 @@ const Items: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1);
- const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
   const [showModal, setShowModal] = useState(false);
   const [editItem, setEditItem] = useState<Item | null>(null);
-
+  const [initialLoad, setInitialLoad] = useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<ItemSummary | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -46,9 +47,9 @@ const Items: React.FC = () => {
       setTotalItems(res.pagination?.total || 0);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load items");
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
 
@@ -56,9 +57,8 @@ const Items: React.FC = () => {
     fetchItems();
   }, [page, pageSize]);
 
-  /* ===============================
-     HANDLERS
-  ================================ */
+  /*      HANDLERS
+   */
 
   const handleAdd = () => {
     setEditItem(null);
@@ -72,7 +72,7 @@ const Items: React.FC = () => {
       setEditItem(res.data);
       setShowModal(true);
     } catch {
-      toast.error("Unable to fetch item details");
+      console.error("Unable to fetch item details");
     }
   };
 
@@ -82,36 +82,50 @@ const Items: React.FC = () => {
     setDeleteModalOpen(true);
   };
 
-  const confirmDelete = async () => {
-    if (!itemToDelete) return;
+const confirmDelete = async () => {
+  if (!itemToDelete) return;
 
-    try {
-      setDeleting(true);
-      await deleteItemByItemCode(itemToDelete.id);
-      setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
-      toast.success("Item deleted successfully");
-      setDeleteModalOpen(false);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete item", {
-        duration: 6000,
-      });
-    } finally {
-      setDeleting(false);
-      setItemToDelete(null);
+  try {
+    setDeleting(true);
+
+    const res = await deleteItemByItemCode(itemToDelete.id);
+
+    if (!res || ![200, 201].includes(res.status_code)) {
+      showApiError(res);
+      return;
     }
-  };
 
-  const handleSaved = async () => {
-    const wasEdit = !!editItem;
-    setShowModal(false);
-    setEditItem(null);
-    await fetchItems();
-    toast.success(wasEdit ? "Item updated" : "Item created");
-  };
+    setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
 
-  /* ===============================
-     FILTER
-  ================================ */
+    showSuccess(res.message || "Item deleted successfully");
+
+    setDeleteModalOpen(false);
+  } catch (err: any) {
+    showApiError(err);
+  } finally {
+    setDeleting(false);
+    setItemToDelete(null);
+  }
+};
+
+
+const handleSaved = async (res: any) => {
+  const wasEdit = !!editItem;
+
+  setShowModal(false);
+  setEditItem(null);
+
+  await fetchItems();
+
+  showSuccess(
+    res?.message ||
+      (wasEdit ? "Item updated successfully" : "Item created successfully")
+  );
+};
+
+
+  /*      FILTER
+   */
 
   const filteredItems = items.filter((i) =>
     [
@@ -127,9 +141,8 @@ const Items: React.FC = () => {
       .includes(searchTerm.toLowerCase()),
   );
 
-  /* ===============================
-     COLUMNS
-  ================================ */
+  /*      COLUMNS
+   */
 
   const columns: Column<ItemSummary>[] = [
     { key: "id", header: "Item Code", align: "left" },
@@ -173,43 +186,34 @@ const Items: React.FC = () => {
     },
   ];
 
-  /* ===============================
-     RENDER
-  ================================ */
+  /*      RENDER
+   */
 
   return (
-     <div className="p-8">
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="mt-2 text-muted">Loading invoices…</p>
-        </div>
-      ) : (
-        <Table
-          loading={loading}
-  serverSide
+    <div className="p-8">
+      <Table
+        loading={loading || initialLoad}
+        serverSide
+        columns={columns}
+        data={filteredItems}
+        showToolbar
+        searchValue={searchTerm}
+        onSearch={setSearchTerm}
+        enableAdd
+        addLabel="Add Item"
+        onAdd={handleAdd}
+        currentPage={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        pageSizeOptions={[10, 25, 50, 100]}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1); // reset page
+        }}
+        onPageChange={setPage}
+      />
 
-          columns={columns}
-          data={filteredItems}
-          showToolbar
-          searchValue={searchTerm}
-          onSearch={setSearchTerm}
-          enableAdd
-          addLabel="Add Item"
-          onAdd={handleAdd}
-          currentPage={page}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={totalItems}
-           pageSizeOptions={[10, 25, 50, 100]}
-  onPageSizeChange={(size) => {
-    setPageSize(size);
-    setPage(1); // reset page
-  }}
-          onPageChange={setPage}
-        />
-          )}
-      
       {/* ITEM MODAL */}
       <ItemModal
         isOpen={showModal}

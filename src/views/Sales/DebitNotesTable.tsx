@@ -1,10 +1,11 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 
 import Table from "../../components/ui/Table/Table";
 import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import CreateDebitNoteModal from "./createDebitNoteModal";
 import { getAllDebitNotes } from "../../api/salesApi";
+import { showApiError } from "../../components/alert";
 
 type DebitNote = {
   noteNo: string;
@@ -13,6 +14,7 @@ type DebitNote = {
   date: string;
   amount: number;
   status: "Draft" | "Approved" | "Rejected";
+  currency: string;
 };
 
 const DebitNotesTable: React.FC = () => {
@@ -22,9 +24,9 @@ const DebitNotesTable: React.FC = () => {
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-const [totalPages, setTotalPages] = useState(1);
-const [totalItems, setTotalItems] = useState(0);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -36,8 +38,13 @@ const [totalItems, setTotalItems] = useState(0);
       key: "amount",
       header: "Amount",
       align: "right",
-      render: (r) => `₹${r.amount.toLocaleString()}`,
+      render: (r) => (
+        <code className="text-xs px-2 py-1 rounded bg-row-hover text-main font-semibold whitespace-nowrap">
+          {r.amount.toLocaleString()} {r.currency}
+        </code>
+      ),
     },
+
     { key: "date", header: "Date" },
     {
       key: "status",
@@ -50,8 +57,7 @@ const [totalItems, setTotalItems] = useState(0);
     try {
       setLoading(true);
 
-    const resp = await getAllDebitNotes(page, pageSize);
-
+      const resp = await getAllDebitNotes(page, pageSize);
 
       const mappedData: DebitNote[] = resp.data.map((item: any) => ({
         noteNo: item.invoiceNumber,
@@ -59,42 +65,41 @@ const [totalItems, setTotalItems] = useState(0);
         customer: item.customerName,
         date: item.dateOfInvoice,
         amount: item.totalAmount,
+        currency:
+          item.currency ||
+          item.currencyCode ||
+          item.currCd ||
+          "",
         status: item.invoiceStatus ?? "Draft",
       }));
 
       setData(mappedData);
       setTotalPages(resp.pagination.total_pages);
-    setTotalItems(resp.pagination.total);
-    } catch (error) {
+      setTotalItems(resp.pagination.total);
+    } catch (error: any) {
       console.error("Failed to load debit notes", error);
-    } finally {
+      showApiError(error);
+    }
+    finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
 
-
-useEffect(() => {
-  fetchDebitNotes();
-}, [page, pageSize]);
-
-
+  useEffect(() => {
+    fetchDebitNotes();
+  }, [page, pageSize]);
 
   return (
-     <div className="p-8">
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="mt-2 text-muted">Loading invoices…</p>
-        </div>
-      ) : (
-       <Table
+    <div className="p-8">
+      <Table
         columns={columns}
         data={data}
         showToolbar
         enableAdd
         searchValue={searchTerm}
         onSearch={setSearchTerm}
-        loading={loading}
+        loading={loading || initialLoad}
         addLabel="Add Debit Note"
         onAdd={() => setOpenCreateModal(true)}
         emptyMessage="No debit notes found"
@@ -110,9 +115,9 @@ useEffect(() => {
         }}
         onPageChange={setPage}
       />
-      )}
 
-    <CreateDebitNoteModal
+
+      <CreateDebitNoteModal
         isOpen={openCreateModal}
         onClose={() => setOpenCreateModal(false)}
         onSubmit={(payload) => {
@@ -127,5 +132,3 @@ useEffect(() => {
 };
 
 export default DebitNotesTable;
- 
-      

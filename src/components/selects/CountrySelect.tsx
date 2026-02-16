@@ -78,11 +78,13 @@ export default function CountrySelect({
 
   return (
     <div className={`flex flex-col gap-1 w-full ${className}`}>
-      <span className="font-medium text-gray-600 text-sm">{label}</span>
+      <span className="font-medium text-muted text-sm">{label}</span>
 
       <input
-        ref={inputRef}
-        className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+  ref={inputRef}
+  className="w-full rounded border border-theme bg-card text-main px-3 py-2 text-sm 
+  focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+
         placeholder={loading ? "Loading..." : "Search country..."}
         value={search}
         onChange={(e) => {
@@ -105,13 +107,15 @@ export default function CountrySelect({
               width: rect.width,
               zIndex: 9999,
             }}
-            className="bg-white border rounded shadow-lg"
+            className="bg-card border border-theme rounded shadow-lg"
+
           >
             <ul className="max-h-56 overflow-y-auto text-sm">
               {filtered.map((c) => (
                 <li
                   key={c.sortOrder}
-                  className="px-4 py-2 cursor-pointer hover:bg-blue-100"
+                className="px-4 py-2 cursor-pointer hover:bg-row-hover text-main"
+
                   onClick={() => {
                     setSearch(c.name);
                     setOpen(false);
@@ -120,13 +124,13 @@ export default function CountrySelect({
                 >
                   <div className="flex justify-between">
                     <span>{c.name}</span>
-                    <span className="text-xs text-gray-500">{c.code}</span>
+                    <span className="text-xs text-muted">{c.code}</span>
                   </div>
                 </li>
               ))}
 
               {filtered.length === 0 && (
-                <li className="px-4 py-2 text-gray-500">No match found</li>
+                <li className="px-4 py-2 text-muted">No match found</li>
               )}
             </ul>
           </div>,

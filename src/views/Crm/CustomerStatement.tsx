@@ -1,94 +1,138 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  Calendar,
-  Search,
-  Download,
-  Printer,
   ArrowUpRight,
   ArrowDownLeft,
-  Wallet,
   FileText,
 } from "lucide-react";
 import Table from "../../components/ui/Table/Table";
+import { getCustomerStatement } from "../../api/statementApi";
 
-const CustomerStatement = () => {
-  const statementData = useMemo(
-    () => [
-      {
-        date: "01 Oct 2023",
-        type: "Opening Balance",
-        ref: "BAL-FWD",
-        debit: 0,
-        credit: 0,
-        balance: 5000,
-      },
-      {
-        date: "05 Oct 2023",
-        type: "Sales Invoice",
-        ref: "INV-001",
-        debit: 1500,
-        credit: 0,
-        balance: 6500,
-      },
-      {
-        date: "12 Oct 2023",
-        type: "Bank Payment",
-        ref: "REC-882",
-        debit: 0,
-        credit: 2000,
-        balance: 4500,
-      },
-      {
-        date: "15 Oct 2023",
-        type: "Credit Note",
-        ref: "CN-002",
-        debit: 0,
-        credit: 500,
-        balance: 4000,
-      },
-      {
-        date: "20 Oct 2023",
-        type: "Sales Invoice",
-        ref: "INV-004",
-        debit: 3500,
-        credit: 0,
-        balance: 7500,
-      },
-    ],
-    [],
-  );
+/*  TYPES  */
+
+interface LedgerEntry {
+  date: string;
+  type: string;
+  ref: string;
+  debit: number;
+  credit: number;
+  balance: number;
+  note: string;
+}
+
+interface StatementData {
+  openingBalance: number;
+  summary: {
+    totalInvoiced: number;
+    totalCollected: number;
+    netOutstanding: number;
+  };
+  aging: {
+    current: number;
+    "1_30": number;
+    "31_60": number;
+    "61_90": number;
+    "90_plus": number;
+  };
+  ledger: LedgerEntry[];
+}
+
+interface CustomerStatementProps {
+  customerId: string;
+}
+
+/*  COMPONENT  */
+
+const CustomerStatement = ({ customerId }: CustomerStatementProps) => {
+  const [data, setData] = useState<StatementData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [dateRange, setDateRange] = useState({ from: "", to: "" });
+  const [searchQuery, setSearchQuery] = useState("");
+   const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(4);
+    const [totalPages, setTotalPages] = useState(1);
+     const [totalItems, setTotalItems] = useState(0);
+
+
+    
+
+  /*  API  */
+useEffect(() => {
+  if (!customerId) return;
+
+  const fetchStatement = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const resp = await getCustomerStatement(customerId, page, pageSize);
+
+      if (resp?.status === "success") {
+        setData(resp.data);
+        setTotalPages(resp.data.pagination?.total_pages || 1);
+        setTotalItems(resp.data.pagination?.total || 0);
+      } else {
+        setError("Failed to load customer statement");
+      }
+    } catch {
+      setError("Unable to fetch customer statement");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchStatement();
+}, [customerId, page, pageSize]);
+
+
+useEffect(() => {
+  setPage(1);
+}, [customerId]);
+
+
+  /*  TABLE COLUMNS  */
 
   const statementColumns = [
     {
       key: "date",
       header: "Date",
-      render: (row: any) => (
-        <span className="text-[11px] font-bold text-muted uppercase tracking-tighter">
-          {row.date}
+      render: (row: LedgerEntry) => (
+        <span className="text-[10px] font-black text-muted uppercase tracking-widest">
+          {new Date(row.date).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })}
         </span>
       ),
     },
     {
       key: "type",
-      header: "Transaction Details",
-      render: (row: any) => (
+      header: "Transaction",
+      render: (row: LedgerEntry) => (
         <div className="flex items-center gap-3">
           <div
-            className={`p-1.5 rounded-lg ${row.debit > 0 ? "bg-amber-500/10 text-amber-600" : row.credit > 0 ? "bg-emerald-500/10 text-emerald-600" : "bg-row-hover text-muted"}`}
+            className={`p-2 rounded-xl ${
+              row.debit > 0
+                ? "bg-warning text-warning"
+                : row.credit > 0
+                ? "bg-success text-success"
+                : "bg-row-hover text-muted"
+            }`}
           >
             {row.debit > 0 ? (
-              <ArrowUpRight size={12} />
+              <ArrowUpRight size={14} />
             ) : row.credit > 0 ? (
-              <ArrowDownLeft size={12} />
+              <ArrowDownLeft size={14} />
             ) : (
-              <FileText size={12} />
+              <FileText size={14} />
             )}
           </div>
+
           <div>
-            <p className="font-bold text-xs text-main leading-none">
-              {row.type}
-            </p>
-            <p className="text-[9px] font-mono text-muted mt-1 uppercase tracking-widest">
+            <p className="text-xs font-bold text-main">{row.type}</p>
+            <p className="text-[9px] font-mono text-muted uppercase">
               {row.ref}
             </p>
           </div>
@@ -97,148 +141,203 @@ const CustomerStatement = () => {
     },
     {
       key: "debit",
-      header: "Debit (+)",
+      header: "Debit",
       align: "right" as const,
-      render: (row: any) =>
-        row.debit > 0 ? (
-          <span className="text-xs font-bold text-main">
+      render: (row: LedgerEntry) =>
+        row.debit ? (
+          <span className="text-xs font-bold text-warning">
             ₹{row.debit.toLocaleString()}
           </span>
         ) : (
-          <span className="opacity-20 text-[10px]">-</span>
+          <span className="text-muted text-xs">—</span>
         ),
     },
     {
       key: "credit",
-      header: "Credit (-)",
+      header: "Credit",
       align: "right" as const,
-      render: (row: any) =>
-        row.credit > 0 ? (
-          <span className="text-xs font-bold text-emerald-600">
+      render: (row: LedgerEntry) =>
+        row.credit ? (
+          <span className="text-xs font-bold text-success">
             ₹{row.credit.toLocaleString()}
           </span>
         ) : (
-          <span className="opacity-20 text-[10px]">-</span>
+          <span className="text-muted text-xs">—</span>
         ),
     },
     {
       key: "balance",
       header: "Balance",
       align: "right" as const,
-      render: (row: any) => (
-        <span className="text-xs font-black text-primary bg-primary/5 px-2 py-1 rounded border border-primary/10">
+      render: (row: LedgerEntry) => (
+        <span className="text-sm font-black text-primary">
           ₹{row.balance.toLocaleString()}
         </span>
       ),
     },
+    {
+      key: "note",
+      header: "Notes",
+      render: (row: LedgerEntry) =>
+        row.note && row.note !== "No Remarks" ? (
+          <span className="text-xs text-muted italic">{row.note}</span>
+        ) : (
+          <span className="text-muted text-xs">—</span>
+        ),
+    },
   ];
 
+  /*  TOTALS  */
+
+  const totalDebit = useMemo(
+    () => data?.ledger.reduce((s, r) => s + r.debit, 0) || 0,
+    [data],
+  );
+
+  const totalCredit = useMemo(
+    () => data?.ledger.reduce((s, r) => s + r.credit, 0) || 0,
+    [data],
+  );
+
+  /*  STATES  */
+
+  if (loading) {
+    return (
+      <div className="p-8 bg-card border border-theme rounded-2xl animate-shimmer">
+        <p className="text-muted text-sm">Loading customer statement…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 bg-card border border-theme rounded-2xl">
+        <p className="text-danger text-sm">{error}</p>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  /*  UI  */
+
   return (
-    <div className="space-y-3 animate-in fade-in duration-500 max-w-[1400px] mx-auto">
-      {/* 1. UNIFIED TOOLBAR */}
-      <div className="flex items-center justify-between bg-card p-2 rounded-2xl border border-[var(--border)] shadow-sm">
-        <div className="flex items-center gap-2">
-          {/* Range Picker */}
-          <div className="flex items-center bg-app/50 border border-[var(--border)] rounded-xl px-3 py-1.5 gap-3 group focus-within:border-primary transition-all">
-            <Calendar className="w-3.5 h-3.5 text-muted" />
-            <input
-              type="date"
-              className="bg-transparent text-[10px] font-black text-main outline-none uppercase tracking-tighter"
-            />
-            <span className="text-muted text-[10px] opacity-30 font-black">
-              TO
-            </span>
-            <input
-              type="date"
-              className="bg-transparent text-[10px] font-black text-main outline-none uppercase tracking-tighter"
-            />
-          </div>
-          <button className="p-2 bg-row-hover text-muted hover:text-primary rounded-xl transition-all border border-[var(--border)]">
-            <Search size={14} />
-          </button>
-        </div>
+   <div className="max-w-[1400px] mx-auto space-y-5 p-6">
 
-        {/* Minimal Actions */}
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-app border border-[var(--border)] text-muted hover:text-main rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-            <Printer size={14} />
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:opacity-90 text-[10px] font-black uppercase tracking-widest transition-all shadow-md">
-            <Download size={14} /> Export Statement
-          </button>
-        </div>
-      </div>
+  {/* TOP ROW: KPI (left) + Aging (right) */}
+  <div className="flex gap-4 items-stretch">
 
-      {/* 2. AGING & KPI STRIP */}
-      <div className="grid grid-cols-12 gap-3">
-        {/* Aging Summary (Takes 8 cols) */}
-        <div className="col-span-8 bg-card border border-[var(--border)] rounded-2xl flex divide-x divide-[var(--border)] overflow-hidden shadow-sm">
-          <AgingCell label="Current" value="4,500" active />
-          <AgingCell label="1-30 Days" value="2,000" />
-          <AgingCell label="31-60" value="1,000" />
-          <AgingCell label="61-90" value="0" />
-          <AgingCell label="90+" value="0" />
-        </div>
-        {/* Total Owed KPI (Takes 4 cols) */}
-        <div className="col-span-4 bg-primary rounded-2xl p-3 flex items-center justify-between px-6 shadow-lg shadow-primary/20">
-          <div className="flex flex-col">
-            <span className="text-[9px] font-black text-white/60 uppercase tracking-[0.2em]">
-              Net Outstanding
-            </span>
-            <span className="text-xl font-black text-white tracking-tighter">
-              ₹7,500.00
-            </span>
-          </div>
-          <Wallet className="text-white/30" size={24} />
-        </div>
-      </div>
+    {/* KPI CARDS — LEFT */}
+    <div className="grid grid-cols-3 gap-4 flex-[3]">
+      <SummaryCard
+        label="Total Debit"
+        value={totalDebit}
+        className="text-primary"
+      />
+      <SummaryCard
+        label="Total Credit"
+        value={totalCredit}
+        className="text-primary"
+      />
+      <SummaryCard
+        label="Net Outstanding"
+        value={data.summary.netOutstanding}
+        className="text-primary"
+      />
+    </div>
 
-      {/* 3. TABLE SECTION */}
-      <div className="bg-card rounded-2xl border border-[var(--border)] shadow-sm overflow-hidden">
-        <div className="px-5 py-3 border-b border-[var(--border)] flex justify-between items-center bg-row-hover/5">
-          <h3 className="text-[10px] font-black text-main uppercase tracking-widest flex items-center gap-2">
-            <div className="w-1 h-3 bg-primary rounded-full" /> Account Ledger
-          </h3>
-          <div className="flex gap-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold text-muted">
-              <span className="w-1.5 h-1.5 rounded-full bg-main/20" /> Total
-              Invoiced: <span className="text-main">₹34,500</span>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] font-bold text-muted">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/20" />{" "}
-              Total Collected: <span className="text-emerald-600">₹27,000</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="custom-table-tight">
-          <Table
-            columns={statementColumns}
-            data={statementData}
-            showToolbar={false}
-          />
-        </div>
+    {/* AGING — RIGHT (COMPACT) */}
+    <div className="flex-[2] bg-card border border-theme rounded-2xl px-3 py-2">
+      <div className="grid grid-cols-5 gap-2">
+        <AgingCell compact label="Current" value={data.aging.current} active />
+        <AgingCell compact label="1–30" value={data.aging["1_30"]} />
+        <AgingCell compact label="31–60" value={data.aging["31_60"]} />
+        <AgingCell compact label="61–90" value={data.aging["61_90"]} />
+        <AgingCell compact label="90+" value={data.aging["90_plus"]} />
       </div>
     </div>
+
+  </div>
+
+
+
+  {/* TABLE */}
+  <div className="bg-card border border-theme rounded-2xl overflow-hidden">
+   <Table
+  columns={statementColumns}
+  data={data.ledger}
+  showToolbar={false}
+  currentPage={page}
+  totalPages={totalPages}
+  totalItems={totalItems}
+  pageSize={pageSize}
+  onPageChange={setPage}
+  onPageSizeChange={(size) => {
+    setPageSize(size);
+    setPage(1);
+  }}
+ pageSizeOptions={[4, 10, 25]}
+
+/>
+
+  </div>
+
+</div>
+
   );
 };
 
-// --- Compact Sub-components ---
-
-const AgingCell = ({ label, value, active = false }: any) => (
+/*  SUB COMPONENTS  */
+const AgingCell = ({
+  label,
+  value,
+  active = false,
+  compact = false,
+}: {
+  label: string;
+  value: number;
+  active?: boolean;
+  compact?: boolean;
+}) => (
   <div
-    className={`flex-1 px-4 py-2.5 flex flex-col transition-all ${active ? "bg-row-hover" : ""}`}
+    className={`rounded-xl text-center transition-all ${
+      compact ? "px-2 py-2" : "px-4 py-4"
+    } ${active ? "bg-primary/10" : "bg-transparent"}`}
   >
-    <span
-      className={`text-[8px] font-black uppercase tracking-widest mb-0.5 ${active ? "text-primary" : "text-muted"}`}
+    <p
+      className={`uppercase tracking-widest font-black ${
+        compact ? "text-[9px]" : "text-[10px]"
+      } ${active ? "text-primary" : "text-muted"}`}
     >
       {label}
-    </span>
-    <span
-      className={`text-xs font-black ${active ? "text-primary" : "text-main"}`}
+    </p>
+    <p
+      className={`font-black ${
+        compact ? "text-sm" : "text-base"
+      } ${active ? "text-primary" : "text-main"}`}
     >
-      ₹{value}
-    </span>
+      ₹{value.toLocaleString()}
+    </p>
+  </div>
+);
+
+
+const SummaryCard = ({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: number;
+  className: string;
+}) => (
+  <div className="bg-card border border-theme rounded-xl p-4">
+    <p className={`text-[9px] font-black uppercase tracking-widest ${className}`}>
+      {label}
+    </p>
+    <p className={`text-lg font-black ${className}`}>
+      ₹{value.toLocaleString()}
+    </p>
   </div>
 );
 

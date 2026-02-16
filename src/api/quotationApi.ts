@@ -1,21 +1,9 @@
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
 
-const base_url = import.meta.env.VITE_BASE_URL_QO as string;
-const api = createAxiosInstance(base_url);
-const vite_quotation_api_url = import.meta.env.VITE_QUOTATION_API_URL as string;
-
-const ENDPOINTS = {
-  getAllQuotations: `${vite_quotation_api_url}.get_all_quotations`,
-  getQuotationDetails: `${vite_quotation_api_url}.get_quotation_details`,
-  getQuotationById: `${vite_quotation_api_url}.get_quotation_by_id`,
-
-  createQuotation: `${vite_quotation_api_url}.create_quotation`,
-  deleteQuotation: `${base_url}.quotation.api.delete_quotation`,
-  updateQuotationTerms: `${vite_quotation_api_url}.update_quotation_terms_and_conditions_by_id`,
-  updateQuotationAddress: `${vite_quotation_api_url}.update_quotation_address`,
-  updateQuotation: `${base_url}.quotation.api.update_quotation`,
-};
+import { API, ERP_BASE } from "../config/api";
+const api = createAxiosInstance(ERP_BASE);
+export const QuotationAPI = API.quotation;
 
 export type QuotationFilters = {
   search?: string;
@@ -27,9 +15,9 @@ export type QuotationFilters = {
 export async function getAllQuotations(
   page: number = 1,
   page_size: number = 10,
-  filters?: QuotationFilters
+  filters?: QuotationFilters,
 ): Promise<any> {
-  const resp = await api.get(ENDPOINTS.getAllQuotations, {
+  const resp = await api.get(QuotationAPI.getAll, {
     params: {
       page,
       page_size,
@@ -40,43 +28,37 @@ export async function getAllQuotations(
 }
 
 export async function getQuotationById(id: string): Promise<any> {
-  const url = `${ENDPOINTS.getQuotationById}?id=${encodeURIComponent(id)}`;
+  const url = `${QuotationAPI.getById}?id=${encodeURIComponent(id)}`;
   const resp: AxiosResponse = await api.get(url);
   return resp.data ?? null;
 }
 
 export async function createQuotation(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(
-    ENDPOINTS.createQuotation,
-    payload
-  );
+  const resp: AxiosResponse = await api.post(QuotationAPI.create, payload);
   return resp.data;
 }
 
 export async function deleteQuotationById(id: string): Promise<any> {
-  const resp: AxiosResponse = await api.delete(ENDPOINTS.deleteQuotation, {
+  const resp: AxiosResponse = await api.delete(QuotationAPI.delete, {
     data: { quotation_id: id },
   });
   return resp.data;
 }
 
 export async function updateQuotationTermsById(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.put(
-    ENDPOINTS.updateQuotationTerms,
-    payload
-  );
+  const resp: AxiosResponse = await api.put(QuotationAPI.updateTerms, payload);
   return resp.data;
 }
 
 export async function updateQuotationAddressById(payload: any): Promise<any> {
   const resp: AxiosResponse = await api.put(
-    ENDPOINTS.updateQuotationAddress,
-    payload
+    QuotationAPI.updateAddress,
+    payload,
   );
   return resp.data;
 }
 
 export async function updateQuotationById(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.put(ENDPOINTS.updateQuotation, payload);
+  const resp: AxiosResponse = await api.put(QuotationAPI.update, payload);
   return resp.data;
 }

@@ -1,22 +1,19 @@
 import React, { useState } from "react";
 
-import { Plus, X, Trash2 } from "lucide-react";
+import { Plus, Trash2, User, Mail, Phone } from "lucide-react";
 
 // import TermsAndCondition from "../TermsAndCondition";
 import { useEffect } from "react";
 import { getSalesInvoiceById } from "../../api/salesApi";
 import { getAllSalesInvoices } from "../../api/salesApi";
-import toast from "react-hot-toast";
-
+import { showApiError, showSuccess } from "../../components/alert";
 
 import { createDebitNoteFromInvoice } from "../../api/salesApi";
 
 import {
-  Input,
-  Select,
-  Button,
   Textarea,
 } from "../../components/ui/modal/formComponent";
+import { ModalInput, ModalSelect } from "../../components/ui/modal/modalComponent";
 
 import ItemSelect from "../../components/selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
@@ -26,9 +23,9 @@ import {
   paymentMethodOptions,
   currencyOptions,
 } from "../../constants/invoice.constants";
+import PaymentInfoBlock from "../../components/sales/PaymentInfoBlock";
+import AddressBlock from "../../components/ui/modal/AddressBlock";
 
-// import Input from "../ui/Input";
-// import Select from "../ui/Select";
 
 interface DebitNoteFormProps {
   onSubmit?: (data: any) => void;
@@ -60,7 +57,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
     totals,
     ui,
     actions,
-  } = useInvoiceForm(true, () => {}, onSubmit);
+  } = useInvoiceForm(true, () => { }, onSubmit);
   const [debitMeta, setDebitMeta] = useState({
     debitNoteReasonCode: "",
     invcAdjustReason: "",
@@ -83,9 +80,11 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
           })) ?? [];
 
         setInvoiceOptions(options);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to load invoices", err);
+        showApiError(err);
       }
+
     };
 
     fetchInvoices();
@@ -102,9 +101,11 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
         if (res?.status_code === 200) {
           actions.setFormDataFromInvoice(res.data);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch invoice", err);
+        showApiError(err);
       }
+
     };
 
     fetchInvoice();
@@ -121,122 +122,148 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
   };
 
   const handleCreateDebitNote = async () => {
-  try {
-    if (!formData.invoiceNumber) {
-      toast.error("Invoice number missing");
-      return;
+    try {
+      // Invoice validation
+      if (!formData.invoiceNumber) {
+        showApiError("Invoice number missing");
+        return;
+      }
+
+      // Reason validation
+      if (!debitMeta.debitNoteReasonCode) {
+        showApiError("Debit note reason missing");
+        return;
+      }
+
+      const invcAdjustReason = getInvoiceAdjustReason();
+
+      if (!invcAdjustReason) {
+        showApiError("Adjustment reason required");
+        return;
+      }
+
+      //  Payment Terms validation 
+      if (!formData.paymentInformation?.paymentTerms) {
+        showApiError("Please select payment terms");
+        return;
+      }
+
+      const payload = {
+        originalSalesInvoiceNumber: formData.invoiceNumber,
+        DebitNoteReasonCode: debitMeta.debitNoteReasonCode,
+        invcAdjustReason,
+        transactionProgress: debitMeta.transactionProgress,
+        items: formData.items.map((it: any) => ({
+          itemCode: it.itemCode,
+          quantity: Number(it.quantity),
+          price: Number(it.price),
+        })),
+      };
+      const res = await createDebitNoteFromInvoice(payload);
+
+      if (!res || ![200, 201].includes(res.status_code)) {
+        showApiError(res);
+        return;
+      }
+
+      showSuccess(
+        res.message || "Debit note created successfully"
+      );
+
+      onSubmit?.(res);
+
+
+    } catch (err: any) {
+      console.error(err);
+
+      //  Backend error message
+      showApiError(err);
     }
-
-    if (!debitMeta.debitNoteReasonCode) {
-      toast.error("Debit note reason missing");
-      return;
-    }
-
-    const invcAdjustReason = getInvoiceAdjustReason();
-    if (!invcAdjustReason) {
-      toast.error("Adjustment reason required");
-      return;
-    }
-
-    const payload = {
-      originalSalesInvoiceNumber: formData.invoiceNumber,
-      DebitNoteReasonCode: debitMeta.debitNoteReasonCode,
-      invcAdjustReason,
-      transactionProgress: debitMeta.transactionProgress,
-      items: formData.items.map((it: any) => ({
-        itemCode: it.itemCode,
-        quantity: Number(it.quantity),
-        price: Number(it.price),
-      })),
-    };
-
-    const res = await createDebitNoteFromInvoice(payload);
-
-    toast.success("Debit Note created successfully");
-
-    onSubmit?.(res);
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to create Debit Note");
-  }
-};
-
+  };
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
 
   return (
-    <form onSubmit={actions.handleSubmit} className="h-full flex flex-col">
+    <form
+      id="debit-note-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleCreateDebitNote();
+      }}
+      className="flex flex-col"
+    >
+
+
       {/* Tabs */}
-      <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
-        {(["details", "terms", "address"] as const).map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => ui.setActiveTab(tab)}
-            className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${
-              ui.activeTab === tab
-                ? "text-primary bg-card shadow-sm"
-                : "text-muted hover:bg-card/50"
-            }`}
-          >
-            {tab === "details" && "Details"}
-            {tab === "terms" && "Terms & Conditions"}
-            {tab === "address" && "Additional Details"}
-          </button>
-        ))}
+      <div className="bg-app border-b border-theme px-8 shrink-0">
+        <div className="flex gap-8">
+          {(["details", "terms", "address"] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => ui.setActiveTab(tab)}
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab
+                  ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
+                }`}
+            >
+              {tab === "details" && "Details"}
+              {/* {tab === "terms" && "Terms & Conditions"} */}
+              {tab === "address" && "Additional Details"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Tab Content */}
-      <section className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto px-8 py-4">
         {/* DETAILS */}
         {ui.activeTab === "details" && (
-          <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4 mt-8">
-            <div className="col-span-2">
-              <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                Invoice Information
-              </h3>
-              <div className="" title="Credit Note Information">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Select
-                    label="Invoice Number"
-                    options={invoiceOptions}
-                    value={formData.invoiceNumber ?? ""}
-                    onChange={(e) =>
-                      actions.handleInputChange({
-                        target: {
-                          name: "invoiceNumber",
-                          value: e.target.value,
-                        },
-                      } as any)
-                    }
-                  />
+          <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
+            <div className="">
+              <div className="grid grid-cols-6 gap-3 items-end">
 
-                  <Select
-                    label="Debit Note Reason Code"
-                    required
-                    options={DEBIT_NOTE_REASONS}
-                    value={debitMeta.debitNoteReasonCode}
-                    onChange={(e) =>
-                      setDebitMeta({
-                        ...debitMeta,
-                        debitNoteReasonCode: e.target.value,
-                      })
-                    }
-                  />
 
-                  <Select
-                    label="Transaction Progress"
-                    required
-                    options={TRANSACTION_PROGRESS}
-                    value={debitMeta.transactionProgress}
-                    onChange={(e) =>
-                      setDebitMeta({
-                        ...debitMeta,
-                        transactionProgress: e.target.value,
-                      })
-                    }
-                  />
-                </div>
+                <ModalSelect
+                  label="Invoice Number"
+                  options={invoiceOptions}
+                  value={formData.invoiceNumber ?? ""}
+                  onChange={(e) =>
+                    actions.handleInputChange({
+                      target: {
+                        name: "invoiceNumber",
+                        value: e.target.value,
+                      },
+                    } as any)
+                  }
+                />
+
+                <ModalSelect
+                  label="Debit Note Reason Code"
+                  required
+                  options={DEBIT_NOTE_REASONS}
+                  value={debitMeta.debitNoteReasonCode}
+                  onChange={(e) =>
+                    setDebitMeta({
+                      ...debitMeta,
+                      debitNoteReasonCode: e.target.value,
+                    })
+                  }
+                />
+
+                <ModalSelect
+                  label="Transaction Progress"
+                  required
+                  options={TRANSACTION_PROGRESS}
+                  value={debitMeta.transactionProgress}
+                  onChange={(e) =>
+                    setDebitMeta({
+                      ...debitMeta,
+                      transactionProgress: e.target.value,
+                    })
+                  }
+                />
+
 
                 {debitMeta.debitNoteReasonCode === "04" && (
                   <Textarea
@@ -253,34 +280,33 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                     }
                   />
                 )}
-              </div>
 
-              <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <Select
-                      label="Currency"
-                      name="currencyCode"
-                      value={formData.currencyCode}
-                      disabled
-                      onChange={actions.handleInputChange}
-                      options={currencyOptions}
-                    />
-                  </div>
 
-                  <div className="flex flex-col gap-1">
-                    <Select
-                      label="Invoice Status"
-                      name="invoiceStatus"
-                      disabled
-                      value={formData.invoiceStatus}
-                      onChange={actions.handleInputChange}
-                      options={invoiceStatusOptions}
-                    />
-                  </div>
 
-                  {/* <div className="flex flex-col gap-1">
-                          <Select
+                <div>
+                  <ModalSelect
+                    label="Currency"
+                    name="currencyCode"
+                    value={formData.currencyCode}
+                    disabled
+                    onChange={actions.handleInputChange}
+                    options={[...currencyOptions]}
+                  />
+                </div>
+
+                <div>
+                  <ModalSelect
+                    label="Invoice Status"
+                    name="invoiceStatus"
+                    disabled
+                    value={formData.invoiceStatus}
+                    onChange={actions.handleInputChange}
+                    options={[...invoiceStatusOptions]}
+                  />
+                </div>
+
+                {/* <div className="flex flex-col gap-1">
+                          <ModalSelect
                             label="Invoice Type"
                             name="invoiceType"
                             value={formData.invoiceType}
@@ -289,8 +315,8 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                           />
                         </div> */}
 
-                  <div className="flex flex-col gap-1">
-                    <Input
+                {/* <div>
+                    <ModalInput
                       label="Invoice Type"
                       name="invoiceType"
                       type="text"
@@ -299,23 +325,23 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                       onChange={actions.handleInputChange}
                       className="w-full col-span-3"
                     />
-                  </div>
+                  </div> */}
 
-                  {ui.isExport && (
-                    // <CountrySelect
-                    //   value={formData.destnCountryCd}
-                    //   onChange={(c) =>
-                    //     actions.handleInputChange({
-                    //       target: {
-                    //         name: "destnCountryCd",
-                    //         value: c.code,
-                    //       },
-                    //     } as any)
-                    //   }
-                    // />
+                {/* {ui.isExport && (
+                    <CountrySelect
+                      value={formData.destnCountryCd}
+                      onChange={(c) =>
+                        actions.handleInputChange({
+                          target: {
+                            name: "destnCountryCd",
+                            value: c.code,
+                          },
+                        } as any)
+                      }
+                    />
 
-                    <div className="flex flex-col gap-1">
-                      <Input
+                    <div>
+                      <ModalInput
                         label="Export To Country"
                         name="destnCountryCd"
                         type="text"
@@ -325,81 +351,62 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                         className="w-full col-span-3"
                       />
                     </div>
-                  )}
+                  )} */}
 
-                  {ui.isLocal && (
-                    <Input
-                      label="LPO Number"
-                      name="lpoNumber"
-                      value={formData.lpoNumber}
-                      onChange={actions.handleInputChange}
-                      placeholder="local purchase order number"
-                    />
-                  )}
-                </div>
+                {ui.isLocal && (
+                  <ModalInput
+                    label="LPO Number"
+                    name="lpoNumber"
+                    value={formData.lpoNumber}
+                    onChange={actions.handleInputChange}
+                    placeholder="local purchase order number"
+                  />
+                )}
               </div>
+            </div>
 
-              <div className="my-6 h-px bg-gray-600" />
 
-              {/* ITEMS */}
-              <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                Invoiced Items
-              </h3>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-gray-600">
-                  Showing {ui.page * 5 + 1}–
-                  {Math.min((ui.page + 1) * 5, ui.itemCount)} of {ui.itemCount}
-                </span>
-                <div className="flex gap-1">
-                  <button
-                    type="button"
-                    onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
-                    disabled={ui.page === 0}
-                    className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    ← Prev
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => ui.setPage(ui.page + 1)}
-                    disabled={(ui.page + 1) * 5 >= ui.itemCount}
-                    className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next →
-                  </button>
+
+            {/* ITEMS */}
+            <div className="grid grid-cols-[4fr_1fr] gap-4">
+              <div className="bg-card rounded-lg p-2 shadow-sm flex-1">
+                <div className="flex items-center gap-1 ">
+                  <h3 className="text-sm font-semibold text-main">
+                    Invoiced Items
+                  </h3>
                 </div>
-              </div>
 
-              <div className="overflow-x-auto rounded-lg border border-gray-300 bg-white shadow-sm">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-100 text-gray-700 text-xs uppercase tracking-wide">
-                    <tr>
-                      <th className="px-2 py-2 text-left">#</th>
-                      <th className="px-2 py-2 text-left">Item</th>
-                      <th className="px-2 py-2 text-left">Description</th>
-                      <th className="px-2 py-2 text-left">Quantity</th>
-                      <th className="px-2 py-2 text-left">Unit Price</th>
-                      <th className="px-2 py-2 text-left">Discount</th>
-                      <th className="px-2 py-2 text-left">Tax</th>
-                      <th className="px-2 py-2 text-left">Tax Code</th>
-                      <th className="px-2 py-2 text-right">Amount</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {paginatedItems.map((it, idx) => {
-                      const i = ui.page * 5 + idx;
-                      const taxVal = parseFloat(it.vatRate || "0");
-                      const amount =
-                        it.quantity * it.price - it.discount + taxVal;
-                      return (
-                        <tr
-                          key={i}
-                          className="hover:bg-blue-50/40 odd:bg-white even:bg-gray-50"
-                        >
-                          <td className="px-3 py-2 text-center">{i + 1}</td>
-                          <td className="px-2 py-2">
-                            {/* <ItemSelect
+
+                <div >
+                  <table className="w-full border-collapse text-[10px]">
+                    <thead >
+                      <tr className="border-b border-theme">
+                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">#</th>
+                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">Item</th>
+                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">Description</th>
+                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">Quantity</th>
+                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Unit Price</th>
+                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Discount</th>
+                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax</th>
+                        <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax Code</th>
+                        <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">Amount</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody >
+                      {paginatedItems.map((it, idx) => {
+                        const i = ui.page * 5 + idx;
+                        const taxVal = parseFloat(it.vatRate || "0");
+                        const amount =
+                          it.quantity * it.price - it.discount + taxVal;
+                        return (
+                          <tr
+                            key={i}
+                            className="border-b border-theme bg-card row-hover"
+                          >
+                            <td className="px-3 py-2 text-center">{i + 1}</td>
+                            <td className="px-2 py-2">
+                              {/* <ItemSelect
                                     taxCategory={ui.taxCategory}
                                     value={it.itemCode}
                                     onChange={(item) => {
@@ -409,184 +416,226 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                                       });
                                     }}
                                   /> */}
-                            <ItemSelect
-                              taxCategory={ui.taxCategory}
-                              value={it.itemCode}
-                              onChange={(item) => {
-                                actions.handleItemSelect(i, item.id);
-                              }}
-                            />
-                          </td>
+                              <ItemSelect
+                                taxCategory={ui.taxCategory}
+                                value={it.itemCode}
+                                onChange={(item) => {
+                                  actions.handleItemSelect(i, item.id);
+                                }}
+                              />
+                            </td>
 
-                          <td className="px-2 py-2">
-                            <input
-                              className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                              name="description"
-                              value={it.description}
-                              onChange={(e) => actions.handleItemChange(i, e)}
-                            />
-                          </td>
-                          <td className="px-2 py-2">
-                            <input
-                              type="number"
-                              className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                              name="quantity"
-                              value={it.quantity}
-                              onChange={(e) => actions.handleItemChange(i, e)}
-                            />
-                          </td>
-                          <td className="px-2 py-2">
-                            <input
-                              type="number"
-                              className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                              name="price"
-                              value={it.price}
-                              onChange={(e) => actions.handleItemChange(i, e)}
-                            />
-                          </td>
-                          <td className="px-2 py-2">
-                            <input
-                              type="number"
-                              className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                              name="discount"
-                              value={it.discount}
-                              onChange={(e) => actions.handleItemChange(i, e)}
-                            />
-                          </td>
-                          <td className="px-2 py-2">
-                            <input
-                              type="number" // Assuming input is number for entry, stored as string in Type
-                              className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                              name="vatRate"
-                              value={it.vatRate}
-                              onChange={(e) => actions.handleItemChange(i, e)}
-                            />
-                          </td>
-                          <td className="px-2 py-2">
-                            <input
-                              type="string"
-                              className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                              name="vatCode"
-                              value={it.vatCode}
-                              onChange={(e) => actions.handleItemChange(i, e)}
-                            />
-                          </td>
-                          <td className="px-2 py-2 text-right font-semibold text-gray-900 whitespace-nowrap">
-                            {symbol} {amount.toFixed(2)}
-                          </td>
+                            <td className="px-2 py-2">
+                              <input
+                                className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                name="description"
+                                value={it.description}
+                                onChange={(e) => actions.handleItemChange(i, e)}
+                              />
+                            </td>
+                            <td className="px-2 py-2">
+                              <input
+                                type="number"
+                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                name="quantity"
+                                value={it.quantity}
+                                onChange={(e) => actions.handleItemChange(i, e)}
+                              />
+                            </td>
+                            <td className="px-2 py-2">
+                              <input
+                                type="number"
+                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                name="price"
+                                value={it.price}
+                                disabled
+                                onChange={(e) => actions.handleItemChange(i, e)}
+                              />
+                            </td>
+                            <td className="px-2 py-2">
+                              <input
+                                type="number"
+                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                name="discount"
+                                value={it.discount}
+                                onChange={(e) => actions.handleItemChange(i, e)}
+                              />
+                            </td>
+                            <td className="px-2 py-2">
+                              <input
+                                type="number" // Assuming input is number for entry, stored as string in Type
+                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                name="vatRate"
+                                value={it.vatRate}
+                                disabled
+                                onChange={(e) => actions.handleItemChange(i, e)}
+                              />
+                            </td>
+                            <td className="px-2 py-2">
+                              <input
+                                type="string"
+                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                name="vatCode"
+                                value={it.vatCode}
+                                disabled
+                                onChange={(e) => actions.handleItemChange(i, e)}
+                              />
+                            </td>
+                            <td className="px-2 py-2 text-right font-semibold text-gray-900 whitespace-nowrap">
+                              {symbol} {amount.toFixed(2)}
+                            </td>
 
-                          <td className="px-1 py-1 text-center">
-                            <button
-                              type="button"
-                              onClick={() => actions.removeItem(i)}
-                              className="p-1.5 rounded-full text-red-600 hover:bg-red-100 transition"
-                              title="Remove item"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            <td className="px-1 py-1 text-center">
+                              <button
+                                type="button"
+                                onClick={() => actions.removeItem(i)}
+                                className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
+                                title="Remove item"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="flex justify-between mt-3">
+                  <button
+                    type="button"
+                    onClick={actions.addItem}
+                    className="px-4 py-1.5 bg-primary hover:bg-[var(--primary-600)] text-white rounded text-xs font-medium flex items-center gap-1.5 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" /> Add Item
+                  </button>
+                  {(ui.itemCount > 5 || ui.page > 0) && (
+                    <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
+
+                      <div className="text-[11px] text-muted whitespace-nowrap">
+                        Showing {ui.page * 5 + 1} to{" "}
+                        {Math.min((ui.page + 1) * 5, ui.itemCount)} of {ui.itemCount} items
+                      </div>
+
+                      <div className="flex gap-1.5 items-center">
+                        <button
+                          type="button"
+                          onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
+                          disabled={ui.page === 0}
+                          className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+                        >
+                          Previous
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => ui.setPage(ui.page + 1)}
+                          disabled={(ui.page + 1) * 5 >= ui.itemCount}
+                          className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+                        >
+                          Next
+                        </button>
+                      </div>
+
+                    </div>
+                  )}
+
+                </div>
               </div>
 
-              <div className="flex justify-between mt-3">
-                <button
-                  type="button"
-                  onClick={actions.addItem}
-                  className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
-                >
-                  <Plus className="w-4 h-4" /> Add Item
-                </button>
-                <div className="py-2 px-2" />
-              </div>
-            </div>
-
-            {/* RIGHT SIDE */}
-            <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
-              <div className="w-full max-w-sm space-y-6">
-                <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
+              {/* RIGHT SIDE */}
+              <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
+                <div className="bg-card rounded-lg p-2 w-[220px]">
+                  <h3 className="text-[12px] font-semibold text-main mb-2">
                     Customer Details
                   </h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">
-                        Customer Name
-                      </span>
-                      <span className="font-medium text-gray-800">
-                        {customerDetails?.name ?? "Customer Name"}
-                      </span>
+
+                  <div className="flex flex-col gap-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <User size={14} className="text-muted" />
+                      {customerDetails?.name ?? "Customer Name"}
                     </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">
-                        Phone Number
-                      </span>
-                      <span className="font-medium text-gray-800">
-                        {customerDetails?.mobile_no ?? "+123 4567890"}
-                      </span>
+
+                    <div className="flex items-center gap-2 text-[10px] text-muted">
+                      <Mail size={12} />
+                      {customerDetails?.email ?? "customer@gmail.com"}
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-base font-semibold text-gray-700">
-                        Email Address
-                      </span>
-                      <span className="text-base font-bold text-blue-600">
-                        {customerDetails?.email ?? "customer@gmail.com"}
-                      </span>
+
+                    <div className="flex items-center gap-2 text-[10px] text-muted">
+                      <Phone size={12} />
+                      {customerDetails?.mobile_no ?? "+123 4567890"}
                     </div>
+                    {customerDetails && (
+                      <div className="bg-card rounded-lg ">
+                        <h3 className="text-[11px] font-semibold text-main mb-1">
+                          Invoice Information
+                        </h3>
+
+                        <div className="flex flex-col gap-1">
+                          {/* Invoice Type */}
+                          <div className="flex items-center gap-19 text-xs">
+                            <span className="text-muted">Invoice Type</span>
+                            <span className="font-medium text-main">
+                              {formData.invoiceType}
+                            </span>
+                          </div>
+
+                          {/* Destination Country – only for Export */}
+                          {formData.invoiceType === "Export" && (
+                            <div className="flex items-center gap-15 text-xs">
+                              <span className="text-muted">
+                                Destination Country
+                              </span>
+                              <span className="font-medium text-main">
+                                {formData.destnCountryCd || "-"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-                  <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
+                <div className="bg-card rounded-lg p-3 w-[220px]">
+                  <h3 className="text-[13px] font-semibold text-main mb-2">
                     Summary
                   </h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">
-                        Total Items
-                      </span>
-                      <span className="font-medium text-gray-800">
+
+                  <div className="flex flex-col gap-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted">Total Items</span>
+                      <span className="font-medium text-main">
                         {formData.items.length}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">
-                        Sub Total
-                      </span>
-                      <span className="font-medium text-gray-800">
+
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted">Subtotal</span>
+                      <span className="font-medium text-main">
                         {symbol} {totals.subTotal.toFixed(2)}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-600">
-                        Total Tax
-                      </span>
-                      <span className="font-medium text-gray-800">
+
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted">Total Tax</span>
+                      <span className="font-medium text-main">
                         {symbol} {totals.totalTax.toFixed(2)}
                       </span>
                     </div>
-                    <div className="flex justify-between border-t pt-2 mt-2">
-                      <span className="text-base font-semibold text-gray-700">
-                        Total Amount
-                      </span>
-                      <span className="text-base font-bold text-blue-600">
-                        {symbol} {totals.grandTotal.toFixed(2)}
-                      </span>
+
+                    <div className="mt-2 p-2 bg-primary rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-semibold text-white">Grand Total</span>
+                        <span className="text-sm font-bold text-white">
+                          {symbol} {totals.grandTotal.toFixed(2)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="w-full max-w-sm">
-                  <Button
-                    type="button"
-                    className="w-full mt-4"
-                    onClick={handleCreateDebitNote}
-                  >
-                    Create Debit Note
-                  </Button>
-                </div>
+
               </div>
             </div>
           </div>
@@ -602,227 +651,58 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
           </div>
         )} */}
 
-        {/* ADDRESS */}
         {ui.activeTab === "address" && (
-          <div className="grid grid-cols-2 gap-10 mt-10">
-            <div className="col-span-1 shadow px-4 rounded-lg border border-gray-300 bg-white py-6">
-              <div className="flex justify-between">
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  Billing Address
-                </h3>
-              </div>
+          <div className="space-y-6 overflow-hidden">
 
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                <Input
-                  label="Line 1"
-                  name="line1"
-                  value={formData.billingAddress.line1}
-                  onChange={(e) =>
-                    actions.handleInputChange(e, "billingAddress")
-                  }
-                  placeholder="Street, Apartment"
-                />
-                <Input
-                  label="Line 2"
-                  name="line2"
-                  value={formData.billingAddress.line2}
-                  onChange={(e) =>
-                    actions.handleInputChange(e, "billingAddress")
-                  }
-                  placeholder="Landmark, City"
-                />
-                <Input
-                  label="Postal Code"
-                  name="postalCode"
-                  value={formData.billingAddress.postalCode}
-                  onChange={(e) =>
-                    actions.handleInputChange(e, "billingAddress")
-                  }
-                  placeholder="Postal Code"
-                />
-                <Input
-                  label="City"
-                  name="city"
-                  value={formData.billingAddress.city}
-                  onChange={(e) =>
-                    actions.handleInputChange(e, "billingAddress")
-                  }
-                  placeholder="City"
-                />
-                <Input
-                  label="State"
-                  name="state"
-                  value={formData.billingAddress.state}
-                  onChange={(e) =>
-                    actions.handleInputChange(e, "billingAddress")
-                  }
-                  placeholder="State"
-                />
-                <Input
-                  label="Country"
-                  name="country"
-                  value={formData.billingAddress.country}
-                  onChange={(e) =>
-                    actions.handleInputChange(e, "billingAddress")
-                  }
-                  placeholder="Country"
-                />
-              </div>
+            {/*  PAYMENT INFO  */}
+            <PaymentInfoBlock
+              data={formData.paymentInformation}
+              onChange={(
+                e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+              ) =>
+                actions.handleInputChange(e, "paymentInformation")
+              }
+              paymentMethodOptions={paymentMethodOptions}
+            />
 
-              <div className="px-4 py-4 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => ui.setIsShippingOpen(!ui.isShippingOpen)}
-                  className="flex items-center gap-2 text-lg font-semibold text-gray-700 hover:text-gray-900"
-                >
-                  <span className="font-bold">
-                    {ui.isShippingOpen ? "−" : "+"}
-                  </span>{" "}
-                  Shipping Address
-                </button>
+            {/*  BILLING + SHIPPING  */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={ui.sameAsBilling}
-                    onChange={(e) =>
-                      actions.handleSameAsBillingChange(e.target.checked)
-                    }
-                    className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
-                  />
-                  <span className="text-sm text-gray-600">
-                    Same as billing address
-                  </span>
-                </label>
-              </div>
+              {/* Billing */}
+              <AddressBlock
+                type="billing"
+                title="Billing Address"
+                subtitle="Invoice and payment details"
+                data={formData.billingAddress}
+                onChange={(
+                  e: React.ChangeEvent<HTMLInputElement>
+                ) =>
+                  actions.handleInputChange(e, "billingAddress")
+                }
+              />
 
-              {ui.isShippingOpen && (
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                  <Input
-                    label="Line 1"
-                    name="line1"
-                    value={formData.shippingAddress.line1}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "shippingAddress")
-                    }
-                    placeholder="Street, Apartment"
-                    disabled={ui.sameAsBilling}
-                  />
-                  <Input
-                    label="Line 2"
-                    name="line2"
-                    value={formData.shippingAddress.line2}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "shippingAddress")
-                    }
-                    placeholder="Landmark, City"
-                    disabled={ui.sameAsBilling}
-                  />
-                  <Input
-                    label="Postal Code"
-                    name="postalCode"
-                    value={formData.shippingAddress.postalCode}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "shippingAddress")
-                    }
-                    placeholder="Postal Code"
-                    disabled={ui.sameAsBilling}
-                  />
-                  <Input
-                    label="City"
-                    name="city"
-                    value={formData.shippingAddress.city}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "shippingAddress")
-                    }
-                    placeholder="City"
-                    disabled={ui.sameAsBilling}
-                  />
-                  <Input
-                    label="State"
-                    name="state"
-                    value={formData.shippingAddress.state}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "shippingAddress")
-                    }
-                    placeholder="State"
-                    disabled={ui.sameAsBilling}
-                  />
-                  <Input
-                    label="Country"
-                    name="country"
-                    value={formData.shippingAddress.country}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "shippingAddress")
-                    }
-                    placeholder="Country"
-                    disabled={ui.sameAsBilling}
-                  />
-                </div>
-              )}
-            </div>
+              {/* Shipping */}
+              <AddressBlock
+                type="shipping"
+                title="Shipping Address"
+                subtitle="Delivery location"
+                data={formData.shippingAddress}
+                sameAsBilling={ui.sameAsBilling}
+                onSameAsBillingChange={
+                  actions.handleSameAsBillingChange
+                }
+                onChange={(
+                  e: React.ChangeEvent<HTMLInputElement>
+                ) =>
+                  actions.handleInputChange(e, "shippingAddress")
+                }
+              />
 
-            <div className="col-span-1 px-4 shadow rounded-lg border border-gray-300 bg-white py-6 sticky h-fit">
-              <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                Payment Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                <Input
-                  label="Payment Terms"
-                  name="paymentTerms"
-                  value={formData.paymentInformation.paymentTerms}
-                  onChange={(e) =>
-                    actions.handleInputChange(e, "paymentInformation")
-                  }
-                  placeholder="e.g., Net 30, Due on Receipt"
-                />
-                <Select
-                  label="Payment Method"
-                  name="paymentMethod"
-                  value={formData.paymentInformation.paymentMethod}
-                  onChange={(e) =>
-                    actions.handleInputChange(e, "paymentInformation")
-                  }
-                  options={paymentMethodOptions}
-                />
-
-                <Input
-                  label="Bank Name"
-                  name="bankName"
-                  value={formData.paymentInformation.bankName}
-                  onChange={(e) =>
-                    actions.handleInputChange(e, "paymentInformation")
-                  }
-                />
-                <Input
-                  label="Account Number"
-                  name="accountNumber"
-                  value={formData.paymentInformation.accountNumber}
-                  onChange={(e) =>
-                    actions.handleInputChange(e, "paymentInformation")
-                  }
-                />
-                <Input
-                  label="Routing Number / IBAN"
-                  name="routingNumber"
-                  value={formData.paymentInformation.routingNumber}
-                  onChange={(e) =>
-                    actions.handleInputChange(e, "paymentInformation")
-                  }
-                />
-                <Input
-                  label="SWIFT / BIC"
-                  name="swiftCode"
-                  value={formData.paymentInformation.swiftCode}
-                  onChange={(e) =>
-                    actions.handleInputChange(e, "paymentInformation")
-                  }
-                />
-              </div>
             </div>
           </div>
         )}
-      </section>
+
+      </div>
     </form>
   );
 };

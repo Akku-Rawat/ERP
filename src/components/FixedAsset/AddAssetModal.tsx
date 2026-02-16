@@ -26,9 +26,7 @@ const AddAssetModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
 
   if (!isOpen) return null;
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
   };

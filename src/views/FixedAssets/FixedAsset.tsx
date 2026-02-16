@@ -1,17 +1,13 @@
 import React, { useState } from "react";
-import {
-  FaWarehouse,
-  FaChartPie,
-} from "react-icons/fa";
+import { FaWarehouse, FaChartPie } from "react-icons/fa";
 import FixedAssetDashboard from "./FA_Dashboard";
 import AssetRegister from "./AssetRegister";
 
 const fixedAssetTabs = [
   { id: "dashboard", name: "Dashboard", icon: <FaChartPie /> },
-  { id: "assets", name: "Assets", icon: <FaWarehouse /> }, 
-  { id: "maintenance", name: "Maintenance", icon: <FaWarehouse /> }, 
+  { id: "assets", name: "Assets", icon: <FaWarehouse /> },
+  { id: "maintenance", name: "Maintenance", icon: <FaWarehouse /> },
 ];
-
 
 const FixedAssets: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("dashboard");
@@ -50,9 +46,8 @@ const FixedAssets: React.FC = () => {
 
       {/* Content */}
       <div className="p-6">
-       {activeTab === "dashboard" && <FixedAssetDashboard />}
-       {activeTab === "assets" && <AssetRegister />}
-
+        {activeTab === "dashboard" && <FixedAssetDashboard />}
+        {activeTab === "assets" && <AssetRegister />}
       </div>
     </div>
   );

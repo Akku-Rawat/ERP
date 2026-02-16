@@ -7,62 +7,47 @@ interface StatusBadgeProps {
   variant?: BadgeVariant;
 }
 
-
-
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, variant }) => {
   const safeStatus = (status ?? "unknown").toLowerCase();
 
-  
+const getVariant = (): BadgeVariant => {
+  if (variant) return variant;
 
-  const getVariant = (): BadgeVariant => {
-    if (variant) return variant;
+  if (["active", "paid", "completed", "approved"].includes(safeStatus))
+    return "success";
 
-  if (
-  safeStatus.includes("paid") ||
-  safeStatus.includes("completed") ||
-  safeStatus.includes("active") ||
-  safeStatus.includes("approved")
-) {
-  return "success";
-}
-
-
-    if (safeStatus.includes("pending") || safeStatus.includes("processing")) {
-      return "warning";
-    }
+  if (["pending", "processing"].includes(safeStatus))
+    return "warning";
 
   if (
-  safeStatus.includes("overdue") ||
-  safeStatus.includes("cancelled") ||
-  safeStatus.includes("failed") ||
-  safeStatus.includes("rejected")
-) {
-  return "danger";
-}
+    ["inactive", "unactive", "overdue", "cancelled", "failed", "rejected"].includes(safeStatus)
+  )
+    return "danger";
+
+  if (["draft", "new"].includes(safeStatus))
+    return "info";
+
+  return "default";
+};
 
 
-    if (safeStatus.includes("draft") || safeStatus.includes("new")) {
-      return "info";
-    }
+const variantStyles: Record<BadgeVariant, string> = {
+  success: "bg-success text-success border-theme",
+  danger: "bg-danger text-danger border-theme",
+  warning: "bg-warning text-warning border-theme",
+  info: "bg-info text-info border-theme",
+  default: "bg-row-hover text-muted border-theme",
+};
 
-    return "default";
-  };
-
-  const variantStyles: Record<BadgeVariant, string> = {
-    success: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    warning: "bg-amber-50 text-amber-700 border-amber-200",
-    danger: "bg-red-50 text-red-700 border-red-200",
-    info: "bg-blue-50 text-blue-700 border-blue-200",
-    default: "bg-row-hover text-muted border-[var(--border)]",
-  };
 
   const currentVariant = getVariant();
 
-  const displayStatus =
-  status
-    ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
-    : "Unknown";
-
+ const displayStatus = status
+  ? status
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ")
+  : "Unknown";
 
 
   return (

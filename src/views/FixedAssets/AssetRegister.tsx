@@ -48,7 +48,7 @@ const AssetRegister: React.FC = () => {
               <th className="p-3 text-left">Location</th>
               <th className="p-3 text-left">Purchase Date</th>
               <th className="p-3 text-right">Value</th>
-                <th className="p-3 text-center">Status</th>
+              <th className="p-3 text-center">Status</th>
               <th className="p-3 text-center">Action</th>
             </tr>
           </thead>

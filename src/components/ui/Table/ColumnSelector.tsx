@@ -140,7 +140,7 @@ function DropdownContent({
       </div>
 
       {/* Search Input */}
-      <div className="p-3 bg-app border-b border-[var(--border)]">
+      <div className="p-3 bg-card border-b border-[var(--border)]">
         <div className="relative">
           <svg
             className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
@@ -199,7 +199,7 @@ function DropdownContent({
                   checked={visibleKeys.includes(col.key)}
                   onChange={() => toggleColumn(col.key)}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-4 h-4 text-[var(--primary)] rounded border-[var(--border)] bg-card accent-[var(--primary)] cursor-pointer"
+                  className="w-4 h-4 border border-[var(--border)] rounded bg-card accent-[var(--primary)] cursor-pointer"
                 />
                 <div className="flex-1 text-sm text-main font-medium">
                   {col.header}
@@ -229,7 +229,7 @@ function DropdownContent({
       </div>
 
       {/* Footer Actions */}
-      <div className="px-3 py-3 bg-app border-t border-[var(--border)] flex items-center justify-end gap-2">
+      <div className="px-3 py-3 bg-card border-t border-[var(--border)] flex items-center justify-end gap-2">
         <button
           onClick={() => {
             onClose();
@@ -285,7 +285,7 @@ export default function ColumnSelector({
         className={`px-3 py-2 rounded-xl text-sm border transaction-none flex items-center gap-2 ${
           open
             ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
-            : "bg-app text-muted border-[var(--border)] hover:text-primary hover:border-primary"
+            : "bg-card text-muted border-[var(--border)] hover:text-primary hover:border-primary"
         }`}
         aria-haspopup="dialog"
         aria-expanded={open}

@@ -5,13 +5,14 @@ import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import CreateCreditNoteModal from "./CreateCreditNoteModal";
 import { getAllCreditNotes } from "../../api/salesApi";
-
+import { showApiError, showSuccess } from "../../components/alert";
 type CreditNote = {
   noteNo: string;
   invoiceNo: string;
   customer: string;
   date: string;
   amount: number;
+  currency: string;
   status: "Draft" | "Approved" | "Refunded";
 };
 
@@ -20,9 +21,9 @@ const CreditNotesTable: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-const [totalPages, setTotalPages] = useState(1);
-const [totalItems, setTotalItems] = useState(0);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const [openCreateModal, setOpenCreateModal] = useState(false);
 
@@ -34,8 +35,13 @@ const [totalItems, setTotalItems] = useState(0);
       key: "amount",
       header: "Amount",
       align: "right",
-      render: (r) => `₹${r.amount.toLocaleString()}`,
+      render: (r) => (
+        <code className="text-xs px-2 py-1 rounded bg-row-hover text-main font-semibold whitespace-nowrap">
+          {r.amount.toLocaleString()} {r.currency}
+        </code>
+      ),
     },
+
     { key: "date", header: "Date" },
     {
       key: "status",
@@ -55,38 +61,32 @@ const [totalItems, setTotalItems] = useState(0);
         customer: item.customerName,
         date: item.dateOfInvoice,
         amount: Math.abs(item.totalAmount),
+        currency: item.currency,
         status: item.invoiceStatus ?? "",
       }));
 
       setData(mappedData);
       setTotalPages(resp.pagination.total_pages);
       setTotalItems(resp.pagination.total);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to load credit notes", error);
+      showApiError(error);
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
 
- useEffect(() => {
-  fetchCreditNotes();
-}, [page, pageSize]);
-
+  useEffect(() => {
+    fetchCreditNotes();
+  }, [page, pageSize]);
 
   return (
-    
-    
-     <div className="p-8">
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="mt-2 text-muted">Loading invoices…</p>
-        </div>
-      ) : (
-        <Table
+    <div className="p-8">
+      <Table
         columns={columns}
         data={data}
-        loading={loading}
+        loading={loading || initialLoad}
         showToolbar
         enableAdd
         addLabel="Add Credit Note"
@@ -104,9 +104,9 @@ const [totalItems, setTotalItems] = useState(0);
         }}
         onPageChange={setPage}
       />
-      )}
 
-    <CreateCreditNoteModal
+
+      <CreateCreditNoteModal
         isOpen={openCreateModal}
         onClose={() => setOpenCreateModal(false)}
         onSubmit={(payload) => {
@@ -120,6 +120,3 @@ const [totalItems, setTotalItems] = useState(0);
 };
 
 export default CreditNotesTable;
-  
-
-        

@@ -1,14 +1,19 @@
-import { Plus, X, Trash2, FileText } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  FileText,
+} from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 import { useQuotationForm } from "../../hooks/useQuotationForm";
-import { Input, Select, Button } from "../../components/ui/modal/formComponent";
-
+import { Button } from "../../components/ui/modal/formComponent";
+import { ModalSelect, ModalInput } from "../ui/modal/modalComponent";
 import CustomerSelect from "../selects/CustomerSelect";
-
 import ItemSelect from "../selects/ItemSelect";
-
 import Modal from "../../components/ui/modal/modal";
-
+import { showApiError,showSuccess } from "../alert";
+import { User, Mail, Phone, } from "lucide-react";
+import AddressBlock from "../ui/modal/AddressBlock";
+import PaymentInfoBlock from "./PaymentInfoBlock";
 import {
   invoiceStatusOptions,
   currencySymbols,
@@ -28,6 +33,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
   onSubmit,
 }) => {
   if (!isOpen) return null;
+
   const {
     formData,
     customerDetails,
@@ -38,10 +44,20 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     actions,
   } = useQuotationForm(isOpen, onClose, onSubmit);
 
+
+
+
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    actions.handleSubmit(e);
+
+const handleFormSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  await actions.handleSubmit(e);
+};
+
+
+
+  const handlePrint = () => {
+    showSuccess("Print functionality - Opens print dialog");
   };
 
   const footerContent = (
@@ -53,411 +69,478 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
         <Button variant="ghost" onClick={actions.handleReset} type="button">
           Reset
         </Button>
-        <Button variant="primary" onClick={handleFormSubmit}>
-          Save
+        <Button variant="primary" type="submit" onClick={handleFormSubmit}>
+          Save Quotation
         </Button>
       </div>
     </>
   );
 
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Create Invoice"
-      subtitle="Create and manage proforma invoice details"
+      title="Create Quotation"
+      subtitle="Create and manage quotation details"
       icon={FileText}
       footer={footerContent}
       maxWidth="6xl"
-      height="90vh"
+      height="79vh"
     >
-      <form onSubmit={actions.handleSubmit} className="h-full flex flex-col">
+
+      <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
-        <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
-          {(["details", "terms", "address"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => ui.setActiveTab(tab)}
-              className={`relative px-6 py-3 font-semibold text-sm capitalize rounded-t-lg ${
-                ui.activeTab === tab
-                  ? "text-primary bg-card shadow-sm"
-                  : "text-muted hover:bg-card/50"
-              }`}
-            >
-              {tab === "details" && "Details"}
-              {tab === "terms" && "Terms & Conditions"}
-              {tab === "address" && "Additional Details"}
-            </button>
-          ))}
+        <div className="bg-app border-b border-theme px-8 shrink-0">
+          <div className="flex gap-8">
+            {[
+              { key: "details", label: "Details" },
+              { key: "terms", label: "Terms & Conditions" },
+              { key: "address", label: "Additional Details" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => ui.setActiveTab(tab.key as any)}
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab.key
+                  ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
+                  }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Tab Content */}
-        <section className="flex-1 overflow-y-auto p-4 space-y-6">
-          {/* DETAILS */}
+        {/* Main Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto px-8 py-4">
+          {/* DETAILS TAB */}
           {ui.activeTab === "details" && (
-            <div className="grid grid-cols-3 gap-6 max-h-screen overflow-auto p-4 mt-8">
-              <div className="col-span-2">
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  ProfromaInvoice Information
-                </h3>
+            <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
+              <div className="">
+                <div className="grid grid-cols-6 gap-3 items-end">
 
-                <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <CustomerSelect
-                      value={customerNameDisplay}
-                      onChange={actions.handleCustomerSelect}
-                      className="w-full"
-                    />
+                  {/* Customer */}
 
-                    <Input
+                  <CustomerSelect
+                    value={customerNameDisplay}
+                    onChange={actions.handleCustomerSelect}
+                    className="w-full"
+                  />
+
+
+
+                  {/* Date of Quotation */}
+                  <div>
+                    <ModalInput
                       label="Date of Quotation"
-                      name="dateOfQuotation"
                       type="date"
+                      name="dateOfInvoice"
                       value={formData.dateOfInvoice}
                       onChange={actions.handleInputChange}
-                      className="w-full"
+                      required
                     />
+                  </div>
 
-                    <div className="flex flex-col gap-1">
-                      <Input
-                        label="Valid until"
-                        name="dueDate"
-                        type="date"
-                        value={formData.dueDate}
-                        onChange={actions.handleInputChange}
-                        className="w-full col-span-3"
-                      />
-                    </div>
+                  {/* Valid Until */}
+                  <div>
+                    <ModalInput
+                      label="Valid Until"
+                      type="date"
+                      name="dueDate"
+                      value={formData.dueDate}
+                      onChange={actions.handleInputChange}
+                      required
+                    />
+                  </div>
 
-                    <div className="flex flex-col gap-1">
-                      <Select
-                        label="Currency"
-                        name="currencyCode"
-                        value={formData.currencyCode}
-                        onChange={actions.handleInputChange}
-                        options={currencyOptions}
-                      />
-                    </div>
 
-                    <div className="flex flex-col gap-1">
-                      <Select
-                        label="Invoice Status"
-                        name="invoiceStatus"
-                        value={formData.invoiceStatus}
-                        onChange={actions.handleInputChange}
-                        options={invoiceStatusOptions}
-                      />
-                    </div>
+                  {/* Currency */}
+                  <div>
 
-                    {/* <div className="flex flex-col gap-1">
-                          <Select
-                            label="Invoice Type"
-                            name="invoiceType"
-                            value={formData.invoiceType}
-                            onChange={actions.handleInputChange}
-                            options={invoiceTypeOptions}
-                          />
-                        </div> */}
+                    <ModalSelect
+                      label="Currency "
+                      name="currencyCode"
+                      value={formData.currencyCode}
+                      onChange={actions.handleInputChange}
+                      options={[...currencyOptions]}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    >
 
-                    <div className="flex flex-col gap-1">
-                      <Input
-                        label="Invoice Type"
-                        name="invoiceType"
+                    </ModalSelect>
+                  </div>
+
+                  {/* Status */}
+                  <div>
+
+                    <ModalSelect
+                      label="Status"
+                      name="invoiceStatus"
+                      value={formData.invoiceStatus}
+                      onChange={actions.handleInputChange}
+                      options={[...invoiceStatusOptions]}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    >
+
+                    </ModalSelect>
+                  </div>
+
+                  {/* LPO Number */}
+                  {ui.isLocal && (
+                    <div>
+                      <label className="block text-[10px] font-medium text-main mb-1">
+                        LPO Number
+                      </label>
+                      <input
                         type="text"
-                        disabled
-                        value={formData.invoiceType}
-                        onChange={actions.handleInputChange}
-                        className="w-full col-span-3"
-                      />
-                    </div>
-
-                    {ui.isExport && (
-                      // <CountrySelect
-                      //   value={formData.destnCountryCd}
-                      //   onChange={(c) =>
-                      //     actions.handleInputChange({
-                      //       target: {
-                      //         name: "destnCountryCd",
-                      //         value: c.code,
-                      //       },
-                      //     } as any)
-                      //   }
-                      // />
-
-                      <div className="flex flex-col gap-1">
-                        <Input
-                          label="Export To Country"
-                          name="destnCountryCd"
-                          type="text"
-                          disabled
-                          value={formData.destnCountryCd}
-                          onChange={actions.handleInputChange}
-                          className="w-full col-span-3"
-                        />
-                      </div>
-                    )}
-
-                    {ui.isLocal && (
-                      <Input
-                        label="LPO Number"
                         name="lpoNumber"
                         value={formData.lpoNumber}
                         onChange={actions.handleInputChange}
-                        placeholder="local purchase order number"
+                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                       />
-                    )}
-                  </div>
-                </div>
-
-                <div className="my-6 h-px bg-gray-600" />
-
-                {/* ITEMS */}
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  Invoiced Items
-                </h3>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-gray-600">
-                    Showing {ui.page * 5 + 1}–
-                    {Math.min((ui.page + 1) * 5, ui.itemCount)} of{" "}
-                    {ui.itemCount}
-                  </span>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
-                      disabled={ui.page === 0}
-                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ← Prev
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => ui.setPage(ui.page + 1)}
-                      disabled={(ui.page + 1) * 5 >= ui.itemCount}
-                      className="px-2 py-1 text-xs rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next →
-                    </button>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto rounded-lg border border-gray-300 bg-white shadow-sm">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-100 text-gray-700 text-xs uppercase tracking-wide">
-                      <tr>
-                        <th className="px-2 py-2 text-left">#</th>
-                        <th className="px-2 py-2 text-left">Item</th>
-                        <th className="px-2 py-2 text-left">Description</th>
-                        <th className="px-2 py-2 text-left">Quantity</th>
-                        <th className="px-2 py-2 text-left">Unit Price</th>
-                        <th className="px-2 py-2 text-left">Discount</th>
-                        <th className="px-2 py-2 text-left">Tax</th>
-                        <th className="px-2 py-2 text-left">Tax Code</th>
-                        <th className="px-2 py-2 text-right">Amount</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {paginatedItems.map((it, idx) => {
-                        const i = ui.page * 5 + idx;
-                        const taxVal = parseFloat(it.vatRate || "0");
-                        const amount =
-                          it.quantity * it.price - it.discount + taxVal;
-                        return (
-                          <tr
-                            key={i}
-                            className="hover:bg-blue-50/40 odd:bg-white even:bg-gray-50"
-                          >
-                            <td className="px-3 py-2 text-center">{i + 1}</td>
-                            <td className="px-2 py-2">
-                              {/* <ItemSelect
-                                    taxCategory={ui.taxCategory}
-                                    value={it.itemCode}
-                                    onChange={(item) => {
-                                      actions.updateItemDirectly(i, {
-                                        itemCode: item.id,
-                                        price: item.sellingPrice ?? it.price,
-                                      });
-                                    }}
-                                  /> */}
-                              <ItemSelect
-                                taxCategory={ui.taxCategory}
-                                value={it.itemCode}
-                                onChange={(item) => {
-                                  actions.handleItemSelect(i, item.id);
-                                }}
-                              />
-                            </td>
-
-                            <td className="px-2 py-2">
-                              <input
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="description"
-                                value={it.description}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="quantity"
-                                value={it.quantity}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="price"
-                                value={it.price}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="discount"
-                                value={it.discount}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="number" // Assuming input is number for entry, stored as string in Type
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="vatRate"
-                                value={it.vatRate}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2">
-                              <input
-                                type="string"
-                                className="w-full bg-transparent border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                name="vatCode"
-                                value={it.vatCode}
-                                onChange={(e) => actions.handleItemChange(i, e)}
-                              />
-                            </td>
-                            <td className="px-2 py-2 text-right font-semibold text-gray-900 whitespace-nowrap">
-                              {symbol} {amount.toFixed(2)}
-                            </td>
-
-                            <td className="px-1 py-1 text-center">
-                              <button
-                                type="button"
-                                onClick={() => actions.removeItem(i)}
-                                className="p-1.5 rounded-full text-red-600 hover:bg-red-100 transition"
-                                title="Remove item"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="flex justify-between mt-3">
-                  <button
-                    type="button"
-                    onClick={actions.addItem}
-                    className="flex items-center gap-1 rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-200"
-                  >
-                    <Plus className="w-4 h-4" /> Add Item
-                  </button>
-                  <div className="py-2 px-2" />
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* RIGHT SIDE */}
-              <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
-                <div className="w-full max-w-sm space-y-6">
-                  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-                    <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
-                      Customer Details
+              {/* ================= MAIN BODY (TABLE LEFT + RIGHT SIDEBAR) ================= */}
+              <div className="grid grid-cols-[4fr_1fr] gap-4">
+                {/* LEFT: QUOTED ITEMS TABLE  */}
+                <div className="bg-card rounded-lg p-2 shadow-sm flex-1">
+                  <div className="flex items-center gap-1 ">
+                    <h3 className="text-sm font-semibold text-main">
+                      Quoted Items
                     </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Customer Name
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {customerDetails?.name ?? "Customer Name"}
-                        </span>
+                  </div>
+                  <div>
+                    <table className="w-full border-collapse text-[10px]">
+                      <thead>
+                        <tr className="border-b border-theme">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">
+                            #
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">
+                            Item
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">
+                            Description
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">
+                            Qty
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
+                            Unit Price
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[55px]">
+                            Discount
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">
+                            Tax
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[55px]">
+                            Tax Code
+                          </th>
+                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">
+                            Amount
+                          </th>
+                          <th className="px-2 py-3 text-center text-muted font-medium text-[11px] w-[35px]">
+                            -
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paginatedItems.map((it, idx) => {
+                          const i = ui.page * 5 + idx;
+                          const taxVal = parseFloat(it.vatRate || "0");
+                          const amount =
+                            it.quantity * it.price - it.discount + taxVal;
+                          return (
+                            <tr
+                              key={i}
+                              className="border-b border-theme bg-card row-hover"
+                            >
+                              <td className="px-3 py-2 text-[10px]">
+                                {i + 1}
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <ItemSelect
+                                  taxCategory={ui.taxCategory}
+                                  value={it.itemCode}
+                                  onChange={(item) => {
+                                    actions.handleItemSelect(i, item.id);
+                                  }}
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="text"
+                                  name="description"
+                                  value={it.description}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  placeholder="Description"
+                                  className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  name="quantity"
+                                  value={it.quantity}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  min="1"
+                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  name="price"
+                                  value={it.price}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  min="0"
+                                  step="0.01"
+                                  disabled
+                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  name="discount"
+                                  value={it.discount}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  min="0"
+                                  placeholder="0"
+                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  name="vatRate"
+                                  value={it.vatRate}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  min="0"
+                                  placeholder="0"
+                                  disabled
+                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="text"
+                                  name="vatCode"
+                                  value={it.vatCode}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  disabled
+                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-1 py-1.5 text-right">
+                                <span className="text-[10px] font-medium text-main">
+                                  {symbol} {amount.toFixed(2)}
+                                </span>
+                              </td>
+                              <td className="px-1 py-1.5 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => actions.removeItem(i)}
+                                  className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+
+
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+
+                  <div className="mt-3 flex justify-between items-center gap-3">
+
+                    {/* Add Item Button */}
+                    <button
+                      type="button"
+                      onClick={actions.addItem}
+                      className="px-4 py-1.5 bg-primary hover:bg-[var(--primary-600)] text-white rounded text-xs font-medium flex items-center gap-1.5 transition-colors"
+                    >
+                      <Plus size={14} />
+                      Add Item
+                    </button>
+
+                    {/* Pagination Controls */}
+                    {(ui.itemCount > 5 || ui.page > 0) && (
+                      <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
+
+                        <div className="text-[11px] text-muted whitespace-nowrap">
+                          Showing {ui.page * 5 + 1} to{" "}
+                          {Math.min((ui.page + 1) * 5, ui.itemCount)} of {ui.itemCount} items
+                        </div>
+
+                        <div className="flex gap-1.5 items-center">
+                          <button
+                            type="button"
+                            onClick={() => ui.setPage(Math.max(0, ui.page - 1))}
+                            disabled={ui.page === 0}
+                            className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+                          >
+                            Previous
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => ui.setPage(ui.page + 1)}
+                            disabled={(ui.page + 1) * 5 >= ui.itemCount}
+                            className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
+                          >
+                            Next
+                          </button>
+                        </div>
+
                       </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Phone Number
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {customerDetails?.mobile_no ?? "+123 4567890"}
-                        </span>
+                    )}
+
+                  </div>
+
+                </div>
+
+
+                {/* RIGHT: CUSTOMER DETAILS + SUMMARY (STACKED) */}
+                <div className="flex flex-col gap-2">
+
+                  <div className="flex flex-col gap-2">
+                    {/* Customer Details */}
+                    <div className="bg-card rounded-lg p-2 w-[220px]">
+                      <h3 className="text-[12px] font-semibold text-main mb-2">
+                        Customer Details
+                      </h3>
+
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-1.5 text-xs text-main">
+                          <span className="flex items-center gap-2">
+                            <User size={16} className="text-muted" />
+                            <span className="text-xs text-main">
+                              {customerDetails?.name ?? "Customer Name"}
+                            </span>
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-[10px] text-muted">
+                          <Mail size={14} className="text-muted" />
+                          <span>
+                            {customerDetails?.email ?? "customer@gmail.com"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-[10px] text-muted">
+                          <Phone size={14} className="text-muted" />
+                          <span>
+                            {customerDetails?.mobile_no ?? "+123 4567890"}
+                          </span>
+                        </div>
+                        {customerDetails && (
+                          <div className="bg-card rounded-lg ">
+                            <h3 className="text-[11px] font-semibold text-main mb-1">
+                              Invoice Information
+                            </h3>
+
+                            <div className="flex flex-col gap-1">
+                              {/* Invoice Type */}
+                              <div className="flex items-center gap-19 text-xs">
+                                <span className="text-muted">Invoice Type</span>
+                                <span className="font-medium text-main">
+                                  {formData.invoiceType}
+                                </span>
+                              </div>
+
+                              {/* Destination Country – only for Export */}
+                              {formData.invoiceType === "Export" && (
+                                <div className="flex items-center gap-15 text-xs">
+                                  <span className="text-muted">
+                                    Destination Country
+                                  </span>
+                                  <span className="font-medium text-main">
+                                    {formData.destnCountryCd || "-"}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-base font-semibold text-gray-700">
-                          Email Address
-                        </span>
-                        <span className="text-base font-bold text-blue-600">
-                          {customerDetails?.email ?? "customer@gmail.com"}
-                        </span>
+                    </div>
+
+                    {/* Summary */}
+                    <div className="bg-card rounded-lg p-3  w-[220px]">
+                      <h3 className="text-[13px] font-semibold text-main mb-2">
+                        Summary
+                      </h3>
+
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-19 text-xs">
+                          <span className="text-muted">Total Items</span>
+                          <span className="font-medium text-main">
+                            {formData.items.length}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-19 text-xs">
+                          <span className="text-muted">Subtotal</span>
+                          <span className="font-medium text-main">
+                            {symbol} {totals.subTotal.toFixed(2)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-19 text-xs">
+                          <span className="text-muted">Total Tax</span>
+                          <span className="font-medium text-main">
+                            {symbol} {totals.totalTax.toFixed(2)}
+                          </span>
+                        </div>
+
+                        <div className="mt-2 p-2 bg-primary rounded-lg w-full">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-semibold text-white">
+                              Grand Total
+                            </span>
+
+                            <span className="text-sm font-bold text-white">
+                              {symbol} {totals.grandTotal.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+
                       </div>
                     </div>
                   </div>
 
-                  <div className="w-full max-w-sm rounded-lg border border-gray-300 p-4 bg-white shadow">
-                    <h3 className="mb-3 text-lg font-semibold text-gray-700 underline">
-                      Summary
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Total Items
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {formData.items.length}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Sub Total
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {symbol} {totals.subTotal.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-600">
-                          Total Tax
-                        </span>
-                        <span className="font-medium text-gray-800">
-                          {symbol} {totals.totalTax.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between border-t pt-2 mt-2">
-                        <span className="text-base font-semibold text-gray-700">
-                          Total Amount
-                        </span>
-                        <span className="text-base font-bold text-blue-600">
-                          {symbol} {totals.grandTotal.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* TERMS */}
+
+
+          {/* TERMS TAB */}
           {ui.activeTab === "terms" && (
-            <div className="h-full w-full mt-10">
+            <div className="w-full mt-3">
               <TermsAndCondition
                 terms={formData.terms?.selling}
                 setTerms={actions.setTerms}
@@ -465,227 +548,54 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
             </div>
           )}
 
-          {/* ADDRESS */}
+
+
+
           {ui.activeTab === "address" && (
-            <div className="grid grid-cols-2 gap-10 mt-10">
-              <div className="col-span-1 shadow px-4 rounded-lg border border-gray-300 bg-white py-6">
-                <div className="flex justify-between">
-                  <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                    Billing Address
-                  </h3>
-                </div>
+            <div className="space-y-6 overflow-hidden">
 
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                  <Input
-                    label="Line 1"
-                    name="line1"
-                    value={formData.billingAddress.line1}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "billingAddress")
-                    }
-                    placeholder="Street, Apartment"
-                  />
-                  <Input
-                    label="Line 2"
-                    name="line2"
-                    value={formData.billingAddress.line2}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "billingAddress")
-                    }
-                    placeholder="Landmark, City"
-                  />
-                  <Input
-                    label="Postal Code"
-                    name="postalCode"
-                    value={formData.billingAddress.postalCode}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "billingAddress")
-                    }
-                    placeholder="Postal Code"
-                  />
-                  <Input
-                    label="City"
-                    name="city"
-                    value={formData.billingAddress.city}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "billingAddress")
-                    }
-                    placeholder="City"
-                  />
-                  <Input
-                    label="State"
-                    name="state"
-                    value={formData.billingAddress.state}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "billingAddress")
-                    }
-                    placeholder="State"
-                  />
-                  <Input
-                    label="Country"
-                    name="country"
-                    value={formData.billingAddress.country}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "billingAddress")
-                    }
-                    placeholder="Country"
-                  />
-                </div>
+              {/* PAYMENT INFO */}
+              <PaymentInfoBlock
+                data={formData.paymentInformation}
+                onChange={(e) =>
+                  actions.handleInputChange(e, "paymentInformation")
+                }
+                paymentMethodOptions={paymentMethodOptions}
+              />
 
-                <div className="px-4 py-4 flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => ui.setIsShippingOpen(!ui.isShippingOpen)}
-                    className="flex items-center gap-2 text-lg font-semibold text-gray-700 hover:text-gray-900"
-                  >
-                    <span className="font-bold">
-                      {ui.isShippingOpen ? "−" : "+"}
-                    </span>{" "}
-                    Shipping Address
-                  </button>
+              {/* BILLING + SHIPPING */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={ui.sameAsBilling}
-                      onChange={(e) =>
-                        actions.handleSameAsBillingChange(e.target.checked)
-                      }
-                      className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
-                    />
-                    <span className="text-sm text-gray-600">
-                      Same as billing address
-                    </span>
-                  </label>
-                </div>
+                {/* Billing */}
+                <AddressBlock
+                  type="billing"
+                  title="Billing Address"
+                  subtitle="Invoice and payment details"
+                  data={formData.billingAddress}
+                  onChange={(e) =>
+                    actions.handleInputChange(e, "billingAddress")
+                  }
+                />
 
-                {ui.isShippingOpen && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                    <Input
-                      label="Line 1"
-                      name="line1"
-                      value={formData.shippingAddress.line1}
-                      onChange={(e) =>
-                        actions.handleInputChange(e, "shippingAddress")
-                      }
-                      placeholder="Street, Apartment"
-                      disabled={ui.sameAsBilling}
-                    />
-                    <Input
-                      label="Line 2"
-                      name="line2"
-                      value={formData.shippingAddress.line2}
-                      onChange={(e) =>
-                        actions.handleInputChange(e, "shippingAddress")
-                      }
-                      placeholder="Landmark, City"
-                      disabled={ui.sameAsBilling}
-                    />
-                    <Input
-                      label="Postal Code"
-                      name="postalCode"
-                      value={formData.shippingAddress.postalCode}
-                      onChange={(e) =>
-                        actions.handleInputChange(e, "shippingAddress")
-                      }
-                      placeholder="Postal Code"
-                      disabled={ui.sameAsBilling}
-                    />
-                    <Input
-                      label="City"
-                      name="city"
-                      value={formData.shippingAddress.city}
-                      onChange={(e) =>
-                        actions.handleInputChange(e, "shippingAddress")
-                      }
-                      placeholder="City"
-                      disabled={ui.sameAsBilling}
-                    />
-                    <Input
-                      label="State"
-                      name="state"
-                      value={formData.shippingAddress.state}
-                      onChange={(e) =>
-                        actions.handleInputChange(e, "shippingAddress")
-                      }
-                      placeholder="State"
-                      disabled={ui.sameAsBilling}
-                    />
-                    <Input
-                      label="Country"
-                      name="country"
-                      value={formData.shippingAddress.country}
-                      onChange={(e) =>
-                        actions.handleInputChange(e, "shippingAddress")
-                      }
-                      placeholder="Country"
-                      disabled={ui.sameAsBilling}
-                    />
-                  </div>
-                )}
-              </div>
+                {/* Shipping */}
+                <AddressBlock
+                  type="shipping"
+                  title="Shipping Address"
+                  subtitle="Delivery location"
+                  data={formData.shippingAddress}
+                  sameAsBilling={ui.sameAsBilling}
+                  onSameAsBillingChange={
+                    actions.handleSameAsBillingChange
+                  }
+                  onChange={(e) =>
+                    actions.handleInputChange(e, "shippingAddress")
+                  }
+                />
 
-              <div className="col-span-1 px-4 shadow rounded-lg border border-gray-300 bg-white py-6 sticky h-fit">
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  Payment Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 gap-5">
-                  <Input
-                    label="Payment Terms"
-                    name="paymentTerms"
-                    value={formData.paymentInformation.paymentTerms}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "paymentInformation")
-                    }
-                    placeholder="e.g., Net 30, Due on Receipt"
-                  />
-                  <Select
-                    label="Payment Method"
-                    name="paymentMethod"
-                    value={formData.paymentInformation.paymentMethod}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "paymentInformation")
-                    }
-                    options={paymentMethodOptions}
-                  />
-
-                  <Input
-                    label="Bank Name"
-                    name="bankName"
-                    value={formData.paymentInformation.bankName}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "paymentInformation")
-                    }
-                  />
-                  <Input
-                    label="Account Number"
-                    name="accountNumber"
-                    value={formData.paymentInformation.accountNumber}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "paymentInformation")
-                    }
-                  />
-                  <Input
-                    label="Routing Number / IBAN"
-                    name="routingNumber"
-                    value={formData.paymentInformation.routingNumber}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "paymentInformation")
-                    }
-                  />
-                  <Input
-                    label="SWIFT / BIC"
-                    name="swiftCode"
-                    value={formData.paymentInformation.swiftCode}
-                    onChange={(e) =>
-                      actions.handleInputChange(e, "paymentInformation")
-                    }
-                  />
-                </div>
               </div>
             </div>
           )}
-        </section>
+        </div>
       </form>
     </Modal>
   );

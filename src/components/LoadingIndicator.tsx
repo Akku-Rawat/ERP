@@ -16,11 +16,11 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
       className={`flex flex-col items-center justify-center py-12 space-y-3 ${className}`}
     >
       <div
-        className="rounded-full border-4 border-indigo-500 border-t-transparent animate-spin backdrop-blur-sm bg-white/30"
+        className="rounded-full border-4 border-theme border-t-primary animate-spin bg-card/40 backdrop-blur-sm"
         style={{ width: size, height: size }}
       />
 
-      {label && <p className="text-sm text-gray-500 tracking-wide">{label}</p>}
+      {label && <p className="text-sm text-muted tracking-wide">{label}</p>}
     </div>
   );
 };

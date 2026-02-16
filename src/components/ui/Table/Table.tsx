@@ -1,16 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useLayoutEffect } from "react";
-import { createPortal } from "react-dom";
+import React, { useRef } from "react";
 import { useTableLogic } from "./useTableLogic";
 import type { Column } from "./type";
 import ColumnSelector from "./ColumnSelector";
 import Pagination from "../../Pagination";
-import {
-  FaFilter,
-  FaSortAmountDown,
-  FaSortAmountUp,
-  FaSearch,
-} from "react-icons/fa";
+import { FaSortAmountDown, FaSortAmountUp, FaSearch } from "react-icons/fa";
 
 interface TableProps<T> {
   columns: Column<T>[];
@@ -48,12 +41,11 @@ const SkeletonRow: React.FC<{ columnsCount: number }> = ({ columnsCount }) => (
   <tr className="bg-transparent">
     {Array.from({ length: columnsCount }).map((_, idx) => (
       <td key={idx} className="px-5 py-3.5 border-b border-[var(--border)]/20">
-        <div className="h-4 bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded" />
+        <div className="h-4 bg-gray-300 animate-pulse rounded"/>
       </td>
     ))}
   </tr>
 );
-
 
 interface FilterFieldProps {
   label: string;
@@ -125,9 +117,10 @@ function Table<T extends Record<string, any>>({
     }
   };
 
-
   const displayData = serverSide ? data : (processedData ?? []);
-  const visibleColumns = loading ? columns : columns.filter((col) => visibleKeys.includes(col.key));
+  const visibleColumns = loading
+    ? columns
+    : columns.filter((col) => visibleKeys.includes(col.key));
 
   return (
     <div className="bg-card rounded-2xl border border-[var(--border)] flex flex-col shadow-sm transition-all relative z-10 w-full overflow-hidden">
@@ -149,7 +142,7 @@ function Table<T extends Record<string, any>>({
                       : setSearch(e.target.value)
                   }
                   placeholder={toolbarPlaceholder}
-                  className="w-full pl-10 pr-4 py-2 bg-app border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2 bg-card border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
                 />
               </>
             )}
@@ -160,7 +153,7 @@ function Table<T extends Record<string, any>>({
               {extraFilters}
             </div>
           )}
-          
+
           <div className="flex items-center gap-2 shrink-0">
             {loading ? (
               <>
@@ -191,9 +184,6 @@ function Table<T extends Record<string, any>>({
                     Sort
                   </span>
                 </button>
-
-
-
 
                 {enableColumnSelector && (
                   <ColumnSelector
@@ -239,7 +229,6 @@ function Table<T extends Record<string, any>>({
                   <th
                     key={column.key}
                     className={`px-5 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted border-b border-[var(--border)] bg-card whitespace-nowrap ${getAlignment(column.align)}`}
-                    style={{ backgroundColor: "var(--card)" }}
                   >
                     {loading ? (
                       <div className="h-3 bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded" />
@@ -309,8 +298,6 @@ function Table<T extends Record<string, any>>({
               <div className="text-[9px] font-black uppercase text-muted tracking-[0.2em] opacity-50">
                 Total: {totalItems}
               </div>
-
-
             </div>
             {/* Action Buttons */}
             {onPageSizeChange && (
@@ -321,7 +308,7 @@ function Table<T extends Record<string, any>>({
                 <select
                   value={pageSize}
                   onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                  className="px-3 py-1.5 bg-app border border-[var(--border)] rounded-lg text-[10px] font-black uppercase text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
+                 className="px-3 py-1.5 bg-card border border-[var(--border)] rounded-lg text-[10px] font-black uppercase text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
                 >
                   {pageSizeOptions.map((size) => (
                     <option key={size} value={size}>

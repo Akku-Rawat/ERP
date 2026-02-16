@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { FaCalendarAlt, FaClock } from "react-icons/fa";
-import { CalendarDays, XCircle } from "lucide-react";
+import { XCircle } from "lucide-react";
 import Table from "../../../components/ui/Table/Table";
 import StatusBadge from "../../../components/ui/Table/StatusBadge";
 import ActionButton from "../../../components/ui/Table/ActionButton";
-import Modal from "../../../components/ui/modal/modal";
-import { Card } from "../../../components/ui/modal/formComponent";
 import type { Column } from "../../../components/ui/Table/type";
 import { useTableLogic } from "../../../components/ui/Table/useTableLogic";
 import { getLeaveHistoryByEmployee } from "../../../api/leaveApi";
@@ -14,14 +12,10 @@ import { cancelLeave } from "../../../api/leaveApi";
 import type { LeaveUI } from "../../../types/leave/uiLeave";
 import { mapLeaveFromApi } from "../../../types/leave/leaveMapper";
 
-
-
-
 interface HistoryProps {
   onNewRequest: () => void;
   onEditLeave: (leaveId: string) => void;
 }
-
 
 const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
   const [selectedLeave, setSelectedLeave] = useState<LeaveUI | null>(null);
@@ -32,8 +26,6 @@ const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-
-
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -56,10 +48,6 @@ const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
     fetchHistory();
   }, [page, pageSize]);
 
-
-
-
-
   const handleCancelLeave = async (leaveId: string) => {
     try {
       setLoading(true);
@@ -68,11 +56,7 @@ const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
 
       // Update UI without refetch
       setLeaves((prev) =>
-        prev.map((l) =>
-          l.id === leaveId
-            ? { ...l, status: "Cancelled" }
-            : l
-        )
+        prev.map((l) => (l.id === leaveId ? { ...l, status: "Cancelled" } : l)),
       );
     } catch (err) {
       console.error("Cancel leave failed", err);
@@ -81,12 +65,8 @@ const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
     }
   };
 
-
-
-
   /*  Columns */
   const columns: Column<LeaveUI>[] = [
-
     {
       key: "type",
       header: "Type",
@@ -143,7 +123,6 @@ const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
             type="view"
             iconOnly
             onClick={() => setSelectedLeaveId(l.id)}
-
           />
 
           {/* Cancel (only for Pending, but space stays consistent) */}
@@ -160,26 +139,21 @@ const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
           )}
 
           {l.status === "Pending" && (
-   <ActionButton
-  type="edit"
-  iconOnly
-  onClick={() => onEditLeave(l.id)}
-/>
-
-
+            <ActionButton
+              type="edit"
+              iconOnly
+              onClick={() => onEditLeave(l.id)}
+            />
           )}
         </div>
       ),
-    }
+    },
   ];
 
   const table = useTableLogic<LeaveUI>({
     columns,
     data: leaves,
   });
-
-
-
 
   const historyFilters = (
     <>
@@ -245,7 +219,6 @@ const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
 
   return (
     <div className="p-8">
-
       <Table
         columns={columns}
         data={table.processedData}
@@ -268,14 +241,10 @@ const History: React.FC<HistoryProps> = ({ onNewRequest, onEditLeave }) => {
         }}
       />
 
-
       <LeaveDetailModal
         leaveId={selectedLeaveId}
         onClose={() => setSelectedLeaveId(null)}
       />
-
-
-
     </div>
   );
 };

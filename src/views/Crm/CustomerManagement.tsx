@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CustomerDetailView from "./CustomerDetailView";
-import toast from "react-hot-toast";
-
+import { showLoading,showApiError,showSuccess,closeSwal } from "../../components/alert";
 import {
   getAllCustomers,
   deleteCustomerById,
@@ -20,6 +19,8 @@ import ActionButton, {
 } from "../../components/ui/Table/ActionButton";
 
 import type { Column } from "../../components/ui/Table/type";
+import { FilterSelect } from "../../components/ui/modal/modalComponent";
+import Swal from "sweetalert2";
 
 interface Props {
   onAdd: () => void;
@@ -34,47 +35,97 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [custLoading, setCustLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editCustomer, setEditCustomer] = useState<CustomerDetail | null>(null);
-
+  const [initialLoad, setInitialLoad] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [allCustomers, setAllCustomers] = useState<CustomerSummary[]>([]);
+  const [taxCategory, setTaxCategory] = useState<string>("");
 
-  const fetchCustomers = async () => {
-    try {
-      setCustLoading(true);
-      const response = await getAllCustomers(page, pageSize);
-      setCustomers(response.data);
-      setTotalPages(response.pagination?.total_pages || 1);
-      setTotalItems(response.pagination?.total || 1);
-    } catch (err) {
-      console.error("Error loading customers:", err);
-    } finally {
-      setCustLoading(false);
-    }
-  };
+
+const fetchCustomers = async () => {
+  try {
+    setCustLoading(true);
+
+    const response = await getAllCustomers(
+      page,
+      pageSize,
+      taxCategory
+    );
+
+    setCustomers(response.data);
+    setTotalPages(response.pagination?.total_pages || 1);
+    setTotalItems(response.pagination?.total || 1);
+
+  } catch (error) {
+    console.error("Error loading customers:", error);
+    showApiError(error);
+  } finally {
+    setCustLoading(false);
+    setInitialLoad(false);
+  }
+};
+
 
   useEffect(() => {
     fetchCustomers();
-  }, [page, pageSize]);
+  }, [page, pageSize, taxCategory]);
 
-  const handleDelete = async (customerId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
 
-    if (!window.confirm(`Delete customer ${customerId}?`)) return;
-
+  const fetchAllCustomers = async () => {
     try {
-      setCustLoading(true);
-      await deleteCustomerById(customerId);
-      setCustomers((prev) => prev.filter((c) => c.id !== customerId));
-      toast.success("Customer deleted successfully.");
-    } catch (err: any) {
-      console.error("Delete error:", err);
-      toast.error(err.response?.data?.message || "Failed to delete customer.");
-    } finally {
-      setCustLoading(false);
+      const resp = await getAllCustomers(1, 1000);
+      setAllCustomers(resp.data || []);
+    } catch (err) {
+      console.error("Error loading all customers:", err);
     }
   };
+
+  const ensureAllCustomers = async () => {
+    if (!allCustomers.length) {
+      await fetchAllCustomers();
+    }
+  };
+
+
+ const handleDelete = async (
+  customerId: string,
+  e: React.MouseEvent
+) => {
+  e.stopPropagation();
+
+  const confirm = await Swal.fire({
+    icon: "warning",
+    title: "Are you sure?",
+    text: `Delete customer ${customerId}?`,
+    showCancelButton: true,
+    confirmButtonColor: "#ef4444",
+    cancelButtonColor: "#6b7280",
+    confirmButtonText: "Yes, delete",
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  try {
+    showLoading("Deleting Customer...");
+
+    await deleteCustomerById(customerId);
+
+    closeSwal();
+
+    setCustomers((prev) =>
+      prev.filter((c) => c.id !== customerId)
+    );
+
+    showSuccess("Customer deleted successfully.");
+
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
 
   const handleAddCustomer = () => {
     setEditCustomer(null);
@@ -87,23 +138,40 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
       const customer = await getCustomerByCustomerCode(id);
       setEditCustomer(customer.data ?? customer);
       setShowModal(true);
-    } catch (err) {
-      console.error("Failed to fetch customer:", err);
-      alert("Unable to fetch full customer details.");
-    }
+    } catch (error) {
+  console.error("Failed to fetch customer:", error);
+  showApiError(error);
+}
   };
 
   const handleCustomerSaved = async () => {
     setShowModal(false);
     setEditCustomer(null);
     await fetchCustomers();
-    toast.success(editCustomer ? "Customer updated!" : "Customer created!");
+    showSuccess(editCustomer ? "Customer updated!" : "Customer created!");
   };
 
-  const handleRowClick = (customer: CustomerDetail) => {
-    setSelectedCustomer(customer);
-    setViewMode("detail");
+  const handleRowClick = async (customer: CustomerSummary) => {
+    try {
+      setCustLoading(true);
+
+      //  Ensure sidebar data loaded
+      await ensureAllCustomers();
+
+      //  Fetch full customer detail
+      const res = await getCustomerByCustomerCode(customer.id);
+      const fullCustomer = res.data ?? res;
+
+      setSelectedCustomer(fullCustomer);
+      setViewMode("detail");
+    } catch (err) {
+      console.error("Failed to load customer detail:", err);
+      showApiError(err);
+    } finally {
+      setCustLoading(false);
+    }
   };
+
 
   const handleBack = () => {
     setViewMode("table");
@@ -156,7 +224,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
         <ActionGroup>
           <ActionButton
             type="view"
-            onClick={() => handleRowClick(c as unknown as CustomerDetail)}
+            onClick={() => handleRowClick(c)}
             iconOnly={false}
           />
           <ActionMenu
@@ -168,21 +236,15 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
     },
   ];
 
-return (
-  <div className="p-8">
-    {viewMode === "table" ? (
-      <>
-        {custLoading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <p className="mt-2 text-muted">Loading customers…</p>
-          </div>
-        ) : (
+  return (
+    <div className="p-8">
+      {viewMode === "table" ? (
+        <>
           <Table
             columns={columns}
             data={customers}
             showToolbar
-            loading={custLoading}
+            loading={custLoading || initialLoad}
             onPageSizeChange={(size) => setPageSize(size)}
             pageSizeOptions={[10, 25, 50, 100]}
             searchValue={searchTerm}
@@ -196,33 +258,47 @@ return (
             pageSize={pageSize}
             totalItems={totalItems}
             onPageChange={setPage}
+            extraFilters={
+              <div>
+                <FilterSelect
+                  value={taxCategory}
+                  onChange={(e) => {
+                    setPage(1);
+                    setTaxCategory(e.target.value);
+                  }}
+                  options={[
+                    { label: "Export", value: "Export" },
+                    { label: "Non-Export", value: "Non-Export" },
+                    { label: "LPO", value: "LPO" },
+                  ]}
+                />
+              </div>
+            }
           />
-        )}
-      </>
-    ) : selectedCustomer ? (
-      <CustomerDetailView
-        customer={selectedCustomer}
-        customers={customers}
-        onBack={handleBack}
-        onCustomerSelect={handleRowClick}
-        onAdd={onAdd}
-        onEdit={handleEditCustomer}
+        </>
+      ) : selectedCustomer ? (
+        <CustomerDetailView
+          customer={selectedCustomer}
+          customers={allCustomers}
+          onBack={handleBack}
+          onCustomerSelect={handleRowClick}
+          onAdd={onAdd}
+          onEdit={handleEditCustomer}
+        />
+      ) : null}
+
+      <CustomerModal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setEditCustomer(null);
+        }}
+        onSubmit={handleCustomerSaved}
+        initialData={editCustomer}
+        isEditMode={!!editCustomer}
       />
-    ) : null}
-
-    <CustomerModal
-      isOpen={showModal}
-      onClose={() => {
-        setShowModal(false);
-        setEditCustomer(null);
-      }}
-      onSubmit={handleCustomerSaved}
-      initialData={editCustomer}
-      isEditMode={!!editCustomer}
-    />
-  </div>
-);
-
+    </div>
+  );
 };
 
 export default CustomerManagement;

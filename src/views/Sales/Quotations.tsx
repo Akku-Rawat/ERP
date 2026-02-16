@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-
+import { showApiError, showSuccess } from "../../components/alert";
 import { getAllQuotations, getQuotationById } from "../../api/quotationApi";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { QuotationSummary, QuotationData } from "../../types/quotation";
-
 import Table from "../../components/ui/Table/Table";
 import ActionButton, {
   ActionGroup,
@@ -21,6 +19,8 @@ interface QuotationTableProps {
   onAddQuotation?: () => void;
   onExportQuotation?: () => void;
 }
+type QuotationStatus = "Draft" | "Sent" | "Pending" | "Accepted" | "Rejected";
+
 
 const QuotationsTable: React.FC<QuotationTableProps> = ({
   onAddQuotation,
@@ -29,15 +29,16 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [quotations, setQuotations] = useState<QuotationSummary[]>([]);
   const [loading, setLoading] = useState(true);
-const [status, setStatus] = useState("");
-const [fromDate, setFromDate] = useState("");
-const [toDate, setToDate] = useState("");
+  const [status, setStatus] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   const [selectedQuotation, setSelectedQuotation] =
     useState<QuotationData | null>(null);
@@ -46,6 +47,18 @@ const [toDate, setToDate] = useState("");
 
   // Company data state
   const [company, setCompany] = useState<any>(null);
+
+  const QUOTATION_STATUS_TRANSITIONS: Record<QuotationStatus, QuotationStatus[]> = {
+    Draft: ["Sent", "Pending"],
+    Sent: ["Pending", "Accepted", "Rejected"],
+    Pending: ["Accepted", "Rejected"],
+    Accepted: [],
+    Rejected: [],
+  };
+  const CRITICAL_QUOTATION_STATUSES: QuotationStatus[] = ["Accepted"];
+
+
+
 
   /* ===============================
      FETCH COMPANY DATA
@@ -68,16 +81,16 @@ const [toDate, setToDate] = useState("");
   const fetchQuotations = async () => {
     try {
       setLoading(true);
-    const res = await getAllQuotations(page, pageSize, {
-      search: searchTerm,
-      status,
-      fromDate,
-      toDate,
-    });
+
+      const res = await getAllQuotations(page, pageSize, {
+        search: searchTerm,
+        status,
+        fromDate,
+        toDate,
+      });
 
       if (!res || res.status_code !== 200) {
         console.error("Invalid response:", res);
-        toast.error("Failed to load quotations");
         setQuotations([]);
         return;
       }
@@ -101,19 +114,19 @@ const [toDate, setToDate] = useState("");
       setTotalItems(res.data?.pagination?.total || mapped.length);
     } catch (error) {
       console.error("Error fetching quotations:", error);
-      toast.error("Failed to load quotations");
       setQuotations([]);
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
   useEffect(() => {
-    fetchCompany("1").catch(() => toast.error("Failed to load company data"));
+    fetchCompany("1").catch(() => console.error("Failed to load company data"));
   }, []);
 
   useEffect(() => {
     fetchQuotations();
-  },[page, pageSize, searchTerm, status, fromDate, toDate]);
+  }, [page, pageSize, searchTerm, status, fromDate, toDate]);
 
   /* ===============================
      ACTIONS
@@ -124,12 +137,12 @@ const [toDate, setToDate] = useState("");
     try {
       const quotationRes = await getQuotationById(quotationNumber);
       if (!quotationRes || quotationRes.status_code !== 200) {
-        toast.error("Failed to load quotation");
+        console.error("Failed to load quotation");
         return;
       }
 
       if (!company) {
-        toast.error("Company data not loaded");
+        console.error("Company data not loaded");
         return;
       }
 
@@ -140,7 +153,7 @@ const [toDate, setToDate] = useState("");
       setPdfUrl(url as string);
       setPdfOpen(true);
     } catch (error) {
-      toast.error("Failed to generate preview");
+      showApiError(error);
     }
   };
 
@@ -151,7 +164,7 @@ const [toDate, setToDate] = useState("");
     e?.stopPropagation();
 
     if (!company) {
-      toast.error("Company data not loaded");
+      console.error("Company data not loaded");
       return;
     }
 
@@ -161,10 +174,10 @@ const [toDate, setToDate] = useState("");
       getCompanyById(COMPANY_ID);
 
       await generateQuotationPDF(res.data, company, "save");
-      toast.success("Quotation downloaded");
+      showSuccess("Quotation downloaded");
     } catch (error) {
       console.error("Download error:", error);
-      toast.error("Download failed");
+      showApiError(error);
     }
   };
 
@@ -174,8 +187,6 @@ const [toDate, setToDate] = useState("");
     setSelectedQuotation(null);
     setPdfOpen(false);
   };
-
-
 
   /* ===============================
      TABLE COLUMNS
@@ -229,49 +240,33 @@ const [toDate, setToDate] = useState("");
   ================================ */
   return (
     <div className="p-8">
-      {loading && quotations.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          <p className="mt-2 text-muted">Loading quotations…</p>
-        </div>
-      ) : (
-        <Table
-          loading={loading}
-          serverSide={true}
-          columns={columns}
-          data={quotations}
-          rowKey={(row) => row.quotationNumber}
-          showToolbar
-          searchValue={searchTerm}
-          onSearch={setSearchTerm}
-          enableColumnSelector
-           extraFilters={
-    <SalesFilter
-      status={status}
-      setStatus={setStatus}
-      fromDate={fromDate}
-      setFromDate={setFromDate}
-      toDate={toDate}
-      setToDate={setToDate}
-    />
-  }
-          enableAdd
-          addLabel="Add Quotation"
-          onAdd={onAddQuotation}
-          enableExport
-          onExport={onExportQuotation}
-          currentPage={page}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={totalItems}
-          pageSizeOptions={[10, 25, 50, 100]}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
-          onPageChange={setPage}
-        />
-      )}
+      <Table
+        loading={loading || initialLoad}
+        serverSide={true}
+        columns={columns}
+        data={quotations}
+        rowKey={(row) => row.quotationNumber}
+        showToolbar
+        searchValue={searchTerm}
+        onSearch={setSearchTerm}
+        enableColumnSelector
+        enableAdd
+        addLabel="Add Quotation"
+        onAdd={onAddQuotation}
+        enableExport
+        onExport={onExportQuotation}
+        currentPage={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        pageSizeOptions={[10, 25, 50, 100]}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        onPageChange={setPage}
+      />
+
 
       <PdfPreviewModal
         open={pdfOpen}

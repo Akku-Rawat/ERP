@@ -19,8 +19,12 @@ export const LeaveEncashmentForm: React.FC<{ onClose: () => void }> = ({
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h2 className="text-xl font-bold text-main">New Leave Encashment</h2>
-            <span className="text-xs font-medium text-orange-600">Not Saved</span>
+            <h2 className="text-xl font-bold text-main">
+              New Leave Encashment
+            </h2>
+            <span className="text-xs font-medium text-orange-600">
+              Not Saved
+            </span>
           </div>
         </div>
         <button className="px-6 py-2 bg-primary rounded-xl font-semibold transition">
@@ -99,7 +103,7 @@ export const LeaveEncashmentForm: React.FC<{ onClose: () => void }> = ({
         {/* Accounting Section */}
         <div className="pt-6 border-t border-theme">
           <h3 className="text-lg font-bold text-main mb-4">Accounting</h3>
-          
+
           <div className="flex items-start gap-3">
             <input
               type="checkbox"
@@ -116,7 +120,8 @@ export const LeaveEncashmentForm: React.FC<{ onClose: () => void }> = ({
                 Pay Via Payment Entry
               </label>
               <p className="text-xs text-muted mt-1">
-                Process leave encashment via a separate Payment Entry instead of Salary Slip
+                Process leave encashment via a separate Payment Entry instead of
+                Salary Slip
               </p>
             </div>
           </div>
@@ -125,7 +130,7 @@ export const LeaveEncashmentForm: React.FC<{ onClose: () => void }> = ({
         {/* Payroll Section */}
         <div className="pt-6 border-t border-theme">
           <h3 className="text-lg font-bold text-main mb-4">Payroll</h3>
-          
+
           <div>
             <label className="block text-sm font-medium text-main mb-2">
               Encashment Date
@@ -141,7 +146,7 @@ export const LeaveEncashmentForm: React.FC<{ onClose: () => void }> = ({
         {/* More Info Section */}
         <div className="pt-6 border-t border-theme">
           <h3 className="text-lg font-bold text-main mb-4">More Info</h3>
-          
+
           <div>
             <label className="block text-sm font-medium text-main mb-2">
               Status

@@ -36,7 +36,9 @@ export const LeavePolicy: React.FC<LeavePolicyProps> = ({ onAdd, onClose }) => {
       {/* Meta Info */}
       <div className="px-6 py-3 border-b border-theme flex items-center justify-between">
         <span className="text-sm text-muted">0 Policies</span>
-        <span className="text-xs text-muted">Last Updated On: Jan 15, 2026</span>
+        <span className="text-xs text-muted">
+          Last Updated On: Jan 15, 2026
+        </span>
       </div>
 
       {/* Empty State */}
@@ -49,9 +51,9 @@ export const LeavePolicy: React.FC<LeavePolicyProps> = ({ onAdd, onClose }) => {
             No Leave Policies Yet
           </h3>
           <p className="text-muted text-sm mb-6">
-            Create your first leave policy to define rules and eligibility criteria for different types of leaves
+            Create your first leave policy to define rules and eligibility
+            criteria for different types of leaves
           </p>
-         
         </div>
       </div>
     </div>

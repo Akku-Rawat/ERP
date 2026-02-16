@@ -106,11 +106,12 @@
   .table-head { background: var(--table-head) !important; color: var(--table-head-text) !important; }
   .row-hover:hover { background: var(--row-hover) !important; }
 
-  /* OVERRIDES 
+   /* OVERRIDES 
   .bg-white { background: var(--card) !important; }
   .text-gray-900, .text-slate-900 { color: var(--text) !important; }
   .text-gray-500, .text-slate-500 { color: var(--muted) !important; }
   .border-gray-200, .border-slate-200 { border-color: var(--border) !important; }
+
 }
 
 @layer components {
@@ -133,4 +134,38 @@
   [data-theme="glass"] .bg-card { backdrop-filter: blur(12px); }
   [data-theme="cyber"] .bg-card { box-shadow: 0 0 15px rgba(0, 242, 255, 0.1); border: 1px solid var(--primary); }
   [data-theme="luxury"] .bg-primary { background: linear-gradient(135deg, #d4af37, #996515) !important; color: black !important; font-weight: 800; }
+}
+
+
+/* TEXT COLORS (Keep as is — already solid) */
+.text-success { color: var(--success) !important; }
+.text-danger  { color: var(--danger) !important; }
+.text-warning { color: #f59e0b !important; }
+.text-info    { color: #3b82f6 !important; }
+
+
+/* DARK BACKGROUND VARIANTS */
+
+/* SUCCESS */
+.bg-success {
+  background: #24b35b !important;   /* dark green */
+  color: #dcfce7 !important;
+}
+
+/* DANGER */
+.bg-danger {
+  background: #d74343 !important;   /* dark red */
+  color: #fee2e2 !important;
+}
+
+/* WARNING */
+.bg-warning {
+  background: #f59e0b !important;   /* dark amber */
+  color: #fef3c7 !important;
+}
+
+/* INFO */
+.bg-info {
+  background: #4780db !important;   /* dark blue */
+  color: #dbeafe !important;
 }

@@ -35,32 +35,32 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
   onViewRunDetails,
 }) => {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="bg-card rounded-xl border border-theme shadow-sm overflow-hidden">
       <table className="w-full">
-        <thead className="bg-slate-100 border-b border-slate-300">
+        <thead className="table-head border-b border-theme">
           <tr>
-            <th className="px-6 py-4 text-left text-xs font-semibold uppercase text-slate-600">
+            <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
               Employee
             </th>
-            <th className="px-4 py-4 text-left text-xs font-semibold uppercase text-slate-600">
+            <th className="px-4 py-4 text-left text-xs font-semibold uppercase">
               Department
             </th>
-            <th className="px-4 py-4 text-center text-xs font-semibold uppercase text-slate-600">
+            <th className="px-4 py-4 text-center text-xs font-semibold uppercase">
               Attendance
             </th>
-            <th className="px-4 py-4 text-right text-xs font-semibold uppercase text-slate-600">
+            <th className="px-4 py-4 text-right text-xs font-semibold uppercase">
               Gross
             </th>
-            <th className="px-4 py-4 text-right text-xs font-semibold uppercase text-slate-600">
+            <th className="px-4 py-4 text-right text-xs font-semibold uppercase">
               Deductions
             </th>
-            <th className="px-4 py-4 text-right text-xs font-semibold uppercase text-slate-600">
+            <th className="px-4 py-4 text-right text-xs font-semibold uppercase">
               Net Pay
             </th>
-            <th className="px-4 py-4 text-center text-xs font-semibold uppercase text-slate-600">
+            <th className="px-4 py-4 text-center text-xs font-semibold uppercase">
               Status
             </th>
-            <th className="px-4 py-4 text-center text-xs font-semibold uppercase text-slate-600">
+            <th className="px-4 py-4 text-center text-xs font-semibold uppercase">
               Actions
             </th>
           </tr>
@@ -73,46 +73,45 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
 
             return (
               <React.Fragment key={record.id}>
-                {/* SUMMARY ROW */}
                 <tr
                   onClick={() => onToggleRow(record.id)}
-                  className="border-b hover:bg-slate-50 cursor-pointer"
+                  className="border-b border-theme row-hover cursor-pointer"
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {expanded ? (
-                        <ChevronUp className="w-4 h-4 text-slate-400" />
+                        <ChevronUp className="w-4 h-4 text-muted" />
                       ) : (
-                        <ChevronDown className="w-4 h-4 text-slate-400" />
+                        <ChevronDown className="w-4 h-4 text-muted" />
                       )}
                       <div>
-                        <p className="font-semibold text-slate-800">
+                        <p className="font-semibold text-main">
                           {record.employeeName}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted">
                           {record.employeeId}
                         </p>
                       </div>
                     </div>
                   </td>
 
-                  <td className="px-4 py-4 text-sm text-slate-700">
+                  <td className="px-4 py-4 text-sm text-main">
                     {record.department}
                   </td>
 
-                  <td className="px-4 py-4 text-center text-sm font-medium">
+                  <td className="px-4 py-4 text-center text-sm font-medium text-main">
                     {record.paidDays}/{record.workingDays}
                   </td>
 
-                  <td className="px-4 py-4 text-right font-semibold">
+                  <td className="px-4 py-4 text-right font-semibold text-main">
                     ₹{record.grossPay.toLocaleString()}
                   </td>
 
-                  <td className="px-4 py-4 text-right font-semibold text-red-600">
+                  <td className="px-4 py-4 text-right font-semibold text-danger">
                     -₹{totalDeductions.toLocaleString()}
                   </td>
 
-                  <td className="px-4 py-4 text-right font-bold text-green-600">
+                  <td className="px-4 py-4 text-right font-bold text-success">
                     ₹{record.netPay.toLocaleString()}
                   </td>
 
@@ -120,12 +119,12 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                     <span
                       className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
                         record.status === "Paid"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-success text-white"
                           : record.status === "Pending"
-                          ? "bg-amber-100 text-amber-700"
-                          : record.status === "Approved"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-red-100 text-red-700"
+                            ? "bg-warning text-white"
+                            : record.status === "Approved"
+                              ? "bg-info text-white"
+                              : "bg-danger text-white"
                       }`}
                     >
                       {record.status === "Paid" && (
@@ -146,21 +145,21 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                       {onViewRunDetails && (
                         <button
                           onClick={() => onViewRunDetails(record)}
-                          className="p-2 rounded-lg text-purple-600 hover:bg-purple-50"
+                          className="p-2 rounded-lg text-primary row-hover"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                       )}
                       <button
                         onClick={() => onViewPayslip(record)}
-                        className="p-2 rounded-lg text-blue-600 hover:bg-blue-50"
+                        className="p-2 rounded-lg text-info row-hover"
                       >
                         <FileText className="w-4 h-4" />
                       </button>
                       {record.status !== "Paid" && (
                         <button
                           onClick={() => onEditRecord(record)}
-                          className="p-2 rounded-lg text-slate-600 hover:bg-slate-100"
+                          className="p-2 rounded-lg text-muted row-hover"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
@@ -169,20 +168,24 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                   </td>
                 </tr>
 
-                {/* EXPANDED DETAILS */}
                 {expanded && (
-                  <tr className="bg-slate-50 border-b">
+                  <tr className="bg-app border-b border-theme">
                     <td colSpan={8} className="px-6 py-8">
-                      {/* TOP INFO CARDS */}
                       <div className="grid grid-cols-4 gap-6 mb-8">
                         <InfoCard title="Employee Details" icon={Users}>
-                          <InfoRow label="Designation" value={record.designation} />
+                          <InfoRow
+                            label="Designation"
+                            value={record.designation}
+                          />
                           <InfoRow label="Grade" value={record.grade} badge />
                           <InfoRow label="PAN" value={record.panNumber} />
                         </InfoCard>
 
                         <InfoCard title="Attendance" icon={Calendar}>
-                          <InfoRow label="Working Days" value={record.workingDays} />
+                          <InfoRow
+                            label="Working Days"
+                            value={record.workingDays}
+                          />
                           <InfoRow label="Paid Days" value={record.paidDays} />
                           <InfoRow
                             label="LOP Days"
@@ -192,40 +195,63 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                         </InfoCard>
 
                         <InfoCard title="Bank Details" icon={CreditCard}>
-                          <InfoRow label="Account No." value={record.bankAccount} />
+                          <InfoRow
+                            label="Account No."
+                            value={record.bankAccount}
+                          />
                           <InfoRow label="IFSC" value={record.ifscCode} />
                         </InfoCard>
 
                         <InfoCard title="Tax Regime" icon={DollarSign}>
-                          <InfoRow label="Regime" value={record.taxRegime} badge />
+                          <InfoRow
+                            label="Regime"
+                            value={record.taxRegime}
+                            badge
+                          />
                           <InfoRow
                             label="Taxable Income"
                             value={`₹${(record.taxableIncome / 1000).toFixed(
-                              0
+                              0,
                             )}K / year`}
                           />
                         </InfoCard>
                       </div>
 
-                      {/* EARNINGS & DEDUCTIONS */}
                       <div className="grid grid-cols-2 gap-6">
-                        {/* Earnings */}
                         <SectionCard
                           title="Earnings Breakdown"
                           icon={TrendingUp}
                           color="green"
                         >
-                          <MoneyRow label="Basic Salary" value={record.basicSalary} />
+                          <MoneyRow
+                            label="Basic Salary"
+                            value={record.basicSalary}
+                          />
                           <MoneyRow label="HRA" value={record.hra} />
-                          <MoneyRow label="Allowances" value={record.allowances} />
+                          <MoneyRow
+                            label="Allowances"
+                            value={record.allowances}
+                          />
                           {record.overtimePay > 0 && (
-                            <MoneyRow label="Overtime" value={record.overtimePay} highlight />
+                            <MoneyRow
+                              label="Overtime"
+                              value={record.overtimePay}
+                              highlight
+                            />
                           )}
                           {record.totalBonus > 0 && (
-                            <MoneyRow label="Bonus" value={record.totalBonus} highlight />
+                            <MoneyRow
+                              label="Bonus"
+                              value={record.totalBonus}
+                              highlight
+                            />
                           )}
                           {record.arrears > 0 && (
-                            <MoneyRow label="Arrears" value={record.arrears} highlight />
+                            <MoneyRow
+                              label="Arrears"
+                              value={record.arrears}
+                              highlight
+                            />
                           )}
                           <Divider />
                           <MoneyRow
@@ -235,7 +261,6 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                           />
                         </SectionCard>
 
-                        {/* Deductions */}
                         <SectionCard
                           title="Deductions Breakdown"
                           icon={AlertCircle}
@@ -245,7 +270,10 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                             label={`Income Tax (${record.taxRegime})`}
                             value={record.taxDeduction}
                           />
-                          <MoneyRow label="Provident Fund" value={record.pfDeduction} />
+                          <MoneyRow
+                            label="Provident Fund"
+                            value={record.pfDeduction}
+                          />
                           {record.esiDeduction > 0 && (
                             <MoneyRow label="ESI" value={record.esiDeduction} />
                           )}
@@ -254,7 +282,10 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                             value={record.professionalTax}
                           />
                           {record.loanDeduction > 0 && (
-                            <MoneyRow label="Loan EMI" value={record.loanDeduction} />
+                            <MoneyRow
+                              label="Loan EMI"
+                              value={record.loanDeduction}
+                            />
                           )}
                           {record.advanceDeduction > 0 && (
                             <MoneyRow
@@ -289,12 +320,10 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
   );
 };
 
-/* ---------- Reusable ERP UI Components ---------- */
-
 const InfoCard = ({ title, icon: Icon, children }: any) => (
-  <div className="bg-white border rounded-xl p-5 shadow-sm">
-    <h4 className="font-bold mb-4 flex items-center gap-2">
-      <Icon className="w-5 h-5 text-blue-600" />
+  <div className="bg-card border border-theme rounded-xl p-5 shadow-sm">
+    <h4 className="font-bold mb-4 flex items-center gap-2 text-main">
+      <Icon className="w-5 h-5 text-info" />
       {title}
     </h4>
     <div className="space-y-2 text-sm">{children}</div>
@@ -303,11 +332,11 @@ const InfoCard = ({ title, icon: Icon, children }: any) => (
 
 const InfoRow = ({ label, value, badge, danger }: any) => (
   <div className="flex justify-between">
-    <span className="text-slate-600">{label}</span>
+    <span className="text-muted">{label}</span>
     <span
       className={`font-semibold ${
-        danger ? "text-red-600" : ""
-      } ${badge ? "px-2 py-0.5 bg-blue-100 rounded text-xs" : ""}`}
+        danger ? "text-danger" : "text-main"
+      } ${badge ? "px-2 py-0.5 bg-info text-white rounded text-xs" : ""}`}
     >
       {value}
     </span>
@@ -316,13 +345,13 @@ const InfoRow = ({ label, value, badge, danger }: any) => (
 
 const SectionCard = ({ title, icon: Icon, children, color }: any) => (
   <div
-    className={`rounded-xl border p-5 shadow-sm ${
+    className={`rounded-xl border border-theme p-5 shadow-sm ${
       color === "green"
-        ? "bg-green-50 border-green-200"
-        : "bg-red-50 border-red-200"
+        ? "bg-success"
+        : "bg-danger"
     }`}
   >
-    <h4 className="font-bold mb-4 flex items-center gap-2">
+    <h4 className="font-bold mb-4 flex items-center gap-2 text-white">
       <Icon className="w-5 h-5" />
       {title}
     </h4>
@@ -332,14 +361,14 @@ const SectionCard = ({ title, icon: Icon, children, color }: any) => (
 
 const MoneyRow = ({ label, value, bold, highlight, negative }: any) => (
   <div
-    className={`flex justify-between ${
-      highlight ? "bg-white/60 px-2 py-1 rounded" : ""
+    className={`flex justify-between text-white ${
+      highlight ? "bg-white/10 px-2 py-1 rounded" : ""
     }`}
   >
     <span>{label}</span>
     <span
       className={`font-${bold ? "bold" : "semibold"} ${
-        negative ? "text-red-600" : ""
+        negative ? "" : ""
       }`}
     >
       ₹{value.toLocaleString()}
@@ -347,10 +376,10 @@ const MoneyRow = ({ label, value, bold, highlight, negative }: any) => (
   </div>
 );
 
-const Divider = () => <div className="border-t my-2" />;
+const Divider = () => <div className="border-t border-white/20 my-2" />;
 
 const NetPay = ({ value }: any) => (
-  <div className="bg-emerald-600 text-white rounded-lg px-4 py-3 mt-3 flex justify-between items-center">
+  <div className="bg-card text-success rounded-lg px-4 py-3 mt-3 flex justify-between items-center">
     <span className="font-semibold">Net Pay (Take Home)</span>
     <span className="text-xl font-bold">₹{value.toLocaleString()}</span>
   </div>

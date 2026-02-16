@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 import {
   AreaChart,
   Area,
@@ -8,8 +8,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { TrendingUp, TrendingDown, Users, Package, DollarSign } from "lucide-react";
 
-// Types for time range and sales trend data
 type TimeRange = "Today" | "This Week" | "This Month";
 type SalesDataPoint = { name: string; ThisYear: number; LastYear: number };
 
@@ -17,20 +17,26 @@ const kpiStats = [
   {
     label: "Total Revenue",
     value: "$125.5k",
-    change: "+12% vs last month",
-    changeColor: "text-green-600",
+    change: "+12%",
+    trend: "up",
+    icon: DollarSign,
+    gradient: "from-emerald-500 to-emerald-600",
   },
   {
     label: "Orders Placed",
     value: "320",
-    change: "-5% vs last month",
-    changeColor: "text-red-500",
+    change: "-5%",
+    trend: "down",
+    icon: Package,
+    gradient: "from-blue-500 to-blue-600",
   },
   {
     label: "Average Order Value",
     value: "$392",
-    change: "+8% vs last month",
-    changeColor: "text-green-600",
+    change: "+8%",
+    trend: "up",
+    icon: TrendingUp,
+    gradient: "from-purple-500 to-purple-600",
   },
 ];
 
@@ -64,177 +70,191 @@ const salesTrendData: Record<TimeRange, SalesDataPoint[]> = {
 };
 
 const topProducts = [
-  {
-    name: "Product A",
-    category: "Electronics",
-    units: 150,
-    revenue: "$30,000",
-  },
-  { name: "Product B", category: "Clothing", units: 200, revenue: "$25,000" },
-  { name: "Product C", category: "Home Goods", units: 100, revenue: "$20,000" },
-  { name: "Product D", category: "Books", units: 250, revenue: "$15,000" },
-  { name: "Product E", category: "Toys", units: 180, revenue: "$10,000" },
+  { name: "Product A", category: "Electronics", units: 150, revenue: "30,000" },
+  { name: "Product B", category: "Clothing", units: 200, revenue: "25,000" },
+  { name: "Product C", category: "Home Goods", units: 100, revenue: "20,000" },
+  { name: "Product D", category: "Books", units: 250, revenue: "15,000" },
+  { name: "Product E", category: "Toys", units: 180, revenue: "10,000" },
 ];
 
 const timeRanges: TimeRange[] = ["Today", "This Week", "This Month"];
 
-// Customer Volume Card component
-const CustomerVolumeCard: React.FC = () => (
-  <div className="bg-white rounded-xl shadow p-8 flex flex-col items-center justify-center h-full">
-    <div className="font-semibold text-xl mb-6">Customer Volume</div>
-    <div
-      className="relative flex justify-center items-center mb-6"
-      style={{ height: 220, width: 220 }}
-    >
-      {/*  SVG Circle */}
-      <svg width={210} height={210}>
-        <circle
-          cx={110}
-          cy={110}
-          r={90}
-          stroke="#e5e7eb"
-          strokeWidth={14}
-          fill="none"
-        />
-        <circle
-          cx={110}
-          cy={110}
-          r={90}
-          stroke="#2563eb"
-          strokeWidth={14}
-          fill="none"
-          strokeDasharray={`${Math.PI * 2 * 85 * 0.15} ${Math.PI * 2 * 85 * 0.85}`}
-          strokeDashoffset={Math.PI * 2 * 85 * 0.325}
-          style={{ transition: "stroke-dasharray 0.4s" }}
-        />
-      </svg>
-      <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center">
-        <span className="text-4xl font-bold text-blue-600">+15%</span>
-        <span className="text-xl mt-2 text-gray-600 font-medium">
-          New Customer
-        </span>
-      </div>
-    </div>
-    <div className="flex w-full justify-around items-center mt-2">
-      <div className="flex items-center gap-1">
-        <span className="inline-block w-4 h-4 rounded bg-blue-100"></span>
-        <span className="text-gray-600 text-m">Current Customer</span>
-        <span className="mr-15 font-semibold text-gray-900 text-m">85%</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <span className="inline-block w-4 h-4 rounded bg-blue-600"></span>
-        <span className="text-gray-600 text-m">New Customer</span>
-        <span className="mr-15 font-semibold text-blue-600 text-m">15%</span>
-      </div>
-    </div>
-  </div>
-);
-
-const SalesDashboard: React.FC = () => {
-  const [selectedRange, setSelectedRange] =
-    React.useState<TimeRange>("This Month");
+const CustomerVolumeCard: React.FC = () => {
+  const percentage = 15;
+  const currentCustomer = 85;
+  const circumference = 2 * Math.PI * 90;
+  const offset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="bg-app w-full pb-8">
-      <div className="max-w-auto mx-auto px-6">
+    <div className="bg-card border border-theme rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 flex flex-col items-center justify-center h-full">
+      <div className="font-bold text-lg mb-6 text-main">Customer Volume</div>
+      <div className="relative flex justify-center items-center mb-6" style={{ height: 220, width: 220 }}>
+        <svg width={220} height={220} className="transform -rotate-90">
+          <circle
+            cx={110}
+            cy={110}
+            r={90}
+            stroke="var(--border)"
+            strokeWidth={16}
+            fill="none"
+            opacity={0.3}
+          />
+          <circle
+            cx={110}
+            cy={110}
+            r={90}
+            stroke="url(#customerGradient)"
+            strokeWidth={16}
+            fill="none"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            style={{ 
+              transition: "stroke-dashoffset 0.6s ease",
+              filter: "drop-shadow(0 0 8px rgba(59, 130, 246, 0.4))"
+            }}
+          />
+          <defs>
+            <linearGradient id="customerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#3b82f6" />
+              <stop offset="100%" stopColor="#2563eb" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+            +{percentage}%
+          </span>
+          <span className="text-lg mt-2 text-muted font-semibold">New Customer</span>
+        </div>
+      </div>
+      <div className="flex flex-col w-full gap-3 mt-4">
+        <div className="flex items-center justify-between px-4 py-2.5 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-blue-200"></span>
+            <span className="text-main text-sm font-semibold">Current</span>
+          </div>
+          <span className="font-bold text-main">{currentCustomer}%</span>
+        </div>
+        <div className="flex items-center justify-between px-4 py-2.5 bg-blue-600/10 rounded-lg border border-blue-600/30">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-blue-600"></span>
+            <span className="text-main text-sm font-semibold">New</span>
+          </div>
+          <span className="font-bold text-blue-600">{percentage}%</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SalesDashboard: React.FC = () => {
+  const [selectedRange, setSelectedRange] = useState<TimeRange>("This Month");
+
+  return (
+    <div className="bg-app w-full min-h-screen p-4 md:p-6 lg:p-8">
+      <div className="max-w-[1600px] mx-auto">
+       
+
         {/* KPI Cards */}
-        <div className="flex gap-5 mb-8 flex-wrap">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {kpiStats.map((stat) => (
             <div
               key={stat.label}
-              className="bg-white rounded-xl shadow-sm border p-5 flex-1 min-w-[230px] mt-5"
+              className="bg-card border border-theme rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-5 group"
             >
-              <div className="text-gray-500 text-[15px] mb-1 font-medium">
-                {stat.label}
+              <div className="flex items-center justify-between mb-3">
+                <div className={`p-3 bg-gradient-to-br ${stat.gradient} rounded-lg shadow-sm group-hover:scale-110 transition-transform`}>
+                  <stat.icon className="text-white" size={20} />
+                </div>
+                <div className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold ${
+                  stat.trend === "up" 
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200" 
+                    : "bg-rose-50 text-rose-700 border border-rose-200"
+                }`}>
+                  {stat.trend === "up" ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                  {stat.change}
+                </div>
               </div>
-              <div className="text-2xl font-extrabold">{stat.value}</div>
-              <div className={`text-xs font-semibold mt-1 ${stat.changeColor}`}>
-                {stat.change}
-              </div>
+              <div className="text-muted text-sm font-semibold mb-1">{stat.label}</div>
+              <div className="text-3xl font-bold text-main">{stat.value}</div>
             </div>
           ))}
         </div>
-        {/* Sales Trends + Customer Volume side-by-side */}
-        <div className="flex gap-8 mb-8">
-          {/* Customer Volume Card  */}
-          <div className="w-[40%] min-w-[260px] flex flex-col">
+
+        {/* Sales Trends + Customer Volume */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+          {/* Customer Volume - 2 columns */}
+          <div className="lg:col-span-2">
             <CustomerVolumeCard />
           </div>
 
-          {/* Chart */}
-          <div className="w-[60%]">
-            <div className="bg-white rounded-xl shadow p-8 h-full">
-              {/* Time range selector and trends chart */}
-              <div className="flex gap-2 mb-4">
-                {timeRanges.map((range) => (
-                  <button
-                    key={range}
-                    onClick={() => setSelectedRange(range)}
-                    className={`rounded-md px-3 py-1 font-semibold ${
-                      selectedRange === range
-                        ? "bg-blue-600 text-white border border-blue-600"
-                        : "bg-white text-gray-600 border border-gray-200"
-                    }`}
-                    aria-pressed={selectedRange === range}
-                  >
-                    {range}
-                  </button>
-                ))}
-              </div>
-              <div className="font-semibold text-2xl mb-3">Sales Trends</div>
-              <div className="flex justify-end items-center mb-4">
-                <span className="inline-block w-2 h-2 rounded-full bg-blue-600 mr-1"></span>
-                <span className="mr-3 text-md text-blue-600 font-bold">
-                  This Year
-                </span>
-                <span className="inline-block w-2 h-2 rounded-full bg-gray-400 mr-1"></span>
-                <span className="text-md text-gray-500 font-bold">
-                  Last Year
-                </span>
-              </div>
-              <ResponsiveContainer width="100%" height={260}>
-                <AreaChart data={salesTrendData[selectedRange]}>
-                  <defs>
-                    <linearGradient
-                      id="colorThisYear"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
+          {/* Sales Chart - 3 columns */}
+          <div className="lg:col-span-3">
+            <div className="bg-card border border-theme rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 h-full">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+                <h3 className="text-lg font-bold text-main">Sales Trends</h3>
+                <div className="flex gap-2">
+                  {timeRanges.map((range) => (
+                    <button
+                      key={range}
+                      onClick={() => setSelectedRange(range)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        selectedRange === range
+                          ? "bg-primary text-white shadow-sm"
+                          : "bg-app text-muted border border-theme hover:border-primary/30"
+                      }`}
                     >
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.5} />
-                      <stop
-                        offset="95%"
-                        stopColor="#2563eb"
-                        stopOpacity={0.03}
-                      />
+                      {range}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-1.5 rounded-full bg-gradient-to-r from-blue-600 to-blue-500"></span>
+                  <span className="text-xs font-bold text-main">This Year</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-1.5 rounded-full bg-gray-400"></span>
+                  <span className="text-xs font-bold text-muted">Last Year</span>
+                </div>
+              </div>
+
+              <ResponsiveContainer width="100%" height={280}>
+                <AreaChart data={salesTrendData[selectedRange]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorThisYear" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0.05} />
                     </linearGradient>
+                    <filter id="shadow">
+                      <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.2"/>
+                    </filter>
                   </defs>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#e5e7eb"
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: 'var(--muted)', fontSize: 12, fontWeight: 600 }}
                   />
-                  <XAxis
-                    dataKey="name"
-                    axisLine={false}
-                    tickLine={false}
-                    className="text-sm"
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    className="text-sm"
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: 'var(--muted)', fontSize: 12, fontWeight: 600 }}
                   />
                   <Tooltip
                     contentStyle={{
-                      background: "white",
-                      border: "1px solid #ddd",
-                      fontSize: 13,
-                      borderRadius: 8,
-                      padding: "8px 10px",
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 12,
+                      padding: "8px 12px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                     }}
-                    cursor={{ fill: "#ddd6fe", opacity: 0.12 }}
+                    itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
+                    cursor={{ fill: "var(--primary)", opacity: 0.1 }}
                   />
                   <Area
                     type="monotone"
@@ -242,6 +262,7 @@ const SalesDashboard: React.FC = () => {
                     stroke="#2563eb"
                     strokeWidth={3}
                     fill="url(#colorThisYear)"
+                    filter="url(#shadow)"
                   />
                   <Area
                     type="monotone"
@@ -249,6 +270,7 @@ const SalesDashboard: React.FC = () => {
                     stroke="#94a3b8"
                     strokeWidth={2}
                     fill="none"
+                    strokeDasharray="5 5"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -257,39 +279,50 @@ const SalesDashboard: React.FC = () => {
         </div>
 
         {/* Top Products Table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6">
-          <div className="font-semibold text-lg mb-4">Top Products</div>
-          <table className="min-w-full">
-            <thead className="bg-gray-50 text-gray-700 text-sm font-medium">
-              <tr>
-                <th className="px-6 py-4 text-left rounded-l-xl">Product</th>
-                <th className="px-6 py-4 text-left">Category</th>
-                <th className="px-6 py-4 text-left">Units Sold</th>
-                <th className="px-6 py-4 text-left rounded-r-xl">Revenue</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {topProducts.map((p) => (
-                <tr
-                  key={p.name}
-                  className="hover:bg-indigo-50/70 cursor-pointer transition-colors duration-150"
-                >
-                  <td className="px-6 py-4 font-semibold text-gray-900">
-                    {p.name}
-                  </td>
-                  <td className="px-6 py-4 text-gray-700">{p.category}</td>
-                  <td className="px-6 py-4 text-indigo-700">{p.units}</td>
-                  <td className="px-6 py-4 font-semibold text-green-600">
-                    ₹{p.revenue.toLocaleString()}
-                  </td>
+        <div className="bg-card border border-theme rounded-2xl shadow-lg overflow-hidden">
+          <div className="p-6 border-b border-theme bg-gradient-to-r from-app/50 to-transparent">
+            <h3 className="text-lg font-bold text-main">Top Products</h3>
+            <p className="text-xs text-muted mt-0.5">Best performing products this month</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="table-head">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-bold rounded-tl-xl">Product</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold">Category</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold">Units Sold</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold rounded-tr-xl">Revenue</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {topProducts.map((p, idx) => (
+                  <tr key={p.name} className="row-hover transition-all cursor-pointer group">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-sm group-hover:scale-110 transition-transform">
+                          {idx + 1}
+                        </div>
+                        <span className="font-bold text-main text-sm">{p.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="px-3 py-1 bg-app rounded-lg text-xs font-semibold text-main border border-theme">
+                        {p.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-primary font-bold text-sm">{p.units}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="font-bold text-emerald-600 text-sm">₹{p.revenue}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {topProducts.length === 0 && (
-            <div className="text-center py-10 text-gray-400">
-              No top products found.
-            </div>
+            <div className="text-center py-12 text-muted">No products found.</div>
           )}
         </div>
       </div>

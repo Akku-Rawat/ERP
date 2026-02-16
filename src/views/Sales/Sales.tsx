@@ -7,12 +7,11 @@ import POS from "./POS";
 import SalesDashboard from "./SalesDashboard";
 import ProformaInvoicesTable from "./ProformaInvoice";
 
-
 import QuotationModal from "../../components/sales/QuotationModal";
 import InvoiceModal from "../../components/sales/InvoiceModal";
 import ProformaInvoiceModal from "../../components/sales/ProformaInvoiceModal";
 import PosModal from "../../components/sales/PosModal";
-
+import { showApiError,showSuccess } from "../../components/alert";
 import { createSalesInvoice } from "../../api/salesApi";
 import { createQuotation } from "../../api/quotationApi";
 import CreditNotesTable from "./CreditNotesTable";
@@ -37,9 +36,9 @@ const salesTabs = [
     icon: <FaFileInvoiceDollar />,
   },
   { id: "invoices", name: "Invoices", icon: <FaFileInvoiceDollar /> },
-  
+
   { id: "creditNotes", name: "Credit Notes", icon: <FaFileInvoiceDollar /> },
-{ id: "debitNotes", name: "Debit Notes", icon: <FaFileInvoiceDollar /> },
+  { id: "debitNotes", name: "Debit Notes", icon: <FaFileInvoiceDollar /> },
 
   // { id: "pos", name: "POS", icon: <FaCashRegister /> },
   { id: "reports", name: "Reports", icon: <FaChartBar /> },
@@ -79,73 +78,82 @@ const SalesModule: React.FC = () => {
         />
       ),
     },
-    invoices: {
-      component: (
-        <InvoiceTable
-          onAddInvoice={() => setOpenModal("invoice")}
-          onExportInvoice={() => {
-            console.log("Export invoices");
-          }}
-        />
-      ),
-    },
+   invoices: {
+  component: (
+    <InvoiceTable
+      key={refreshKey}  
+      onAddInvoice={() => setOpenModal("invoice")}
+      onExportInvoice={() => {
+        console.log("Export invoices");
+      }}
+    />
+  ),
+},
+
     pos: {
       component: <POS />,
       onAdd: () => setOpenModal("pos"),
     },
-  creditNotes: {
-  component: (
-    <CreditNotesTable />
-  ),
-},
+    creditNotes: {
+      component: <CreditNotesTable />,
+    },
 
-debitNotes: {
-  component: (
-    <DebitNotesTable />
-  ),
-},
+    debitNotes: {
+      component: <DebitNotesTable />,
+    },
 
-    
     reports: {
       component: <ReportTable />,
     },
-
-     
   };
 
-  const handleInvoiceSubmit = async (payload: any) => {
-    console.log("📤 Invoice payload:", payload);
+const handleInvoiceSubmit = async (payload: any) => {
+  try {
+    const response = await createSalesInvoice(payload);
 
-    try {
-      const response = await createSalesInvoice(payload);
-      
-      alert("Invoice created successfully!");
-      setOpenModal(null);
-    } catch (err) {
-      
-      alert("Failed to create invoice. Please try again.");
+    if (
+      !response ||
+      ![200, 201].includes(response.status_code)
+    ) {
+      showApiError(response);
+      return;
     }
-  };
+
+    showSuccess(
+      response.message || "Invoice created successfully"
+    );
+
+    setOpenModal(null);
+    setRefreshKey((prev) => prev + 1);
+
+  } catch (error: any) {
+    showApiError(error);
+  }
+};
+
+
 
   const handleQuotationSubmit = async (payload: any) => {
-    console.log("📤 Quotation payload:", payload);
+  try {
+    const response = await createQuotation(payload);
 
-    try {
-      const response = await createQuotation(payload);
-      
-      
-      if (response.status_code === 200 || response.status_code === 201) {
-        alert("Quotation created successfully!");
-        setRefreshKey((prev) => prev + 1); // Refresh quotations table
-        setOpenModal(null); // Close modal
-      } else {
-        throw new Error(response.message || "Failed to create quotation");
-      }
-    } catch (err: any) {
-      
-      alert(err.message || "Failed to create quotation. Please try again.");
+    if (!response || ![200, 201].includes(response.status_code)) {
+      showApiError(response);
+      return;
     }
-  };
+
+    showSuccess(
+      response.message || "Quotation created successfully"
+    );
+
+    setRefreshKey((prev) => prev + 1);
+    setOpenModal(null);
+
+  } catch (error: any) {
+    showApiError(error);
+  }
+};
+
 
   const handleProformaCreated = () => {
     setRefreshKey((prev) => prev + 1);
@@ -171,8 +179,8 @@ debitNotes: {
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors ${
               activeTab === tab.id
-                ? "text-teal-600 border-b-2 border-teal-600"
-                : "text-gray-500 hover:text-gray-700"
+                 ? "text-primary border-b-2 border-current"
+                : "text-muted hover:text-main"
             }`}
           >
             {tab.icon}

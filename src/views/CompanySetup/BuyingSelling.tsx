@@ -11,7 +11,6 @@ interface BuyingSellingProps {
   terms?: Terms | null;
 }
 
-
 const emptySection = (): TermSection => ({
   general: "",
   delivery: "",
@@ -26,7 +25,6 @@ const emptySection = (): TermSection => ({
     notes: "",
   },
 });
-
 
 const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
   const [showSuccess, setShowSuccess] = useState(false);
@@ -80,9 +78,9 @@ const BuyingSelling: React.FC<BuyingSellingProps> = ({ terms }) => {
 
   const handleSubmit = async () => {
     const payload = {
-    id: COMPANY_ID,          
-    terms: formData,         
-  };
+      id: COMPANY_ID,
+      terms: formData,
+    };
 
     try {
       console.log("payload:", payload);

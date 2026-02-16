@@ -19,8 +19,12 @@ export const LeavePolicyAssignmentForm: React.FC<{ onClose: () => void }> = ({
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h2 className="text-xl font-bold text-main">New Leave Policy Assignment</h2>
-            <span className="text-xs font-medium text-orange-600">Not Saved</span>
+            <h2 className="text-xl font-bold text-main">
+              New Leave Policy Assignment
+            </h2>
+            <span className="text-xs font-medium text-orange-600">
+              Not Saved
+            </span>
           </div>
         </div>
         <button className="px-6 py-2 bg-primary rounded-xl font-semibold transition">

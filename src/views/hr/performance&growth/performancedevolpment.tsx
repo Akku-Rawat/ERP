@@ -30,32 +30,32 @@ const PerformanceDevelopment: React.FC = () => {
             className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               tab === "performance"
                 ? "text-primary border-primary"
-        : "text-muted border-transparent hover:text-main"
+                : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <Clipboard size={15}/> Performance Reviews
+            <Clipboard size={15} /> Performance Reviews
           </button>
 
           <button
             onClick={() => setTab("training")}
             className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               tab === "training"
-                 ? "text-primary border-primary"
-        : "text-muted border-transparent hover:text-main"
+                ? "text-primary border-primary"
+                : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <BookOpen size={15}/> Training & Development
+            <BookOpen size={15} /> Training & Development
           </button>
 
           <button
             onClick={() => setTab("appraisals")}
             className={`flex items-center gap-2 text-sm font-semibold pb-2 border-b-2 transition ${
               tab === "appraisals"
-                  ? "text-primary border-primary"
-        : "text-muted border-transparent hover:text-main"
+                ? "text-primary border-primary"
+                : "text-muted border-transparent hover:text-main"
             }`}
           >
-            <FaMedal size={15}/> Appraisals
+            <FaMedal size={15} /> Appraisals
           </button>
         </div>
 

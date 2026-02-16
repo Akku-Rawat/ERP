@@ -1,4 +1,3 @@
-
 export const ROUTES = {
   LOGIN: "/login",
   DASHBOARD: "/dashboard",
@@ -9,7 +8,7 @@ export const ROUTES = {
   ACCOUNTING: "/accounting",
   CRM: "/crm",
   Hr: "/hr",
-  FixedAssets : "/fasset",
+  FixedAssets: "/fasset",
   CompanySetup: "/companySetup",
   UserManagement: "/userManagement",
 };

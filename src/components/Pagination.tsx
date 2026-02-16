@@ -6,15 +6,10 @@ interface Props {
   pageSize?: number;
   totalItems?: number;
   onPageChange: (page: number) => void;
-  // optional: handle page size change (if you want a selector)
   onPageSizeChange?: (size: number) => void;
-  pageSizeOptions?: number[]; // defaults [10,20,50]
+  pageSizeOptions?: number[];
 }
 
-/**
- * Smart page range generator: returns array with numbers and '...' strings
- * Eg: [1, '...', 4,5,6, '...', 20]
- */
 function makeRange(current: number, total: number, delta = 1) {
   const range: (number | string)[] = [];
   const left = Math.max(2, current - delta);
@@ -50,73 +45,72 @@ export default function Pagination({
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-      {/* Left: summary */}
-      <div className="text-sm text-gray-600">
+      {/* Left Summary */}
+      <div className="text-sm text-muted">
         Showing{" "}
-        <span className="font-medium">{(currentPage - 1) * pageSize + 1}</span>{" "}
+        <span className="font-medium text-main">
+          {(currentPage - 1) * pageSize + 1}
+        </span>{" "}
         –{" "}
-        <span className="font-medium">
+        <span className="font-medium text-main">
           {Math.min(currentPage * pageSize, totalItems)}
         </span>{" "}
-        of <span className="font-medium">{totalItems}</span>
+        of <span className="font-medium text-main">{totalItems}</span>
       </div>
 
-      {/* Right: controls */}
+      {/* Controls */}
       <div className="flex items-center gap-2">
         {/* Prev */}
         <button
           onClick={() => goto(currentPage - 1)}
           disabled={currentPage <= 1}
-          className={`px-3 py-1 rounded-md border text-sm ${currentPage <= 1 ? "opacity-50 cursor-not-allowed bg-white" : "bg-white hover:bg-gray-50"}`}
-          aria-label="Previous page"
+          className={`px-3 py-1 rounded-md border border-theme text-sm bg-app text-main hover:bg-row-hover transition-all ${
+            currentPage <= 1 ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
           ‹ Prev
         </button>
 
-        {/* Page numbers */}
-        <nav aria-label="Pagination" className="flex items-center gap-2">
+        {/* Page Numbers */}
+        <nav className="flex items-center gap-2">
           {range.map((r, i) =>
             typeof r === "string" ? (
-              <span
-                key={`dot-${i}`}
-                className="px-3 py-1 text-sm text-gray-400"
-              >
+              <span key={`dots-${i}`} className="px-3 py-1 text-sm text-muted">
                 {r}
               </span>
             ) : (
               <button
-                key={r}
+                key={`page-${r}-${i}`}
                 onClick={() => goto(r)}
-                className={`min-w-[36px] h-8 flex items-center justify-center px-2 rounded-md text-sm border ${
-                  r === currentPage
-                    ? "bg-primary text-white border-teal-600 shadow"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
-                }`}
-                aria-current={r === currentPage ? "page" : undefined}
+                className={`min-w-[36px] h-8 flex items-center justify-center px-2 rounded-md text-sm border border-theme transition-all ${r === currentPage
+                    ? "bg-primary text-white shadow"
+                    : "bg-app text-main hover:bg-row-hover"
+                  }`}
               >
                 {r}
               </button>
-            ),
+            )
           )}
+
         </nav>
 
         {/* Next */}
         <button
           onClick={() => goto(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className={`px-3 py-1 rounded-md border text-sm ${currentPage >= totalPages ? "opacity-50 cursor-not-allowed bg-white" : "bg-white hover:bg-gray-50"}`}
-          aria-label="Next page"
+          className={`px-3 py-1 rounded-md border border-theme text-sm bg-app text-main hover:bg-row-hover transition-all ${
+            currentPage >= totalPages ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
           Next ›
         </button>
 
-        {/* Optional page size selector */}
+        {/* Page Size */}
         {onPageSizeChange && (
           <select
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="ml-3 border rounded px-2 py-1 text-sm bg-white"
-            aria-label="Rows per page"
+            className="ml-3 border border-theme bg-app text-main rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           >
             {pageSizeOptions.map((opt) => (
               <option key={opt} value={opt}>

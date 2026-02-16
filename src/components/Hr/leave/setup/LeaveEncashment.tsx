@@ -39,7 +39,9 @@ export const LeaveEncashment: React.FC<LeaveEncashmentProps> = ({
       {/* Meta Info */}
       <div className="px-6 py-3 border-b border-theme flex items-center justify-between">
         <span className="text-sm text-muted">0 Encashments</span>
-        <span className="text-xs text-muted">Last Updated On: Jan 15, 2026</span>
+        <span className="text-xs text-muted">
+          Last Updated On: Jan 15, 2026
+        </span>
       </div>
 
       {/* Empty State */}
@@ -52,7 +54,8 @@ export const LeaveEncashment: React.FC<LeaveEncashmentProps> = ({
             No Leave Encashments Yet
           </h3>
           <p className="text-muted text-sm mb-6">
-            Process leave encashment for employees who want to convert their unused leaves to cash
+            Process leave encashment for employees who want to convert their
+            unused leaves to cash
           </p>
           <button
             onClick={onAdd}

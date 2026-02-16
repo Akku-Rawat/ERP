@@ -531,7 +531,7 @@ const HrDashboard: React.FC = () => {
                       Recent Payroll
                     </span>
                     <button
-                      onclick={() => {
+                      onClick={() => {
                         alert("Navigating to Payroll Management Page");
                       }}
                       className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center hover:bg-orange-600 transition shadow-sm"

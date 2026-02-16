@@ -1,6 +1,6 @@
 export function filterEmployeesByRole(
   employees: any[],
-  role: { match: string[]; exclude?: string[] }
+  role: { match: string[]; exclude?: string[] },
 ) {
   return employees.filter((e) => {
     const title = (e.jobTitle || "").toLowerCase();

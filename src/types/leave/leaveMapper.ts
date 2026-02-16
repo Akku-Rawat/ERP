@@ -39,9 +39,6 @@ export const mapLeaveFromApi = (l: any): LeaveUI => ({
   appliedOn: l.appliedOn,
 });
 
-
-
-
 export const mapAllocationFromApi = (a: any): LeaveAllocationUI => {
   const allocated = a.totalLeavesAllocated ?? 0;
   const remaining = a.unusedLeaves ?? 0;
@@ -55,8 +52,6 @@ export const mapAllocationFromApi = (a: any): LeaveAllocationUI => {
     remaining,
   };
 };
-
-
 
 export const mapLeaveBalanceFromApi = (data: any): LeaveBalanceUI => {
   const summary = data?.summary ?? {};

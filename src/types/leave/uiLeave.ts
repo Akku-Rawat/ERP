@@ -13,11 +13,10 @@ export type LeaveUI = {
   appliedOn: string;
 };
 
-
 export type LeaveAllocationUI = {
   id: string;
   leaveType: string;
-  period: string;          
+  period: string;
   allocated: number;
   used: number;
   remaining: number;

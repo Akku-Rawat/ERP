@@ -265,8 +265,8 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`flex-1 py-3 flex items-center justify-center gap-2 text-sm font-medium ${
-                activeTab === t.id ? "bg-primary-600 text-white" : "text-muted"
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium border-b-2 ${
+                activeTab === t.id ? "table-head text-table-head-text" : "text-main"
               }`}
             >
               <t.icon />

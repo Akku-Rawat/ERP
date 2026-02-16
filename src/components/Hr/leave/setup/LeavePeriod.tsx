@@ -115,8 +115,10 @@ export const LeavePeriod: React.FC<LeavePeriodProps> = ({ onAdd, onClose }) => {
       {/* Footer Pagination */}
       <div className="px-6 py-4 border-t border-theme flex items-center justify-between">
         <div className="text-sm text-muted">
-          Showing <span className="font-semibold text-main">1-{periods.length}</span> of{" "}
-          <span className="font-semibold text-main">{periods.length}</span> results
+          Showing{" "}
+          <span className="font-semibold text-main">1-{periods.length}</span> of{" "}
+          <span className="font-semibold text-main">{periods.length}</span>{" "}
+          results
         </div>
         <div className="flex items-center gap-2">
           <button className="px-3 py-1 text-sm border border-theme rounded-lg text-muted hover:text-main transition">

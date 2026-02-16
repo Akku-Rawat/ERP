@@ -1,0 +1,76 @@
+import type { AxiosResponse } from "axios";
+import { createAxiosInstance } from "../axiosInstance";
+
+
+import { API, ERP_BASE } from "../../config/api";
+const api = createAxiosInstance(ERP_BASE);
+export const purchaseorderapi = API.purchaseOrder;
+
+
+
+export async function getPurchaseOrders(page = 1, pageSize = 10) {
+  const resp = await api.get(
+    `${purchaseorderapi.getAll}?page=${page}&page_size=${pageSize}`
+  );
+  return resp.data;
+}
+
+
+
+export async function createPurchaseOrder(payload: any): Promise<any> {
+  const resp: AxiosResponse = await api.post(purchaseorderapi.create, payload);
+  return resp.data;
+}
+
+
+
+export async function getPurchaseOrderById(id: string | number): Promise<any> {
+  const resp = await api.get(
+    `${purchaseorderapi.getById}?id=${id}`
+  );
+  return resp.data;
+}
+
+
+
+
+
+
+export async function getPurchaseOrdersBySupplier(
+  supplierName: string,
+  page = 1,
+  pageSize = 5,
+  status = ""
+) {
+  const resp = await api.get(purchaseorderapi.getAll, {
+    params: {
+      supplier: supplierName,
+      page,
+      page_size: pageSize,
+      status,
+    },
+  });
+
+  return {
+    data: resp.data?.data || [],
+    pagination: resp.data?.pagination || {
+      total: 0,
+      total_pages: 1,
+    },
+  };
+}
+
+
+export async function updatePurchaseOrderStatus(
+  id: string,
+  status: string,
+): Promise<any> {
+  const resp: AxiosResponse = await api.patch(
+    purchaseorderapi.updateStatus,
+    {
+      id,
+      status,
+    }
+  );
+  return resp.data;
+}

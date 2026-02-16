@@ -1,4 +1,4 @@
-import React, { useState ,useMemo} from "react";
+import React, { useState, useMemo } from "react";
 import Table from "../../../components/ui/Table/Table";
 import StatusBadge from "../../../components/ui/Table/StatusBadge";
 import ActionButton from "../../../components/ui/Table/ActionButton";
@@ -9,9 +9,6 @@ import { getAllEmployeeLeaveHistory } from "../../../api/leaveApi";
 import type { LeaveUI } from "../../../types/leave/uiLeave";
 import { mapLeaveFromApi } from "../../../types/leave/leaveMapper";
 import EmployeeLeaveDetailModal from "../../../components/Hr/leave/EmployeeLeaveDetailModal";
-
-
-
 
 /* Component */
 const EmployeeHistory: React.FC = () => {
@@ -24,101 +21,98 @@ const EmployeeHistory: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [leaves, setLeaves] = useState<LeaveUI[]>([]);
-  
+  const [selectedLeaveId, setSelectedLeaveId] = useState<string | null>(null);
 
+  const filteredData = useMemo(() => {
+    return selectedEmployee
+      ? leaves.filter((l) => l.employeeId === selectedEmployee)
+      : leaves;
+  }, [leaves, selectedEmployee]);
 
+  useEffect(() => {
+    const fetchEmployeeLeaves = async () => {
+      setLoading(true);
+      try {
+        const res = await getAllEmployeeLeaveHistory(page, pageSize);
 
-const filteredData = useMemo(() => {
-  return selectedEmployee
-    ? leaves.filter((l) => l.employeeId === selectedEmployee)
-    : leaves;
-}, [leaves, selectedEmployee]);
-
-
-
-useEffect(() => {
-  const fetchEmployeeLeaves = async () => {
-    setLoading(true);
-    try {
-      const res = await getAllEmployeeLeaveHistory(page, pageSize);
-
-      const mapped = (res.data?.leaves || []).map(mapLeaveFromApi);
-setLeaves(mapped);
-      const pg = res.data?.pagination;
-      if (pg) {
-        setTotalPages(pg.total_pages);
-        setTotalItems(pg.total);
+        const mapped = (res.data?.leaves || []).map(mapLeaveFromApi);
+        setLeaves(mapped);
+        const pg = res.data?.pagination;
+        if (pg) {
+          setTotalPages(pg.total_pages);
+          setTotalItems(pg.total);
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  fetchEmployeeLeaves();
-}, [page, pageSize]); 
+    fetchEmployeeLeaves();
+  }, [page, pageSize]);
 
+  const columns = useMemo<Column<LeaveUI>[]>(
+    () => [
+      {
+        key: "employee",
+        header: "Employee",
+        render: (l) => (
+          <div>
+            <div className="font-semibold">{l.employeeName}</div>
+            <div className="text-xs text-muted">
+              {l.employeeId} • {l.department}
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: "type",
+        header: "Type",
+        render: (l) => l.leaveType,
+      },
+      {
+        key: "period",
+        header: "Period",
+        render: (l) => `${l.startDate} → ${l.endDate}`,
+      },
+      {
+        key: "days",
+        header: "Days",
+        align: "center",
+        render: (l) => l.totalDays,
+      },
 
-const columns = useMemo<Column<LeaveUI>[]>(() => [
-  {
-    key: "employee",
-    header: "Employee",
-    render: (l) => (
-      <div>
-        <div className="font-semibold">{l.employeeName}</div>
-        <div className="text-xs text-muted">
-          {l.employeeId} • {l.department}
-        </div>
-      </div>
-    ),
-  },
-  {
-    key: "type",
-    header: "Type",
-    render: (l) => l.leaveType,
-  },
-  {
-    key: "period",
-    header: "Period",
-    render: (l) => `${l.startDate} → ${l.endDate}`,
-  },
-  {
-    key: "days",
-    header: "Days",
-    align: "center",
-    render: (l) => l.totalDays,
-  },
+      // ✅ NEW COLUMN (your requirement)
+      {
+        key: "appliedOn",
+        header: "Applied",
+        render: (l) => l.appliedOn,
+      },
 
-  // ✅ NEW COLUMN (your requirement)
-  {
-    key: "appliedOn",
-    header: "Applied",
-    render: (l) => l.appliedOn,
-  },
+      {
+        key: "status",
+        header: "Status",
+        render: (l) => <StatusBadge status={l.status} />,
+      },
+      {
+        key: "actions",
+        header: "Actions",
+        align: "center",
+        render: (l) => (
+          <ActionButton
+            type="view"
+            iconOnly
+            onClick={() => setSelectedLeaveId(l.id)}
+          />
+        ),
+      },
+    ],
+    [],
+  );
 
-  {
-    key: "status",
-    header: "Status",
-    render: (l) => <StatusBadge status={l.status} />,
-  },
-  {
-    key: "actions",
-    header: "Actions",
-    align: "center",
-    render: (l) => (
-      <ActionButton
-        type="view"
-        iconOnly
-        onClick={() => setSelectedLeave(l)}
-      />
-    ),
-  },
-], []);
-
-const table = useTableLogic<LeaveUI>({
-  columns,
-  data: filteredData,
-});
-
+  const table = useTableLogic<LeaveUI>({
+    columns,
+    data: filteredData,
+  });
 
   /* Filters */
   const historyFilters = (
@@ -187,8 +181,8 @@ const table = useTableLogic<LeaveUI>({
       {/* YEAR FILTER */}
       <div className="relative">
         <select
-        value={table.yearFilter}
-onChange={(e) => table.setYearFilter(e.target.value)}
+          value={table.yearFilter}
+          onChange={(e) => table.setYearFilter(e.target.value)}
           className="
             appearance-none
             px-4 py-2
@@ -216,7 +210,7 @@ onChange={(e) => table.setYearFilter(e.target.value)}
       <div className="relative">
         <select
           value={table.leaveTypeFilter}
-  onChange={(e) => table.setLeaveTypeFilter(e.target.value)}
+          onChange={(e) => table.setLeaveTypeFilter(e.target.value)}
           className="
             appearance-none
             px-4 py-2
@@ -248,35 +242,30 @@ onChange={(e) => table.setYearFilter(e.target.value)}
       {/*  TABLE  */}
       <Table
         columns={columns}
-         data={filteredData}
+        data={filteredData}
         loading={loading}
         showToolbar
         extraFilters={historyFilters}
         toolbarPlaceholder="Search employee name, reason..."
         emptyMessage="No leave history found."
         currentPage={page}
-         enableColumnSelector
-         
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={totalItems}
-          pageSizeOptions={[10, 25, 50, 100]}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1); // reset page
-          }}
-          onPageChange={setPage}
-        />
-      
-<EmployeeLeaveDetailModal
-  leave={selectedLeave}
-  onClose={() => setSelectedLeave(null)}
-/>
-
+        enableColumnSelector
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        pageSizeOptions={[10, 25, 50, 100]}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1); // reset page
+        }}
+        onPageChange={setPage}
+      />
+      <EmployeeLeaveDetailModal
+        leaveId={selectedLeaveId}
+        onClose={() => setSelectedLeaveId(null)}
+      />
     </div>
   );
 };
-
-
 
 export default EmployeeHistory;

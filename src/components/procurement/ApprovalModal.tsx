@@ -45,7 +45,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    >
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -54,7 +54,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
-    idx: number,
+    idx: number
   ) => {
     const rows = [...items];
     rows[idx] = { ...rows[idx], [e.target.name]: e.target.value };
@@ -97,76 +97,78 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 40 }}
-          className="rounded-lg bg-white w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden"
+          className="rounded-xl bg-card w-[96vw] max-w-6xl shadow-lg flex flex-col max-h-[90vh] overflow-hidden border border-theme"
         >
           <form
-            className="pb-2 bg-[#fefefe]/10 flex flex-col flex-1 overflow-hidden"
+            className="pb-2 bg-card flex flex-col flex-1 overflow-hidden"
             onSubmit={handleSave}
           >
-            <div className="flex h-12 items-center justify-between border-b px-6 py-3 rounded-t-lg bg-blue-100/30 shrink-0">
-              <h3 className="text-2xl w-full font-semibold text-blue-600">
+            {/* Header */}
+            <div className="flex h-12 items-center justify-between border-b border-theme px-6 py-3 rounded-t-xl bg-app shrink-0">
+              <h3 className="text-xl w-full font-semibold text-primary">
                 Approval Request
               </h3>
               <button
                 type="button"
-                className="text-gray-700 hover:bg-[#fefefe] rounded-full w-8 h-8"
+                className="text-muted hover:bg-app rounded-full w-8 h-8"
                 onClick={onClose}
               >
                 <span className="text-2xl">&times;</span>
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto border-b px-4">
+            <div className="flex-1 overflow-y-auto border-b border-theme px-4">
               {/* APPROVAL HEADER */}
-              <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-4">
+              <div className="border border-theme m-4 p-6 flex flex-col gap-y-2 bg-card rounded-lg">
+                <div className="font-semibold text-muted mb-4">
                   APPROVAL DETAILS
                 </div>
+
                 <div className="grid grid-cols-6 gap-4 mb-6">
+                  {[
+                    { name: "approvalNumber", placeholder: "Approval Number", span: 1 },
+                    { name: "tag", placeholder: "Tag", span: 1 },
+                  ].map((f) => (
+                    <input
+                      key={f.name}
+                      className={`col-span-${f.span} filter-input-refined`}
+                      placeholder={f.placeholder}
+                      name={f.name}
+                      value={(form as any)[f.name]}
+                      onChange={handleFormChange}
+                    />
+                  ))}
+
                   <input
-                    className="col-span-1 border rounded p-2"
-                    placeholder="Approval Number"
-                    name="approvalNumber"
-                    value={form.approvalNumber}
-                    onChange={handleFormChange}
-                  />
-                  <input
-                    className="col-span-1 border rounded p-2"
-                    placeholder="Tag"
-                    name="tag"
-                    value={form.tag}
-                    onChange={handleFormChange}
-                  />
-                  <input
-                    className="col-span-2 border rounded p-2"
+                    className="col-span-2 filter-input-refined"
                     type="datetime-local"
                     name="dateTime"
                     value={form.dateTime}
                     onChange={handleFormChange}
                   />
                   <input
-                    className="col-span-2 border rounded p-2"
+                    className="col-span-2 filter-input-refined"
                     placeholder="Description"
                     name="description"
                     value={form.description}
                     onChange={handleFormChange}
                   />
                   <input
-                    className="col-span-2 border rounded p-2"
+                    className="col-span-2 filter-input-refined"
                     placeholder="Requester"
                     name="requester"
                     value={form.requester}
                     onChange={handleFormChange}
                   />
                   <input
-                    className="col-span-2 border rounded p-2"
+                    className="col-span-2 filter-input-refined"
                     placeholder="Department"
                     name="department"
                     value={form.department}
                     onChange={handleFormChange}
                   />
                   <input
-                    className="col-span-2 border rounded p-2"
+                    className="col-span-2 filter-input-refined"
                     placeholder="Priority"
                     name="priority"
                     value={form.priority}
@@ -176,28 +178,29 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               </div>
 
               {/* APPROVAL ITEMS */}
-              <div className="border m-4 p-6 flex flex-col gap-y-2">
-                <div className="font-semibold text-gray-600 mb-2">
+              <div className="border border-theme m-4 p-6 flex flex-col gap-y-2 bg-card rounded-lg">
+                <div className="font-semibold text-muted mb-2">
                   APPROVAL STEPS
                 </div>
-                <div className="overflow-x-auto rounded-md border border-gray-200 bg-white mb-2 py-4 px-2">
+
+                <div className="overflow-x-auto rounded-md border border-theme bg-card mb-2 py-4 px-2">
                   <table className="min-w-full text-xs table-fixed">
                     <thead>
-                      <tr className="bg-gray-50 text-gray-800">
-                        <th className="w-1/6 px-2 py-1 text-left">APPROVER</th>
-                        <th className="w-1/6 px-2 py-1 text-left">ROLE</th>
-                        <th className="w-1/6 px-2 py-1 text-left">STATUS</th>
-                        <th className="w-1/6 px-2 py-1 text-left">COMMENTS</th>
-                        <th className="w-1/6 px-2 py-1 text-left">DATE</th>
-                        <th className="w-1/10 px-2 py-1 text-center"></th>
+                      <tr className="table-head">
+                        <th className="px-2 py-1 text-left">APPROVER</th>
+                        <th className="px-2 py-1 text-left">ROLE</th>
+                        <th className="px-2 py-1 text-left">STATUS</th>
+                        <th className="px-2 py-1 text-left">COMMENTS</th>
+                        <th className="px-2 py-1 text-left">DATE</th>
+                        <th className="px-2 py-1"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {items.map((item, idx) => (
-                        <tr key={idx}>
+                        <tr key={idx} className="row-hover">
                           <td className="px-2 py-1">
                             <input
-                              className="border rounded p-1 w-full"
+                              className="filter-input-refined"
                               placeholder="Approver"
                               name="approver"
                               value={item.approver}
@@ -206,7 +209,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                           </td>
                           <td className="px-2 py-1">
                             <input
-                              className="border rounded p-1 w-full"
+                              className="filter-input-refined"
                               placeholder="Role"
                               name="role"
                               value={item.role}
@@ -216,7 +219,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                           <td className="px-2 py-1">
                             <select
                               name="status"
-                              className="border rounded p-1 w-full"
+                              className="filter-input-refined"
                               value={item.status}
                               onChange={(e) => handleItemChange(e, idx)}
                             >
@@ -229,7 +232,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                           <td className="px-2 py-1">
                             <textarea
                               name="comments"
-                              className="border rounded p-1 w-full"
+                              className="filter-input-refined"
                               placeholder="Comments"
                               value={item.comments}
                               onChange={(e) => handleItemChange(e, idx)}
@@ -239,7 +242,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                             <input
                               type="date"
                               name="date"
-                              className="border rounded p-1 w-full"
+                              className="filter-input-refined"
                               value={item.date}
                               onChange={(e) => handleItemChange(e, idx)}
                             />
@@ -247,7 +250,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                           <td className="px-2 py-1 text-center">
                             <button
                               type="button"
-                              className="bg-red-100 border border-red-300 rounded px-2 py-1"
+                              className="bg-danger border border-danger-700 rounded px-2 py-1 text-white"
                               onClick={() => removeItem(idx)}
                             >
                               -
@@ -258,15 +261,14 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                     </tbody>
                   </table>
                 </div>
-                <div>
-                  <button
-                    type="button"
-                    className="bg-blue-100 border border-blue-300 rounded px-2 py-1"
-                    onClick={addItem}
-                  >
-                    Add
-                  </button>
-                </div>
+
+                <button
+                  type="button"
+                  className="bg-primary rounded px-3 py-1 text-sm"
+                  onClick={addItem}
+                >
+                  Add
+                </button>
               </div>
             </div>
 
@@ -274,21 +276,22 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             <div className="m-3 flex items-center justify-between gap-x-7 shrink-0">
               <button
                 type="button"
-                className="w-24 rounded-3xl bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
+                className="w-24 rounded-3xl bg-app border border-theme px-4 py-2 text-sm text-main"
                 onClick={onClose}
               >
                 Cancel
               </button>
+
               <div className="flex gap-x-2">
                 <button
                   type="submit"
-                  className="w-24 rounded-3xl bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+                  className="w-24 rounded-3xl bg-primary px-4 py-2 text-sm"
                 >
                   Save
                 </button>
                 <button
                   type="button"
-                  className="w-24 rounded-3xl bg-gray-300 text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-500 hover:text-white"
+                  className="w-24 rounded-3xl bg-app border border-theme px-4 py-2 text-sm text-main"
                   onClick={handleReset}
                 >
                   Reset

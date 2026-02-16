@@ -15,7 +15,7 @@ export interface Invoice {
   billingAddress: Address;
   shippingAddress: Address;
   paymentInformation: PaymentInformation;
-
+industryBases?: string;
   items: InvoiceItem[];
   terms: InvoiceTerms;
 }
@@ -52,7 +52,7 @@ export interface InvoiceItem {
   vatRate: string;
   price: number;
   vatCode: string;
-   _fromInvoice?: boolean;
+  _fromInvoice?: boolean;
 }
 
 export interface PaymentInformation {
