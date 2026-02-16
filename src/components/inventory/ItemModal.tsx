@@ -124,10 +124,6 @@ useEffect(() => {
   setActiveTab("details");
 }, [isOpen]);
 
-    try {
-      const payload = { ...form, itemTypeCode: Number(form.itemTypeCode) };
-
-
  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   setLoading(true);
