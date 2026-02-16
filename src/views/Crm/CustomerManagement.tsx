@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CustomerDetailView from "./CustomerDetailView";
-import toast from "react-hot-toast";
-
+import { showLoading,showApiError,showSuccess,closeSwal } from "../../components/alert";
 import {
   getAllCustomers,
   deleteCustomerById,
@@ -21,6 +20,7 @@ import ActionButton, {
 
 import type { Column } from "../../components/ui/Table/type";
 import { FilterSelect } from "../../components/ui/modal/modalComponent";
+import Swal from "sweetalert2";
 
 interface Props {
   onAdd: () => void;
@@ -44,20 +44,29 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [taxCategory, setTaxCategory] = useState<string>("");
 
 
-  const fetchCustomers = async () => {
-    try {
-      setCustLoading(true);
-      const response = await getAllCustomers(page, pageSize, taxCategory);
-      setCustomers(response.data);
-      setTotalPages(response.pagination?.total_pages || 1);
-      setTotalItems(response.pagination?.total || 1);
-    } catch (err) {
-      console.error("Error loading customers:", err);
-    } finally {
-      setCustLoading(false);
-      setInitialLoad(false);
-    }
-  };
+const fetchCustomers = async () => {
+  try {
+    setCustLoading(true);
+
+    const response = await getAllCustomers(
+      page,
+      pageSize,
+      taxCategory
+    );
+
+    setCustomers(response.data);
+    setTotalPages(response.pagination?.total_pages || 1);
+    setTotalItems(response.pagination?.total || 1);
+
+  } catch (error) {
+    console.error("Error loading customers:", error);
+    showApiError(error);
+  } finally {
+    setCustLoading(false);
+    setInitialLoad(false);
+  }
+};
+
 
   useEffect(() => {
     fetchCustomers();
@@ -80,23 +89,43 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   };
 
 
-  const handleDelete = async (customerId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+ const handleDelete = async (
+  customerId: string,
+  e: React.MouseEvent
+) => {
+  e.stopPropagation();
 
-    if (!window.confirm(`Delete customer ${customerId}?`)) return;
+  const confirm = await Swal.fire({
+    icon: "warning",
+    title: "Are you sure?",
+    text: `Delete customer ${customerId}?`,
+    showCancelButton: true,
+    confirmButtonColor: "#ef4444",
+    cancelButtonColor: "#6b7280",
+    confirmButtonText: "Yes, delete",
+  });
 
-    try {
-      setCustLoading(true);
-      await deleteCustomerById(customerId);
-      setCustomers((prev) => prev.filter((c) => c.id !== customerId));
-      toast.success("Customer deleted successfully.");
-    } catch (err: any) {
-      console.error("Delete error:", err);
-      toast.error(err.response?.data?.message || "Failed to delete customer.");
-    } finally {
-      setCustLoading(false);
-    }
-  };
+  if (!confirm.isConfirmed) return;
+
+  try {
+    showLoading("Deleting Customer...");
+
+    await deleteCustomerById(customerId);
+
+    closeSwal();
+
+    setCustomers((prev) =>
+      prev.filter((c) => c.id !== customerId)
+    );
+
+    showSuccess("Customer deleted successfully.");
+
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
 
   const handleAddCustomer = () => {
     setEditCustomer(null);
@@ -109,17 +138,17 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
       const customer = await getCustomerByCustomerCode(id);
       setEditCustomer(customer.data ?? customer);
       setShowModal(true);
-    } catch (err) {
-      console.error("Failed to fetch customer:", err);
-      alert("Unable to fetch full customer details.");
-    }
+    } catch (error) {
+  console.error("Failed to fetch customer:", error);
+  showApiError(error);
+}
   };
 
   const handleCustomerSaved = async () => {
     setShowModal(false);
     setEditCustomer(null);
     await fetchCustomers();
-    toast.success(editCustomer ? "Customer updated!" : "Customer created!");
+    showSuccess(editCustomer ? "Customer updated!" : "Customer created!");
   };
 
   const handleRowClick = async (customer: CustomerSummary) => {
@@ -137,7 +166,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
       setViewMode("detail");
     } catch (err) {
       console.error("Failed to load customer detail:", err);
-      toast.error("Unable to load customer detail");
+      showApiError(err);
     } finally {
       setCustLoading(false);
     }
