@@ -1,10 +1,7 @@
-import { updateCompanyFiles } from "../api/companySetupApi";
-import { getPurchaseInvoiceById } from "../api/procurement/PurchaseInvoiceApi";
 import { ENV } from "./env";
 
 export const ERP_BASE = ENV.apiBaseUrl;
 export const CODES_BASE = ENV.zraCodesBaseUrl;
-export const ROLA_CODES_BASE = ENV.rolaCodesBaseUrl; 
 
 export const API = {
   /* =========================
@@ -202,9 +199,9 @@ export const API = {
     getItemClasses: `${CODES_BASE}/item-class-list/`,
   },
   rolaLookup: {
-    getPackagingUnits: `${ROLA_CODES_BASE}/api//`,
-    getCountries: `${ROLA_CODES_BASE}/api/country-list/`,
-    getUnitOfMeasure: `${ROLA_CODES_BASE}/api/resource/UOM'`,
-    getItemClasses  : `${ROLA_CODES_BASE}/api/item-class-list/`,
+    getPackagingUnits: `${ERP_BASE}/api//`,
+    getCountries: `${ERP_BASE}/api/country-list/`,
+    getUnitOfMeasure: `${ERP_BASE}/api/resource/UOM'`,
+    getItemClasses: `${ERP_BASE}/api/item-class-list/`,
   },
 } as const;
