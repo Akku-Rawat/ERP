@@ -1,6 +1,8 @@
 import Swal from "sweetalert2";
 
 const extractErrorMessage = (error: any): string => {
+  if (typeof error === "string") return error;
+
   if (error?.response?.data?.message) {
     return error.response.data.message;
   }
