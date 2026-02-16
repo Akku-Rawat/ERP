@@ -44,75 +44,16 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     actions,
   } = useQuotationForm(isOpen, onClose, onSubmit);
 
- const validateForm = () => {
-  // Customer
-  if (!formData.customerId) {
-    showApiError("Please select a customer");
-    return false;
-  }
 
-  // Valid until
-  if (!formData.dueDate) {
-    showApiError("Please enter a valid until date");
-    return false;
-  }
-
-  //  Payment Terms validation 
-  if (!formData.paymentInformation?.paymentTerms) {
-    showApiError("Please select payment terms");
-    return false;
-  }
-
-  // At least 1 item
-  if (!formData.items.length) {
-    showApiError("Please add at least one item");
-    return false;
-  }
-
-  // Items validation
-  for (let i = 0; i < formData.items.length; i++) {
-    const it = formData.items[i];
-
-    if (!it.itemCode) {
-      showApiError(`Item ${i + 1}: Please select an item`);
-      return false;
-    }
-
-    if (!it.quantity || it.quantity <= 0) {
-      showApiError(
-        `Item ${i + 1}: Quantity must be greater than 0`,
-      );
-      return false;
-    }
-
-    if (!it.price || it.price <= 0) {
-      showApiError(
-        `Item ${i + 1}: Unit price must be greater than 0`,
-      );
-      return false;
-    }
-  }
-
-  return true;
-};
 
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
 
- const handleFormSubmit = async (e: React.FormEvent) => {
+const handleFormSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
-
-  if (!validateForm()) return;
-
-  try {
-    await actions.handleSubmit(e);
-
-    showSuccess("Quotation saved successfully");
-
-  } catch (error: any) {
-    showApiError(error);
-  }
+  await actions.handleSubmit(e);
 };
+
 
 
   const handlePrint = () => {

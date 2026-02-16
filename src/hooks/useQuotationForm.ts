@@ -12,6 +12,7 @@ import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
 } from "../constants/invoice.constants";
+import { showApiError, showLoading ,showSuccess,closeSwal } from "../components/alert";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -413,31 +414,41 @@ const handleReset = () => {
     };
   }, [formData.items]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // Validation
+  try {
+    //  VALIDATION 
     if (!formData.customerId) {
-      alert("Please select a customer");
-      return;
+      throw new Error("Please select a customer");
     }
 
     if (!formData.dateOfInvoice) {
-      alert("Please select quotation date");
-      return;
+      throw new Error("Please select quotation date");
     }
 
     if (!formData.dueDate) {
-      alert("Please select valid until date");
-      return;
-    }
+  throw new Error("Please select valid until date");
+}
+
+   if (formData.dueDate < formData.dateOfInvoice) {
+  throw new Error("Valid until date cannot be before quotation date");
+}
+
+
+    if (!formData.paymentInformation?.paymentTerms) {
+  throw new Error("Please select payment terms");
+}
+
 
     if (formData.items.length === 0 || !formData.items[0].itemCode) {
-      alert("Please add at least one item");
-      return;
+      throw new Error("Please add at least one item");
     }
 
-    // Map to backend format for quotation
+    //  LOADING 
+    showLoading("Saving quotation...");
+
+    //  PAYLOAD 
     const payload = {
       customerId: formData.customerId,
       currencyCode: formData.currencyCode,
@@ -445,15 +456,13 @@ const handleReset = () => {
       dateOfQuotation: formData.dateOfInvoice,
       validUntil: formData.dueDate,
       industryBases: formData.industryBases || "Service",
-      invoiceType: formData.invoiceType, //
+      invoiceType: formData.invoiceType,
       invoiceStatus: formData.invoiceStatus,
 
-      // Only include if export quotation
       ...(formData.invoiceType === "Export" && {
         destnCountryCd: formData.destnCountryCd,
       }),
 
-      // Only include if LPO
       ...(formData.invoiceType === "Lpo" && {
         lpoNumber: formData.lpoNumber,
       }),
@@ -475,25 +484,35 @@ const handleReset = () => {
         })),
 
       terms: formData.terms,
-
-      // Additional fields for tracking
       subTotal,
       totalTax,
       grandTotal,
       documentType: "quotation",
     };
 
-    // Call the onSubmit callback
+    //  API CALL 
     if (onSubmit) {
-      try {
-        await onSubmit(payload);
-      } catch (error) {}
+      await onSubmit(payload);
     } else {
-      alert(
-        "No onSubmit handler provided. Please check your QuotationModal usage.",
+      throw new Error(
+        "No onSubmit handler provided. Please check QuotationModal usage.",
       );
     }
-  };
+
+    //  SUCCESS 
+    closeSwal();
+
+    showSuccess("Quotation saved successfully");
+
+    onClose?.();
+
+  } catch (error: any) {
+  closeSwal();
+  showApiError(error);
+}
+
+};
+
 
   const paginatedItems = formData.items.slice(
     page * ITEMS_PER_PAGE,
