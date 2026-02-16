@@ -140,6 +140,9 @@ export const API = {
    * ========================= */
   stock: {
     getAll: `${ERP_BASE}/api/method/erpnext.zra_client.stock.stock.get_all_stock_entries`,
+    getbyId: `${ERP_BASE}/api/method/erpnext.zra_client.stock.stock.get_stock_by_id`,
+  //  getAllStockItems:'${ERP_BASE}/api'
+    
     create: `${ERP_BASE}/api/method/erpnext.zra_client.stock.stock.create_item_stock_api`,
     correct: `${ERP_BASE}/api/method/erpnext.zra_client.stock.stock.correct_stock`,
     delete: `${ERP_BASE}/api/method/erpnext.zra_client.stock.stock.delete_stock_entry`,

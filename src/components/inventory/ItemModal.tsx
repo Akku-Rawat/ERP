@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React, { useState, useEffect } from "react";
-import { showApiError, showSuccess } from "../../components/alert";
+import { showApiError, showSuccess ,showLoading, closeSwal } from "../../components/alert";
 
 import { updateItemByItemCode, createItem } from "../../api/itemApi";
 
@@ -124,38 +124,52 @@ useEffect(() => {
   setActiveTab("details");
 }, [isOpen]);
 
- const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
-  setLoading(true);
 
   try {
-    const payload = { ...form, itemTypeCode: Number(form.itemTypeCode) };
+    setLoading(true);
+
+    showLoading(
+      isEditMode ? "Updating Item..." : "Creating Item..."
+    );
+
+    const payload = {
+      ...form,
+      itemTypeCode: Number(form.itemTypeCode),
+    };
 
     let response;
 
     if (isEditMode && initialData?.id) {
-      response = await updateItemByItemCode(initialData.id, payload);
+      response = await updateItemByItemCode(
+        initialData.id,
+        payload
+      );
     } else {
       response = await createItem(payload);
     }
+
+    closeSwal();
 
     if (!response || ![200, 201].includes(response.status_code)) {
       showApiError(response);
       return;
     }
 
-    
+   
 
     onSubmit?.(response);
     handleClose();
-
   } catch (err: any) {
+    closeSwal();
     console.error("Item save failed:", err);
     showApiError(err);
   } finally {
     setLoading(false);
   }
 };
+;
 
   const handleClose = () => {
     setForm(emptyForm);

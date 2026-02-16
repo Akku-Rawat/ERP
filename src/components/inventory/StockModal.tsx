@@ -9,11 +9,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import React, { useState, useEffect } from "react";
-import { toast } from "sonner";
+import { showApiError, showSuccess, showLoading, closeSwal } from "../../components/alert";
+
 import { createItemStock } from "../../api/stockApi";
 import { getStockById, getAllStockItems } from "../../api/stockItemApi";
 import Modal from "../ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
+;
+import { getAllItems } from "../../api/itemApi";
+
+
 
 type FormState = Record<string, any>;
 
@@ -70,43 +75,49 @@ const ItemModal: React.FC<{
     Array<{ label: string; value: string; id: string; itemClassCode?: string }>
   >([]);
   // Fetch all available items for dropdown on open
+useEffect(() => {
+  if (!isOpen) return;
+
+  (async () => {
+    try {
+      const response = await getAllItems(1, 1000);
+
+      const items = response?.data || [];
+
+      const mappedOptions = items.map((item: any) => ({
+        label: item.itemName,
+        value: item.id,
+        id: item.id,
+        itemClassCode: item.itemClassCode,
+      }));
+
+      setItemOptions(mappedOptions);
+    } catch (err) {
+      console.error("Item fetch failed:", err);
+      setItemOptions([]);
+    }
+  })();
+}, [isOpen]);
+
   useEffect(() => {
-    if (!isOpen) return;
-    (async () => {
-      try {
-        const items = await getAllStockItems();
-        console.log("Fetched items:", items);
-        const itemOptions = items
-          .map((item: any) => ({
-            label:
-              item.itemName ||
-              item.item_name ||
-              item.name ||
-              item.id ||
-              "",
-            value:
-              item.itemName || item.item_name || item.name || item.id || "",
-            id: item.id || "",
-            itemClassCode: item.itemClassCode || item.item_class_code || "",
-          }))
-          .filter((opt) => !!opt.id);
-        console.log("Processed itemOptions:", itemOptions);
-        setItemOptions(itemOptions);
-      } catch (err) {
-        setItemOptions([]);
-      }
-    })();
-  }, [isOpen]);
-  useEffect(() => {
-    if (!form.itemCode) return;
-    getStockById(form.itemCode).then((data) => {
+    if (!form.id) return;
+
+    getStockById(form.id).then((res) => {
+      console.log("Full Response:", res);
+
+      const item = res?.items?.[0];
+
+      if (!item) return;
+
       setForm((prev) => ({
         ...prev,
-        itemCode: data.item_code || data.itemCode || prev.itemCode,
-        warehouse: data.id || prev.id,
+        itemClassCode: item.itemCode || "",
+        quantity: item.quantity || "",
+        rate: item.rate || "",
+        warehouse: item.warehouse || "",
       }));
     });
-  }, [form.itemCode]);
+  }, [form.id]);
 
   const [activeTab, setActiveTab] = useState<
     "details" | "taxDetails" | "inventoryDetails"
@@ -115,87 +126,62 @@ const ItemModal: React.FC<{
   useEffect(() => {
     if (!isOpen) return;
 
-    setForm(isEditMode && initialData ? initialData : emptyForm);
-    setActiveTab("details");
-  }, [isOpen]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      // Validate required fields
-      if (!form.id) {
-        toast.error("Please select an item");
-        setLoading(false);
-        return;
-      }
-
-      const qty = parseFloat(form.quantity);
-      const price = parseFloat(form.rate);
-
-      if (!qty || qty <= 0) {
-        toast.error("Please enter a valid quantity greater than 0");
-        setLoading(false);
-        return;
-      }
-
-      if (!price || price <= 0) {
-        toast.error("Please enter a valid price greater than 0");
-        setLoading(false);
-        return;
-      }
-
-      // Prepare stock entry payload
-      const payload = {
-        items: [
-          {
-            item_code: form.id,
-            qty: qty,
-            price: price,
-          },
-        ],
-      };
-
-      console.log("Sending stock entry payload:", payload);
-      const response = await createItemStock(payload);
-      toast.success("Stock entry created successfully");
-      onSubmit?.();
-    } catch (err: any) {
-      let errorMessage = "Something went wrong while saving the stock entry.";
-
-      if (err.response?.data) {
-        const data = err.response.data;
-
-        if (data._server_messages) {
-          try {
-            const msgs = JSON.parse(data._server_messages);
-            errorMessage = msgs
-              .map((m: string) => {
-                try {
-                  return JSON.parse(m).message || "";
-                } catch {
-                  return m;
-                }
-              })
-              .filter(Boolean)
-              .join("\n");
-          } catch {}
-        } else if (data.message) {
-          errorMessage = data.message;
-        }
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-
-      toast.error(errorMessage, {
-        duration: 8000,
-        style: { whiteSpace: "pre-line" },
-      });
-    } finally {
-      setLoading(false);
+    if (isEditMode && initialData) {
+      setForm({ ...emptyForm, ...initialData });
+    } else {
+      setForm(emptyForm);
     }
-  };
+
+    setActiveTab("details");
+  }, [isOpen, isEditMode, initialData]);
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    if (!form.id) {
+      showApiError("Please select an item");
+      return;
+    }
+
+    const qty = parseFloat(form.quantity);
+    const price = parseFloat(form.rate);
+
+    if (!qty || qty <= 0) {
+      showApiError("Please enter a valid quantity greater than 0");
+      return;
+    }
+
+    if (!price || price <= 0) {
+      showApiError("Please enter a valid price greater than 0");
+      return;
+    }
+
+    const payload = {
+      items: [
+        {
+          item_code: form.id,
+          qty: qty,
+          price: price,
+        },
+      ],
+    };
+
+    showLoading("Creating Stock Entry...");
+
+    await createItemStock(payload);
+
+    closeSwal();
+    showSuccess("Stock entry created successfully");
+
+    onSubmit?.();
+    handleClose();
+  } catch (error: any) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
   const handleClose = () => {
     setForm(emptyForm);
     onClose();
@@ -258,25 +244,28 @@ const ItemModal: React.FC<{
                       <select
                         className="w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
                         value={
-                          itemOptions.find((opt) => opt.id === form.id)?.value || ""
+                          itemOptions.find((opt) => opt.id === form.id)
+                            ?.value || ""
                         }
-                        onChange={(e) => {
-                          const selectedValue = e.target.value;
-                          const selectedOption = itemOptions.find(
-                            (opt) => opt.value === selectedValue,
-                          );
-                          console.log("Selected option:", selectedOption);
-                          setForm((p) => ({
-                            ...p,
-                            id: selectedOption?.id || "",
-                            itemName: selectedOption?.label || "",
-                            itemClassCode: selectedOption?.itemClassCode || "",
-                          }));
-                        }}
+                     onChange={(e) => {
+  const selectedId = e.target.value;
+
+  const selectedOption = itemOptions.find(
+    (opt) => opt.id === selectedId
+  );
+
+  setForm((p) => ({
+    ...p,
+    id: selectedId,
+    itemName: selectedOption?.label || "",
+    itemClassCode: selectedOption?.itemClassCode || "",
+  }));
+}}
+
                       >
                         <option value="">Select an item</option>
                         {itemOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
+                          <option key={opt.id} value={opt.id}>
                             {opt.label}
                           </option>
                         ))}
@@ -286,7 +275,7 @@ const ItemModal: React.FC<{
                     <Input
                       label="Item Code"
                       name="itemClassCode"
-                      value={form.itemClassCode || ""}
+                       value={form.itemClassCode || ""}
                       onChange={handleForm}
                       className="w-full"
                       readOnly

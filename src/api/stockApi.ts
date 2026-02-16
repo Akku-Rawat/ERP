@@ -1,5 +1,9 @@
+
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
+
+
+
 
 import { API, ERP_BASE } from "../config/api";
 const api = createAxiosInstance(ERP_BASE);
@@ -16,8 +20,9 @@ export async function getAllStockEntries(): Promise<any> {
 }
 
 export async function getStockById(id: string): Promise<any> {
-  const url = `${base_url}.stock.stock.get_stock_by_id?id=${id}`;
-  const resp: AxiosResponse = await api.get(url);
+  const resp: AxiosResponse = await api.get(StockAPI.getbyId, {
+    params: { id },
+  });
   return resp.data;
 }
 
