@@ -29,8 +29,8 @@ export interface ProformaInvoiceSummary {
   exchangeRate: string;
   dueDate: string | null;
   totalAmount: number;
-  invoiceStatus: InvoiceStatus;
-  createdAt: string;
+  status: InvoiceStatus;   
+  createdAt: Date;    
 }
 
 export interface Address {

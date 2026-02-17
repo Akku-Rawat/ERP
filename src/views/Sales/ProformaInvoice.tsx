@@ -3,7 +3,7 @@ import {
   getAllProformaInvoices,
   updateProformaInvoiceStatus,
   getProformaInvoiceById,
-
+  deleteProformaInvoiceById
 } from "../../api/proformaInvoiceApi";
 
 import { getCompanyById } from "../../api/companySetupApi";
@@ -23,6 +23,7 @@ import ActionButton, {
 import type { Column } from "../../components/ui/Table/type";
 import PdfPreviewModal from "./PdfPreviewModal";
 import { showApiError, showSuccess } from "../../components/alert";
+import Swal from "sweetalert2";
 
 type InvoiceStatus = "Draft" | "Rejected" | "Paid" | "Cancelled" | "Approved";
 
@@ -195,13 +196,55 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   //   toast.success(`Marked as ${status}`);
   // };
 
-  const handleDelete = async (proformaId: string, e?: React.MouseEvent) => {
+  const handleDelete = async (
+    proformaId: string,
+    e?: React.MouseEvent
+  ) => {
     e?.stopPropagation();
-    if (!window.confirm(`Delete proforma invoice ${proformaId}?`)) return;
 
-    // TODO: Hook delete API later
-    showSuccess("Proforma invoice deleted");
+    const confirm = await Swal.fire({
+      icon: "warning",
+      title: "Are you sure?",
+      text: `Delete proforma invoice ${proformaId}?`,
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete",
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      Swal.fire({
+        title: "Deleting...",
+        text: "Please wait while we delete the invoice.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      const res = await deleteProformaInvoiceById(proformaId);
+
+      Swal.close();
+
+      if (!res || res.status_code !== 200) {
+        showApiError(res?.message || "Delete failed");
+        return;
+      }
+
+      // Remove from table instantly
+      setInvoices((prev) =>
+        prev.filter((inv) => inv.proformaId !== proformaId)
+      );
+
+      showSuccess("Proforma invoice deleted successfully");
+    } catch (err) {
+      Swal.close();
+      showApiError(err);
+    }
   };
+
 
   const handleClosePdf = () => {
     if (pdfUrl) URL.revokeObjectURL(pdfUrl);
@@ -231,10 +274,11 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
     setInvoices((prev) =>
       prev.map((inv) =>
         inv.proformaId === invoiceNumber
-          ? { ...inv, invoiceStatus: status }
+          ? { ...inv, status }
           : inv,
       ),
     );
+
 
     showSuccess(`Invoice marked as ${status}`);
     setOpenStatusMenuFor(null);
@@ -297,8 +341,9 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
       key: "status",
       header: "Status",
       align: "left",
-      render: (inv) => <StatusBadge status={inv.invoiceStatus} />,
-    },
+      render: (inv) => <StatusBadge status={inv.status} />,
+    }
+    ,
     {
       key: "actions",
       header: "Actions",
@@ -314,7 +359,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
             showDownload
             onDownload={(e) => handleDownload(inv.proformaId, e)}
             onDelete={(e) => handleDelete(inv.proformaId, e)}
-            customActions={(STATUS_TRANSITIONS[inv.invoiceStatus] ?? []).map(
+            customActions={(STATUS_TRANSITIONS[inv.status] ?? []).map(
               (status) => ({
                 label: `Mark as ${status}`,
                 danger: status === "Paid",
@@ -322,7 +367,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
               }),
             )}
           />
-        </ActionGroup>
+        </ActionGroup> 
       ),
     },
   ];

@@ -38,8 +38,11 @@ export async function getAllProformaInvoices(
   return resp.data;
 }
 
-export async function deleteProformaInvoiceById(id: string): Promise<any> {
-  const url = `${ProformaAPI.delete}?id=${encodeURIComponent(id)}`;
-  const resp: AxiosResponse = await api.delete(url);
+export async function deleteProformaInvoiceById(proformaId: string) {
+  const resp = await api.delete(ProformaAPI.delete, {
+    data: { proformaId },   
+  });
+
   return resp.data;
 }
+

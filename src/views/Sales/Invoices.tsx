@@ -21,8 +21,7 @@ import StatusBadge from "../../components/ui/Table/StatusBadge";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { Company } from "../../types/company";
 import { showApiError, showSuccess } from "../../components/alert";
-
-type InvoiceStatus = "Draft" | "Rejected" | "Paid" | "Cancelled" | "Approved";
+import type { InvoiceStatus } from "../../types/invoice";
 
 const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
   Draft: ["Rejected", "Approved"],
@@ -84,8 +83,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
         dateOfInvoice: new Date(inv.dateOfInvoice),
         total: Number(inv.totalAmount),
         totalTax: inv.totalTax,
-        invoiceStatus: inv.invoiceStatus as InvoiceStatus,
-
+        invoiceStatus: inv.invoiceStatus,
         invoiceTypeParent: inv.invoiceTypeParent,
         invoiceType: inv.invoiceType,
       }));
@@ -235,11 +233,11 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       key: "dateOfInvoice",
       header: "Date",
       align: "left",
-      render: (inv: InvoiceSummary) => (
-        <span className="text-xs text-muted">
-          {new Date(inv.dateOfInvoice).toLocaleDateString()}
-        </span>
-      ),
+      render: (inv) => (
+  <span className="text-xs text-muted">
+    {inv.dateOfInvoice.toLocaleDateString()}
+  </span>
+),
     },
     {
       key: "dueDate",
@@ -289,7 +287,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
             showDownload
             onDownload={(e) => handleDownload(inv, e)}
             customActions={(
-              STATUS_TRANSITIONS[inv.invoiceStatus as InvoiceStatus] ?? []
+              STATUS_TRANSITIONS[inv.invoiceStatus] ?? []
             ).map((status) => ({
               label: `Mark as ${status}`,
               danger: status === "Paid",
