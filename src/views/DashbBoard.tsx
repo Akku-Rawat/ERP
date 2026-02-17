@@ -124,8 +124,7 @@ const Dashboard = () => {
   const totalReceivableUpcoming = receivableUpcoming.reduce((sum, item) => sum + item.amount, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3 md:p-4 lg:p-5">
-      <div className="max-w-7xl mx-auto">
+      <div className="p-6 bg-app min-h-screen">
         
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -674,7 +673,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </div>
+    
   );
 };
 

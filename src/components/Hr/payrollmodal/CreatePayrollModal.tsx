@@ -1,6 +1,6 @@
 import React from "react";
 import { XCircle, Search, CheckCircle } from "lucide-react";
-import type { Employee } from "../../../views/hr/payroll/types";
+import type { Employee } from "../../../types/employee";
 
 interface CreatePayrollModalProps {
   show: boolean;
