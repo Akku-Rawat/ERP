@@ -1,0 +1,232 @@
+/* ==========================================
+   COMPLETE LOGIN CSS WITH ANIMATIONS
+   Copy this ENTIRE file to: src/login.css
+   ========================================== */
+
+/* ==========================================
+   1. KEYFRAME ANIMATIONS
+   ========================================== */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.15;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================
+   2. ANIMATION CLASSES
+   ========================================== */
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulse-slow {
+  animation: pulse 6s ease-in-out infinite;
+}
+
+.animate-pulse-slower {
+  animation: pulse 8s ease-in-out infinite 1s;
+}
+
+.animate-spin-slow {
+  animation: spin 50s linear infinite;
+}
+
+.animate-spin-slower {
+  animation: spin 35s linear infinite reverse;
+}
+
+.animate-spin-slowest {
+  animation: spin 45s linear infinite;
+}
+
+/* ==========================================
+   3. UTILITY CLASSES
+   ========================================== */
+
+/* Hover Scale */
+.hover-scale {
+  transition: transform 200ms ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* Transform Origins */
+.origin-55-50 {
+  transform-origin: 55% 50%;
+}
+
+.origin-45-50 {
+  transform-origin: 45% 50%;
+}
+
+.origin-50-60 {
+  transform-origin: 50% 60%;
+}
+
+/* Border Radius for Blobs */
+.rounded-blob-1 {
+  border-radius: 40% 60% 60% 40%;
+}
+
+.rounded-blob-2 {
+  border-radius: 50% 50% 40% 60%;
+}
+
+/* Animation Fill Mode */
+.fill-both {
+  animation-fill-mode: both;
+}
+
+/* Opacity Start Hidden */
+.opacity-0-start {
+  opacity: 0;
+}
+
+/* ==========================================
+   4. ANIMATION DELAYS
+   ========================================== */
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-250 {
+  animation-delay: 0.25s;
+}
+
+.delay-350 {
+  animation-delay: 0.35s;
+}
+
+.delay-450 {
+  animation-delay: 0.45s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+.delay-550 {
+  animation-delay: 0.55s;
+}
+
+.delay-650 {
+  animation-delay: 0.65s;
+}
+
+.delay-750 {
+  animation-delay: 0.75s;
+}
+
+.delay-800 {
+  animation-delay: 0.8s;
+}
+
+.delay-900 {
+  animation-delay: 0.9s;
+}
+
+.delay-1000 {
+  animation-delay: 1s;
+}
+
+.delay-1100 {
+  animation-delay: 1.1s;
+}
+
+.delay-1200 {
+  animation-delay: 1.2s;
+}
+
+.delay-1300 {
+  animation-delay: 1.3s;
+}
+
+/* ==========================================
+   5. ANIMATION DURATION
+   ========================================== */
+
+.duration-800 {
+  animation-duration: 0.8s;
+}
+
+/* ==========================================
+   6. CUSTOM SHADOWS (Purple Theme)
+   ========================================== */
+
+.shadow-primary-lg {
+  box-shadow: 0 8px 16px rgba(153, 101, 230, 0.3);
+}
+
+.shadow-primary-xl {
+  box-shadow: 0 10px 25px -5px rgba(153, 101, 230, 0.25);
+}
+
+.shadow-primary-2xl {
+  box-shadow: 0 15px 30px -5px rgba(153, 101, 230, 0.35);
+}
+
+/* ==========================================
+   7. HOVER EFFECTS
+   ========================================== */
+
+.hover-translate-up {
+  transition: all 300ms ease;
+}
+
+.hover-translate-up:hover {
+  transform: translateY(-2px);
+}
+
+/* Arrow translate on button hover */
+.group:hover .group-hover-translate-x {
+  transform: translateX(0.25rem);
+}

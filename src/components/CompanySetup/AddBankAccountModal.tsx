@@ -3,6 +3,8 @@ import Modal from "../ui/modal/modal";
 import { Button, Input, Select, Card } from "../ui/modal/formComponent";
 import { Building2 } from "lucide-react";
 import type { BankAccount } from "../../types/company";
+import { showApiError } from "../../components/alert";
+
 
 interface Props {
   isOpen: boolean;
@@ -60,7 +62,7 @@ const AddBankAccountModal: React.FC<Props> = ({
       !form.bankName ||
       !form.currency
     ) {
-      alert("Please fill in all required fields.");
+      showApiError("Please fill in all required fields.");
       return;
     }
 

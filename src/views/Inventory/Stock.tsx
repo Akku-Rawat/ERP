@@ -54,56 +54,54 @@ const Items: React.FC = () => {
   const fetchItems = async () => {
     try {
       setLoading(true);
-     const apiData = await getAllStockEntries();
-     
-      // Map API data to ItemSummary[]
-     const list = Array.isArray(apiData)
-  ? apiData
-  : apiData?.data || [];
+      const apiData = await getAllStockEntries(page, pageSize);
 
-const mapped = list.map((entry: any) => ({
-  id: entry.id || entry.name || "",
-  itemName: entry.item_name || "",
-  itemGroup: entry.item_group || "",
-  itemClassCode: entry.item_class_code || "",
-  unitOfMeasureCd: entry.unit_of_measure_cd || "",
-  sellingPrice: entry.selling_price || 0,
-  preferredVendor: entry.preferred_vendor || "",
-  minStockLevel: entry.min_stock_level || "",
-  maxStockLevel: entry.max_stock_level || "",
-  taxCategory: entry.tax_category || "",
-  date: entry.date || entry.posting_date || "",
-  orgSarNo:
-    entry.orgSarNo ||
-    entry.org_sar_no ||
-    entry.org_sarNo ||
-    entry.orgsarno ||
-    "",
-  registrationType:
-    entry.registrationType ||
-    entry.registration_type ||
-    entry.registrationtype ||
-    "",
-  stockEntryType:
-    entry.stockEntryType ||
-    entry.stock_entry_type ||
-    entry.stockentrytype ||
-    "",
-  totalTaxableAmount:
-    entry.totalTaxableAmount ||
-    entry.total_taxable_amount ||
-    entry.totaltaxableamount ||
-    0,
-  warehouse: entry.warehouse || "",
-}));
+      // Map API data to ItemSummary[]
+      const list = Array.isArray(apiData) ? apiData : apiData?.data || [];
+
+      const mapped = list.map((entry: any) => ({
+        id: entry.id || entry.name || "",
+        itemName: entry.item_name || "",
+        itemGroup: entry.item_group || "",
+        itemClassCode: entry.item_class_code || "",
+        unitOfMeasureCd: entry.unit_of_measure_cd || "",
+        sellingPrice: entry.selling_price || 0,
+        preferredVendor: entry.preferred_vendor || "",
+        minStockLevel: entry.min_stock_level || "",
+        maxStockLevel: entry.max_stock_level || "",
+        taxCategory: entry.tax_category || "",
+        date: entry.date || entry.posting_date || "",
+        orgSarNo:
+          entry.orgSarNo ||
+          entry.org_sar_no ||
+          entry.org_sarNo ||
+          entry.orgsarno ||
+          "",
+        registrationType:
+          entry.registrationType ||
+          entry.registration_type ||
+          entry.registrationtype ||
+          "",
+        stockEntryType:
+          entry.stockEntryType ||
+          entry.stock_entry_type ||
+          entry.stockentrytype ||
+          "",
+        totalTaxableAmount:
+          entry.totalTaxableAmount ||
+          entry.total_taxable_amount ||
+          entry.totaltaxableamount ||
+          0,
+        warehouse: entry.warehouse || "",
+      }));
 
       setItems(mapped);
-      setTotalPages(1); // Adjust if API supports pagination
-      setTotalItems(mapped.length);
+
+      setTotalItems(apiData?.totalItems ?? 0);
+      setTotalPages(apiData?.totalPages ?? 1);
     } catch (err) {
       console.error(err);
-   showApiError("Failed to load stock entries");
-
+      showApiError("Failed to load stock entries");
     } finally {
       setLoading(false);
       setInitialLoad(false);
@@ -126,12 +124,11 @@ const mapped = list.map((entry: any) => ({
     e.stopPropagation();
     try {
       const res = await getStockById(stockId);
-     setViewStockData(res?.data || res);
+      setViewStockData(res?.data || res);
 
       setShowViewModal(true);
     } catch {
-     showApiError("Unable to fetch stock entry details");
-
+      showApiError("Unable to fetch stock entry details");
     }
   };
 
@@ -141,52 +138,45 @@ const mapped = list.map((entry: any) => ({
     setDeleteModalOpen(true);
   };
 
-const confirmDelete = async () => {
-  if (!itemToDelete) return;
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
 
-  try {
-    setDeleting(true);
-    showLoading("Deleting Stock Entry...");
+    try {
+      setDeleting(true);
+      showLoading("Deleting Stock Entry...");
 
-    await deleteStockEntry({ id: itemToDelete.id });
+      await deleteStockEntry({ id: itemToDelete.id });
 
-    closeSwal();
-    showSuccess("Stock entry deleted successfully");
+      closeSwal();
+      showSuccess("Stock entry deleted successfully");
 
-    setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
-    setDeleteModalOpen(false);
-  } catch (error: any) {
-    closeSwal();
-    showApiError(error);
-  } finally {
-    setDeleting(false);
-    setItemToDelete(null);
-  }
-};
+      setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
+      setDeleteModalOpen(false);
+    } catch (error: any) {
+      closeSwal();
+      showApiError(error);
+    } finally {
+      setDeleting(false);
+      setItemToDelete(null);
+    }
+  };
 
+  const handleSaved = async () => {
+    const wasEdit = !!editItem;
 
-const handleSaved = async () => {
-  const wasEdit = !!editItem;
+    setShowModal(false);
+    setEditItem(null);
 
-  setShowModal(false);
-  setEditItem(null);
+    try {
+      await fetchItems();
+      closeSwal();
 
-  try {
-    showLoading("Refreshing data...");
-    await fetchItems();
-    closeSwal();
-
-    showSuccess(
-      wasEdit
-        ? "Stock entry updated"
-        : "Stock entry created"
-    );
-  } catch (err) {
-    closeSwal();
-    showApiError(err);
-  }
-};
-
+      showSuccess(wasEdit ? "Stock entry updated" : "Stock entry created");
+    } catch (err) {
+      closeSwal();
+      showApiError(err);
+    }
+  };
 
   /*      FILTER
    */
@@ -246,7 +236,7 @@ const handleSaved = async () => {
         loading={loading || initialLoad}
         serverSide
         columns={columns}
-        data={filteredItems}
+        data={items}
         showToolbar
         searchValue={searchTerm}
         onSearch={setSearchTerm}

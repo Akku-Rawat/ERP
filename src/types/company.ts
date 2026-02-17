@@ -30,6 +30,7 @@ export interface Address {
   timeZone?: string;
 }
 export interface BankAccount {
+    id?: string; 
   accountNo: string;
   accountHolderName?: string;
   bankName: string;
@@ -39,6 +40,7 @@ export interface BankAccount {
   currency: string;
   dateAdded: string;
   openingBalance: number;
+  isdefault?: boolean;
 }
 export interface FinancialConfig {
   baseCurrency?: string;

@@ -15,6 +15,7 @@ const CompanySetup = lazy(() => import("../views/CompanySetup/CompanySetup"));
 const UserManagement = lazy(() => import("../views/User/UserModule"));
 const FixedAssets = lazy(() => import("../views/FixedAssets/FixedAsset"));
 import { Toaster } from "react-hot-toast";
+import ResetPassword from "../ResetPassword";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -23,6 +24,7 @@ const AppRoutes: React.FC = () => {
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
+        <Route path="/reset" element={<ResetPassword />} />
 
         {/* Protected Routes */}
 <Route element={<ProtectedRoute />}>

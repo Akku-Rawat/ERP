@@ -1,152 +1,200 @@
-import React, { useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import ERPImage from "../assets/ERP_Image.jpg";
-import ERPLogo from "../assets/ERP_Logo.png";
+import  { useState } from "react";
+import { User, Lock, EyeOff, Eye, Shield, Zap, BarChart3, Users, ArrowRight } from "lucide-react";
+import { useLogin } from "../hooks/useloginhooks";
+import erp2 from"../assets/erp2.png";
+import "../login.css";
 
-const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+const features = [
+  { icon: Shield, label: "Enterprise Security" },
+  { icon: Zap, label: "Lightning Fast" },
+  { icon: BarChart3, label: "Real-time Analytics" },
+  { icon: Users, label: "Team Collaboration" },
+];
 
-  const { login } = useAuth();
-  const navigate = useNavigate();
+const Login = () => {
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    showPassword,
+    setShowPassword,
+    error,
+    handleSubmit,
+  } = useLogin();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    try {
-      await login(email, password);
-      navigate("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Login failed");
-    }
-  };
+  const [rememberMe, setRememberMe] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen flex items-stretch bg-gray-200">
-      <div className="flex w-full h-screen overflow-hidden">
-        {/* Right Side: Banner (larger portion) */}
-        <div className="w-3/5 bg-gray-300 flex items-center justify-center">
-          <img
-            src={ERPImage}
-            alt="ERP Banner"
-            className="w-full h-full object-cover"
-          />
-        </div>
+    <div className="flex min-h-screen items-center justify-center bg-[hsl(240,20%,95%)] p-4 overflow-hidden">
+      {/* Ambient background blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-[hsl(270,70%,55%)]/10 blur-3xl animate-pulse-slow" />
+        <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-[hsl(270,60%,50%)]/8 blur-3xl animate-pulse-slower" />
+      </div>
 
-        <div className="w-2/5 bg-white flex flex-col items-center justify-center">
-          <div className="mb-8">
-            <img
-              src={ERPLogo}
-              alt="ERP Logo"
-              className="h-16 w-auto object-contain"
-            />
-          </div>
-          <div className="p-8 max-w-md w-full">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold">Welcome Back!</h2>
+      <div className="relative w-full max-w-[1100px] overflow-hidden rounded-3xl bg-white shadow-2xl shadow-[hsl(270,70%,55%)]/10 animate-scale-in">
+        <div className="grid min-h-[640px] md:grid-cols-[1fr_1.1fr]">
+          {/* Left - Form */}
+          <div className="flex flex-col justify-center px-8 py-12 md:px-14">
+            {/* Logo */}
+            <div className="mb-8 flex items-center gap-3 animate-fade-in delay-100 fill-both opacity-0-start">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(270,70%,55%)] shadow-primary-lg hover-scale cursor-pointer">
+                <span className="text-base font-bold text-white">⬡</span>
+              </div>
+              <div>
+                <span className="text-xl font-bold text-[hsl(240,10%,20%)] tracking-tight">ERP</span>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(240,5%,50%)] font-medium">
+                  Enterprise Suite
+                </p>
+              </div>
             </div>
 
-            {error && <p className="text-red-300 text-center mb-4">{error}</p>}
+            {/* Heading */}
+            <h1 className="mb-1 text-2xl font-bold text-[hsl(240,10%,20%)] animate-fade-in delay-200 fill-both opacity-0-start">
+              Welcome back
+            </h1>
+            <p className="mb-8 text-sm text-[hsl(240,5%,50%)] animate-fade-in delay-250 fill-both opacity-0-start">
+              Sign in to manage your business operations
+            </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-2xl font-medium mb-2"
-                >
-                  Username
-                </label>
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-3 rounded-xl bg-[hsl(0,84%,97%)] border border-[hsl(0,84%,90%)] animate-fade-in">
+                <p className="text-sm text-[hsl(0,84%,60%)] font-medium">{error}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              {/* Username */}
+              <div className="relative mb-4 animate-fade-in delay-350 fill-both opacity-0-start">
+                <User
+                  className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-300 ${
+                    focusedField === "user" ? "text-[hsl(270,70%,55%)]" : "text-[hsl(240,5%,50%)]"
+                  }`}
+                />
                 <input
                   type="text"
-                  id="email"
+                  placeholder="Username or email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 bg-white border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="Enter your username"
+                  onFocus={() => setFocusedField("user")}
+                  onBlur={() => setFocusedField(null)}
+                  className="w-full rounded-xl border border-[hsl(270,20%,88%)] bg-[hsl(270,30%,97%)] py-3 pl-11 pr-4 text-sm text-[hsl(240,10%,20%)] placeholder:text-[hsl(240,5%,50%)]/60 outline-none focus:border-[hsl(270,70%,55%)] focus:ring-2 focus:ring-[hsl(270,70%,55%)]/10 focus:bg-white transition-all duration-300"
                   required
                 />
               </div>
 
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-2xl font-medium mb-2"
+              {/* Password */}
+              <div className="relative mb-5 animate-fade-in delay-450 fill-both opacity-0-start">
+                <Lock
+                  className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-300 ${
+                    focusedField === "pass" ? "text-[hsl(270,70%,55%)]" : "text-[hsl(240,5%,50%)]"
+                  }`}
+                />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setFocusedField("pass")}
+                  onBlur={() => setFocusedField(null)}
+                  className="w-full rounded-xl border border-[hsl(270,20%,88%)] bg-[hsl(270,30%,97%)] py-3 pl-11 pr-11 text-sm text-[hsl(240,10%,20%)] placeholder:text-[hsl(240,5%,50%)]/60 outline-none focus:border-[hsl(270,70%,55%)] focus:ring-2 focus:ring-[hsl(270,70%,55%)]/10 focus:bg-white transition-all duration-300"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[hsl(240,5%,50%)] hover:text-[hsl(240,10%,20%)] transition-colors"
                 >
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-2 bg-white border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 pr-10"
-                    placeholder="Enter your password"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-black"
-                  >
-                    {showPassword ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c5.523 0 10 4.477 10 10a10.01 10.01 0 01-1.588 5.41l3.589 3.59"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
-                      </svg>
-                    )}
-                  </button>
-                </div>
+                  {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                </button>
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-[#006182] text-white py-2 px-4 rounded-md hover:bg-[#006182] transition duration-200"
-              >
-                LOGIN
-              </button>
+              {/* Remember / Forgot */}
+              <div className="mb-6 flex items-center justify-between animate-fade-in delay-550 fill-both opacity-0-start">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-[hsl(240,5%,50%)] group">
+                  <div
+                    className={`flex h-4 w-4 items-center justify-center rounded border transition-all duration-200 ${
+                      rememberMe
+                        ? "border-[hsl(270,70%,55%)] bg-[hsl(270,70%,55%)]"
+                        : "border-[hsl(270,20%,88%)] group-hover:border-[hsl(270,70%,55%)]/50"
+                    }`}
+                    onClick={() => setRememberMe(!rememberMe)}
+                  >
+                    {rememberMe && (
+                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  Remember me
+                </label>
+                <button
+                  type="button"
+                  className="text-sm font-medium text-[hsl(270,70%,55%)] hover:text-[hsl(270,70%,45%)] transition-colors"
+                >
+                  Reset Password
+                </button>
+              </div>
+
+              {/* Login button */}
+              <div className="animate-fade-in delay-650 fill-both opacity-0-start">
+                <button
+                  type="submit"
+                  className="group flex w-full items-center justify-center gap-2 rounded-xl bg-[hsl(270,70%,55%)] px-6 py-3.5 text-sm font-semibold text-white shadow-primary-xl hover:shadow-primary-2xl hover-translate-up active:translate-y-0 transition-all duration-300"
+                >
+                  Sign In
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </button>
+              </div>
             </form>
 
-            <p className="mt-6 text-center text-sm text-black">
-              Forgot password?{" "}
-              <a href="#" className="text-[#006182] hover:underline">
-                Reset it
-              </a>
+            {/* Secure badge */}
+            <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-[hsl(240,5%,50%)] animate-fade-in delay-750 fill-both opacity-0-start">
+              <Shield className="h-3 w-3" />
+              256-bit SSL encrypted · SOC 2 Compliant
             </p>
+          </div>
+
+          {/* Right - Illustration */}
+          <div className="relative hidden md:block overflow-hidden bg-[hsl(270,70%,55%)]">
+            {/* Animated gradient background */}
+            <div className="absolute inset-0">
+              <div className="absolute -left-16 -top-16 h-[130%] w-[130%] rounded-blob-1 bg-[hsl(270,70%,55%)] opacity-90 animate-spin-slow origin-55-50" />
+              <div className="absolute -bottom-20 -right-20 h-[70%] w-[70%] rounded-blob-2 bg-[hsl(270,70%,45%)]/30 animate-spin-slower origin-45-50" />
+              <div className="absolute top-10 right-10 h-[40%] w-[40%] rounded-full bg-white/5 animate-spin-slowest origin-50-60" />
+            </div>
+
+            {/* Content */}
+            <div className="relative flex h-full flex-col items-center justify-center p-10">
+              {/* Laptop */}
+              <img
+
+                src={erp2}
+                alt="ERP Dashboard Preview"
+                className="w-[85%] max-w-[380px] drop-shadow-2xl animate-fade-in delay-500 fill-both opacity-0-start duration-800 hover-scale"
+              />
+
+              {/* Feature pills */}
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-2 animate-fade-in delay-800 fill-both opacity-0-start">
+                {features.map((f, i) => (
+                  <div
+                    key={f.label}
+                    className={`flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-sm px-3 py-1.5 text-xs font-medium text-white border border-white/10 animate-fade-in fill-both opacity-0-start hover-scale delay-${900 + i * 100}`}
+                  >
+                    <f.icon className="h-3 w-3" />
+                    {f.label}
+                  </div>
+                ))}
+              </div>
+
+              {/* Tagline */}
+              <p className="mt-6 text-center text-sm font-medium text-white/80 max-w-[280px] animate-fade-in delay-1300 fill-both opacity-0-start">
+                One platform to manage inventory, sales, HR & finance — simplified.
+              </p>
+            </div>
           </div>
         </div>
       </div>

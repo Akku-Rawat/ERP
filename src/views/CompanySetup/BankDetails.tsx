@@ -11,6 +11,13 @@ import {
 } from "react-icons/fa";
 import type { BankAccount } from "../../types/company";
 import AddBankAccountModal from "../../components/CompanySetup/AddBankAccountModal";
+import { updateCompanyById } from "../../api/companySetupApi";
+import { showApiError, showSuccess, showLoading, closeSwal, } from "../../components/alert";
+import Swal from "sweetalert2";
+
+
+
+const VITE_COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 interface DetailProps {
   label: string;
@@ -73,6 +80,13 @@ const Detail: React.FC<DetailProps> = ({
   );
 };
 
+const normalizeBankAccounts = (accounts: any[]): BankAccount[] =>
+  accounts.map((acc) => ({
+    ...acc,
+    // API returns default as "0"/"1" string — normalize to boolean
+    isdefault: acc.default === "1" || acc.default === 1 || acc.isdefault === true,
+  }));
+
 interface Props {
   bankAccounts: BankAccount[];
   setBankAccounts: React.Dispatch<React.SetStateAction<BankAccount[]>>;
@@ -80,7 +94,7 @@ interface Props {
 
 const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  // selectedAccount is the global index inside bankAccounts (or null)
+
   const [selectedAccount, setSelectedAccount] = useState<number | null>(
     bankAccounts.length > 0 ? 0 : null,
   );
@@ -102,11 +116,39 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
     }
   }, [selectedAccount, bankAccounts]);
 
-  const handleAddSubmit = (newAccount: BankAccount) => {
-    setBankAccounts((prev) => [...prev, newAccount]);
-    setShowBankModal(false);
-  };
+  const handleAddSubmit = async (newAccount: BankAccount) => {
+    try {
+       showLoading("Adding Bank Account...");
+      const updatedAccounts = [...bankAccounts, newAccount];
 
+      const payload = {
+        id: VITE_COMPANY_ID,
+        bankAccounts: updatedAccounts.map((acc) => ({
+          id: acc.id,
+          accountNo: acc.accountNo,
+          accountHolderName: acc.accountHolderName,
+          bankName: acc.bankName,
+          swiftCode: acc.swiftCode,
+          sortCode: acc.sortCode,
+          branchAddress: acc.branchAddress,
+          currency: acc.currency,
+          dateAdded: acc.dateAdded,
+          openingBalance: acc.openingBalance,
+          default: acc.isdefault ? 1 : 0,
+        })),
+      };
+
+      await updateCompanyById(payload);
+ closeSwal();
+    showSuccess("Bank account added successfully.");
+
+    setBankAccounts(updatedAccounts);
+    setShowBankModal(false);
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
   const handleEditClick = () => {
     if (selectedAccount !== null && bankAccounts[selectedAccount]) {
       setEditForm(bankAccounts[selectedAccount]);
@@ -121,69 +163,172 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
     }
   };
 
-  const handleSaveEdit = () => {
-    if (editForm && selectedAccount !== null) {
-      setBankAccounts((prev) => {
-        const updated = [...prev];
-        updated[selectedAccount] = editForm;
-        return updated;
-      });
-      setIsEditing(false);
-    }
-  };
+  const handleSaveEdit = async () => {
+    if (!editForm || selectedAccount === null) return;
 
+    try {
+      showLoading("Updating Bank Account...");
+      const updatedAccounts = [...bankAccounts];
+      updatedAccounts[selectedAccount] = editForm;
+
+      const payload = {
+        id: VITE_COMPANY_ID,
+        bankAccounts: updatedAccounts.map((acc) => ({
+          id: acc.id,
+          accountNo: acc.accountNo,
+          accountHolderName: acc.accountHolderName,
+          bankName: acc.bankName,
+          swiftCode: acc.swiftCode,
+          sortCode: acc.sortCode,
+          branchAddress: acc.branchAddress,
+          currency: acc.currency,
+          dateAdded: acc.dateAdded,
+          openingBalance: acc.openingBalance,
+          default: acc.isdefault ? 1 : 0,
+        })),
+      };
+
+      await updateCompanyById(payload);
+
+   closeSwal();
+    showSuccess("Bank account updated successfully.");
+
+    setBankAccounts(updatedAccounts);
+    setIsEditing(false);
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (editForm) {
       setEditForm({ ...editForm, [e.target.name]: e.target.value });
     }
   };
 
-  const handleDelete = () => {
+const handleDelete = async () => {
+  if (selectedAccount === null) return;
+
+  const accountName = bankAccounts[selectedAccount].bankName;
+
+  const result = await Swal.fire({
+    icon: "warning",
+    title: "Delete Bank Account?",
+    text: `Are you sure you want to delete ${accountName}?`,
+    showCancelButton: true,
+    confirmButtonColor: "#ef4444",
+    cancelButtonColor: "#6b7280",
+    confirmButtonText: "Yes, Delete",
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    showLoading("Deleting Bank Account...");
+
+    const updatedAccounts = bankAccounts.filter(
+      (_, index) => index !== selectedAccount,
+    );
+
+    const payload = {
+      id: VITE_COMPANY_ID,
+      bankAccounts: updatedAccounts.map((acc) => ({
+        id: acc.id,
+        accountNo: acc.accountNo,
+        accountHolderName: acc.accountHolderName,
+        bankName: acc.bankName,
+        swiftCode: acc.swiftCode,
+        sortCode: acc.sortCode,
+        branchAddress: acc.branchAddress,
+        currency: acc.currency,
+        dateAdded: acc.dateAdded,
+        openingBalance: acc.openingBalance,
+        default: acc.isdefault ? 1 : 0,
+      })),
+    };
+
+    await updateCompanyById(payload);
+
+    closeSwal();
+    showSuccess("Bank account deleted successfully.");
+
+    setBankAccounts(updatedAccounts);
+    setSelectedAccount(null);
+    setIsEditing(false);
+    setEditForm(null);
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
+
+  const handleSetDefault = async () => {
     if (selectedAccount === null) return;
 
-    const accountName = bankAccounts[selectedAccount].bankName;
+    const selected = bankAccounts[selectedAccount];
 
-    if (
-      confirm(`Are you sure you want to delete the account for ${accountName}?`)
-    ) {
-      setBankAccounts((prev) =>
-        prev.filter((_, index) => index !== selectedAccount),
-      );
+    try {
+         showLoading("Setting Default Account...");
+      const payload = {
+        id: VITE_COMPANY_ID,
+        bankAccounts: [
+          {
+            id: selected.id,
+            default: 1,
+          },
+        ],
+      };
 
-      setSelectedAccount(null);
-      setIsEditing(false);
-      setEditForm(null);
-    }
-  };
+      await updateCompanyById(payload);
 
-  // ----------------
+   closeSwal();
+    showSuccess("Default account updated successfully.");
 
-  const filteredAccounts = bankAccounts.filter(
-    (acc) =>
-      acc.bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      acc.accountNo.includes(searchTerm),
-  );
+    setBankAccounts((prev) =>
+      prev.map((acc) => ({
+        ...acc,
+        isdefault: acc.id === selected.id,
+          default: acc.id === selected.id ? "1" : "0",
+      })),
+    );
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
 
-  // map filtered index -> global index
+
+ 
+  const normalizedAccounts = normalizeBankAccounts(bankAccounts);
+
+  const filteredAccounts = normalizedAccounts.filter((acc) => {
+
+    if (!acc.bankName?.trim()) return false;
+
+    const bankName = acc.bankName ?? "";
+    const accountNo = acc.accountNo ?? "";
+
+    return (
+      bankName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      accountNo.includes(searchTerm)
+    );
+  });
+
+
   const getGlobalIndex = (filteredIndex: number) => {
     const acc = filteredAccounts[filteredIndex];
     if (!acc) return -1;
-    return bankAccounts.findIndex(
-      (a) =>
-        a.accountNumber === acc.accountNumber &&
-        a.bankName === acc.bankName &&
-        a.ifscCode === acc.ifscCode,
-    );
+
+    return bankAccounts.findIndex((a) => a.id === acc.id);
   };
 
-  const toggleAccountVisibility = (accountNumber: string) => {
+  const toggleAccountVisibility = (index: number) => {
     setShowAccountNumber((prev) => ({
       ...prev,
-      [accountNumber]: !prev[accountNumber],
+      [index]: !prev[index],
     }));
   };
-
-  const defaultAccount = bankAccounts.find((a) => a.isdefault);
 
   return (
     <div className="bg-card">
@@ -194,7 +339,6 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
           onClose={() => setShowBankModal(false)}
           onSubmit={handleAddSubmit}
         />
-
       )}
 
       <div className="mx-auto">
@@ -247,19 +391,36 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
                   filteredAccounts.map((acc, i) => (
                     <div
                       key={i}
-                      onClick={() => !isEditing && setSelectedAccount(i)}
+                      onClick={() => {
+                        if (!isEditing) {
+                          const globalIndex = getGlobalIndex(i);
+                          if (globalIndex !== -1) {
+                            setSelectedAccount(globalIndex);
+                          }
+                        }
+                      }}
                       className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                        selectedAccount === i
+                        selectedAccount === getGlobalIndex(i)
                           ? " text-primary"
                           : "border bg-card hover:row-hover text-main"
                       } ${isEditing ? "cursor-not-allowed opacity-60" : ""}`}
                     >
                       <div className="flex justify-between items-start mb-1">
-                        <p className="font-semibold text-main text-sm">
-                          {acc.bankName}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-main text-sm">
+                            {acc.bankName}
+                          </p>
+
+                          {acc.isdefault && (
+                            <span className="inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-medium tracking-wide">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                              Default
+                            </span>
+                          )}
+                        </div>
+
                         <p className="text-xs text-muted mt-1">
-                          IFSC: {acc.ifscCode}
+                          SWIFT: {acc.swiftCode}
                         </p>
                       </div>
                       <p className="text-xs text-muted font-mono truncate">
@@ -312,6 +473,25 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
                         style={{ background: "rgba(255,255,255,0.12)" }}
                       >
                         <FaTrash className="w-3.5 h-3.5" /> Delete
+                      </button>
+                     
+                      <button
+                        onClick={handleSetDefault}
+                        disabled={normalizedAccounts[selectedAccount]?.isdefault}
+                        className={`px-3 py-1.5 rounded-md text-white transition-colors flex items-center gap-2 text-sm font-medium ${
+                          normalizedAccounts[selectedAccount]?.isdefault
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "hover:bg-white/20"
+                        }`}
+                        style={{
+                          background: normalizedAccounts[selectedAccount]?.isdefault
+                            ? "#9CA3AF"
+                            : "rgba(255,255,255,0.12)",
+                        }}
+                      >
+                        {normalizedAccounts[selectedAccount]?.isdefault
+                          ? "Default Account"
+                          : "Set Default"}
                       </button>
                     </>
                   )}
@@ -423,29 +603,6 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
   );
 };
 
-// --- Reusable Small Component for Detail Blocks ---
-const DetailBlock = ({
-  label,
-  value,
-  isMono = false,
-}: {
-  label: string;
-  value: string;
-  isMono?: boolean;
-}) => (
-  <div className="space-y-2">
-    <label className="text-[11px] font-bold text-muted uppercase tracking-widest ml-1">
-      {label}
-    </label>
-    <div className="bg-app border border-[var(--border)] rounded-xl px-4 py-3.5 group hover:border-[var(--primary)]/40 transition-colors">
-      <p
-        className={`text-main font-bold text-base ${isMono ? "font-mono tracking-wider" : ""}`}
-      >
-        {value}
-      </p>
-    </div>
-  </div>
-);
 
 const FaCheck = ({ className }: { className?: string }) => (
   <svg
