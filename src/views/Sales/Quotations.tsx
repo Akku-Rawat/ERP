@@ -60,9 +60,8 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
 
 
 
-  /* ===============================
-     FETCH COMPANY DATA
-  ================================ */
+  /*      FETCH COMPANY DATA
+   */
 
   const fetchCompany = async (companyId: string) => {
     const res = await getCompanyById(COMPANY_ID);
@@ -75,15 +74,13 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
     return res.data;
   };
 
-  /* ===============================
-     FETCH QUOTATIONS
-  ================================ */
+  /*      FETCH QUOTATIONS
+   */
   const fetchQuotations = async () => {
     try {
       setLoading(true);
 
       const res = await getAllQuotations(page, pageSize, {
-        search: searchTerm,
         status,
         fromDate,
         toDate,
@@ -126,11 +123,10 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
 
   useEffect(() => {
     fetchQuotations();
-  }, [page, pageSize, searchTerm, status, fromDate, toDate]);
+  }, [page, pageSize, status, fromDate, toDate]);
 
-  /* ===============================
-     ACTIONS
-  ================================ */
+  /*      ACTIONS
+   */
   const handleView = async (quotationNumber: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
 
@@ -188,9 +184,8 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
     setPdfOpen(false);
   };
 
-  /* ===============================
-     TABLE COLUMNS
-  ================================ */
+  /*      TABLE COLUMNS
+   */
   const columns: Column<QuotationSummary>[] = [
     {
       key: "quotationNumber",
@@ -210,8 +205,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
       align: "right",
       render: (q) => (
         <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
-          {q.currency === "INR" ? "₹" : q.currency === "USD" ? "$" : "ZK"}
-          {q.grandTotal.toLocaleString()}
+          {q.currency} {q.grandTotal.toLocaleString()}
         </code>
       ),
     },
@@ -224,7 +218,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
           <ActionButton
             type="view"
             onClick={(e) => handleView(q.quotationNumber, e)}
-            iconOnly={false}
+            iconOnly
           />
           <ActionMenu
             showDownload
@@ -235,16 +229,21 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
     },
   ];
 
-  /* ===============================
-     RENDER
-  ================================ */
+  const filteredQuotations = quotations.filter((q) =>
+  q.quotationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  q.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+
+  /*      RENDER
+   */
   return (
     <div className="p-8">
       <Table
         loading={loading || initialLoad}
-        serverSide={true}
+        serverSide={false}  
         columns={columns}
-        data={quotations}
+        data={filteredQuotations}
         rowKey={(row) => row.quotationNumber}
         showToolbar
         searchValue={searchTerm}

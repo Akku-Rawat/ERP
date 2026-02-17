@@ -70,7 +70,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
 
             <ModalInput
-            label="Bank Account"
+            label="Bank"
             name="bankAccount"
             value={form.bankAccount}
             onChange={onChange}

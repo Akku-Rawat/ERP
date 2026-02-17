@@ -220,7 +220,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
       align: "right",
       render: (o) => (
         <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
-          ${Number(o.amount || 0).toFixed(2)}
+          ZMW {Number(o.amount || 0).toFixed(2)}
         </code>
       ),
     },
@@ -240,7 +240,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
       align: "center",
       render: (o) => (
         <ActionGroup>
-          <ActionButton type="view" onClick={() => handleView(o)} />
+          <ActionButton type="view" onClick={() => handleView(o)} iconOnly />
 
           <ActionMenu
             // onEdit={(e) => handleEdit(o, e as any)}

@@ -1,16 +1,20 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Checkbox } from "../../ui/modal/formComponent";
 import type { PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
 import { MapPin, Truck, Building2, Plus, Minus } from "lucide-react";
-import { ModalInput ,ModalSelect } from "../../ui/modal/modalComponent";
+import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
+import { getCountryList } from "../../../api/lookupApi";
+
 interface AddressTabProps {
   form: PurchaseOrderFormData;
-  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onFormChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => void;
 }
 
 type AddressKey = keyof PurchaseOrderFormData["addresses"];
 
-/*  Address Block  */
+/* ---------------- Address Block ---------------- */
 
 const AddressBlock: React.FC<{
   title: string;
@@ -19,7 +23,10 @@ const AddressBlock: React.FC<{
   data: PurchaseOrderFormData["addresses"][AddressKey];
   isOpen: boolean;
   onToggle: () => void;
-  onFormChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFormChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => void;
+  countryOptions: { label: string; value: string }[];
   showCopyCheckbox?: boolean;
   copyCheckboxLabel?: string;
   copyChecked?: boolean;
@@ -32,6 +39,7 @@ const AddressBlock: React.FC<{
   isOpen,
   onToggle,
   onFormChange,
+  countryOptions,
   showCopyCheckbox,
   copyCheckboxLabel,
   copyChecked,
@@ -39,6 +47,8 @@ const AddressBlock: React.FC<{
 }) => {
   return (
     <div className="bg-card border border-theme rounded-xl shadow-sm overflow-hidden">
+      
+      {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-app border-b border-theme">
         <div className="flex items-center gap-3">
           <div className="bg-primary/10 text-primary p-2 rounded-lg">
@@ -51,31 +61,99 @@ const AddressBlock: React.FC<{
           {showCopyCheckbox && (
             <Checkbox
               label={copyCheckboxLabel || "Copy"}
-                checked={copyChecked ?? false} 
+              checked={copyChecked ?? false}
               onChange={(checked) => onCopyToggle?.(checked)}
             />
           )}
-          <button type="button" onClick={onToggle} className="p-1 rounded row-hover">
+
+          <button
+            type="button"
+            onClick={onToggle}
+            className="p-1 rounded row-hover"
+          >
             {isOpen ? <Minus size={16} /> : <Plus size={16} />}
           </button>
         </div>
       </div>
 
+      {/* Body */}
       {isOpen && (
         <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-card text-main">
-          <ModalInput label="Address Title" name={`addresses.${keyName}.addressTitle`} value={data?.addressTitle || ""} onChange={onFormChange} />
-          <ModalInput label="Address Type" name={`addresses.${keyName}.addressType`} value={data?.addressType || ""} onChange={onFormChange} />
-          <ModalInput label="Address Line 1" name={`addresses.${keyName}.addressLine1`} value={data?.addressLine1 || ""} onChange={onFormChange} />
-          <ModalInput label="Address Line 2" name={`addresses.${keyName}.addressLine2`} value={data?.addressLine2 || ""} onChange={onFormChange} />
-          <ModalInput label="Postal Code" name={`addresses.${keyName}.postalCode`} value={data?.postalCode || ""} onChange={onFormChange} />
-          <ModalInput label="City" name={`addresses.${keyName}.city`} value={data?.city || ""} onChange={onFormChange} />
-          <ModalInput label="State" name={`addresses.${keyName}.state`} value={data?.state || ""} onChange={onFormChange} />
-          <ModalInput label="Country" name={`addresses.${keyName}.country`} value={data?.country || ""} onChange={onFormChange} />
+          
+          <ModalInput
+            label="Address Title"
+            name={`addresses.${keyName}.addressTitle`}
+            value={data?.addressTitle || ""}
+            onChange={onFormChange}
+          />
 
+          <ModalInput
+            label="Address Type"
+            name={`addresses.${keyName}.addressType`}
+            value={data?.addressType || ""}
+            onChange={onFormChange}
+          />
+
+          <ModalInput
+            label="Address Line 1"
+            name={`addresses.${keyName}.addressLine1`}
+            value={data?.addressLine1 || ""}
+            onChange={onFormChange}
+          />
+
+          <ModalInput
+            label="Address Line 2"
+            name={`addresses.${keyName}.addressLine2`}
+            value={data?.addressLine2 || ""}
+            onChange={onFormChange}
+          />
+
+          <ModalInput
+            label="Postal Code"
+            name={`addresses.${keyName}.postalCode`}
+            value={data?.postalCode || ""}
+            onChange={onFormChange}
+          />
+
+          <ModalInput
+            label="City"
+            name={`addresses.${keyName}.city`}
+            value={data?.city || ""}
+            onChange={onFormChange}
+          />
+
+          <ModalInput
+            label="State"
+            name={`addresses.${keyName}.state`}
+            value={data?.state || ""}
+            onChange={onFormChange}
+          />
+
+          {/* Country Dropdown */}
+          <ModalSelect
+            label="Country"
+            name={`addresses.${keyName}.country`}
+            value={data?.country || ""}
+            onChange={onFormChange}
+            options={countryOptions}
+          />
+
+          {/* Extra fields for supplier */}
           {keyName === "supplierAddress" && (
             <>
-              <ModalInput label="Phone" name={`addresses.${keyName}.phone`} value={data?.phone || ""} onChange={onFormChange} />
-              <ModalInput label="Email" name={`addresses.${keyName}.email`} value={data?.email || ""} onChange={onFormChange} />
+              <ModalInput
+                label="Phone"
+                name={`addresses.${keyName}.phone`}
+                value={data?.phone || ""}
+                onChange={onFormChange}
+              />
+
+              <ModalInput
+                label="Email"
+                name={`addresses.${keyName}.email`}
+                value={data?.email || ""}
+                onChange={onFormChange}
+              />
             </>
           )}
         </div>
@@ -84,9 +162,14 @@ const AddressBlock: React.FC<{
   );
 };
 
-/*  Address Tab  */
+/* ---------------- Address Tab ---------------- */
 
-export const AddressTab: React.FC<AddressTabProps> = ({ form, onFormChange }) => {
+export const AddressTab: React.FC<AddressTabProps> = ({
+  form,
+  onFormChange,
+}) => {
+  
+  /* Accordion open state */
   const [open, setOpen] = useState<Record<AddressKey, boolean>>({
     supplierAddress: true,
     dispatchAddress: false,
@@ -101,21 +184,47 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onFormChange }) =>
     setOpen((p) => ({ ...p, [key]: !p[key] }));
   }, []);
 
-  /*  reusable copy helper  */
-const copyAddress = useCallback(
-  (from: PurchaseOrderFormData["addresses"][AddressKey], toKey: AddressKey) => {
-    Object.entries(from).forEach(([field, value]) => {
-      onFormChange({
-        target: {
-          name: `addresses.${toKey}.${field}`,
-          value: value ?? "",
-        },
-      } as React.ChangeEvent<HTMLInputElement>);
-    });
-  },
-  [onFormChange]
-);
+  /* -------- Country API -------- */
 
+  const [countries, setCountries] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await getCountryList();
+        setCountries(res || []);
+      } catch (err) {
+        console.error("Failed to load countries", err);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
+  const countryOptions = useMemo(
+    () =>
+      countries.map((c: any) => ({
+        label: c.name,
+        value: c.code,
+      })),
+    [countries]
+  );
+
+  /* -------- Copy helper -------- */
+
+  const copyAddress = useCallback(
+    (from: PurchaseOrderFormData["addresses"][AddressKey], toKey: AddressKey) => {
+      Object.entries(from).forEach(([field, value]) => {
+        onFormChange({
+          target: {
+            name: `addresses.${toKey}.${field}`,
+            value: value ?? "",
+          },
+        } as React.ChangeEvent<HTMLInputElement>);
+      });
+    },
+    [onFormChange]
+  );
 
   const handleCopySupplierToDispatch = useCallback(
     (checked: boolean) => {
@@ -137,45 +246,132 @@ const copyAddress = useCallback(
     [form.addresses.companyBillingAddress, copyAddress]
   );
 
-  const supplierData = useMemo(() => form.addresses.supplierAddress, [form.addresses.supplierAddress]);
-  const companyBillingData = useMemo(() => form.addresses.companyBillingAddress, [form.addresses.companyBillingAddress]);
-  const shippingData = useMemo(() => form.addresses.shippingAddress, [form.addresses.shippingAddress]);
-  const dispatchData = useMemo(() => form.addresses.dispatchAddress, [form.addresses.dispatchAddress]);
+  const supplierData = useMemo(
+    () => form.addresses.supplierAddress,
+    [form.addresses.supplierAddress]
+  );
+
+  const companyBillingData = useMemo(
+    () => form.addresses.companyBillingAddress,
+    [form.addresses.companyBillingAddress]
+  );
+
+  const shippingData = useMemo(
+    () => form.addresses.shippingAddress,
+    [form.addresses.shippingAddress]
+  );
+
+  const dispatchData = useMemo(
+    () => form.addresses.dispatchAddress,
+    [form.addresses.dispatchAddress]
+  );
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-4 gap-4  p-4 ">
+      
+      {/* Top fields */}
+      <div className="grid grid-cols-4 gap-4 p-4">
+        
         <ModalSelect
-               label="Shipping Rule"
-                name="shippingRule" 
-                value={form.shippingRule || ""} 
-                onChange={onFormChange} 
-                options={[    { value: "STANDARD", label: "Standard Shipping" },
-                               { value: "EXPRESS", label: "Express Shipping" },
-                               { value: "OVERNIGHT", label: "Overnight Shipping" },
-                               { value: "SAME_DAY", label: "Same Day Delivery" },
-                               { value: "ECONOMY", label: "Economy Shipping" },
-                               { value: "FREIGHT", label: "Freight" },
-                               { value: "SEA", label: "Sea Freight" },
-                               { value: "AIR", label: "Air Freight" },
-                               { value: "ROAD", label: "Road Transport" },
-                               { value: "PICKUP", label: "Self Pickup" },
-                             ]}
-                             />
-        <ModalInput label="Incoterm" name="incoterm" value={form.incoterm || ""} onChange={onFormChange} />
-        <ModalInput label="Supplier Contact" name="supplierContact" value={form.supplierContact || ""} onChange={onFormChange} />
-        <ModalInput label="Place of Supply" name="placeOfSupply" value={form.placeOfSupply || ""} onChange={onFormChange} />
+          label="Shipping Rule"
+          name="shippingRule"
+          value={form.shippingRule || ""}
+          onChange={onFormChange}
+          options={[
+            { value: "STANDARD", label: "Standard Shipping" },
+            { value: "EXPRESS", label: "Express Shipping" },
+            { value: "OVERNIGHT", label: "Overnight Shipping" },
+            { value: "SAME_DAY", label: "Same Day Delivery" },
+            { value: "ECONOMY", label: "Economy Shipping" },
+            { value: "FREIGHT", label: "Freight" },
+            { value: "SEA", label: "Sea Freight" },
+            { value: "AIR", label: "Air Freight" },
+            { value: "ROAD", label: "Road Transport" },
+            { value: "PICKUP", label: "Self Pickup" },
+          ]}
+        />
+
+        <ModalInput
+          label="Incoterm"
+          name="incoterm"
+          value={form.incoterm || ""}
+          onChange={onFormChange}
+        />
+
+        <ModalInput
+          label="Supplier Contact"
+          name="supplierContact"
+          value={form.supplierContact || ""}
+          onChange={onFormChange}
+        />
+
+        <ModalInput
+          label="Place of Supply"
+          name="placeOfSupply"
+          value={form.placeOfSupply || ""}
+          onChange={onFormChange}
+        />
       </div>
 
+      {/* Address blocks */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
         <div className="space-y-4">
-          <AddressBlock title="Company Billing Address" icon={Building2} keyName="companyBillingAddress" data={companyBillingData} isOpen={open.companyBillingAddress} onToggle={() => toggle("companyBillingAddress")} onFormChange={onFormChange} />
-          <AddressBlock title="Supplier Address" icon={MapPin} keyName="supplierAddress" data={supplierData} isOpen={open.supplierAddress} onToggle={() => toggle("supplierAddress")} onFormChange={onFormChange} />
+          
+          <AddressBlock
+            title="Company Billing Address"
+            icon={Building2}
+            keyName="companyBillingAddress"
+            data={companyBillingData}
+            isOpen={open.companyBillingAddress}
+            onToggle={() => toggle("companyBillingAddress")}
+            onFormChange={onFormChange}
+            countryOptions={countryOptions}
+          />
+
+          <AddressBlock
+            title="Supplier Address"
+            icon={MapPin}
+            keyName="supplierAddress"
+            data={supplierData}
+            isOpen={open.supplierAddress}
+            onToggle={() => toggle("supplierAddress")}
+            onFormChange={onFormChange}
+            countryOptions={countryOptions}
+          />
         </div>
 
         <div className="space-y-4">
-          <AddressBlock title="Shipping Address" icon={Truck} keyName="shippingAddress" data={shippingData} isOpen={open.shippingAddress} onToggle={() => toggle("shippingAddress")} onFormChange={onFormChange} showCopyCheckbox copyCheckboxLabel="Same as Billing" copyChecked={copyBillingToShipping} onCopyToggle={handleCopyBillingToShipping} />
-          <AddressBlock title="Dispatch Address" icon={Truck} keyName="dispatchAddress" data={dispatchData} isOpen={open.dispatchAddress} onToggle={() => toggle("dispatchAddress")} onFormChange={onFormChange} showCopyCheckbox copyCheckboxLabel="Same as Supplier" copyChecked={copySupplierToDispatch} onCopyToggle={handleCopySupplierToDispatch} />
+          
+          <AddressBlock
+            title="Shipping Address"
+            icon={Truck}
+            keyName="shippingAddress"
+            data={shippingData}
+            isOpen={open.shippingAddress}
+            onToggle={() => toggle("shippingAddress")}
+            onFormChange={onFormChange}
+            countryOptions={countryOptions}
+            showCopyCheckbox
+            copyCheckboxLabel="Same as Billing"
+            copyChecked={copyBillingToShipping}
+            onCopyToggle={handleCopyBillingToShipping}
+          />
+
+          <AddressBlock
+            title="Dispatch Address"
+            icon={Truck}
+            keyName="dispatchAddress"
+            data={dispatchData}
+            isOpen={open.dispatchAddress}
+            onToggle={() => toggle("dispatchAddress")}
+            onFormChange={onFormChange}
+            countryOptions={countryOptions}
+            showCopyCheckbox
+            copyCheckboxLabel="Same as Supplier"
+            copyChecked={copySupplierToDispatch}
+            onCopyToggle={handleCopySupplierToDispatch}
+          />
         </div>
       </div>
     </div>

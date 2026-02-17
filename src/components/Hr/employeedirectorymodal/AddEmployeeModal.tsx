@@ -6,7 +6,7 @@ import ContactInfoTab from "./ContactInfoTabs";
 import EmploymentTab from "./EmploymentTab";
 import CompensationTab from "./CompensationTab";
 import { LeaveSetupTab } from "./LeaveSetupTab";
-import { WorkScheduleTab } from "./WorkScheduletab";
+import { WorkScheduleTab } from "./WorkScheduletab";  
 import { getLevelsFromHrSettings } from "../../../views/hr/tabs/salarystructure";
 
 import { EMPLOYEE_ROLE_CONFIG } from "../../../api/config/employeeRoleConfig";
