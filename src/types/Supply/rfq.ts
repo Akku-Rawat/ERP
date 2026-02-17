@@ -1,9 +1,17 @@
+
+
+import type { TermSection } from "../termsAndCondition";
+
+/*  SUPPLIER  */
+
 export interface SupplierRow {
   supplier: string;
   contact: string;
   email: string;
   sendEmail: boolean;
 }
+
+/*  ITEMS  */
 
 export interface ItemRow {
   itemCode: string;
@@ -13,6 +21,9 @@ export interface ItemRow {
   warehouse: string;
 }
 
+/*  PAYMENT ROWS  */
+/* 👉 Optional — keep only if RFQ payment table needed */
+
 export interface PaymentRow {
   paymentTerm: string;
   description: string;
@@ -21,15 +32,26 @@ export interface PaymentRow {
   paymentAmount: number;
 }
 
+/*  RFQ FORM  */
+
 export interface RfqFormData {
   rfqNumber: string;
   requestDate: string;
   quoteDeadline: string;
   status: string;
+
   suppliers: SupplierRow[];
   items: ItemRow[];
+
   paymentRows: PaymentRow[];
-  termsAndConditions: string;
+
+
+  terms?: {
+    buying: TermSection;
+  };
+
+  /*  EMAIL TEMPLATE  */
+
   templateName: string;
   templateType: string;
   subject: string;
@@ -37,6 +59,8 @@ export interface RfqFormData {
   sendAttachedFiles: boolean;
   sendPrint: boolean;
 }
+
+/*  EMPTY ROWS  */
 
 export const emptySupplier: SupplierRow = {
   supplier: "",
@@ -61,6 +85,26 @@ export const emptyPaymentRow: PaymentRow = {
   paymentAmount: 0,
 };
 
+/*  EMPTY TERMS  */
+
+
+export const emptyTerms: TermSection = {
+  general: "",
+  payment: {
+    phases: [],
+    dueDates: "",
+    lateCharges: "",
+    taxes: "",
+    notes: "",
+  },
+  delivery: "",
+  cancellation: "",
+  warranty: "",
+  liability: "",
+};
+
+/* ================= EMPTY RFQ FORM ================= */
+
 export const emptyRfqForm: RfqFormData = {
   rfqNumber: "PUR-RFQ-",
   requestDate: new Date().toISOString().split("T")[0],
@@ -69,13 +113,21 @@ export const emptyRfqForm: RfqFormData = {
   suppliers: [{ ...emptySupplier }],
   items: [{ ...emptyItem }],
   paymentRows: [{ ...emptyPaymentRow }],
-  termsAndConditions: "",
+  terms: {
+    buying: { ...emptyTerms },
+  },
+
+  /*  EMAIL  */
+
   templateName: "",
   templateType: "Quote Email",
   subject: "",
   messageHtml: "",
+
   sendAttachedFiles: true,
   sendPrint: false,
 };
+
+/*  TABS  */
 
 export type RfqTab = "details" | "emailTemplates" | "terms";
