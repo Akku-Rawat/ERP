@@ -11,6 +11,9 @@ import {
   FaSave,
   FaUndo,
 } from "react-icons/fa";
+import { showApiError, showSuccess, showLoading, closeSwal } from "../../components/alert";
+import Swal from "sweetalert2";
+
 
 import type { AccountingSetup, FinancialConfig } from "../../types/company";
 import { updateCompanyById } from "../../api/companySetupApi";
@@ -41,6 +44,7 @@ interface InputFieldProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
+const VITE_COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 const InputField: React.FC<InputFieldProps> = ({
   label,
@@ -137,7 +141,7 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
   financialConfig,
   accountingSetup,
 }) => {
-  const [showSuccess, setShowSuccess] = useState(false);
+  
   const [activeTab, setActiveTab] = useState("financial");
 
   const [form, setForm] = useState(() => ({
@@ -179,29 +183,43 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
       },
     }));
   };
-
-  const handleSubmit = async () => {
-    const payload = {
-      id: "VITE_COMPANY_ID",
-      accountingSetup: form.accountingSetup,
-      financialConfig: form.financialConfig,
-    };
-
-    try {
-      await updateCompanyById(payload);
-      setShowSuccess(true);
-
-      setTimeout(() => setShowSuccess(false), 3000);
-    } catch (err) {
-      console.error("Update failed:", err);
-      alert("Failed to update accounting settings.");
-    }
+const handleSubmit = async () => {
+  const payload = {
+    id: VITE_COMPANY_ID,
+    accountingSetup: form.accountingSetup,
+    financialConfig: form.financialConfig,
   };
 
-  const handleReset = () => {
-    if (!confirm("Reset all fields?")) return;
-    setForm(defaultForm);
-  };
+  try {
+    showLoading("Saving Accounting Settings...");
+
+    await updateCompanyById(payload);
+
+    closeSwal();
+    showSuccess("Accounting settings updated successfully.");
+  } catch (err) {
+    closeSwal();
+    showApiError(err);
+  }
+};
+
+const handleReset = async () => {
+  const result = await Swal.fire({
+    icon: "warning",
+    title: "Reset All Fields?",
+    text: "This will clear all entered accounting settings.",
+    showCancelButton: true,
+    confirmButtonColor: "#ef4444",
+    cancelButtonColor: "#6b7280",
+    confirmButtonText: "Yes, Reset",
+  });
+
+  if (!result.isConfirmed) return;
+
+  setForm(defaultForm);
+  showSuccess("Form reset successfully.");
+};
+
 
   const renderInput = (
     label: string,
@@ -243,17 +261,6 @@ const AccountingDetails: React.FC<AccountingDetailsProps> = ({
 
   return (
     <div className="w-full">
-      {showSuccess && (
-        <div className="mb-4 rounded-lg p-4 shadow-sm flex items-center gap-3">
-          <FaCheckCircle className="w-5 h-5 text-success" />
-          <div>
-            <p className="text-sm font-medium text-success">
-              Saved successfully!
-            </p>
-            <p className="text-xs text-success">All changes stored.</p>
-          </div>
-        </div>
-      )}
 
       <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
         {/* TABS */}

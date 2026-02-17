@@ -5,12 +5,12 @@ import AdvancedCalendar from "../../../components/Hr/leave/Calendar";
 import { applyLeave } from "../../../api/leaveApi";
 import { getAllEmployees } from "../../../api/employeeapi";
 import { getEmployeeById } from "../../../api/employeeapi";
-import toast from "react-hot-toast";
 import { getLeaveById, updateLeaveApplication } from "../../../api/leaveApi";
 import type { LeaveBalanceUI } from "../../../types/leave/leaveBalance";
 
 import { mapLeaveBalanceFromApi } from "../../../types/leave/leaveMapper";
 import { getEmployeeLeaveBalanceReport } from "../../../api/leaveApi";
+import { closeSwal, showApiError, showLoading, showSuccess } from "../../../components/alert";
 
 type LeaveFormData = {
   type: string;
@@ -255,56 +255,59 @@ useEffect(() => {
     };
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (!employeeId) {
-      toast.error("Please select employee");
-      return;
+  if (!employeeId) {
+    showApiError("Please select employee");
+    return;
+  }
+
+  if (!formData.startDate) {
+    showApiError("Start date is required");
+    return;
+  }
+
+  if (!formData.isHalfDay && !formData.endDate) {
+    showApiError("End date is required");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    showLoading(isEditMode ? "Updating Leave..." : "Applying Leave...");
+
+    if (isEditMode && editLeaveId) {
+      await updateLeaveApplication({
+        leaveId: editLeaveId,
+        leaveType: formData.type,
+        leaveFromDate: formData.startDate,
+        leaveToDate: formData.endDate,
+        isHalfDay: formData.isHalfDay,
+        leaveReason: formData.reason,
+      });
+
+      closeSwal();
+      showSuccess("Leave updated successfully");
+    } else {
+      await applyLeave(buildPayload());
+
+      closeSwal();
+      showSuccess("Leave applied successfully");
     }
 
-    if (!formData.startDate) {
-      toast.error("Start date is required");
-      return;
+    if (!isEditMode) {
+      handleReset();
     }
+  } catch (err: any) {
+    closeSwal();
+    showApiError(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
-    if (!formData.isHalfDay && !formData.endDate) {
-      toast.error("End date is required");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      if (isEditMode && editLeaveId) {
-        await updateLeaveApplication({
-          leaveId: editLeaveId,
-          leaveType: formData.type, 
-          leaveFromDate: formData.startDate,
-          leaveToDate: formData.endDate,
-          isHalfDay: formData.isHalfDay,
-          leaveReason: formData.reason,
-        });
-
-        toast.success("Leave updated successfully");
-      } else {
-        await applyLeave(buildPayload());
-        toast.success("Leave applied successfully");
-      }
-
-      if (!isEditMode) {
-        handleReset();
-      }
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        "Unable to apply leave. Please contact HR.";
-
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleReset = () => {
     setFormData({

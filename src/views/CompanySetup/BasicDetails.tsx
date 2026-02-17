@@ -14,6 +14,9 @@ import {
   FaSave,
   FaUndo,
 } from "react-icons/fa";
+import { showApiError, showSuccess, showLoading, closeSwal } from "../../components/alert";
+import Swal from "sweetalert2";
+
 
 import type { BasicDetailsForm } from "../../types/company";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
@@ -112,7 +115,7 @@ interface BasicDetailsProps {
 }
 
 const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
-  const [showSuccess, setShowSuccess] = useState(false);
+
   const [activeTab, setActiveTab] = useState("registration");
 
   const [form, setForm] = useState<BasicDetailsForm>(() => ({
@@ -198,26 +201,42 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
   });
 
   const handleSubmit = async () => {
-    const payload = {
-      id: COMPANY_ID,
-      ...mapFormToApiPayload(form),
-    };
-
-    try {
-      console.log("payload:", payload);
-      await updateCompanyById(payload);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-    } catch (err) {
-      console.error("Update failed:", err);
-      alert("Failed to update company basic details.");
-    }
+  const payload = {
+    id: COMPANY_ID,
+    ...mapFormToApiPayload(form),
   };
 
-  const handleReset = () => {
-    if (!confirm("Reset all fields?")) return;
-    setForm(defaultForm);
-  };
+  try {
+    showLoading("Saving Company Details...");
+
+    await updateCompanyById(payload);
+
+    closeSwal();
+    showSuccess("Company basic details updated successfully.");
+  } catch (err) {
+    closeSwal();
+    showApiError(err);
+  }
+};
+
+
+const handleReset = async () => {
+  const result = await Swal.fire({
+    icon: "warning",
+    title: "Reset All Fields?",
+    text: "This will clear all entered data.",
+    showCancelButton: true,
+    confirmButtonColor: "#ef4444",
+    cancelButtonColor: "#6b7280",
+    confirmButtonText: "Yes, Reset",
+  });
+
+  if (!result.isConfirmed) return;
+
+  setForm(defaultForm);
+  showSuccess("Form reset successfully.");
+};
+
 
   const renderField = (
     label: string,
@@ -245,17 +264,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
 
   return (
     <div className="w-full">
-      {showSuccess && (
-        <div className="mb-4 rounded-lg p-4 flex items-center gap-3 shadow-sm badge-success">
-          <FaCheckCircle className="w-5 h-5 text-success" />
-          <div>
-            <p className="text-sm font-medium text-main">
-              Details saved successfully!
-            </p>
-            <p className="text-xs text-muted">All changes have been stored</p>
-          </div>
-        </div>
-      )}
+      
 
       <div className="bg-card rounded-xl shadow-sm border border-theme overflow-hidden">
         {/* Tabs */}

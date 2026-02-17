@@ -14,10 +14,22 @@ export async function createItemStock(payload: any): Promise<any> {
   return resp.data;
 }
 
-export async function getAllStockEntries(): Promise<any> {
-  const resp: AxiosResponse = await api.get(StockAPI.getAll);
-  return resp.data?.data || [];
+export async function getAllStockEntries(
+  page: number,
+  pageSize: number,
+  search?: string
+): Promise<any> {
+  const resp: AxiosResponse = await api.get(StockAPI.getAll, {
+    params: {
+      page,
+      pageSize,
+      search,
+    },
+  });
+
+  return resp.data; // 🔥 DO NOT strip .data
 }
+
 
 export async function getStockById(id: string): Promise<any> {
   const resp: AxiosResponse = await api.get(StockAPI.getbyId, {
