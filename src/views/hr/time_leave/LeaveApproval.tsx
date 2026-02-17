@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { FaCheckCircle, FaTimesCircle, FaClipboardList } from "react-icons/fa";
 import { getPendingLeaveRequests } from "../../../api/leaveApi";
 import { updateLeaveStatus } from "../../../api/leaveApi";
-import toast from "react-hot-toast";
 import type { LeaveUI } from "../../../types/leave/uiLeave";
 import { mapLeaveFromApi } from "../../../types/leave/leaveMapper";
+import { closeSwal, showApiError, showLoading, showSuccess } from "../../../components/alert";
 
 /*  Component  */
 const LeaveManagment: React.FC = () => {
@@ -30,44 +30,56 @@ const LeaveManagment: React.FC = () => {
     fetchLeaves();
   }, []);
 
-  const approveLeave = async (id: string) => {
-    try {
-      setActionLoadingId(id);
+ const approveLeave = async (id: string) => {
+  try {
+    setActionLoadingId(id);
 
-      await updateLeaveStatus({
-        leaveId: id,
-        status: "Approved",
-      });
+    showLoading("Approving Leave...");
 
-      setRequests((prev) => prev.filter((r) => r.id !== id));
+    await updateLeaveStatus({
+      leaveId: id,
+      status: "Approved",
+    });
 
-      toast.success("Leave approved successfully");
-    } catch {
-      toast.error("Failed to approve leave");
-    } finally {
-      setActionLoadingId(null);
-    }
-  };
+    closeSwal();
 
-  const rejectLeave = async (id: string) => {
-    try {
-      setActionLoadingId(id);
+    setRequests((prev) => prev.filter((r) => r.id !== id));
 
-      await updateLeaveStatus({
-        leaveId: id,
-        status: "Rejected",
-        rejectionReason,
-      });
+    showSuccess("Leave approved successfully");
+  } catch (err) {
+    closeSwal();
+    showApiError(err);
+  } finally {
+    setActionLoadingId(null);
+  }
+};
 
-      setRequests((prev) => prev.filter((r) => r.id !== id));
 
-      toast.success("Leave rejected successfully");
-    } catch {
-      toast.error("Failed to reject leave");
-    } finally {
-      setActionLoadingId(null);
-    }
-  };
+ const rejectLeave = async (id: string) => {
+  try {
+    setActionLoadingId(id);
+
+    showLoading("Rejecting Leave...");
+
+    await updateLeaveStatus({
+      leaveId: id,
+      status: "Rejected",
+      rejectionReason,
+    });
+
+    closeSwal();
+
+    setRequests((prev) => prev.filter((r) => r.id !== id));
+
+    showSuccess("Leave rejected successfully");
+  } catch (err) {
+    closeSwal();
+    showApiError(err);
+  } finally {
+    setActionLoadingId(null);
+  }
+};
+
 
   return (
     <div className="bg-app">

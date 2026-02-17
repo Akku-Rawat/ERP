@@ -52,6 +52,9 @@ const LeaveSetupModal: React.FC<LeaveSetupModalProps> = ({
 }) => {
   const [currentView, setCurrentView] = useState<ViewType>(initialView);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+  const [refreshHolidayList, setRefreshHolidayList] =
+    useState(false);
+
 
   useEffect(() => {
     if (isOpen) {
@@ -186,16 +189,24 @@ const LeaveSetupModal: React.FC<LeaveSetupModalProps> = ({
           {currentView === "holiday-list" && (
             <div className="p-6">
               <HolidayList
+                key={refreshHolidayList.toString()} // forces reload
                 onAdd={() => setCurrentView("holiday-form")}
                 onClose={() => setCurrentView("setup-menu")}
               />
             </div>
           )}
+
           {currentView === "holiday-form" && (
             <div className="p-6">
-              <HolidayListForm onClose={() => setCurrentView("holiday-list")} />
+              <HolidayListForm
+                onClose={() => setCurrentView("holiday-list")}
+                onSuccess={() => {
+                  setRefreshHolidayList((prev) => !prev);
+                }}
+              />
             </div>
           )}
+
 
           {/* Leave Type */}
           {currentView === "leave-type" && (

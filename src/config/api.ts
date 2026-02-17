@@ -83,6 +83,13 @@ export const API = {
     getHolidays: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.get_holidays`,
   },
 
+  holidays: {
+  getAll: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.get_holidays`,
+  create: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.create_holiday`,
+  update: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.update_holiday`,
+  delete: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.delete_holiday`,
+},
+
   /* =========================
    * MODULES (SYSTEM)
    * ========================= */
