@@ -81,7 +81,7 @@ const EmployeeHistory: React.FC = () => {
         render: (l) => l.totalDays,
       },
 
-      // ✅ NEW COLUMN (your requirement)
+      
       {
         key: "appliedOn",
         header: "Applied",
