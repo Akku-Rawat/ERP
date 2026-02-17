@@ -1,7 +1,17 @@
-import  { useState } from "react";
-import { User, Lock, EyeOff, Eye, Shield, Zap, BarChart3, Users, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import {
+  User,
+  Lock,
+  EyeOff,
+  Eye,
+  Shield,
+  Zap,
+  BarChart3,
+  Users,
+  ArrowRight,
+} from "lucide-react";
 import { useLogin } from "../hooks/useloginhooks";
-import erp2 from"../assets/erp2.png";
+import erp2 from "../assets/erp2.png";
 import "../login.css";
 
 const features = [
@@ -44,7 +54,9 @@ const Login = () => {
                 <span className="text-base font-bold text-white">⬡</span>
               </div>
               <div>
-                <span className="text-xl font-bold text-[hsl(240,10%,20%)] tracking-tight">ERP</span>
+                <span className="text-xl font-bold text-[hsl(240,10%,20%)] tracking-tight">
+                  ERP
+                </span>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(240,5%,50%)] font-medium">
                   Enterprise Suite
                 </p>
@@ -62,7 +74,9 @@ const Login = () => {
             {/* Error Message */}
             {error && (
               <div className="mb-4 p-3 rounded-xl bg-[hsl(0,84%,97%)] border border-[hsl(0,84%,90%)] animate-fade-in">
-                <p className="text-sm text-[hsl(0,84%,60%)] font-medium">{error}</p>
+                <p className="text-sm text-[hsl(0,84%,60%)] font-medium">
+                  {error}
+                </p>
               </div>
             )}
 
@@ -71,7 +85,9 @@ const Login = () => {
               <div className="relative mb-4 animate-fade-in delay-350 fill-both opacity-0-start">
                 <User
                   className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-300 ${
-                    focusedField === "user" ? "text-[hsl(270,70%,55%)]" : "text-[hsl(240,5%,50%)]"
+                    focusedField === "user"
+                      ? "text-[hsl(270,70%,55%)]"
+                      : "text-[hsl(240,5%,50%)]"
                   }`}
                 />
                 <input
@@ -90,7 +106,9 @@ const Login = () => {
               <div className="relative mb-5 animate-fade-in delay-450 fill-both opacity-0-start">
                 <Lock
                   className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-300 ${
-                    focusedField === "pass" ? "text-[hsl(270,70%,55%)]" : "text-[hsl(240,5%,50%)]"
+                    focusedField === "pass"
+                      ? "text-[hsl(270,70%,55%)]"
+                      : "text-[hsl(240,5%,50%)]"
                   }`}
                 />
                 <input
@@ -108,7 +126,11 @@ const Login = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[hsl(240,5%,50%)] hover:text-[hsl(240,10%,20%)] transition-colors"
                 >
-                  {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  {showPassword ? (
+                    <Eye className="h-4 w-4" />
+                  ) : (
+                    <EyeOff className="h-4 w-4" />
+                  )}
                 </button>
               </div>
 
@@ -124,8 +146,18 @@ const Login = () => {
                     onClick={() => setRememberMe(!rememberMe)}
                   >
                     {rememberMe && (
-                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      <svg
+                        className="h-3 w-3 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={3}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     )}
                   </div>
@@ -150,12 +182,6 @@ const Login = () => {
                 </button>
               </div>
             </form>
-
-            {/* Secure badge */}
-            <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-[hsl(240,5%,50%)] animate-fade-in delay-750 fill-both opacity-0-start">
-              <Shield className="h-3 w-3" />
-              256-bit SSL encrypted · SOC 2 Compliant
-            </p>
           </div>
 
           {/* Right - Illustration */}
@@ -171,7 +197,6 @@ const Login = () => {
             <div className="relative flex h-full flex-col items-center justify-center p-10">
               {/* Laptop */}
               <img
-
                 src={erp2}
                 alt="ERP Dashboard Preview"
                 className="w-[85%] max-w-[380px] drop-shadow-2xl animate-fade-in delay-500 fill-both opacity-0-start duration-800 hover-scale"
@@ -192,7 +217,8 @@ const Login = () => {
 
               {/* Tagline */}
               <p className="mt-6 text-center text-sm font-medium text-white/80 max-w-[280px] animate-fade-in delay-1300 fill-both opacity-0-start">
-                One platform to manage inventory, sales, HR & finance — simplified.
+                One platform to manage inventory, sales, HR & finance —
+                simplified.
               </p>
             </div>
           </div>
