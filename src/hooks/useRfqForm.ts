@@ -1,7 +1,22 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import type { RfqFormData, RfqTab, SupplierRow, ItemRow, PaymentRow } from "../types/Supply/rfq";
-import { emptyRfqForm, emptySupplier, emptyItem, emptyPaymentRow } from "../types/Supply/rfq";
+
+import type {
+  RfqFormData,
+  RfqTab,
+  SupplierRow,
+  ItemRow,
+  PaymentRow,
+} from "../types/Supply/rfq";
+
+import {
+  emptyRfqForm,
+  emptySupplier,
+  emptyItem,
+  emptyPaymentRow,
+} from "../types/Supply/rfq";
+
+import type { TermSection } from "../types/termsAndCondition";
 
 interface UseRfqFormProps {
   onSuccess?: (data: RfqFormData) => void;
@@ -12,12 +27,27 @@ export const useRfqForm = ({ onSuccess, onClose }: UseRfqFormProps) => {
   const [form, setForm] = useState<RfqFormData>(emptyRfqForm);
   const [activeTab, setActiveTab] = useState<RfqTab>("details");
 
-  const setRfqNumber = (value: string) => setForm((p) => ({ ...p, rfqNumber: value }));
-  const setRequestDate = (value: string) => setForm((p) => ({ ...p, requestDate: value }));
-  const setQuoteDeadline = (value: string) => setForm((p) => ({ ...p, quoteDeadline: value }));
-  const setStatus = (value: string) => setForm((p) => ({ ...p, status: value }));
+  /*  BASIC  */
 
-  const handleSupplierChange = (idx: number, field: keyof SupplierRow, value: any) => {
+  const setRfqNumber = (value: string) =>
+    setForm((p) => ({ ...p, rfqNumber: value }));
+
+  const setRequestDate = (value: string) =>
+    setForm((p) => ({ ...p, requestDate: value }));
+
+  const setQuoteDeadline = (value: string) =>
+    setForm((p) => ({ ...p, quoteDeadline: value }));
+
+  const setStatus = (value: string) =>
+    setForm((p) => ({ ...p, status: value }));
+
+  /*  SUPPLIERS  */
+
+  const handleSupplierChange = (
+    idx: number,
+    field: keyof SupplierRow,
+    value: any
+  ) => {
     setForm((p) => {
       const suppliers = [...p.suppliers];
       suppliers[idx] = { ...suppliers[idx], [field]: value };
@@ -26,17 +56,29 @@ export const useRfqForm = ({ onSuccess, onClose }: UseRfqFormProps) => {
   };
 
   const addSupplier = () => {
-    setForm((p) => ({ ...p, suppliers: [...p.suppliers, { ...emptySupplier }] }));
+    setForm((p) => ({
+      ...p,
+      suppliers: [...p.suppliers, { ...emptySupplier }],
+    }));
   };
 
   const removeSupplier = (idx: number) => {
     setForm((p) => {
       if (p.suppliers.length === 1) return p;
-      return { ...p, suppliers: p.suppliers.filter((_, i) => i !== idx) };
+      return {
+        ...p,
+        suppliers: p.suppliers.filter((_, i) => i !== idx),
+      };
     });
   };
 
-  const handleItemChange = (idx: number, field: keyof ItemRow, value: any) => {
+  /*  ITEMS  */
+
+  const handleItemChange = (
+    idx: number,
+    field: keyof ItemRow,
+    value: any
+  ) => {
     setForm((p) => {
       const items = [...p.items];
       items[idx] = { ...items[idx], [field]: value };
@@ -45,42 +87,87 @@ export const useRfqForm = ({ onSuccess, onClose }: UseRfqFormProps) => {
   };
 
   const addItem = () => {
-    setForm((p) => ({ ...p, items: [...p.items, { ...emptyItem }] }));
+    setForm((p) => ({
+      ...p,
+      items: [...p.items, { ...emptyItem }],
+    }));
   };
 
   const removeItem = (idx: number) => {
     setForm((p) => {
       if (p.items.length === 1) return p;
-      return { ...p, items: p.items.filter((_, i) => i !== idx) };
+      return {
+        ...p,
+        items: p.items.filter((_, i) => i !== idx),
+      };
     });
   };
 
-  const handlePaymentRowChange = (idx: number, field: keyof PaymentRow, value: any) => {
+  /*  PAYMENT ROWS  */
+
+  const handlePaymentRowChange = (
+    idx: number,
+    field: keyof PaymentRow,
+    value: any
+  ) => {
     setForm((p) => {
       const paymentRows = [...p.paymentRows];
-      paymentRows[idx] = { ...paymentRows[idx], [field]: value };
+      paymentRows[idx] = {
+        ...paymentRows[idx],
+        [field]: value,
+      };
       return { ...p, paymentRows };
     });
   };
 
   const addPaymentRow = () => {
-    setForm((p) => ({ ...p, paymentRows: [...p.paymentRows, { ...emptyPaymentRow }] }));
+    setForm((p) => ({
+      ...p,
+      paymentRows: [...p.paymentRows, { ...emptyPaymentRow }],
+    }));
   };
 
   const removePaymentRow = (idx: number) => {
     setForm((p) => {
       if (p.paymentRows.length === 1) return p;
-      return { ...p, paymentRows: p.paymentRows.filter((_, i) => i !== idx) };
+      return {
+        ...p,
+        paymentRows: p.paymentRows.filter((_, i) => i !== idx),
+      };
     });
   };
 
-  const setTemplateName = (value: string) => setForm((p) => ({ ...p, templateName: value }));
-  const setTemplateType = (value: string) => setForm((p) => ({ ...p, templateType: value }));
-  const setSubject = (value: string) => setForm((p) => ({ ...p, subject: value }));
-  const setMessageHtml = (value: string) => setForm((p) => ({ ...p, messageHtml: value }));
-  const setSendAttachedFiles = (value: boolean) => setForm((p) => ({ ...p, sendAttachedFiles: value }));
-  const setSendPrint = (value: boolean) => setForm((p) => ({ ...p, sendPrint: value }));
-  const setTermsAndConditions = (value: string) => setForm((p) => ({ ...p, termsAndConditions: value }));
+  /*  TERMS (PO STYLE)  */
+
+  const setTermsBuying = (updated: TermSection) => {
+    setForm((prev) => ({
+      ...prev,
+      terms: {
+        ...prev.terms,
+        buying: updated,
+      },
+    }));
+  };
+
+  /*  EMAIL TEMPLATE  */
+
+  const setTemplateName = (value: string) =>
+    setForm((p) => ({ ...p, templateName: value }));
+
+  const setTemplateType = (value: string) =>
+    setForm((p) => ({ ...p, templateType: value }));
+
+  const setSubject = (value: string) =>
+    setForm((p) => ({ ...p, subject: value }));
+
+  const setMessageHtml = (value: string) =>
+    setForm((p) => ({ ...p, messageHtml: value }));
+
+  const setSendAttachedFiles = (value: boolean) =>
+    setForm((p) => ({ ...p, sendAttachedFiles: value }));
+
+  const setSendPrint = (value: boolean) =>
+    setForm((p) => ({ ...p, sendPrint: value }));
 
   const handleSaveTemplate = () => {
     console.log("Template saved:", {
@@ -104,6 +191,8 @@ export const useRfqForm = ({ onSuccess, onClose }: UseRfqFormProps) => {
     }));
   };
 
+  /*  SUBMIT  */
+
   const handleSubmit = async () => {
     try {
       console.log("RFQ Data:", form);
@@ -116,10 +205,14 @@ export const useRfqForm = ({ onSuccess, onClose }: UseRfqFormProps) => {
     }
   };
 
+  /*  RESET  */
+
   const reset = () => {
     setForm(emptyRfqForm);
     setActiveTab("details");
   };
+
+  /*  RETURN  */
 
   return {
     form,
@@ -138,6 +231,7 @@ export const useRfqForm = ({ onSuccess, onClose }: UseRfqFormProps) => {
     handlePaymentRowChange,
     addPaymentRow,
     removePaymentRow,
+    setTermsBuying,
     setTemplateName,
     setTemplateType,
     setSubject,
@@ -146,7 +240,6 @@ export const useRfqForm = ({ onSuccess, onClose }: UseRfqFormProps) => {
     setSendPrint,
     handleSaveTemplate,
     resetTemplate,
-    setTermsAndConditions,
     handleSubmit,
     reset,
   };
