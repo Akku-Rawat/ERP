@@ -5,7 +5,11 @@ import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import CreateCreditNoteModal from "./CreateCreditNoteModal";
 import { getAllCreditNotes } from "../../api/salesApi";
-import { showApiError, showSuccess } from "../../utils/alert";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { showLoading, closeSwal , showApiError , showSuccess } from "../../utils/alert";
+
+
 type CreditNote = {
   noteNo: string;
   invoiceNo: string;
@@ -81,6 +85,92 @@ const CreditNotesTable: React.FC = () => {
     fetchCreditNotes();
   }, [page, pageSize]);
 
+  const fetchAllCreditNotesForExport = async () => {
+  try {
+    let allData: CreditNote[] = [];
+    let currentPage = 1;
+    let totalPagesLocal = 1;
+
+    do {
+      const resp = await getAllCreditNotes(currentPage, 100);
+
+      const mappedData: CreditNote[] = resp.data.map((item: any) => ({
+        noteNo: item.invoiceNumber,
+        invoiceNo: item.receiptNumber,
+        customer: item.customerName,
+        date: item.dateOfInvoice,
+        amount: Math.abs(item.totalAmount),
+        currency: item.currency,
+        status: item.invoiceStatus ?? "",
+      }));
+
+      allData = [...allData, ...mappedData];
+      totalPagesLocal = resp.pagination.total_pages;
+
+      currentPage++;
+    } while (currentPage <= totalPagesLocal);
+
+    return allData;
+  } catch (error) {
+    showApiError(error);
+    return [];
+  }
+};
+
+const handleExportExcel = async () => {
+  try {
+    showLoading("Exporting Credit Notes...");
+
+    const dataToExport = await fetchAllCreditNotesForExport();
+
+    if (!dataToExport.length) {
+      closeSwal();
+      showApiError("No credit notes to export");
+      return;
+    }
+
+    const formattedData = dataToExport.map((r) => ({
+      "Credit Note No": r.noteNo,
+      "Receipt No": r.invoiceNo,
+      Customer: r.customer,
+      Date: r.date,
+      Amount: r.amount,
+      Currency: r.currency,
+      Status: r.status,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "Credit Notes"
+    );
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const fileData = new Blob([excelBuffer], {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(fileData, "Credit_Notes.xlsx");
+
+    closeSwal();
+    showSuccess("Credit notes exported successfully");
+
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
+
+
   return (
     <div className="p-8">
       <Table
@@ -93,6 +183,8 @@ const CreditNotesTable: React.FC = () => {
         onAdd={() => setOpenCreateModal(true)}
         emptyMessage="No credit notes found"
         enableColumnSelector
+        enableExport
+        onExport={handleExportExcel}
         currentPage={page}
         totalPages={totalPages}
         pageSize={pageSize}

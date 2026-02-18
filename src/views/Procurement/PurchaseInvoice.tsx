@@ -12,9 +12,10 @@ import ActionButton, {
 import type { Column } from "../../components/ui/Table/type";
 import { getPurchaseInvoices } from "../../api/procurement/PurchaseInvoiceApi";
 import { updatePurchaseinvoiceStatus } from "../../api/procurement/PurchaseInvoiceApi";
-import { showApiError , showSuccess } from "../../utils/alert";
-
-
+import { showApiError, showSuccess, showLoading, closeSwal } from "../../utils/alert";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { getPurchaseInvoiceById } from "../../api/procurement/PurchaseInvoiceApi";
 interface Purchaseinvoice {
   pId: string;
   supplier: string;
@@ -31,7 +32,7 @@ interface PurchaseinvoicesTableProps {
 }
 
 export type PIStatus =
-  |"Draft"
+  | "Draft"
   | "Return"
   | "Submitted"
   | "Paid"
@@ -45,14 +46,14 @@ export type PIStatus =
 
 
 const STATUS_TRANSITIONS: Record<PIStatus, PIStatus[]> = {
-    Draft: [
+  Draft: [
     "Submitted",
     "Cancelled",
     "Paid",
     "Party Paid",
     "Internal Transfer",
     "Debit Note Issued",
-     "Return"
+    "Return"
   ],
   Submitted: [
     "Paid",
@@ -101,7 +102,8 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
   const [totalItems, setTotalItems] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<Purchaseinvoice | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
+
 
 
 
@@ -138,10 +140,30 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
     fetchInvoice();
   }, [page, pageSize]);
 
-  const handleView = (Invoice: Purchaseinvoice) => {
-    setSelectedInvoice(Invoice);
-    setViewModalOpen(true);
+  const handleView = async (invoice: Purchaseinvoice) => {
+    try {
+      // SweetAlert Loader
+      showLoading("Loading Purchase Invoice...");
+
+      const res = await getPurchaseInvoiceById(invoice.pId);
+
+      if (res?.status !== "success") {
+        throw new Error(res?.message || "Failed to load");
+      }
+
+      // Set full data
+      setSelectedInvoice(res.data);
+
+
+      closeSwal();
+      setViewModalOpen(true);
+
+    } catch (error) {
+      closeSwal();
+      showApiError(error);
+    }
   };
+
 
 
   //  MODAL HANDLERS 
@@ -150,6 +172,94 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
     setModalOpen(true);
     onAdd?.();
   };
+
+
+  const fetchAllPIForExport = async () => {
+    try {
+      let allData: Purchaseinvoice[] = [];
+      let currentPage = 1;
+      let totalPagesLocal = 1;
+
+      do {
+        const res = await getPurchaseInvoices(currentPage, 100);
+
+        if (res?.status_code === 200) {
+          const mapped = res.data.map((pi: any) => ({
+            pId: pi.pId,
+            supplier: pi.supplierName,
+            podate: pi.poDate,
+            deliveryDate: pi.deliveryDate,
+            amount: pi.grandTotal,
+            status: pi.status,
+            registrationType: pi.registrationType,
+          }));
+
+          allData = [...allData, ...mapped];
+          totalPagesLocal = res.pagination?.total_pages || 1;
+        }
+
+        currentPage++;
+      } while (currentPage <= totalPagesLocal);
+
+      return allData;
+    } catch (error) {
+      showApiError(error);
+      return [];
+    }
+  };
+
+
+  const handleExportExcel = async () => {
+    try {
+      showLoading("Exporting Purchase Invoices...");
+
+      const dataToExport = await fetchAllPIForExport();
+
+      if (!dataToExport.length) {
+        closeSwal();
+        showApiError("No purchase invoices to export");
+        return;
+      }
+
+      const formattedData = dataToExport.map((pi) => ({
+        "PI ID": pi.pId,
+        Supplier: pi.supplier,
+        "PO Date": pi.podate,
+        "Delivery Date": pi.deliveryDate,
+        "Registration Type": pi.registrationType,
+        Amount: pi.amount,
+        Status: pi.status,
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(formattedData);
+      const workbook = XLSX.utils.book_new();
+
+      XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        "Purchase Invoices"
+      );
+
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+
+      const fileData = new Blob([excelBuffer], {
+        type:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      saveAs(fileData, "All_Purchase_Invoices.xlsx");
+
+      closeSwal();
+      showSuccess("Export completed successfully");
+    } catch (error) {
+      closeSwal();
+      showApiError(error);
+    }
+  };
+
 
   const handleEdit = (Invoice: Purchaseinvoice, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -167,8 +277,8 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
   const handleCloseModal = () => setModalOpen(false);
 
   const handlePISaved = async () => {
-  await fetchInvoice();
-};
+    await fetchInvoice();
+  };
 
   const handleStatusChange = async (
     pId: string,
@@ -183,8 +293,8 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
 
       if (!res || res.status_code !== 200) {
         showApiError({
-  message: "Failed to update Purchase Invoice status",
-});
+          message: "Failed to update Purchase Invoice status",
+        });
 
         return;
       }
@@ -208,7 +318,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
   const columns: Column<Purchaseinvoice>[] = [
     { key: "pId", header: " PI ID", align: "left" },
     { key: "supplier", header: "Supplier", align: "left" },
-    { key: "podate", header: "po Date", align: "left" },
+    { key: "pidate", header: "pi Date", align: "left" },
     {
       key: "registrationType"
       , header: "Registration Type"
@@ -275,6 +385,8 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
         enableAdd
         addLabel="Add Purchase Invoice"
         onAdd={handleAddClick}
+        enableExport
+        onExport={handleExportExcel}
         enableColumnSelector
         currentPage={page}
         totalPages={totalPages}
@@ -292,19 +404,20 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
         isOpen={modalOpen}
         onClose={handleCloseModal}
         pId={selectedInvoice?.pId}
-        onSubmit={handlePISaved} 
+        onSubmit={handlePISaved}
       />
 
 
       {viewModalOpen && selectedInvoice && (
         <PurchaseInvoiceView
-          pId={selectedInvoice.pId}
+          piData={selectedInvoice}
           onClose={() => setViewModalOpen(false)}
           onEdit={() => {
             setViewModalOpen(false);
             setModalOpen(true);
           }}
         />
+
       )}
 
     </div>

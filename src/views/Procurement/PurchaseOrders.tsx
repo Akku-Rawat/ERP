@@ -11,9 +11,11 @@ import ActionButton, {
   ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
-import { showApiError,showSuccess } from "../../utils/alert";
+import { showApiError,showSuccess ,showLoading,closeSwal } from "../../utils/alert";
 import { getPurchaseOrders ,updatePurchaseOrderStatus } from "../../api/procurement/PurchaseOrderApi";
-import { data } from "react-router-dom";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { getPurchaseOrderById } from "../../api/procurement/PurchaseOrderApi";
 
 interface PurchaseOrder {
   id: string;
@@ -58,7 +60,8 @@ const [page, setPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null);
+const [selectedOrder, setSelectedOrder] =  useState<any | null>(null);
+
 
 
 
@@ -99,10 +102,30 @@ useEffect(() => {
 }, [page, pageSize]);
 
 
-  const handleView = (order: PurchaseOrder) => {
-  setSelectedOrder(order);
-  setViewModalOpen(true);
+const handleView = async (order: PurchaseOrder) => {
+  try {
+    // SweetAlert Loader
+    showLoading("Loading Purchase Order...");
+
+    const res = await getPurchaseOrderById(order.id);
+
+    if (res.status !== "success") {
+      throw new Error(res.message || "Failed to load");
+    }
+
+    // Data set
+    setSelectedOrder(res.data);
+
+    // Close loader → open modal
+    closeSwal();
+    setViewModalOpen(true);
+
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
 };
+
   //  FILTER 
  const filteredOrders = useMemo(() => {
   const term = searchTerm.toLowerCase();
@@ -141,6 +164,91 @@ useEffect(() => {
 };
 
 
+const fetchAllPOsForExport = async () => {
+  try {
+    let allData: PurchaseOrder[] = [];
+    let currentPage = 1;
+    let totalPagesLocal = 1;
+
+    do {
+      const res = await getPurchaseOrders(currentPage, 100);
+
+      if (res?.status_code === 200) {
+        const mapped = res.data.map((po: any) => ({
+          id: po.poId,
+          supplier: po.supplierName,
+          date: po.poDate,
+          deliveryDate: po.deliveryDate,
+          amount: po.grandTotal,
+          status: po.status,
+        }));
+
+        allData = [...allData, ...mapped];
+        totalPagesLocal = res.pagination?.total_pages || 1;
+      }
+
+      currentPage++;
+    } while (currentPage <= totalPagesLocal);
+
+    return allData;
+  } catch (error) {
+    showApiError(error);
+    return [];
+  }
+};
+
+const handleExportExcel = async () => {
+  try {
+    showLoading("Exporting Purchase Orders...");
+
+    const dataToExport = await fetchAllPOsForExport();
+
+    if (!dataToExport.length) {
+      closeSwal();
+      showApiError("No purchase orders to export");
+      return;
+    }
+
+    const formattedData = dataToExport.map((po) => ({
+      "PO ID": po.id,
+      Supplier: po.supplier,
+      Date: po.date,
+      "Delivery Date": po.deliveryDate,
+      Amount: po.amount,
+      Status: po.status,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "Purchase Orders"
+    );
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const fileData = new Blob([excelBuffer], {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(fileData, "All_Purchase_Orders.xlsx");
+
+    closeSwal();
+    showSuccess("Export completed successfully");
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
+
+
 const handleStatusChange = async (
   poId: string,
   newStatus: POStatus,
@@ -151,13 +259,13 @@ const handleStatusChange = async (
       newStatus
     );
 
-    // ❌ Backend error
+ 
     if (!res || res.status_code !== 200) {
       showApiError(res);
       return;
     }
 
-    // ✅ Update UI instantly
+ 
     setOrders((prev) =>
       prev.map((o) =>
         o.id === poId
@@ -166,7 +274,7 @@ const handleStatusChange = async (
       ),
     );
 
-    // ✅ Show backend message
+  
     showSuccess(
       res.message ||
         `Purchase Order marked as ${newStatus}`,
@@ -240,6 +348,8 @@ const handleStatusChange = async (
         showToolbar
         loading={loading}
         searchValue={searchTerm}
+         enableExport
+        onExport={handleExportExcel}
         onSearch={setSearchTerm}
         enableAdd
         addLabel="Add Purchase Order"
@@ -260,13 +370,13 @@ const handleStatusChange = async (
       <PurchaseOrderModal
         isOpen={modalOpen}
         onClose={handleCloseModal}
-          poId={selectedOrder?.id}  
+         poId={selectedOrder?.poId}
           onSubmit={handlePOSaved} 
       />
       {/* VIEW MODAL */}
     {viewModalOpen && selectedOrder && (
       <PurchaseOrderView
-        poId={selectedOrder.id}
+        poData={selectedOrder}
         onClose={() => setViewModalOpen(false)}
         onEdit={() => {
           setViewModalOpen(false);

@@ -5,7 +5,8 @@ import {
   getProformaInvoiceById,
   deleteProformaInvoiceById
 } from "../../api/proformaInvoiceApi";
-
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import { getCompanyById } from "../../api/companySetupApi";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 import type {
@@ -22,7 +23,7 @@ import ActionButton, {
 
 import type { Column } from "../../components/ui/Table/type";
 import PdfPreviewModal from "./PdfPreviewModal";
-import { showApiError, showSuccess } from "../../utils/alert";
+import { showApiError, showSuccess, showLoading , closeSwal} from "../../utils/alert";
 import Swal from "sweetalert2";
 
 type InvoiceStatus = "Draft" | "Rejected" | "Paid" | "Cancelled" | "Approved";
@@ -46,7 +47,6 @@ interface ProformaInvoiceTableProps {
 
 const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   onAddProformaInvoice,
-  onExportProformaInvoice,
   refreshKey,
 }) => {
   const [openStatusMenuFor, setOpenStatusMenuFor] = useState<string | null>(
@@ -119,56 +119,184 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
     fetchInvoices();
   }, [page, pageSize, refreshKey]);
 
+  const fetchAllInvoicesForExport = async () => {
+  try {
+    let allData: ProformaInvoiceSummary[] = [];
+    let currentPage = 1;
+    let totalPagesLocal = 1;
+
+    do {
+      const res = await getAllProformaInvoices(currentPage, 100);
+
+      if (res?.status_code === 200) {
+        const mapped = res.data.map((inv: any) => ({
+          proformaId: inv.proformaId,
+          customerName: inv.customerName,
+          currency: inv.currency,
+          exchangeRate: inv.exchangeRate,
+          dueDate: inv.dueDate,
+          totalAmount: Number(inv.totalAmount),
+          status: inv.status as InvoiceStatus,
+          createdAt: new Date(inv.createdAt.replace(" ", "T")),
+        }));
+
+        allData = [...allData, ...mapped];
+        totalPagesLocal = res.pagination?.total_pages || 1;
+      }
+
+      currentPage++;
+    } while (currentPage <= totalPagesLocal);
+
+    return allData;
+  } catch (error) {
+    showApiError(error);
+    return [];
+  }
+};
+
+
+const handleExportExcel = async () => {
+  try {
+    showLoading("Exporting Proforma Invoices...");
+
+    const dataToExport = await fetchAllInvoicesForExport();
+
+    if (!dataToExport.length) {
+      closeSwal();
+      showApiError("No invoices to export");
+      return;
+    }
+
+    const formattedData = dataToExport.map((inv) => ({
+      "Proforma No": inv.proformaId,
+      Customer: inv.customerName,
+      Date: inv.createdAt.toLocaleDateString(),
+      "Due Date": inv.dueDate
+        ? new Date(inv.dueDate).toLocaleDateString()
+        : "",
+      Amount: inv.totalAmount,
+      Currency: inv.currency,
+      Status: inv.status,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "Proforma Invoices"
+    );
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const fileData = new Blob([excelBuffer], {
+      type:
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+    });
+
+    saveAs(fileData, "Proforma_Invoices.xlsx");
+
+    closeSwal();
+    showSuccess("Export completed successfully");
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
+
   /*    ACTIONS
 */
-  const handleView = async (proformaId: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
+ const handleView = async (
+  proformaId: string,
+  e?: React.MouseEvent
+) => {
+  e?.stopPropagation();
 
-    try {
-      const res = await getProformaInvoiceById(proformaId);
-      if (!res || res.status_code !== 200) {
-        console.error("Failed to load invoice");
-        return;
-      }
+  try {
+   
+    showLoading("Loading proforma invoice preview...");
 
-      if (!company) {
-        console.error("Company data not loaded");
-        return;
-      }
-
-      setSelectedInvoice(res.data);
-
-      const url = await generateProformaInvoicePDF(
-        res.data,
-        company,
-        "bloburl",
-      );
-
-      setPdfUrl(url as string);
-      setPdfOpen(true);
-    } catch (err: any) {
-      showApiError(err);
+    if (!company) {
+      closeSwal();
+      console.error("Company data not loaded");
+      return;
     }
-  };
 
-  const handleDownload = async (proformaId: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
+    const res = await getProformaInvoiceById(
+      proformaId
+    );
 
-    try {
-      if (!company) {
-        console.error("Company data not loaded");
-        return;
-      }
-
-      const res = await getProformaInvoiceById(proformaId);
-      if (!res || res.status_code !== 200) return;
-
-      await generateProformaInvoicePDF(res.data, company, "save");
-      showSuccess("Proforma invoice downloaded");
-    } catch (err: any) {
-      showApiError(err);
+    if (!res || res.status_code !== 200) {
+      closeSwal();
+      showApiError("Failed to load invoice");
+      return;
     }
-  };
+
+    setSelectedInvoice(res.data);
+
+    const url = await generateProformaInvoicePDF(
+      res.data,
+      company,
+      "bloburl"
+    );
+
+    setPdfUrl(url as string);
+    setPdfOpen(true);
+
+    
+    closeSwal();
+
+  } catch (err: any) {
+    closeSwal();
+    showApiError(err);
+  }
+};
+
+
+  const handleDownload = async (
+  proformaId: string,
+  e?: React.MouseEvent
+) => {
+  e?.stopPropagation();
+
+  try {
+    showLoading("Preparing proforma invoice download...");
+
+    if (!company) {
+      closeSwal();
+      console.error("Company data not loaded");
+      return;
+    }
+
+    const res = await getProformaInvoiceById(
+      proformaId
+    );
+
+    if (!res || res.status_code !== 200) {
+      closeSwal();
+      showApiError("Failed to load invoice");
+      return;
+    }
+
+    await generateProformaInvoicePDF(
+      res.data,
+      company,
+      "save"
+    );
+
+    closeSwal();
+    showSuccess("Proforma invoice downloaded");
+
+  } catch (err: any) {
+    closeSwal();
+    showApiError(err);
+  }
+};
 
   // const handleStatusChange = async (
   //   proformaId: string,
@@ -389,7 +517,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
         addLabel=" Add Proforma Invoice"
         onAdd={onAddProformaInvoice}
         enableExport
-        onExport={onExportProformaInvoice}
+        onExport={handleExportExcel}
         enableColumnSelector
         currentPage={page}
         totalPages={totalPages}
