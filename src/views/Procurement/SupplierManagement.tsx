@@ -225,7 +225,7 @@ const handleEditFromDetail = (supplier: Supplier) => {
           <ActionButton
             type="view"
             onClick={() => handleRowClick(s)}
-            iconOnly={false}
+            iconOnly
           />
 
           <ActionMenu

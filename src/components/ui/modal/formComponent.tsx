@@ -1,9 +1,9 @@
-// src/components/ui/FormComponents.tsx
+
 import React from "react";
 
-// ============================================================
+// 
 // Input Component
-// ============================================================
+// 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   icon?: React.ReactNode;
@@ -51,9 +51,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 );
 Input.displayName = "Input";
 
-// ============================================================
+// 
 // Select Component
-// ============================================================
+// 
 interface SelectOption {
   label: string;
   value: string | number;
@@ -111,9 +111,9 @@ Select.displayName = "Select";
 
 Select.displayName = "Select";
 
-// ============================================================
+// 
 // Textarea Component
-// ============================================================
+// 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
   icon?: React.ReactNode;
@@ -157,9 +157,10 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 );
 Textarea.displayName = "Textarea";
 
-// ============================================================
+// 
 // Checkbox Component
-// ============================================================
+
+
 interface CheckboxProps {
   label: string;
   checked: boolean;
@@ -171,19 +172,32 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
   ({ label, checked, onChange, className = "" }, ref) => {
     return (
       <label className="flex items-center gap-2 cursor-pointer group">
-        <div className="relative">
+        <div className="relative w-5 h-5 flex-shrink-0">
+          {/* Real input — invisible but handles all click/keyboard events */}
           <input
             ref={ref}
             type="checkbox"
             checked={checked}
-            onChange={(e) => onChange(e.target.checked)} 
-            className="peer absolute inset-0 opacity-0 cursor-pointer"
+            onChange={(e) => onChange(e.target.checked)}
+            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
           />
 
-          <div className="w-5 h-5 border-2 border-[var(--border)] rounded peer-checked:border-primary peer-checked:bg-primary transition-all bg-card" />
+          {/* Styled box — driven by React `checked` prop, not peer CSS */}
+          <div
+            className={[
+              "w-5 h-5 border-2 rounded transition-all",
+              checked
+                ? "border-primary bg-primary"
+                : "border-[var(--border)] bg-card",
+            ].join(" ")}
+          />
 
+          {/* Tick — visible only when checked */}
           <svg
-            className="w-3 h-3 text-white absolute top-1 left-1 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
+            className={[
+              "w-3 h-3 text-white absolute top-1 left-1 pointer-events-none transition-opacity",
+              checked ? "opacity-100" : "opacity-0",
+            ].join(" ")}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -206,10 +220,9 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
 );
 
 Checkbox.displayName = "Checkbox";
-
-// ============================================================
-// Card Component (for sections inside modals)
-// ============================================================
+// 
+// Card Component 
+// 
 interface CardProps {
   title: string;
   subtitle?: string;
@@ -250,9 +263,9 @@ export const Card: React.FC<CardProps> = ({
   </div>
 );
 
-// ============================================================
+// 
 // Button Component
-// ============================================================
+// 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "ghost";
   icon?: React.ReactNode;

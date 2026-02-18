@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, Checkbox } from "./formComponent";
-import { ModalInput } from "./modalComponent";
+import { ModalInput ,ModalSelect } from "./modalComponent";
+import { getCountryList } from "../../../api/lookupApi";
 
 interface Address {
   line1: string;
@@ -16,7 +17,7 @@ interface AddressBlockProps {
   title: string;
   subtitle?: string;
   data: Address;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   sameAsBilling?: boolean;
   onSameAsBillingChange?: (checked: boolean) => void;
   disableAll?: boolean;
@@ -33,6 +34,32 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
   disableAll = false,
 }) => {
   const isShipping = type === "shipping";
+
+const [countries, setCountries] = React.useState<any[]>([]);
+
+const countryOptions = countries.map((c: any) => ({
+  label: c.name,   
+  value: c.code,   
+}));
+
+
+useEffect(() => {
+  const fetchCountries = async () => {
+    try {
+      const res = await getCountryList();
+
+      // If API returns direct array
+      setCountries(res || []);
+
+    } catch (err) {
+      console.error("Failed to load countries", err);
+    }
+  };
+
+  fetchCountries();
+}, []);
+
+
 
   return (
     <Card
@@ -96,13 +123,16 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             disabled={disableAll || sameAsBilling}
           />
 
-          <ModalInput
-            label="Country"
-            name="country"
-            value={data.country}
-            onChange={onChange}
-            disabled={disableAll || sameAsBilling}
-          />
+          <ModalSelect
+  label="Country"
+  name="country"
+  value={data.country}
+  onChange={onChange}
+  options={countryOptions}
+  disabled={disableAll || sameAsBilling}
+/>
+
+
         </div>
       </div>
     </Card>

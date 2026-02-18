@@ -11,10 +11,16 @@ export async function getAllCustomers(
   taxCategory?: string,
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(CustomerAPI.getAll, {
-    params: { page, page_size },
+    params: {
+      page,
+      page_size,
+      ...(taxCategory && { taxCategory }), 
+    },
   });
+
   return resp.data;
 }
+
 
 export async function deleteCustomerById(id: string): Promise<any> {
   const url = `${CustomerAPI.delete}?id=${id}`;

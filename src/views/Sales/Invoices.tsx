@@ -275,7 +275,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
           <ActionButton
             type="view"
             onClick={(e) => handleViewClick(inv.invoiceNumber, e)}
-            iconOnly={false}
+            iconOnly
           />
           {/* <ActionButton
             type="download"

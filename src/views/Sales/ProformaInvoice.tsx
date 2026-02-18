@@ -353,7 +353,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
           <ActionButton
             type="view"
             onClick={(e) => handleView(inv.proformaId, e)}
-            iconOnly={false}
+            iconOnly
           />
           <ActionMenu
             showDownload

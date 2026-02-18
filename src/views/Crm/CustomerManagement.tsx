@@ -225,7 +225,7 @@ const fetchCustomers = async () => {
           <ActionButton
             type="view"
             onClick={() => handleRowClick(c)}
-            iconOnly={false}
+            iconOnly
           />
           <ActionMenu
             onEdit={(e) => handleEditCustomer(c.id, e as any)}
