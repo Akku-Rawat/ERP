@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { showApiError, showSuccess } from "../../components/alert";
-
+import { FilterSelect } from "../../components/ui/modal/modalComponent";
 import {
   getAllItems,
   getItemByItemCode,
@@ -37,11 +37,13 @@ const Items: React.FC = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<ItemSummary | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [taxCategory, setTaxCategory] = useState<string>("");
+
 
   const fetchItems = async () => {
     try {
       setLoading(true);
-      const res = await getAllItems(page, pageSize);
+      const res = await getAllItems(page, pageSize,taxCategory );
       setItems(res.data);
       setTotalPages(res.pagination?.total_pages || 1);
       setTotalItems(res.pagination?.total || 0);
@@ -55,7 +57,7 @@ const Items: React.FC = () => {
 
   useEffect(() => {
     fetchItems();
-  }, [page, pageSize]);
+  }, [page, pageSize,taxCategory]);
 
   /*      HANDLERS
    */
@@ -127,19 +129,19 @@ const handleSaved = async (res: any) => {
   /*      FILTER
    */
 
-  const filteredItems = items.filter((i) =>
-    [
-      i.id,
-      i.itemName,
-      i.itemGroup,
-      i.taxCategory,
-      i.preferredVendor,
-      i.sellingPrice,
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()),
-  );
+  // const filteredItems = items.filter((i) =>
+  //   [
+  //     i.id,
+  //     i.itemName,
+  //     i.itemGroup,
+  //     i.taxCategory,
+  //     i.preferredVendor,
+  //     i.sellingPrice,
+  //   ]
+  //     .join(" ")
+  //     .toLowerCase()
+  //     .includes(searchTerm.toLowerCase()),
+  // );
 
   /*      COLUMNS
    */
@@ -166,7 +168,7 @@ const handleSaved = async (res: any) => {
       align: "right",
       render: (i) => (
         <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
-          {i.sellingPrice}
+          ZMW {i.sellingPrice}
         </code>
       ),
     },
@@ -176,7 +178,7 @@ const handleSaved = async (res: any) => {
       align: "center",
       render: (i) => (
         <ActionGroup>
-          <ActionButton type="view" onClick={(e) => handleEdit(i.id, e)} />
+          <ActionButton type="view" onClick={(e) => handleEdit(i.id, e)} iconOnly/>
           <ActionMenu
             onEdit={(e) => handleEdit(i.id, e as any)}
             onDelete={(e) => handleDeleteClick(i, e as any)}
@@ -195,7 +197,7 @@ const handleSaved = async (res: any) => {
         loading={loading || initialLoad}
         serverSide
         columns={columns}
-        data={filteredItems}
+        data={items}
         showToolbar
         searchValue={searchTerm}
         onSearch={setSearchTerm}
@@ -212,7 +214,24 @@ const handleSaved = async (res: any) => {
           setPage(1); // reset page
         }}
         onPageChange={setPage}
-      />
+      extraFilters={
+  <div className="w-48">
+    <FilterSelect
+      value={taxCategory}
+      onChange={(e) => {
+        setPage(1);
+        setTaxCategory(e.target.value);
+      }}
+      options={[
+       
+        { label: "Export", value: "Export" },
+        { label: "Non-Export", value: "Non-Export" },
+        { label: "LPO", value: "LPO" },
+      ]}
+    />
+  </div>
+}
+/>
 
       {/* ITEM MODAL */}
       <ItemModal

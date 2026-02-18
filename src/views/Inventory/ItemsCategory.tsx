@@ -156,7 +156,7 @@ const confirmDelete = async () => {
       align: "right",
       render: (g) => (
         <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
-          {g.sellingPrice}
+          ZMW {g.sellingPrice}
         </code>
       ),
     },
@@ -167,7 +167,7 @@ const confirmDelete = async () => {
       align: "center",
       render: (g) => (
         <ActionGroup>
-          <ActionButton type="view" onClick={(e) => handleEdit(g.id, e)} />
+          <ActionButton type="view" onClick={(e) => handleEdit(g.id, e)} iconOnly/>
           <ActionMenu
             onEdit={(e) => handleEdit(g.id, e as any)}
             onDelete={(e) => handleDeleteClick(g, e as any)}

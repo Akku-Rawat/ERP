@@ -151,7 +151,7 @@ const EmployeeDirectory: React.FC = () => {
       align: "center",
       render: (e) => (
         <ActionGroup>
-          <ActionButton type="view" onClick={() => handleViewEmployee(e.id)} />
+          <ActionButton type="view" onClick={() => handleViewEmployee(e.id)}iconOnly />
 
           <ActionMenu
             onEdit={(ev) => handleEdit(e.id, ev as any)}
@@ -167,7 +167,7 @@ const EmployeeDirectory: React.FC = () => {
   ================================ */
 
   return (
-    <div className="p-8">
+    <div className="p-6">
       {viewMode === "table" ? (
         <Table
           loading={loading}
