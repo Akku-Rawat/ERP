@@ -23,17 +23,17 @@ export default function DocumentsTab({
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-sm font-semibold text-gray-800">
+          <h3 className="text-sm font-semibold text-main">
             Employee Documents
           </h3>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted">
             Upload and manage employee documents
           </p>
         </div>
 
         <button
           onClick={() => setUploadingDoc("CUSTOM")}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          className="flex items-center gap-2 px-3 py-1.5 text-xs bg-primary text-white"
         >
           <Plus className="w-3 h-3" />
           Add Document
@@ -45,20 +45,20 @@ export default function DocumentsTab({
         {Object.entries(documents).map(([key, doc]) => (
           <div
             key={key}
-            className="border rounded-lg p-4 bg-white flex justify-between items-center"
+            className="border border-theme rounded-lg p-4 bg-card flex justify-between items-center"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-gray-500" />
+              <div className="w-10 h-10 rounded-lg bg-app flex items-center justify-center">
+                <FileText className="w-5 h-5 text-muted" />
               </div>
 
               <div>
-                <div className="text-sm font-medium text-gray-800">{key}</div>
+                <div className="text-sm font-medium text-main">{key}</div>
 
                 {doc.uploaded ? (
-                  <div className="text-xs text-green-600">{doc.fileName}</div>
+                  <div className="text-xs text-success">{doc.fileName}</div>
                 ) : (
-                  <div className="text-xs text-gray-400">Not uploaded</div>
+                  <div className="text-xs text-muted">Not uploaded</div>
                 )}
               </div>
             </div>
@@ -67,14 +67,14 @@ export default function DocumentsTab({
               {!doc.uploaded ? (
                 <button
                   onClick={() => setUploadingDoc(key)}
-                  className="p-2 text-gray-600 hover:text-purple-600"
+                  className="p-2 text-muted hover:text-primary"
                 >
                   <Upload className="w-4 h-4" />
                 </button>
               ) : (
                 <button
                   onClick={() => removeDocument(key)}
-                  className="p-2 text-red-500 hover:text-red-700"
+                  className="p-2 text-danger hover:text-danger-700"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

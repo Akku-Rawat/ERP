@@ -7,7 +7,7 @@ export type Employee = {
   status: string;
 };
 
-// 🔁 Switch flag later
+//  Switch flag later
 const USE_API = false;
 
 // Mock DB (temporary)

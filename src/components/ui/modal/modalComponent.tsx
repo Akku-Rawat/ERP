@@ -1,5 +1,5 @@
 
-import React from "react";interface SelectOption {
+import React from "react"; interface SelectOption {
   label: string;
   value: string | number;
 }
@@ -55,48 +55,67 @@ ModalSelect.displayName = "ModalSelect";
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   icon?: React.ReactNode;
+  error?: string;
 }
 
 
-export const ModalInput = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, icon, className = "", ...props }, ref) => (
-    <label className="flex flex-col  text-sm w-full group">
-      <span className="block text-[10px] font-medium text-main mb-1">
-        {icon && (
-          <span className="text-muted group-focus-within:text-primary transition-colors">
-            {icon}
-          </span>
-        )}
-        {label}
-        {props.required && <span className="text-danger">*</span>}
-      </span>
-      <input
-        ref={ref}
-        {...props}
-        value={props.value ?? ""}
-        className={[
-          "w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card",
-          props.disabled
-            ? "bg-app cursor-not-allowed opacity-60"
+export const ModalInput = React.forwardRef<
+  HTMLInputElement,
+  InputProps
+>(({ label, icon, className = "", error, ...props }, ref) => (
+  <label className="flex flex-col text-sm w-full group">
+
+    {/* LABEL */}
+    <span className="block text-[10px] font-medium text-main mb-1">
+      {icon && (
+        <span className="text-muted group-focus-within:text-primary transition-colors">
+          {icon}
+        </span>
+      )}
+      {label}
+      {props.required && <span className="text-danger">*</span>}
+    </span>
+
+    {/* INPUT */}
+    <input
+      ref={ref}
+      {...props}
+      value={props.value ?? ""}
+      className={[
+        "w-full py-1 px-2 border rounded text-[11px] text-main bg-card transition-all",
+
+        error
+          ? "border-danger focus:border-danger"
+          : props.disabled
+            ? "bg-app cursor-not-allowed opacity-60 border-theme"
             : "border-[var(--border)] hover:border-primary/40",
-          className,
-        ].join(" ")}
-        onFocus={(e) => {
-          if (!props.disabled) {
-            e.currentTarget.style.boxShadow =
-              "0 0 0 3px rgba(37, 99, 235, 0.16)"; // primary-like glow
-          }
-          props.onFocus?.(e);
-        }}
-        onBlur={(e) => {
-          e.currentTarget.style.boxShadow = "";
-          props.onBlur?.(e);
-        }}
-      />
-    </label>
-  ),
-);
+
+        className,
+      ].join(" ")}
+      onFocus={(e) => {
+        if (!props.disabled) {
+          e.currentTarget.style.boxShadow = error
+            ? "0 0 0 3px rgba(239, 68, 68, 0.18)" // red glow
+            : "0 0 0 3px rgba(37, 99, 235, 0.16)"; // blue glow
+        }
+        props.onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        e.currentTarget.style.boxShadow = "";
+        props.onBlur?.(e);
+      }}
+    />
+
+    {error && (
+      <span className="text-[10px] text-danger mt-1">
+        {error}
+      </span>
+    )}
+  </label>
+));
+
 ModalInput.displayName = "ModalInput";
+
 
 
 /*  FILTER SELECT  */
