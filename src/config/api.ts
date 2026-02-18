@@ -199,6 +199,13 @@ export const API = {
     delete: `${ERP_BASE}/api/method/erpnext.supplier.api.delete_supplier`,
   },
 
+
+  places:{
+    getCountry:`${CODES_BASE}/countries/`,
+    getProvinces: `${CODES_BASE}/provinces/`,
+    getTown: `${CODES_BASE}/towns/`
+  },
+
   /* =========================
    * LOOKUPS / CODES
    * ========================= */

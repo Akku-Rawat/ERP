@@ -354,7 +354,7 @@ const handleClose = () => {
                 />
 
                 <ModalInput
-                  label="Contact Person"
+                  label="Contact Person Name"
                   name="contactPerson"
                   value={form.contactPerson}
                   onChange={handleChange}

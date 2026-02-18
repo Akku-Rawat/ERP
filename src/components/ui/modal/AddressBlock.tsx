@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { Card, Checkbox } from "./formComponent";
-import { ModalInput ,ModalSelect } from "./modalComponent";
-import { getCountryList } from "../../../api/lookupApi";
+import { ModalInput, ModalSelect } from "./modalComponent";
+import { getCountry, getProvinces, getTowns } from "../../../api/PlacesApi";
+import SearchSelect from "./SearchSelect";
 
 interface Address {
   line1: string;
@@ -35,30 +36,37 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
 }) => {
   const isShipping = type === "shipping";
 
-const [countries, setCountries] = React.useState<any[]>([]);
-
-const countryOptions = countries.map((c: any) => ({
-  label: c.name,   
-  value: c.code,   
-}));
 
 
-useEffect(() => {
-  const fetchCountries = async () => {
-    try {
-      const res = await getCountryList();
 
-      // If API returns direct array
-      setCountries(res || []);
+  const fetchCountryOptions = async (q: string) => {
+    const res = await getCountry(q);
 
-    } catch (err) {
-      console.error("Failed to load countries", err);
-    }
+    return (res.data || []).map((c: string) => ({
+      label: c,
+      value: c,
+    }));
   };
 
-  fetchCountries();
-}, []);
 
+  const fetchProvinceOptions = async (q: string) => {
+    const res = await getProvinces(q);
+
+    return (res.data || []).map((p: string) => ({
+      label: p,
+      value: p,
+    }));
+  };
+
+
+  const fetchTownOptions = async (q: string) => {
+    const res = await getTowns(q);
+
+    return (res.data || []).map((t: string) => ({
+      label: t,
+      value: t,
+    }));
+  };
 
 
   return (
@@ -105,33 +113,45 @@ useEffect(() => {
             disabled={disableAll || sameAsBilling}
           />
 
-          <ModalInput
-            label="City"
-            name="city"
+          <SearchSelect
+            label="City / Town"
             value={data.city}
-            onChange={onChange}
+            onChange={(val) =>
+              onChange({
+                target: { name: "city", value: val },
+              } as any)
+            }
+            fetchOptions={fetchTownOptions}
             disabled={disableAll || sameAsBilling}
           />
+
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <ModalInput
-            label="State"
-            name="state"
+          <SearchSelect
+            label="State / Province"
             value={data.state}
-            onChange={onChange}
+            onChange={(val) =>
+              onChange({
+                target: { name: "state", value: val },
+              } as any)
+            }
+            fetchOptions={fetchProvinceOptions}
             disabled={disableAll || sameAsBilling}
           />
 
-          <ModalSelect
-  label="Country"
-  name="country"
-  value={data.country}
-  onChange={onChange}
-  options={countryOptions}
-  disabled={disableAll || sameAsBilling}
-/>
 
+          <SearchSelect
+            label="Country"
+            value={data.country}
+            onChange={(val) =>
+              onChange({
+                target: { name: "country", value: val },
+              } as any)
+            }
+            fetchOptions={fetchCountryOptions}
+            disabled={disableAll || sameAsBilling}
+          />
 
         </div>
       </div>
