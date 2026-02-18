@@ -1,4 +1,4 @@
-// FILE: components/IdentityVerificationModal.tsx
+
 import React, { useState } from "react";
 import { Search, UserPlus, AlertCircle } from "lucide-react";
 
@@ -66,11 +66,11 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md relative">
+      <div className="bg-card rounded-2xl shadow-2xl border border-theme w-full max-w-md relative">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition text-gray-400 hover:text-gray-600"
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-app transition text-muted hover:text-main"
           aria-label="Close"
         >
           <svg
@@ -90,13 +90,13 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
 
         {/* Header */}
         <div className="text-center pt-8 pb-6 px-6">
-          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="w-8 h-8 text-purple-600" />
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Search className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+          <h2 className="text-2xl font-bold text-main mb-2">
             Verify Employee Identity
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted">
             🇿🇲 Search using NRC or NAPSA SSN
           </p>
         </div>
@@ -105,7 +105,7 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
         <div className="px-6 pb-6">
           {/* Identity Type Toggle */}
           <div className="mb-5">
-            <label className="block text-xs font-medium text-gray-600 mb-2">
+            <label className="block text-xs font-medium text-main mb-2">
               Identity Type
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -113,8 +113,8 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
                 onClick={() => setIdentityType("NRC")}
                 className={`py-3 px-4 rounded-lg font-semibold text-sm transition ${
                   identityType === "NRC"
-                    ? "bg-purple-600 text-white shadow-lg"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-primary text-white shadow-md"
+                    : "bg-app text-main hover:bg-primary/10"
                 }`}
               >
                 NRC
@@ -123,8 +123,8 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
                 onClick={() => setIdentityType("SSN")}
                 className={`py-3 px-4 rounded-lg font-semibold text-sm transition ${
                   identityType === "SSN"
-                    ? "bg-purple-600 text-white shadow-lg"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-primary text-white shadow-md"
+                    : "bg-app text-main hover:bg-primary/10"
                 }`}
               >
                 SSN (NAPSA)
@@ -134,7 +134,7 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
 
           {/* Input Field */}
           <div className="mb-4">
-            <label className="block text-xs font-medium text-gray-600 mb-2">
+            <label className="block text-xs font-medium text-main mb-2">
               {identityType === "NRC"
                 ? "National Registration Card"
                 : "Social Security Number"}
@@ -147,15 +147,15 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
               placeholder={
                 identityType === "NRC" ? "123456/78/9" : "SS2024001234"
               }
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+              className="w-full px-4 py-3 border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
             />
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2">
-              <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-red-700 whitespace-pre-line">
+            <div className="mb-4 p-3 bg-danger/10 border border-danger/30 rounded-lg flex gap-2">
+              <AlertCircle className="w-4 h-4 text-danger flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-danger whitespace-pre-line">
                 {error}
               </p>
             </div>
@@ -165,7 +165,7 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
           <button
             onClick={handleVerify}
             disabled={loading}
-            className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4"
+            className="w-full bg-primary text-white py-3 rounded-lg font-semibold  transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4"
           >
             <Search className="w-4 h-4" />
             {loading ? "Verifying..." : "Verify Identity"}
@@ -173,22 +173,22 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
 
           {/* Divider */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px bg-gray-300"></div>
-            <span className="text-xs text-gray-500 font-medium">OR</span>
-            <div className="flex-1 h-px bg-gray-300"></div>
+            <div className="flex-1 h-px bg-border-theme"></div>
+            <span className="text-xs text-muted font-medium">OR</span>
+            <div className="flex-1 h-px bg-border-theme"></div>
           </div>
 
           {/* Manual Entry Button */}
           <button
             onClick={onManualEntry}
-            className="w-full bg-white text-purple-600 py-3 rounded-lg font-semibold border-2 border-purple-600 hover:bg-purple-50 transition flex items-center justify-center gap-2"
+            className="w-full bg-card text-primary py-3 rounded-lg font-semibold border-2 border-primary hover:bg-primary/10 transition flex items-center justify-center gap-2"
           >
             <UserPlus className="w-4 h-4" />
             Enter Details Manually
           </button>
 
           {/* Info Text */}
-          <p className="text-xs text-gray-500 text-center mt-4 leading-relaxed">
+          <p className="text-xs text-muted text-center mt-4 leading-relaxed">
             Identity verification helps prevent duplicates and auto-fills data
             from national databases.
           </p>

@@ -1,6 +1,6 @@
-// WorkScheduleTab.tsx - FIXED VERSION
 import React from "react";
-import { Clock, Calendar } from "lucide-react";
+import { Clock, Calendar, CalendarDays, RotateCw, BarChart3 } from "lucide-react";
+
 
 type WorkScheduleTabProps = {
   formData: any;
@@ -52,12 +52,12 @@ export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-4">
+      <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+          <h4 className="text-xs font-semibold text-main uppercase tracking-wide">
             Weekly Work Schedule
           </h4>
-          <Clock className="w-4 h-4 text-gray-400" />
+          <Clock className="w-4 h-4 text-muted" />
         </div>
 
         {/* Quick Fill Templates */}
@@ -65,31 +65,35 @@ export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({
           <button
             type="button"
             onClick={() => handleQuickFill("standard")}
-            className="px-3 py-1.5 text-xs bg-purple-50 text-purple-600 rounded border border-purple-200 hover:bg-purple-100"
+            className="px-3 py-1.5 text-xs bg-primary/10 text-primary rounded border border-primary/30 hover:bg-primary/20 transition flex items-center gap-1.5"
           >
-            📅 Standard (Mon-Fri: 8am-5pm)
+            <CalendarDays className="w-3.5 h-3.5" />
+            <span>Standard (Mon-Fri: 8am-5pm)</span>
           </button>
+
           <button
             type="button"
             onClick={() => handleQuickFill("shift")}
-            className="px-3 py-1.5 text-xs bg-blue-50 text-blue-600 rounded border border-blue-200 hover:bg-blue-100"
+            className="px-3 py-1.5 text-xs bg-app text-main rounded border border-theme hover:bg-primary/10 transition flex items-center gap-1.5"
           >
-            🔄 Shift Work (9am-6pm)
+            <RotateCw className="w-3.5 h-3.5 text-primary" />
+            <span>Shift Work (9am-6pm)</span>
           </button>
+
         </div>
 
         {/* Day Schedule Inputs */}
         <div className="space-y-3">
           {DAYS.map((day) => (
             <div key={day.key} className="grid grid-cols-3 gap-3 items-center">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-gray-400" />
+              <label className="text-sm font-medium text-main flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-muted" />
                 {day.label}
               </label>
               <select
                 value={formData[day.field] || ""}
                 onChange={(e) => handleInputChange(day.field, e.target.value)}
-                className="col-span-2 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="col-span-2 px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               >
                 <option value="">Select schedule...</option>
                 {TIME_SLOTS.map((slot) => (
@@ -108,7 +112,7 @@ export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({
                   onChange={(e) =>
                     handleInputChange(`${day.field}Custom`, e.target.value)
                   }
-                  className="col-span-2 col-start-2 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="col-span-2 px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               )}
             </div>
@@ -116,11 +120,13 @@ export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({
         </div>
 
         {/* Summary */}
-        <div className="mt-4 p-3 bg-gray-50 rounded border border-gray-200">
-          <p className="text-xs font-medium text-gray-700 mb-2">
-            📊 Weekly Summary:
+        <div className="mt-4 p-3 bg-app rounded border border-theme">
+          <p className="text-xs font-medium text-main mb-2 flex items-center gap-1.5">
+            <BarChart3 className="w-3.5 h-3.5 text-primary" />
+            <span>Weekly Summary:</span>
           </p>
-          <div className="text-xs text-gray-600">
+
+          <div className="text-xs text-muted">
             {DAYS.map((day) => {
               const schedule = formData[day.field];
               if (!schedule) return null;
@@ -130,8 +136,8 @@ export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({
                   <span
                     className={
                       schedule === "Off"
-                        ? "text-red-600"
-                        : "text-green-600 font-medium"
+                        ? "text-danger"
+                        : "text-success font-medium"
                     }
                   >
                     {schedule}

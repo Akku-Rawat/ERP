@@ -61,7 +61,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
     return basic + housing + meal + transport + other;
   };
 
-  // ✅ Update gross salary when any field loses focus
+  //  Update gross salary when any field loses focus
   const handleFieldBlur = () => {
     const newGrossSalary = calculateGrossSalary();
     if (newGrossSalary > 0) {
@@ -78,19 +78,19 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
       <div className="grid grid-cols-2 gap-6">
         {/* Left - Salary Components */}
         <div className="space-y-5">
-          <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-4">
+          <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+              <h4 className="text-xs font-semibold text-main uppercase tracking-wide">
                 Salary Components (Annual)
               </h4>
-              <Calculator className="w-4 h-4 text-gray-400" />
+              <Calculator className="w-4 h-4 text-muted" />
             </div>
 
             <div className="space-y-4">
               {/* Basic Salary */}
               <div>
-                <label className="block text-xs text-gray-600 mb-2 font-medium">
-                  Basic Salary (ZMW) <span className="text-red-500">*</span>
+                <label className="block text-xs text-main mb-2 font-medium">
+                  Basic Salary (ZMW) <span className="text-danger">*</span>
                 </label>
                 <input
                   type="number"
@@ -100,13 +100,13 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                   }
                   onBlur={handleFieldBlur}
                   placeholder="e.g., 14500"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-theme bg-card  rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
               {/* Housing Allowance */}
               <div>
-                <label className="block text-xs text-gray-600 mb-2 font-medium">
+                <label className="block text-xs text-main mb-2 font-medium">
                   Housing Allowance
                 </label>
                 <div className="flex gap-2">
@@ -120,21 +120,21 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                     placeholder={
                       housingType === "percentage" ? "e.g., 20" : "e.g., 3000"
                     }
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="flex-1 px-4 py-2 border border-theme bg-card  rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                   <select
                     value={housingType}
                     onChange={(e) =>
                       setHousingType(e.target.value as "percentage" | "amount")
                     }
-                    className="w-24 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    className="w-24 px-2 py-2 text-sm border border-theme bg-card  rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
                   >
                     <option value="amount">ZMW</option>
                     <option value="percentage">%</option>
                   </select>
                 </div>
                 {formData.basicSalary && formData.housingAllowance && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     {housingType === "percentage"
                       ? `Amount: ZMW ${calculateAllowance(formData.housingAllowance, housingType, parseFloat(formData.basicSalary)).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
                       : `Percentage: ${((parseFloat(formData.housingAllowance) / parseFloat(formData.basicSalary)) * 100).toFixed(1)}%`}
@@ -144,7 +144,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
 
               {/* Meal Allowance */}
               <div>
-                <label className="block text-xs text-gray-600 mb-2 font-medium">
+                <label className="block text-xs text-main mb-2 font-medium">
                   Meal Allowance
                 </label>
                 <div className="flex gap-2">
@@ -158,21 +158,21 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                     placeholder={
                       mealType === "percentage" ? "e.g., 10" : "e.g., 1300"
                     }
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="flex-1 px-4 py-2 border border-theme bg-card  rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                   <select
                     value={mealType}
                     onChange={(e) =>
                       setMealType(e.target.value as "percentage" | "amount")
                     }
-                    className="w-24 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    className="w-24 px-2 py-2 text-sm border border-theme bg-card  rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
                   >
                     <option value="amount">ZMW</option>
                     <option value="percentage">%</option>
                   </select>
                 </div>
                 {formData.basicSalary && formData.mealAllowance && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     {mealType === "percentage"
                       ? `Amount: ZMW ${calculateAllowance(formData.mealAllowance, mealType, parseFloat(formData.basicSalary)).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
                       : `Percentage: ${((parseFloat(formData.mealAllowance) / parseFloat(formData.basicSalary)) * 100).toFixed(1)}%`}
@@ -182,7 +182,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
 
               {/* Transport Allowance */}
               <div>
-                <label className="block text-xs text-gray-600 mb-2 font-medium">
+                <label className="block text-xs text-main mb-2 font-medium">
                   Transport Allowance
                 </label>
                 <div className="flex gap-2">
@@ -196,7 +196,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                     placeholder={
                       transportType === "percentage" ? "e.g., 8" : "e.g., 1000"
                     }
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="flex-1 px-4 py-2 border border-theme bg-card  rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                   <select
                     value={transportType}
@@ -205,14 +205,14 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                         e.target.value as "percentage" | "amount",
                       )
                     }
-                    className="w-24 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    className="w-24 px-2 py-2 text-sm border border-theme bg-card  rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
                   >
                     <option value="amount">ZMW</option>
                     <option value="percentage">%</option>
                   </select>
                 </div>
                 {formData.basicSalary && formData.transportAllowance && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     {transportType === "percentage"
                       ? `Amount: ZMW ${calculateAllowance(formData.transportAllowance, transportType, parseFloat(formData.basicSalary)).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
                       : `Percentage: ${((parseFloat(formData.transportAllowance) / parseFloat(formData.basicSalary)) * 100).toFixed(1)}%`}
@@ -222,7 +222,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
 
               {/* Other Allowances */}
               <div>
-                <label className="block text-xs text-gray-600 mb-2 font-medium">
+                <label className="block text-xs text-main mb-2 font-medium">
                   Other Allowances
                 </label>
                 <div className="flex gap-2">
@@ -236,21 +236,21 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                     placeholder={
                       otherType === "percentage" ? "e.g., 5" : "e.g., 700"
                     }
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="flex-1 px-4 py-2 border border-theme bg-card  rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                   <select
                     value={otherType}
                     onChange={(e) =>
                       setOtherType(e.target.value as "percentage" | "amount")
                     }
-                    className="w-24 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    className="w-24 px-2 py-2 text-sm border border-theme bg-card  rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
                   >
                     <option value="amount">ZMW</option>
                     <option value="percentage">%</option>
                   </select>
                 </div>
                 {formData.basicSalary && formData.otherAllowances && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     {otherType === "percentage"
                       ? `Amount: ZMW ${calculateAllowance(formData.otherAllowances, otherType, parseFloat(formData.basicSalary)).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
                       : `Percentage: ${((parseFloat(formData.otherAllowances) / parseFloat(formData.basicSalary)) * 100).toFixed(1)}%`}
@@ -259,21 +259,21 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               </div>
 
               {/* Gross Salary Display */}
-              <div className="pt-4 border-t border-gray-200">
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <div className="pt-4 border-t border-theme">
+                <div className="bg-primary/10 border border-primary/30 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-purple-700 uppercase">
+                    <span className="text-xs font-semibold text-primary uppercase">
                       Gross Salary (Annual)
                     </span>
-                    <DollarSign className="w-4 h-4 text-purple-600" />
+                    <DollarSign className="w-4 h-4 text-primary/80" />
                   </div>
-                  <div className="text-2xl font-bold text-purple-900">
+                  <div className="text-2xl font-bold text-primary">
                     ZMW{" "}
                     {grossSalary.toLocaleString(undefined, {
                       maximumFractionDigits: 2,
                     })}
                   </div>
-                  <div className="text-xs text-purple-600 mt-1">
+                  <div className="text-xs text-primary/80 mt-1">
                     Monthly: ZMW{" "}
                     {monthlySalary.toLocaleString(undefined, {
                       maximumFractionDigits: 2,
@@ -285,13 +285,13 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
           </div>
 
           {/* Payroll Config */}
-          <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-4">
-            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+          <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
+            <h4 className="text-xs font-semibold text-main uppercase tracking-wide">
               Payroll Configuration
             </h4>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                <label className="block text-xs text-main mb-1 font-medium">
                   Currency
                 </label>
                 <select
@@ -299,14 +299,14 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                   onChange={(e) =>
                     handleInputChange("currency", e.target.value)
                   }
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="ZMW">ZMW</option>
                   <option value="USD">USD</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                <label className="block text-xs text-main mb-1 font-medium">
                   Frequency
                 </label>
                 <select
@@ -314,14 +314,14 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                   onChange={(e) =>
                     handleInputChange("paymentFrequency", e.target.value)
                   }
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="Monthly">Monthly</option>
                   <option value="Bi-weekly">Bi-weekly</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                <label className="block text-xs text-main mb-1 font-medium">
                   Method
                 </label>
                 <select
@@ -329,7 +329,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                   onChange={(e) =>
                     handleInputChange("paymentMethod", e.target.value)
                   }
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="Bank Transfer">Bank Transfer</option>
                   <option value="Cash">Cash</option>
@@ -343,29 +343,29 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
         {/* Right - Bank Details & Insurance */}
         <div className="space-y-5">
           {/* Bank Details */}
-          <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-4">
-            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+          <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
+            <h4 className="text-xs font-semibold text-main uppercase tracking-wide">
               Bank Account Details
             </h4>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">
-                  Account Type <span className="text-red-500">*</span>
+                <label className="block text-xs text-main mb-1 font-medium">
+                  Account Type <span className="text-danger">*</span>
                 </label>
                 <select
                   value={formData.accountType || "Savings"}
                   onChange={(e) =>
                     handleInputChange("accountType", e.target.value)
                   }
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="Savings">Savings</option>
                   <option value="Current">Current</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">
-                  Account Name *<span className="text-red-500">*</span>
+                <label className="block text-xs text-main mb-1 font-medium">
+                  Account Name *<span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -374,12 +374,12 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                     handleInputChange("accountName", e.target.value)
                   }
                   placeholder="Account holder name"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">
-                  Account Number *<span className="text-red-500">*</span>
+                <label className="block text-xs text-main mb-1 font-medium">
+                  Account Number *<span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -388,12 +388,12 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                     handleInputChange("accountNumber", e.target.value)
                   }
                   placeholder="Bank account number"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">
-                  Bank Name *<span className="text-red-500">*</span>
+                <label className="block text-xs text-main mb-1 font-medium">
+                  Bank Name *<span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -402,12 +402,12 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                     handleInputChange("bankName", e.target.value)
                   }
                   placeholder="e.g., Zanaco Bank"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">
-                  Branch Code<span className="text-red-500">*</span>
+                <label className="block text-xs text-main mb-1 font-medium">
+                  Branch Code<span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -416,20 +416,20 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                     handleInputChange("branchCode", e.target.value)
                   }
                   placeholder="e.g., 027"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
             </div>
           </div>
 
           {/* Insurance Section */}
-          <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-4">
-            <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+          <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
+            <h4 className="text-xs font-semibold text-main uppercase tracking-wide">
               Insurance & Benefits
             </h4>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                <label className="block text-xs text-main mb-1 font-medium">
                   NHIMA Number
                 </label>
                 <input
@@ -439,11 +439,11 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                     handleInputChange("nhimaHealthInsurance", e.target.value)
                   }
                   placeholder="e.g., 88990011"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                <label className="block text-xs text-main mb-1 font-medium">
                   NAPSA Number
                 </label>
                 <input
@@ -453,11 +453,11 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                     handleInputChange("socialSecurityNapsa", e.target.value)
                   }
                   placeholder="e.g., 33445566"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1 font-medium">
+                <label className="block text-xs text-main mb-1 font-medium">
                   TPIN
                 </label>
                 <input
@@ -465,7 +465,7 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                   value={formData.tpinId || ""}
                   onChange={(e) => handleInputChange("tpinId", e.target.value)}
                   placeholder="e.g., TPIN445566"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
             </div>
