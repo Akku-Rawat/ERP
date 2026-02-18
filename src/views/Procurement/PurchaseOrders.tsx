@@ -15,6 +15,7 @@ import { showApiError,showSuccess ,showLoading,closeSwal } from "../../component
 import { getPurchaseOrders ,updatePurchaseOrderStatus } from "../../api/procurement/PurchaseOrderApi";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { getPurchaseOrderById } from "../../api/procurement/PurchaseOrderApi";
 
 interface PurchaseOrder {
   id: string;
@@ -59,7 +60,8 @@ const [page, setPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null);
+const [selectedOrder, setSelectedOrder] =  useState<any | null>(null);
+
 
 
 
@@ -100,10 +102,30 @@ useEffect(() => {
 }, [page, pageSize]);
 
 
-  const handleView = (order: PurchaseOrder) => {
-  setSelectedOrder(order);
-  setViewModalOpen(true);
+const handleView = async (order: PurchaseOrder) => {
+  try {
+    // SweetAlert Loader
+    showLoading("Loading Purchase Order...");
+
+    const res = await getPurchaseOrderById(order.id);
+
+    if (res.status !== "success") {
+      throw new Error(res.message || "Failed to load");
+    }
+
+    // Data set
+    setSelectedOrder(res.data);
+
+    // Close loader → open modal
+    closeSwal();
+    setViewModalOpen(true);
+
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
 };
+
   //  FILTER 
  const filteredOrders = useMemo(() => {
   const term = searchTerm.toLowerCase();
@@ -348,13 +370,13 @@ const handleStatusChange = async (
       <PurchaseOrderModal
         isOpen={modalOpen}
         onClose={handleCloseModal}
-          poId={selectedOrder?.id}  
+         poId={selectedOrder?.poId}
           onSubmit={handlePOSaved} 
       />
       {/* VIEW MODAL */}
     {viewModalOpen && selectedOrder && (
       <PurchaseOrderView
-        poId={selectedOrder.id}
+        poData={selectedOrder}
         onClose={() => setViewModalOpen(false)}
         onEdit={() => {
           setViewModalOpen(false);

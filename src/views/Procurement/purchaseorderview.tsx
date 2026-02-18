@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import {
@@ -16,10 +16,7 @@ import {
   Share2,
   Eye,
   Truck,
-  Loader2,
 } from "lucide-react";
-
-import { getPurchaseOrderById } from "../../api/procurement/PurchaseOrderApi";
 
 // Backend API Response Structure
 interface PurchaseOrderData {
@@ -115,55 +112,25 @@ interface PurchaseOrderData {
 }
 
 interface PurchaseOrderViewProps {
-  poId: string | number;
+   poData: PurchaseOrderData;
   onClose?: () => void;
   onEdit?: () => void;
 }
 
 const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
-  poId,
+  poData,
   onClose,
   onEdit,
 }) => {
-  const [po, setPO] = useState<PurchaseOrderData | null>(null);
+  const po = poData;
   const [showActions, setShowActions] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchPO = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await getPurchaseOrderById(poId);
-
-        if (response.status === "success" && response.data) {
-          setPO(response.data);
-        } else {
-          throw new Error(response.message || "Failed to load purchase order");
-        }
-      } catch (error: any) {
-        console.error("Failed to load Purchase Order", error);
-        const errorMessage = error?.response?.data?.message || error?.message || "Failed to load Purchase Order details";
-        setError(errorMessage);
-        toast.error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (poId) {
-      fetchPO();
-    }
-  }, [poId]);
+ if (!po) return null;
+ 
 
   const getCurrencySymbol = (currency: string) => {
     switch (currency) {
-      case "ZMW": return "K";
+      case "ZMW": return "ZMW";
       case "USD": return "$";
-      case "EUR": return "€";
-      case "GBP": return "£";
       case "INR": return "₹";
       default: return currency;
     }
@@ -189,12 +156,12 @@ const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
   };
 
   const formatCurrency = (amount: number) => {
-    if (!po) return "";
-    return `${getCurrencySymbol(po.currency)} ${amount.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })}`;
-  };
+  return `${getCurrencySymbol(po.currency)} ${amount.toLocaleString(
+    "en-US",
+    { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+  )}`;
+};
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB', {
@@ -218,56 +185,7 @@ const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
     toast.success("Email feature coming soon!");
   };
 
-  // Loading State
-  if (loading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)' }}>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-card rounded-2xl p-8 shadow-2xl"
-          style={{ borderColor: 'var(--border)', borderWidth: '1px' }}
-        >
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-12 h-12 text-primary animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
-            <div className="text-center">
-              <p className="text-lg font-semibold text-primary">Loading Purchase Order</p>
-              <p className="text-sm text-muted mt-1">Please wait...</p>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
 
-  // Error State
-  if (error || !po) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-card rounded-2xl p-8 shadow-2xl max-w-md w-full"
-          style={{ borderColor: 'var(--border)', borderWidth: '1px' }}
-        >
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-danger">
-              <X className="w-8 h-8 text-danger" />
-            </div>
-            <h3 className="text-xl font-bold text-main mb-2">Failed to Load</h3>
-            <p className="text-muted mb-6">{error || "Purchase Order not found"}</p>
-            <button
-              onClick={onClose}
-              className="px-6 py-2 bg-primary text-white rounded-xl font-medium transition-all"
-              style={{ background: 'var(--primary)' }}
-            >
-              Close
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
 
   const statusConfig = getStatusConfig(po.status);
   const StatusIcon = statusConfig.icon;
