@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 import { Plus, Trash2, User, Mail, Phone } from "lucide-react";
-import { showApiError, showSuccess } from "../../components/alert";
+import { showApiError, showSuccess , showLoading , closeSwal } from "../../components/alert";
 // import TermsAndCondition from "../TermsAndCondition";
 import { useEffect } from "react";
 import { getSalesInvoiceById } from "../../api/salesApi";
@@ -712,7 +712,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                 subtitle="Invoice and payment details"
                 data={formData.billingAddress}
                 onChange={(
-                  e: React.ChangeEvent<HTMLInputElement>
+                  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
                 ) =>
                   actions.handleInputChange(e, "billingAddress")
                 }
@@ -729,7 +729,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   actions.handleSameAsBillingChange
                 }
                 onChange={(
-                  e: React.ChangeEvent<HTMLInputElement>
+                  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
                 ) =>
                   actions.handleInputChange(e, "shippingAddress")
                 }

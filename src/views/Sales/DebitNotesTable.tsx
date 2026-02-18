@@ -5,7 +5,9 @@ import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import CreateDebitNoteModal from "./createDebitNoteModal";
 import { getAllDebitNotes } from "../../api/salesApi";
-import { showApiError } from "../../components/alert";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { showLoading, closeSwal, showSuccess , showApiError} from "../../components/alert";
 
 type DebitNote = {
   noteNo: string;
@@ -90,6 +92,96 @@ const DebitNotesTable: React.FC = () => {
     fetchDebitNotes();
   }, [page, pageSize]);
 
+  const fetchAllDebitNotesForExport = async () => {
+  try {
+    let allData: DebitNote[] = [];
+    let currentPage = 1;
+    let totalPagesLocal = 1;
+
+    do {
+      const resp = await getAllDebitNotes(currentPage, 100);
+
+      const mappedData: DebitNote[] = resp.data.map((item: any) => ({
+        noteNo: item.invoiceNumber,
+        invoiceNo: item.receiptNumber,
+        customer: item.customerName,
+        date: item.dateOfInvoice,
+        amount: item.totalAmount,
+        currency:
+          item.currency ||
+          item.currencyCode ||
+          item.currCd ||
+          "",
+        status: item.invoiceStatus ?? "Draft",
+      }));
+
+      allData = [...allData, ...mappedData];
+      totalPagesLocal = resp.pagination.total_pages;
+
+      currentPage++;
+    } while (currentPage <= totalPagesLocal);
+
+    return allData;
+  } catch (error) {
+    showApiError(error);
+    return [];
+  }
+};
+
+
+const handleExportExcel = async () => {
+  try {
+    showLoading("Exporting Debit Notes...");
+
+    const dataToExport = await fetchAllDebitNotesForExport();
+
+    if (!dataToExport.length) {
+      closeSwal();
+      showApiError("No debit notes to export");
+      return;
+    }
+
+    const formattedData = dataToExport.map((r) => ({
+      "Debit Note No": r.noteNo,
+      "Receipt No": r.invoiceNo,
+      Customer: r.customer,
+      Date: r.date,
+      Amount: r.amount,
+      Currency: r.currency,
+      Status: r.status,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "Debit Notes"
+    );
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const fileData = new Blob([excelBuffer], {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(fileData, "Debit_Notes.xlsx");
+
+    closeSwal();
+    showSuccess("Debit notes exported successfully");
+
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
+
   return (
     <div className="p-8">
       <Table
@@ -104,6 +196,8 @@ const DebitNotesTable: React.FC = () => {
         onAdd={() => setOpenCreateModal(true)}
         emptyMessage="No debit notes found"
         enableColumnSelector
+        enableExport
+        onExport={handleExportExcel}
         currentPage={page}
         totalPages={totalPages}
         pageSize={pageSize}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { showApiError, showSuccess } from "../../components/alert";
+import { showApiError, showSuccess ,showLoading , closeSwal} from "../../components/alert";
 import { getAllQuotations, getQuotationById } from "../../api/quotationApi";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { QuotationSummary, QuotationData } from "../../types/quotation";
@@ -9,7 +9,9 @@ import ActionButton, {
   ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
-import SalesFilter from "../../components/filters/SalesFilters";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 
 import PdfPreviewModal from "./PdfPreviewModal";
 import { generateQuotationPDF } from "../../components/template/quotation/QuotationTemplate1";
@@ -24,7 +26,6 @@ type QuotationStatus = "Draft" | "Sent" | "Pending" | "Accepted" | "Rejected";
 
 const QuotationsTable: React.FC<QuotationTableProps> = ({
   onAddQuotation,
-  onExportQuotation,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [quotations, setQuotations] = useState<QuotationSummary[]>([]);
@@ -44,6 +45,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
     useState<QuotationData | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
+  
 
   // Company data state
   const [company, setCompany] = useState<any>(null);
@@ -56,6 +58,94 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
     Rejected: [],
   };
   const CRITICAL_QUOTATION_STATUSES: QuotationStatus[] = ["Accepted"];
+
+
+  const fetchAllQuotationsForExport = async () => {
+  try {
+    let allData: QuotationSummary[] = [];
+    let currentPage = 1;
+    let totalPagesLocal = 1;
+
+    do {
+      const res = await getAllQuotations(currentPage, 100, {
+        status,
+        fromDate,
+        toDate,
+      });
+
+      if (res?.status_code === 200) {
+        const quotationsData = res.data?.quotations || [];
+
+        const mapped = quotationsData.map((q: any) => ({
+          quotationNumber: q.id || "",
+          customerName: q.customerName || "N/A",
+          industryBases: q.industryBases || "N/A",
+          transactionDate: q.transactionDate || "",
+          validTill: q.validTill || "",
+          grandTotal: Number(q.grandTotal ?? 0),
+          currency: q.currency || "ZMW",
+        }));
+
+        allData = [...allData, ...mapped];
+        totalPagesLocal = res.data?.pagination?.totalPages || 1;
+      }
+
+      currentPage++;
+    } while (currentPage <= totalPagesLocal);
+
+    return allData;
+  } catch (error) {
+    showApiError(error);
+    return [];
+  }
+};
+
+
+const handleExportExcel = async () => {
+  try {
+    showLoading("Exporting Quotations...");  
+
+    const dataToExport = await fetchAllQuotationsForExport();
+
+    if (!dataToExport.length) {
+      closeSwal();
+      showApiError("No quotations to export");
+      return;
+    }
+
+    const formattedData = dataToExport.map((q) => ({
+      "Quotation No": q.quotationNumber,
+      Customer: q.customerName,
+      Industry: q.industryBases,
+      Date: q.transactionDate,
+      "Valid Till": q.validTill,
+      Amount: q.grandTotal,
+      Currency: q.currency,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Quotations");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const fileData = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(fileData, "All_Quotations.xlsx");
+
+    closeSwal();              
+    showSuccess("Export completed successfully");
+
+  } catch (error) {
+    closeSwal();               
+    showApiError(error);
+  }
+};
 
 
 
@@ -235,8 +325,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
 );
 
 
-  /*      RENDER
-   */
+  /*  RENDER */
   return (
     <div className="p-8">
       <Table
@@ -253,7 +342,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
         addLabel="Add Quotation"
         onAdd={onAddQuotation}
         enableExport
-        onExport={onExportQuotation}
+        onExport={handleExportExcel}
         currentPage={page}
         totalPages={totalPages}
         pageSize={pageSize}
