@@ -126,6 +126,12 @@ type AddEmployeeModalProps = {
   editData?: any;
   mode?: "add" | "edit";
 };
+import {
+  showApiError,
+  showSuccess,
+  showLoading,
+  closeSwal,
+} from "../../../utils/alert";
 
 const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   isOpen,
@@ -170,7 +176,7 @@ const [step, setStep] = useState<"verification" | "form">(
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+ 
 
   // Auto-set salary structure when job title changes
 
@@ -394,16 +400,17 @@ const [step, setStep] = useState<"verification" | "form">(
 
   const handleNext = () => {
     const error = validateCurrentTab();
-    if (error) {
-      setError(error);
-      return;
-    }
-    setError(null);
+  if (error) {
+  showApiError(error);
+  return;
+}
+
+    
     setCurrentTabIndex((prev) => prev + 1);
   };
 
   const handlePrevious = () => {
-    setError(null);
+    
     setCurrentTabIndex((prev) => prev - 1);
   };
 
@@ -504,41 +511,38 @@ const [step, setStep] = useState<"verification" | "form">(
 
     return payload;
   };
-  const handleSave = async () => {
-    setLoading(true);
-    setError(null);
+ const handleSave = async () => {
+  const validationError = validateCurrentTab();
+  if (validationError) {
+    showApiError(validationError);
+    return;
+  }
 
-    try {
-      if (editData?.id) {
-        //  EDIT FLOW
-        const payload = {
-          id: String(editData.id), // backend expects this
-          ...buildPayload(),
-        };
+  try {
+    showLoading(editData ? "Updating Employee..." : "Creating Employee...");
 
-        await updateEmployeeById(payload);
-      } else {
-        //  CREATE FLOW
-        await createEmployee(buildPayload());
-      }
+    if (editData?.id) {
+      const payload = {
+        id: String(editData.id),
+        ...buildPayload(),
+      };
 
-      onSuccess?.();
-      onClose();
-    } catch (e: any) {
-      console.error("Create/Update Employee Error:", e);
-
-      const apiMessage =
-        e?.response?.data?.message ||
-        e?.response?.data?.error ||
-        e?.response?.data?.details ||
-        e?.message ||
-        "Failed to save employee";
-
-      setError(apiMessage);
-    } finally {
-      setLoading(false);
+      await updateEmployeeById(payload);
+      closeSwal();
+      showSuccess("Employee updated successfully");
+    } else {
+      await createEmployee(buildPayload());
+      closeSwal();
+      showSuccess("Employee created successfully");
     }
-  };
+
+    onSuccess?.();
+    onClose();
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
 
   if (!isOpen) return null;
 
@@ -641,13 +645,8 @@ if (step === "verification" && features.requireIdentityVerification) {
           </div>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mx-6 mt-3 p-2.5 bg-danger/10 border border-danger text-danger text-xs flex items-center gap-2 flex-shrink-0">
-            <AlertCircle className="w-4 h-4" />
-            {error}
-          </div>
-        )}
+       
+       
 
         {/* Tabs */}
         <div className="flex border-b border-theme bg-card px-6 overflow-x-auto">

@@ -5,7 +5,7 @@ import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import CreateDebitNoteModal from "./createDebitNoteModal";
 import { getAllDebitNotes } from "../../api/salesApi";
-import { showApiError } from "../../components/alert";
+import { showApiError } from "../../utils/alert";
 
 type DebitNote = {
   noteNo: string;

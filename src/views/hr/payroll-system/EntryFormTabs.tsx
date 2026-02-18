@@ -182,14 +182,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
     );
   };
 
-  const filteredEmployees = employees.filter((e) => {
-    if (!e.isActive) return false;
-    if (data.branch && e.branch !== data.branch) return false;
-    if (data.department && e.department !== data.department) return false;
-    if (data.designation && e.designation !== data.designation) return false;
-    if (data.grade && e.grade !== data.grade) return false;
-    return true;
-  });
+  const filteredEmployees = employees;
 
   const allIds = filteredEmployees.map((e) => e.id);
   const selectedCount = data.selectedEmployees?.length || 0;

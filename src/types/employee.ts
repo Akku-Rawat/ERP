@@ -51,6 +51,8 @@ export interface EmploymentInfo {
   contractEndDate: Date;
   workLocation: string;
   workAddress: string;
+  branchId: string;
+  branchName: string;
   shift: string;
   weeklySchedule: WeeklySchedule;
 }
@@ -70,7 +72,7 @@ export interface IdentityInfo {
   SocialSecurityNapsa: string;
   NhimaHealthInsurance: string;
   TpinId: string;
-  verifiedFromSource: string;
+  verifiedFromSource: boolean;
 }
 
 export interface PayrollInfo {

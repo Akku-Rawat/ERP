@@ -11,7 +11,7 @@ import {
   FaSave,
   FaUndo,
 } from "react-icons/fa";
-import { showApiError, showSuccess, showLoading, closeSwal } from "../../components/alert";
+import { showApiError, showSuccess, showLoading, closeSwal } from "../../utils/alert";
 import Swal from "sweetalert2";
 
 

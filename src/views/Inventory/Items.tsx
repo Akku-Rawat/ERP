@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { showApiError, showSuccess } from "../../components/alert";
+import { showApiError, showSuccess } from "../../utils/alert";
 import { FilterSelect } from "../../components/ui/modal/modalComponent";
 import {
   getAllItems,

@@ -4,7 +4,7 @@ import {
   createItemGroup,
 } from "../../api/itemCategoryApi";
 import { getUOMs } from "../../api/itemZraApi";
-import { showApiError, showSuccess } from "../../components/alert";
+import { showApiError, showSuccess } from "../../utils/alert";
 
 import ItemGenericSelect from "../selects/ItemGenericSelect";
 import Modal from "../ui/modal/modal";

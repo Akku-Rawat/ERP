@@ -12,7 +12,7 @@ import ActionButton, {
 import type { Column } from "../../components/ui/Table/type";
 import { getPurchaseInvoices } from "../../api/procurement/PurchaseInvoiceApi";
 import { updatePurchaseinvoiceStatus } from "../../api/procurement/PurchaseInvoiceApi";
-import { showApiError , showSuccess } from "../../components/alert";
+import { showApiError , showSuccess } from "../../utils/alert";
 
 
 interface Purchaseinvoice {

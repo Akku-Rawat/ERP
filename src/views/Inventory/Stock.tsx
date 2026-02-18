@@ -10,7 +10,7 @@ import {
   showSuccess,
   showLoading,
   closeSwal,
-} from "../../components/alert";
+} from "../../utils/alert";
 
 import {
   getAllStockEntries,

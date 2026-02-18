@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 import { Plus, Trash2, User, Mail, Phone } from "lucide-react";
-import { showApiError, showSuccess } from "../../components/alert";
+import { showApiError, showSuccess } from "../../utils/alert";
 // import TermsAndCondition from "../TermsAndCondition";
 import { useEffect } from "react";
 import { getSalesInvoiceById } from "../../api/salesApi";

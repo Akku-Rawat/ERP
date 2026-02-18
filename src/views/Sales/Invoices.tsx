@@ -20,7 +20,7 @@ import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { Company } from "../../types/company";
-import { showApiError, showSuccess } from "../../components/alert";
+import { showApiError, showSuccess } from "../../utils/alert";
 import type { InvoiceStatus } from "../../types/invoice";
 
 const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {

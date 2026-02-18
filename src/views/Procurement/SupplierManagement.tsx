@@ -14,7 +14,7 @@ import ActionButton, {
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
 import type { Supplier} from "../../types/Supply/supplier";
-import { showSuccess } from "../../components/alert";
+import { showSuccess } from "../../utils/alert";
 
 interface Props {}
 

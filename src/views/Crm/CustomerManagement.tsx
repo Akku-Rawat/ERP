@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CustomerDetailView from "./CustomerDetailView";
-import { showLoading,showApiError,showSuccess,closeSwal } from "../../components/alert";
+import { showLoading,showApiError,showSuccess,closeSwal } from "../../utils/alert";
 import {
   getAllCustomers,
   deleteCustomerById,

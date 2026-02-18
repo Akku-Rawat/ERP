@@ -12,7 +12,7 @@ import {
 import type { BankAccount } from "../../types/company";
 import AddBankAccountModal from "../../components/CompanySetup/AddBankAccountModal";
 import { updateCompanyById } from "../../api/companySetupApi";
-import { showApiError, showSuccess, showLoading, closeSwal, } from "../../components/alert";
+import { showApiError, showSuccess, showLoading, closeSwal, } from "../../utils/alert";
 import Swal from "sweetalert2";
 
 

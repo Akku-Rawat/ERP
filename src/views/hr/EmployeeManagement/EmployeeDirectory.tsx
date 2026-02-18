@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
+import Swal from "sweetalert2";
+import {
+  showApiError,
+  showSuccess,
+  showLoading,
+  closeSwal,
+} from "../../../utils/alert";
 import {
   getAllEmployees,
   getEmployeeById,
@@ -40,15 +46,19 @@ const EmployeeDirectory: React.FC = () => {
   );
 
   //function to handle view employee details
-  const handleViewEmployee = async (id: string) => {
-    try {
-      const res = await getEmployeeById(id);
-      setSelectedEmployee(res.data ?? res);
-      setViewMode("detail");
-    } catch {
-      toast.error("Unable to load employee details");
-    }
-  };
+ const handleViewEmployee = async (id: string) => {
+  try {
+    showLoading("Loading Employee...");
+    const res = await getEmployeeById(id);
+    setSelectedEmployee(res.data ?? res);
+    setViewMode("detail");
+    closeSwal();
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
 
   const refreshSelectedEmployee = async () => {
     if (!selectedEmployee?.id) return;
@@ -57,21 +67,21 @@ const EmployeeDirectory: React.FC = () => {
     setSelectedEmployee(res.data ?? res);
   };
 
-  const fetchEmployees = async () => {
-    try {
-      setLoading(true);
-      const res = await getAllEmployees(page, pageSize, searchTerm);
+const fetchEmployees = async () => {
+  try {
+    setLoading(true);
+    const res = await getAllEmployees(page, pageSize, searchTerm);
 
-      setEmployees(res.data.employees);
-      setTotalPages(res.data.pagination?.total_pages || 1);
-      setTotalItems(res.data.pagination?.total || 0);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to load employees");
-    } finally {
-      setLoading(false);
-    }
-  };
+    setEmployees(res.data.employees);
+    setTotalPages(res.data.pagination?.total_pages || 1);
+    setTotalItems(res.data.pagination?.total || 0);
+  } catch (error) {
+    showApiError(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchEmployees();
@@ -85,36 +95,57 @@ const EmployeeDirectory: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleEdit = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      const res = await getEmployeeById(id);
-      setEditEmployee(res.data ?? res);
-      setShowModal(true);
-    } catch {
-      toast.error("Unable to fetch employee details");
-    }
-  };
+const handleEdit = async (id: string, e: React.MouseEvent) => {
+  e.stopPropagation();
+  try {
+    showLoading("Fetching Employee...");
+    const res = await getEmployeeById(id);
+    setEditEmployee(res.data ?? res);
+    setShowModal(true);
+    closeSwal();
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!window.confirm("Delete this employee?")) return;
 
-    try {
-      await deleteEmployeeById(id);
-      setEmployees((prev) => prev.filter((e) => e.id !== id));
-      toast.success("Employee deleted");
-    } catch {
-      toast.error("Delete failed");
-    }
-  };
+const handleDelete = async (id: string, e: React.MouseEvent) => {
+  e.stopPropagation();
 
-  const handleSaved = async () => {
-    setShowModal(false);
-    setEditEmployee(null);
-    await fetchEmployees();
-    toast.success(editEmployee ? "Employee updated" : "Employee added");
-  };
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "This employee will be permanently deleted.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#ef4444",
+    cancelButtonColor: "#6b7280",
+    confirmButtonText: "Yes, delete",
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    showLoading("Deleting Employee...");
+    await deleteEmployeeById(id);
+
+    setEmployees((prev) => prev.filter((emp) => emp.id !== id));
+
+    closeSwal();
+    showSuccess("Employee deleted successfully");
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
+const handleSaved = async () => {
+  setShowModal(false);
+  setEditEmployee(null);
+  await fetchEmployees();
+
+  showSuccess(editEmployee ? "Employee updated" : "Employee added");
+};
 
   const uniqueDepartments = Array.from(
     new Set(employees.map((e) => e.department)),

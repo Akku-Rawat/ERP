@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { showApiError, showSuccess } from "../../components/alert";
+import { showApiError, showSuccess } from "../../utils/alert";
 import { getAllQuotations, getQuotationById } from "../../api/quotationApi";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { QuotationSummary, QuotationData } from "../../types/quotation";

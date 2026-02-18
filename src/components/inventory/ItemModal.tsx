@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React, { useState, useEffect } from "react";
-import { showApiError, showSuccess ,showLoading, closeSwal } from "../../components/alert";
+import { showApiError, showSuccess ,showLoading, closeSwal } from "../../utils/alert";
 
 import { updateItemByItemCode, createItem } from "../../api/itemApi";
 

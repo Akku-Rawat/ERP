@@ -14,7 +14,7 @@ import {
   showSuccess,
   showLoading,
   closeSwal,
-} from "../../components/alert";
+} from "../../utils/alert";
 
 import { createItemStock } from "../../api/stockApi";
 import { getStockById, getAllStockItems } from "../../api/stockItemApi";

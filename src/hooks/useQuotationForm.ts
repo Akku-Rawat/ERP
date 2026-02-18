@@ -12,7 +12,7 @@ import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
 } from "../constants/invoice.constants";
-import { showApiError, showLoading ,showSuccess,closeSwal } from "../components/alert";
+import { showApiError, showLoading ,showSuccess,closeSwal } from "../utils/alert";
 
 const ITEMS_PER_PAGE = 5;
 

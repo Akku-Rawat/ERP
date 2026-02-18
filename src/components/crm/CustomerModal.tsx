@@ -1,7 +1,7 @@
 // components/modals/CustomerModal.tsx
 import React, { useState, useEffect } from "react";
 import Modal from "../ui/modal/modal";
-import { showApiError, showSuccess, closeSwal, showLoading } from "../alert";
+import { showApiError, showSuccess, closeSwal, showLoading } from "../../utils/alert";
 import { getCompanyById } from "../../api/companySetupApi";
 const companyId = import.meta.env.VITE_COMPANY_ID;
 import {

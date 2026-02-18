@@ -11,7 +11,7 @@ import ActionButton, {
   ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
-import { showApiError,showSuccess } from "../../components/alert";
+import { showApiError,showSuccess } from "../../utils/alert";
 import { getPurchaseOrders ,updatePurchaseOrderStatus } from "../../api/procurement/PurchaseOrderApi";
 import { data } from "react-router-dom";
 

@@ -421,55 +421,47 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               </div>
             </div>
           </div>
+         {/* Ceiling Configuration */}
+<div className="bg-card p-5 rounded-lg border border-theme space-y-4">
+  <h4 className="text-xs font-semibold text-main uppercase tracking-wide">
+    Ceiling Configuration
+  </h4>
 
-          {/* Insurance Section */}
-          <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
-            <h4 className="text-xs font-semibold text-main uppercase tracking-wide">
-              Insurance & Benefits
-            </h4>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs text-main mb-1 font-medium">
-                  NHIMA Number
-                </label>
-                <input
-                  type="text"
-                  value={formData.nhimaHealthInsurance || ""}
-                  onChange={(e) =>
-                    handleInputChange("nhimaHealthInsurance", e.target.value)
-                  }
-                  placeholder="e.g., 88990011"
-                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-main mb-1 font-medium">
-                  NAPSA Number
-                </label>
-                <input
-                  type="text"
-                  value={formData.socialSecurityNapsa || ""}
-                  onChange={(e) =>
-                    handleInputChange("socialSecurityNapsa", e.target.value)
-                  }
-                  placeholder="e.g., 33445566"
-                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-main mb-1 font-medium">
-                  TPIN
-                </label>
-                <input
-                  type="text"
-                  value={formData.tpinId || ""}
-                  onChange={(e) => handleInputChange("tpinId", e.target.value)}
-                  placeholder="e.g., TPIN445566"
-                  className="w-full px-3 py-2 text-sm border border-theme bg-card  rounded-lg focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-            </div>
-          </div>
+  <div className="space-y-3">
+    {/* Ceiling Amount */}
+    <div>
+      <label className="block text-xs text-main mb-1 font-medium">
+        Ceiling Amount <span className="text-danger">*</span>
+      </label>
+      <input
+        type="number"
+        value={formData.ceilingAmount || ""}
+        onChange={(e) =>
+          handleInputChange("ceilingAmount", e.target.value)
+        }
+        placeholder="e.g., 50000"
+        className="w-full px-3 py-2 text-sm border border-theme bg-card rounded-lg focus:ring-2 focus:ring-purple-500"
+      />
+    </div>
+
+    {/* Ceiling Year */}
+    <div>
+      <label className="block text-xs text-main mb-1 font-medium">
+        Ceiling Year <span className="text-danger">*</span>
+      </label>
+      <input
+        type="number"
+        value={formData.ceilingYear || ""}
+        onChange={(e) =>
+          handleInputChange("ceilingYear", e.target.value)
+        }
+        placeholder="e.g., 2025"
+        className="w-full px-3 py-2 text-sm border border-theme bg-card rounded-lg focus:ring-2 focus:ring-purple-500"
+      />
+    </div>
+  </div>
+</div>
+
         </div>
       </div>
     </div>

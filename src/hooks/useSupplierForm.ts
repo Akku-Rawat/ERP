@@ -5,7 +5,7 @@ import { createSupplier,updateSupplier } from "../api/procurement/supplierApi";
 import { mapSupplierToApi } from "../types/Supply/supplierMapper";
 import { Supplier } from "../types/Supply/supplier";
 import { mapSupplierToForm } from "../types/Supply/supplierMapper";
-import { showApiError,showSuccess } from "../components/alert";
+import { showApiError,showSuccess } from "../utils/alert";
 
 
 interface UseSupplierFormProps {

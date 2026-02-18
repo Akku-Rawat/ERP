@@ -33,6 +33,10 @@ import TaxDeduction from "./TaxDeduction";
 import type { Employee } from "./types";
 import { PayrollConfirmationModal } from "../../../components/Hr/payrollmodal/PayrollConfirmationModal";
 import { EmployeeDetailPage } from "./Employeedetailpage";
+import { useEffect } from "react";
+import { getAllEmployees } from "../../../api/employeeapi";
+
+
 
 // ─── Compact KPI pill ─────────────────────────────────────────────────────────
 const KpiPill: React.FC<{
@@ -168,6 +172,10 @@ export default function PayrollManagement() {
   const [activeTab, setActiveTab]       = useState(0);
   const [saved, setSaved]               = useState(false);
 
+  const [employees, setEmployees] = useState<Employee[]>([]);
+const [loadingEmployees, setLoadingEmployees] = useState(false);
+
+
   const [formData, setFormData] = useState<PayrollEntry>({
     payrollName: "", postingDate: "2026-01-18", currency: "INR",
     company: "Izyane", payrollPayableAccount: "Payroll Payable - I",
@@ -264,6 +272,48 @@ export default function PayrollManagement() {
     const all = demoEmployees.filter((e) => e.isActive).map((e) => e.id);
     setSelectedEmployees(selectedEmployees.length === all.length ? [] : all);
   };
+useEffect(() => {
+  fetchEmployees();
+}, []);
+
+useEffect(() => {
+  fetchEmployees();
+}, [
+  formData.branch,
+  formData.department,
+  formData.designation,
+  formData.grade,
+]);
+
+const fetchEmployees = async () => {
+  try {
+    setLoadingEmployees(true);
+
+    const response = await getAllEmployees(1, 200, "Active");
+
+    console.log("Full API Response:", response);
+
+    const mappedEmployees: Employee[] =
+      response?.data?.employees?.map((emp: any) => ({
+        id: emp.id,
+        name:emp.name,
+        designation: emp.designation,
+        department: emp.department,
+        branch: emp.branch,
+        grade: emp.grade,
+        basicSalary: emp.basic_salary || 0,
+        hra: emp.hra || 0,
+        allowances: emp.allowances || 0,
+        isActive: emp.status === "Active",
+      })) || [];
+
+    setEmployees(mappedEmployees);
+  } catch (error) {
+    console.error("Error fetching employees:", error);
+  } finally {
+    setLoadingEmployees(false);
+  }
+};
 
   // ── NEW ENTRY ────────────────────────────────────────────────────────────────
   if (view === "newEntry") {
@@ -332,8 +382,8 @@ export default function PayrollManagement() {
             {/* ── Tab content ── */}
             <div className="flex-1 min-h-0 overflow-y-auto p-6">
               {activeTab === 0 && <OverviewTab  data={formData} onChange={handleFormChange} />}
-              {activeTab === 1 && <EmployeesTab data={formData} onChange={handleFormChange} employees={demoEmployees} onEditEmployee={(emp) => setEditEmployee(emp)} />}
-              {activeTab === 2 && <AccountingTab data={formData} onChange={handleFormChange} employees={demoEmployees} />}
+              {activeTab === 1 && <EmployeesTab data={formData} onChange={handleFormChange} employees={employees} onEditEmployee={(emp) => setEditEmployee(emp)} />}
+              {activeTab === 2 && <AccountingTab data={formData} onChange={handleFormChange} employees={employees} />}
             </div>
 
             {/* ── Footer nav ── */}

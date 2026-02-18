@@ -5,7 +5,7 @@ import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import CreateCreditNoteModal from "./CreateCreditNoteModal";
 import { getAllCreditNotes } from "../../api/salesApi";
-import { showApiError, showSuccess } from "../../components/alert";
+import { showApiError, showSuccess } from "../../utils/alert";
 type CreditNote = {
   noteNo: string;
   invoiceNo: string;
