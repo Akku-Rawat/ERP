@@ -6,7 +6,6 @@ import {
   Download,
   Printer,
   Mail,
-  Edit,
   MoreVertical,
   X,
   CreditCard,
@@ -309,15 +308,7 @@ const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
                 <StatusIcon className="w-3.5 h-3.5" />
                 {po.status}
               </div>
-              <button
-                onClick={onEdit}
-                className="px-3 py-1.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 text-primary"
-                style={{ background: 'color-mix(in srgb, var(--primary) 10%, transparent)' }}
-              >
-                <Edit className="w-4 h-4" />
-                Edit
-              </button>
-
+            
               <div className="relative">
                 <button
                   onClick={() => setShowActions(!showActions)}
