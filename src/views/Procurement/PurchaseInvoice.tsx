@@ -12,8 +12,9 @@ import ActionButton, {
 import type { Column } from "../../components/ui/Table/type";
 import { getPurchaseInvoices } from "../../api/procurement/PurchaseInvoiceApi";
 import { updatePurchaseinvoiceStatus } from "../../api/procurement/PurchaseInvoiceApi";
-import { showApiError , showSuccess } from "../../components/alert";
-
+import { showApiError , showSuccess ,showLoading,closeSwal} from "../../components/alert";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 interface Purchaseinvoice {
   pId: string;
@@ -151,6 +152,94 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
     onAdd?.();
   };
 
+
+  const fetchAllPIForExport = async () => {
+  try {
+    let allData: Purchaseinvoice[] = [];
+    let currentPage = 1;
+    let totalPagesLocal = 1;
+
+    do {
+      const res = await getPurchaseInvoices(currentPage, 100);
+
+      if (res?.status_code === 200) {
+        const mapped = res.data.map((pi: any) => ({
+          pId: pi.pId,
+          supplier: pi.supplierName,
+          podate: pi.poDate,
+          deliveryDate: pi.deliveryDate,
+          amount: pi.grandTotal,
+          status: pi.status,
+          registrationType: pi.registrationType,
+        }));
+
+        allData = [...allData, ...mapped];
+        totalPagesLocal = res.pagination?.total_pages || 1;
+      }
+
+      currentPage++;
+    } while (currentPage <= totalPagesLocal);
+
+    return allData;
+  } catch (error) {
+    showApiError(error);
+    return [];
+  }
+};
+
+
+const handleExportExcel = async () => {
+  try {
+    showLoading("Exporting Purchase Invoices...");
+
+    const dataToExport = await fetchAllPIForExport();
+
+    if (!dataToExport.length) {
+      closeSwal();
+      showApiError("No purchase invoices to export");
+      return;
+    }
+
+    const formattedData = dataToExport.map((pi) => ({
+      "PI ID": pi.pId,
+      Supplier: pi.supplier,
+      "PO Date": pi.podate,
+      "Delivery Date": pi.deliveryDate,
+      "Registration Type": pi.registrationType,
+      Amount: pi.amount,
+      Status: pi.status,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "Purchase Invoices"
+    );
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const fileData = new Blob([excelBuffer], {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(fileData, "All_Purchase_Invoices.xlsx");
+
+    closeSwal();
+    showSuccess("Export completed successfully");
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
+
   const handleEdit = (Invoice: Purchaseinvoice, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedInvoice(Invoice);
@@ -275,6 +364,8 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
         enableAdd
         addLabel="Add Purchase Invoice"
         onAdd={handleAddClick}
+          enableExport
+        onExport={handleExportExcel}
         enableColumnSelector
         currentPage={page}
         totalPages={totalPages}

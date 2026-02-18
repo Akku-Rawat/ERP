@@ -194,7 +194,8 @@ const handleExportExcel = async () => {
 
     const fileData = new Blob([excelBuffer], {
       type:
-        "/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
     });
 
     saveAs(fileData, "Proforma_Invoices.xlsx");
@@ -210,54 +211,92 @@ const handleExportExcel = async () => {
 
   /*    ACTIONS
 */
-  const handleView = async (proformaId: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
+ const handleView = async (
+  proformaId: string,
+  e?: React.MouseEvent
+) => {
+  e?.stopPropagation();
 
-    try {
-      const res = await getProformaInvoiceById(proformaId);
-      if (!res || res.status_code !== 200) {
-        console.error("Failed to load invoice");
-        return;
-      }
+  try {
+   
+    showLoading("Loading proforma invoice preview...");
 
-      if (!company) {
-        console.error("Company data not loaded");
-        return;
-      }
-
-      setSelectedInvoice(res.data);
-
-      const url = await generateProformaInvoicePDF(
-        res.data,
-        company,
-        "bloburl",
-      );
-
-      setPdfUrl(url as string);
-      setPdfOpen(true);
-    } catch (err: any) {
-      showApiError(err);
+    if (!company) {
+      closeSwal();
+      console.error("Company data not loaded");
+      return;
     }
-  };
 
-  const handleDownload = async (proformaId: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
+    const res = await getProformaInvoiceById(
+      proformaId
+    );
 
-    try {
-      if (!company) {
-        console.error("Company data not loaded");
-        return;
-      }
-
-      const res = await getProformaInvoiceById(proformaId);
-      if (!res || res.status_code !== 200) return;
-
-      await generateProformaInvoicePDF(res.data, company, "save");
-      showSuccess("Proforma invoice downloaded");
-    } catch (err: any) {
-      showApiError(err);
+    if (!res || res.status_code !== 200) {
+      closeSwal();
+      showApiError("Failed to load invoice");
+      return;
     }
-  };
+
+    setSelectedInvoice(res.data);
+
+    const url = await generateProformaInvoicePDF(
+      res.data,
+      company,
+      "bloburl"
+    );
+
+    setPdfUrl(url as string);
+    setPdfOpen(true);
+
+    
+    closeSwal();
+
+  } catch (err: any) {
+    closeSwal();
+    showApiError(err);
+  }
+};
+
+
+  const handleDownload = async (
+  proformaId: string,
+  e?: React.MouseEvent
+) => {
+  e?.stopPropagation();
+
+  try {
+    showLoading("Preparing proforma invoice download...");
+
+    if (!company) {
+      closeSwal();
+      console.error("Company data not loaded");
+      return;
+    }
+
+    const res = await getProformaInvoiceById(
+      proformaId
+    );
+
+    if (!res || res.status_code !== 200) {
+      closeSwal();
+      showApiError("Failed to load invoice");
+      return;
+    }
+
+    await generateProformaInvoicePDF(
+      res.data,
+      company,
+      "save"
+    );
+
+    closeSwal();
+    showSuccess("Proforma invoice downloaded");
+
+  } catch (err: any) {
+    closeSwal();
+    showApiError(err);
+  }
+};
 
   // const handleStatusChange = async (
   //   proformaId: string,

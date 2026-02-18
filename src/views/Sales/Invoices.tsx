@@ -195,48 +195,97 @@ const handleExportExcel = async () => {
 
 
   const handleViewClick = async (
-    invoiceNumber: string,
-    e?: React.MouseEvent,
-  ) => {
-    e?.stopPropagation();
+  invoiceNumber: string,
+  e?: React.MouseEvent,
+) => {
+  e?.stopPropagation();
 
-    try {
-      if (!company) {
-        console.error("Company data not loaded");
-        return;
-      }
+  try {
+    
+    showLoading("Loading invoice preview...");
 
-      const invoiceRes = await getSalesInvoiceById(invoiceNumber);
-      const invoice = invoiceRes.data as Invoice;
-
-      setSelectedInvoice(invoice);
-
-      const url = await generateInvoicePDF(invoice, company, "bloburl");
-      setPdfUrl(url as string);
-      setPdfOpen(true);
-    } catch (err: any) {
-      showApiError(err);
+    if (!company) {
+      closeSwal(); 
+      console.error("Company data not loaded");
+      return;
     }
-  };
 
-  const handleDownload = async (inv: InvoiceSummary, e?: React.MouseEvent) => {
-    e?.stopPropagation();
+    const invoiceRes = await getSalesInvoiceById(
+      invoiceNumber
+    );
 
-    try {
-      if (!company) {
-        showApiError("Company data not loaded");
-        return;
-      }
-
-      const invoiceRes = await getSalesInvoiceById(inv.invoiceNumber);
-      const invoice = invoiceRes.data as Invoice;
-
-      await generateInvoicePDF(invoice, company, "save");
-      showSuccess("Invoice downloaded successfully!");
-    } catch (err: any) {
-      showApiError(err);
+    if (!invoiceRes || invoiceRes.status_code !== 200) {
+      closeSwal();
+      showApiError("Failed to load invoice");
+      return;
     }
-  };
+
+    const invoice = invoiceRes.data as Invoice;
+
+    setSelectedInvoice(invoice);
+
+    const url = await generateInvoicePDF(
+      invoice,
+      company,
+      "bloburl"
+    );
+
+    setPdfUrl(url as string);
+    setPdfOpen(true);
+
+    
+    closeSwal();
+
+  } catch (err: any) {
+    closeSwal(); 
+    showApiError(err);
+  }
+};
+
+
+  const handleDownload = async (
+  inv: InvoiceSummary,
+  e?: React.MouseEvent
+) => {
+  e?.stopPropagation();
+
+  try {
+    
+    showLoading("Preparing invoice download...");
+
+    if (!company) {
+      closeSwal();
+      showApiError("Company data not loaded");
+      return;
+    }
+
+    const invoiceRes = await getSalesInvoiceById(
+      inv.invoiceNumber
+    );
+
+    if (!invoiceRes || invoiceRes.status_code !== 200) {
+      closeSwal();
+      showApiError("Failed to load invoice");
+      return;
+    }
+
+    const invoice = invoiceRes.data as Invoice;
+
+    await generateInvoicePDF(
+      invoice,
+      company,
+      "save"
+    );
+
+    closeSwal(); 
+    showSuccess("Invoice downloaded successfully!");
+
+  } catch (err: any) {
+    closeSwal();
+    showApiError(err);
+  }
+};
+
 
   const handleClosePdf = () => {
     if (pdfUrl) URL.revokeObjectURL(pdfUrl);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { showApiError, showSuccess ,showLoading , closeSwal} from "../../components/alert";
+import { showApiError, showSuccess, showLoading, closeSwal } from "../../components/alert";
 import { getAllQuotations, getQuotationById } from "../../api/quotationApi";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { QuotationSummary, QuotationData } from "../../types/quotation";
@@ -45,7 +45,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
     useState<QuotationData | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
-  
+
 
   // Company data state
   const [company, setCompany] = useState<any>(null);
@@ -61,91 +61,91 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
 
 
   const fetchAllQuotationsForExport = async () => {
-  try {
-    let allData: QuotationSummary[] = [];
-    let currentPage = 1;
-    let totalPagesLocal = 1;
+    try {
+      let allData: QuotationSummary[] = [];
+      let currentPage = 1;
+      let totalPagesLocal = 1;
 
-    do {
-      const res = await getAllQuotations(currentPage, 100, {
-        status,
-        fromDate,
-        toDate,
-      });
+      do {
+        const res = await getAllQuotations(currentPage, 100, {
+          status,
+          fromDate,
+          toDate,
+        });
 
-      if (res?.status_code === 200) {
-        const quotationsData = res.data?.quotations || [];
+        if (res?.status_code === 200) {
+          const quotationsData = res.data?.quotations || [];
 
-        const mapped = quotationsData.map((q: any) => ({
-          quotationNumber: q.id || "",
-          customerName: q.customerName || "N/A",
-          industryBases: q.industryBases || "N/A",
-          transactionDate: q.transactionDate || "",
-          validTill: q.validTill || "",
-          grandTotal: Number(q.grandTotal ?? 0),
-          currency: q.currency || "ZMW",
-        }));
+          const mapped = quotationsData.map((q: any) => ({
+            quotationNumber: q.id || "",
+            customerName: q.customerName || "N/A",
+            industryBases: q.industryBases || "N/A",
+            transactionDate: q.transactionDate || "",
+            validTill: q.validTill || "",
+            grandTotal: Number(q.grandTotal ?? 0),
+            currency: q.currency || "ZMW",
+          }));
 
-        allData = [...allData, ...mapped];
-        totalPagesLocal = res.data?.pagination?.totalPages || 1;
+          allData = [...allData, ...mapped];
+          totalPagesLocal = res.data?.pagination?.totalPages || 1;
+        }
+
+        currentPage++;
+      } while (currentPage <= totalPagesLocal);
+
+      return allData;
+    } catch (error) {
+      showApiError(error);
+      return [];
+    }
+  };
+
+
+  const handleExportExcel = async () => {
+    try {
+      showLoading("Exporting Quotations...");
+
+      const dataToExport = await fetchAllQuotationsForExport();
+
+      if (!dataToExport.length) {
+        closeSwal();
+        showApiError("No quotations to export");
+        return;
       }
 
-      currentPage++;
-    } while (currentPage <= totalPagesLocal);
+      const formattedData = dataToExport.map((q) => ({
+        "Quotation No": q.quotationNumber,
+        Customer: q.customerName,
+        Industry: q.industryBases,
+        Date: q.transactionDate,
+        "Valid Till": q.validTill,
+        Amount: q.grandTotal,
+        Currency: q.currency,
+      }));
 
-    return allData;
-  } catch (error) {
-    showApiError(error);
-    return [];
-  }
-};
+      const worksheet = XLSX.utils.json_to_sheet(formattedData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Quotations");
 
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
 
-const handleExportExcel = async () => {
-  try {
-    showLoading("Exporting Quotations...");  
+      const fileData = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
 
-    const dataToExport = await fetchAllQuotationsForExport();
+      saveAs(fileData, "All_Quotations.xlsx");
 
-    if (!dataToExport.length) {
       closeSwal();
-      showApiError("No quotations to export");
-      return;
+      showSuccess("Export completed successfully");
+
+    } catch (error) {
+      closeSwal();
+      showApiError(error);
     }
-
-    const formattedData = dataToExport.map((q) => ({
-      "Quotation No": q.quotationNumber,
-      Customer: q.customerName,
-      Industry: q.industryBases,
-      Date: q.transactionDate,
-      "Valid Till": q.validTill,
-      Amount: q.grandTotal,
-      Currency: q.currency,
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(formattedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Quotations");
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-
-    const fileData = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-
-    saveAs(fileData, "All_Quotations.xlsx");
-
-    closeSwal();              
-    showSuccess("Export completed successfully");
-
-  } catch (error) {
-    closeSwal();               
-    showApiError(error);
-  }
-};
+  };
 
 
 
@@ -217,31 +217,52 @@ const handleExportExcel = async () => {
 
   /*      ACTIONS
    */
-  const handleView = async (quotationNumber: string, e?: React.MouseEvent) => {
+  const handleView = async (
+    quotationNumber: string,
+    e?: React.MouseEvent
+  ) => {
     e?.stopPropagation();
 
     try {
-      const quotationRes = await getQuotationById(quotationNumber);
+      showLoading("Loading quotation preview...");
+
+      const quotationRes =
+        await getQuotationById(quotationNumber);
+
       if (!quotationRes || quotationRes.status_code !== 200) {
+        closeSwal();
         console.error("Failed to load quotation");
         return;
       }
 
       if (!company) {
+        closeSwal();
         console.error("Company data not loaded");
         return;
       }
 
-      const quotation = quotationRes.data as QuotationData;
+      const quotation =
+        quotationRes.data as QuotationData;
+
       setSelectedQuotation(quotation);
 
-      const url = await generateQuotationPDF(quotation, company, "bloburl");
+      const url = await generateQuotationPDF(
+        quotation,
+        company,
+        "bloburl"
+      );
+
       setPdfUrl(url as string);
       setPdfOpen(true);
+
+      closeSwal();
+
     } catch (error) {
+      closeSwal();
       showApiError(error);
     }
   };
+
 
   const handleDownload = async (
     quotationNumber: string,
@@ -249,23 +270,36 @@ const handleExportExcel = async () => {
   ) => {
     e?.stopPropagation();
 
-    if (!company) {
-      console.error("Company data not loaded");
-      return;
-    }
-
     try {
-      const res = await getQuotationById(quotationNumber);
-      if (!res || res.status_code !== 200) return;
-      getCompanyById(COMPANY_ID);
+      showLoading("Preparing download...");
 
-      await generateQuotationPDF(res.data, company, "save");
+      if (!company) {
+        closeSwal();
+        console.error("Company data not loaded");
+        return;
+      }
+
+      const res = await getQuotationById(quotationNumber);
+      if (!res || res.status_code !== 200) {
+        closeSwal();
+        return;
+      }
+
+      await generateQuotationPDF(
+        res.data,
+        company,
+        "save"
+      );
+
+      closeSwal();
       showSuccess("Quotation downloaded");
+
     } catch (error) {
-      console.error("Download error:", error);
+      closeSwal();
       showApiError(error);
     }
   };
+
 
   const handleClosePdf = () => {
     if (pdfUrl) URL.revokeObjectURL(pdfUrl);
@@ -320,9 +354,9 @@ const handleExportExcel = async () => {
   ];
 
   const filteredQuotations = quotations.filter((q) =>
-  q.quotationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  q.customerName.toLowerCase().includes(searchTerm.toLowerCase())
-);
+    q.quotationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    q.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
 
   /*  RENDER */
@@ -330,7 +364,7 @@ const handleExportExcel = async () => {
     <div className="p-8">
       <Table
         loading={loading || initialLoad}
-        serverSide={false}  
+        serverSide={false}
         columns={columns}
         data={filteredQuotations}
         rowKey={(row) => row.quotationNumber}
