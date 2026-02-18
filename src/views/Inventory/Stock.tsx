@@ -226,6 +226,7 @@ const Items: React.FC = () => {
         serverSide
         columns={columns}
         data={items}
+        enableColumnSelector
         showToolbar
         searchValue={searchTerm}
         onSearch={setSearchTerm}

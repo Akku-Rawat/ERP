@@ -1,7 +1,7 @@
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
 import type { ApiSingleResponse } from "../types/api";
-import type { ItemGroup } from "../types/itemGroup";
+import type { ItemGroup } from "../types/itemCategory";
 
 import { API, ERP_BASE } from "../config/api";
 const api = createAxiosInstance(ERP_BASE);

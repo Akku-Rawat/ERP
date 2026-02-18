@@ -62,7 +62,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
           onChange={(e) => onChange(config.fieldName, e.target.value)}
           placeholder={config.placeholder}
           required={config.required}
-          rows={3}
+          rows={1}
           className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
         />
       </label>

@@ -189,6 +189,7 @@ const confirmDelete = async () => {
           columns={columns}
           data={filteredGroups}
           showToolbar
+          enableColumnSelector
           searchValue={searchTerm}
           onSearch={setSearchTerm}
           enableAdd

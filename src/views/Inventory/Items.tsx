@@ -198,6 +198,7 @@ const handleSaved = async (res: any) => {
         serverSide
         columns={columns}
         data={items}
+        enableColumnSelector
         showToolbar
         searchValue={searchTerm}
         onSearch={setSearchTerm}

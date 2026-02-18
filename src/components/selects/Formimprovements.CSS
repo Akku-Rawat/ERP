@@ -1,0 +1,245 @@
+/* ═══════════════════════════════════════════════════════════════
+   SIMPLE FORM IMPROVEMENTS - Just add these CSS rules
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── 1. More breathing room ─────────────────────────────────── */
+.modal-body, .form-container {
+  padding: 28px 32px !important;
+}
+
+/* ─── 2. Section headings - make them stand out ────────────── */
+.section-heading,
+h3:contains("Items Information"),
+h3:contains("Sales & Purchase") {
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: #6b7280 !important;
+  margin-bottom: 16px !important;
+  margin-top: 24px !important;
+  padding-bottom: 8px !important;
+  border-bottom: 2px solid #f3f4f6 !important;
+}
+
+.section-heading:first-child {
+  margin-top: 0 !important;
+}
+
+/* ─── 3. Better input styling ──────────────────────────────── */
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  border: 1.5px solid #d1d5db !important;
+  border-radius: 8px !important;
+  padding: 9px 12px !important;
+  font-size: 0.875rem !important;
+  background: white !important;
+  transition: border-color 0.15s, box-shadow 0.15s !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+input::placeholder {
+  color: #d1d5db !important;
+}
+
+/* ─── 4. Field labels - darker and bolder ───────────────────── */
+label {
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+  margin-bottom: 6px !important;
+  display: block !important;
+}
+
+/* ─── 5. Field spacing ───────────────────────────────────────── */
+.field,
+.form-group,
+[class*="col-"] > div {
+  margin-bottom: 16px !important;
+}
+
+/* ─── 6. FIX ITEM CLASS - Show only ONE selected item ────── */
+.item-class-trigger,
+.multi-value-container,
+[class*="ItemClass"] .select__control {
+  min-height: 42px !important;
+  padding: 6px 10px !important;
+  border: 1.5px solid #d1d5db !important;
+  border-radius: 8px !important;
+  background: white !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* Hide extra chips - show only the LAST selected one */
+.item-class-trigger > span:not(:last-of-type),
+.multi-value-container > *:not(:last-child) {
+  display: none !important;
+}
+
+/* OR if you want breadcrumb style (L1 › L2 › L3): */
+.item-class-breadcrumb {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+  flex: 1 !important;
+}
+
+.item-class-breadcrumb .chip {
+  font-size: 0.75rem !important;
+  padding: 3px 8px !important;
+  border-radius: 5px !important;
+  font-weight: 500 !important;
+  background: #f3f4f6 !important;
+  color: #6b7280 !important;
+  max-width: 140px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.item-class-breadcrumb .chip:last-child {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+  font-weight: 600 !important;
+}
+
+.item-class-breadcrumb .separator {
+  color: #d1d5db !important;
+  font-size: 0.7rem !important;
+}
+
+/* ─── 7. Better buttons ──────────────────────────────────────── */
+button {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  padding: 9px 20px !important;
+  transition: all 0.15s !important;
+}
+
+/* Cancel button */
+button:contains("Cancel"),
+.btn-ghost,
+.btn-secondary {
+  background: white !important;
+  border: 1.5px solid #d1d5db !important;
+  color: #6b7280 !important;
+}
+
+button:contains("Cancel"):hover {
+  background: #f9fafb !important;
+  border-color: #9ca3af !important;
+}
+
+/* Reset button */
+button:contains("Reset"),
+.btn-reset {
+  background: white !important;
+  border: 1.5px solid #f3f4f6 !important;
+  color: #6b7280 !important;
+}
+
+button:contains("Reset"):hover {
+  background: #fef2f2 !important;
+  border-color: #fca5a5 !important;
+  color: #ef4444 !important;
+}
+
+/* Save/Primary button - keep brown but modernize it */
+button:contains("Save"),
+.btn-primary,
+.btn-save {
+  background: linear-gradient(135deg, #d97706, #ea580c) !important;
+  border: none !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25) !important;
+}
+
+button:contains("Save"):hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35) !important;
+}
+
+/* ─── 8. Grid spacing - more room between columns ──────────── */
+.grid,
+.row,
+[class*="grid-"] {
+  gap: 16px !important;
+  row-gap: 16px !important;
+  column-gap: 16px !important;
+}
+
+/* ─── 9. Required asterisk - make it visible ────────────────── */
+.required,
+span:contains("*") {
+  color: #ef4444 !important;
+  font-weight: 700 !important;
+  margin-left: 3px !important;
+}
+
+/* ─── 10. Tabs - subtle improvement ─────────────────────────── */
+.nav-tabs,
+.tab-bar {
+  border-bottom: 2px solid #f3f4f6 !important;
+  margin-bottom: 24px !important;
+}
+
+.nav-tabs .nav-link,
+.tab {
+  color: #9ca3af !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  padding: 12px 20px !important;
+  font-weight: 500 !important;
+  margin-bottom: -2px !important;
+  transition: color 0.15s !important;
+}
+
+.nav-tabs .nav-link.active,
+.tab.active {
+  color: #1f2937 !important;
+  border-bottom-color: #d97706 !important;
+  font-weight: 600 !important;
+}
+
+/* ─── 11. Dropdown improvements ─────────────────────────────── */
+select {
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%236b7280' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  padding-right: 36px !important;
+}
+
+/* ─── 12. Footer buttons - better alignment ─────────────────── */
+.modal-footer,
+.form-footer,
+.button-group {
+  padding: 16px 32px !important;
+  border-top: 2px solid #f3f4f6 !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  background: #fafafa !important;
+}
+
+/* ─── 13. Card/modal background ─────────────────────────────── */
+.modal-content,
+.card,
+.form-card {
+  background: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
