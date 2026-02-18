@@ -1,9 +1,5 @@
-import React from "react";
-import { Building2, Mail } from "lucide-react";
-import { Input, Card } from "../../ui/modal/formComponent";
-import {  taxCategorySelectOptions, type SupplierFormData } from "../../../types/Supply/supplier";
-import CountrySelect from "../../selects/CountrySelect";
-import Select from "../../ui/Select";
+import React, { useState } from "react";
+import { taxCategorySelectOptions, type SupplierFormData } from "../../../types/Supply/supplier";
 import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
 
 
@@ -13,8 +9,44 @@ interface SupplierInfoTabProps {
 }
 
 export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange }) => {
+
+  const [errors, setErrors] = useState<{
+    phoneNo?: string;
+    alternateNo?: string;
+  }>({});
+
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value } = e.target;
+
+    // parent form change
+    onChange(e);
+
+    // validation
+    if (name === "phoneNo" || name === "alternateNo") {
+      if (!/^\d*$/.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: "Only numbers allowed",
+        }));
+      } else if (value.length > 0 && value.length < 10) {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: "Must be 10 digits",
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: "",
+        }));
+      }
+    }
+  };
+
   return (
-     <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
+    <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
       <div className="space-y-6">
         {/* Supplier Details */}
         <div className="space-y-3">
@@ -41,16 +73,16 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               value={form.supplierCode}
               onChange={onChange}
             />
-             <ModalSelect
-            label="Tax Category"
-            name="taxCategory"
-            value={form.taxCategory}
-            onChange={onChange}
-            options={[
+            <ModalSelect
+              label="Tax Category"
+              name="taxCategory"
+              value={form.taxCategory}
+              onChange={onChange}
+              options={[
                 ...taxCategorySelectOptions,
-            ]}
-          />
-         
+              ]}
+            />
+
           </div>
         </div>
 
@@ -70,22 +102,29 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               label="Phone No"
               name="phoneNo"
               value={form.phoneNo}
-              onChange={onChange}
+              onChange={handleInputChange}
               type="tel"
+              maxLength={10}
+              error={errors.phoneNo}
             />
+
             <ModalInput
               label="Alternate No"
               name="alternateNo"
               value={form.alternateNo}
-              onChange={onChange}
+              onChange={handleInputChange}
+              type="tel"
+              maxLength={10}
+              error={errors.alternateNo}
             />
+
             <ModalInput
               label="Email Id"
               name="emailId"
               value={form.emailId}
               onChange={onChange}
               type="email"
-             
+
             />
           </div>
         </div>

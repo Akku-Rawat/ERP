@@ -1,7 +1,7 @@
 // components/modals/CustomerModal.tsx
 import React, { useState, useEffect } from "react";
 import Modal from "../ui/modal/modal";
-import { showApiError,showSuccess,closeSwal,showLoading } from "../alert";
+import { showApiError, showSuccess, closeSwal, showLoading } from "../alert";
 import { getCompanyById } from "../../api/companySetupApi";
 const companyId = import.meta.env.VITE_COMPANY_ID;
 import {
@@ -74,7 +74,7 @@ const CustomerModal: React.FC<{
   const [form, setForm] = useState<CustomerDetail & { sameAsBilling: boolean }>(
     emptyForm,
   );
-
+  const [errors, setErrors] = useState<{ mobile?: string; }>({});
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
     "details",
@@ -109,19 +109,19 @@ const CustomerModal: React.FC<{
     loadCompanyTerms();
   }, [companyId, isOpen, isEditMode]);
 
-useEffect(() => {
-  if (initialData) {
-    setForm({
-      ...initialData,
-      sameAsBilling: false,
-    });
-  } else {
-    setForm(emptyForm);
-  }
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        ...initialData,
+        sameAsBilling: false,
+      });
+    } else {
+      setForm(emptyForm);
+    }
 
-  setActiveTab("details");
-  setLoading(false);
-}, [initialData, isOpen]);
+    setActiveTab("details");
+    setLoading(false);
+  }, [initialData, isOpen]);
 
 
   useEffect(() => {
@@ -171,7 +171,7 @@ useEffect(() => {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
 
@@ -179,66 +179,87 @@ useEffect(() => {
       ...prev,
       [name]: name === "onboardingBalance" ? Number(value) : value,
     }));
+
+    // 🔹 Mobile validation
+    if (name === "mobile") {
+      if (!/^\d*$/.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          mobile: "Only numbers allowed",
+        }));
+      } else if (value.length > 0 && value.length < 10) {
+        setErrors((prev) => ({
+          ...prev,
+          mobile: "Mobile number must be 10 digits",
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          mobile: "",
+        }));
+      }
+    }
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
 
-  if (loading) return; // prevent double submit
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  setLoading(true);
+    if (loading) return; // prevent double submit
 
-  const payload: CustomerDetail = { ...form };
-  delete (payload as any).sameAsBilling;
+    setLoading(true);
 
-  try {
-    //  Loading
-    showLoading(
-      isEditMode
-        ? "Updating Customer..."
-        : "Creating Customer..."
-    );
+    const payload: CustomerDetail = { ...form };
+    delete (payload as any).sameAsBilling;
 
-    if (isEditMode && initialData?.id) {
-      await updateCustomerByCustomerCode(
-        initialData.id,
-        payload
+    try {
+      //  Loading
+      showLoading(
+        isEditMode
+          ? "Updating Customer..."
+          : "Creating Customer..."
       );
-    } else {
-      await createCustomer(payload);
+
+      if (isEditMode && initialData?.id) {
+        await updateCustomerByCustomerCode(
+          initialData.id,
+          payload
+        );
+      } else {
+        await createCustomer(payload);
+      }
+
+      //  Success
+      closeSwal();
+
+      showSuccess(
+        isEditMode
+          ? "Customer updated successfully!"
+          : "Customer created successfully!"
+      );
+
+      onSubmit?.(payload);
+      handleClose();
+
+    } catch (error) {
+      console.error("Customer save error:", error);
+
+      closeSwal();
+      showApiError(error);
+
+    } finally {
+      setLoading(false);
     }
-
-    //  Success
-    closeSwal();
-
-    showSuccess(
-      isEditMode
-        ? "Customer updated successfully!"
-        : "Customer created successfully!"
-    );
-
-    onSubmit?.(payload);
-    handleClose();
-
-  } catch (error) {
-    console.error("Customer save error:", error);
-
-    closeSwal();        
-    showApiError(error); 
-
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
 
-const handleClose = () => {
-  if (loading) return;
+  const handleClose = () => {
+    if (loading) return;
 
-  setForm(emptyForm);
-  onClose();
-};
+    setForm(emptyForm);
+    onClose();
+  };
 
 
   const reset = () => {
@@ -445,7 +466,9 @@ const handleClose = () => {
                   value={form.mobile}
                   onChange={handleChange}
                   placeholder="+1234567890"
+                  error={errors.mobile}
                 />
+
               </div>
             </Card>
           )}
