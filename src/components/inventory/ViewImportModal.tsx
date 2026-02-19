@@ -258,7 +258,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                   <div className="space-y-6">
                     {/* Basic Information */}
                     <div>
-                      <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 border-b">
+                      <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2">
                         Basic Information
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -300,7 +300,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
 
                     {/* Item Details */}
                     <div>
-                      <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 border-b">
+                      <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 ">
                         Item Details
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -324,7 +324,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
 
                     {/* Quantity Information */}
                     <div>
-                      <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 border-b">
+                      <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 ">
                         Quantity & Weight
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -357,7 +357,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
 
                     {/* Origin & Export Information */}
                     <div>
-                      <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 border-b">
+                      <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 ">
                         Origin & Export
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -374,7 +374,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
 
                     {/* Invoice Information */}
                     <div>
-                      <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 border-b">
+                      <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 ">
                         Invoice & Financial
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -395,10 +395,10 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
 
                     {/* Parties Information */}
                     <div>
-                      <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 border-b">
+                      <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 ">
                         Parties
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border border-theme bg-card gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoField
                           label="Supplier Name"
                           value={importData.supplierName}
@@ -604,7 +604,7 @@ const InfoField: React.FC<{ label: string; value: string | number }> = ({
     <label className="text-xs font-medium text-gray-500 uppercase block mb-1">
       {label}
     </label>
-    <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded border">
+    <p className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
       {value}
     </p>
   </div>
