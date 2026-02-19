@@ -109,6 +109,24 @@ const HrDashboard: React.FC = () => {
     [summaryData],
   );
 
+  const activeRateDonutData = useMemo(() => {
+    const total = Number(summaryData?.total ?? 0);
+    const active = Number(summaryData?.active ?? 0);
+    const notActive = Math.max(0, total - active);
+    return [
+      { name: "Active", value: active },
+      { name: "Not Active", value: notActive },
+    ];
+  }, [summaryData]);
+
+  const totalsVsLeaveTypesData = useMemo(
+    () => [
+      { name: "Employees", value: Number(summaryData?.total ?? 0) },
+      { name: "Leave Types", value: Number(summaryData?.totalLeaveTypes ?? 0) },
+    ],
+    [summaryData],
+  );
+
   const renderDonutLabel = (props: any) => {
     const { x, y, name, value } = props;
     return (
@@ -265,6 +283,90 @@ const HrDashboard: React.FC = () => {
                       ))}
                     </Pie>
                   </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-gray-900">Active Rate</h3>
+            </div>
+
+            <div className="h-64 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
+              {summaryLoading ? (
+                <ChartSkeleton variant="pie" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                    <Tooltip
+                      formatter={(v: any) => Number(v ?? 0)}
+                      contentStyle={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 12,
+                        padding: "8px 12px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      }}
+                      itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
+                    />
+                    <Legend {...legendProps} />
+                    <Pie
+                      data={activeRateDonutData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="42%"
+                      innerRadius={62}
+                      outerRadius={94}
+                      paddingAngle={2}
+                      label={renderDonutLabel}
+                      labelLine={false}
+                    >
+                      {activeRateDonutData.map((_, idx) => (
+                        <Cell key={idx} fill={idx === 0 ? palette.emerald : palette.slate} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-gray-900">Employees vs Leave Types</h3>
+            </div>
+
+            <div className="h-64 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
+              {summaryLoading ? (
+                <ChartSkeleton variant="bar" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={totalsVsLeaveTypesData} margin={{ top: 20, right: 18, left: 6, bottom: 4 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} width={52} />
+                    <Tooltip
+                      formatter={(v: any) => Number(v ?? 0)}
+                      contentStyle={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 12,
+                        padding: "8px 12px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      }}
+                      itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
+                      cursor={{ fill: "var(--primary)", opacity: 0.1 }}
+                    />
+                    <Legend {...legendProps} />
+                    <Bar dataKey="value" radius={[6, 6, 0, 0]} name="Count">
+                      {totalsVsLeaveTypesData.map((_, idx) => (
+                        <Cell key={idx} fill={idx === 0 ? palette.blue : palette.purple} />
+                      ))}
+                      <LabelList dataKey="value" position="top" fill="#6b7280" fontSize={10} />
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               )}
             </div>
