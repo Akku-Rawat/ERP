@@ -43,6 +43,13 @@ export const API = {
   },
 
   /* =========================
+   * HR DASHBOARD
+   * ========================= */
+  hrDashboard: {
+    summary: `${ERP_BASE}/api/method/hrms.dashboards.main.api.summary`,
+  },
+
+  /* =========================
    * COMPANY
    * ========================= */
   company: {
