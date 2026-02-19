@@ -4,6 +4,30 @@ export const ERP_BASE = ENV.apiBaseUrl;
 export const CODES_BASE = ENV.zraCodesBaseUrl;
 
 export const API = {
+
+
+   /* =========================
+   * DASHBOARD
+   * ========================= */
+  dashboard: {
+    summary: `${ERP_BASE}/api/method/erpnext.dashboards.main.api.summary`,
+  },
+
+  
+   /* =========================
+   * SALES DASHBOARD
+   * ========================= */
+  salesDashboard: {
+    summary: `${ERP_BASE}/api/method/erpnext.dashboards.sale.api.summary`,
+  },
+
+  /* =========================
+   * CUSTOMER DASHBOARD
+   * ========================= */
+  customerDashboard: {
+    summary: `${ERP_BASE}/api/method/erpnext.dashboards.customer.api.summary`,
+  },
+
   /* =========================
    * COMPANY
    * ========================= */
