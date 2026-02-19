@@ -12,7 +12,12 @@ import ActionButton, {
 import type { Column } from "../../components/ui/Table/type";
 import { getPurchaseInvoices } from "../../api/procurement/PurchaseInvoiceApi";
 import { updatePurchaseinvoiceStatus } from "../../api/procurement/PurchaseInvoiceApi";
-import { showApiError, showSuccess, showLoading, closeSwal } from "../../utils/alert";
+import {
+  showApiError,
+  showSuccess,
+  showLoading,
+  closeSwal,
+} from "../../utils/alert";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { getPurchaseInvoiceById } from "../../api/procurement/PurchaseInvoiceApi";
@@ -25,7 +30,6 @@ interface Purchaseinvoice {
   deliveryDate: string;
   registrationType: string;
 }
-
 
 interface PurchaseinvoicesTableProps {
   onAdd?: () => void;
@@ -41,10 +45,6 @@ export type PIStatus =
   | "Internal Transfer"
   | "Debit Note Issued";
 
-
-
-
-
 const STATUS_TRANSITIONS: Record<PIStatus, PIStatus[]> = {
   Draft: [
     "Submitted",
@@ -53,28 +53,15 @@ const STATUS_TRANSITIONS: Record<PIStatus, PIStatus[]> = {
     "Party Paid",
     "Internal Transfer",
     "Debit Note Issued",
-    "Return"
-  ],
-  Submitted: [
-    "Paid",
-    "Party Paid",
-    "Cancelled",
     "Return",
   ],
+  Submitted: ["Paid", "Party Paid", "Cancelled", "Return"],
 
-  Paid: [
-    "Debit Note Issued",
-    "Return",
-  ],
+  Paid: ["Debit Note Issued", "Return"],
 
-  "Party Paid": [
-    "Paid",
-    "Debit Note Issued",
-  ],
+  "Party Paid": ["Paid", "Debit Note Issued"],
 
-  Return: [
-    "Debit Note Issued",
-  ],
+  Return: ["Debit Note Issued"],
 
   "Debit Note Issued": [],
 
@@ -83,16 +70,11 @@ const STATUS_TRANSITIONS: Record<PIStatus, PIStatus[]> = {
   Cancelled: [],
 };
 
+const CRITICAL_STATUSES: PIStatus[] = ["Debit Note Issued", "Cancelled"];
 
-const CRITICAL_STATUSES: PIStatus[] = [
-  "Debit Note Issued",
-  "Cancelled",
-];
-
-
-
-
-const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) => {
+const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
+  onAdd,
+}) => {
   const [orders, setOrders] = useState<Purchaseinvoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -104,11 +86,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
 
-
-
-
-
-  //  FETCH ORDERS 
+  //  FETCH ORDERS
   const fetchInvoice = async () => {
     try {
       setLoading(true);
@@ -125,7 +103,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
         deliveryDate: pi.deliveryDate,
         amount: pi.grandTotal,
         status: pi.status,
-        registrationType: pi.registrationType
+        registrationType: pi.registrationType,
       }));
 
       setOrders(mappedInvoice);
@@ -154,25 +132,20 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
       // Set full data
       setSelectedInvoice(res.data);
 
-
       closeSwal();
       setViewModalOpen(true);
-
     } catch (error) {
       closeSwal();
       showApiError(error);
     }
   };
 
-
-
-  //  MODAL HANDLERS 
+  //  MODAL HANDLERS
   const handleAddClick = () => {
     setSelectedInvoice(null);
     setModalOpen(true);
     onAdd?.();
   };
-
 
   const fetchAllPIForExport = async () => {
     try {
@@ -208,7 +181,6 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
     }
   };
 
-
   const handleExportExcel = async () => {
     try {
       showLoading("Exporting Purchase Invoices...");
@@ -234,11 +206,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
       const worksheet = XLSX.utils.json_to_sheet(formattedData);
       const workbook = XLSX.utils.book_new();
 
-      XLSX.utils.book_append_sheet(
-        workbook,
-        worksheet,
-        "Purchase Invoices"
-      );
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Purchase Invoices");
 
       const excelBuffer = XLSX.write(workbook, {
         bookType: "xlsx",
@@ -246,8 +214,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
       });
 
       const fileData = new Blob([excelBuffer], {
-        type:
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 
       saveAs(fileData, "All_Purchase_Invoices.xlsx");
@@ -259,7 +226,6 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
       showApiError(error);
     }
   };
-
 
   const handleEdit = (Invoice: Purchaseinvoice, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -280,16 +246,9 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
     await fetchInvoice();
   };
 
-  const handleStatusChange = async (
-    pId: string,
-    newStatus: PIStatus,
-  ) => {
+  const handleStatusChange = async (pId: string, newStatus: PIStatus) => {
     try {
-      const res = await updatePurchaseinvoiceStatus(
-        pId,
-        newStatus,
-      );
-
+      const res = await updatePurchaseinvoiceStatus(pId, newStatus);
 
       if (!res || res.status_code !== 200) {
         showApiError({
@@ -301,9 +260,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
 
       // OPTIMISTIC UPDATE
       setOrders((prev) =>
-        prev.map((o) =>
-          o.pId === pId ? { ...o, status: newStatus } : o,
-        ),
+        prev.map((o) => (o.pId === pId ? { ...o, status: newStatus } : o)),
       );
 
       showSuccess(`Purchase Invoice marked as ${newStatus}`);
@@ -312,17 +269,15 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
     }
   };
 
-
-
-  //  TABLE COLUMNS 
+  //  TABLE COLUMNS
   const columns: Column<Purchaseinvoice>[] = [
     { key: "pId", header: " PI ID", align: "left" },
     { key: "supplier", header: "Supplier", align: "left" },
-    { key: "pidate", header: "pi Date", align: "left" },
+    { key: "podate", header: "pi Date", align: "left" },
     {
-      key: "registrationType"
-      , header: "Registration Type"
-      , align: "left"
+      key: "registrationType",
+      header: "Registration Type",
+      align: "left",
     },
     {
       key: "amount",
@@ -355,22 +310,19 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
           <ActionMenu
             // onEdit={(e) => handleEdit(o, e as any)}
             onDelete={(e) => handleDelete(o, e as any)}
-            customActions={(
-              STATUS_TRANSITIONS[o.status as PIStatus] ?? []
-            ).map((status) => ({
-              label: `Mark as ${status}`,
-              danger:
-                status === "Cancelled" ||
-                status === "Debit Note Issued",
+            customActions={(STATUS_TRANSITIONS[o.status as PIStatus] ?? []).map(
+              (status) => ({
+                label: `Mark as ${status}`,
+                danger:
+                  status === "Cancelled" || status === "Debit Note Issued",
 
-              onClick: () => handleStatusChange(o.pId, status)
-            }))}
+                onClick: () => handleStatusChange(o.pId, status),
+              }),
+            )}
           />
-
         </ActionGroup>
       ),
     },
-
   ];
 
   return (
@@ -395,8 +347,6 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
         onPageChange={setPage}
         onPageSizeChange={(size) => setPageSize(size)}
         pageSizeOptions={[10, 25, 50, 100]}
-
-
       />
 
       {/* MODAL */}
@@ -407,7 +357,6 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
         onSubmit={handlePISaved}
       />
 
-
       {viewModalOpen && selectedInvoice && (
         <PurchaseInvoiceView
           piData={selectedInvoice}
@@ -417,9 +366,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({ onAdd }) 
             setModalOpen(true);
           }}
         />
-
       )}
-
     </div>
   );
 };
