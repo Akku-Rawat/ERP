@@ -21,7 +21,6 @@ const emptyForm: Record<string, any> = {
   itemType: "",
 };
 const itemTypeOptions = [
-  { value: "", label: "Select Item Type..." },
   { value: "1", label: "Raw Material" },
   { value: "2", label: "Finished Product" },
   { value: "3", label: "Service" },
