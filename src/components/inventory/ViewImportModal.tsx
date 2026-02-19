@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { getImportItemById, updateStockAutomatic } from "../../api/importApi";
+import { API } from "../../config/api";
 import Modal from "../ui/modal/modal";
 import { Button } from "../ui/modal/formComponent";
 
@@ -78,8 +79,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
   const fetchItemClassList = useCallback(async () => {
     try {
       setLoadingItemClasses(true);
-      const apiUrl = import.meta.env.VITE_CLASS_LIST_API_URL as string;
-      const response = await fetch(`${apiUrl}/item-class-list/`);
+      const response = await fetch(API.lookup.getItemClasses);
       const data = await response.json();
       const mapped = data.map((item: any) => ({
         cd: item.itemClsCd || item.cd || "",
