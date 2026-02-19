@@ -74,7 +74,7 @@ const handleFormSubmit = async (e: React.FormEvent) => {
           Reset
         </Button>
         <Button variant="primary" type="submit" onClick={handleFormSubmit}>
-          Save Invoice
+          Submit
         </Button>
       </div>
     </>
