@@ -12,7 +12,7 @@ import AddressBlock from "../../components/ui/modal/AddressBlock";
 import {
   Textarea,
 } from "../../components/ui/modal/formComponent";
-import { ModalInput, ModalSelect } from "../../components/ui/modal/modalComponent";
+import { ModalInput, ModalSelect, ModalTextarea } from "../../components/ui/modal/modalComponent";
 import ItemSelect from "../../components/selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
@@ -308,8 +308,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                 />
 
                 {creditMeta.creditNoteReasonCode === "07" && (
-                  <Textarea
-                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                  <ModalTextarea
                     label="Reason / Remark"
                     required
                     placeholder="Provide reason in brief"
@@ -320,7 +319,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                         invcAdjustReason: e.target.value,
                       })
                     }
-
+                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                   />
                 )}
                 <div >
@@ -433,9 +432,13 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                     <tbody >
                       {paginatedItems.map((it, idx) => {
                         const i = ui.page * 5 + idx;
-                        const taxVal = parseFloat(it.vatRate || "0");
-                        const amount =
-                          it.quantity * it.price - it.discount + taxVal;
+                        const qty = Number(it.quantity) || 0;
+                        const price = Number(it.price) || 0;
+                        const discount = Number(it.discount) || 0;
+                        const vatRate = Number(it.vatRate) || 0;
+                        const base = qty * price - discount;
+                        const taxAmount = base * (vatRate / 100);
+                        const amount = base + taxAmount;
                         return (
                           <tr
                             key={i}
@@ -482,7 +485,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                             <td className="px-0.5 py-1">
                               <input
                                 type="number"
-                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                className="w-[70px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 name="price"
                                 value={it.price}
                                 disabled

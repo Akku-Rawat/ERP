@@ -1,9 +1,5 @@
-
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
-
-
-
 
 import { API, ERP_BASE } from "../config/api";
 const api = createAxiosInstance(ERP_BASE);
@@ -17,7 +13,7 @@ export async function createItemStock(payload: any): Promise<any> {
 export async function getAllStockEntries(
   page: number,
   pageSize: number,
-  search?: string
+  search?: string,
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(StockAPI.getAll, {
     params: {
@@ -29,7 +25,6 @@ export async function getAllStockEntries(
 
   return resp.data; // 🔥 DO NOT strip .data
 }
-
 
 export async function getStockById(id: string): Promise<any> {
   const resp: AxiosResponse = await api.get(StockAPI.getbyId, {

@@ -12,7 +12,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, icon, options = [], className = "", ...props }, ref) => (
+  ({ label, icon, options = [], children, className = "", ...props }, ref) => (
     <label className="flex flex-col  text-sm w-full group">
       <span className="block text-[10px] font-medium text-main mb-1">
         {icon && (
@@ -29,7 +29,7 @@ export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
         {...props}
         value={props.value ?? ""}
         className={[
-          "w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card",
+          "w-full py-2 px-3 border border-theme rounded text-[13px] text-main bg-card",
           props.disabled
             ? "bg-app cursor-not-allowed opacity-60"
             : "border-[var(--border)] hover:border-primary/40",
@@ -40,11 +40,12 @@ export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
           Select
         </option>
 
-        {options.map((opt, idx) => (
-          <option key={`${opt.value}-${idx}`} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
+        {children ??
+          options.map((opt, idx) => (
+            <option key={`${opt.value}-${idx}`} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
       </select>
     </label>
   ),
@@ -82,7 +83,7 @@ export const ModalInput = React.forwardRef<
       {...props}
       value={props.value ?? ""}
       className={[
-        "w-full py-1 px-2 border rounded text-[11px] text-main bg-card transition-all",
+        "w-full py-2 px-3 border rounded text-[13px] text-main bg-card transition-all",
 
         error
           ? "border-danger focus:border-danger"
@@ -115,6 +116,51 @@ export const ModalInput = React.forwardRef<
 ));
 
 ModalInput.displayName = "ModalInput";
+
+
+interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label: string;
+  icon?: React.ReactNode;
+}
+
+export const ModalTextarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ label, icon, className = "", ...props }, ref) => (
+      <label className="flex flex-col text-sm w-full group">
+      <span className="block text-[10px] font-medium text-main mb-1">
+        {icon && (
+          <span className="text-muted group-focus-within:text-primary transition-colors">
+            {icon}
+          </span>
+        )}
+        {label}
+        {props.required && <span className="text-danger">*</span>}
+      </span>
+
+      <textarea
+        ref={ref}
+        {...props}
+        className={[
+        "w-full h-[30px] py-1 px-2 border rounded text-[11px] resize-none text-main bg-card transition-all",
+          props.disabled
+            ? "bg-app cursor-not-allowed opacity-60 border-theme"
+            : "border-[var(--border)] hover:border-primary/40",
+          className,
+        ].join(" ")}
+        onFocus={(e) => {
+          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(37, 99, 235, 0.16)";
+          props.onFocus?.(e);
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.boxShadow = "";
+          props.onBlur?.(e);
+        }}
+      />
+    </label>
+  ),
+);
+
+
+ModalTextarea.displayName = "ModalTextarea";
 
 
 

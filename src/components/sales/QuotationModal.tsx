@@ -252,9 +252,13 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                       <tbody>
                         {paginatedItems.map((it, idx) => {
                           const i = ui.page * 5 + idx;
-                          const taxVal = parseFloat(it.vatRate || "0");
-                          const amount =
-                            it.quantity * it.price - it.discount + taxVal;
+                         const qty = Number(it.quantity) || 0;
+const price = Number(it.price) || 0;
+const discount = Number(it.discount) || 0;
+const vatRate = Number(it.vatRate) || 0;
+const base = qty * price - discount;
+const taxAmount = base * (vatRate / 100);
+const amount = base + taxAmount;
                           return (
                             <tr
                               key={i}

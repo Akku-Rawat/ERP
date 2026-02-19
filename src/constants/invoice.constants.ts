@@ -3,7 +3,7 @@ import type { InvoiceItem, InvoiceTerms } from "../types/invoice";
 export const EMPTY_ITEM: InvoiceItem = {
   itemCode: "",
   description: "",
-  quantity: 0,
+  quantity: 1,
   price: 0,
   discount: 0,
  vatRate: 0,

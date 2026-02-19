@@ -87,11 +87,11 @@ export const API = {
   },
 
   holidays: {
-  getAll: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.get_holidays`,
-  create: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.create_holiday`,
-  update: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.update_holiday`,
-  delete: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.delete_holiday`,
-},
+    getAll: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.get_holidays`,
+    create: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.create_holiday`,
+    update: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.update_holiday`,
+    delete: `${ERP_BASE}/api/method/hrms.napsa_client.holidays.api.delete_holiday`,
+  },
 
   /* =========================
    * MODULES (SYSTEM)
@@ -151,8 +151,8 @@ export const API = {
   stock: {
     getAll: `${ERP_BASE}/api/method/erpnext.zra_client.stock.stock.get_all_stock_entries`,
     getbyId: `${ERP_BASE}/api/method/erpnext.zra_client.stock.stock.get_stock_by_id`,
-  //  getAllStockItems:'${ERP_BASE}/api'
-    
+    //  getAllStockItems:'${ERP_BASE}/api'
+
     create: `${ERP_BASE}/api/method/erpnext.zra_client.stock.stock.create_item_stock_api`,
     correct: `${ERP_BASE}/api/method/erpnext.zra_client.stock.stock.correct_stock`,
     delete: `${ERP_BASE}/api/method/erpnext.zra_client.stock.stock.delete_stock_entry`,
@@ -166,6 +166,15 @@ export const API = {
     create: `${ERP_BASE}/api/method/erpnext.zra_client.stock.warehouse.create_warehouse_api`,
     update: `${ERP_BASE}/api/method/erpnext.zra_client.stock.warehouse.update_warehouse_api`,
     delete: `${ERP_BASE}/api/method/erpnext.zra_client.stock.warehouse.delete_warehouse_api`,
+  },
+
+  /* =========================
+   * IMPORT
+   * ========================= */
+  import: {
+    getAll: `${ERP_BASE}/api/method/erpnext.zra_client.item.imports.api.get_all_import_items`,
+    getById: `${ERP_BASE}/api/method/erpnext.zra_client.item.imports.api.get_import_item_by_id`,
+    updateAutomatic: `${ERP_BASE}/api/method/erpnext.zra_client.item.imports.api.update_stock_automatic`,
   },
 
   /* =========================
@@ -202,11 +211,10 @@ export const API = {
     delete: `${ERP_BASE}/api/method/erpnext.supplier.api.delete_supplier`,
   },
 
-
-  places:{
-    getCountry:`${CODES_BASE}/countries/`,
+  places: {
+    getCountry: `${CODES_BASE}/countries/`,
     getProvinces: `${CODES_BASE}/provinces/`,
-    getTown: `${CODES_BASE}/towns/`
+    getTown: `${CODES_BASE}/towns/`,
   },
 
   /* =========================

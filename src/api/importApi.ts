@@ -1,28 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable camelcase */
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
+import { API } from "../config/api";
+import { ENV } from "../config/env";
 
-const base_url = import.meta.env.VITE_BASE_URL as string;
-const api = createAxiosInstance(base_url);
-
-const ENDPOINTS = {
-  createItemStock: `${base_url}.stock.stock.create_item_stock_api`,
-  getAllStockEntries: `${base_url}.stock.stock.get_all_stock_entries`,
-  deleteStockEntry: `${base_url}.stock.stock.delete_stock_entry`,
-  correctStock: `${base_url}.stock.stock.correct_stock`,
-  getAllItemsApi: `${base_url}.zra_client.item.item.get_all_items_api`,
-  getAllImportItems: `${base_url}.item.imports.api.get_all_import_items`,
-  getImportItemById: `${base_url}.item.imports.api.get_import_item_by_id`,
-  updateStockAutomatic: `${base_url}.item.imports.api.update_stock_automatic`,
-};
+const api = createAxiosInstance(ENV.apiBaseUrl);
 
 export async function createItemStock(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(
-    ENDPOINTS.createItemStock,
-    payload,
-  );
+  const resp: AxiosResponse = await api.post(API.stock.create, payload);
   return resp.data;
 }
 
@@ -32,38 +17,38 @@ export async function getAllItemsApi(params: {
   page_size?: number;
   taxCategory?: string;
 }): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllItemsApi, {
+  const resp: AxiosResponse = await api.get(API.item.getAll, {
     params,
   });
   return resp.data?.data || [];
 }
 
 export async function getAllStockEntries(): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllStockEntries);
+  const resp: AxiosResponse = await api.get(API.stock.getAll);
   return resp.data?.data || [];
 }
 
 export async function deleteStockEntry(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.delete(ENDPOINTS.deleteStockEntry, {
+  const resp: AxiosResponse = await api.delete(API.stock.delete, {
     data: payload,
   });
   return resp.data;
 }
 
 export async function correctStock(payload: any): Promise<any> {
-  const resp: AxiosResponse = await api.post(ENDPOINTS.correctStock, payload);
+  const resp: AxiosResponse = await api.post(API.stock.correct, payload);
   return resp.data;
 }
 
 // Fetch all import items
 export async function getAllImportItems(): Promise<any> {
-  const resp: AxiosResponse = await api.get(ENDPOINTS.getAllImportItems);
+  const resp: AxiosResponse = await api.get(API.import.getAll);
   return resp.data?.data || [];
 }
 
 // Fetch import item by ID
 export async function getImportItemById(id: string): Promise<any> {
-  const url = `${ENDPOINTS.getImportItemById}?id=${id}`;
+  const url = `${API.import.getById}?id=${id}`;
   const resp: AxiosResponse = await api.get(url);
   return resp.data?.data || null;
 }
@@ -75,7 +60,7 @@ export async function updateStockAutomatic(payload: {
   itemClassCd: string;
 }): Promise<any> {
   const resp: AxiosResponse = await api.put(
-    ENDPOINTS.updateStockAutomatic,
+    API.import.updateAutomatic,
     payload,
   );
   return resp.data;

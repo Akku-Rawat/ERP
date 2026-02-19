@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { getAllItems } from "../../api/itemApi";
 
@@ -22,12 +22,12 @@ export default function ItemSelect({
   onAddNew,
   className = "",
 }: ItemSelectProps) {
- const [items, setItems] = useState<Array<{
-  id: string;
-  itemCode: string;
-  itemName: string;
-  sellingPrice?: number;
-}>>([]);
+  const [items, setItems] = useState<Array<{
+    id: string;
+    itemCode: string;
+    itemName: string;
+    sellingPrice?: number;
+  }>>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -137,59 +137,70 @@ export default function ItemSelect({
         rect &&
         !loading &&
         createPortal(
-          <div
-            ref={dropdownRef}
-            style={{
-              position: "fixed",
-              top: rect.bottom,
-              left: rect.left,
-              width: rect.width,
-              zIndex: 9999,
-            }}
-            className="bg-card border border-theme rounded shadow-lg"
-          >
-            <ul className="max-h-56 overflow-y-auto text-sm">
-              {filtered.map((it) => (
-                <li
-                  key={it.id}
-                  className="px-4 py-2 cursor-pointer hover:bg-row-hover text-main"
-                  onClick={() => {
-                    setSearch(it.itemName);
-                    setOpen(false);
-                    onChange({
-                      id: it.id,
-                      itemCode: it.itemCode,
-                      itemName: it.itemName,
-                      sellingPrice: it.sellingPrice,
-                    });
-                  }}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">{it.itemName}</span>
-                    <span className="text-xs text-muted ml-2">Code: {it.itemCode}</span>
-                  </div>
-                </li>
-              ))}
+          (() => {
+            const dropdownWidth = Math.max(rect.width, 360);
+            const maxLeft = Math.max(8, window.innerWidth - dropdownWidth - 8);
+            const left = Math.min(rect.left, maxLeft);
 
-              {filtered.length === 0 && (
-                <li className="px-4 py-3 text-center">
-                  <p className="text-muted mb-3">No items found</p>
-                  {onAddNew && (
-                    <button
-                      type="button"
+            return (
+              <div
+                ref={dropdownRef}
+                style={{
+                  position: "fixed",
+                  top: rect.bottom,
+                  left,
+                  width: dropdownWidth,
+                  zIndex: 9999,
+                }}
+                className="bg-card border border-theme rounded shadow-lg"
+              >
+                <ul className="max-h-56 overflow-y-auto text-sm">
+                  {filtered.map((it) => (
+                    <li
+                      key={it.id}
+                      className="px-4 py-2 cursor-pointer hover:bg-row-hover text-main"
                       onClick={() => {
+                        setSearch(it.itemName);
                         setOpen(false);
-                        onAddNew();
+                        onChange({
+                          id: it.id,
+                          itemCode: it.itemCode,
+                          itemName: it.itemName,
+                          sellingPrice: it.sellingPrice,
+                        });
                       }}
-                      className="px-3 py-1.5 bg-primary text-white rounded text-sm hover:bg-primary/90"
                     >
-                      + Add New Item
-                    </button>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-semibold leading-snug whitespace-normal break-words">
+                          {it.itemName}
+                        </span>
+                        <span className="text-xs text-muted leading-snug whitespace-normal break-words">
+                          Code: {it.itemCode}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                  {filtered.length === 0 && (
+                    <li className="px-4 py-3 text-center">
+                      <p className="text-muted mb-3">No items found</p>
+                      {onAddNew && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOpen(false);
+                            onAddNew();
+                          }}
+                          className="px-3 py-1.5 bg-primary text-white rounded text-sm hover:bg-primary/90"
+                        >
+                          + Add New Item
+                        </button>
+                      )}
+                    </li>
                   )}
-                </li>
-              )}
-            </ul>
-          </div>,
+                </ul>
+              </div>
+            );
+          })(),
           document.body,
         )}
     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { AxiosResponse } from "axios";
 
 interface Props {
@@ -10,6 +10,7 @@ interface Props {
   className?: string;
   displayField?: "code" | "name";
   displayFormatter?: (option: any) => string;
+  variant?: "default" | "modal";
 }
 
 export default function ItemGenericSelect({
@@ -21,6 +22,7 @@ export default function ItemGenericSelect({
   className = "",
   displayField,
   displayFormatter,
+  variant = "default",
 }: Props) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,6 +93,14 @@ export default function ItemGenericSelect({
       return displayFormatter(item);
     }
 
+    if (displayField === "code") {
+      return getCodeForDisplay(item) || getId(item);
+    }
+
+    if (displayField === "name") {
+      return getNameForDisplay(item) || String(item);
+    }
+
     // Default format: "CODE - NAME"
     const code = getCodeForDisplay(item);
     const name = getNameForDisplay(item);
@@ -108,23 +118,35 @@ export default function ItemGenericSelect({
 
   // Filter with search
   const filtered = items.filter((item) => {
-    const display = getDisplayName(item).toLowerCase();
     const name = getDisplayName(item).toLowerCase();
     const code = getId(item).toLowerCase();
     const query = search.toLowerCase();
     return name.includes(query) || code.includes(query);
   });
 
+  const rootClassName =
+    variant === "modal"
+      ? "flex flex-col text-sm w-full group"
+      : "flex flex-col gap-1";
+
+  const labelClassName =
+    variant === "modal"
+      ? "block text-[10px] font-medium text-main mb-1"
+      : "font-medium text-muted text-sm";
+
+  const inputClassName =
+    variant === "modal"
+      ? "w-full py-2 px-3 border rounded text-[13px] text-main bg-card transition-all border-[var(--border)] hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary"
+      : "w-full rounded border border-theme bg-card text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary";
+
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
-      <span className="font-medium text-muted text-sm">{label}</span>
+    <div className={`${rootClassName} ${className}`}>
+      <span className={labelClassName}>{label}</span>
 
 
       <div ref={ref} className="relative w-full">
-<input
-  className="w-full rounded border border-theme bg-card text-main px-3 py-2 text-sm 
-  focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-
+        <input
+          className={inputClassName}
           placeholder={loading ? "Loading..." : placeholder}
           value={open ? search : displayValue}
           onChange={(e) => {
