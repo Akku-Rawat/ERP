@@ -105,7 +105,10 @@ const ItemModal: React.FC<{
   const isServiceItem = Number(form.itemTypeCode) === 3;
   const { companyCode } = useCompanySelection();
   const fieldConfigs = getItemFieldConfigs(companyCode);
-  console.log("=== ITEM MODAL DEBUG ===");
+  console.log("=== ITEM MODAL RENDER ===");
+  console.log("isEditMode:", isEditMode);
+  console.log("initialData:", initialData);
+  console.log("itemClassCode from initialData:", initialData?.itemClassCode);
   console.log("Company Code:", companyCode);
   console.log("Field Configs:", fieldConfigs);
   console.log("First 3 fields:", fieldConfigs.slice(0, 3));
@@ -130,6 +133,14 @@ const ItemModal: React.FC<{
     setForm(isEditMode && initialData ? initialData : emptyForm);
     setActiveTab("details");
 
+    // Clear level selections when opening in add mode
+    if (!isEditMode) {
+      setSelectedLevel1("");
+      setSelectedLevel2("");
+      setSelectedLevel3("");
+      setSelectedLevel4("");
+    }
+
     // Fetch item class list when modal opens
     void fetchItemClassList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -148,23 +159,52 @@ const ItemModal: React.FC<{
     const code = String(initialData.itemClassCode);
     const codeLength = code.length;
 
+    console.log("Populating cascading dropdowns for edit mode:");
+    console.log("Item Class Code:", code, "Length:", codeLength);
+    console.log("Available options count:", itemClassOptions.length);
+
+    // Helper to check if a code exists in options
+    const codeExists = (checkCode: string) => {
+      return itemClassOptions.some((opt) => opt.cd === checkCode);
+    };
+
     // Determine level based on code length (each level adds 2 characters)
     // Level 1: 2 chars, Level 2: 4 chars, Level 3: 6 chars, Level 4: 8 chars
     if (codeLength >= 2) {
       const level1Code = code.substring(0, 2);
-      setSelectedLevel1(level1Code);
+      if (codeExists(level1Code)) {
+        console.log("Setting Level 1:", level1Code);
+        setSelectedLevel1(level1Code);
+      } else {
+        console.warn("Level 1 code not found:", level1Code);
+      }
     }
     if (codeLength >= 4) {
       const level2Code = code.substring(0, 4);
-      setSelectedLevel2(level2Code);
+      if (codeExists(level2Code)) {
+        console.log("Setting Level 2:", level2Code);
+        setSelectedLevel2(level2Code);
+      } else {
+        console.warn("Level 2 code not found:", level2Code);
+      }
     }
     if (codeLength >= 6) {
       const level3Code = code.substring(0, 6);
-      setSelectedLevel3(level3Code);
+      if (codeExists(level3Code)) {
+        console.log("Setting Level 3:", level3Code);
+        setSelectedLevel3(level3Code);
+      } else {
+        console.warn("Level 3 code not found:", level3Code);
+      }
     }
     if (codeLength >= 8) {
       const level4Code = code.substring(0, 8);
-      setSelectedLevel4(level4Code);
+      if (codeExists(level4Code)) {
+        console.log("Setting Level 4:", level4Code);
+        setSelectedLevel4(level4Code);
+      } else {
+        console.warn("Level 4 code not found:", level4Code);
+      }
     }
   }, [isEditMode, initialData, itemClassOptions]);
 
