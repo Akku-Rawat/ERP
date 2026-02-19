@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import { useTableLogic } from "./useTableLogic";
 import type { Column } from "./type";
 import ColumnSelector from "./ColumnSelector";
@@ -40,25 +40,11 @@ interface TableProps<T> {
 const SkeletonRow: React.FC<{ columnsCount: number }> = ({ columnsCount }) => (
   <tr className="bg-transparent">
     {Array.from({ length: columnsCount }).map((_, idx) => (
-      <td key={idx} className="px-5 py-3.5 border-b border-[var(--border)]/20">
+      <td key={idx} className="px-3 sm:px-5 py-3.5 border-b border-[var(--border)]/20">
         <div className="h-4 bg-gray-300 animate-pulse rounded"/>
       </td>
     ))}
   </tr>
-);
-
-interface FilterFieldProps {
-  label: string;
-  children: React.ReactNode;
-}
-
-const FilterField: React.FC<FilterFieldProps> = ({ label, children }) => (
-  <div className="space-y-1.5">
-    <label className="text-[9px] font-black text-muted uppercase tracking-widest ml-1">
-      {label}
-    </label>
-    {children}
-  </div>
 );
 
 /**
@@ -89,7 +75,6 @@ function Table<T extends Record<string, any>>({
   onPageSizeChange,
   pageSizeOptions = [10, 20, 50, 100],
   onSearch,
-  serverSide = false,
 }: TableProps<T>) {
   const {
     effectiveSearch,
@@ -104,8 +89,6 @@ function Table<T extends Record<string, any>>({
     processedData,
   } = useTableLogic<T>({ columns, data, searchValue });
 
-  const filterButtonRef = useRef<HTMLButtonElement>(null);
-
   const getAlignment = (align?: "left" | "center" | "right"): string => {
     switch (align) {
       case "center":
@@ -117,7 +100,7 @@ function Table<T extends Record<string, any>>({
     }
   };
 
-  const displayData = serverSide ? data : (processedData ?? []);
+  const displayData = processedData ?? [];
   const visibleColumns = loading
     ? columns
     : columns.filter((col) => visibleKeys.includes(col.key));
@@ -220,15 +203,15 @@ function Table<T extends Record<string, any>>({
 
       {/* Scrollable Table Container */}
       <div className="w-full overflow-x-auto custom-scrollbar">
-        <div className="max-h-[420px] overflow-y-auto min-w-[800px] relative">
-          <table className="w-full border-separate border-spacing-0">
+        <div className="max-h-[420px] overflow-y-auto min-w-full md:min-w-[800px] relative">
+          <table className="w-full min-w-full border-separate border-spacing-0">
             {/* Table Header */}
             <thead className="sticky top-0 z-30 shadow-sm">
               <tr>
                 {visibleColumns.map((column) => (
                   <th
                     key={column.key}
-                    className={`px-5 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-muted border-b border-[var(--border)] bg-card whitespace-nowrap ${getAlignment(column.align)}`}
+                    className={`px-3 sm:px-5 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-[0.08em] sm:tracking-[0.12em] text-muted border-b border-[var(--border)] bg-card whitespace-nowrap ${getAlignment(column.align)}`}
                   >
                     {loading ? (
                       <div className="h-3 bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded" />
@@ -268,7 +251,7 @@ function Table<T extends Record<string, any>>({
                     {visibleColumns.map((column) => (
                       <td
                         key={column.key}
-                        className={`px-5 py-3.5 text-xs font-medium text-main border-b border-[var(--border)]/20 ${getAlignment(column.align)}`}
+                        className={`px-3 sm:px-5 py-3.5 text-xs font-medium text-main border-b border-[var(--border)]/20 ${getAlignment(column.align)}`}
                       >
                         {column.render ? (
                           column.render(item)

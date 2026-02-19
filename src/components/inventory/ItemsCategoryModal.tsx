@@ -4,12 +4,12 @@ import {
   createItemGroup,
 } from "../../api/itemCategoryApi";
 import { getUOMs } from "../../api/itemZraApi";
-import { showApiError, showSuccess } from "../../utils/alert";
+import { showApiError } from "../../utils/alert";
 
 import ItemGenericSelect from "../selects/ItemGenericSelect";
 import Modal from "../ui/modal/modal";
 import { Button } from "../ui/modal/formComponent";
-import { ModalInput } from "../ui/modal/modalComponent";
+import { ModalInput, ModalSelect } from "../ui/modal/modalComponent";
 
 const emptyForm: Record<string, any> = {
   id: "",
@@ -53,6 +53,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   try {
     const payload = { ...form };
+    delete payload.id;
 
     let response;
 
@@ -169,32 +170,19 @@ const handleSubmit = async (e: React.FormEvent) => {
                   Category Type
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                  <div className="flex flex-col gap-1 text-sm w-full">
-                    <span className="font-medium text-gray-600">
-                      Item Type
-                      <span className="text-red-500 ml-1">*</span>
-                    </span>
-                    <select
-                      name="itemType"
-                      value={form.itemType || ""}
-                      onChange={handleChange}
-                      required
-                      className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
-                    >
-                      {itemTypeOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <ModalInput
-                    label="Id"
-                    name="id"
-                    value={form.id}
+                  <ModalSelect
+                    label="Item Type"
+                    name="itemType"
+                    value={form.itemType || ""}
                     onChange={handleChange}
                     required
-                  />
+                  >
+                    {itemTypeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </ModalSelect>
                   <ModalInput
                     label="Category Name"
                     name="groupName"
@@ -225,9 +213,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                         }}
                       /> */}
                   <ItemGenericSelect
-                    label="UOM"
+                    label="Unit of Measure"
                     value={form.unitOfMeasurement}
                     fetchData={getUOMs}
+                    variant="modal"
                     onChange={({ id }) =>
                       setForm((p) => ({ ...p, unitOfMeasurement: id }))
                     }
