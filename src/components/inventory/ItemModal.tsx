@@ -263,9 +263,8 @@ const ItemModal: React.FC<{
     setForm((prev) => ({ ...prev, itemClassCode: finalCode }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  // Validate Item Details section
+  const validateItemDetails = () => {
     // First, validate Item Class Level for ZRA company
     if (companyCode === "ZRA") {
       if (!selectedLevel3 && !selectedLevel4) {
@@ -273,18 +272,18 @@ const ItemModal: React.FC<{
           toast.error(
             "Item Class Level 1 alone is not sufficient. Please select at least Level 3 or higher.",
           );
-          return;
+          return false;
         } else if (selectedLevel2 && !selectedLevel3) {
           toast.error(
             "Item Class Level 2 is not sufficient. Please select at least Level 3 or higher.",
           );
-          return;
+          return false;
         } else if (!selectedLevel1) {
           toast.error("Please select an Item Class Level.");
-          return;
+          return false;
         } else {
           toast.error("Please select at least Item Class Level 3 to proceed.");
-          return;
+          return false;
         }
       }
     }
@@ -302,7 +301,11 @@ const ItemModal: React.FC<{
       { field: "ins", label: "INSURANCE" },
       { field: "sku", label: "SKU" },
       { field: "sellingPrice", label: "Selling Price", isNumeric: true },
+      { field: "salesAccount", label: "Sales Account" },
       { field: "buyingPrice", label: "Buying Price", isNumeric: true },
+      { field: "purchaseAccount", label: "Purchase Account" },
+      { field: "taxPreference", label: "Tax Preference" },
+      { field: "preferredVendor", label: "Preferred Vendor" },
     ];
 
     for (const { field, label, isNumeric } of requiredFields) {
@@ -315,43 +318,128 @@ const ItemModal: React.FC<{
         toast.error(
           `${label} is required. Please fill in all required fields.`,
         );
-        return;
+        return false;
       }
     }
 
-    try {
-      setLoading(true);
+    return true;
+  };
 
-      showLoading(isEditMode ? "Updating Item..." : "Creating Item...");
+  // Validate Tax Details section
+  const validateTaxDetails = () => {
+    if (!form.taxCategory || String(form.taxCategory).trim() === "") {
+      toast.error("Please select a Tax Category.");
+      return false;
+    }
 
-      const payload = {
-        ...form,
-        itemTypeCode: Number(form.itemTypeCode),
-      };
+    return true;
+  };
 
-      let response;
+  // Handle form submission based on active tab
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-      if (isEditMode && initialData?.id) {
-        response = await updateItemByItemCode(initialData.id, payload);
-      } else {
-        response = await createItem(payload);
+    // If on Item Details tab, validate and move to Tax Details
+    if (activeTab === "details") {
+      if (validateItemDetails()) {
+        toast.success("Item details validated. Please complete Tax Details.");
+        setActiveTab("taxDetails");
       }
+      return;
+    }
 
-      closeSwal();
-
-      if (!response || ![200, 201].includes(response.status_code)) {
-        showApiError(response);
+    // If on Tax Details tab, validate tax details and submit to API
+    if (activeTab === "taxDetails") {
+      if (!validateTaxDetails()) {
         return;
       }
 
-      onSubmit?.(response);
-      handleClose();
-    } catch (err: any) {
-      closeSwal();
-      console.error("Item save failed:", err);
-      showApiError(err);
-    } finally {
-      setLoading(false);
+      try {
+        setLoading(true);
+
+        showLoading(isEditMode ? "Updating Item..." : "Creating Item...");
+
+        const payload = {
+          ...form,
+          itemTypeCode: Number(form.itemTypeCode),
+        };
+
+        let response;
+
+        if (isEditMode && initialData?.id) {
+          response = await updateItemByItemCode(initialData.id, payload);
+        } else {
+          response = await createItem(payload);
+        }
+
+        closeSwal();
+
+        if (!response || ![200, 201].includes(response.status_code)) {
+          showApiError(response);
+          return;
+        }
+
+        onSubmit?.(response);
+
+        // Show success message and close modal
+        toast.success(
+          isEditMode
+            ? "Item updated successfully!"
+            : "Item created successfully!",
+        );
+        handleClose();
+      } catch (err: any) {
+        closeSwal();
+        console.error("Item save failed:", err);
+        showApiError(err);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // If on Inventory Details tab, just submit (inventory details are optional)
+    if (activeTab === "inventoryDetails") {
+      try {
+        setLoading(true);
+
+        showLoading(isEditMode ? "Updating Item..." : "Creating Item...");
+
+        const payload = {
+          ...form,
+          itemTypeCode: Number(form.itemTypeCode),
+        };
+
+        let response;
+
+        if (isEditMode && initialData?.id) {
+          response = await updateItemByItemCode(initialData.id, payload);
+        } else {
+          response = await createItem(payload);
+        }
+
+        closeSwal();
+
+        if (!response || ![200, 201].includes(response.status_code)) {
+          showApiError(response);
+          return;
+        }
+
+        onSubmit?.(response);
+
+        toast.success(
+          isEditMode
+            ? "Item updated successfully!"
+            : "Item created successfully!",
+        );
+        handleClose();
+      } catch (err: any) {
+        closeSwal();
+        console.error("Item save failed:", err);
+        showApiError(err);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -669,16 +757,22 @@ const ItemModal: React.FC<{
                       className="w-full"
                       required
                     />
-                    <select
-                      name="taxPreference"
-                      value={form.taxPreference || ""}
-                      onChange={handleForm}
-                      className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                      required
-                    >
-                      <option value="Taxable">Taxable</option>
-                      <option value="Non-Taxable">Non-Taxable</option>
-                    </select>
+                    <label className="flex flex-col gap-1 text-sm">
+                      <span className="font-medium text-muted">
+                        Tax Preference <span className="text-red-500">*</span>
+                      </span>
+                      <select
+                        name="taxPreference"
+                        value={form.taxPreference || ""}
+                        onChange={handleForm}
+                        className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                        required
+                      >
+                        <option value="">Select...</option>
+                        <option value="Taxable">Taxable</option>
+                        <option value="Non-Taxable">Non-Taxable</option>
+                      </select>
+                    </label>
                     <Input
                       label="Preferred Vendor"
                       name="preferredVendor"
@@ -758,6 +852,7 @@ const ItemModal: React.FC<{
                       onChange={handleForm}
                       placeholder="Standard VAT"
                       className="w-full"
+                      readOnly
                     />
                     <div className="md:col-span-2">
                       <Input
@@ -782,7 +877,7 @@ const ItemModal: React.FC<{
                           value={form.taxPerct || ""}
                           onChange={handleForm}
                           placeholder="12"
-                          className="w-full px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-app text-muted cursor-not-allowed"
+                          className="w-full px-3 py-2 pr-10 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-card text-muted cursor-not-allowed"
                           disabled
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted font-medium">
@@ -1015,12 +1110,12 @@ const ItemModal: React.FC<{
             Cancel
           </Button>
 
-          <Button variant="ghost" type="button" onClick={reset}>
+          <Button variant="danger" type="button" onClick={reset}>
             Reset
           </Button>
 
           <Button variant="primary" loading={loading} type="submit">
-            Save Item
+            {activeTab === "details" ? "Next" : "Submit"}
           </Button>
         </div>
       </form>

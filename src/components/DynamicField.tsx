@@ -89,7 +89,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
           required={selectConfig.required}
           className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
         >
-          {!selectConfig.required && <option value="">Select...</option>}
+          <option value="">Select...</option>
           {selectConfig.options.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}

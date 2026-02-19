@@ -9,7 +9,6 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     required: true,
     colSpan: 1,
     options: [
-      { value: "", label: "select type" },
       { value: "1", label: "Raw Material" },
       { value: "2", label: "Finished Product" },
       { value: "3", label: "Service" },
@@ -97,8 +96,8 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     required: true,
     colSpan: 1,
     options: [
-      { value: "Y", label: "Y" },
-      { value: "N", label: "N" },
+      { value: "Y", label: "Yes" },
+      { value: "N", label: "No" },
     ],
   },
 
@@ -106,12 +105,12 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
   {
     fieldName: "ins",
     fieldType: "static-select",
-    label: "INSURANCE",
+    label: "Insurance",
     required: true,
     colSpan: 1,
     options: [
-      { value: "Y", label: "Y" },
-      { value: "N", label: "N" },
+      { value: "Y", label: "Yes" },
+      { value: "N", label: "No" },
     ],
   },
 
