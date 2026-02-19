@@ -9,11 +9,7 @@ import { getAllSalesInvoices } from "../../api/salesApi";
 import { showApiError, showSuccess } from "../../utils/alert";
 
 import { createDebitNoteFromInvoice } from "../../api/salesApi";
-
-import {
-  Textarea,
-} from "../../components/ui/modal/formComponent";
-import { ModalInput, ModalSelect } from "../../components/ui/modal/modalComponent";
+import { ModalInput, ModalSelect, ModalTextarea } from "../../components/ui/modal/modalComponent";
 
 import ItemSelect from "../../components/selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
@@ -266,8 +262,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
 
 
                 {debitMeta.debitNoteReasonCode === "04" && (
-                  <Textarea
-                    className="mt-4"
+                  <ModalTextarea
                     label="Reason / Remark"
                     required
                     placeholder="Provide reason in brief"
