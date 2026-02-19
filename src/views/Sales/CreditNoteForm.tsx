@@ -12,7 +12,7 @@ import AddressBlock from "../../components/ui/modal/AddressBlock";
 import {
   Textarea,
 } from "../../components/ui/modal/formComponent";
-import { ModalInput, ModalSelect } from "../../components/ui/modal/modalComponent";
+import { ModalInput, ModalSelect, ModalTextarea } from "../../components/ui/modal/modalComponent";
 import ItemSelect from "../../components/selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
@@ -308,8 +308,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                 />
 
                 {creditMeta.creditNoteReasonCode === "07" && (
-                  <Textarea
-                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                  <ModalTextarea
                     label="Reason / Remark"
                     required
                     placeholder="Provide reason in brief"
@@ -320,7 +319,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                         invcAdjustReason: e.target.value,
                       })
                     }
-
+                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                   />
                 )}
                 <div >

@@ -1,13 +1,9 @@
-import React from 'react';
-import type { 
-  FieldConfig, 
-  StaticSelectConfig, 
-  ApiFieldConfig 
-} from '../types/fieldConfig.types';
+import React from "react";
+import type { FieldConfig } from "../types/fieldConfig.types";
 import ItemCategorySelect from "../components/selects/ItemCategorySelect";
-import ItemTreeSelect from '../components/selects/ItemTreeSelect';
-import ItemGenericSelect from '../components/selects/ItemGenericSelect';
-import { getApiFunction } from '../config/apiRegistry';
+import ItemTreeSelect from "../components/selects/ItemTreeSelect";
+import ItemGenericSelect from "../components/selects/ItemGenericSelect";
+import { getApiFunction } from "../config/apiRegistry";
 interface DynamicFieldProps {
   config: FieldConfig;
   value: any;
@@ -21,12 +17,14 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
   onChange,
   onApiChange,
 }) => {
-  const colSpanClass = config.colSpan ? `col-span-${config.colSpan}` : 'col-span-1';
+  const colSpanClass = config.colSpan
+    ? `col-span-${config.colSpan}`
+    : "col-span-1";
 
   // ========================================
   // TEXT INPUT
   // ========================================
-  if (config.fieldType === 'text-input') {
+  if (config.fieldType === "text-input") {
     return (
       <label className={`flex flex-col gap-1 text-sm ${colSpanClass}`}>
         <span className="font-medium text-muted">
@@ -36,7 +34,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
         <input
           type="text"
           name={config.fieldName}
-          value={value || ''}
+          value={value || ""}
           onChange={(e) => onChange(config.fieldName, e.target.value)}
           placeholder={config.placeholder}
           required={config.required}
@@ -49,7 +47,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
   // ========================================
   // TEXTAREA
   // ========================================
-  if (config.fieldType === 'textarea') {
+  if (config.fieldType === "textarea") {
     return (
       <label className={`flex flex-col gap-1 text-sm ${colSpanClass}`}>
         <span className="font-medium text-muted">
@@ -58,7 +56,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
         </span>
         <textarea
           name={config.fieldName}
-          value={value || ''}
+          value={value || ""}
           onChange={(e) => onChange(config.fieldName, e.target.value)}
           placeholder={config.placeholder}
           required={config.required}
@@ -69,27 +67,29 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
     );
   }
 
- // ========================================
+  // ========================================
   // STATIC SELECT
   // ========================================
-  if (config.fieldType === 'static-select') {
+  if (config.fieldType === "static-select") {
     // TypeScript now knows this is StaticSelectConfig
-    const selectConfig = config as StaticSelectConfig;
-    
+    const selectConfig = config;
+
     return (
       <label className={`flex flex-col gap-1 text-sm ${colSpanClass}`}>
         <span className="font-medium text-muted">
           {selectConfig.label}
-          {selectConfig.required && <span className="text-red-500 ml-1">*</span>}
+          {selectConfig.required && (
+            <span className="text-red-500 ml-1">*</span>
+          )}
         </span>
         <select
           name={selectConfig.fieldName}
-          value={value || ''}
+          value={value || ""}
           onChange={(e) => onChange(selectConfig.fieldName, e.target.value)}
           required={selectConfig.required}
           className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
         >
-          {!selectConfig.required && <option value="">Select...</option>}
+          <option value="">Select...</option>
           {selectConfig.options.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -99,16 +99,16 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
       </label>
     );
   }
-// ========================================
+  // ========================================
   // API SELECT
   // ========================================
-  if (config.fieldType === 'api-select') {
+  if (config.fieldType === "api-select") {
     // TypeScript now knows this is ApiFieldConfig
-    const apiConfig = config as ApiFieldConfig; // Type assertion for safety
+    const apiConfig = config; // Type assertion for safety
     const { customComponent, apiFunctionName } = apiConfig;
 
     // ItemCategorySelect (special component)
-    if (customComponent === 'ItemCategorySelect') {
+    if (customComponent === "ItemCategorySelect") {
       return (
         <div className={colSpanClass}>
           <ItemCategorySelect
@@ -117,14 +117,32 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
               onChange(apiConfig.fieldName, name);
               onApiChange?.({ name, id });
             }}
+            required={apiConfig.required}
             className="w-full"
           />
+          {/* Hidden input for HTML5 validation */}
+          {apiConfig.required && (
+            <input
+              type="text"
+              value={value || ""}
+              required
+              style={{
+                position: "absolute",
+                opacity: 0,
+                height: 0,
+                width: 0,
+                pointerEvents: "none",
+              }}
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+          )}
         </div>
       );
     }
 
     // ItemTreeSelect
-    if (customComponent === 'ItemTreeSelect') {
+    if (customComponent === "ItemTreeSelect") {
       const fetchFn = getApiFunction(apiFunctionName);
       if (!fetchFn) return null;
 
@@ -135,13 +153,31 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
             value={value}
             fetchData={fetchFn}
             onChange={({ id }) => onChange(apiConfig.fieldName, id)}
+            required={apiConfig.required}
           />
+          {/* Hidden input for HTML5 validation */}
+          {apiConfig.required && (
+            <input
+              type="text"
+              value={value || ""}
+              required
+              style={{
+                position: "absolute",
+                opacity: 0,
+                height: 0,
+                width: 0,
+                pointerEvents: "none",
+              }}
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+          )}
         </div>
       );
     }
 
     // ItemGenericSelect
-    if (customComponent === 'ItemGenericSelect') {
+    if (customComponent === "ItemGenericSelect") {
       const fetchFn = getApiFunction(apiFunctionName);
       if (!fetchFn) return null;
 
@@ -152,11 +188,30 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
             value={value}
             fetchData={fetchFn}
             onChange={({ id }) => onChange(apiConfig.fieldName, id)}
+            required={apiConfig.required}
           />
+          {/* Hidden input for HTML5 validation */}
+          {apiConfig.required && (
+            <input
+              type="text"
+              value={value || ""}
+              required
+              style={{
+                position: "absolute",
+                opacity: 0,
+                height: 0,
+                width: 0,
+                pointerEvents: "none",
+              }}
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+          )}
         </div>
       );
     }
 
     // Fallback: shouldn't reach here
     return null;
-  } }
+  }
+};

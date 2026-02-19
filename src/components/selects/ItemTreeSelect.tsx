@@ -18,6 +18,7 @@ interface Props {
   placeholder?: string;
   className?: string;
   displayFormatter?: (option: any) => string;
+  required?: boolean;
 }
 
 // ─── Level colors ─────────────────────────────────────────────────────────────
@@ -57,6 +58,7 @@ export default function ItemTreeSelect({
   placeholder = "Select item class",
   className = "",
   displayFormatter,
+  required = false,
 }: Props) {
   const [treeData, setTreeData] = useState<TreeItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -273,7 +275,10 @@ export default function ItemTreeSelect({
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
       {/* Label */}
-      <label className="text-sm font-semibold text-gray-600">{label}</label>
+      <label className="text-sm font-semibold text-gray-600">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
 
       <div ref={containerRef} className="relative">
         {/* ── Trigger ── */}
