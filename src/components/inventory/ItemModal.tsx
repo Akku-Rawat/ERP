@@ -105,13 +105,6 @@ const ItemModal: React.FC<{
   const isServiceItem = Number(form.itemTypeCode) === 3;
   const { companyCode } = useCompanySelection();
   const fieldConfigs = getItemFieldConfigs(companyCode);
-  console.log("=== ITEM MODAL RENDER ===");
-  console.log("isEditMode:", isEditMode);
-  console.log("initialData:", initialData);
-  console.log("itemClassCode from initialData:", initialData?.itemClassCode);
-  console.log("Company Code:", companyCode);
-  console.log("Field Configs:", fieldConfigs);
-  console.log("First 3 fields:", fieldConfigs.slice(0, 3));
 
   const [activeTab, setActiveTab] = useState<
     "details" | "taxDetails" | "inventoryDetails"
@@ -159,10 +152,6 @@ const ItemModal: React.FC<{
     const code = String(initialData.itemClassCode);
     const codeLength = code.length;
 
-    console.log("Populating cascading dropdowns for edit mode:");
-    console.log("Item Class Code:", code, "Length:", codeLength);
-    console.log("Available options count:", itemClassOptions.length);
-
     // Helper to check if a code exists in options
     const codeExists = (checkCode: string) => {
       return itemClassOptions.some((opt) => opt.cd === checkCode);
@@ -173,37 +162,25 @@ const ItemModal: React.FC<{
     if (codeLength >= 2) {
       const level1Code = code.substring(0, 2);
       if (codeExists(level1Code)) {
-        console.log("Setting Level 1:", level1Code);
         setSelectedLevel1(level1Code);
-      } else {
-        console.warn("Level 1 code not found:", level1Code);
       }
     }
     if (codeLength >= 4) {
       const level2Code = code.substring(0, 4);
       if (codeExists(level2Code)) {
-        console.log("Setting Level 2:", level2Code);
         setSelectedLevel2(level2Code);
-      } else {
-        console.warn("Level 2 code not found:", level2Code);
       }
     }
     if (codeLength >= 6) {
       const level3Code = code.substring(0, 6);
       if (codeExists(level3Code)) {
-        console.log("Setting Level 3:", level3Code);
         setSelectedLevel3(level3Code);
-      } else {
-        console.warn("Level 3 code not found:", level3Code);
       }
     }
     if (codeLength >= 8) {
       const level4Code = code.substring(0, 8);
       if (codeExists(level4Code)) {
-        console.log("Setting Level 4:", level4Code);
         setSelectedLevel4(level4Code);
-      } else {
-        console.warn("Level 4 code not found:", level4Code);
       }
     }
   }, [isEditMode, initialData, itemClassOptions]);
@@ -291,7 +268,17 @@ const ItemModal: React.FC<{
 
     // Validate that at least Level 3 is selected for item class code
     if (companyCode === "ZRA" && !selectedLevel3 && !selectedLevel4) {
-      toast.error("Please select at least Item Class Level 3");
+      if (selectedLevel1 && !selectedLevel2) {
+        toast.error(
+          "Item Class Level 1 alone is not sufficient. Please select at least Level 3 or higher.",
+        );
+      } else if (selectedLevel2 && !selectedLevel3) {
+        toast.error(
+          "Item Class Level 2 is not sufficient. Please select at least Level 3 or higher.",
+        );
+      } else {
+        toast.error("Please select at least Item Class Level 3 to proceed.");
+      }
       return;
     }
 

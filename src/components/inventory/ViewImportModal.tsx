@@ -36,6 +36,7 @@ interface ImportItemDetails {
   invoiceExchangeRate: string;
   id: string;
   syncStatus: string;
+  itemClassCode?: string;
 }
 
 const ViewImportModal: React.FC<ViewImportModalProps> = ({
@@ -59,7 +60,6 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
   const [selectedLevel2, setSelectedLevel2] = useState("");
   const [selectedLevel3, setSelectedLevel3] = useState("");
   const [selectedLevel4, setSelectedLevel4] = useState("");
-  const [selectedLevel5, setSelectedLevel5] = useState("");
 
   const fetchImportDetails = useCallback(async () => {
     if (!importId) return;
@@ -135,25 +135,18 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
         setSelectedLevel2("");
         setSelectedLevel3("");
         setSelectedLevel4("");
-        setSelectedLevel5("");
         break;
       case 2:
         setSelectedLevel2(value);
         setSelectedLevel3("");
         setSelectedLevel4("");
-        setSelectedLevel5("");
         break;
       case 3:
         setSelectedLevel3(value);
         setSelectedLevel4("");
-        setSelectedLevel5("");
         break;
       case 4:
         setSelectedLevel4(value);
-        setSelectedLevel5("");
-        break;
-      case 5:
-        setSelectedLevel5(value);
         break;
     }
   };
@@ -167,7 +160,6 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
     setSelectedLevel2("");
     setSelectedLevel3("");
     setSelectedLevel4("");
-    setSelectedLevel5("");
     onClose();
   };
 
@@ -177,6 +169,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
 
   const handleApprovalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!importId) {
       toast.error("Import ID is missing");
       return;
@@ -184,20 +177,26 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
 
     // Calculate final item class code - use the deepest selected level
     const finalItemClassCd =
-      selectedLevel5 ||
-      selectedLevel4 ||
-      selectedLevel3 ||
-      selectedLevel2 ||
-      selectedLevel1;
+      selectedLevel4 || selectedLevel3 || selectedLevel2 || selectedLevel1;
 
     if (!finalItemClassCd) {
       toast.error("Please select an Item Class Code");
       return;
     }
 
-    // Validate that level 3 or higher is selected (reject levels 1 and 2)
-    if (!selectedLevel3 && !selectedLevel4 && !selectedLevel5) {
-      toast.error("Please select at least Item Class Level 3 or higher");
+    // Validate that level 3 or 4 is selected (reject levels 1 and 2)
+    if (!selectedLevel3 && !selectedLevel4) {
+      if (selectedLevel1 && !selectedLevel2) {
+        toast.error(
+          "Item Class Level 1 alone is not sufficient. Please select at least Level 3 or higher.",
+        );
+      } else if (selectedLevel2 && !selectedLevel3) {
+        toast.error(
+          "Item Class Level 2 is not sufficient. Please select at least Level 3 or higher.",
+        );
+      } else {
+        toast.error("Please select at least Item Class Level 3 to proceed.");
+      }
       return;
     }
 
@@ -220,7 +219,6 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
       setSelectedLevel2("");
       setSelectedLevel3("");
       setSelectedLevel4("");
-      setSelectedLevel5("");
 
       // Call onSuccess to refresh the import list
       onSuccess?.();
@@ -315,6 +313,12 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                           label="Import Status"
                           value={importData.importItemStatus}
                         />
+                        {importData.itemClassCode && (
+                          <InfoField
+                            label="Item Class Code"
+                            value={importData.itemClassCode}
+                          />
+                        )}
                       </div>
                     </div>
 
@@ -486,7 +490,8 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                         getCodesByLevel("3", selectedLevel2).length > 0 && (
                           <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-gray-600">
-                              Item Class Level 3
+                              Item Class Level 3{" "}
+                              <span className="text-red-500">*</span>
                             </label>
                             <select
                               className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -495,7 +500,9 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                                 handleLevelChange(3, e.target.value)
                               }
                             >
-                              <option value="">Select Level 3</option>
+                              <option value="">
+                                Select Level 3 (Required)
+                              </option>
                               {getCodesByLevel("3", selectedLevel2).map(
                                 (option) => (
                                   <option key={option.cd} value={option.cd}>
@@ -520,33 +527,10 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                                 handleLevelChange(4, e.target.value)
                               }
                             >
-                              <option value="">Select Level 4</option>
+                              <option value="">
+                                Select Level 4 (Optional)
+                              </option>
                               {getCodesByLevel("4", selectedLevel3).map(
-                                (option) => (
-                                  <option key={option.cd} value={option.cd}>
-                                    {option.cd} - {option.cdNm}
-                                  </option>
-                                ),
-                              )}
-                            </select>
-                          </div>
-                        )}
-
-                      {selectedLevel4 &&
-                        getCodesByLevel("5", selectedLevel4).length > 0 && (
-                          <div className="flex flex-col gap-1">
-                            <label className="text-sm font-medium text-gray-600">
-                              Item Class Level 5
-                            </label>
-                            <select
-                              className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
-                              value={selectedLevel5}
-                              onChange={(e) =>
-                                handleLevelChange(5, e.target.value)
-                              }
-                            >
-                              <option value="">Select Level 5</option>
-                              {getCodesByLevel("5", selectedLevel4).map(
                                 (option) => (
                                   <option key={option.cd} value={option.cd}>
                                     {option.cd} - {option.cdNm}
@@ -569,7 +553,6 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                           setSelectedLevel2("");
                           setSelectedLevel3("");
                           setSelectedLevel4("");
-                          setSelectedLevel5("");
                         }}
                       >
                         Cancel
