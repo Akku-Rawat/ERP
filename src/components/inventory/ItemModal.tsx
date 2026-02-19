@@ -1,25 +1,22 @@
-/* eslint-disable no-empty */
 /* eslint-disable unused-imports/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import React, { useState, useEffect } from "react";
-import { showApiError, showSuccess ,showLoading, closeSwal } from "../../utils/alert";
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import React, { useState, useEffect, useCallback } from "react";
+import { showApiError, showLoading, closeSwal } from "../../utils/alert";
+import { toast } from "sonner";
 import { updateItemByItemCode, createItem } from "../../api/itemApi";
 
 import { getItemGroupById } from "../../api/itemCategoryApi";
-
 
 import Modal from "../ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
 import { useCompanySelection } from "../../hooks/useCompanySelection";
 import { getItemFieldConfigs } from "../../config/companyConfigResolver";
 import { DynamicField } from "../DynamicField";
-
+import { API } from "../../config/api";
 
 type FormState = Record<string, any>;
 
@@ -73,28 +70,30 @@ const TAX_CONFIGS = {
     taxType: "Standard Rated",
     taxPerct: "16",
     taxCode: "A",
-    taxDescription: "Applies to products and services subject to VAT at 16% by default.",
+    taxDescription:
+      "Applies to products and services subject to VAT at 16% by default.",
   },
-  "LPO": {
+  LPO: {
     taxType: "Zero-Rated",
     taxPerct: "0",
     taxCode: "C2",
-    taxDescription: "Applies to transactions involving customers or projects granted exemption from paying taxes.",
+    taxDescription:
+      "Applies to transactions involving customers or projects granted exemption from paying taxes.",
   },
-  "Export": {
+  Export: {
     taxType: "Export",
     taxPerct: "0",
     taxCode: "C1",
-    taxDescription: "Applies to goods or services exported outside the country and exempt from VAT.",
+    taxDescription:
+      "Applies to goods or services exported outside the country and exempt from VAT.",
   },
 };
-
 
 const ItemModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   // onSubmit?: (data: Record<string, any>) => void;
- onSubmit?: (res: any) => void;
+  onSubmit?: (res: any) => void;
 
   initialData?: Record<string, any> | null;
   isEditMode?: boolean;
@@ -106,74 +105,190 @@ const ItemModal: React.FC<{
   const isServiceItem = Number(form.itemTypeCode) === 3;
   const { companyCode } = useCompanySelection();
   const fieldConfigs = getItemFieldConfigs(companyCode);
-   console.log('=== ITEM MODAL DEBUG ===');
-  console.log('Company Code:', companyCode);
-  console.log('Field Configs:', fieldConfigs);
-  console.log('First 3 fields:', fieldConfigs.slice(0, 3));
-  
-  
+  console.log("=== ITEM MODAL DEBUG ===");
+  console.log("Company Code:", companyCode);
+  console.log("Field Configs:", fieldConfigs);
+  console.log("First 3 fields:", fieldConfigs.slice(0, 3));
 
   const [activeTab, setActiveTab] = useState<
     "details" | "taxDetails" | "inventoryDetails"
   >("details");
 
-useEffect(() => {
-  if (!isOpen) return;
+  // Cascading item class dropdown states
+  const [itemClassOptions, setItemClassOptions] = useState<
+    Array<{ cd: string; cdNm: string; lvl: string }>
+  >([]);
+  const [loadingItemClasses, setLoadingItemClasses] = useState(false);
+  const [selectedLevel1, setSelectedLevel1] = useState("");
+  const [selectedLevel2, setSelectedLevel2] = useState("");
+  const [selectedLevel3, setSelectedLevel3] = useState("");
+  const [selectedLevel4, setSelectedLevel4] = useState("");
 
-  setForm(isEditMode && initialData ? initialData : emptyForm);
-  setActiveTab("details");
-}, [isOpen]);
+  useEffect(() => {
+    if (!isOpen) return;
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    setForm(isEditMode && initialData ? initialData : emptyForm);
+    setActiveTab("details");
 
-  try {
-    setLoading(true);
+    // Fetch item class list when modal opens
+    void fetchItemClassList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isEditMode, initialData]);
 
-    showLoading(
-      isEditMode ? "Updating Item..." : "Creating Item..."
-    );
-
-    const payload = {
-      ...form,
-      itemTypeCode: Number(form.itemTypeCode),
-    };
-
-    let response;
-
-    if (isEditMode && initialData?.id) {
-      response = await updateItemByItemCode(
-        initialData.id,
-        payload
-      );
-    } else {
-      response = await createItem(payload);
-    }
-
-    closeSwal();
-
-    if (!response || ![200, 201].includes(response.status_code)) {
-      showApiError(response);
+  // Populate cascading selections from existing itemClassCode when editing
+  useEffect(() => {
+    if (
+      !isEditMode ||
+      !initialData?.itemClassCode ||
+      itemClassOptions.length === 0
+    ) {
       return;
     }
 
-   
+    const code = String(initialData.itemClassCode);
+    const codeLength = code.length;
 
-    onSubmit?.(response);
-    handleClose();
-  } catch (err: any) {
-    closeSwal();
-    console.error("Item save failed:", err);
-    showApiError(err);
-  } finally {
-    setLoading(false);
-  }
-};
-;
+    // Determine level based on code length (each level adds 2 characters)
+    // Level 1: 2 chars, Level 2: 4 chars, Level 3: 6 chars, Level 4: 8 chars
+    if (codeLength >= 2) {
+      const level1Code = code.substring(0, 2);
+      setSelectedLevel1(level1Code);
+    }
+    if (codeLength >= 4) {
+      const level2Code = code.substring(0, 4);
+      setSelectedLevel2(level2Code);
+    }
+    if (codeLength >= 6) {
+      const level3Code = code.substring(0, 6);
+      setSelectedLevel3(level3Code);
+    }
+    if (codeLength >= 8) {
+      const level4Code = code.substring(0, 8);
+      setSelectedLevel4(level4Code);
+    }
+  }, [isEditMode, initialData, itemClassOptions]);
 
-  const handleClose = () => {
-    setForm(emptyForm);
-    onClose();
+  // Fetch item class list from API
+  const fetchItemClassList = useCallback(async () => {
+    try {
+      setLoadingItemClasses(true);
+      const response = await fetch(API.lookup.getItemClasses);
+
+      const data = await response.json();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      const mapped = data.map((item: any) => ({
+        cd: item.itemClsCd || item.cd || "",
+        cdNm: item.itemClsNm || item.cdNm || "",
+        lvl: item.itemClsLvl || item.lvl || "1",
+      }));
+      setItemClassOptions(mapped || []);
+    } catch (err) {
+      toast.error("Failed to load item class list");
+      console.error(err);
+      setItemClassOptions([]);
+    } finally {
+      setLoadingItemClasses(false);
+    }
+  }, []);
+
+  // Helper function to get codes by level and parent
+  const getCodesByLevel = (level: string, parentCode?: string) => {
+    return itemClassOptions.filter((option) => {
+      if (option.lvl !== level) return false;
+
+      // Level 1 has no parent
+      if (level === "1") return true;
+
+      // For other levels, check if code starts with parent prefix
+      if (!parentCode) return false;
+
+      const prefixLength = parseInt(level) * 2;
+      const parentPrefix = parentCode.substring(0, prefixLength - 2);
+      const codePrefix = option.cd.substring(0, prefixLength - 2);
+
+      return codePrefix === parentPrefix;
+    });
+  };
+
+  // Handle level selection - clear child levels when parent changes
+  const handleLevelChange = (level: number, value: string) => {
+    switch (level) {
+      case 1:
+        setSelectedLevel1(value);
+        setSelectedLevel2("");
+        setSelectedLevel3("");
+        setSelectedLevel4("");
+        break;
+      case 2:
+        setSelectedLevel2(value);
+        setSelectedLevel3("");
+        setSelectedLevel4("");
+        break;
+      case 3:
+        setSelectedLevel3(value);
+        setSelectedLevel4("");
+        break;
+      case 4:
+        setSelectedLevel4(value);
+        break;
+    }
+
+    // Update form with the final selected code (Level 3 or 4 required for submission)
+    const finalCode =
+      level === 4
+        ? value || selectedLevel3 || selectedLevel2 || selectedLevel1
+        : level === 3
+          ? value || selectedLevel2 || selectedLevel1
+          : level === 2
+            ? value || selectedLevel1
+            : value;
+
+    setForm((prev) => ({ ...prev, itemClassCode: finalCode }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate that at least Level 3 is selected for item class code
+    if (companyCode === "ZRA" && !selectedLevel3 && !selectedLevel4) {
+      toast.error("Please select at least Item Class Level 3");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      showLoading(isEditMode ? "Updating Item..." : "Creating Item...");
+
+      const payload = {
+        ...form,
+        itemTypeCode: Number(form.itemTypeCode),
+      };
+
+      let response;
+
+      if (isEditMode && initialData?.id) {
+        response = await updateItemByItemCode(initialData.id, payload);
+      } else {
+        response = await createItem(payload);
+      }
+
+      closeSwal();
+
+      if (!response || ![200, 201].includes(response.status_code)) {
+        showApiError(response);
+        return;
+      }
+
+      onSubmit?.(response);
+      handleClose();
+    } catch (err: any) {
+      closeSwal();
+      console.error("Item save failed:", err);
+      showApiError(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loadItemCategoryDetailsById = async (id: string) => {
@@ -183,8 +298,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       setForm((p) => ({ ...p, item_group: response.data.name }));
       setItemCategoryDetails(response.data);
     } catch (err) {
-     showApiError("Error loading item category details");
-
+      showApiError("Error loading item category details");
     }
   };
 
@@ -194,7 +308,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     >,
   ) => {
     const { name, value } = e.target;
-    
+
     // Auto-populate tax details when tax category changes
     if (name === "taxCategory") {
       const taxConfig = TAX_CONFIGS[value as keyof typeof TAX_CONFIGS];
@@ -210,10 +324,10 @@ const handleSubmit = async (e: React.FormEvent) => {
         return;
       }
     }
-    
+
     setForm((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleDynamicFieldChange = (name: string, value: any) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -225,6 +339,15 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   const reset = () => {
     setForm(emptyForm);
+    setSelectedLevel1("");
+    setSelectedLevel2("");
+    setSelectedLevel3("");
+    setSelectedLevel4("");
+  };
+
+  const handleClose = () => {
+    reset();
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -245,20 +368,22 @@ const handleSubmit = async (e: React.FormEvent) => {
             <button
               type="button"
               onClick={() => setActiveTab("details")}
-              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === "details"
-                   ? "text-primary border-b-[3px] border-primary"
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
+                activeTab === "details"
+                  ? "text-primary border-b-[3px] border-primary"
                   : "text-muted border-b-[3px] border-transparent hover:text-main"
-                }`}
+              }`}
             >
               Item Details
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("taxDetails")}
-              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === "taxDetails"
-                    ? "text-primary border-b-[3px] border-primary"
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
+                activeTab === "taxDetails"
+                  ? "text-primary border-b-[3px] border-primary"
                   : "text-muted border-b-[3px] border-transparent hover:text-main"
-                }`}
+              }`}
             >
               Tax Details
             </button>
@@ -267,10 +392,11 @@ const handleSubmit = async (e: React.FormEvent) => {
               disabled={isServiceItem}
               onClick={() => !isServiceItem && setActiveTab("inventoryDetails")}
               className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2
-    ${activeTab === "inventoryDetails" && !isServiceItem
-                  ? "text-primary border-b-[3px] border-primary"
-                  : "text-muted border-b-[3px] border-transparent hover:text-main"
-                }
+    ${
+      activeTab === "inventoryDetails" && !isServiceItem
+        ? "text-primary border-b-[3px] border-primary"
+        : "text-muted border-b-[3px] border-transparent hover:text-main"
+    }
     ${isServiceItem ? "opacity-50 cursor-not-allowed" : ""}
   `}
             >
@@ -289,19 +415,152 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </h3>
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                 {fieldConfigs.map((fieldConfig) => (
-                      <DynamicField
-                        key={fieldConfig.fieldName}
-                        config={fieldConfig}
-                        value={form[fieldConfig.fieldName]}
-                        onChange={handleDynamicFieldChange}
-                        onApiChange={
-                          fieldConfig.fieldName === 'itemGroup' 
-                            ? handleCategoryChange 
-                            : undefined
-                        }
-                      />
-                    ))}
+                    {fieldConfigs.map((fieldConfig) => {
+                      // Special rendering for itemClassCode - use cascading dropdowns
+                      if (fieldConfig.fieldName === "itemClassCode") {
+                        return (
+                          <React.Fragment key="itemClassCode">
+                            {/* Level 1 */}
+                            <div className="flex flex-col gap-1 text-sm">
+                              <span className="font-medium text-muted">
+                                Item Class Level 1
+                              </span>
+                              <select
+                                value={selectedLevel1}
+                                onChange={(e) =>
+                                  handleLevelChange(1, e.target.value)
+                                }
+                                disabled={loadingItemClasses}
+                                className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                              >
+                                <option value="">
+                                  {loadingItemClasses
+                                    ? "Loading..."
+                                    : "Select Level 1"}
+                                </option>
+                                {getCodesByLevel("1").map((option) => (
+                                  <option key={option.cd} value={option.cd}>
+                                    {option.cd} - {option.cdNm}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Level 2 */}
+                            {selectedLevel1 &&
+                              getCodesByLevel("2", selectedLevel1).length >
+                                0 && (
+                                <div className="flex flex-col gap-1 text-sm">
+                                  <span className="font-medium text-muted">
+                                    Item Class Level 2
+                                  </span>
+                                  <select
+                                    value={selectedLevel2}
+                                    onChange={(e) =>
+                                      handleLevelChange(2, e.target.value)
+                                    }
+                                    className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                  >
+                                    <option value="">
+                                      Select Level 2 (Optional)
+                                    </option>
+                                    {getCodesByLevel("2", selectedLevel1).map(
+                                      (option) => (
+                                        <option
+                                          key={option.cd}
+                                          value={option.cd}
+                                        >
+                                          {option.cd} - {option.cdNm}
+                                        </option>
+                                      ),
+                                    )}
+                                  </select>
+                                </div>
+                              )}
+
+                            {/* Level 3 */}
+                            {selectedLevel2 &&
+                              getCodesByLevel("3", selectedLevel2).length >
+                                0 && (
+                                <div className="flex flex-col gap-1 text-sm">
+                                  <span className="font-medium text-muted">
+                                    Item Class Level 3{" "}
+                                    <span className="text-red-500">*</span>
+                                  </span>
+                                  <select
+                                    value={selectedLevel3}
+                                    onChange={(e) =>
+                                      handleLevelChange(3, e.target.value)
+                                    }
+                                    className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                  >
+                                    <option value="">
+                                      Select Level 3 (Required)
+                                    </option>
+                                    {getCodesByLevel("3", selectedLevel2).map(
+                                      (option) => (
+                                        <option
+                                          key={option.cd}
+                                          value={option.cd}
+                                        >
+                                          {option.cd} - {option.cdNm}
+                                        </option>
+                                      ),
+                                    )}
+                                  </select>
+                                </div>
+                              )}
+
+                            {/* Level 4 */}
+                            {selectedLevel3 &&
+                              getCodesByLevel("4", selectedLevel3).length >
+                                0 && (
+                                <div className="flex flex-col gap-1 text-sm">
+                                  <span className="font-medium text-muted">
+                                    Item Class Level 4
+                                  </span>
+                                  <select
+                                    value={selectedLevel4}
+                                    onChange={(e) =>
+                                      handleLevelChange(4, e.target.value)
+                                    }
+                                    className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                  >
+                                    <option value="">
+                                      Select Level 4 (Optional)
+                                    </option>
+                                    {getCodesByLevel("4", selectedLevel3).map(
+                                      (option) => (
+                                        <option
+                                          key={option.cd}
+                                          value={option.cd}
+                                        >
+                                          {option.cd} - {option.cdNm}
+                                        </option>
+                                      ),
+                                    )}
+                                  </select>
+                                </div>
+                              )}
+                          </React.Fragment>
+                        );
+                      }
+
+                      // Regular DynamicField for other fields
+                      return (
+                        <DynamicField
+                          key={fieldConfig.fieldName}
+                          config={fieldConfig}
+                          value={form[fieldConfig.fieldName]}
+                          onChange={handleDynamicFieldChange}
+                          onApiChange={
+                            fieldConfig.fieldName === "itemGroup"
+                              ? handleCategoryChange
+                              : undefined
+                          }
+                        />
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -369,10 +628,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </label>
                   <select
                     name="taxCategory"
-                    value={form.taxCategory }
+                    value={form.taxCategory}
                     onChange={handleForm}
                     className="w-full md:w-96 px-4 py-3 text-base border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                  > 
+                  >
                     <option value="">Select...</option>
                     <option value="Non-Export">Non-Export</option>
                     <option value="Export">Export</option>
@@ -706,8 +965,9 @@ const Input = React.forwardRef<
     <input
       ref={ref}
       className={`rounded border border-theme px-3 py-2 bg-card text-main 
-focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${props.disabled ? "bg-app text-muted cursor-not-allowed" : ""
-        } ${className}`}
+focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+        props.disabled ? "bg-app text-muted cursor-not-allowed" : ""
+      } ${className}`}
       {...props}
     />
   </label>
