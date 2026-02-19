@@ -7,6 +7,8 @@ import {
   Cell,
   Legend,
   LabelList,
+  Line,
+  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -91,6 +93,14 @@ const InventoryDashboard: React.FC = () => {
       { name: "Local", value: local },
     ];
   }, [summaryData]);
+
+  const rawVsFinishedTrendData = useMemo(
+    () => [
+      { name: "Raw Materials", value: Number(summaryData?.rawMaterialItems ?? 0) },
+      { name: "Finished Products", value: Number(summaryData?.finishedProductsItems ?? 0) },
+    ],
+    [summaryData],
+  );
 
   const chartPlaneStyle = useMemo(
     () => ({
@@ -313,6 +323,48 @@ const InventoryDashboard: React.FC = () => {
                       ))}
                     </Pie>
                   </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-gray-900">Raw Materials vs Finished Products</h3>
+            </div>
+
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
+              {summaryLoading ? (
+                <ChartSkeleton variant="line" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={rawVsFinishedTrendData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} width={52} />
+                    <Tooltip
+                      formatter={(v: any) => Number(v ?? 0)}
+                      contentStyle={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 12,
+                        padding: "8px 12px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      }}
+                      itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
+                      cursor={{ fill: "var(--primary)", opacity: 0.1 }}
+                    />
+                    <Legend {...legendProps} />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke={palette.purple}
+                      strokeWidth={3}
+                      dot={false}
+                      name="Count"
+                      label={{ position: "top", fontSize: 10, fill: "#6b7280" }}
+                    />
+                  </LineChart>
                 </ResponsiveContainer>
               )}
             </div>
