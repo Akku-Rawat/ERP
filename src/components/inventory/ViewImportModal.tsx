@@ -398,7 +398,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                       <h3 className="text-sm font-bold text-gray-700 uppercase mb-3 pb-2 border-b">
                         Parties
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border border-theme bg-card gap-4">
                         <InfoField
                           label="Supplier Name"
                           value={importData.supplierName}
@@ -427,7 +427,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                           Status <span className="text-red-500">*</span>
                         </label>
                         <select
-                          className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
+                          className="px-3 py-2 rounded border border-theme bg-card focus:outline-none focus:ring-2 focus:ring-blue-400"
                           value={approvalStatus}
                           onChange={(e) => setApprovalStatus(e.target.value)}
                           required
@@ -443,7 +443,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                           Item Class Level 1
                         </label>
                         <select
-                          className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
+                          className="px-3 py-2 rounded border border-theme bg-card focus:outline-none focus:ring-2 focus:ring-blue-400"
                           value={selectedLevel1}
                           onChange={(e) => handleLevelChange(1, e.target.value)}
                           disabled={loadingItemClasses}
@@ -468,7 +468,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                               Item Class Level 2
                             </label>
                             <select
-                              className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
+                              className="px-3 py-2 rounded border border-theme bg-card focus:outline-none focus:ring-2 focus:ring-blue-400"
                               value={selectedLevel2}
                               onChange={(e) =>
                                 handleLevelChange(2, e.target.value)
@@ -494,7 +494,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                               <span className="text-red-500">*</span>
                             </label>
                             <select
-                              className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
+                              className="px-3 py-2 rounded border border-theme bg-card focus:outline-none focus:ring-2 focus:ring-blue-400"
                               value={selectedLevel3}
                               onChange={(e) =>
                                 handleLevelChange(3, e.target.value)
@@ -521,7 +521,7 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                               Item Class Level 4
                             </label>
                             <select
-                              className="px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
+                              className="px-3 py-2 rounded border border-theme bg-card focus:outline-none focus:ring-2 focus:ring-blue-400"
                               value={selectedLevel4}
                               onChange={(e) =>
                                 handleLevelChange(4, e.target.value)

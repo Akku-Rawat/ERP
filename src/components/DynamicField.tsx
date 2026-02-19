@@ -117,8 +117,26 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
               onChange(apiConfig.fieldName, name);
               onApiChange?.({ name, id });
             }}
+            required={apiConfig.required}
             className="w-full"
           />
+          {/* Hidden input for HTML5 validation */}
+          {apiConfig.required && (
+            <input
+              type="text"
+              value={value || ""}
+              required
+              style={{
+                position: "absolute",
+                opacity: 0,
+                height: 0,
+                width: 0,
+                pointerEvents: "none",
+              }}
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+          )}
         </div>
       );
     }
@@ -135,7 +153,25 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
             value={value}
             fetchData={fetchFn}
             onChange={({ id }) => onChange(apiConfig.fieldName, id)}
+            required={apiConfig.required}
           />
+          {/* Hidden input for HTML5 validation */}
+          {apiConfig.required && (
+            <input
+              type="text"
+              value={value || ""}
+              required
+              style={{
+                position: "absolute",
+                opacity: 0,
+                height: 0,
+                width: 0,
+                pointerEvents: "none",
+              }}
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+          )}
         </div>
       );
     }
@@ -152,7 +188,25 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
             value={value}
             fetchData={fetchFn}
             onChange={({ id }) => onChange(apiConfig.fieldName, id)}
+            required={apiConfig.required}
           />
+          {/* Hidden input for HTML5 validation */}
+          {apiConfig.required && (
+            <input
+              type="text"
+              value={value || ""}
+              required
+              style={{
+                position: "absolute",
+                opacity: 0,
+                height: 0,
+                width: 0,
+                pointerEvents: "none",
+              }}
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+          )}
         </div>
       );
     }

@@ -30,8 +30,8 @@ const emptyForm: Record<string, any> = {
   packagingUnitCode: "",
   svcCharge: "",
   ins: "",
-  sellingPrice: 0,
-  buyingPrice: 0,
+  sellingPrice: "",
+  buyingPrice: "",
   unitOfMeasureCd: "",
   description: "",
   sku: "",
@@ -266,20 +266,57 @@ const ItemModal: React.FC<{
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate that at least Level 3 is selected for item class code
-    if (companyCode === "ZRA" && !selectedLevel3 && !selectedLevel4) {
-      if (selectedLevel1 && !selectedLevel2) {
-        toast.error(
-          "Item Class Level 1 alone is not sufficient. Please select at least Level 3 or higher.",
-        );
-      } else if (selectedLevel2 && !selectedLevel3) {
-        toast.error(
-          "Item Class Level 2 is not sufficient. Please select at least Level 3 or higher.",
-        );
-      } else {
-        toast.error("Please select at least Item Class Level 3 to proceed.");
+    // First, validate Item Class Level for ZRA company
+    if (companyCode === "ZRA") {
+      if (!selectedLevel3 && !selectedLevel4) {
+        if (selectedLevel1 && !selectedLevel2) {
+          toast.error(
+            "Item Class Level 1 alone is not sufficient. Please select at least Level 3 or higher.",
+          );
+          return;
+        } else if (selectedLevel2 && !selectedLevel3) {
+          toast.error(
+            "Item Class Level 2 is not sufficient. Please select at least Level 3 or higher.",
+          );
+          return;
+        } else if (!selectedLevel1) {
+          toast.error("Please select an Item Class Level.");
+          return;
+        } else {
+          toast.error("Please select at least Item Class Level 3 to proceed.");
+          return;
+        }
       }
-      return;
+    }
+
+    // Then validate other required Item Details and Sales & Purchase fields
+    const requiredFields = [
+      { field: "itemTypeCode", label: "Item Type" },
+      { field: "itemGroup", label: "Item Category" },
+      { field: "itemName", label: "Items Name" },
+      { field: "description", label: "Description" },
+      { field: "packagingUnitCode", label: "Packaging Unit" },
+      { field: "originNationCode", label: "Country Code" },
+      { field: "unitOfMeasureCd", label: "Unit of Measurement" },
+      { field: "svcCharge", label: "Service Charge" },
+      { field: "ins", label: "INSURANCE" },
+      { field: "sku", label: "SKU" },
+      { field: "sellingPrice", label: "Selling Price", isNumeric: true },
+      { field: "buyingPrice", label: "Buying Price", isNumeric: true },
+    ];
+
+    for (const { field, label, isNumeric } of requiredFields) {
+      const fieldValue = form[field];
+      const isEmpty = isNumeric
+        ? fieldValue === "" || fieldValue === null || fieldValue === undefined
+        : !fieldValue || String(fieldValue).trim() === "";
+
+      if (isEmpty) {
+        toast.error(
+          `${label} is required. Please fill in all required fields.`,
+        );
+        return;
+      }
     }
 
     try {
@@ -388,7 +425,7 @@ const ItemModal: React.FC<{
       maxWidth="6xl"
       height="90vh"
     >
-      <form onSubmit={handleSubmit} className="h-full flex flex-col">
+      <form onSubmit={handleSubmit} noValidate className="h-full flex flex-col">
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
@@ -450,7 +487,8 @@ const ItemModal: React.FC<{
                             {/* Level 1 */}
                             <div className="flex flex-col gap-1 text-sm">
                               <span className="font-medium text-muted">
-                                Item Class Level 1
+                                Item Class Level 1{" "}
+                                <span className="text-red-500">*</span>
                               </span>
                               <select
                                 value={selectedLevel1}
@@ -458,12 +496,13 @@ const ItemModal: React.FC<{
                                   handleLevelChange(1, e.target.value)
                                 }
                                 disabled={loadingItemClasses}
+                                required
                                 className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                               >
                                 <option value="">
                                   {loadingItemClasses
                                     ? "Loading..."
-                                    : "Select Level 1"}
+                                    : "Select Level 1 (Required)"}
                                 </option>
                                 {getCodesByLevel("1").map((option) => (
                                   <option key={option.cd} value={option.cd}>
@@ -599,9 +638,11 @@ const ItemModal: React.FC<{
                     <Input
                       label="Selling Price"
                       name="sellingPrice"
+                      type="number"
                       value={form.sellingPrice || ""}
                       onChange={handleForm}
                       className="w-full col-span-3"
+                      required
                     />
                     <Input
                       label="Sales Account"
@@ -609,13 +650,16 @@ const ItemModal: React.FC<{
                       value={form.salesAccount || ""}
                       onChange={handleForm}
                       className="w-full col-span-3"
+                      required
                     />
                     <Input
                       label="Buying Price"
                       name="buyingPrice"
+                      type="number"
                       value={form.buyingPrice || ""}
                       onChange={handleForm}
                       className="w-full"
+                      required
                     />
                     <Input
                       label="Purchase Account"
@@ -623,6 +667,7 @@ const ItemModal: React.FC<{
                       value={form.purchaseAccount || ""}
                       onChange={handleForm}
                       className="w-full"
+                      required
                     />
                     <select
                       name="taxPreference"
@@ -640,6 +685,7 @@ const ItemModal: React.FC<{
                       value={form.preferredVendor || ""}
                       onChange={handleForm}
                       className="w-full col-span-3"
+                      required
                     />
                   </div>
                 </div>
@@ -982,13 +1028,16 @@ const ItemModal: React.FC<{
   );
 };
 
-// Input component unchanged
+// Input component with required support
 const Input = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement> & { label: string }
 >(({ label, className = "", ...props }, ref) => (
   <label className="flex flex-col gap-1 text-sm w-full">
-    <span className="font-medium text-muted">{label}</span>
+    <span className="font-medium text-muted">
+      {label}
+      {props.required && <span className="text-red-500 ml-1">*</span>}
+    </span>
     <input
       ref={ref}
       className={`rounded border border-theme px-3 py-2 bg-card text-main 
