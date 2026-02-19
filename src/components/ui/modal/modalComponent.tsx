@@ -12,7 +12,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, icon, options = [], className = "", ...props }, ref) => (
+  ({ label, icon, options = [], children, className = "", ...props }, ref) => (
     <label className="flex flex-col  text-sm w-full group">
       <span className="block text-[10px] font-medium text-main mb-1">
         {icon && (
@@ -29,7 +29,7 @@ export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
         {...props}
         value={props.value ?? ""}
         className={[
-          "w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card",
+          "w-full py-2 px-3 border border-theme rounded text-[13px] text-main bg-card",
           props.disabled
             ? "bg-app cursor-not-allowed opacity-60"
             : "border-[var(--border)] hover:border-primary/40",
@@ -40,11 +40,12 @@ export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
           Select
         </option>
 
-        {options.map((opt, idx) => (
-          <option key={`${opt.value}-${idx}`} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
+        {children ??
+          options.map((opt, idx) => (
+            <option key={`${opt.value}-${idx}`} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
       </select>
     </label>
   ),
@@ -82,7 +83,7 @@ export const ModalInput = React.forwardRef<
       {...props}
       value={props.value ?? ""}
       className={[
-        "w-full py-1 px-2 border rounded text-[11px] text-main bg-card transition-all",
+        "w-full py-2 px-3 border rounded text-[13px] text-main bg-card transition-all",
 
         error
           ? "border-danger focus:border-danger"

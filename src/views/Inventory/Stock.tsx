@@ -120,8 +120,8 @@ const Items: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleEdit = async (stockId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleEdit = async (stockId: string, e?: React.MouseEvent<Element>) => {
+    e?.stopPropagation();
     try {
       const res = await getStockById(stockId);
       setViewStockData(res?.data || res);
@@ -132,8 +132,8 @@ const Items: React.FC = () => {
     }
   };
 
-  const handleDeleteClick = (item: ItemSummary, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDeleteClick = (item: ItemSummary, e?: React.MouseEvent<Element>) => {
+    e?.stopPropagation();
     setItemToDelete(item);
     setDeleteModalOpen(true);
   };
@@ -183,8 +183,26 @@ const Items: React.FC = () => {
    */
 
   const columns: Column<ItemSummary>[] = [
-    { key: "id", header: "Stock ID", align: "left" },
-    { key: "date", header: "Date", align: "left" },
+    {
+      key: "id",
+      header: "Stock ID",
+      align: "left",
+      render: (i) => (
+        <span className="whitespace-nowrap tabular-nums font-semibold text-main">
+          {i.id}
+        </span>
+      ),
+    },
+    {
+      key: "date",
+      header: "Date",
+      align: "left",
+      render: (i) => (
+        <span className="whitespace-nowrap text-xs text-muted">
+          {i.date ? new Date(i.date).toLocaleDateString() : "—"}
+        </span>
+      ),
+    },
     { key: "orgSarNo", header: "orgSarNo", align: "left" },
     { key: "registrationType", header: "Registration Type", align: "left" },
     { key: "stockEntryType", header: "Stock Entry Type", align: "left" },
@@ -208,8 +226,8 @@ const Items: React.FC = () => {
         <ActionGroup>
           <ActionButton type="view" onClick={(e) => handleEdit(i.id, e)} iconOnly />
           <ActionMenu
-            onEdit={(e) => handleEdit(i.id, e as any)}
-            onDelete={(e) => handleDeleteClick(i, e as any)}
+            onEdit={(e) => handleEdit(i.id, e)}
+            onDelete={(e) => handleDeleteClick(i, e)}
           />
         </ActionGroup>
       ),

@@ -49,6 +49,25 @@ export const useTableLogic = <T extends Record<string, any>>({
 
   const numericKey = React.useMemo(() => detectNumericKey(columns), [columns]);
   const customerIdKey = React.useMemo(() => detectCustomerIdKey(columns), [columns]);
+
+  const defaultSortKey = React.useMemo(() => {
+    const keys = columns
+      .map((c) => c.key)
+      .filter((k) => k && k.toLowerCase() !== "actions");
+
+    const byPriority = keys.find((k) => {
+      const lk = k.toLowerCase();
+      return (
+        lk.includes("number") ||
+        lk.endsWith("no") ||
+        lk.includes("_no") ||
+        lk.includes("id")
+      );
+    });
+    return byPriority ?? keys[0] ?? null;
+  }, [columns]);
+
+  const sortKey = numericKey ?? customerIdKey ?? defaultSortKey;
   
   const [yearFilter, setYearFilter] = React.useState("");
 const [leaveTypeFilter, setLeaveTypeFilter] = React.useState("");
@@ -159,10 +178,10 @@ if (leaveTypeFilter) {
       return true;
     });
 
-    if (customerIdKey && sortOrder) {
+    if (sortKey && sortOrder) {
       rows = rows.slice().sort((a, b) => {
-        const va = a[customerIdKey];
-        const vb = b[customerIdKey];
+        const va = a[sortKey];
+        const vb = b[sortKey];
         return compareIdSmart(va, vb, sortOrder);
       });
     }
@@ -180,6 +199,7 @@ if (leaveTypeFilter) {
   leaveTypeFilter,  
     numericKey,
     customerIdKey,
+    sortKey,
     sortOrder,
   ]);
 
