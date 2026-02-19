@@ -223,8 +223,8 @@ const SalesDashboard: React.FC = () => {
   };
 
   return (
-    <div className="bg-app min-h-screen px-4 sm:px-6 pb-6 pt-3 lg:h-screen lg:overflow-hidden">
-      <div className="max-w-[1600px] mx-auto lg:h-full flex flex-col lg:min-h-0">
+    <div className="bg-app min-h-screen px-4 sm:px-6 pb-6 pt-3">
+      <div className="max-w-[1600px] mx-auto flex flex-col">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
           {[
             {
@@ -281,7 +281,7 @@ const SalesDashboard: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:flex-1 lg:min-h-0 lg:overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold text-gray-900">Monthly Sales</h3>

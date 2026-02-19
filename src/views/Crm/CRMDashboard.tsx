@@ -178,8 +178,8 @@ const CRMDashboard: React.FC = () => {
   );
 
   return (
-    <div className="bg-app min-h-screen px-4 sm:px-6 pb-6 pt-0 lg:h-screen lg:overflow-hidden">
-      <div className="max-w-[1600px] mx-auto lg:h-full flex flex-col lg:min-h-0">
+    <div className="bg-app min-h-screen px-4 sm:px-6 pb-6 pt-0">
+      <div className="max-w-[1600px] mx-auto flex flex-col">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-3 -mt-3 lg:-mt-3">
           {kpiCards.map((card, idx) => (
             <div
@@ -205,7 +205,7 @@ const CRMDashboard: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:flex-1 lg:min-h-0 lg:overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
               <h3 className="text-sm font-bold text-gray-900">Customer Types</h3>
@@ -252,7 +252,7 @@ const CRMDashboard: React.FC = () => {
                 <ChartSkeleton variant="pie" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 8, right: 12, bottom: 8, left: 12 }}>
                 <Tooltip
                   formatter={(v: any) => Number(v ?? 0)}
                   contentStyle={{
@@ -330,7 +330,7 @@ const CRMDashboard: React.FC = () => {
                   nameKey="name"
                   cx="50%"
                   cy="45%"
-                  outerRadius={82}
+                  outerRadius={76}
                   label={renderDonutLabel}
                   labelLine={false}
                 >
@@ -354,7 +354,7 @@ const CRMDashboard: React.FC = () => {
                 <ChartSkeleton variant="bar" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={totalsOverviewBarData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <BarChart data={totalsOverviewBarData} margin={{ top: 28, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} width={52} />
@@ -372,7 +372,7 @@ const CRMDashboard: React.FC = () => {
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar dataKey="value" fill={palette.blue} radius={[6, 6, 0, 0]} name="Customers">
-                  <LabelList dataKey="value" position="top" fill="#6b7280" fontSize={10} />
+                  <LabelList dataKey="value" position="top" offset={8} fill="#6b7280" fontSize={10} />
                 </Bar>
                   </BarChart>
                 </ResponsiveContainer>
