@@ -301,7 +301,7 @@ if (!formData.paymentInformation?.paymentTerms) {
       if (!res || res.status_code !== 200) return;
 
       const data = res.data;
-
+      console.log('RAW API DATA:', JSON.stringify(data));
       setFormData((prev) => {
         const items = [...prev.items];
 
@@ -309,9 +309,11 @@ if (!formData.paymentInformation?.paymentTerms) {
           ...items[index],
           itemCode: data.id,
           description: data.itemDescription ?? data.itemName ?? "",
-          price: data.sellingPrice ?? items[index].price,
-          vatRate: data.taxPerct ?? 0,
+           price: Number(data.sellingPrice ?? items[index].price),   
+        vatRate: Number(data.taxPerct ?? 0), 
           vatCode: prev.invoiceType === "Export" ? "C1" : (data.taxCode ?? ""),
+            quantity: Number(items[index].quantity) || 1,  
+  discount: Number(items[index].discount) || 0,
         };
 
         return { ...prev, items };
@@ -379,10 +381,11 @@ if (!formData.paymentInformation?.paymentTerms) {
       items: invoice.items.map((it: any) => {
         const base =
           Number(it.quantity) * Number(it.price) - Number(it.discount);
-        const taxAmount = Number(it.vatTaxableAmount ?? 0);
-        const taxRate =
-          base > 0 ? Number(((taxAmount / base) * 100).toFixed(2)) : 0;
-
+        const taxRate = it.vatRate != null && it.vatRate !== ""
+          ? Number(it.vatRate)
+          : base > 0
+            ? Number(((Number(it.vatTaxableAmount ?? 0) / base) * 100).toFixed(2))
+            : 0;
         return {
           itemCode: it.itemCode,
           description: it.description ?? "",

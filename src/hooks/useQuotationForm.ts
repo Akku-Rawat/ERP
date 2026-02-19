@@ -297,8 +297,8 @@ if (!company) return;
           ...items[index],
           itemCode: data.id,
           description: data.itemDescription ?? data.itemName ?? "",
-          price: data.sellingPrice ?? items[index].price,
-          vatRate: data.taxPerct ?? 0,
+          price: Number(data.sellingPrice ?? items[index].price),
+          vatRate: Number(data.taxPerct ?? 0),
           vatCode:
             formData.invoiceType === "Export" ? "C1" : (data.taxCode ?? ""),
         };

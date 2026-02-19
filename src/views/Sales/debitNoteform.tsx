@@ -391,9 +391,13 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                     <tbody >
                       {paginatedItems.map((it, idx) => {
                         const i = ui.page * 5 + idx;
-                        const taxVal = parseFloat(it.vatRate || "0");
-                        const amount =
-                          it.quantity * it.price - it.discount + taxVal;
+                        const qty = Number(it.quantity) || 0;
+                        const price = Number(it.price) || 0;
+                        const discount = Number(it.discount) || 0;
+                        const vatRate = Number(it.vatRate) || 0;
+                        const base = qty * price - discount;
+                        const taxAmount = base * (vatRate / 100);
+                        const amount = base + taxAmount;
                         return (
                           <tr
                             key={i}
@@ -440,7 +444,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                             <td className="px-2 py-2">
                               <input
                                 type="number"
-                                className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                className="w-[70px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 name="price"
                                 value={it.price}
                                 disabled
