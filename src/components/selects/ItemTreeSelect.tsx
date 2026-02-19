@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { showApiError, showLoading, closeSwal } from '../../utils/alert';
+import { showApiError, showLoading, closeSwal } from "../../utils/alert";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface TreeItem {
@@ -22,10 +22,30 @@ interface Props {
 
 // ─── Level colors ─────────────────────────────────────────────────────────────
 const LEVEL_COLORS = [
-  { bg: "bg-violet-50", text: "text-violet-700", border: "border-violet-200", hover: "hover:bg-violet-100 hover:border-violet-300" },
-  { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200", hover: "hover:bg-blue-100 hover:border-blue-300" },
-  { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", hover: "hover:bg-emerald-100 hover:border-emerald-300" },
-  { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", hover: "hover:bg-amber-100 hover:border-amber-300" },
+  {
+    bg: "bg-violet-50",
+    text: "text-violet-700",
+    border: "border-violet-200",
+    hover: "hover:bg-violet-100 hover:border-violet-300",
+  },
+  {
+    bg: "bg-blue-50",
+    text: "text-blue-700",
+    border: "border-blue-200",
+    hover: "hover:bg-blue-100 hover:border-blue-300",
+  },
+  {
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    border: "border-emerald-200",
+    hover: "hover:bg-emerald-100 hover:border-emerald-300",
+  },
+  {
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    border: "border-amber-200",
+    hover: "hover:bg-amber-100 hover:border-amber-300",
+  },
 ] as const;
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -49,7 +69,8 @@ export default function ItemTreeSelect({
 
   // ── Accessors ────────────────────────────────────────────────────────────
   const getId = (item: any) => item.itemClsCd ?? item.code ?? String(item);
-  const getName = (item: any) => item.itemClsNm ?? item.name ?? item.code_name ?? "";
+  const getName = (item: any) =>
+    item.itemClsNm ?? item.name ?? item.code_name ?? "";
   const getLevel = (item: any) => Number(item.itemClsLvl ?? item.level ?? 1);
   const getDisplayName = (item: any) => {
     if (displayFormatter) return displayFormatter(item);
@@ -59,41 +80,55 @@ export default function ItemTreeSelect({
   };
 
   // ── Build tree from flat list ────────────────────────────────────────────
-  const buildTree = useCallback((flatList: any[]): TreeItem[] => {
-    const map: Record<string, TreeItem> = {};
-    const roots: TreeItem[] = [];
+  const buildTree = useCallback(
+    (flatList: any[]): TreeItem[] => {
+      const map: Record<string, TreeItem> = {};
+      const roots: TreeItem[] = [];
 
-    flatList
-      .filter((item) => item.useYn === "Y" || item.useYn === true)
-      .forEach((item) => {
-        const code = getId(item);
-        map[code] = {
-          code,
-          name: getDisplayName(item),
-          level: getLevel(item),
-          children: [],
-          originalData: item,
-        };
+      flatList
+        .filter((item) => item.useYn === "Y" || item.useYn === true)
+        .forEach((item) => {
+          const code = getId(item);
+          map[code] = {
+            code,
+            name: getDisplayName(item),
+            level: getLevel(item),
+            children: [],
+            originalData: item,
+          };
+        });
+
+      Object.values(map).forEach((node) => {
+        if (node.level === 1) {
+          roots.push(node);
+          return;
+        }
+        let parentCode: string | null = null;
+        if (node.level === 2) parentCode = node.code.slice(0, 2) + "000000";
+        else if (node.level === 3) parentCode = node.code.slice(0, 4) + "0000";
+        else if (node.level === 4) parentCode = node.code.slice(0, 6) + "00";
+        if (parentCode && map[parentCode]) map[parentCode].children.push(node);
       });
 
-    Object.values(map).forEach((node) => {
-      if (node.level === 1) { roots.push(node); return; }
-      let parentCode: string | null = null;
-      if (node.level === 2) parentCode = node.code.slice(0, 2) + "000000";
-      else if (node.level === 3) parentCode = node.code.slice(0, 4) + "0000";
-      else if (node.level === 4) parentCode = node.code.slice(0, 6) + "00";
-      if (parentCode && map[parentCode]) map[parentCode].children.push(node);
-    });
+      const sort = (nodes: TreeItem[]): TreeItem[] =>
+        nodes
+          .sort((a, b) => a.code.localeCompare(b.code))
+          .map((n) => ({ ...n, children: sort(n.children) }));
 
-    const sort = (nodes: TreeItem[]): TreeItem[] =>
-      nodes.sort((a, b) => a.code.localeCompare(b.code)).map((n) => ({ ...n, children: sort(n.children) }));
-
-    return sort(roots);
-  }, [displayFormatter]);
+      return sort(roots);
+    },
+    [displayFormatter],
+  );
 
   // ── Find node and its path ───────────────────────────────────────────────
-  const findNodeWithPath = (code: string): { node: TreeItem | null; path: TreeItem[] } => {
-    const walk = (nodes: TreeItem[], target: string, path: TreeItem[]): { node: TreeItem | null; path: TreeItem[] } => {
+  const findNodeWithPath = (
+    code: string,
+  ): { node: TreeItem | null; path: TreeItem[] } => {
+    const walk = (
+      nodes: TreeItem[],
+      target: string,
+      path: TreeItem[],
+    ): { node: TreeItem | null; path: TreeItem[] } => {
       for (const n of nodes) {
         if (n.code === target) return { node: n, path: [...path, n] };
         const result = walk(n.children, target, [...path, n]);
@@ -109,16 +144,19 @@ export default function ItemTreeSelect({
     if (!term.trim()) return [];
     const lower = term.toLowerCase();
     const results: TreeItem[] = [];
-    
+
     const collect = (nodes: TreeItem[]) => {
       nodes.forEach((node) => {
-        if (node.code.toLowerCase().includes(lower) || node.name.toLowerCase().includes(lower)) {
+        if (
+          node.code.toLowerCase().includes(lower) ||
+          node.name.toLowerCase().includes(lower)
+        ) {
           results.push(node);
         }
         collect(node.children);
       });
     };
-    
+
     collect(treeData);
     return results.slice(0, 20); // Limit to 20 results
   };
@@ -128,16 +166,20 @@ export default function ItemTreeSelect({
     (async () => {
       try {
         setLoading(true);
-        showLoading("Loading options..."); 
+
         const res = await fetchData();
         let data =
-          res?.data?.itemClsList ?? res?.data?.data?.itemClsList ??
-          res?.data?.data?.list ?? res?.data?.data?.items ??
-          res?.data?.data ?? res?.data ?? res;
+          res?.data?.itemClsList ??
+          res?.data?.data?.itemClsList ??
+          res?.data?.data?.list ??
+          res?.data?.data?.items ??
+          res?.data?.data ??
+          res?.data ??
+          res;
         if (!Array.isArray(data)) data = [];
         const tree = buildTree(data);
         setTreeData(tree);
-        
+
         // If there's a value, set the path
         if (value && tree.length > 0) {
           const { path } = findNodeWithPath(value);
@@ -147,10 +189,8 @@ export default function ItemTreeSelect({
         }
       } catch {
         setTreeData([]);
-         showApiError(err);  
       } finally {
         setLoading(false);
-        closeSwal();
       }
     })();
   }, [fetchData, buildTree, value]);
@@ -167,7 +207,10 @@ export default function ItemTreeSelect({
   // ── Outside click ────────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
         setSearch("");
       }
@@ -242,9 +285,11 @@ export default function ItemTreeSelect({
             className={`
               w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border
               text-left text-sm transition-all
-              ${loading 
-                ? "bg-gray-50 border-gray-200 cursor-not-allowed" 
-                : "bg-white border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"}
+              ${
+                loading
+                  ? "bg-gray-50 border-gray-200 cursor-not-allowed"
+                  : "bg-white border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              }
             `}
           >
             {loading ? (
@@ -260,12 +305,26 @@ export default function ItemTreeSelect({
                     const isLast = i === selectedPath.length - 1;
                     return (
                       <React.Fragment key={node.code}>
-                        <span className={`text-xs px-2 py-0.5 rounded-md border font-medium truncate max-w-[140px] ${color.bg} ${color.text} ${color.border} ${!isLast && "opacity-60"}`}>
-                          {node.name.length > 20 ? node.name.slice(0, 18) + "…" : node.name}
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-md border font-medium truncate max-w-[140px] ${color.bg} ${color.text} ${color.border} ${!isLast && "opacity-60"}`}
+                        >
+                          {node.name.length > 20
+                            ? node.name.slice(0, 18) + "…"
+                            : node.name}
                         </span>
                         {!isLast && (
-                          <svg className="w-3 h-3 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          <svg
+                            className="w-3 h-3 text-gray-300 shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
                           </svg>
                         )}
                       </React.Fragment>
@@ -277,19 +336,49 @@ export default function ItemTreeSelect({
                   onClick={handleClear}
                   className="shrink-0 w-5 h-5 rounded-full bg-gray-100 hover:bg-red-100 hover:text-red-500 flex items-center justify-center text-gray-400 transition-colors"
                 >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
-                <svg className="shrink-0 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg
+                  className="shrink-0 w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </>
             ) : (
               <>
                 <span className="text-gray-400 flex-1">{placeholder}</span>
-                <svg className="shrink-0 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg
+                  className="shrink-0 w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </>
             )}
@@ -302,8 +391,18 @@ export default function ItemTreeSelect({
             {/* Search bar */}
             <div className="p-3 border-b bg-gray-50">
               <div className="relative">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
                 <input
                   ref={searchInputRef}
@@ -318,8 +417,18 @@ export default function ItemTreeSelect({
                     onClick={() => setSearch("")}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 )}
@@ -347,12 +456,25 @@ export default function ItemTreeSelect({
                             className={`w-full text-left px-3 py-2 rounded-lg border transition-all ${color.bg} ${color.border} ${color.hover}`}
                           >
                             <div className="flex items-center gap-2">
-                              <span className={`text-xs font-semibold ${color.text}`}>L{node.level}</span>
-                              <span className="text-sm font-medium text-gray-700 flex-1">{node.name}</span>
-                              {!isLeaf && <span className="text-xs text-gray-400">{node.children.length} →</span>}
+                              <span
+                                className={`text-xs font-semibold ${color.text}`}
+                              >
+                                L{node.level}
+                              </span>
+                              <span className="text-sm font-medium text-gray-700 flex-1">
+                                {node.name}
+                              </span>
+                              {!isLeaf && (
+                                <span className="text-xs text-gray-400">
+                                  {node.children.length} →
+                                </span>
+                              )}
                             </div>
                             <div className="text-xs text-gray-500 mt-0.5">
-                              {path.slice(0, -1).map(n => n.name).join(" › ")}
+                              {path
+                                .slice(0, -1)
+                                .map((n) => n.name)
+                                .join(" › ")}
                             </div>
                           </button>
                         );
@@ -378,8 +500,18 @@ export default function ItemTreeSelect({
                       </button>
                       {currentPath.map((node, i) => (
                         <React.Fragment key={node.code}>
-                          <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          <svg
+                            className="w-3 h-3 text-gray-300"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
                           </svg>
                           <button
                             onClick={() => handleBreadcrumbClick(i + 1)}
@@ -395,14 +527,17 @@ export default function ItemTreeSelect({
                   {/* Level indicator */}
                   <div className={`px-3 py-2 border-b ${levelColor.bg}`}>
                     <div className="text-xs font-semibold uppercase text-gray-500">
-                      Level {currentLevel} {currentPath.length === 0 && "— Choose Category"}
+                      Level {currentLevel}{" "}
+                      {currentPath.length === 0 && "— Choose Category"}
                     </div>
                   </div>
 
                   {/* Options grid */}
                   <div className="p-3">
                     {loading ? (
-                      <div className="text-center py-8 text-gray-400">Loading…</div>
+                      <div className="text-center py-8 text-gray-400">
+                        Loading…
+                      </div>
                     ) : currentOptions.length > 0 ? (
                       <div className="grid grid-cols-1 gap-2">
                         {currentOptions.map((node) => {
@@ -414,14 +549,18 @@ export default function ItemTreeSelect({
                               onClick={() => handleSelect(node)}
                               className={`
                                 text-left px-4 py-3 rounded-lg border-2 transition-all
-                                ${isSelected 
-                                  ? "bg-indigo-50 border-indigo-500 ring-2 ring-indigo-200" 
-                                  : `${levelColor.bg} ${levelColor.border} ${levelColor.hover}`}
+                                ${
+                                  isSelected
+                                    ? "bg-indigo-50 border-indigo-500 ring-2 ring-indigo-200"
+                                    : `${levelColor.bg} ${levelColor.border} ${levelColor.hover}`
+                                }
                               `}
                             >
                               <div className="flex items-center gap-3">
                                 <div className="flex-1 min-w-0">
-                                  <div className={`font-semibold text-sm ${isSelected ? "text-indigo-700" : "text-gray-700"}`}>
+                                  <div
+                                    className={`font-semibold text-sm ${isSelected ? "text-indigo-700" : "text-gray-700"}`}
+                                  >
                                     {node.name}
                                   </div>
                                   <div className="text-xs text-gray-500 mt-0.5">
@@ -431,16 +570,38 @@ export default function ItemTreeSelect({
                                 {hasChildren ? (
                                   <div className="flex items-center gap-1.5 text-xs text-gray-500">
                                     <span>{node.children.length}</span>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    <svg
+                                      className="w-4 h-4"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 5l7 7-7 7"
+                                      />
                                     </svg>
                                   </div>
                                 ) : isSelected ? (
-                                  <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                  <svg
+                                    className="w-5 h-5 text-indigo-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2.5}
+                                      d="M5 13l4 4L19 7"
+                                    />
                                   </svg>
                                 ) : (
-                                  <span className="text-xs text-gray-400">Select</span>
+                                  <span className="text-xs text-gray-400">
+                                    Select
+                                  </span>
                                 )}
                               </div>
                             </button>
@@ -460,8 +621,18 @@ export default function ItemTreeSelect({
             {/* Footer */}
             {selectedNode && !search && (
               <div className="px-3 py-2 border-t bg-indigo-50 flex items-center gap-2">
-                <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-4 h-4 text-indigo-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span className="text-xs text-indigo-700 font-medium flex-1 truncate">
                   Selected: {selectedNode.name}
