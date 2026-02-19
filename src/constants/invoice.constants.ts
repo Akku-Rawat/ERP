@@ -6,7 +6,7 @@ export const EMPTY_ITEM: InvoiceItem = {
   quantity: 0,
   price: 0,
   discount: 0,
-  vatRate: "",
+ vatRate: 0,
   vatCode: "",
 };
 

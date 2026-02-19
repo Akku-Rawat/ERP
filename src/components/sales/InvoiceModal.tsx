@@ -5,8 +5,8 @@ import TermsAndCondition from "../TermsAndCondition";
 import { User, Mail, Phone } from "lucide-react";
 import CustomerSelect from "../selects/CustomerSelect";
 import Modal from "../../components/ui/modal/modal";
-import {  Button } from "../../components/ui/modal/formComponent";
-import { ModalInput,ModalSelect } from "../ui/modal/modalComponent";
+import { Button } from "../../components/ui/modal/formComponent";
+import { ModalInput, ModalSelect } from "../ui/modal/modalComponent";
 import ItemSelect from "../selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
@@ -45,22 +45,20 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   } = useInvoiceForm(isOpen, onClose, onSubmit);
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
-const handleFormSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  try {
-    const payload = await actions.handleSubmit(e);
+    try {
+      const payload = await actions.handleSubmit(e);
 
-    if (!payload) return;
+      if (!payload) return;
 
-    // ❗ Wait for parent API response
-    await onSubmit?.(payload);
-
-  } catch (err: any) {
-    showApiError(err);
-  }
-};
-
+      // ❗ Wait for parent API response
+      await onSubmit?.(payload);
+    } catch (err: any) {
+      showApiError(err);
+    }
+  };
 
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
 
@@ -93,18 +91,19 @@ const handleFormSubmit = async (e: React.FormEvent) => {
     >
       <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
-           <div className="bg-app border-b border-theme px-8 shrink-0">
+        <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
             {(["details", "terms", "address"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => ui.setActiveTab(tab)}
-             className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all 
-              ${ui.activeTab === tab
-                        ? "text-primary border-b-[3px] border-primary"
-                    : "text-muted border-b-[3px] border-transparent hover:text-main"
-                  }`}
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all 
+              ${
+                ui.activeTab === tab
+                  ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
+              }`}
               >
                 {tab === "details" && "Details"}
                 {tab === "terms" && "Terms & Conditions"}
@@ -133,7 +132,7 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                     type="date"
                     value={formData.dateOfInvoice}
                     onChange={actions.handleInputChange}
-                     className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                   />
 
                   <div>
@@ -147,14 +146,14 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                     />
                   </div>
 
-                  <div >
+                  <div>
                     <ModalSelect
                       label="Currency"
                       name="currencyCode"
                       value={formData.currencyCode}
                       onChange={actions.handleInputChange}
                       options={[...currencyOptions]}
-                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   </div>
 
@@ -168,10 +167,6 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   </div>
-
-                 
-
-                    
 
                   {/* <div>
                     <ModalInput
@@ -206,7 +201,7 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                         disabled
                         value={formData.destnCountryCd}
                         onChange={actions.handleInputChange}
-                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                       />
                     </div>
                   )}
@@ -218,13 +213,11 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                       value={formData.lpoNumber}
                       onChange={actions.handleInputChange}
                       placeholder="local purchase order number"
-                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   )}
                 </div>
               </div>
-
-             
 
               {/* ITEMS */}
               <div className="grid grid-cols-[4fr_1fr] gap-4">
@@ -235,30 +228,48 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                     </h3>
                   </div>
 
-
-
-                  <div >
+                  <div>
                     <table className="w-full border-collapse text-[10px]">
-                      <thead >
+                      <thead>
                         <tr className="border-b border-theme">
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">#</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">Item</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">Description</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">Quantity</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Unit Price</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Discount</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax Code</th>
-                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">Amount</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">
+                            #
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">
+                            Item
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">
+                            Description
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">
+                            Quantity
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
+                            Unit Price
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
+                            Discount
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
+                            Tax
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
+                            Tax Code
+                          </th>
+                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">
+                            Amount
+                          </th>
                           <th></th>
                         </tr>
                       </thead>
-                      <tbody >
+                      <tbody>
                         {paginatedItems.map((it, idx) => {
                           const i = ui.page * 5 + idx;
-                          const taxVal = parseFloat(it.vatRate || "0");
-                          const amount =
-                            it.quantity * it.price - it.discount + taxVal;
+                          const base = it.quantity * it.price - it.discount;
+                          const taxAmount =
+                            base * (Number(it.vatRate || 0) / 100);
+                          const amount = base + taxAmount;
+
                           return (
                             <tr
                               key={i}
@@ -290,7 +301,9 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                   className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="description"
                                   value={it.description}
-                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -299,7 +312,9 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                   className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="quantity"
                                   value={it.quantity}
-                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -309,7 +324,9 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                   name="price"
                                   value={it.price}
                                   disabled
-                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -318,7 +335,9 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                   className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="discount"
                                   value={it.discount}
-                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -328,7 +347,9 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                   name="vatRate"
                                   value={it.vatRate}
                                   disabled
-                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -338,7 +359,9 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                   name="vatCode"
                                   value={it.vatCode}
                                   disabled
-                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
                                 />
                               </td>
                               <td className="px-2 py-2 text-right font-semibold text-gray-900 whitespace-nowrap">
@@ -349,7 +372,7 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                 <button
                                   type="button"
                                   onClick={() => actions.removeItem(i)}
-                               className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
+                                  className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
                                   title="Remove item"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -371,13 +394,12 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                       <Plus className="w-4 h-4" /> Add Item
                     </button>
 
-
                     {(ui.itemCount > 5 || ui.page > 0) && (
                       <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
-
                         <div className="text-[11px] text-muted whitespace-nowrap">
                           Showing {ui.page * 5 + 1} to{" "}
-                          {Math.min((ui.page + 1) * 5, ui.itemCount)} of {ui.itemCount} items
+                          {Math.min((ui.page + 1) * 5, ui.itemCount)} of{" "}
+                          {ui.itemCount} items
                         </div>
 
                         <div className="flex gap-1.5 items-center">
@@ -399,12 +421,10 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                             Next
                           </button>
                         </div>
-
                       </div>
                     )}
                   </div>
                 </div>
-
 
                 {/* RIGHT SIDE */}
                 <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
@@ -429,34 +449,34 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                         {customerDetails?.mobile_no ?? "+123 4567890"}
                       </div>
                       {customerDetails && (
-                      <div className="bg-card rounded-lg ">
-                        <h3 className="text-[11px] font-semibold text-main mb-1">
-                          Invoice Information
-                        </h3>
+                        <div className="bg-card rounded-lg ">
+                          <h3 className="text-[11px] font-semibold text-main mb-1">
+                            Invoice Information
+                          </h3>
 
-                        <div className="flex flex-col gap-1">
-                          {/* Invoice Type */}
-                          <div className="flex items-center gap-19 text-xs">
-                            <span className="text-muted">Invoice Type</span>
-                            <span className="font-medium text-main">
-                              {formData.invoiceType}
-                            </span>
-                          </div>
-
-                          {/* Destination Country – only for Export */}
-                          {formData.invoiceType === "Export" && (
-                            <div className="flex items-center gap-15 text-xs">
-                              <span className="text-muted">
-                                Destination Country
-                              </span>
+                          <div className="flex flex-col gap-1">
+                            {/* Invoice Type */}
+                            <div className="flex items-center gap-19 text-xs">
+                              <span className="text-muted">Invoice Type</span>
                               <span className="font-medium text-main">
-                                {formData.destnCountryCd || "-"}
+                                {formData.invoiceType}
                               </span>
                             </div>
-                          )}
+
+                            {/* Destination Country – only for Export */}
+                            {formData.invoiceType === "Export" && (
+                              <div className="flex items-center gap-15 text-xs">
+                                <span className="text-muted">
+                                  Destination Country
+                                </span>
+                                <span className="font-medium text-main">
+                                  {formData.destnCountryCd || "-"}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                     </div>
                   </div>
 
@@ -489,7 +509,9 @@ const handleFormSubmit = async (e: React.FormEvent) => {
 
                       <div className="mt-2 p-2 bg-primary rounded-lg">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-semibold text-white">Grand Total</span>
+                          <span className="text-sm font-semibold text-white">
+                            Grand Total
+                          </span>
                           <span className="text-sm font-bold text-white">
                             {symbol} {totals.grandTotal.toFixed(2)}
                           </span>
@@ -497,7 +519,6 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
@@ -515,56 +536,44 @@ const handleFormSubmit = async (e: React.FormEvent) => {
 
           {/* ADDRESS */}
           {ui.activeTab === "address" && (
-  <div className="space-y-6 overflow-hidden">
+            <div className="space-y-6 overflow-hidden">
+              {/* PAYMENT INFO */}
+              <PaymentInfoBlock
+                data={formData.paymentInformation}
+                onChange={(
+                  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+                ) => actions.handleInputChange(e, "paymentInformation")}
+                paymentMethodOptions={paymentMethodOptions}
+              />
 
-    {/* PAYMENT INFO */}
-    <PaymentInfoBlock
-      data={formData.paymentInformation}
-      onChange={(
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-      ) =>
-        actions.handleInputChange(e, "paymentInformation")
-      }
-      paymentMethodOptions={paymentMethodOptions}
-    />
+              {/* BILLING + SHIPPING */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Billing */}
+                <AddressBlock
+                  type="billing"
+                  title="Billing Address"
+                  subtitle="Invoice and payment details"
+                  data={formData.billingAddress}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    actions.handleInputChange(e, "billingAddress")
+                  }
+                />
 
-    {/* BILLING + SHIPPING */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-      {/* Billing */}
-      <AddressBlock
-        type="billing"
-        title="Billing Address"
-        subtitle="Invoice and payment details"
-        data={formData.billingAddress}
-        onChange={(
-          e: React.ChangeEvent<HTMLInputElement>
-        ) =>
-          actions.handleInputChange(e, "billingAddress")
-        }
-      />
-
-      {/* Shipping */}
-      <AddressBlock
-        type="shipping"
-        title="Shipping Address"
-        subtitle="Delivery location"
-        data={formData.shippingAddress}
-        sameAsBilling={ui.sameAsBilling}
-        onSameAsBillingChange={
-          actions.handleSameAsBillingChange
-        }
-        onChange={(
-          e: React.ChangeEvent<HTMLInputElement>
-        ) =>
-          actions.handleInputChange(e, "shippingAddress")
-        }
-      />
-
-    </div>
-  </div>
-)}
-
+                {/* Shipping */}
+                <AddressBlock
+                  type="shipping"
+                  title="Shipping Address"
+                  subtitle="Delivery location"
+                  data={formData.shippingAddress}
+                  sameAsBilling={ui.sameAsBilling}
+                  onSameAsBillingChange={actions.handleSameAsBillingChange}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    actions.handleInputChange(e, "shippingAddress")
+                  }
+                />
+              </div>
+            </div>
+          )}
         </div>
       </form>
     </Modal>

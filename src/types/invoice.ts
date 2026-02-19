@@ -58,7 +58,7 @@ export interface InvoiceItem {
   quantity: number;
   description: string;
   discount: number;
-  vatRate: string;
+  vatRate: number;
   price: number;
   vatCode: string;
   _fromInvoice?: boolean;

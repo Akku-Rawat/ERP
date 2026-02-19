@@ -1,6 +1,8 @@
+// ExpandedRowDetail.tsx
 import React from "react";
 import { ChevronUp, ArrowRight } from "lucide-react";
-import type { PayrollRecord } from "./types";
+import type { PayrollRecord } from "../../../types/payrolltypes";
+import { fmtINR } from "./utils";
 
 interface ExpandedRowDetailProps {
   record: PayrollRecord;
@@ -8,157 +10,112 @@ interface ExpandedRowDetailProps {
   onViewDetails: (record: PayrollRecord) => void;
 }
 
-export const ExpandedRowDetail: React.FC<ExpandedRowDetailProps> = ({
-  record,
-  onCollapse,
-  onViewDetails,
-}) => {
-  const totalDed = record.taxDeduction + record.pfDeduction + record.otherDeductions;
-
-  return (
-  <tr>
-    <td
-      colSpan={7}
-      className="border-b border-theme bg-app"
-    >
-      <div className="px-8 py-6">
-
-        {/* Top Summary Strip */}
-        <div className="flex items-end justify-between border-b border-theme pb-5 mb-6">
-
-          <div className="flex gap-12">
-
-            <SummaryItem
-              label="Gross Pay"
-              value={record.grossPay}
-            />
-
-            <SummaryItem
-              label="Total Deductions"
-              value={totalDed}
-              danger
-            />
-
-            <SummaryItem
-              label="Net Pay"
-              value={record.netPay}
-              success
-              large
-            />
-
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={() => onViewDetails(record)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-primary text-white rounded-lg hover:opacity-90 transition"
-            >
-              View Details
-              <ArrowRight className="w-4 h-4" />
-            </button>
-
-            <button
-              onClick={onCollapse}
-              className="flex items-center gap-1 px-4 py-2 text-sm border border-theme rounded-lg text-muted hover:text-main transition"
-            >
-              <ChevronUp className="w-4 h-4" />
-              Collapse
-            </button>
-          </div>
-        </div>
-
-        {/* Breakdown Grid */}
-        <div className="grid grid-cols-3 gap-12 text-sm">
-
-          {/* Earnings */}
-          <FinancialBlock title="Earnings">
-            <MoneyRow label="Basic Salary" value={record.basicSalary} />
-            <MoneyRow label="HRA" value={record.hra} />
-            <MoneyRow label="Allowances" value={record.allowances} />
-
-            {record.arrears > 0 && (
-              <MoneyRow label="Arrears" value={record.arrears} highlight />
-            )}
-          </FinancialBlock>
-
-          {/* Deductions */}
-          <FinancialBlock title="Deductions">
-            <MoneyRow label="Income Tax" value={record.taxDeduction} danger />
-            <MoneyRow label="Provident Fund" value={record.pfDeduction} danger />
-            <MoneyRow label="Other Deductions" value={record.otherDeductions} danger />
-          </FinancialBlock>
-
-          {/* Attendance */}
-          <FinancialBlock title="Attendance">
-            <MetaRow
-              label="Paid Days"
-              value={`${record.paidDays}/${record.workingDays}`}
-            />
-            <MetaRow
-              label="Absent / Leave"
-              value={record.absentDays + record.leaveDays}
-            />
-          </FinancialBlock>
-
-        </div>
-      </div>
-    </td>
-  </tr>
-);
-
-};
-const SummaryItem = ({ label, value, danger, success, large }: any) => (
+const SummaryItem: React.FC<{ label: string; value: number; danger?: boolean; success?: boolean; large?: boolean }> = ({
+  label, value, danger, success, large,
+}) => (
   <div>
-    <p className="text-xs uppercase tracking-wider text-muted mb-1">
-      {label}
-    </p>
-    <p
-      className={`font-mono ${
-        large ? "text-2xl font-bold" : "text-lg font-semibold"
-      } ${
-        danger
-          ? "text-danger"
-          : success
-          ? "text-success"
-          : "text-main"
-      }`}
-    >
-      ₹{value.toLocaleString("en-IN")}
+    <p className="text-[10px] uppercase tracking-widest text-muted mb-1">{label}</p>
+    <p className={`tabular-nums font-mono ${large ? "text-xl font-extrabold" : "text-base font-bold"} ${
+      danger ? "text-danger" : success ? "text-success" : "text-main"
+    }`}>
+      ₹{fmtINR(value)}
     </p>
   </div>
 );
 
-const FinancialBlock = ({ title, children }: any) => (
+const Block: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div>
-    <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-4">
-      {title}
-    </p>
-    <div className="space-y-3">
-      {children}
-    </div>
+    <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted mb-3">{title}</p>
+    <div className="space-y-2.5">{children}</div>
   </div>
 );
 
-const MoneyRow = ({ label, value, danger, highlight }: any) => (
-  <div
-    className={`flex justify-between items-center ${
-      highlight ? "bg-warning/10 px-2 py-1 rounded" : ""
-    }`}
-  >
-    <span className="text-muted">{label}</span>
-    <span
-      className={`font-mono font-semibold ${
-        danger ? "text-danger" : "text-main"
-      }`}
-    >
-      ₹{value.toLocaleString("en-IN")}
+const MoneyRow: React.FC<{ label: string; value: number; danger?: boolean; highlight?: boolean }> = ({
+  label, value, danger, highlight,
+}) => (
+  <div className={`flex items-center justify-between ${highlight ? "bg-warning/10 px-2 py-1 rounded-lg" : ""}`}>
+    <span className="text-xs text-muted">{label}</span>
+    <span className={`text-xs font-bold tabular-nums font-mono ${danger ? "text-danger" : "text-main"}`}>
+      ₹{fmtINR(value)}
     </span>
   </div>
 );
 
-const MetaRow = ({ label, value }: any) => (
-  <div className="flex justify-between items-center">
-    <span className="text-muted">{label}</span>
-    <span className="font-semibold text-main">{value}</span>
+const MetaRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
+  <div className="flex items-center justify-between">
+    <span className="text-xs text-muted">{label}</span>
+    <span className="text-xs font-semibold text-main">{value}</span>
   </div>
 );
+
+export const ExpandedRowDetail: React.FC<ExpandedRowDetailProps> = ({
+  record, onCollapse, onViewDetails,
+}) => {
+  const totalDed = record.taxDeduction + record.pfDeduction + record.esiDeduction +
+    record.professionalTax + record.loanDeduction + record.advanceDeduction + record.otherDeductions;
+
+  return (
+    <tr>
+      <td colSpan={8} className="border-b border-theme bg-app">
+        <div className="px-8 py-5 animate-[fadeIn_0.2s_ease]">
+
+          {/* Top summary strip */}
+          <div className="flex items-end justify-between border-b border-theme pb-4 mb-5">
+            <div className="flex gap-10">
+              <SummaryItem label="Gross Pay"        value={record.grossPay} />
+              <SummaryItem label="Total Deductions" value={totalDed}        danger />
+              <SummaryItem label="Net Pay"          value={record.netPay}   success large />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => onViewDetails(record)}
+                className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold bg-primary text-white rounded-lg hover:opacity-90 transition"
+              >
+                View Details <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={onCollapse}
+                className="flex items-center gap-1 px-3 py-2 text-xs border border-theme rounded-lg text-muted hover:text-main hover:bg-card transition"
+              >
+                <ChevronUp className="w-3.5 h-3.5" /> Collapse
+              </button>
+            </div>
+          </div>
+
+          {/* Three-column breakdown */}
+          <div className="grid grid-cols-3 gap-10 text-sm">
+            <Block title="Earnings">
+              <MoneyRow label="Basic Salary"  value={record.basicSalary}  />
+              <MoneyRow label="HRA"           value={record.hra}           />
+              <MoneyRow label="Allowances"    value={record.allowances}    />
+              {record.overtimePay > 0 && <MoneyRow label="Overtime"  value={record.overtimePay} />}
+              {record.totalBonus  > 0 && <MoneyRow label="Bonus"     value={record.totalBonus}  highlight />}
+              {record.arrears     > 0 && <MoneyRow label="Arrears"   value={record.arrears}     highlight />}
+            </Block>
+
+            <Block title="Deductions">
+              <MoneyRow label="Income Tax"       value={record.taxDeduction}    danger />
+              <MoneyRow label="Provident Fund"   value={record.pfDeduction}     danger />
+              <MoneyRow label="ESI"              value={record.esiDeduction}    danger />
+              <MoneyRow label="Professional Tax" value={record.professionalTax} danger />
+              <MoneyRow label="Other"            value={record.otherDeductions} danger />
+            </Block>
+
+            <Block title="Attendance & Tax">
+              <MetaRow label="Working Days" value={`${record.workingDays} days`} />
+              <MetaRow label="Paid Days"    value={`${record.paidDays} days`}    />
+              <MetaRow label="Absent Days"  value={record.absentDays}            />
+              <MetaRow label="LWP Days"     value={record.leaveDays}             />
+              <MetaRow label="Tax Regime"   value={
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${record.taxRegime === "New" ? "bg-primary/10 text-primary" : "bg-warning/10 text-warning"}`}>
+                  {record.taxRegime} Regime
+                </span>
+              } />
+            </Block>
+          </div>
+
+        </div>
+      </td>
+    </tr>
+  );
+};

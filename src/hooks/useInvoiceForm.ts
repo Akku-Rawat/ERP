@@ -377,23 +377,32 @@ if (!formData.paymentInformation?.paymentTerms) {
       invoice.paymentInformation ?? prev.paymentInformation,
     terms: invoice.terms ?? prev.terms,
       items: invoice.items.map((it: any) => {
-        const base =
-          Number(it.quantity) * Number(it.price) - Number(it.discount);
-        const taxAmount = Number(it.vatTaxableAmount ?? 0);
-        const taxRate =
-          base > 0 ? Number(((taxAmount / base) * 100).toFixed(2)) : 0;
+  const quantity = Number(it.quantity);
+  const price = Number(it.price);
+  const discount = Number(it.discount || 0);
 
-        return {
-          itemCode: it.itemCode,
-          description: it.description ?? "",
-          quantity: Number(it.quantity),
-          price: Number(it.price),
-          discount: Number(it.discount),
-          vatRate: taxRate,
-          vatCode: it.vatCode ?? "",
-          _fromInvoice: true,
-        };
-      }),
+  const totalInclusive = quantity * price - discount;
+  const exclusiveBase = Number(it.vatTaxableAmount || 0);
+
+  const taxAmount = totalInclusive - exclusiveBase;
+
+  const taxRate =
+    exclusiveBase > 0
+      ? Number(((taxAmount / exclusiveBase) * 100).toFixed(2))
+      : 0;
+
+  return {
+    itemCode: it.itemCode,
+    description: it.description ?? "",
+    quantity,
+    price,
+    discount,
+    vatRate: taxRate,
+    vatCode: it.vatCode ?? "",
+    _fromInvoice: true,
+  };
+}),
+
     }));
 
     setCustomerDetails(invoice.customer);
@@ -413,33 +422,36 @@ const handleReset = async () => {
   try {
     const companyRes = await getCompanyById(COMPANY_ID);
     const company = companyRes?.data;
-    
+
     setFormData({
-      ...DEFAULT_INVOICE_FORM,
+      ...(DEFAULT_INVOICE_FORM as Invoice),
       terms: {
-        selling: company?.terms?.selling ?? EMPTY_TERMS.selling,
+        selling:
+          company?.terms?.selling ?? EMPTY_TERMS.selling,
       },
-      shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
+      shippingAddress: {
+        ...DEFAULT_INVOICE_FORM.billingAddress,
+      },
     });
   } catch (err) {
     setFormData({
-      ...DEFAULT_INVOICE_FORM,
+      ...(DEFAULT_INVOICE_FORM as Invoice),
       terms: { ...EMPTY_TERMS },
-      shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
+      shippingAddress: {
+        ...DEFAULT_INVOICE_FORM.billingAddress,
+      },
     });
   }
 
-    setCustomerDetails(null);
-    setCustomerNameDisplay("");
-    setTaxCategory("");
-
-    // reset UI state
-    setActiveTab("details");
-    setSameAsBilling(true);
-    setIsShippingOpen(false);
-    setPage(0);
-    shippingEditedRef.current = false;
-  };
+  setCustomerDetails(null);
+  setCustomerNameDisplay("");
+  setTaxCategory("");
+  setActiveTab("details");
+  setSameAsBilling(true);
+  setIsShippingOpen(false);
+  setPage(0);
+  shippingEditedRef.current = false;
+};
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -448,33 +460,39 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   const payload = {
     ...formData,
-    subTotal,
-    totalTax,
-    grandTotal,
+    items: formData.items.map((item) => ({
+      ...item,
+      vatRate: String(item.vatRate), // convert to string only here
+    })),
   };
 
   return payload;
 };
 
 
-  const { subTotal, totalTax, grandTotal } = useMemo(() => {
-    let sub = 0;
-    let tax = 0;
+const { subTotal, totalTax, grandTotal } = useMemo(() => {
+  let sub = 0;
+  let tax = 0;
 
-    formData.items.forEach((item) => {
-      const base = item.quantity * item.price - item.discount;
-      const taxAmt = base * (Number(item.vatRate || 0) / 100);
+  formData.items.forEach((item) => {
+    const inclusive = item.quantity * item.price - item.discount;
 
-      sub += base;
-      tax += taxAmt;
-    });
+    const exclusive =
+      inclusive / (1 + Number(item.vatRate || 0) / 100);
 
-    return {
-      subTotal: sub,
-      totalTax: tax,
-      grandTotal: sub + tax,
-    };
-  }, [formData.items]);
+    const taxAmt = inclusive - exclusive;
+
+    sub += exclusive;
+    tax += taxAmt;
+  });
+
+  return {
+    subTotal: sub,
+    totalTax: tax,
+    grandTotal: sub + tax,
+  };
+}, [formData.items]);
+
 
   const paginatedItems = formData.items.slice(
     page * ITEMS_PER_PAGE,
