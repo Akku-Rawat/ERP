@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  LabelList,
   Line,
   LineChart,
   PieChart,
@@ -24,6 +25,7 @@ import {
 } from "lucide-react";
 
 import { getSalesDashboardSummary } from "../../api/salesDashboardApi";
+import { ChartSkeleton } from "../../components/ChartSkeleton";
 
 const SalesDashboard: React.FC = () => {
   const [summaryLoading, setSummaryLoading] = useState(false);
@@ -192,28 +194,31 @@ const SalesDashboard: React.FC = () => {
     };
   }, []);
 
-  const ChartSkeleton = ({ variant }: { variant: "line" | "bar" | "pie" }) => {
-    if (variant === "pie") {
-      return (
-        <div className="w-full h-full flex items-center justify-center animate-pulse">
-          <div className="h-32 w-32 rounded-full bg-gray-100" />
-        </div>
-      );
-    }
+  const chartPlaneStyle = useMemo(
+    () => ({
+      backgroundImage:
+        "linear-gradient(rgba(229,231,235,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(229,231,235,0.7) 1px, transparent 1px)",
+      backgroundSize: "24px 24px",
+      backgroundPosition: "-1px -1px",
+    }),
+    [],
+  );
 
+  const renderDonutLabel = (props: any) => {
+    const { x, y, name, value } = props;
     return (
-      <div className="w-full h-full p-3 animate-pulse flex flex-col justify-end gap-2">
-        <div className="h-2 w-24 bg-gray-100 rounded" />
-        <div className="flex items-end gap-2 h-full">
-          {Array.from({ length: 10 }).map((_, idx) => (
-            <div
-              key={idx}
-              className="bg-gray-100 rounded w-full"
-              style={{ height: `${30 + ((idx * 13) % 70)}%` }}
-            />
-          ))}
-        </div>
-      </div>
+      <text x={x} y={y} fill="#374151" fontSize={11} textAnchor="middle" dominantBaseline="central">
+        {String(name)}: {String(value)}
+      </text>
+    );
+  };
+
+  const renderCurrencyDonutLabel = (props: any) => {
+    const { x, y, name, value } = props;
+    return (
+      <text x={x} y={y} fill="#374151" fontSize={11} textAnchor="middle" dominantBaseline="central">
+        {String(name)}: {currencyZMWCompact.format(Number(value ?? 0))}
+      </text>
     );
   };
 
@@ -270,12 +275,6 @@ const SalesDashboard: React.FC = () => {
           ))}
         </div>
 
-        {summaryLoading && (
-          <div className="mb-3 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl px-4 py-3 text-sm font-semibold">
-            Loading sales dashboard summary...
-          </div>
-        )}
-
         {summaryError && (
           <div className="mb-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm font-semibold">
             {summaryError}
@@ -288,24 +287,18 @@ const SalesDashboard: React.FC = () => {
               <h3 className="text-sm font-bold text-gray-900">Monthly Sales</h3>
             </div>
 
-            <div className="h-[180px] sm:h-[200px] lg:h-[200px] rounded-lg border border-gray-200 bg-white">
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
               {summaryLoading ? (
                 <ChartSkeleton variant="line" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={monthlyTrendData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
-                    <XAxis
-                      dataKey="name"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: "var(--muted)", fontSize: 12, fontWeight: 600 }}
-                    />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis
-                      axisLine={false}
-                      tickLine={false}
+                      tick={{ fontSize: 12 }}
+                      width={52}
                       tickFormatter={(v) => currencyZMWCompact.format(Number(v))}
-                      tick={{ fill: "var(--muted)", fontSize: 12, fontWeight: 600 }}
                     />
                     <Tooltip
                       formatter={(v: any) => currencyZMW.format(Number(v ?? 0))}
@@ -320,7 +313,15 @@ const SalesDashboard: React.FC = () => {
                       cursor={{ fill: "var(--primary)", opacity: 0.1 }}
                     />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Line type="monotone" dataKey="revenue" stroke="#8b5cf6" strokeWidth={3} dot={false} name="Sales" />
+                    <Line
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#8b5cf6"
+                      strokeWidth={3}
+                      dot={false}
+                      name="Sales"
+                      label={{ position: "top", fontSize: 10, fill: "#6b7280" }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               )}
@@ -331,28 +332,24 @@ const SalesDashboard: React.FC = () => {
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold text-gray-900">Daily Sales (Recent)</h3>
             </div>
-
-            <div className="h-[180px] sm:h-[200px] lg:h-[200px] rounded-lg border border-gray-200 bg-white">
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
               {summaryLoading ? (
                 <ChartSkeleton variant="bar" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={dailySalesChartData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis
                       dataKey="name"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: "var(--muted)", fontSize: 11, fontWeight: 600 }}
+                      tick={{ fontSize: 11 }}
                       interval={0}
                       angle={-15}
                       textAnchor="end"
                       height={54}
                     />
                     <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: "var(--muted)", fontSize: 12, fontWeight: 600 }}
+                      tick={{ fontSize: 12 }}
+                      width={52}
                     />
                     <Tooltip
                       formatter={(v: any) => currencyZMW.format(Number(v ?? 0))}
@@ -367,7 +364,15 @@ const SalesDashboard: React.FC = () => {
                       cursor={{ fill: "var(--primary)", opacity: 0.1 }}
                     />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="total" fill="#10b981" radius={[6, 6, 0, 0]} name="Sales" />
+                    <Bar dataKey="total" fill="#10b981" radius={[6, 6, 0, 0]} name="Sales">
+                      <LabelList
+                        dataKey="total"
+                        position="top"
+                        formatter={(v: any) => currencyZMWCompact.format(Number(v ?? 0))}
+                        fill="#6b7280"
+                        fontSize={10}
+                      />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -379,7 +384,7 @@ const SalesDashboard: React.FC = () => {
               <h3 className="text-sm font-bold text-gray-900">Document Totals</h3>
             </div>
 
-            <div className="h-[180px] sm:h-[200px] lg:h-[200px] rounded-lg border border-gray-200 bg-white">
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
               {summaryLoading ? (
                 <ChartSkeleton variant="pie" />
               ) : (
@@ -396,16 +401,25 @@ const SalesDashboard: React.FC = () => {
                       }}
                       itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
                     />
-                    <Legend wrapperStyle={{ fontSize: 11 }} verticalAlign="bottom" height={28} align="center" />
+                    <Legend
+                      wrapperStyle={{ fontSize: 12 }}
+                      layout="horizontal"
+                      verticalAlign="bottom"
+                      align="center"
+                      iconType="square"
+                      height={36}
+                    />
                     <Pie
                       data={documentTotalsDonutData}
                       dataKey="total"
                       nameKey="name"
                       cx="50%"
-                      cy="42%"
-                      innerRadius={45}
-                      outerRadius={70}
+                      cy="45%"
+                      innerRadius={55}
+                      outerRadius={82}
                       paddingAngle={2}
+                      label={renderDonutLabel}
+                      labelLine={false}
                     >
                       {documentTotalsDonutData.map((_, idx) => (
                         <Cell key={idx} fill={pieColors[idx % pieColors.length]} />
@@ -422,7 +436,7 @@ const SalesDashboard: React.FC = () => {
               <h3 className="text-sm font-bold text-gray-900">Sales Breakdown</h3>
             </div>
 
-            <div className="h-[180px] sm:h-[200px] lg:h-[200px] rounded-lg border border-gray-200 bg-white">
+            <div className="h-72 rounded-lg border border-gray-200 bg-white">
               {summaryLoading ? (
                 <ChartSkeleton variant="pie" />
               ) : (
@@ -439,16 +453,25 @@ const SalesDashboard: React.FC = () => {
                       }}
                       itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
                     />
-                    <Legend wrapperStyle={{ fontSize: 11 }} verticalAlign="bottom" height={34} align="center" />
+                    <Legend
+                      wrapperStyle={{ fontSize: 12 }}
+                      layout="horizontal"
+                      verticalAlign="bottom"
+                      align="center"
+                      iconType="square"
+                      height={36}
+                    />
                     <Pie
                       data={customerSharePieData}
                       dataKey="total"
                       nameKey="name"
                       cx="50%"
                       cy="45%"
-                      innerRadius={45}
-                      outerRadius={70}
+                      innerRadius={55}
+                      outerRadius={82}
                       paddingAngle={2}
+                      label={renderCurrencyDonutLabel}
+                      labelLine={false}
                     >
                       {customerSharePieData.map((_, idx) => (
                         <Cell key={idx} fill={pieColors[idx % pieColors.length]} />

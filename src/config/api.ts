@@ -29,6 +29,20 @@ export const API = {
   },
 
   /* =========================
+   * PROCUREMENT DASHBOARD
+   * ========================= */
+  procurementDashboard: {
+    summary: `${ERP_BASE}/api/method/erpnext.dashboards.procurement.api.summary`,
+  },
+
+  /* =========================
+   * INVENTORY DASHBOARD
+   * ========================= */
+  inventoryDashboard: {
+    summary: `${ERP_BASE}/api/method/erpnext.dashboards.inventory.api.summary`,
+  },
+
+  /* =========================
    * COMPANY
    * ========================= */
   company: {

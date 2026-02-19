@@ -1,202 +1,401 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  FaTruck,
-  FaExclamationTriangle,
-  FaClipboardList,
-  FaMoneyCheckAlt,
-  FaChevronUp,
-  FaChevronDown,
-} from "react-icons/fa";
-import {
-  PieChart,
-  Pie,
+  Bar,
+  BarChart,
+  CartesianGrid,
   Cell,
+  Legend,
+  LabelList,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
-  Legend,
+  XAxis,
+  YAxis,
 } from "recharts";
 
-const COLORS = ["#6366F1", "#06b6d4", "#f59e42", "#65A30D", "#EA580C"];
+import {
+  FileText,
+  ShoppingCart,
+  Truck,
+  Users,
+  UsersRound,
+} from "lucide-react";
 
-const dashboardData = {
-  stats: [
-    {
-      label: "Open RFQs",
-      value: 8,
-      delta: 2,
-      icon: <FaClipboardList className="text-blue-500 w-5 h-5" />,
-      bg: "bg-blue-50",
-    },
-    {
-      label: "Open Purchase Orders",
-      value: 12,
-      delta: -1,
-      icon: <FaTruck className="text-teal-600 w-5 h-5" />,
-      bg: "bg-teal-50",
-    },
-    {
-      label: "Invoices Pending Match",
-      value: 3,
-      delta: 1,
-      icon: <FaMoneyCheckAlt className="text-indigo-600 w-5 h-5" />,
-      bg: "bg-indigo-50",
-    },
-    {
-      label: "Goods Receipts Pending",
-      value: 2,
-      delta: 0,
-      icon: <FaExclamationTriangle className="text-yellow-500 w-5 h-5" />,
-      bg: "bg-yellow-50",
-    },
-  ],
-  spendByCategory: [
-    { category: "Raw Materials", value: 140000 },
-    { category: "Capex", value: 50000 },
-    { category: "IT Equipment", value: 35000 },
-    { category: "Services", value: 22000 },
-  ],
-  approvalBottlenecks: [
-    { user: "Priya Verma", count: 3, color: "bg-pink-100 text-pink-700" },
-    { user: "Sandeep Rana", count: 2, color: "bg-blue-100 text-blue-700" },
-  ],
-  topSuppliers: [
-    { supplier: "TechSupply Co", value: 73000 },
-    { supplier: "Office Solutions", value: 46000 },
-  ],
-};
+import { getProcurementDashboardSummary } from "../../api/procurementDashboardApi";
+import { ChartSkeleton } from "../../components/ChartSkeleton";
 
-const ProcurementDashboard: React.FC = () => (
-  <div className="space-y-8">
-    {/* Stat Cards Row */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      {dashboardData.stats.map((stat, i) => (
-        <div
-          key={i}
-          className={`rounded-xl shadow-md p-5 flex flex-col items-center justify-center ${stat.bg} hover:shadow-lg transition`}
-        >
-          <div className="mb-2">{stat.icon}</div>
-          <div className="text-3xl font-bold flex items-center gap-2">
-            {stat.value}
-            {stat.delta !== undefined && (
-              <span
-                className={`flex items-center text-xs font-semibold ${stat.delta > 0 ? "text-red-500" : stat.delta < 0 ? "text-green-600" : "text-gray-400"}`}
-              >
-                {stat.delta > 0 && <FaChevronUp />}
-                {stat.delta < 0 && <FaChevronDown />}
-                {Math.abs(stat.delta)}
-              </span>
-            )}
-          </div>
-          <div className="text-gray-700 text-sm">{stat.label}</div>
-        </div>
-      ))}
+const ProcurementDashboard: React.FC = () => {
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [summaryData, setSummaryData] = useState<{
+    totalSuppliers: number;
+    activeSuppliers: number;
+    inactiveSuppliers: number;
+    totalPurchaseInvoice: number;
+    totalPurchaseOrder: number;
+  } | null>(null);
+
+  const palette = useMemo(
+    () => ({
+      purple: "#8b5cf6",
+      blue: "#3b82f6",
+      emerald: "#10b981",
+      amber: "#f59e0b",
+      red: "#ef4444",
+      slate: "#64748b",
+    }),
+    [],
+  );
+
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      try {
+        setSummaryLoading(true);
+        setSummaryError(null);
+        const resp = await getProcurementDashboardSummary();
+        if (!mounted) return;
+        setSummaryData(resp.data);
+      } catch (e: any) {
+        if (!mounted) return;
+        setSummaryError(e?.message ?? "Failed to load procurement dashboard summary");
+      } finally {
+        if (!mounted) return;
+        setSummaryLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const chartPlaneStyle = useMemo(
+    () => ({
+      backgroundImage:
+        "linear-gradient(rgba(229,231,235,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(229,231,235,0.7) 1px, transparent 1px)",
+      backgroundSize: "24px 24px",
+      backgroundPosition: "-1px -1px",
+    }),
+    [],
+  );
+
+  const renderDonutLabel = (props: any) => {
+    const { x, y, name, value } = props;
+    return (
+      <text x={x} y={y} fill="#374151" fontSize={11} textAnchor="middle" dominantBaseline="central">
+        {String(name)}: {String(value)}
+      </text>
+    );
+  };
+
+  const TableSkeleton = () => (
+    <div className="animate-pulse space-y-3">
+      <div className="h-3 w-28 bg-gray-100 rounded" />
+      <div className="h-3 w-full bg-gray-100 rounded" />
+      <div className="h-3 w-5/6 bg-gray-100 rounded" />
+      <div className="h-3 w-2/3 bg-gray-100 rounded" />
     </div>
+  );
 
-    {/* Lower Analytics Grid */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {/* Spend by Category Panel */}
-      <div className="bg-white rounded-xl p-6 shadow space-y-4 border col-span-1 md:col-span-2">
-        <div className="font-semibold text-lg mb-2">Spend By Category</div>
-        <div className="flex flex-col md:flex-row gap-4 items-center">
-          <div className="w-full md:w-1/2 h-44">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={dashboardData.spendByCategory}
-                  dataKey="value"
-                  nameKey="category"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={70}
-                  labelLine={false}
-                >
-                  {dashboardData.spendByCategory.map((entry, idx) => (
-                    <Cell
-                      key={entry.category}
-                      fill={COLORS[idx % COLORS.length]}
+  const kpiCards = useMemo(
+    () =>
+      [
+        {
+          label: "Total Suppliers",
+          value: String(summaryData?.totalSuppliers ?? 0),
+          icon: Users,
+          gradient: "from-blue-500 to-blue-600",
+        },
+        {
+          label: "Active Suppliers",
+          value: String(summaryData?.activeSuppliers ?? 0),
+          icon: UsersRound,
+          gradient: "from-emerald-500 to-emerald-600",
+        },
+        {
+          label: "Inactive Suppliers",
+          value: String(summaryData?.inactiveSuppliers ?? 0),
+          icon: UsersRound,
+          gradient: "from-slate-500 to-slate-600",
+        },
+        {
+          label: "Purchase Orders",
+          value: String(summaryData?.totalPurchaseOrder ?? 0),
+          icon: ShoppingCart,
+          gradient: "from-purple-500 to-purple-600",
+        },
+        {
+          label: "Purchase Invoices",
+          value: String(summaryData?.totalPurchaseInvoice ?? 0),
+          icon: FileText,
+          gradient: "from-amber-500 to-amber-600",
+        },
+      ],
+    [summaryData],
+  );
+
+  const supplierStatusDonutData = useMemo(
+    () => [
+      { name: "Active", value: Number(summaryData?.activeSuppliers ?? 0) },
+      { name: "Inactive", value: Number(summaryData?.inactiveSuppliers ?? 0) },
+    ],
+    [summaryData],
+  );
+
+  const documentsPieData = useMemo(
+    () => [
+      { name: "Purchase Orders", value: Number(summaryData?.totalPurchaseOrder ?? 0) },
+      { name: "Purchase Invoices", value: Number(summaryData?.totalPurchaseInvoice ?? 0) },
+    ],
+    [summaryData],
+  );
+
+  const procurementBarData = useMemo(
+    () => [
+      { name: "Total Suppliers", value: Number(summaryData?.totalSuppliers ?? 0) },
+      { name: "Active", value: Number(summaryData?.activeSuppliers ?? 0) },
+      { name: "Inactive", value: Number(summaryData?.inactiveSuppliers ?? 0) },
+      { name: "Purchase Orders", value: Number(summaryData?.totalPurchaseOrder ?? 0) },
+      { name: "Purchase Invoices", value: Number(summaryData?.totalPurchaseInvoice ?? 0) },
+    ],
+    [summaryData],
+  );
+
+  const pieColors = useMemo(
+    () => [palette.purple, palette.emerald, palette.amber, palette.blue, palette.red, palette.slate],
+    [palette],
+  );
+
+  return (
+    <div className="bg-app min-h-screen px-4 sm:px-6 pb-6 pt-3 lg:h-screen lg:overflow-hidden">
+      <div className="max-w-[1600px] mx-auto lg:h-full flex flex-col lg:min-h-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
+          {kpiCards.map((stat) => (
+            <div
+              key={stat.label}
+              className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px]"
+            >
+              <div className="flex items-center justify-between h-full">
+                <div>
+                  <p className="text-sm font-semibold text-gray-600">{stat.label}</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                </div>
+                <div className={`p-3 bg-gradient-to-br ${stat.gradient} rounded-xl shadow-sm`}>
+                  <stat.icon className="text-white" size={22} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {summaryError && (
+          <div className="mb-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm font-semibold">
+            {summaryError}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:flex-1 lg:min-h-0 lg:overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-gray-900">Procurement Overview</h3>
+              <Truck className="text-gray-400" size={18} />
+            </div>
+
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
+              {summaryLoading ? (
+                <ChartSkeleton variant="bar" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={procurementBarData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 11 }}
+                      interval={0}
+                      angle={-12}
+                      textAnchor="end"
+                      height={48}
                     />
-                  ))}
-                </Pie>
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      width={52}
+                    />
+                    <Tooltip
+                      formatter={(v: any) => Number(v ?? 0)}
+                      contentStyle={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 12,
+                        padding: "8px 12px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      }}
+                      itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
+                      cursor={{ fill: "var(--primary)", opacity: 0.1 }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Bar dataKey="value" fill={palette.blue} radius={[6, 6, 0, 0]} name="Count">
+                      <LabelList dataKey="value" position="top" fill="#6b7280" fontSize={10} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
 
-                <Tooltip />
-                <Legend verticalAlign="bottom" height={36} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="w-full md:w-1/2">
-            <table className="min-w-full text-xs">
-              <thead>
-                <tr className="bg-slate-100">
-                  <th className="p-2 text-left">Category</th>
-                  <th className="p-2 text-right">Amount (₹)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dashboardData.spendByCategory.map((row, i) => (
-                  <tr key={i} className="border-b last:border-none">
-                    <td className="p-2">{row.category}</td>
-                    <td className="p-2 text-right">
-                      {row.value.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      {/* Approval Bottlenecks & Top Suppliers */}
-      <div className="space-y-7">
-        <div className="bg-white rounded-xl p-6 shadow border">
-          <div className="font-semibold text-lg mb-2">Approval Bottlenecks</div>
-          {dashboardData.approvalBottlenecks.length === 0 ? (
-            <div className="text-gray-400 text-sm">No bottlenecks 🎉</div>
-          ) : (
-            <ul className="space-y-2">
-              {dashboardData.approvalBottlenecks.map((row, i) => (
-                <li key={i} className="flex items-center justify-between">
-                  <div className={`flex items-center gap-2`}>
-                    <span
-                      className={`inline-block rounded-full w-7 h-7 flex items-center justify-center font-bold uppercase ${row.color}`}
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-gray-900">Supplier Status</h3>
+            </div>
+
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
+              {summaryLoading ? (
+                <ChartSkeleton variant="pie" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Tooltip
+                      formatter={(v: any) => Number(v ?? 0)}
+                      contentStyle={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 12,
+                        padding: "8px 12px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      }}
+                      itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
+                    />
+                    <Legend
+                      wrapperStyle={{ fontSize: 12 }}
+                      layout="horizontal"
+                      verticalAlign="bottom"
+                      align="center"
+                      iconType="square"
+                      height={36}
+                    />
+                    <Pie
+                      data={supplierStatusDonutData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="45%"
+                      outerRadius={82}
+                      paddingAngle={2}
+                      label={renderDonutLabel}
+                      labelLine={false}
                     >
-                      {row.user
-                        .split(" ")
-                        .map((x) => x[0])
-                        .join("")}
-                    </span>
-                    <span>{row.user}</span>
-                  </div>
-                  <span className="font-bold">
-                    <FaExclamationTriangle className="inline text-yellow-500 mr-1" />
-                    {row.count} pending
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <div className="bg-white rounded-xl p-6 shadow border">
-          <div className="font-semibold text-lg mb-2">
-            Top Suppliers This Quarter
+                      {supplierStatusDonutData.map((_, idx) => (
+                        <Cell key={idx} fill={idx === 0 ? palette.emerald : palette.slate} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
-          <ul className="space-y-2">
-            {dashboardData.topSuppliers.map((row, i) => (
-              <li key={i} className="flex justify-between items-center">
-                <span className="font-medium">{row.supplier}</span>
-                <span className="font-semibold">
-                  &#8377; {row.value.toLocaleString()}
-                </span>
-              </li>
-            ))}
-          </ul>
+
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-gray-900">Documents</h3>
+            </div>
+
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
+              {summaryLoading ? (
+                <ChartSkeleton variant="pie" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Tooltip
+                      formatter={(v: any) => Number(v ?? 0)}
+                      contentStyle={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 12,
+                        padding: "8px 12px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      }}
+                      itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
+                    />
+                    <Legend
+                      wrapperStyle={{ fontSize: 12 }}
+                      layout="horizontal"
+                      verticalAlign="bottom"
+                      align="center"
+                      iconType="square"
+                      height={36}
+                    />
+                    <Pie
+                      data={documentsPieData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="45%"
+                      innerRadius={55}
+                      outerRadius={82}
+                      paddingAngle={2}
+                      label={renderDonutLabel}
+                      labelLine={false}
+                    >
+                      {documentsPieData.map((_, idx) => (
+                        <Cell key={idx} fill={pieColors[idx % pieColors.length]} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-gray-900">Documents Summary</h3>
+            </div>
+
+            <div className="h-72 rounded-lg border border-gray-200 bg-white overflow-auto" style={chartPlaneStyle}>
+              {summaryLoading ? (
+                <div className="p-4">
+                  <TableSkeleton />
+                </div>
+              ) : (
+                <div className="p-4">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-gray-600">
+                        <th className="py-2 font-semibold">Document</th>
+                        <th className="py-2 font-semibold text-right">Count</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-t">
+                        <td className="py-2 text-gray-700">Purchase Orders</td>
+                        <td className="py-2 text-right font-semibold text-gray-900">
+                          {Number(summaryData?.totalPurchaseOrder ?? 0)}
+                        </td>
+                      </tr>
+                      <tr className="border-t">
+                        <td className="py-2 text-gray-700">Purchase Invoices</td>
+                        <td className="py-2 text-right font-semibold text-gray-900">
+                          {Number(summaryData?.totalPurchaseInvoice ?? 0)}
+                        </td>
+                      </tr>
+                      <tr className="border-t">
+                        <td className="py-2 text-gray-700">Total Suppliers</td>
+                        <td className="py-2 text-right font-semibold text-gray-900">
+                          {Number(summaryData?.totalSuppliers ?? 0)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    {/* Footer */}
-    <div className="text-xs text-gray-400 text-right pt-2">
-      Data as of {new Date().toLocaleDateString()}
-    </div>
-  </div>
-);
+  );
+};
 
 export default ProcurementDashboard;

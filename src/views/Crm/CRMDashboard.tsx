@@ -9,6 +9,7 @@ import {
   Pie,
   Cell,
   Legend,
+  LabelList,
   BarChart,
   Bar,
 } from "recharts";
@@ -22,7 +23,7 @@ import {
 } from "lucide-react";
 
 import { getCustomerDashboardSummary } from "../../api/customerDashboardApi";
-
+import { ChartSkeleton } from "../../components/ChartSkeleton";
 
 const CRMDashboard: React.FC = () => {
   const [summaryLoading, setSummaryLoading] = useState(false);
@@ -73,28 +74,22 @@ const CRMDashboard: React.FC = () => {
     [],
   );
 
-  const ChartSkeleton = ({ variant }: { variant: "bar" | "pie" }) => {
-    if (variant === "pie") {
-      return (
-        <div className="w-full h-full flex items-center justify-center animate-pulse">
-          <div className="h-28 w-28 rounded-full bg-gray-100" />
-        </div>
-      );
-    }
+  const chartPlaneStyle = useMemo(
+    () => ({
+      backgroundImage:
+        "linear-gradient(rgba(229,231,235,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(229,231,235,0.7) 1px, transparent 1px)",
+      backgroundSize: "24px 24px",
+      backgroundPosition: "-1px -1px",
+    }),
+    [],
+  );
 
+  const renderDonutLabel = (props: any) => {
+    const { x, y, name, value } = props;
     return (
-      <div className="w-full h-full p-3 animate-pulse flex flex-col justify-end gap-2">
-        <div className="h-2 w-24 bg-gray-100 rounded" />
-        <div className="flex items-end gap-2 h-full">
-          {Array.from({ length: 8 }).map((_, idx) => (
-            <div
-              key={idx}
-              className="bg-gray-100 rounded w-full"
-              style={{ height: `${35 + ((idx * 17) % 60)}%` }}
-            />
-          ))}
-        </div>
-      </div>
+      <text x={x} y={y} fill="#374151" fontSize={11} textAnchor="middle" dominantBaseline="central">
+        {String(name)}: {String(value)}
+      </text>
     );
   };
 
@@ -204,12 +199,6 @@ const CRMDashboard: React.FC = () => {
           ))}
         </div>
 
-        {summaryLoading && (
-          <div className="mb-4 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl px-4 py-3 text-sm font-semibold">
-            Loading customer dashboard summary...
-          </div>
-        )}
-
         {summaryError && (
           <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm font-semibold">
             {summaryError}
@@ -217,29 +206,20 @@ const CRMDashboard: React.FC = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:flex-1 lg:min-h-0 lg:overflow-hidden">
-          <div className="bg-card border border-theme rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-5">
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-              <h3 className="text-sm font-bold text-main">Customer Types</h3>
+              <h3 className="text-sm font-bold text-gray-900">Customer Types</h3>
             </div>
 
-            <div className="h-[180px] sm:h-[200px] lg:h-[200px]">
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
               {summaryLoading ? (
                 <ChartSkeleton variant="bar" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={customerTypeBarData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "var(--muted)", fontSize: 12, fontWeight: 600 }}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "var(--muted)", fontSize: 12, fontWeight: 600 }}
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} width={52} />
                 <Tooltip
                   formatter={(v: any) => Number(v ?? 0)}
                   contentStyle={{
@@ -253,19 +233,21 @@ const CRMDashboard: React.FC = () => {
                   cursor={{ fill: "var(--primary)", opacity: 0.1 }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="value" fill={palette.purple} radius={[6, 6, 0, 0]} name="Customers" />
+                <Bar dataKey="value" fill={palette.purple} radius={[6, 6, 0, 0]} name="Customers">
+                  <LabelList dataKey="value" position="top" fill="#6b7280" fontSize={10} />
+                </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               )}
             </div>
           </div>
 
-          <div className="bg-card border border-theme rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-5">
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-              <h3 className="text-sm font-bold text-main">Export vs Non-Export</h3>
+              <h3 className="text-sm font-bold text-gray-900">Export vs Non-Export</h3>
             </div>
 
-            <div className="h-[180px] sm:h-[200px] lg:h-[200px]">
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
               {summaryLoading ? (
                 <ChartSkeleton variant="pie" />
               ) : (
@@ -282,16 +264,25 @@ const CRMDashboard: React.FC = () => {
                   }}
                   itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
                 />
-                <Legend wrapperStyle={{ fontSize: 11 }} verticalAlign="bottom" height={28} align="center" />
+                <Legend
+                  wrapperStyle={{ fontSize: 12 }}
+                  layout="horizontal"
+                  verticalAlign="bottom"
+                  align="center"
+                  iconType="square"
+                  height={36}
+                />
                 <Pie
                   data={exportDonutData}
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
-                  cy="42%"
-                  innerRadius={45}
-                  outerRadius={70}
+                  cy="45%"
+                  innerRadius={55}
+                  outerRadius={82}
                   paddingAngle={2}
+                  label={renderDonutLabel}
+                  labelLine={false}
                 >
                   {exportDonutData.map((_, idx) => (
                     <Cell key={idx} fill={idx === 0 ? palette.emerald : palette.slate} />
@@ -303,12 +294,12 @@ const CRMDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-card border border-theme rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-5">
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-              <h3 className="text-sm font-bold text-main">LOP Customers</h3>
+              <h3 className="text-sm font-bold text-gray-900">LOP Customers</h3>
             </div>
 
-            <div className="h-[180px] sm:h-[200px] lg:h-[200px]">
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
               {summaryLoading ? (
                 <ChartSkeleton variant="pie" />
               ) : (
@@ -325,14 +316,23 @@ const CRMDashboard: React.FC = () => {
                   }}
                   itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
                 />
-                <Legend wrapperStyle={{ fontSize: 11 }} verticalAlign="bottom" height={28} align="center" />
+                <Legend
+                  wrapperStyle={{ fontSize: 12 }}
+                  layout="horizontal"
+                  verticalAlign="bottom"
+                  align="center"
+                  iconType="square"
+                  height={36}
+                />
                 <Pie
                   data={lopPieData}
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
-                  cy="42%"
-                  outerRadius={70}
+                  cy="45%"
+                  outerRadius={82}
+                  label={renderDonutLabel}
+                  labelLine={false}
                 >
                   {lopPieData.map((_, idx) => (
                     <Cell key={idx} fill={idx === 0 ? palette.amber : palette.blue} />
@@ -344,29 +344,20 @@ const CRMDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-card border border-theme rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-5">
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-              <h3 className="text-sm font-bold text-main">Totals Overview</h3>
+              <h3 className="text-sm font-bold text-gray-900">Totals Overview</h3>
             </div>
 
-            <div className="h-[180px] sm:h-[200px] lg:h-[200px]">
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
               {summaryLoading ? (
                 <ChartSkeleton variant="bar" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={totalsOverviewBarData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "var(--muted)", fontSize: 12, fontWeight: 600 }}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "var(--muted)", fontSize: 12, fontWeight: 600 }}
-                />
+                <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} width={52} />
                 <Tooltip
                   formatter={(v: any) => Number(v ?? 0)}
                   contentStyle={{
@@ -380,7 +371,9 @@ const CRMDashboard: React.FC = () => {
                   cursor={{ fill: "var(--primary)", opacity: 0.1 }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="value" fill={palette.blue} radius={[6, 6, 0, 0]} name="Customers" />
+                <Bar dataKey="value" fill={palette.blue} radius={[6, 6, 0, 0]} name="Customers">
+                  <LabelList dataKey="value" position="top" fill="#6b7280" fontSize={10} />
+                </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               )}
