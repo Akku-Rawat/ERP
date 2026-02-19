@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 import { getDashboardSummary } from '../api/dashboardApi';
+import { ChartSkeleton } from '../components/ChartSkeleton';
 
 import {
   Bar,
@@ -43,12 +44,17 @@ const Dashboard = () => {
     Array<{ name: string; revenue: number }>
   >([]);
 
+  const chartsLoading = summaryLoading || !summaryData;
+
   useEffect(() => {
     let mounted = true;
     const run = async () => {
       try {
         setSummaryLoading(true);
         setSummaryError(null);
+        setSummaryData(null);
+        setMonthlyTrendData([]);
+
         const resp = await getDashboardSummary();
         if (!mounted) return;
         const d = resp.data;
@@ -238,22 +244,37 @@ const Dashboard = () => {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-5">
-        {kpiCards.map((card, idx) => (
-          <div
-            key={idx}
-            className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px]"
-          >
-            <div className="flex items-center justify-between h-full">
-              <div>
-                <p className="text-sm font-semibold text-gray-600">{card.label}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
+        {chartsLoading
+          ? Array.from({ length: 5 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px] animate-pulse"
+              >
+                <div className="flex items-center justify-between h-full">
+                  <div>
+                    <div className="h-3 w-28 bg-gray-300 rounded" />
+                    <div className="h-7 w-20 bg-gray-300 rounded mt-2" />
+                  </div>
+                  <div className="h-12 w-12 bg-gray-300 rounded-xl border border-gray-400" />
+                </div>
               </div>
-              <div className={`p-3 bg-gradient-to-br ${card.gradient} rounded-xl shadow-sm`}>
-                <card.icon className="text-white" size={22} />
+            ))
+          : kpiCards.map((card, idx) => (
+              <div
+                key={idx}
+                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px]"
+              >
+                <div className="flex items-center justify-between h-full">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-600">{card.label}</p>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
+                  </div>
+                  <div className={`p-3 bg-gradient-to-br ${card.gradient} rounded-xl shadow-sm`}>
+                    <card.icon className="text-white" size={22} />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -262,16 +283,20 @@ const Dashboard = () => {
             <h3 className="text-sm font-bold text-gray-900">Monthly Sales</h3>
           </div>
           <div className="h-72 rounded-lg border border-gray-200 bg-white">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyTrendData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} width={52} />
-                <Tooltip formatter={(v: any) => currencyZMW.format(Number(v ?? 0))} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="revenue" stroke="#8b5cf6" strokeWidth={2} dot={false} name="Sales" />
-              </LineChart>
-            </ResponsiveContainer>
+            {chartsLoading ? (
+              <ChartSkeleton variant="line" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={monthlyTrendData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} width={52} />
+                  <Tooltip formatter={(v: any) => currencyZMW.format(Number(v ?? 0))} />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Line type="monotone" dataKey="revenue" stroke="#8b5cf6" strokeWidth={2} dot={false} name="Sales" />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -280,34 +305,38 @@ const Dashboard = () => {
             <h3 className="text-sm font-bold text-gray-900">Top 10 Invoices</h3>
           </div>
           <div className="h-72 rounded-lg border border-gray-200 bg-white">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={recentSalesChartData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={48} />
-                <YAxis tick={{ fontSize: 12 }} width={52} />
-                <Tooltip
-                  formatter={(v: any) => currencyZMW.format(Number(v ?? 0))}
-                  labelFormatter={(
-                    _label: any,
-                    payload: readonly { payload?: { name?: string; customer?: string; posting_date?: string } }[],
-                  ) => {
-                    const p = payload?.[0]?.payload;
-                    const labelParts: string[] = [];
-                    if (p?.name) labelParts.push(p.name);
-                    if (p?.customer) labelParts.push(p.customer);
-                    if (p?.posting_date) {
-                      const d = new Date(p.posting_date);
-                      if (!Number.isNaN(d.getTime())) {
-                        labelParts.push(dateWithDay.format(d));
+            {chartsLoading ? (
+              <ChartSkeleton variant="bar" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={recentSalesChartData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={48} />
+                  <YAxis tick={{ fontSize: 12 }} width={52} />
+                  <Tooltip
+                    formatter={(v: any) => currencyZMW.format(Number(v ?? 0))}
+                    labelFormatter={(
+                      _label: any,
+                      payload: readonly { payload?: { name?: string; customer?: string; posting_date?: string } }[],
+                    ) => {
+                      const p = payload?.[0]?.payload;
+                      const labelParts: string[] = [];
+                      if (p?.name) labelParts.push(p.name);
+                      if (p?.customer) labelParts.push(p.customer);
+                      if (p?.posting_date) {
+                        const d = new Date(p.posting_date);
+                        if (!Number.isNaN(d.getTime())) {
+                          labelParts.push(dateWithDay.format(d));
+                        }
                       }
-                    }
-                    return labelParts.join(' • ');
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="total" fill="#10b981" radius={[6, 6, 0, 0]} name="Total" />
-              </BarChart>
-            </ResponsiveContainer>
+                      return labelParts.join(' • ');
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Bar dataKey="total" fill="#10b981" radius={[6, 6, 0, 0]} name="Total" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -316,16 +345,20 @@ const Dashboard = () => {
             <h3 className="text-sm font-bold text-gray-900">Top 10 Customers</h3>
           </div>
           <div className="h-72 rounded-lg border border-gray-200 bg-white">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={salesByCustomerChartData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-15} textAnchor="end" height={52} />
-                <YAxis tick={{ fontSize: 12 }} width={52} />
-                <Tooltip formatter={(v: any) => currencyZMW.format(Number(v ?? 0))} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="total" fill="#f59e0b" radius={[6, 6, 0, 0]} name="Total" />
-              </BarChart>
-            </ResponsiveContainer>
+            {chartsLoading ? (
+              <ChartSkeleton variant="bar" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={salesByCustomerChartData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-15} textAnchor="end" height={52} />
+                  <YAxis tick={{ fontSize: 12 }} width={52} />
+                  <Tooltip formatter={(v: any) => currencyZMW.format(Number(v ?? 0))} />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Bar dataKey="total" fill="#f59e0b" radius={[6, 6, 0, 0]} name="Total" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -334,16 +367,20 @@ const Dashboard = () => {
             <h3 className="text-sm font-bold text-gray-900">Totals Overview</h3>
           </div>
           <div className="h-72 rounded-lg border border-gray-200 bg-white">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={totalsOverviewChartData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-10} textAnchor="end" height={44} />
-                <YAxis tick={{ fontSize: 12 }} width={52} />
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} name="Count" />
-              </BarChart>
-            </ResponsiveContainer>
+            {chartsLoading ? (
+              <ChartSkeleton variant="bar" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={totalsOverviewChartData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-10} textAnchor="end" height={44} />
+                  <YAxis tick={{ fontSize: 12 }} width={52} />
+                  <Tooltip />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} name="Count" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </div>

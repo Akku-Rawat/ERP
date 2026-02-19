@@ -33,6 +33,8 @@ const InventoryDashboard: React.FC = () => {
     totalImportedItems: number;
   } | null>(null);
 
+  const chartsLoading = summaryLoading || !summaryData;
+
   const palette = useMemo(
     () => ({
       purple: "#8b5cf6",
@@ -56,6 +58,7 @@ const InventoryDashboard: React.FC = () => {
       try {
         setSummaryLoading(true);
         setSummaryError(null);
+        setSummaryData(null);
         const resp = await getInventoryDashboardSummary();
         if (!mounted) return;
         setSummaryData(resp.data);
@@ -174,22 +177,37 @@ const InventoryDashboard: React.FC = () => {
     <div className="bg-app px-4 sm:px-6 pb-6 pt-3">
       <div className="max-w-[1600px] mx-auto flex flex-col">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
-          {kpiCards.map((stat) => (
-            <div
-              key={stat.label}
-              className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px]"
-            >
-              <div className="flex items-center justify-between h-full">
-                <div>
-                  <p className="text-sm font-semibold text-gray-600">{stat.label}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+          {chartsLoading
+            ? Array.from({ length: 5 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px] animate-pulse"
+                >
+                  <div className="flex items-center justify-between h-full">
+                    <div>
+                      <div className="h-3 w-28 bg-gray-300 rounded" />
+                      <div className="h-7 w-20 bg-gray-300 rounded mt-2" />
+                    </div>
+                    <div className="h-12 w-12 bg-gray-300 rounded-xl border border-gray-400" />
+                  </div>
                 </div>
-                <div className={`p-3 bg-gradient-to-br ${stat.gradient} rounded-xl shadow-sm`}>
-                  <stat.icon className="text-white" size={22} />
+              ))
+            : kpiCards.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px]"
+                >
+                  <div className="flex items-center justify-between h-full">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-600">{stat.label}</p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                    </div>
+                    <div className={`p-3 bg-gradient-to-br ${stat.gradient} rounded-xl shadow-sm`}>
+                      <stat.icon className="text-white" size={22} />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              ))}
         </div>
 
         {summaryError && (
@@ -205,7 +223,7 @@ const InventoryDashboard: React.FC = () => {
             </div>
 
             <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
-              {summaryLoading ? (
+              {chartsLoading ? (
                 <ChartSkeleton variant="pie" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
@@ -250,7 +268,7 @@ const InventoryDashboard: React.FC = () => {
             </div>
 
             <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
-              {summaryLoading ? (
+              {chartsLoading ? (
                 <ChartSkeleton variant="bar" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
@@ -334,7 +352,7 @@ const InventoryDashboard: React.FC = () => {
             </div>
 
             <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
-              {summaryLoading ? (
+              {chartsLoading ? (
                 <ChartSkeleton variant="line" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">

@@ -30,6 +30,8 @@ const HrDashboard: React.FC = () => {
     totalLeaveTypes: number;
   } | null>(null);
 
+  const chartsLoading = summaryLoading || !summaryData;
+
   const palette = useMemo(
     () => ({
       purple: "#8b5cf6",
@@ -82,6 +84,7 @@ const HrDashboard: React.FC = () => {
       try {
         setSummaryLoading(true);
         setSummaryError(null);
+        setSummaryData(null);
         const resp = await getHrDashboardSummary();
         if (!mounted) return;
         setSummaryData(resp.data);
@@ -189,21 +192,37 @@ const HrDashboard: React.FC = () => {
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mb-3">
-          {kpiCards.map((stat) => (
-            <div key={stat.label} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm min-h-[96px]">
-              <div className="flex items-center justify-between h-full">
-                <div>
-                  <p className="text-xs font-semibold text-gray-600">{stat.label}</p>
-                  <p className="text-xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                </div>
+          {chartsLoading
+            ? Array.from({ length: 5 }).map((_, idx) => (
                 <div
-                  className={`p-3 bg-gradient-to-br ${stat.gradient} rounded-xl shadow-sm`}
+                  key={idx}
+                  className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm min-h-[96px] animate-pulse"
                 >
-                  <stat.icon className="text-white" size={22} />
+                  <div className="flex items-center justify-between h-full">
+                    <div>
+                      <div className="h-3 w-24 bg-gray-300 rounded" />
+                      <div className="h-6 w-16 bg-gray-300 rounded mt-2" />
+                    </div>
+                    <div className="h-10 w-10 bg-gray-300 rounded-xl border border-gray-400" />
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              ))
+            : kpiCards.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm min-h-[96px]"
+                >
+                  <div className="flex items-center justify-between h-full">
+                    <div>
+                      <p className="text-xs font-semibold text-gray-600">{stat.label}</p>
+                      <p className="text-xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                    </div>
+                    <div className={`p-3 bg-gradient-to-br ${stat.gradient} rounded-xl shadow-sm`}>
+                      <stat.icon className="text-white" size={22} />
+                    </div>
+                  </div>
+                </div>
+              ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -213,7 +232,7 @@ const HrDashboard: React.FC = () => {
             </div>
 
             <div className="h-64 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
-              {summaryLoading ? (
+              {chartsLoading ? (
                 <ChartSkeleton variant="bar" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
@@ -249,7 +268,7 @@ const HrDashboard: React.FC = () => {
             </div>
 
             <div className="h-64 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
-              {summaryLoading ? (
+              {chartsLoading ? (
                 <ChartSkeleton variant="pie" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
@@ -294,7 +313,7 @@ const HrDashboard: React.FC = () => {
             </div>
 
             <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
-              {summaryLoading ? (
+              {chartsLoading ? (
                 <ChartSkeleton variant="pie" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
@@ -339,7 +358,7 @@ const HrDashboard: React.FC = () => {
             </div>
 
             <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
-              {summaryLoading ? (
+              {chartsLoading ? (
                 <ChartSkeleton variant="bar" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
