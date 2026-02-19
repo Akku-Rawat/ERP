@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CustomerDetailView from "./CustomerDetailView";
-import { showLoading,showApiError,showSuccess,closeSwal } from "../../components/alert";
+import { showLoading,showApiError,showSuccess,closeSwal } from "../../utils/alert";
 import {
   getAllCustomers,
   deleteCustomerById,
@@ -225,7 +225,7 @@ const fetchCustomers = async () => {
           <ActionButton
             type="view"
             onClick={() => handleRowClick(c)}
-            iconOnly={false}
+            iconOnly
           />
           <ActionMenu
             onEdit={(e) => handleEditCustomer(c.id, e as any)}

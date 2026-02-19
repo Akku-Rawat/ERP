@@ -3,7 +3,7 @@ import Modal from "../ui/modal/modal";
 import { Button, Input, Select, Card } from "../ui/modal/formComponent";
 import { Building2 } from "lucide-react";
 import type { BankAccount } from "../../types/company";
-import { showApiError } from "../../components/alert";
+import { showApiError } from "../../utils/alert";
 
 
 interface Props {

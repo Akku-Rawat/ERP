@@ -10,7 +10,7 @@ import {
   showSuccess,
   showLoading,
   closeSwal,
-} from "../../components/alert";
+} from "../../utils/alert";
 
 import {
   getAllStockEntries,
@@ -178,23 +178,6 @@ const Items: React.FC = () => {
     }
   };
 
-  /*      FILTER
-   */
-
-  const filteredItems = items.filter((i) =>
-    [
-      i.id,
-      i.date,
-      i.orgSarNo,
-      i.registrationType,
-      i.stockEntryType,
-      i.totalTaxableAmount,
-      i.warehouse,
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()),
-  );
 
   /*      COLUMNS
    */
@@ -206,10 +189,16 @@ const Items: React.FC = () => {
     { key: "registrationType", header: "Registration Type", align: "left" },
     { key: "stockEntryType", header: "Stock Entry Type", align: "left" },
     {
-      key: "totalTaxableAmount",
-      header: "Total Taxable Amount",
-      align: "left",
-    },
+  key: "totalTaxableAmount",
+  header: "Total Taxable Amount",
+  align: "right",
+  render: (i) => (
+    <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
+      ZMW {Number(i.totalTaxableAmount || 0).toLocaleString()}
+    </code>
+  ),
+},
+
     { key: "warehouse", header: "Warehouse", align: "left" },
     {
       key: "actions",
@@ -217,7 +206,7 @@ const Items: React.FC = () => {
       align: "center",
       render: (i) => (
         <ActionGroup>
-          <ActionButton type="view" onClick={(e) => handleEdit(i.id, e)} />
+          <ActionButton type="view" onClick={(e) => handleEdit(i.id, e)} iconOnly />
           <ActionMenu
             onEdit={(e) => handleEdit(i.id, e as any)}
             onDelete={(e) => handleDeleteClick(i, e as any)}
@@ -237,6 +226,7 @@ const Items: React.FC = () => {
         serverSide
         columns={columns}
         data={items}
+        enableColumnSelector
         showToolbar
         searchValue={searchTerm}
         onSearch={setSearchTerm}

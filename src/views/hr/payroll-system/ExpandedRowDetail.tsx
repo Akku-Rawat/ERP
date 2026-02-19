@@ -1,196 +1,164 @@
 import React from "react";
-import {
-  Users,
-  TrendingUp,
-  AlertCircle,
-  Calendar,
-  CheckCircle,
-  Clock,
-  ChevronUp,
-} from "lucide-react";
+import { ChevronUp, ArrowRight } from "lucide-react";
 import type { PayrollRecord } from "./types";
 
 interface ExpandedRowDetailProps {
   record: PayrollRecord;
   onCollapse: () => void;
+  onViewDetails: (record: PayrollRecord) => void;
 }
 
 export const ExpandedRowDetail: React.FC<ExpandedRowDetailProps> = ({
   record,
   onCollapse,
+  onViewDetails,
 }) => {
-  const totalDeductions =
-    record.taxDeduction + record.pfDeduction + record.otherDeductions;
+  const totalDed = record.taxDeduction + record.pfDeduction + record.otherDeductions;
 
   return (
-    <tr className="bg-app border-b-2 border-primary">
-      <td colSpan={7} className="px-6 py-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-3 gap-8 mb-6">
-            <div className="bg-card rounded-xl shadow-sm border border-theme p-5">
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-theme">
-                <Users className="w-5 h-5 text-info" />
-                <h4 className="font-bold text-main">Employee Details</h4>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted">Designation:</span>
-                  <span className="text-sm font-semibold text-main">
-                    {record.designation}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted">Grade:</span>
-                  <span className="px-2 py-1 bg-info text-white text-xs font-bold rounded">
-                    {record.grade}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted">Joining:</span>
-                  <span className="text-sm font-semibold text-main">
-                    {record.joiningDate}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted">Bank:</span>
-                  <span className="text-xs font-semibold text-main">
-                    {record.bankAccount}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted">PF:</span>
-                  <span className="text-xs font-semibold text-main">
-                    {record.pfNumber}
-                  </span>
-                </div>
-              </div>
-            </div>
+  <tr>
+    <td
+      colSpan={7}
+      className="border-b border-theme bg-app"
+    >
+      <div className="px-8 py-6">
 
-            <div className="bg-success rounded-xl shadow-sm border border-theme p-5">
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/20">
-                <TrendingUp className="w-5 h-5 text-white" />
-                <h4 className="font-bold text-white">Earnings</h4>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-white">Basic:</span>
-                  <span className="text-sm font-bold text-white">
-                    ₹{record.basicSalary.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-white">HRA:</span>
-                  <span className="text-sm font-bold text-white">
-                    ₹{record.hra.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-white">Allowances:</span>
-                  <span className="text-sm font-bold text-white">
-                    ₹{record.allowances.toLocaleString()}
-                  </span>
-                </div>
-                {record.arrears > 0 && (
-                  <div className="flex justify-between bg-white/10 -mx-2 px-2 py-2 rounded">
-                    <span className="text-sm text-white font-medium">
-                      Arrears:
-                    </span>
-                    <span className="text-sm font-bold text-white">
-                      ₹{record.arrears.toLocaleString()}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between pt-3 border-t-2 border-white/30 bg-white/10 -mx-2 px-2 py-2.5 rounded">
-                  <span className="font-bold text-white">Gross:</span>
-                  <span className="text-lg font-bold text-white">
-                    ₹{record.grossPay.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
+        {/* Top Summary Strip */}
+        <div className="flex items-end justify-between border-b border-theme pb-5 mb-6">
 
-            <div className="bg-danger rounded-xl shadow-sm border border-theme p-5">
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/20">
-                <AlertCircle className="w-5 h-5 text-white" />
-                <h4 className="font-bold text-white">Deductions</h4>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-white">
-                    Tax ({record.taxRegime}):
-                  </span>
-                  <span className="text-sm font-bold text-white">
-                    ₹{record.taxDeduction.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-white">PF:</span>
-                  <span className="text-sm font-bold text-white">
-                    ₹{record.pfDeduction.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-white">Other:</span>
-                  <span className="text-sm font-bold text-white">
-                    ₹{record.otherDeductions.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between pt-3 border-t-2 border-white/30 bg-white/10 -mx-2 px-2 py-2.5 rounded">
-                  <span className="font-bold text-white">Total:</span>
-                  <span className="text-lg font-bold text-white">
-                    -₹{totalDeductions.toLocaleString()}
-                  </span>
-                </div>
-                <div className="mt-4 pt-4 border-t-2 border-white/30">
-                  <div className="bg-card -mx-2 px-3 py-3 rounded-lg">
-                    <div className="flex justify-between">
-                      <span className="text-sm font-bold text-success">
-                        Net Pay:
-                      </span>
-                      <span className="text-2xl font-bold text-success">
-                        ₹{record.netPay.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="flex gap-12">
+
+            <SummaryItem
+              label="Gross Pay"
+              value={record.grossPay}
+            />
+
+            <SummaryItem
+              label="Total Deductions"
+              value={totalDed}
+              danger
+            />
+
+            <SummaryItem
+              label="Net Pay"
+              value={record.netPay}
+              success
+              large
+            />
+
           </div>
 
-          <div className="bg-card rounded-lg border border-theme p-4 flex items-center justify-between">
-            <div className="flex items-center gap-8">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-info" />
-                <span className="text-sm text-main">
-                  Working: <strong>{record.workingDays}</strong>
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-success" />
-                <span className="text-sm text-main">
-                  Paid: <strong>{record.paidDays}</strong>
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-muted" />
-                <span className="text-sm text-main">
-                  Created:{" "}
-                  <strong>
-                    {new Date(record.createdDate).toLocaleDateString()}
-                  </strong>
-                </span>
-              </div>
-            </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => onViewDetails(record)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-primary text-white rounded-lg hover:opacity-90 transition"
+            >
+              View Details
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
             <button
               onClick={onCollapse}
-              className="text-sm text-primary hover:text-[var(--primary-600)] font-medium flex items-center gap-1"
+              className="flex items-center gap-1 px-4 py-2 text-sm border border-theme rounded-lg text-muted hover:text-main transition"
             >
               <ChevronUp className="w-4 h-4" />
               Collapse
             </button>
           </div>
         </div>
-      </td>
-    </tr>
-  );
+
+        {/* Breakdown Grid */}
+        <div className="grid grid-cols-3 gap-12 text-sm">
+
+          {/* Earnings */}
+          <FinancialBlock title="Earnings">
+            <MoneyRow label="Basic Salary" value={record.basicSalary} />
+            <MoneyRow label="HRA" value={record.hra} />
+            <MoneyRow label="Allowances" value={record.allowances} />
+
+            {record.arrears > 0 && (
+              <MoneyRow label="Arrears" value={record.arrears} highlight />
+            )}
+          </FinancialBlock>
+
+          {/* Deductions */}
+          <FinancialBlock title="Deductions">
+            <MoneyRow label="Income Tax" value={record.taxDeduction} danger />
+            <MoneyRow label="Provident Fund" value={record.pfDeduction} danger />
+            <MoneyRow label="Other Deductions" value={record.otherDeductions} danger />
+          </FinancialBlock>
+
+          {/* Attendance */}
+          <FinancialBlock title="Attendance">
+            <MetaRow
+              label="Paid Days"
+              value={`${record.paidDays}/${record.workingDays}`}
+            />
+            <MetaRow
+              label="Absent / Leave"
+              value={record.absentDays + record.leaveDays}
+            />
+          </FinancialBlock>
+
+        </div>
+      </div>
+    </td>
+  </tr>
+);
+
 };
+const SummaryItem = ({ label, value, danger, success, large }: any) => (
+  <div>
+    <p className="text-xs uppercase tracking-wider text-muted mb-1">
+      {label}
+    </p>
+    <p
+      className={`font-mono ${
+        large ? "text-2xl font-bold" : "text-lg font-semibold"
+      } ${
+        danger
+          ? "text-danger"
+          : success
+          ? "text-success"
+          : "text-main"
+      }`}
+    >
+      ₹{value.toLocaleString("en-IN")}
+    </p>
+  </div>
+);
+
+const FinancialBlock = ({ title, children }: any) => (
+  <div>
+    <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-4">
+      {title}
+    </p>
+    <div className="space-y-3">
+      {children}
+    </div>
+  </div>
+);
+
+const MoneyRow = ({ label, value, danger, highlight }: any) => (
+  <div
+    className={`flex justify-between items-center ${
+      highlight ? "bg-warning/10 px-2 py-1 rounded" : ""
+    }`}
+  >
+    <span className="text-muted">{label}</span>
+    <span
+      className={`font-mono font-semibold ${
+        danger ? "text-danger" : "text-main"
+      }`}
+    >
+      ₹{value.toLocaleString("en-IN")}
+    </span>
+  </div>
+);
+
+const MetaRow = ({ label, value }: any) => (
+  <div className="flex justify-between items-center">
+    <span className="text-muted">{label}</span>
+    <span className="font-semibold text-main">{value}</span>
+  </div>
+);

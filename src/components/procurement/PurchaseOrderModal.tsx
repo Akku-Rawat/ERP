@@ -6,7 +6,7 @@ import { Button } from "../ui/modal/formComponent";
 import { DetailsTab } from "../procurement/purchaseorder/DetailsTab";
 import { EmailTab } from "../procurement/purchaseorder/EmailTab";
 import { TaxTab } from "../procurement/purchaseorder/TaxTab";
-import { AddressTab } from "../procurement/purchaseorder/AddressTab";
+import { AddressTab } from "./purchaseinvoice/AddressTab";
 import TermsAndCondition from "../TermsAndCondition";
 import { usePurchaseOrderForm } from "../../hooks/usePurchaseOrderForm";
 import type { POTab } from "../../types/Supply/purchaseOrder";
@@ -22,8 +22,8 @@ const tabs: { key: POTab; icon: typeof Building2; label: string }[] = [
   { key: "details", icon: Building2, label: "Details" },
   // { key: "email", icon: Mail, label: "Email" },
   // { key: "tax", icon: Calculator, label: "Tax" },
-  { key: "address", icon: MapPin, label: "Address" },
   { key: "terms", icon: FileText, label: "Terms" },
+    { key: "address", icon: MapPin, label: "Address" },
 ];
 
 const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({

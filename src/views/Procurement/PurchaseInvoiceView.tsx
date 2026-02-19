@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import {
@@ -6,7 +6,6 @@ import {
   Download,
   Printer,
   Mail,
-  Edit,
   MoreVertical,
   X,
   CreditCard,
@@ -17,10 +16,9 @@ import {
   Share2,
   Eye,
   Truck,
-  Loader2,
+
 } from "lucide-react";
 
-import { getPurchaseInvoiceById } from "../../api/procurement/PurchaseInvoiceApi";
 
 // Backend API Response Structure
 interface PurchaseInvoiceData {
@@ -119,58 +117,25 @@ interface PurchaseInvoiceData {
 }
 
 interface PurchaseInvoiceViewProps {
-  pId: string | number;
+  piData: PurchaseInvoiceData;
   onClose?: () => void;
   onEdit?: () => void;
 }
 
 const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
-  pId,
+  piData,
   onClose,
   onEdit,
 }) => {
-  const [po, setPO] = useState<PurchaseInvoiceData | null>(null);
   const [showActions, setShowActions] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchPI = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+if (!piData) return null;
 
-          const response = await getPurchaseInvoiceById(pId);
-
-          if (response?.status === "success" && response?.data) {
-              setPO(response.data);
-          } else {
-              throw new Error(
-                  response?.message || "Failed to load purchase invoice"
-              );
-          }
-
-      } catch (error: any) {
-        console.error("Failed to load Purchase Invoice", error);
-        const errorMessage = error?.response?.data?.message || error?.message || "Failed to load Purchase Invoice details";
-        setError(errorMessage);
-        toast.error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (pId) {
-      fetchPI();
-    }
-  }, [pId]);
 
   const getCurrencySymbol = (currency: string) => {
     switch (currency) {
-      case "ZMW": return "K";
+      case "ZMW": return "ZMW";
       case "USD": return "$";
-      case "EUR": return "€";
-      case "GBP": return "£";
       case "INR": return "₹";
       default: return currency;
     }
@@ -195,13 +160,16 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    if (!po) return "";
-    return `${getCurrencySymbol(po.currency)} ${amount.toLocaleString('en-US', {
+ const formatCurrency = (amount: number) => {
+  return `${getCurrencySymbol(piData.currency)} ${amount.toLocaleString(
+    "en-US",
+    {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })}`;
-  };
+      maximumFractionDigits: 2,
+    }
+  )}`;
+};
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB', {
@@ -225,58 +193,10 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
     toast.success("Email feature coming soon!");
   };
 
-  // Loading State
-  if (loading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)' }}>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-card rounded-2xl p-8 shadow-2xl"
-          style={{ borderColor: 'var(--border)', borderWidth: '1px' }}
-        >
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-12 h-12 text-primary animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
-            <div className="text-center">
-              <p className="text-lg font-semibold text-primary">Loading Purchase Invoice</p>
-              <p className="text-sm text-muted mt-1">Please wait...</p>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
 
-  // Error State
-  if (error || !po) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-card rounded-2xl p-8 shadow-2xl max-w-md w-full"
-          style={{ borderColor: 'var(--border)', borderWidth: '1px' }}
-        >
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-danger">
-              <X className="w-8 h-8 text-danger" />
-            </div>
-            <h3 className="text-xl font-bold text-main mb-2">Failed to Load</h3>
-            <p className="text-muted mb-6">{error || "Purchase Invoice not found"}</p>
-            <button
-              onClick={onClose}
-              className="px-6 py-2 bg-primary text-white rounded-xl font-medium transition-all"
-              style={{ background: 'var(--primary)' }}
-            >
-              Close
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
 
-  const statusConfig = getStatusConfig(po.status);
+
+  const statusConfig = getStatusConfig(piData.status);
   const StatusIcon = statusConfig.icon;
 
   return (
@@ -306,23 +226,16 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
                 <ArrowLeft className="w-5 h-5 text-muted" />
               </button>
               <div>
-                <h1 className="text-lg font-bold text-primary">{po.pId}</h1>
+                <h1 className="text-lg font-bold text-primary">{piData.pId}</h1>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <div className={`px-3 py-1.5 rounded font-semibold text-xs flex items-center gap-1.5 ${statusConfig.className}`}>
                 <StatusIcon className="w-3.5 h-3.5" />
-                {po.status}
+                {piData.status}
               </div>
-              <button
-                onClick={onEdit}
-                className="px-3 py-1.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 text-primary"
-                style={{ background: 'color-mix(in srgb, var(--primary) 10%, transparent)' }}
-              >
-                <Edit className="w-4 h-4" />
-                Edit
-              </button>
+              
 
               <div className="relative">
                 <button
@@ -381,111 +294,111 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
               <div className="grid grid-cols-4 gap-3 text-xs">
                 <div>
                   <p className="text-muted mb-0.5">PO Date</p>
-                  <p className="text-main font-semibold">{formatDate(po.pDate)}</p>
+                  <p className="text-main font-semibold">{formatDate(piData.pDate)}</p>
                 </div>
                 <div>
                   <p className="text-muted mb-0.5">Required By</p>
-                  <p className="text-main font-semibold">{formatDate(po.requiredBy)}</p>
+                  <p className="text-main font-semibold">{formatDate(piData.requiredBy)}</p>
                 </div>
                 <div>
                   <p className="text-muted mb-0.5">Currency</p>
-                  <p className="text-main font-semibold">{po.currency}</p>
+                  <p className="text-main font-semibold">{piData.currency}</p>
                 </div>
                 <div>
                   <p className="text-muted mb-0.5">Total Amount</p>
-                  <p className="text-primary font-bold" style={{ fontSize: '13px' }}>{formatCurrency(po.grandTotal)}</p>
+                  <p className="text-primary font-bold" style={{ fontSize: '13px' }}>{formatCurrency(piData.grandTotal)}</p>
                 </div>
               </div>
             </div>
 
             {/* Parties Section */}
-            <div className={`grid gap-4 mb-4 ${po.addresses?.dispatchAddress ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            <div className={`grid gap-4 mb-4 ${piData.addresses?.dispatchAddress ? 'grid-cols-3' : 'grid-cols-2'}`}>
               {/* Supplier */}
-              {po.addresses?.supplierAddress && (
+              {piData.addresses?.supplierAddress && (
                 <div className="border-theme rounded p-3" style={{ borderWidth: '1px' }}>
                   <div className="flex items-center gap-2 mb-2 pb-2 border-theme" style={{ borderBottomWidth: '1px' }}>
                     <Building2 className="w-3.5 h-3.5 text-primary" />
                     <h3 className="font-bold text-main text-xs">SUPPLIER</h3>
                   </div>
                   <div className="space-y-1">
-                    <p className="font-bold text-main" style={{ fontSize: '12px' }}>{po.supplierName}</p>
-                    {po.addresses.supplierAddress.addressLine1 && (
-                      <p className="text-muted leading-tight">{po.addresses.supplierAddress.addressLine1}</p>
+                    <p className="font-bold text-main" style={{ fontSize: '12px' }}>{piData.supplierName}</p>
+                    {piData.addresses.supplierAddress.addressLine1 && (
+                      <p className="text-muted leading-tight">{piData.addresses.supplierAddress.addressLine1}</p>
                     )}
-                    {po.addresses.supplierAddress.addressLine2 && (
-                      <p className="text-muted leading-tight">{po.addresses.supplierAddress.addressLine2}</p>
+                    {piData.addresses.supplierAddress.addressLine2 && (
+                      <p className="text-muted leading-tight">{piData.addresses.supplierAddress.addressLine2}</p>
                     )}
-                    {po.addresses.supplierAddress.city && po.addresses.supplierAddress.state && (
+                    {piData.addresses.supplierAddress.city && piData.addresses.supplierAddress.state && (
                       <p className="text-muted leading-tight">
-                        {po.addresses.supplierAddress.city}, {po.addresses.supplierAddress.state} {po.addresses.supplierAddress.postalCode}
+                        {piData.addresses.supplierAddress.city}, {piData.addresses.supplierAddress.state} {piData.addresses.supplierAddress.postalCode}
                       </p>
                     )}
-                    {po.addresses.supplierAddress.country && (
-                      <p className="text-muted leading-tight">{po.addresses.supplierAddress.country}</p>
+                    {piData.addresses.supplierAddress.country && (
+                      <p className="text-muted leading-tight">{piData.addresses.supplierAddress.country}</p>
                     )}
-                    {po.addresses.supplierAddress.phone && (
-                      <p className="text-muted leading-tight mt-1.5">Tel: {po.addresses.supplierAddress.phone}</p>
+                    {piData.addresses.supplierAddress.phone && (
+                      <p className="text-muted leading-tight mt-1.5">Tel: {piData.addresses.supplierAddress.phone}</p>
                     )}
-                    {po.addresses.supplierAddress.email && (
-                      <p className="text-muted leading-tight">Email: {po.addresses.supplierAddress.email}</p>
+                    {piData.addresses.supplierAddress.email && (
+                      <p className="text-muted leading-tight">Email: {piData.addresses.supplierAddress.email}</p>
                     )}
                   </div>
                 </div>
               )}
 
               {/* Dispatch Address */}
-              {po.addresses?.dispatchAddress && (
+              {piData.addresses?.dispatchAddress && (
                 <div className="border-theme rounded p-3" style={{ borderWidth: '1px' }}>
                   <div className="flex items-center gap-2 mb-2 pb-2 border-theme" style={{ borderBottomWidth: '1px' }}>
                     <Building2 className="w-3.5 h-3.5 text-primary" />
                     <h3 className="font-bold text-main text-xs">DISPATCH FROM</h3>
                   </div>
                   <div className="space-y-1">
-                    {po.addresses.dispatchAddress.addressTitle && (
-                      <p className="font-bold text-main" style={{ fontSize: '12px' }}>{po.addresses.dispatchAddress.addressTitle}</p>
+                    {piData.addresses.dispatchAddress.addressTitle && (
+                      <p className="font-bold text-main" style={{ fontSize: '12px' }}>{piData.addresses.dispatchAddress.addressTitle}</p>
                     )}
-                    {po.addresses.dispatchAddress.addressLine1 && (
-                      <p className="text-muted leading-tight">{po.addresses.dispatchAddress.addressLine1}</p>
+                    {piData.addresses.dispatchAddress.addressLine1 && (
+                      <p className="text-muted leading-tight">{piData.addresses.dispatchAddress.addressLine1}</p>
                     )}
-                    {po.addresses.dispatchAddress.addressLine2 && (
-                      <p className="text-muted leading-tight">{po.addresses.dispatchAddress.addressLine2}</p>
+                    {piData.addresses.dispatchAddress.addressLine2 && (
+                      <p className="text-muted leading-tight">{piData.addresses.dispatchAddress.addressLine2}</p>
                     )}
-                    {po.addresses.dispatchAddress.city && po.addresses.dispatchAddress.state && (
+                    {piData.addresses.dispatchAddress.city && piData.addresses.dispatchAddress.state && (
                       <p className="text-muted leading-tight">
-                        {po.addresses.dispatchAddress.city}, {po.addresses.dispatchAddress.state} {po.addresses.dispatchAddress.postalCode}
+                        {piData.addresses.dispatchAddress.city}, {piData.addresses.dispatchAddress.state} {piData.addresses.dispatchAddress.postalCode}
                       </p>
                     )}
-                    {po.addresses.dispatchAddress.country && (
-                      <p className="text-muted leading-tight">{po.addresses.dispatchAddress.country}</p>
+                    {piData.addresses.dispatchAddress.country && (
+                      <p className="text-muted leading-tight">{piData.addresses.dispatchAddress.country}</p>
                     )}
                   </div>
                 </div>
               )}
 
               {/* Shipping Address */}
-              {po.addresses?.shippingAddress && (
+              {piData.addresses?.shippingAddress && (
                 <div className="border-theme rounded p-3" style={{ borderWidth: '1px' }}>
                   <div className="flex items-center gap-2 mb-2 pb-2 border-theme" style={{ borderBottomWidth: '1px' }}>
                     <Truck className="w-3.5 h-3.5 text-primary" />
                     <h3 className="font-bold text-main text-xs">SHIP TO</h3>
                   </div>
                   <div className="space-y-1">
-                    {po.addresses.shippingAddress.addressTitle && (
-                      <p className="font-bold text-main" style={{ fontSize: '12px' }}>{po.addresses.shippingAddress.addressTitle}</p>
+                    {piData.addresses.shippingAddress.addressTitle && (
+                      <p className="font-bold text-main" style={{ fontSize: '12px' }}>{piData.addresses.shippingAddress.addressTitle}</p>
                     )}
-                    {po.addresses.shippingAddress.addressLine1 && (
-                      <p className="text-muted leading-tight">{po.addresses.shippingAddress.addressLine1}</p>
+                    {piData.addresses.shippingAddress.addressLine1 && (
+                      <p className="text-muted leading-tight">{piData.addresses.shippingAddress.addressLine1}</p>
                     )}
-                    {po.addresses.shippingAddress.addressLine2 && (
-                      <p className="text-muted leading-tight">{po.addresses.shippingAddress.addressLine2}</p>
+                    {piData.addresses.shippingAddress.addressLine2 && (
+                      <p className="text-muted leading-tight">{piData.addresses.shippingAddress.addressLine2}</p>
                     )}
-                    {po.addresses.shippingAddress.city && po.addresses.shippingAddress.state && (
+                    {piData.addresses.shippingAddress.city && piData.addresses.shippingAddress.state && (
                       <p className="text-muted leading-tight">
-                        {po.addresses.shippingAddress.city}, {po.addresses.shippingAddress.state} {po.addresses.shippingAddress.postalCode}
+                        {piData.addresses.shippingAddress.city}, {piData.addresses.shippingAddress.state} {piData.addresses.shippingAddress.postalCode}
                       </p>
                     )}
-                    {po.addresses.shippingAddress.country && (
-                      <p className="text-muted leading-tight">{po.addresses.shippingAddress.country}</p>
+                    {piData.addresses.shippingAddress.country && (
+                      <p className="text-muted leading-tight">{piData.addresses.shippingAddress.country}</p>
                     )}
                   </div>
                 </div>
@@ -493,37 +406,37 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
             </div>
 
             {/* Additional Info */}
-            {(po.project || po.costCenter || po.taxCategory || po.incoterm || po.placeOfSupply) && (
+            {(piData.project || piData.costCenter || piData.taxCategory || piData.incoterm || piData.placeOfSupply) && (
               <div className="border-theme rounded p-3 mb-4" style={{ borderWidth: '1px' }}>
                 <div className="grid grid-cols-5 gap-4 text-xs">
-                  {po.project && (
+                  {piData.project && (
                     <div>
                       <p className="text-muted mb-0.5">Project</p>
-                      <p className="text-main font-semibold">{po.project}</p>
+                      <p className="text-main font-semibold">{piData.project}</p>
                     </div>
                   )}
-                  {po.costCenter && (
+                  {piData.costCenter && (
                     <div>
                       <p className="text-muted mb-0.5">Cost Center</p>
-                      <p className="text-main font-semibold">{po.costCenter}</p>
+                      <p className="text-main font-semibold">{piData.costCenter}</p>
                     </div>
                   )}
-                  {po.taxCategory && (
+                  {piData.taxCategory && (
                     <div>
                       <p className="text-muted mb-0.5">Tax Category</p>
-                      <p className="text-main font-semibold">{po.taxCategory}</p>
+                      <p className="text-main font-semibold">{piData.taxCategory}</p>
                     </div>
                   )}
-                  {po.incoterm && (
+                  {piData.incoterm && (
                     <div>
                       <p className="text-muted mb-0.5">Incoterm</p>
-                      <p className="text-main font-semibold">{po.incoterm}</p>
+                      <p className="text-main font-semibold">{piData.incoterm}</p>
                     </div>
                   )}
-                  {po.placeOfSupply && (
+                  {piData.placeOfSupply && (
                     <div>
                       <p className="text-muted mb-0.5">Place of Supply</p>
-                      <p className="text-main font-semibold">{po.placeOfSupply}</p>
+                      <p className="text-main font-semibold">{piData.placeOfSupply}</p>
                     </div>
                   )}
                 </div>
@@ -545,7 +458,7 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {po.items.map((item, idx) => (
+                  {piData.items.map((item, idx) => (
                     <tr key={idx} className="border-theme row-hover" style={{ borderTopWidth: idx > 0 ? '1px' : '0' }}>
                       <td className="px-3 py-2 text-muted">{idx + 1}</td>
                       <td className="px-3 py-2 font-mono text-main font-semibold">{item.item_code}</td>
@@ -563,12 +476,12 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
             {/* Summary & Taxes */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               {/* Taxes */}
-              {po.taxes && po.taxes.length > 0 && (
+              {piData.taxes && piData.taxes.length > 0 && (
                 <div className="border-theme rounded p-3" style={{ borderWidth: '1px' }}>
                   <h3 className="font-bold text-main text-xs mb-2">TAX DETAILS</h3>
                   <div className="space-y-2 text-xs">
-                    {po.taxes.map((tax, idx) => (
-                      <div key={idx} className="flex items-center justify-between pb-2 border-theme" style={{ borderBottomWidth: idx < po.taxes!.length - 1 ? '1px' : '0' }}>
+                    {piData.taxes.map((tax, idx) => (
+                      <div key={idx} className="flex items-center justify-between pb-2 border-theme" style={{ borderBottomWidth: idx < piData.taxes!.length - 1 ? '1px' : '0' }}>
                         <div>
                           <p className="font-semibold text-main">{tax.accountHead}</p>
                           <p className="text-muted text-[10px]">
@@ -588,17 +501,17 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-muted">Subtotal</span>
-                    <span className="font-mono text-main">{formatCurrency(po.items.reduce((sum, item) => sum + item.amount, 0))}</span>
+                    <span className="font-mono text-main">{formatCurrency(piData.items.reduce((sum, item) => sum + item.amount, 0))}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted">Tax Total</span>
-                    <span className="font-mono text-main">{formatCurrency(po.taxes?.reduce((sum, tax) => sum + tax.taxAmount, 0) || 0)}</span>
+                    <span className="font-mono text-main">{formatCurrency(piData.taxes?.reduce((sum, tax) => sum + tax.taxAmount, 0) || 0)}</span>
                   </div>
                   <div className="pt-2 border-theme" style={{ borderTopWidth: '2px' }}>
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-primary">GRAND TOTAL</span>
                       <span className="font-bold text-primary" style={{ fontSize: '15px' }}>
-                        {formatCurrency(po.grandTotal)}
+                        {formatCurrency(piData.grandTotal)}
                       </span>
                     </div>
                   </div>
@@ -607,14 +520,14 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
             </div>
 
             {/* Payment Terms */}
-            {po.terms?.terms?.buying?.payment?.phases && po.terms.terms.buying.payment.phases.length > 0 && (
+            {piData.terms?.terms?.buying?.payment?.phases && piData.terms.terms.buying.payment.phases.length > 0 && (
               <div className="border-theme rounded p-3 mb-4" style={{ borderWidth: '1px' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <CreditCard className="w-3.5 h-3.5 text-primary" />
                   <h3 className="font-bold text-main text-xs">PAYMENT TERMS</h3>
                 </div>
                 <div className="space-y-2 text-xs">
-                  {po.terms.terms.buying.payment.phases.map((phase, idx) => (
+                  {piData.terms.terms.buying.payment.phases.map((phase, idx) => (
                     <div key={idx} className="flex items-start justify-between p-2 rounded" style={{ background: 'var(--row-hover)' }}>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-0.5">
@@ -626,7 +539,7 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
                         <p className="text-muted text-[10px]">{phase.condition}</p>
                       </div>
                       <p className="font-bold text-primary ml-3">
-                        {formatCurrency((po.grandTotal * parseFloat(phase.percentage)) / 100)}
+                        {formatCurrency((piData.grandTotal * parseFloat(phase.percentage)) / 100)}
                       </p>
                     </div>
                   ))}
@@ -635,65 +548,65 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
             )}
 
             {/* Terms and Remarks */}
-            {(po.terms?.terms?.buying || po.metadata?.remarks) && (
+            {(piData.terms?.terms?.buying || piData.metadata?.remarks) && (
               <div className="grid grid-cols-2 gap-4 mb-4">
-                {po.terms?.terms?.buying && (
+                {piData.terms?.terms?.buying && (
                   <div className="border-theme rounded p-3 text-xs" style={{ borderWidth: '1px' }}>
                     <h3 className="font-bold text-main mb-2">TERMS & CONDITIONS</h3>
                     <div className="text-muted leading-relaxed space-y-1" style={{ fontSize: '10px' }}>
-                      {po.terms.terms.buying.general && (
-                        <p><strong>General:</strong> {po.terms.terms.buying.general}</p>
+                      {piData.terms.terms.buying.general && (
+                        <p><strong>General:</strong> {piData.terms.terms.buying.general}</p>
                       )}
-                      {po.terms.terms.buying.delivery && (
-                        <p><strong>Delivery:</strong> {po.terms.terms.buying.delivery}</p>
+                      {piData.terms.terms.buying.delivery && (
+                        <p><strong>Delivery:</strong> {piData.terms.terms.buying.delivery}</p>
                       )}
-                      {po.terms.terms.buying.cancellation && (
-                        <p><strong>Cancellation:</strong> {po.terms.terms.buying.cancellation}</p>
+                      {piData.terms.terms.buying.cancellation && (
+                        <p><strong>Cancellation:</strong> {piData.terms.terms.buying.cancellation}</p>
                       )}
-                      {po.terms.terms.buying.warranty && (
-                        <p><strong>Warranty:</strong> {po.terms.terms.buying.warranty}</p>
+                      {piData.terms.terms.buying.warranty && (
+                        <p><strong>Warranty:</strong> {piData.terms.terms.buying.warranty}</p>
                       )}
-                      {po.terms.terms.buying.liability && (
-                        <p><strong>Liability:</strong> {po.terms.terms.buying.liability}</p>
+                      {piData.terms.terms.buying.liability && (
+                        <p><strong>Liability:</strong> {piData.terms.terms.buying.liability}</p>
                       )}
-                      {po.terms.terms.buying.payment?.notes && (
-                        <p><strong>Payment Notes:</strong> {po.terms.terms.buying.payment.notes}</p>
+                      {piData.terms.terms.buying.payment?.notes && (
+                        <p><strong>Payment Notes:</strong> {piData.terms.terms.buying.payment.notes}</p>
                       )}
                     </div>
                   </div>
                 )}
-                {po.metadata?.remarks && (
+                {piData.metadata?.remarks && (
                   <div className="border-theme rounded p-3 text-xs" style={{ borderWidth: '1px' }}>
                     <h3 className="font-bold text-main mb-2">REMARKS</h3>
-                    <p className="text-muted leading-relaxed" style={{ fontSize: '10px' }}>{po.metadata.remarks}</p>
+                    <p className="text-muted leading-relaxed" style={{ fontSize: '10px' }}>{piData.metadata.remarks}</p>
                   </div>
                 )}
               </div>
             )}
 
             {/* Footer - Metadata */}
-            {po.metadata && (
+            {piData.metadata && (
               <div className="border-theme rounded p-3 text-xs" style={{ borderWidth: '1px', borderStyle: 'dashed' }}>
                 <div className="grid grid-cols-3 gap-4">
-                  {po.metadata.createdBy && (
+                  {piData.metadata.createdBy && (
                     <div>
                       <p className="text-muted text-[10px] mb-0.5">Created By</p>
-                      <p className="text-main font-semibold">{po.metadata.createdBy}</p>
+                      <p className="text-main font-semibold">{piData.metadata.createdBy}</p>
                     </div>
                   )}
-                  {po.metadata.createdAt && (
+                  {piData.metadata.createdAt && (
                     <div>
                       <p className="text-muted text-[10px] mb-0.5">Created At</p>
                       <p className="text-main font-semibold">
-                        {new Date(po.metadata.createdAt).toLocaleString('en-GB')}
+                        {new Date(piData.metadata.createdAt).toLocaleString('en-GB')}
                       </p>
                     </div>
                   )}
-                  {po.metadata.updatedAt && (
+                  {piData.metadata.updatedAt && (
                     <div>
                       <p className="text-muted text-[10px] mb-0.5">Last Updated</p>
                       <p className="text-main font-semibold">
-                        {new Date(po.metadata.updatedAt).toLocaleString('en-GB')}
+                        {new Date(piData.metadata.updatedAt).toLocaleString('en-GB')}
                       </p>
                     </div>
                   )}

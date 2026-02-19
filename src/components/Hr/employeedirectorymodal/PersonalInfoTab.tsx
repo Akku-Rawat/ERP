@@ -21,21 +21,21 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
   const features = getEmployeeFeatures(companyCode);
 
   const verifiedInputStyle =
-    "bg-gray-100 text-gray-600 cursor-not-allowed border-gray-300";
+    "bg-app text-main cursor-not-allowed border-theme";
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
       {/* ✅ CONDITIONAL RENDERING - Only show for companies with statutory fields */}
       {features.showStatutoryFields && (
-        <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-4">
-          <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">
+        <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
+          <h4 className="text-xs font-semibold text-main uppercase tracking-wide mb-3">
             Identity & Statutory Information
           </h4>
           <div className="grid grid-cols-2 gap-4">
             {/* NRC Field */}
             <div>
-              <label className="block text-xs text-gray-600 mb-1 font-medium">
-                NRC Number {features.statutoryFieldsRequired && <span className="text-red-500">*</span>}
+              <label className="block text-xs text-main mb-1 font-medium">
+                NRC Number {features.statutoryFieldsRequired && <span className="text-danger">*</span>}
               </label>
               <input
                 type="text"
@@ -45,11 +45,11 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 className={`w-full px-3 py-2 text-sm rounded-lg border focus:outline-none
                   ${verifiedFields.nrcId
                     ? verifiedInputStyle
-                    : "border-gray-300 focus:ring-2 focus:ring-purple-500"
+                    : "border border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   }`}
               />
               {verifiedFields.nrcId && (
-                <p className="text-[10px] text-green-600 mt-1 font-medium">
+                <p className="text-[10px] text-success mt-1 font-medium">
                   ✓ Verified from NAPSA
                 </p>
               )}
@@ -57,8 +57,8 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
 
             {/* SSN Field */}
             <div>
-              <label className="block text-xs text-gray-600 mb-1 font-medium">
-                SSN {features.statutoryFieldsRequired && <span className="text-red-500">*</span>}
+              <label className="block text-xs text-main mb-1 font-medium">
+                SSN {features.statutoryFieldsRequired && <span className="text-danger">*</span>}
               </label>
               <input
                 type="text"
@@ -70,14 +70,14 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 className={`w-full px-3 py-2 text-sm rounded-lg border
                   ${verifiedFields.socialSecurityNapsa
                     ? verifiedInputStyle
-                    : "border-gray-300 focus:ring-2 focus:ring-purple-500"
+                    : "border border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   }`}
               />
             </div>
 
             {/* NHIMA Field */}
             <div>
-              <label className="block text-xs text-gray-600 mb-1 font-medium">
+              <label className="block text-xs text-main mb-1 font-medium">
                 NHIMA Number
               </label>
               <input
@@ -87,13 +87,13 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                   handleInputChange("nhimaHealthInsurance", e.target.value)
                 }
                 placeholder="e.g., 91897177171"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
             </div>
 
             {/* TPIN Field */}
             <div>
-              <label className="block text-xs text-gray-600 mb-1 font-medium">
+              <label className="block text-xs text-main mb-1 font-medium">
                 TPIN
               </label>
               <input
@@ -101,7 +101,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 value={formData.tpinId}
                 onChange={(e) => handleInputChange("tpinId", e.target.value)}
                 placeholder="e.g., 10000000000"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
             </div>
           </div>
@@ -109,14 +109,14 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
       )}
 
       {/* Personal Information */}
-      <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-4">
-        <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-3">
+      <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
+        <h4 className="text-xs font-semibold text-main uppercase tracking-wide mb-3">
           Personal Information
         </h4>
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs text-gray-600 mb-1 font-medium">
-              First Name <span className="text-red-500">*</span>
+            <label className="block text-xs text-main mb-1 font-medium">
+              First Name <span className="text-danger">*</span>
             </label>
             <input
               value={formData.firstName}
@@ -126,24 +126,24 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     ${
       verifiedFields.firstName
         ? verifiedInputStyle
-        : "border-gray-300 focus:ring-2 focus:ring-purple-500"
+        : "border border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
     }`}
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-600 mb-1 font-medium">
+            <label className="block text-xs text-main mb-1 font-medium">
               Other Names
             </label>
             <input
               type="text"
               value={formData.otherNames}
               onChange={(e) => handleInputChange("otherNames", e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Last Name <span className="text-red-500">*</span>
+            <label className="block text-xs text-main mb-1 font-medium">
+              Last Name <span className="text-danger">*</span>
             </label>
             <input
               value={formData.lastName}
@@ -153,13 +153,13 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     ${
       verifiedFields.lastName
         ? verifiedInputStyle
-        : "border-gray-300 focus:ring-2 focus:ring-purple-500"
+        : "border border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
     }`}
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Date of Birth <span className="text-red-500">*</span>
+            <label className="block text-xs text-main mb-1 font-medium">
+              Date of Birth <span className="text-danger">*</span>
             </label>
             <input
               type="date"
@@ -181,19 +181,19 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
               className={`w-full px-3 py-2 text-sm rounded-lg border focus:outline-none
     ${
       dobError
-        ? "border-red-400 focus:ring-2 focus:ring-red-500"
-        : "border-gray-300 focus:ring-2 focus:ring-purple-500"
+        ? "border-danger focus:ring-2 focus:ring-danger/30"
+        : "border border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
     }`}
             />
             {dobError && (
-              <p className="text-[10px] text-red-600 mt-1 font-medium">
+              <p className="text-[10px] text-danger mt-1 font-medium">
                 {dobError}
               </p>
             )}
           </div>
           <div>
-            <label className="block text-xs text-gray-600 mb-1 font-medium">
-              Gender <span className="text-red-500">*</span>
+            <label className="block text-xs text-main mb-1 font-medium">
+              Gender <span className="text-danger">*</span>
             </label>
             <select
               value={formData.gender}
@@ -203,7 +203,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     ${
       verifiedFields.gender
         ? verifiedInputStyle
-        : "border-gray-300 focus:ring-2 focus:ring-purple-500"
+        : "border border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
     }`}
             >
               <option value="">Select</option>
@@ -213,7 +213,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             </select>
           </div>
           <div>
-            <label className="block text-xs text-gray-600 mb-1 font-medium">
+            <label className="block text-xs text-main mb-1 font-medium">
               Marital Status
             </label>
             <select
@@ -221,7 +221,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
               onChange={(e) =>
                 handleInputChange("maritalStatus", e.target.value)
               }
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             >
               <option value="">Select</option>
               <option>Single</option>

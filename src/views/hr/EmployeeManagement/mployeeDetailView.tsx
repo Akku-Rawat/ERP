@@ -1,5 +1,11 @@
 import React, { useState } from "react";
 import {
+  showApiError,
+  showSuccess,
+  showLoading,
+  closeSwal,
+} from "../../../utils/alert";
+import {
   Eye,
   Download,
   Upload,
@@ -36,13 +42,17 @@ const DocumentUploadModal: React.FC<{
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async () => {
-    if (!description || !file) return;
+const handleSubmit = async () => {
+  if (!description || !file) return;
+
+  try {
     setLoading(true);
     await onUpload({ description, file });
-    setLoading(false);
     onClose();
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
@@ -144,13 +154,16 @@ const EmployeeDetailView: React.FC<Props> = ({
     return "bg-gray-100 text-gray-600 border-gray-300";
   };
 
-  const handleUploadDocument = async ({
-    description,
-    file,
-  }: {
-    description: string;
-    file: File;
-  }) => {
+const handleUploadDocument = async ({
+  description,
+  file,
+}: {
+  description: string;
+  file: File;
+}) => {
+  try {
+    showLoading("Uploading Document...");
+
     const formData = new FormData();
     formData.append("employeeId", employee.id);
     formData.append("name[0]", description);
@@ -160,8 +173,17 @@ const EmployeeDetailView: React.FC<Props> = ({
     formData.append("isDelete", "0");
 
     await updateEmployeeDocuments(formData);
+
     await onDocumentUploaded();
-  };
+
+    closeSwal();
+    showSuccess("Document uploaded successfully");
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-background">

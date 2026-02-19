@@ -1,161 +1,170 @@
-// EntryFormTabs.tsx - New Payroll Entry Form Tab Components
+// EntryFormTabs.tsx — Landscape layout, no vertical scroll
 
 import React from "react";
 import type { PayrollEntry, Employee } from "./types";
-import { Edit2 } from "lucide-react";
+import { Edit2, CheckSquare } from "lucide-react";
 
+// ─── Shared field primitives ──────────────────────────────────────────────────
+const Label: React.FC<{ children: React.ReactNode; required?: boolean }> = ({
+  children,
+  required,
+}) => (
+  <label className="block text-[11px] font-semibold text-muted mb-1 uppercase tracking-wide">
+    {children}
+    {required && <span className="text-red-400 ml-0.5">*</span>}
+  </label>
+);
+
+const inputCls =
+  "w-full px-3 py-2 bg-app border border-theme rounded-lg text-sm text-main " +
+  "placeholder:text-muted focus:outline-none focus:border-primary transition";
+
+const selectCls =
+  "w-full px-3 py-2 bg-app border border-theme rounded-lg text-sm text-main " +
+  "focus:outline-none focus:border-primary transition cursor-pointer";
+
+// ─── Overview Tab — 3-column grid, everything above the fold ─────────────────
 interface OverviewTabProps {
   data: PayrollEntry;
   onChange: (field: string, value: any) => void;
 }
+
+export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
+  <div className="space-y-4">
+    {/* Row 1 — 3 cols */}
+    <div className="grid grid-cols-3 gap-4">
+      <div>
+        <Label required>Payroll Name</Label>
+        <input
+          type="text"
+          value={data.payrollName}
+          onChange={(e) => onChange("payrollName", e.target.value)}
+          placeholder="e.g. March Payroll"
+          className={inputCls}
+        />
+      </div>
+      <div>
+        <Label required>Posting Date</Label>
+        <input
+          type="date"
+          value={data.postingDate}
+          onChange={(e) => onChange("postingDate", e.target.value)}
+          className={inputCls}
+        />
+      </div>
+      <div>
+        <Label required>Payroll Frequency</Label>
+        <select
+          value={data.payrollFrequency}
+          onChange={(e) => onChange("payrollFrequency", e.target.value)}
+          className={selectCls}
+        >
+          <option value="">Select frequency</option>
+          <option value="Monthly">Monthly</option>
+          <option value="Biweekly">Biweekly</option>
+        </select>
+      </div>
+    </div>
+
+    {/* Row 2 — 3 cols */}
+    <div className="grid grid-cols-3 gap-4">
+      <div>
+        <Label required>Currency</Label>
+        <select
+          value={data.currency}
+          onChange={(e) => onChange("currency", e.target.value)}
+          className={selectCls}
+        >
+          <option value="INR">INR — Indian Rupee</option>
+          <option value="USD">USD — US Dollar</option>
+        </select>
+      </div>
+      <div>
+        <Label required>Company</Label>
+        <input
+          type="text"
+          value={data.company}
+          onChange={(e) => onChange("company", e.target.value)}
+          className={inputCls}
+        />
+      </div>
+      <div>
+        <Label required>Payroll Payable Account</Label>
+        <select
+          value={data.payrollPayableAccount}
+          onChange={(e) => onChange("payrollPayableAccount", e.target.value)}
+          className={selectCls}
+        >
+          <option value="Payroll Payable - I">Payroll Payable - I</option>
+          <option value="Payroll Payable - II">Payroll Payable - II</option>
+        </select>
+      </div>
+    </div>
+
+    {/* Row 3 — date range + status + checkboxes */}
+    <div className="grid grid-cols-3 gap-4">
+      <div>
+        <Label required>Start Date</Label>
+        <input
+          type="date"
+          value={data.startDate}
+          onChange={(e) => onChange("startDate", e.target.value)}
+          className={inputCls}
+        />
+      </div>
+      <div>
+        <Label required>End Date</Label>
+        <input
+          type="date"
+          value={data.endDate}
+          onChange={(e) => onChange("endDate", e.target.value)}
+          className={inputCls}
+        />
+      </div>
+      <div>
+        <Label>Status</Label>
+        <div className="flex items-center gap-2 px-3 py-2 bg-app border border-theme rounded-lg">
+          <span className="w-2 h-2 rounded-full bg-[var(--warning)] shrink-0" />
+          <span className="text-sm text-muted">{data.status}</span>
+        </div>
+      </div>
+    </div>
+
+    {/* Row 4 — checkboxes inline */}
+    <div className="grid grid-cols-2 gap-4">
+      <label className="flex items-center gap-3 px-4 py-3 bg-app border border-theme rounded-lg hover:border-primary cursor-pointer transition group">
+        <input
+          type="checkbox"
+          checked={data.salarySlipTimesheet}
+          onChange={(e) => onChange("salarySlipTimesheet", e.target.checked)}
+          className="w-4 h-4 accent-[var(--primary)] rounded"
+        />
+        <span className="text-sm text-main font-medium group-hover:text-primary transition">
+          Salary Slip Based on Timesheet
+        </span>
+      </label>
+      <label className="flex items-center gap-3 px-4 py-3 bg-app border border-theme rounded-lg hover:border-primary cursor-pointer transition group">
+        <input
+          type="checkbox"
+          checked={data.deductTaxForProof}
+          onChange={(e) => onChange("deductTaxForProof", e.target.checked)}
+          className="w-4 h-4 accent-[var(--primary)] rounded"
+        />
+        <span className="text-sm text-main font-medium group-hover:text-primary transition">
+          Deduct Tax For Unsubmitted Proof
+        </span>
+      </label>
+    </div>
+  </div>
+);
+
+// ─── Employees Tab — left filters + right scrollable list ─────────────────────
 interface EmployeesTabProps {
   data: PayrollEntry;
   onChange: (field: string, value: any) => void;
   employees: Employee[];
   onEditEmployee?: (employee: Employee) => void;
 }
-
-export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
-  <div className="space-y-6">
-    <div className="grid grid-cols-2 gap-6">
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Payroll Name <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          value={data.payrollName}
-          onChange={(e) => onChange("payrollName", e.target.value)}
-          placeholder="e.g. March Payroll"
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg
-      focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Posting Date <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="date"
-          value={data.postingDate}
-          onChange={(e) => onChange("postingDate", e.target.value)}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Currency <span className="text-red-500">*</span>
-        </label>
-        <select
-          value={data.currency}
-          onChange={(e) => onChange("currency", e.target.value)}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-        >
-          <option value="INR">INR</option>
-          <option value="USD">USD</option>
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Company <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          value={data.company}
-          onChange={(e) => onChange("company", e.target.value)}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Payroll Payable Account <span className="text-red-500">*</span>
-        </label>
-        <select
-          value={data.payrollPayableAccount}
-          onChange={(e) => onChange("payrollPayableAccount", e.target.value)}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-        >
-          <option value="Payroll Payable - I">Payroll Payable - I</option>
-          <option value="Payroll Payable - II">Payroll Payable - II</option>
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Status
-        </label>
-        <input
-          type="text"
-          value={data.status}
-          readOnly
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg bg-slate-100 text-slate-600 cursor-not-allowed"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Payroll Frequency <span className="text-red-500">*</span>
-        </label>
-        <select
-          value={data.payrollFrequency}
-          onChange={(e) => onChange("payrollFrequency", e.target.value)}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-        >
-          <option value="">Select</option>
-          <option value="Monthly">Monthly</option>
-          <option value="Biweekly">Biweekly</option>
-        </select>
-      </div>
-    </div>
-    <div className="grid grid-cols-2 gap-6">
-      <label className="flex items-center gap-3 p-4 border border-slate-300 rounded-lg hover:bg-slate-50 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={data.salarySlipTimesheet}
-          onChange={(e) => onChange("salarySlipTimesheet", e.target.checked)}
-          className="w-5 h-5 text-blue-600 rounded"
-        />
-        <span className="text-sm font-medium">
-          Salary Slip Based on Timesheet
-        </span>
-      </label>
-      <label className="flex items-center gap-3 p-4 border border-slate-300 rounded-lg hover:bg-slate-50 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={data.deductTaxForProof}
-          onChange={(e) => onChange("deductTaxForProof", e.target.checked)}
-          className="w-5 h-5 text-blue-600 rounded"
-        />
-        <span className="text-sm font-medium">
-          Deduct Tax For Unsubmitted Proof
-        </span>
-      </label>
-    </div>
-    <div className="grid grid-cols-2 gap-6">
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Start Date <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="date"
-          value={data.startDate}
-          onChange={(e) => onChange("startDate", e.target.value)}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          End Date <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="date"
-          value={data.endDate}
-          onChange={(e) => onChange("endDate", e.target.value)}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-        />
-      </div>
-    </div>
-  </div>
-);
 
 export const EmployeesTab: React.FC<EmployeesTabProps> = ({
   data,
@@ -165,150 +174,129 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 }) => {
   const toggleEmployee = (empId: string) => {
     const current = data.selectedEmployees || [];
-    const updated = current.includes(empId)
-      ? current.filter((id) => id !== empId)
-      : [...current, empId];
-    onChange("selectedEmployees", updated);
-  };
-  const filteredEmployees = employees.filter((e) => {
-    if (!e.isActive) return false;
-
-    if (data.branch && e.branch !== data.branch) return false;
-    if (data.department && e.department !== data.department) return false;
-    if (data.designation && e.designation !== data.designation) return false;
-    if (data.grade && e.grade !== data.grade) return false;
-
-    return true;
-  });
-
-  const selectAll = () => {
-    const allIds = filteredEmployees.map((e) => e.id);
-
     onChange(
       "selectedEmployees",
-      data.selectedEmployees?.length === allIds.length ? [] : allIds,
+      current.includes(empId)
+        ? current.filter((id) => id !== empId)
+        : [...current, empId],
     );
   };
 
+  const filteredEmployees = employees;
+
+  const allIds = filteredEmployees.map((e) => e.id);
+  const selectedCount = data.selectedEmployees?.length || 0;
+  const allSelected = selectedCount === allIds.length && allIds.length > 0;
+
+  const selectAll = () =>
+    onChange("selectedEmployees", allSelected ? [] : allIds);
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg bg-slate-50">
+    // Two-column: narrow filter panel | wide employee list
+    <div className="flex gap-4 h-full">
+      {/* ── Filter sidebar ── */}
+      <div className="w-52 shrink-0 flex flex-col gap-2">
+        <p className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">
+          Filter Employees
+        </p>
         <input
           placeholder="Branch"
           value={data.branch || ""}
           onChange={(e) => onChange("branch", e.target.value)}
-          className="px-4 py-2 border rounded-lg"
+          className={inputCls}
         />
         <input
           placeholder="Designation"
           value={data.designation || ""}
           onChange={(e) => onChange("designation", e.target.value)}
-          className="px-4 py-2 border rounded-lg"
+          className={inputCls}
         />
         <input
           placeholder="Department"
           value={data.department || ""}
           onChange={(e) => onChange("department", e.target.value)}
-          className="px-4 py-2 border rounded-lg"
+          className={inputCls}
         />
         <input
           placeholder="Grade"
           value={data.grade || ""}
           onChange={(e) => onChange("grade", e.target.value)}
-          className="px-4 py-2 border rounded-lg"
+          className={inputCls}
         />
-        <span className="text-sm font-medium text-blue-700">
-          {filteredEmployees.length} employees
-        </span>
+        <div className="mt-auto pt-2 border-t border-theme text-xs text-muted">
+          <span className="font-semibold text-primary">{filteredEmployees.length}</span> employees found
+        </div>
       </div>
 
-      <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={
-              data.selectedEmployees?.length ===
-              employees.filter((e) => e.isActive).length
-            }
-            onChange={selectAll}
-            className="w-5 h-5 text-blue-600 rounded"
-          />
-          <span className="font-semibold text-blue-900">
-            Select All Employees
+      {/* ── Employee list ── */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Select all header */}
+        <label className="flex items-center justify-between px-4 py-2.5 bg-[color-mix(in_srgb,var(--primary)_6%,transparent)] border border-[color-mix(in_srgb,var(--primary)_20%,transparent)] rounded-lg mb-2 cursor-pointer shrink-0">
+          <div className="flex items-center gap-2.5">
+            <input
+              type="checkbox"
+              checked={allSelected}
+              onChange={selectAll}
+              className="w-4 h-4 accent-[var(--primary)] rounded"
+            />
+            <span className="text-sm font-semibold text-main">Select All</span>
+          </div>
+          <span className="text-xs font-semibold text-primary bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] px-2 py-0.5 rounded-full">
+            {selectedCount} selected
           </span>
         </label>
-        <span className="text-sm font-medium text-blue-700">
-          {data.selectedEmployees?.length || 0} selected
-        </span>
-      </div>
-      <div className="space-y-3 max-h-96 overflow-y-auto">
-        {employees
-          .filter((e) => e.isActive)
-          .map((emp) => {
-            const isSelected = data.selectedEmployees?.includes(emp.id);
 
+        {/* Scrollable list */}
+        <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
+          {filteredEmployees.map((emp) => {
+            const isSelected = data.selectedEmployees?.includes(emp.id);
+            const gross = emp.basicSalary + emp.hra + emp.allowances;
             return (
               <div
                 key={emp.id}
-                className={`border-2 rounded-xl p-4 transition-all ${
+                onClick={() => toggleEmployee(emp.id)}
+                className={`flex items-center justify-between px-3 py-2.5 rounded-lg border cursor-pointer transition-all ${
                   isSelected
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-slate-200 hover:border-blue-300"
+                    ? "border-primary bg-[color-mix(in_srgb,var(--primary)_8%,transparent)]"
+                    : "border-theme bg-app hover:border-primary/40"
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  {/* LEFT: Selection */}
-                  <div
-                    className="flex items-center gap-4 cursor-pointer"
-                    onClick={() => toggleEmployee(emp.id)}
+                <div className="flex items-center gap-3 min-w-0">
+                  <input
+                    type="checkbox"
+                    checked={!!isSelected}
+                    readOnly
+                    className="w-3.5 h-3.5 accent-[var(--primary)] rounded shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-main truncate">{emp.name}</p>
+                    <p className="text-[11px] text-muted truncate">
+                      {emp.id} · {emp.designation}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 shrink-0 ml-3">
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-main">₹{gross.toLocaleString()}</p>
+                    <p className="text-[10px] text-muted">Gross</p>
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onEditEmployee?.(emp); }}
+                    className="p-1.5 rounded-md hover:bg-app border border-transparent hover:border-theme text-muted hover:text-main transition"
                   >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      readOnly
-                      className="w-5 h-5 text-blue-600 rounded"
-                    />
-                    <div>
-                      <p className="font-semibold text-slate-800">{emp.name}</p>
-                      <p className="text-sm text-slate-600">
-                        {emp.id} • {emp.designation}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* RIGHT: Salary + Edit */}
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="font-bold text-slate-800">
-                        ₹
-                        {(
-                          emp.basicSalary +
-                          emp.hra +
-                          emp.allowances
-                        ).toLocaleString()}
-                      </p>
-                      <p className="text-xs text-slate-500">Gross</p>
-                    </div>
-
-                    {/* EDIT BUTTON */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditEmployee?.(emp);
-                      }}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             );
           })}
+        </div>
       </div>
     </div>
   );
 };
 
+// ─── Accounting Tab — 2-col form + compact summary ────────────────────────────
 interface AccountingTabProps {
   data: PayrollEntry;
   onChange: (field: string, value: any) => void;
@@ -319,98 +307,104 @@ export const AccountingTab: React.FC<AccountingTabProps> = ({
   data,
   onChange,
   employees,
-}) => (
-  <div className="space-y-6">
-    <div className="grid grid-cols-2 gap-6">
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Payment Account <span className="text-red-500">*</span>
-        </label>
-        <select
-          value={data.paymentAccount}
-          onChange={(e) => onChange("paymentAccount", e.target.value)}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-        >
-          <option value="">Select</option>
-          <option value="HDFC Bank">HDFC Bank</option>
-          <option value="ICICI Bank">ICICI Bank</option>
-        </select>
+}) => {
+  const selectedEmps = employees.filter((e) =>
+    data.selectedEmployees?.includes(e.id),
+  );
+  const grossTotal = selectedEmps.reduce(
+    (s, e) => s + e.basicSalary + e.hra + e.allowances,
+    0,
+  );
+  const netTotal = Math.round(grossTotal * 0.76);
+
+  return (
+    <div className="flex gap-6 h-full">
+      {/* ── Left: form fields ── */}
+      <div className="flex-1 grid grid-cols-2 gap-4 content-start">
+        <div>
+          <Label required>Payment Account</Label>
+          <select
+            value={data.paymentAccount}
+            onChange={(e) => onChange("paymentAccount", e.target.value)}
+            className={selectCls}
+          >
+            <option value="">Select bank account</option>
+            <option value="HDFC Bank">HDFC Bank</option>
+            <option value="ICICI Bank">ICICI Bank</option>
+          </select>
+        </div>
+        <div>
+          <Label>Cost Center</Label>
+          <select
+            value={data.costCenter}
+            onChange={(e) => onChange("costCenter", e.target.value)}
+            className={selectCls}
+          >
+            <option value="">Select cost center</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Sales">Sales</option>
+          </select>
+        </div>
+        <div>
+          <Label>Project</Label>
+          <select
+            value={data.project}
+            onChange={(e) => onChange("project", e.target.value)}
+            className={selectCls}
+          >
+            <option value="">Select project</option>
+            <option value="Project Alpha">Project Alpha</option>
+          </select>
+        </div>
+        <div>
+          <Label>Letter Head</Label>
+          <select
+            value={data.letterHead}
+            onChange={(e) => onChange("letterHead", e.target.value)}
+            className={selectCls}
+          >
+            <option value="">Select letter head</option>
+            <option value="Company">Company</option>
+          </select>
+        </div>
       </div>
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Cost Center
-        </label>
-        <select
-          value={data.costCenter}
-          onChange={(e) => onChange("costCenter", e.target.value)}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-        >
-          <option value="">Select</option>
-          <option value="Engineering">Engineering</option>
-          <option value="Sales">Sales</option>
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Project
-        </label>
-        <select
-          value={data.project}
-          onChange={(e) => onChange("project", e.target.value)}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-        >
-          <option value="">Select</option>
-          <option value="Project Alpha">Project Alpha</option>
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Letter Head
-        </label>
-        <select
-          value={data.letterHead}
-          onChange={(e) => onChange("letterHead", e.target.value)}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-        >
-          <option value="">Select</option>
-          <option value="Company">Company</option>
-        </select>
+
+      {/* ── Right: payment summary card ── */}
+      <div className="w-60 shrink-0 bg-app border border-theme rounded-xl p-4 flex flex-col gap-3">
+        <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">
+          Payment Summary
+        </p>
+
+        <div className="flex-1 flex flex-col gap-2">
+          {/* Employees */}
+          <div className="flex items-center justify-between py-2 border-b border-theme">
+            <span className="text-xs text-muted">Employees</span>
+            <span className="text-sm font-bold text-main">
+              {data.selectedEmployees?.length || 0}
+            </span>
+          </div>
+          {/* Gross */}
+          <div className="flex items-center justify-between py-2 border-b border-theme">
+            <span className="text-xs text-muted">Est. Gross</span>
+            <span className="text-sm font-bold text-main">
+              ₹{grossTotal.toLocaleString()}
+            </span>
+          </div>
+          {/* Net */}
+          <div className="flex items-center justify-between py-2">
+            <span className="text-xs text-muted">Est. Net Pay</span>
+            <span className="text-base font-bold text-primary">
+              ₹{netTotal.toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-auto pt-2 border-t border-theme">
+          <p className="text-[10px] text-muted opacity-60 leading-relaxed">
+            Net estimated after ~24% deductions (PF, ESI, TDS)
+          </p>
+        </div>
       </div>
     </div>
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
-      <h3 className="font-bold text-blue-900 mb-4">Payment Summary</h3>
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg p-4">
-          <p className="text-xs text-slate-600 mb-1">Employees</p>
-          <p className="text-2xl font-bold text-slate-800">
-            {data.selectedEmployees?.length || 0}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg p-4">
-          <p className="text-xs text-slate-600 mb-1">Est. Gross</p>
-          <p className="text-2xl font-bold text-green-600">
-            ₹
-            {employees
-              .filter((e) => data.selectedEmployees?.includes(e.id))
-              .reduce((sum, e) => sum + e.basicSalary + e.hra + e.allowances, 0)
-              .toLocaleString()}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg p-4">
-          <p className="text-xs text-slate-600 mb-1">Est. Net</p>
-          <p className="text-2xl font-bold text-blue-600">
-            ₹
-            {Math.round(
-              employees
-                .filter((e) => data.selectedEmployees?.includes(e.id))
-                .reduce(
-                  (sum, e) => sum + e.basicSalary + e.hra + e.allowances,
-                  0,
-                ) * 0.76,
-            ).toLocaleString()}
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+  );
+};

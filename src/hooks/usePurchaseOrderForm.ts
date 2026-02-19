@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { showApiError, showSuccess } from "../components/alert";
+import { showApiError, showSuccess } from "../utils/alert";
 import type {
   PurchaseOrderFormData,
   POTab,

@@ -8,7 +8,6 @@ import type { InvoiceSummary, Invoice } from "../../types/invoice";
 import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTemplate1";
 import PdfPreviewModal from "./PdfPreviewModal";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
-
 import Table from "../../components/ui/Table/Table";
 
 import ActionButton, {
@@ -20,8 +19,11 @@ import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { Company } from "../../types/company";
-import { showApiError, showSuccess } from "../../components/alert";
+import { showApiError, showSuccess , showLoading,closeSwal} from "../../utils/alert";
 import type { InvoiceStatus } from "../../types/invoice";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 
 const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
   Draft: ["Rejected", "Approved"],
@@ -40,7 +42,6 @@ interface InvoiceTableProps {
 }
 const InvoiceTable: React.FC<InvoiceTableProps> = ({
   onAddInvoice,
-  onExportInvoice,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
@@ -104,49 +105,187 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     fetchInvoices();
   }, [page, pageSize]);
 
+  const fetchAllInvoicesForExport = async () => {
+  try {
+    let allData: InvoiceSummary[] = [];
+    let currentPage = 1;
+    let totalPagesLocal = 1;
+
+    do {
+      const res = await getAllSalesInvoices(currentPage, 100);
+
+      if (res?.status_code === 200) {
+        const mapped: InvoiceSummary[] = res.data.map((inv: any) => ({
+          invoiceNumber: inv.invoiceNumber,
+          customerName: inv.customerName,
+          receiptNumber: inv.receiptNumber,
+          currency: inv.currency,
+          exchangeRate: inv.exchangeRate,
+          dueDate: inv.dueDate,
+          dateOfInvoice: new Date(inv.dateOfInvoice),
+          total: Number(inv.totalAmount),
+          totalTax: inv.totalTax,
+          invoiceStatus: inv.invoiceStatus,
+          invoiceTypeParent: inv.invoiceTypeParent,
+          invoiceType: inv.invoiceType,
+        }));
+
+        allData = [...allData, ...mapped];
+        totalPagesLocal = res.pagination?.total_pages || 1;
+      }
+
+      currentPage++;
+    } while (currentPage <= totalPagesLocal);
+
+    return allData;
+  } catch (error) {
+    showApiError(error);
+    return [];
+  }
+};
+
+const handleExportExcel = async () => {
+  try {
+    showLoading("Exporting Sales Invoices...");
+
+    const dataToExport = await fetchAllInvoicesForExport();
+
+    if (!dataToExport.length) {
+      closeSwal();
+      showApiError("No invoices to export");
+      return;
+    }
+
+    const formattedData = dataToExport.map((inv) => ({
+      "Invoice No": inv.invoiceNumber,
+      Type: inv.invoiceType,
+      Customer: inv.customerName,
+      Date: inv.dateOfInvoice.toLocaleDateString(),
+      "Due Date": inv.dueDate
+        ? new Date(inv.dueDate).toLocaleDateString()
+        : "",
+      Amount: inv.total,
+      Currency: inv.currency,
+      Status: inv.invoiceStatus,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Invoices");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const fileData = new Blob([excelBuffer], {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(fileData, "Sales_Invoices.xlsx");
+
+    closeSwal();
+    showSuccess("Invoices exported successfully");
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
+
+
   const handleViewClick = async (
-    invoiceNumber: string,
-    e?: React.MouseEvent,
-  ) => {
-    e?.stopPropagation();
+  invoiceNumber: string,
+  e?: React.MouseEvent,
+) => {
+  e?.stopPropagation();
 
-    try {
-      if (!company) {
-        console.error("Company data not loaded");
-        return;
-      }
+  try {
+    
+    showLoading("Loading invoice preview...");
 
-      const invoiceRes = await getSalesInvoiceById(invoiceNumber);
-      const invoice = invoiceRes.data as Invoice;
-
-      setSelectedInvoice(invoice);
-
-      const url = await generateInvoicePDF(invoice, company, "bloburl");
-      setPdfUrl(url as string);
-      setPdfOpen(true);
-    } catch (err: any) {
-      showApiError(err);
+    if (!company) {
+      closeSwal(); 
+      console.error("Company data not loaded");
+      return;
     }
-  };
 
-  const handleDownload = async (inv: InvoiceSummary, e?: React.MouseEvent) => {
-    e?.stopPropagation();
+    const invoiceRes = await getSalesInvoiceById(
+      invoiceNumber
+    );
 
-    try {
-      if (!company) {
-        showApiError("Company data not loaded");
-        return;
-      }
-
-      const invoiceRes = await getSalesInvoiceById(inv.invoiceNumber);
-      const invoice = invoiceRes.data as Invoice;
-
-      await generateInvoicePDF(invoice, company, "save");
-      showSuccess("Invoice downloaded successfully!");
-    } catch (err: any) {
-      showApiError(err);
+    if (!invoiceRes || invoiceRes.status_code !== 200) {
+      closeSwal();
+      showApiError("Failed to load invoice");
+      return;
     }
-  };
+
+    const invoice = invoiceRes.data as Invoice;
+
+    setSelectedInvoice(invoice);
+
+    const url = await generateInvoicePDF(
+      invoice,
+      company,
+      "bloburl"
+    );
+
+    setPdfUrl(url as string);
+    setPdfOpen(true);
+
+    
+    closeSwal();
+
+  } catch (err: any) {
+    closeSwal(); 
+    showApiError(err);
+  }
+};
+
+
+  const handleDownload = async (
+  inv: InvoiceSummary,
+  e?: React.MouseEvent
+) => {
+  e?.stopPropagation();
+
+  try {
+    
+    showLoading("Preparing invoice download...");
+
+    if (!company) {
+      closeSwal();
+      showApiError("Company data not loaded");
+      return;
+    }
+
+    const invoiceRes = await getSalesInvoiceById(
+      inv.invoiceNumber
+    );
+
+    if (!invoiceRes || invoiceRes.status_code !== 200) {
+      closeSwal();
+      showApiError("Failed to load invoice");
+      return;
+    }
+
+    const invoice = invoiceRes.data as Invoice;
+
+    await generateInvoicePDF(
+      invoice,
+      company,
+      "save"
+    );
+
+    closeSwal(); 
+    showSuccess("Invoice downloaded successfully!");
+
+  } catch (err: any) {
+    closeSwal();
+    showApiError(err);
+  }
+};
+
 
   const handleClosePdf = () => {
     if (pdfUrl) URL.revokeObjectURL(pdfUrl);
@@ -275,7 +414,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
           <ActionButton
             type="view"
             onClick={(e) => handleViewClick(inv.invoiceNumber, e)}
-            iconOnly={false}
+            iconOnly
           />
           {/* <ActionButton
             type="download"
@@ -313,7 +452,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
         onAdd={onAddInvoice}
         enableColumnSelector
         enableExport
-        onExport={onExportInvoice}
+        onExport={handleExportExcel}
         currentPage={page}
         searchValue={searchTerm}
         onSearch={setSearchTerm}

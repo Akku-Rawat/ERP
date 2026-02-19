@@ -9,16 +9,20 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import React, { useState, useEffect } from "react";
-import { showApiError, showSuccess, showLoading, closeSwal } from "../../components/alert";
+import {
+  showApiError,
+  showSuccess,
+  showLoading,
+  closeSwal,
+} from "../../utils/alert";
 
 import { createItemStock } from "../../api/stockApi";
 import { getStockById, getAllStockItems } from "../../api/stockItemApi";
 import Modal from "../ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
-;
+import Select from "../../components/ui/Select";
+
 import { getAllItems } from "../../api/itemApi";
-
-
 
 type FormState = Record<string, any>;
 
@@ -75,29 +79,29 @@ const ItemModal: React.FC<{
     Array<{ label: string; value: string; id: string; itemClassCode?: string }>
   >([]);
   // Fetch all available items for dropdown on open
-useEffect(() => {
-  if (!isOpen) return;
+  useEffect(() => {
+    if (!isOpen) return;
 
-  (async () => {
-    try {
-      const response = await getAllItems(1, 1000);
+    (async () => {
+      try {
+        const response = await getAllItems(1, 1000);
 
-      const items = response?.data || [];
+        const items = response?.data || [];
 
-      const mappedOptions = items.map((item: any) => ({
-        label: item.itemName,
-        value: item.id,
-        id: item.id,
-        itemClassCode: item.itemClassCode,
-      }));
+        const mappedOptions = items.map((item: any) => ({
+          label: item.itemName,
+          value: item.id,
+          id: item.id,
+          itemClassCode: item.itemClassCode,
+        }));
 
-      setItemOptions(mappedOptions);
-    } catch (err) {
-      console.error("Item fetch failed:", err);
-      setItemOptions([]);
-    }
-  })();
-}, [isOpen]);
+        setItemOptions(mappedOptions);
+      } catch (err) {
+        console.error("Item fetch failed:", err);
+        setItemOptions([]);
+      }
+    })();
+  }, [isOpen]);
 
   useEffect(() => {
     if (!form.id) return;
@@ -135,52 +139,52 @@ useEffect(() => {
     setActiveTab("details");
   }, [isOpen, isEditMode, initialData]);
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  try {
-    if (!form.id) {
-      showApiError("Please select an item");
-      return;
+    try {
+      if (!form.id) {
+        showApiError("Please select an item");
+        return;
+      }
+
+      const qty = parseFloat(form.quantity);
+      const price = parseFloat(form.rate);
+
+      if (!qty || qty <= 0) {
+        showApiError("Please enter a valid quantity greater than 0");
+        return;
+      }
+
+      if (!price || price <= 0) {
+        showApiError("Please enter a valid price greater than 0");
+        return;
+      }
+
+      const payload = {
+        items: [
+          {
+            item_code: form.id,
+            qty: qty,
+            price: price,
+          },
+        ],
+      };
+
+      showLoading("Creating Stock Entry...");
+
+      await createItemStock(payload);
+
+      closeSwal();
+      showSuccess("Stock entry created successfully");
+
+      onSubmit?.();
+      handleClose();
+    } catch (error: any) {
+      closeSwal();
+      showApiError(error);
     }
-
-    const qty = parseFloat(form.quantity);
-    const price = parseFloat(form.rate);
-
-    if (!qty || qty <= 0) {
-      showApiError("Please enter a valid quantity greater than 0");
-      return;
-    }
-
-    if (!price || price <= 0) {
-      showApiError("Please enter a valid price greater than 0");
-      return;
-    }
-
-    const payload = {
-      items: [
-        {
-          item_code: form.id,
-          qty: qty,
-          price: price,
-        },
-      ],
-    };
-
-    showLoading("Creating Stock Entry...");
-
-    await createItemStock(payload);
-
-    closeSwal();
-    showSuccess("Stock entry created successfully");
-
-    onSubmit?.();
-    handleClose();
-  } catch (error: any) {
-    closeSwal();
-    showApiError(error);
-  }
-};
+  };
 
   const handleClose = () => {
     setForm(emptyForm);
@@ -237,45 +241,36 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </h3>
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
-                    <div className="flex flex-col gap-1 text-sm col-span-3">
-                      <label className="font-medium text-gray-600">
-                        Select Item
-                      </label>
-                      <select
-                        className="w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        value={
-                          itemOptions.find((opt) => opt.id === form.id)
-                            ?.value || ""
-                        }
-                     onChange={(e) => {
-  const selectedId = e.target.value;
+                    <div className="flex flex-col gap-1 text-sm col-span-1">
+                       <Select
+                        label="Select Item"
+                        name="id"
+                        value={form.id}
+                        onChange={(e) => {
+                          const selectedId = e.target.value;
 
-  const selectedOption = itemOptions.find(
-    (opt) => opt.id === selectedId
-  );
+                          const selectedItem = itemOptions.find(
+                            (item) => item.id === selectedId,
+                          );
 
-  setForm((p) => ({
-    ...p,
-    id: selectedId,
-    itemName: selectedOption?.label || "",
-    itemClassCode: selectedOption?.itemClassCode || "",
-  }));
-}}
-
-                      >
-                        <option value="">Select an item</option>
-                        {itemOptions.map((opt) => (
-                          <option key={opt.id} value={opt.id}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
+                          setForm((prev) => ({
+                            ...prev,
+                            id: selectedId,
+                            itemName: selectedItem?.label || "",
+                            itemClassCode: selectedItem?.itemClassCode || "",
+                          }));
+                        }}
+                        options={[
+                          { value: "", label: "Select an item" },
+                          ...itemOptions,
+                        ]}
+                      />
                     </div>
 
                     <Input
                       label="Item Code"
                       name="itemClassCode"
-                       value={form.itemClassCode || ""}
+                      value={form.itemClassCode || ""}
                       onChange={handleForm}
                       className="w-full"
                       readOnly

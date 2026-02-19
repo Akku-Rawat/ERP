@@ -1,4 +1,4 @@
-// LeaveSetupTab.tsx - UPDATED TO USE HR SETTINGS
+
 import React, { useState, useEffect } from "react";
 import { Info } from "lucide-react";
 
@@ -72,22 +72,22 @@ export const LeaveSetupTab: React.FC<LeaveSetupTabProps> = ({
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-4">
+      <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+          <h4 className="text-xs font-semibold text-main uppercase tracking-wide">
             Leave Configuration
           </h4>
-          <Info className="w-4 h-4 text-gray-400" />
+          <Info className="w-4 h-4 text-muted" />
         </div>
 
         <div>
-          <label className="block text-xs text-gray-600 mb-2 font-medium">
+          <label className="block text-xs text-main mb-2 font-medium">
             Select Leave Policy *
           </label>
           <select
             value={selectedPolicy}
             onChange={(e) => setSelectedPolicy(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-theme bg-card text-main rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
           >
             <option value="">Choose leave policy...</option>
             {LEAVE_POLICIES.map((policy) => (
@@ -96,15 +96,15 @@ export const LeaveSetupTab: React.FC<LeaveSetupTabProps> = ({
               </option>
             ))}
           </select>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted mt-1">
             ⚙️ Managed in HR Settings → Leave Policy
           </p>
         </div>
 
         {/* Policy Preview */}
         {policyDetails && (
-          <div className="border-t pt-4 mt-4">
-            <p className="text-xs font-semibold text-gray-700 mb-3">
+          <div className="border-t border-theme pt-4 mt-4">
+            <p className="text-xs font-semibold text-main mb-3">
               Leave Entitlement:
             </p>
             <div className="space-y-3">
@@ -116,26 +116,26 @@ export const LeaveSetupTab: React.FC<LeaveSetupTabProps> = ({
                 return (
                   <div
                     key={idx}
-                    className="bg-gray-50 p-3 rounded border border-gray-200"
+                    className="bg-app p-3 rounded border border-theme"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <span className="text-sm font-medium text-gray-900">
+                        <span className="text-sm font-medium text-main">
                           {leave.name}
                         </span>
-                        <span className="ml-2 text-xs px-2 py-0.5 bg-gray-200 text-gray-600 rounded">
+                        <span className="ml-2 text-xs px-2 py-0.5 bg-app text-main rounded">
                           {leave.code}
                         </span>
                       </div>
-                      <span className="text-sm font-semibold text-purple-600">
+                      <span className="text-sm font-semibold text-primary">
                         {leave.quota} days
                       </span>
                     </div>
-                    <div className="text-xs text-gray-600">
+                    <div className="text-xs text-main">
                       <p>Accrual: {leave.accrual}</p>
                       {formData.engagementDate &&
                         leave.accrual === "Monthly" && (
-                          <p className="text-green-600 font-medium mt-1">
+                          <p className="text-green-success font-medium mt-1">
                             Prorated for{" "}
                             {new Date(formData.engagementDate).getFullYear()}:{" "}
                             {prorated} days
@@ -151,8 +151,8 @@ export const LeaveSetupTab: React.FC<LeaveSetupTabProps> = ({
 
         {/* Engagement Date Warning */}
         {!formData.engagementDate && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-            <p className="text-xs text-amber-800">
+          <div className="bg-warning/10 border border-warning/30 rounded-lg p-3">
+            <p className="text-xs text-warning">
               ⚠️ Set engagement date in Employment tab to see prorated leave
               calculation
             </p>

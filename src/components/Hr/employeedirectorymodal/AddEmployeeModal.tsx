@@ -6,7 +6,7 @@ import ContactInfoTab from "./ContactInfoTabs";
 import EmploymentTab from "./EmploymentTab";
 import CompensationTab from "./CompensationTab";
 import { LeaveSetupTab } from "./LeaveSetupTab";
-import { WorkScheduleTab } from "./WorkScheduletab";
+import { WorkScheduleTab } from "./WorkScheduletab";  
 import { getLevelsFromHrSettings } from "../../../views/hr/tabs/salarystructure";
 
 import { EMPLOYEE_ROLE_CONFIG } from "../../../api/config/employeeRoleConfig";
@@ -126,6 +126,12 @@ type AddEmployeeModalProps = {
   editData?: any;
   mode?: "add" | "edit";
 };
+import {
+  showApiError,
+  showSuccess,
+  showLoading,
+  closeSwal,
+} from "../../../utils/alert";
 
 const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   isOpen,
@@ -170,7 +176,7 @@ const [step, setStep] = useState<"verification" | "form">(
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+ 
 
   // Auto-set salary structure when job title changes
 
@@ -394,16 +400,17 @@ const [step, setStep] = useState<"verification" | "form">(
 
   const handleNext = () => {
     const error = validateCurrentTab();
-    if (error) {
-      setError(error);
-      return;
-    }
-    setError(null);
+  if (error) {
+  showApiError(error);
+  return;
+}
+
+    
     setCurrentTabIndex((prev) => prev + 1);
   };
 
   const handlePrevious = () => {
-    setError(null);
+    
     setCurrentTabIndex((prev) => prev - 1);
   };
 
@@ -504,41 +511,38 @@ const [step, setStep] = useState<"verification" | "form">(
 
     return payload;
   };
-  const handleSave = async () => {
-    setLoading(true);
-    setError(null);
+ const handleSave = async () => {
+  const validationError = validateCurrentTab();
+  if (validationError) {
+    showApiError(validationError);
+    return;
+  }
 
-    try {
-      if (editData?.id) {
-        //  EDIT FLOW
-        const payload = {
-          id: String(editData.id), // backend expects this
-          ...buildPayload(),
-        };
+  try {
+    showLoading(editData ? "Updating Employee..." : "Creating Employee...");
 
-        await updateEmployeeById(payload);
-      } else {
-        //  CREATE FLOW
-        await createEmployee(buildPayload());
-      }
+    if (editData?.id) {
+      const payload = {
+        id: String(editData.id),
+        ...buildPayload(),
+      };
 
-      onSuccess?.();
-      onClose();
-    } catch (e: any) {
-      console.error("Create/Update Employee Error:", e);
-
-      const apiMessage =
-        e?.response?.data?.message ||
-        e?.response?.data?.error ||
-        e?.response?.data?.details ||
-        e?.message ||
-        "Failed to save employee";
-
-      setError(apiMessage);
-    } finally {
-      setLoading(false);
+      await updateEmployeeById(payload);
+      closeSwal();
+      showSuccess("Employee updated successfully");
+    } else {
+      await createEmployee(buildPayload());
+      closeSwal();
+      showSuccess("Employee created successfully");
     }
-  };
+
+    onSuccess?.();
+    onClose();
+  } catch (error) {
+    closeSwal();
+    showApiError(error);
+  }
+};
 
   if (!isOpen) return null;
 
@@ -564,18 +568,18 @@ if (step === "verification" && features.requireIdentityVerification) {
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-start justify-center z-50 overflow-y-auto pt-4 pb-4">
       <div
-        className="bg-white rounded-lg shadow-2xl w-full max-w-6xl mx-4 flex flex-col"
+        className="bg-card rounded-lg shadow-xl w-full max-w-6xl mx-4 flex flex-col border border-theme"
         style={{ maxHeight: "95vh" }}
       >
         {/* Top Bar */}
-        <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-white flex-shrink-0">
+        <div className="flex justify-between items-center px-6 py-3 border-b border-theme bg-card flex-shrink-0">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🇿🇲</span>
             <div>
-              <div className="font-semibold text-gray-800">
+              <div className="font-semibold text-main">
                 {editData ? "Edit Employee" : "Employee Onboarding"}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-muted">
                 {isPreFilled
                   ? "✓ Verified from NAPSA"
                   : "Complete employee information"}
@@ -584,41 +588,41 @@ if (step === "verification" && features.requireIdentityVerification) {
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition p-1"
+            className="text-muted hover:text-main transition p-1"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Employee Header */}
-        <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
+        <div className="px-6 py-4 border-b border-theme flex-shrink-0">
           <div className="flex gap-4">
             <div className="flex-shrink-0">
               <div className="relative">
-                <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-gray-200">
-                  <User className="w-8 h-8 text-gray-300" />
+                <div className="w-16 h-16 bg-approunded-lg flex items-center justify-center border-2 border-theme">
+                  <User className="w-8 h-8 text-muted" />
                 </div>
-                <button className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full border-2 border-gray-300 flex items-center justify-center hover:bg-gray-50 transition shadow-sm">
-                  <Upload className="w-2.5 h-2.5 text-gray-600" />
+                <button className="absolute -bottom-1 -right-1 w-5 h-5 bg-card rounded-full border-2 border-theme flex items-center justify-center hover:bg-app transition shadow-sm">
+                  <Upload className="w-2.5 h-2.5 text-main" />
                 </button>
               </div>
             </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-base font-semibold text-gray-800 truncate">
+                <h3 className="text-base font-semibold text-main truncate">
                   {formData.firstName || formData.lastName
                     ? `${formData.firstName} ${formData.lastName}`.trim()
                     : "New Employee"}
                 </h3>
                 {isPreFilled && (
-                  <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded flex-shrink-0">
+                  <span className="flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-0.5 rounded flex-shrink-0">
                     <CheckCircle2 className="w-3 h-3" />
                     Verified
                   </span>
                 )}
               </div>
-              <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+              <div className="flex flex-wrap gap-2 text-xs text-main">
                 {formData.nrcId && (
                   <div>
                     <span className="font-medium">NRC:</span> {formData.nrcId}
@@ -641,16 +645,11 @@ if (step === "verification" && features.requireIdentityVerification) {
           </div>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mx-6 mt-3 p-2.5 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs flex items-center gap-2 flex-shrink-0">
-            <AlertCircle className="w-4 h-4" />
-            {error}
-          </div>
-        )}
+       
+       
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 bg-white px-6 overflow-x-auto">
+        <div className="flex border-b border-theme bg-card px-6 overflow-x-auto">
           {TAB_ORDER.map((tab, index) => {
             const isClickable = true;
 
@@ -662,10 +661,10 @@ if (step === "verification" && features.requireIdentityVerification) {
                 className={`px-3 py-2.5 text-xs font-medium whitespace-nowrap transition
                   ${
                     index === currentTabIndex
-                      ? "text-purple-600 border-b-2 border-purple-600"
+                      ? "text-primary border-b-2 border-primary"
                       : isClickable
-                        ? "text-gray-700 hover:text-purple-600"
-                        : "text-gray-400 cursor-not-allowed"
+                        ? "text-gray-700 hover:text-primary"
+                        : "text-muted cursor-not-allowed"
                   }`}
               >
                 {tab}
@@ -675,7 +674,7 @@ if (step === "verification" && features.requireIdentityVerification) {
         </div>
 
         {/* Form Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
+        <div className="flex-1 overflow-y-auto bg-app p-6">
           {activeTab === "Personal" && (
             <PersonalInfoTab
               formData={formData}
@@ -725,10 +724,10 @@ if (step === "verification" && features.requireIdentityVerification) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between items-center px-6 py-4 border-t bg-gray-50 flex-shrink-0">
+        <div className="flex justify-between items-center px-6 py-4 border-t border-theme bg-card flex-shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-lg"
+            className="px-4 py-2 text-sm text-main hover:bg-app rounded-lg"
           >
             Cancel
           </button>
@@ -746,7 +745,7 @@ if (step === "verification" && features.requireIdentityVerification) {
             {!isLastTab ? (
               <button
                 onClick={handleNext}
-                className="px-6 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                className="px-6 py-2 text-sm bg-primary text-white rounded-lg"
               >
                 Next
               </button>
@@ -754,7 +753,7 @@ if (step === "verification" && features.requireIdentityVerification) {
               <button
                 onClick={handleSave}
                 disabled={loading}
-                className="px-6 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                className="px-6 py-2 text-sm bg-success text-white rounded-lg  disabled:opacity-50"
               >
                 {loading ? "Saving..." : "Save Employee"}
               </button>

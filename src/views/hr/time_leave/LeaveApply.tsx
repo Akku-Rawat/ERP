@@ -10,7 +10,7 @@ import type { LeaveBalanceUI } from "../../../types/leave/leaveBalance";
 
 import { mapLeaveBalanceFromApi } from "../../../types/leave/leaveMapper";
 import { getEmployeeLeaveBalanceReport } from "../../../api/leaveApi";
-import { closeSwal, showApiError, showLoading, showSuccess } from "../../../components/alert";
+import { closeSwal, showApiError, showLoading, showSuccess } from "../../../utils/alert";
 
 type LeaveFormData = {
   type: string;

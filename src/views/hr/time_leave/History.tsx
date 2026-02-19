@@ -11,7 +11,7 @@ import LeaveDetailModal from "../../../components/Hr/leave/LeaveDetailModal";
 import { cancelLeave } from "../../../api/leaveApi";
 import type { LeaveUI } from "../../../types/leave/uiLeave";
 import { mapLeaveFromApi } from "../../../types/leave/leaveMapper";
-import { closeSwal, showApiError, showLoading, showSuccess } from "../../../components/alert";
+import { closeSwal, showApiError, showLoading, showSuccess } from "../../../utils/alert";
 
 interface HistoryProps {
   onNewRequest: () => void;

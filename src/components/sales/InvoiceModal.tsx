@@ -17,7 +17,7 @@ import {
 } from "../../constants/invoice.constants";
 import PaymentInfoBlock from "./PaymentInfoBlock";
 import AddressBlock from "../ui/modal/AddressBlock";
-import { showApiError } from "../alert";
+import { showApiError } from "../../utils/alert";
 
 // import ModalInput from "../ui/ModalInput";
 // import ModalSelect from "../ui/ModalSelect";

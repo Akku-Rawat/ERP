@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, Checkbox } from "./formComponent";
-import { ModalInput } from "./modalComponent";
+import { ModalInput, ModalSelect } from "./modalComponent";
+import { getCountry, getProvinces, getTowns } from "../../../api/PlacesApi";
+import SearchSelect from "./SearchSelect";
 
 interface Address {
   line1: string;
@@ -16,7 +18,7 @@ interface AddressBlockProps {
   title: string;
   subtitle?: string;
   data: Address;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   sameAsBilling?: boolean;
   onSameAsBillingChange?: (checked: boolean) => void;
   disableAll?: boolean;
@@ -33,6 +35,39 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
   disableAll = false,
 }) => {
   const isShipping = type === "shipping";
+
+
+
+
+  const fetchCountryOptions = async (q: string) => {
+    const res = await getCountry(q);
+
+    return (res.data || []).map((c: string) => ({
+      label: c,
+      value: c,
+    }));
+  };
+
+
+  const fetchProvinceOptions = async (q: string) => {
+    const res = await getProvinces(q);
+
+    return (res.data || []).map((p: string) => ({
+      label: p,
+      value: p,
+    }));
+  };
+
+
+  const fetchTownOptions = async (q: string) => {
+    const res = await getTowns(q);
+
+    return (res.data || []).map((t: string) => ({
+      label: t,
+      value: t,
+    }));
+  };
+
 
   return (
     <Card
@@ -78,31 +113,46 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             disabled={disableAll || sameAsBilling}
           />
 
-          <ModalInput
-            label="City"
-            name="city"
+          <SearchSelect
+            label="City / Town"
             value={data.city}
-            onChange={onChange}
+            onChange={(val) =>
+              onChange({
+                target: { name: "city", value: val },
+              } as any)
+            }
+            fetchOptions={fetchTownOptions}
             disabled={disableAll || sameAsBilling}
           />
+
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <ModalInput
-            label="State"
-            name="state"
+          <SearchSelect
+            label="State / Province"
             value={data.state}
-            onChange={onChange}
+            onChange={(val) =>
+              onChange({
+                target: { name: "state", value: val },
+              } as any)
+            }
+            fetchOptions={fetchProvinceOptions}
             disabled={disableAll || sameAsBilling}
           />
 
-          <ModalInput
+
+          <SearchSelect
             label="Country"
-            name="country"
             value={data.country}
-            onChange={onChange}
+            onChange={(val) =>
+              onChange({
+                target: { name: "country", value: val },
+              } as any)
+            }
+            fetchOptions={fetchCountryOptions}
             disabled={disableAll || sameAsBilling}
           />
+
         </div>
       </div>
     </Card>

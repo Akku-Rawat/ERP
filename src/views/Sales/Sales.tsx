@@ -11,7 +11,7 @@ import QuotationModal from "../../components/sales/QuotationModal";
 import InvoiceModal from "../../components/sales/InvoiceModal";
 import ProformaInvoiceModal from "../../components/sales/ProformaInvoiceModal";
 import PosModal from "../../components/sales/PosModal";
-import { showApiError,showSuccess } from "../../components/alert";
+import { showApiError,showSuccess } from "../../utils/alert";
 import { createSalesInvoice } from "../../api/salesApi";
 import { createQuotation } from "../../api/quotationApi";
 import CreditNotesTable from "./CreditNotesTable";

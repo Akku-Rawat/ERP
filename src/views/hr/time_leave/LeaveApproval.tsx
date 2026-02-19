@@ -4,7 +4,7 @@ import { getPendingLeaveRequests } from "../../../api/leaveApi";
 import { updateLeaveStatus } from "../../../api/leaveApi";
 import type { LeaveUI } from "../../../types/leave/uiLeave";
 import { mapLeaveFromApi } from "../../../types/leave/leaveMapper";
-import { closeSwal, showApiError, showLoading, showSuccess } from "../../../components/alert";
+import { closeSwal, showApiError, showLoading, showSuccess } from "../../../utils/alert";
 
 /*  Component  */
 const LeaveManagment: React.FC = () => {

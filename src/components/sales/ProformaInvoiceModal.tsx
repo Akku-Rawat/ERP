@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
-import { showApiError, showSuccess } from "../alert";
+import { showApiError, showSuccess } from "../../utils/alert";
 import { User, Mail, Phone } from "lucide-react";
 import {  Button  } from "../../components/ui/modal/formComponent";
 import { ModalInput,ModalSelect } from "../ui/modal/modalComponent";

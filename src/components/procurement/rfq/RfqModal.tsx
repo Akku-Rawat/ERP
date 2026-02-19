@@ -1,13 +1,14 @@
 import React from "react";
-import { motion } from "framer-motion";
-import { Building2, Mail, FileText } from "lucide-react";
+import { Building2, FileText } from "lucide-react";
 import Modal from "../../ui/modal/modal";
 import { Button } from "../../ui/modal/formComponent";
 import { DetailsTab } from "./DetailsTab";
-import { EmailTemplateTab } from "./EmailTemplateTab";
-import { TermsTab } from "./TermsTab";
+import TermsAndCondition from "../../TermsAndCondition";
 import { useRfqForm } from "../../../hooks/useRfqForm";
 import type { RfqFormData, RfqTab } from "../../../types/Supply/rfq";
+// import { EmailTemplateTab } from "./EmailTemplateTab";
+// import { TermsTab } from "./TermsTab";
+
 
 interface RfqModalProps {
   isOpen: boolean;
@@ -15,13 +16,18 @@ interface RfqModalProps {
   onSubmit?: (data: RfqFormData) => void;
 }
 
+/* ---------- TABS (PO STYLE) ---------- */
+
 const tabs: { key: RfqTab; icon: typeof Building2; label: string }[] = [
   { key: "details", icon: Building2, label: "Details" },
-  { key: "emailTemplates", icon: Mail, label: "Email Templates" },
   { key: "terms", icon: FileText, label: "Terms" },
 ];
 
-const RfqModal: React.FC<RfqModalProps> = ({ isOpen, onClose, onSubmit }) => {
+const RfqModal: React.FC<RfqModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+}) => {
   const {
     form,
     activeTab,
@@ -36,18 +42,7 @@ const RfqModal: React.FC<RfqModalProps> = ({ isOpen, onClose, onSubmit }) => {
     handleItemChange,
     addItem,
     removeItem,
-    handlePaymentRowChange,
-    addPaymentRow,
-    removePaymentRow,
-    setTemplateName,
-    setTemplateType,
-    setSubject,
-    setMessageHtml,
-    setSendAttachedFiles,
-    setSendPrint,
-    handleSaveTemplate,
-    resetTemplate,
-    setTermsAndConditions,
+    setTermsBuying,
     handleSubmit,
     reset,
   } = useRfqForm({
@@ -55,16 +50,24 @@ const RfqModal: React.FC<RfqModalProps> = ({ isOpen, onClose, onSubmit }) => {
     onClose,
   });
 
+  /* ---------- FOOTER (PO STYLE) ---------- */
+
   const footer = (
     <>
       <Button variant="secondary" onClick={onClose}>
         Cancel
       </Button>
+
       <div className="flex gap-2">
         <Button variant="secondary" onClick={reset}>
           Reset
         </Button>
-        <Button variant="primary" onClick={handleSubmit}>
+
+        <Button
+          variant="primary"
+          type="submit"
+          form="rfqForm"
+        >
           Save RFQ
         </Button>
       </div>
@@ -78,40 +81,49 @@ const RfqModal: React.FC<RfqModalProps> = ({ isOpen, onClose, onSubmit }) => {
       title="New Request For Quotation"
       subtitle="Create and send RFQ to suppliers"
       icon={Building2}
-      footer={footer}
       maxWidth="6xl"
-      height="90vh"
+      height="81vh"   // same as PO
+      footer={footer}
     >
-      <div className="h-full flex flex-col">
-        <div className="flex gap-1 -mx-6 -mt-6 px-6 pt-4 bg-app sticky top-0 z-10 shrink-0">
-          {tabs.map(({ key, icon: Icon, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveTab(key)}
-              className={`relative px-6 py-3 font-semibold text-sm capitalize transition-all duration-200 rounded-t-lg ${
-                activeTab === key
-                  ? "text-primary bg-card shadow-sm"
-                  : "text-muted hover:text-main hover:bg-card/50"
-              }`}
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                <Icon className="w-4 h-4" />
+      {/* ---------- FORM WRAPPER (PO STYLE) ---------- */}
+
+      <form
+        id="rfqForm"
+        onSubmit={handleSubmit}
+        className="h-full flex flex-col"
+      >
+
+        {/* ---------- TABS HEADER ---------- */}
+
+        <div className="bg-app border-b border-theme px-8 shrink-0">
+          <div className="flex gap-8">
+
+            {tabs.map(({ key, icon: Icon, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveTab(key)}
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2
+                ${
+                  activeTab === key
+                    ? "text-primary border-b-[3px] border-primary"
+                    : "text-muted border-b-[3px] border-transparent hover:text-main"
+                }`}
+              >
+                <Icon size={14} />
                 {label}
-              </span>
-              {activeTab === key && (
-                <motion.div
-                  layoutId="activeRfqTab"
-                  className="absolute inset-0 bg-card rounded-t-lg shadow-sm"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  style={{ zIndex: -1 }}
-                />
-              )}
-            </button>
-          ))}
+              </button>
+            ))}
+
+          </div>
         </div>
 
+        {/* ---------- TAB BODY ---------- */}
+
         <section className="flex-1 overflow-y-auto p-4 space-y-6">
+
+          {/* ===== DETAILS ===== */}
+
           {activeTab === "details" && (
             <DetailsTab
               rfqNumber={form.rfqNumber}
@@ -133,37 +145,20 @@ const RfqModal: React.FC<RfqModalProps> = ({ isOpen, onClose, onSubmit }) => {
             />
           )}
 
-          {activeTab === "emailTemplates" && (
-            <EmailTemplateTab
-              templateName={form.templateName}
-              templateType={form.templateType}
-              subject={form.subject}
-              messageHtml={form.messageHtml}
-              sendAttachedFiles={form.sendAttachedFiles}
-              sendPrint={form.sendPrint}
-              onTemplateNameChange={setTemplateName}
-              onTemplateTypeChange={setTemplateType}
-              onSubjectChange={setSubject}
-              onMessageHtmlChange={setMessageHtml}
-              onSendAttachedFilesChange={setSendAttachedFiles}
-              onSendPrintChange={setSendPrint}
-              onSaveTemplate={handleSaveTemplate}
-              onResetTemplate={resetTemplate}
+          {/* ===== TERMS ===== */}
+
+          {activeTab === "terms" && (
+            <TermsAndCondition
+              title="RFQ Terms & Conditions"
+              terms={form.terms?.buying ?? null}
+              setTerms={(updated) =>
+                setTermsBuying(updated)
+              }
             />
           )}
 
-          {activeTab === "terms" && (
-            <TermsTab
-              paymentRows={form.paymentRows}
-              termsAndConditions={form.termsAndConditions}
-              onPaymentRowChange={handlePaymentRowChange}
-              onAddPaymentRow={addPaymentRow}
-              onRemovePaymentRow={removePaymentRow}
-              onTermsChange={setTermsAndConditions}
-            />
-          )}
         </section>
-      </div>
+      </form>
     </Modal>
   );
 };
