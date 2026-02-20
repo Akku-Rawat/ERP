@@ -309,7 +309,15 @@ const InvoiceDetailsModal: React.FC<Props> = ({
                       type="button"
                       onClick={() => {
                         if (data.Receipt) {
-                          onOpenReceiptPdf?.(data.Receipt);
+                          if (onOpenReceiptPdf) {
+                            onOpenReceiptPdf(data.Receipt);
+                          } else {
+                            window.open(
+                              data.Receipt,
+                              "_blank",
+                              "noopener,noreferrer",
+                            );
+                          }
                           return;
                         }
 

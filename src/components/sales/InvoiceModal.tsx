@@ -180,7 +180,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     />
                   </div> */}
 
-                  {ui.isExport && (
+                  {(ui.isExport || ui.hasC1) && (
                     // <CountrySelect
                     //   value={formData.destnCountryCd}
                     //   onChange={(c) =>
@@ -198,7 +198,6 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                         label="Export To Country"
                         name="destnCountryCd"
                         type="text"
-                        disabled
                         value={formData.destnCountryCd}
                         onChange={actions.handleInputChange}
                         className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"

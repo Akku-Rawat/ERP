@@ -90,6 +90,10 @@ useEffect(() => {
   };
 
   const validateForm = (): boolean => {
+    const hasC1 = formData.items.some(
+      (it) => String(it?.vatCode ?? "").toUpperCase() === "C1",
+    );
+
     if (!formData.customerId) {
       throw new Error("Please select a customer");
     }
@@ -121,6 +125,12 @@ if (!formData.paymentInformation?.paymentTerms) {
         throw new Error(`Item ${idx + 1}: Price must be greater than 0`);
       }
     });
+
+    if (hasC1 && !formData.destnCountryCd) {
+      throw new Error(
+        "Destination country (destnCountryCd) is required for VAT code C1 transactions",
+      );
+    }
 
     return true;
   };
@@ -264,7 +274,7 @@ if (!formData.paymentInformation?.paymentTerms) {
 
         return {
           ...prev,
-          destnCountryCd: invoiceType === "Export" ? countryCode : "",
+          destnCountryCd: invoiceType === "Export" ? countryCode : prev.destnCountryCd,
           invoiceType,
           billingAddress: billing,
           shippingAddress: shipping,
@@ -519,6 +529,9 @@ tax += taxAmt;
       isExport: formData.invoiceType === "Export",
       isLocal: formData.invoiceType === "Lpo",
       isNonExport: formData.invoiceType === "Non-Export",
+      hasC1: formData.items.some(
+        (it) => String(it?.vatCode ?? "").toUpperCase() === "C1",
+      ),
     },
     actions: {
       handleInputChange,

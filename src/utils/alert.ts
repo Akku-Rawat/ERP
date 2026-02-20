@@ -32,17 +32,38 @@ const extractErrorMessage = (error: any): string => {
   return "Something went wrong. Please try again.";
 };
 
+const toUserFriendlyMessage = (message: string): string => {
+  const m = (message ?? "").trim();
+  if (!m) return "Something went wrong. Please try again.";
+
+  const normalized = m.toLowerCase();
+
+  if (normalized.includes("destncountrycd") && normalized.includes("c1")) {
+    return "Export To Country is required when using Tax Code C1.";
+  }
+
+  if (normalized.includes("destncountrycd")) {
+    return m
+      .replace(/\(\s*destnCountryCd\s*\)/gi, "")
+      .replace(/destnCountryCd/gi, "Export To Country")
+      .trim();
+  }
+
+  return m;
+};
+
 
 export const showApiError = (error: any) => {
   const rawMessage = extractErrorMessage(error);
 
   // Strip HTML tags (clean version)
   const cleanMessage = rawMessage.replace(/<[^>]+>/g, "");
+  const userMessage = toUserFriendlyMessage(cleanMessage);
 
   Swal.fire({
     icon: "error",
     title: "Operation Failed",
-    text: cleanMessage,
+    text: userMessage,
     confirmButtonColor: "#ef4444",
   });
 };
