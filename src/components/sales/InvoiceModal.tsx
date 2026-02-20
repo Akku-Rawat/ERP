@@ -28,6 +28,7 @@ interface InvoiceModalProps {
   onSubmit?: (data: any) => void;
 }
 
+
 const InvoiceModal: React.FC<InvoiceModalProps> = ({
   isOpen,
   onClose,
@@ -43,6 +44,13 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     ui,
     actions,
   } = useInvoiceForm(isOpen, onClose, onSubmit);
+    const handleNext = () => {
+  if (ui.activeTab === "details") {
+    ui.setActiveTab("address");
+  } else if (ui.activeTab === "address") {
+    ui.setActiveTab("terms");
+  }
+};
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -68,9 +76,17 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
         Cancel
       </Button>
       <div className="flex gap-2">
-        <Button variant="ghost" onClick={actions.handleReset} type="button">
+        <Button variant="secondary" onClick={actions.handleReset} type="button">
           Reset
         </Button>
+         <Button
+                  variant="secondary"
+                  type="button"
+                   onClick={handleNext}
+                    disabled={ui.activeTab === "terms"}
+                >
+                  Next →
+                </Button>
         <Button variant="primary" type="submit" onClick={handleFormSubmit}>
           Submit
         </Button>
@@ -93,7 +109,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
-            {(["details", "terms", "address"] as const).map((tab) => (
+            {(["details", "address","terms"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
@@ -106,8 +122,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               }`}
               >
                 {tab === "details" && "Details"}
-                {tab === "terms" && "Terms & Conditions"}
                 {tab === "address" && "Additional Details"}
+               {tab === "terms" && "Terms & Conditions"}
               </button>
             ))}
           </div>
