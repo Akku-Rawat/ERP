@@ -2,19 +2,19 @@ import React, { useEffect, useState } from "react";
 import { showApiError, showSuccess, showLoading, closeSwal } from "../../utils/alert";
 import { getAllQuotations, getQuotationById } from "../../api/quotationApi";
 import { getCompanyById } from "../../api/companySetupApi";
-import type { QuotationSummary, QuotationData } from "../../types/quotation";
+import type { QuotationSummary } from "../../types/quotation";
 import Table from "../../components/ui/Table/Table";
 import ActionButton, {
   ActionGroup,
   ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 
+import InvoiceDetailsModal, { type InvoiceDetails } from "./InvoiceDetailsModal";
+
 import type { Column } from "../../components/ui/Table/type";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-
-import PdfPreviewModal from "./PdfPreviewModal";
 import { generateQuotationPDF } from "../../components/template/quotation/QuotationTemplate1";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
@@ -22,8 +22,6 @@ interface QuotationTableProps {
   onAddQuotation?: () => void;
   onExportQuotation?: () => void;
 }
-type QuotationStatus = "Draft" | "Sent" | "Pending" | "Accepted" | "Rejected";
-
 
 const QuotationsTable: React.FC<QuotationTableProps> = ({
   onAddQuotation,
@@ -31,9 +29,9 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [quotations, setQuotations] = useState<QuotationSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState("");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  const [status] = useState("");
+  const [fromDate] = useState("");
+  const [toDate] = useState("");
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -42,24 +40,12 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
   const [totalItems, setTotalItems] = useState(0);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  const [selectedQuotation, setSelectedQuotation] =
-    useState<QuotationData | null>(null);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [pdfOpen, setPdfOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsId, setDetailsId] = useState<string | null>(null);
 
 
   // Company data state
   const [company, setCompany] = useState<any>(null);
-
-  const QUOTATION_STATUS_TRANSITIONS: Record<QuotationStatus, QuotationStatus[]> = {
-    Draft: ["Sent", "Pending"],
-    Sent: ["Pending", "Accepted", "Rejected"],
-    Pending: ["Accepted", "Rejected"],
-    Accepted: [],
-    Rejected: [],
-  };
-  const CRITICAL_QUOTATION_STATUSES: QuotationStatus[] = ["Accepted"];
-
 
   const fetchAllQuotationsForExport = async () => {
     try {
@@ -154,7 +140,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
   /*      FETCH COMPANY DATA
    */
 
-  const fetchCompany = async (companyId: string) => {
+  const fetchCompany = async () => {
     const res = await getCompanyById(COMPANY_ID);
 
     if (!res || res.status_code !== 200) {
@@ -209,7 +195,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
     }
   };
   useEffect(() => {
-    fetchCompany("1").catch(() => console.error("Failed to load company data"));
+    fetchCompany().catch(() => console.error("Failed to load company data"));
   }, []);
 
   useEffect(() => {
@@ -224,44 +210,8 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
   ) => {
     e?.stopPropagation();
 
-    try {
-      showLoading("Loading quotation preview...");
-
-      const quotationRes =
-        await getQuotationById(quotationNumber);
-
-      if (!quotationRes || quotationRes.status_code !== 200) {
-        closeSwal();
-        console.error("Failed to load quotation");
-        return;
-      }
-
-      if (!company) {
-        closeSwal();
-        console.error("Company data not loaded");
-        return;
-      }
-
-      const quotation =
-        quotationRes.data as QuotationData;
-
-      setSelectedQuotation(quotation);
-
-      const url = await generateQuotationPDF(
-        quotation,
-        company,
-        "bloburl"
-      );
-
-      setPdfUrl(url as string);
-      setPdfOpen(true);
-
-      closeSwal();
-
-    } catch (error) {
-      closeSwal();
-      showApiError(error);
-    }
+    setDetailsId(quotationNumber);
+    setDetailsOpen(true);
   };
 
 
@@ -302,11 +252,56 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
   };
 
 
-  const handleClosePdf = () => {
-    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-    setPdfUrl(null);
-    setSelectedQuotation(null);
-    setPdfOpen(false);
+  const mapQuotationToInvoiceDetails = (raw: any): InvoiceDetails => {
+    const billingAddress = raw?.billingAddress;
+    const shippingAddress = raw?.shippingAddress;
+
+    const items = Array.isArray(raw?.items)
+      ? raw.items.map((it: any) => ({
+          itemCode: it?.itemCode ?? it?.productName,
+          quantity: Number(it?.quantity ?? 0),
+          description: it?.description,
+          discount: Number(it?.discount ?? 0),
+          price: Number(it?.price ?? it?.listPrice ?? 0),
+          vatCode: it?.vatCode,
+        }))
+      : [];
+
+    return {
+      invoiceNumber: raw?.id ?? raw?.quotationNumber ?? raw?.quotationId,
+      invoiceType: raw?.invoiceType ?? "Quotation",
+      originInvoice: null,
+      customerName: raw?.customerName ?? raw?.customerId,
+      customerTpin: raw?.customerTpin,
+      currencyCode: raw?.currencyCode ?? raw?.currency,
+      exchangeRt: raw?.exchangeRt,
+      dateOfInvoice: raw?.transactionDate ?? raw?.quotationDate,
+      dueDate: raw?.validUntil ?? raw?.validTill,
+      invoiceStatus: raw?.invoiceStatus ?? raw?.status ?? "—",
+      Receipt: raw?.Receipt ?? raw?.receipt,
+      ReceiptNo: raw?.ReceiptNo ?? raw?.receiptNo,
+      TotalAmount: raw?.TotalAmount ?? raw?.grandTotal ?? raw?.totalAmount,
+      discountPercentage: raw?.discountPercentage,
+      discountAmount: raw?.discountAmount ?? raw?.totalDiscount,
+      lpoNumber: raw?.lpoNumber ?? raw?.poNumber,
+      destnCountryCd: raw?.destnCountryCd ?? null,
+      billingAddress,
+      shippingAddress,
+      paymentInformation: raw?.paymentInformation ?? {
+        paymentTerms: raw?.paymentTerms,
+        paymentMethod: raw?.paymentMethod,
+        bankName: raw?.bankName,
+        accountNumber: raw?.accountNumber,
+        routingNumber: raw?.routingNumber,
+        swiftCode: raw?.swiftCode,
+      },
+      items,
+      terms: raw?.terms ?? {
+        selling: {
+          general: raw?.termsAndConditions ?? raw?.notes,
+        },
+      },
+    };
   };
 
   /*      TABLE COLUMNS
@@ -390,17 +385,15 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({
         onPageChange={setPage}
       />
 
-
-      <PdfPreviewModal
-        open={pdfOpen}
-        title="Quotation Preview"
-        pdfUrl={pdfUrl}
-        onClose={handleClosePdf}
-        onDownload={() =>
-          selectedQuotation &&
-          company &&
-          generateQuotationPDF(selectedQuotation, company, "save")
-        }
+      <InvoiceDetailsModal
+        open={detailsOpen}
+        invoiceId={detailsId}
+        onClose={() => {
+          setDetailsOpen(false);
+          setDetailsId(null);
+        }}
+        fetchDetails={getQuotationById}
+        mapDetails={mapQuotationToInvoiceDetails}
       />
     </div>
   );

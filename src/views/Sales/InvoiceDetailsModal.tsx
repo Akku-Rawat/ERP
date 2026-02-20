@@ -87,6 +87,8 @@ type Props = {
   invoiceId: string | null;
   onClose: () => void;
   onOpenReceiptPdf?: (receiptUrl: string) => void;
+  fetchDetails?: (id: string) => Promise<any>;
+  mapDetails?: (raw: any) => InvoiceDetails;
 };
 
 const InvoiceDetailsModal: React.FC<Props> = ({
@@ -94,6 +96,8 @@ const InvoiceDetailsModal: React.FC<Props> = ({
   invoiceId,
   onClose,
   onOpenReceiptPdf,
+  fetchDetails,
+  mapDetails,
 }) => {
   const Field = ({ label, value }: { label: string; value: React.ReactNode }) => {
     const isPrimitive = typeof value === "string" || typeof value === "number";
@@ -148,7 +152,9 @@ const InvoiceDetailsModal: React.FC<Props> = ({
         setError(null);
         setData(null);
 
-        const resp = await getSalesInvoiceById(invoiceId);
+        const resp = fetchDetails
+          ? await fetchDetails(invoiceId)
+          : await getSalesInvoiceById(invoiceId);
         if (!mounted) return;
 
         if (!resp || resp.status_code !== 200) {
@@ -156,7 +162,8 @@ const InvoiceDetailsModal: React.FC<Props> = ({
           return;
         }
 
-        setData(resp.data as InvoiceDetails);
+        const next = mapDetails ? mapDetails(resp.data) : (resp.data as InvoiceDetails);
+        setData(next);
       } catch (e: any) {
         if (!mounted) return;
         setError(e?.message ?? "Failed to load invoice details");
@@ -170,7 +177,7 @@ const InvoiceDetailsModal: React.FC<Props> = ({
     return () => {
       mounted = false;
     };
-  }, [open, invoiceId]);
+  }, [open, invoiceId, fetchDetails, mapDetails]);
 
   const items = data?.items ?? [];
 
@@ -298,17 +305,21 @@ const InvoiceDetailsModal: React.FC<Props> = ({
                 <Field
                   label="Receipt"
                   value={
-                    data.Receipt ? (
-                      <button
-                        type="button"
-                        onClick={() => data.Receipt && onOpenReceiptPdf?.(data.Receipt)}
-                        className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold"
-                      >
-                        Open Receipt <ExternalLink className="w-4 h-4" />
-                      </button>
-                    ) : (
-                      "—"
-                    )
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (data.Receipt) {
+                          onOpenReceiptPdf?.(data.Receipt);
+                          return;
+                        }
+
+                        window.open("about:blank", "_blank", "noopener,noreferrer");
+                      }}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary"
+                    >
+                      {data.Receipt ? "Open Receipt" : "Receipt Not Available"}{" "}
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
                   }
                 />
               </div>
