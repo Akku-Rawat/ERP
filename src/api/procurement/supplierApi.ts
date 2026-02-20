@@ -7,23 +7,29 @@ const api = createAxiosInstance(ERP_BASE);
 
 export const SupplierAPI = API.supplier;
 
-
-
-
-export async function getSuppliers(page = 1, pageSize = 10) {
-  const resp = await api.get(SupplierAPI.getAll,
-    {
-    params: {
-      page,
-      pageSize
-      
-    },
-  }
-    
-  );
-  return resp.data;
+export interface SupplierFilters {
+  search?: string;
+  status?: string;
+  currency?: string;
 }
 
+
+
+export async function getSuppliers(
+  page: number = 1,
+  page_size: number = 10,
+  filters?: SupplierFilters
+): Promise<any> {
+  const resp: AxiosResponse = await api.get(SupplierAPI.getAll, {
+    params: {
+      page,
+      page_size,
+      ...filters,
+    },
+  });
+
+  return resp.data;
+}
 
 export async function createSupplier(payload: any): Promise<any> {
   const resp: AxiosResponse = await api.post(SupplierAPI.create, payload);

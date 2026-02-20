@@ -7,11 +7,33 @@ const api = createAxiosInstance(ERP_BASE);
 export const purchaseorderapi = API.purchaseOrder;
 
 
+export interface PurchaseOrderFilters {
+  search?: string;
+  status?: string;
+  supplier?: string;
+  from_date?: string;
+  to_date?: string;
+}
 
-export async function getPurchaseOrders(page = 1, pageSize = 10) {
-  const resp = await api.get(
-    `${purchaseorderapi.getAll}?page=${page}&page_size=${pageSize}`
+export async function getPurchaseOrders(
+  page = 1,
+  page_size = 10,
+  filters?: PurchaseOrderFilters
+) {
+  const cleanedFilters = Object.fromEntries(
+    Object.entries(filters || {}).filter(
+      ([_, v]) => v !== undefined && v !== ""
+    )
   );
+
+  const resp = await api.get(purchaseorderapi.getAll, {
+    params: {
+      page,
+      page_size,
+      ...cleanedFilters,
+    },
+  });
+
   return resp.data;
 }
 
@@ -74,3 +96,5 @@ export async function updatePurchaseOrderStatus(
   );
   return resp.data;
 }
+
+

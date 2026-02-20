@@ -29,7 +29,7 @@ import { ModalInput, ModalSelect } from "../ui/modal/modalComponent";
 const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   id: "",
   name: "",
-  type: "Individual",
+  type: "",
   tpin: "",
   currency: "",
   onboardingBalance: 0,
@@ -357,14 +357,13 @@ const CustomerModal: React.FC<{
                 <ModalSelect
                   label="Type"
                   name="type"
-                  value={form.type}
+                  value={form.type || ""}
                   onChange={handleChange}
-                  options={[
-                    { value: "Individual", label: "Individual" },
-                    { value: "Company", label: "Company" },
-                  ]}
-                />
-
+                  placeholder="Select Customer Type"
+                >
+                  <option value="Individual">Individual</option>
+                  <option value="Company">Company</option>
+                </ModalSelect>
                 <ModalInput
                   label="Customer Name"
                   name="name"

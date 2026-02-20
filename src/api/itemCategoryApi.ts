@@ -7,15 +7,34 @@ import { API, ERP_BASE } from "../config/api";
 const api = createAxiosInstance(ERP_BASE);
 export const ItemGroupAPI = API.itemGroup;
 
-export async function getAllItemGroups(
-  page: number = 1,
-  page_size: number = 10,
-): Promise<any> {
-  const url = `${ItemGroupAPI.getAll}?page=${page}&page_size=${page_size}`;
+export interface ItemGroupFilters {
+  search?: string;
+  itemType?: string;
+}
 
-  const resp = await api.get(url);
+export async function getAllItemGroups(
+  page = 1,
+  page_size = 10,
+  filters?: ItemGroupFilters
+): Promise<any> {
+
+  const cleanedFilters = Object.fromEntries(
+    Object.entries(filters || {}).filter(
+      ([_, v]) => v !== undefined && v !== ""
+    )
+  );
+
+  const resp = await api.get(ItemGroupAPI.getAll, {
+    params: {
+      page,
+      page_size,
+      ...cleanedFilters,
+    },
+  });
+
   return resp.data;
 }
+
 
 export async function getItemGroupById(
   id: string,

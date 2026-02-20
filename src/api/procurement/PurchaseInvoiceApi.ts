@@ -8,17 +8,35 @@ const api = createAxiosInstance(ERP_BASE);
 export const purchaseinvoiceapi = API.purchaseIvoice;
 
 
+export interface PurchaseInvoiceFilters {
+  search?: string;
+  status?: string;
+  from_date?: string;
+  to_date?: string;
+  supplier?: string;
+}
+
+export async function getPurchaseInvoices(
+  page = 1,
+  pageSize = 10,
+  filters?: PurchaseInvoiceFilters
+) {
+  const resp = await api.get(purchaseinvoiceapi.getAll, {
+    params: {
+      page,
+      page_size: pageSize,
+      ...filters,
+    },
+  });
+
+  return resp.data;
+}
+
 export async function createPurchaseInvoice(payload: any): Promise<any> {
   const resp: AxiosResponse = await api.post(purchaseinvoiceapi.create, payload);
   return resp.data;
 }
 
-export async function getPurchaseInvoices(page = 1, pageSize = 10) {
-  const resp = await api.get(
-    `${purchaseinvoiceapi.getAll}?page=${page}&page_size=${pageSize}`
-  );
-  return resp.data;
-}
 
 export async function getPurchaseInvoiceById(
   pId: string | number
