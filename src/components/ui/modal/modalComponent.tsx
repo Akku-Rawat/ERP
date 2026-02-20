@@ -9,6 +9,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   icon?: React.ReactNode;
   options?: SelectOption[];
   children?: React.ReactNode;
+  placeholder? : string
 }
 
 export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
@@ -37,7 +38,7 @@ export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
         ].join(" ")}
       >
         <option value="" disabled>
-          Select
+          {props.placeholder || "Select"}
         </option>
 
         {children ??

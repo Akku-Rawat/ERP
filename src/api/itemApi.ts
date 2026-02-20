@@ -5,14 +5,31 @@ import { API, ERP_BASE } from "../config/api";
 const api = createAxiosInstance(ERP_BASE);
 export const ItemAPI = API.item;
 
+export interface ItemFilters {
+  search?: string;
+  taxCategory?: string;
+}
+
 export async function getAllItems(
-  page: number = 1,
-  page_size: number = 10,
-  taxCategory: string | undefined = undefined,
+  page = 1,
+  page_size = 10,
+  filters?: ItemFilters
 ): Promise<any> {
+
+  const cleanedFilters = Object.fromEntries(
+    Object.entries(filters || {}).filter(
+      ([_, v]) => v !== undefined && v !== ""
+    )
+  );
+
   const resp: AxiosResponse = await api.get(ItemAPI.getAll, {
-    params: { page, page_size, taxCategory },
+    params: {
+      page,
+      page_size,
+      ...cleanedFilters,
+    },
   });
+
   return resp.data;
 }
 
