@@ -48,12 +48,12 @@ const HrPayrollModule: React.FC = () => {
       </div>
 
       {/* Navbar */}
-      <div className="flex border-b border-gray-200 mb-4">
+      <div className="flex flex-wrap gap-2 border-b border-gray-200 mb-4">
         {navTabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`px-4 py-2 font-medium flex items-center gap-2 transition-colors 
+            className={`px-3 py-2 text-sm font-medium flex items-center gap-2 transition-colors whitespace-nowrap 
               ${
                 tab === t.key
                ? "text-primary border-b-2 border-current"

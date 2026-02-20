@@ -6,6 +6,7 @@ interface ItemCategorySelectProps {
   onChange: (category: { name: string; id: string }) => void;
   className?: string;
   label?: string;
+  required?: boolean;
 }
 
 export default function ItemCategorySelect({
@@ -13,6 +14,7 @@ export default function ItemCategorySelect({
   onChange,
   className = "",
   label = "Item Category",
+  required = false,
 }: ItemCategorySelectProps) {
   const [categories, setCategories] = useState<{ name: string; id: string }[]>(
     [],
@@ -71,7 +73,10 @@ export default function ItemCategorySelect({
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      <span className="font-medium text-muted text-sm">{label}</span>
+      <span className="font-medium text-muted text-sm">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </span>
 
 
       <div ref={ref} className="relative w-full">

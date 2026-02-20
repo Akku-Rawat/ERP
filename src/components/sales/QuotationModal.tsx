@@ -1,8 +1,4 @@
-import {
-  Plus,
-  Trash2,
-  FileText,
-} from "lucide-react";
+import { Plus, Trash2, FileText } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 import { useQuotationForm } from "../../hooks/useQuotationForm";
 import { Button } from "../../components/ui/modal/formComponent";
@@ -10,8 +6,8 @@ import { ModalSelect, ModalInput } from "../ui/modal/modalComponent";
 import CustomerSelect from "../selects/CustomerSelect";
 import ItemSelect from "../selects/ItemSelect";
 import Modal from "../../components/ui/modal/modal";
-import { showApiError,showSuccess } from "../../utils/alert";
-import { User, Mail, Phone, } from "lucide-react";
+import { showSuccess } from "../../utils/alert";
+import { User, Mail, Phone } from "lucide-react";
 import AddressBlock from "../ui/modal/AddressBlock";
 import PaymentInfoBlock from "./PaymentInfoBlock";
 import {
@@ -44,17 +40,12 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     actions,
   } = useQuotationForm(isOpen, onClose, onSubmit);
 
-
-
-
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
 
-const handleFormSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  await actions.handleSubmit(e);
-};
-
-
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await actions.handleSubmit(e);
+  };
 
   const handlePrint = () => {
     showSuccess("Print functionality - Opens print dialog");
@@ -70,12 +61,11 @@ const handleFormSubmit = async (e: React.FormEvent) => {
           Reset
         </Button>
         <Button variant="primary" type="submit" onClick={handleFormSubmit}>
-          Save Quotation
+          Submit
         </Button>
       </div>
     </>
   );
-
 
   return (
     <Modal
@@ -88,7 +78,6 @@ const handleFormSubmit = async (e: React.FormEvent) => {
       maxWidth="6xl"
       height="79vh"
     >
-
       <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
@@ -102,10 +91,11 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                 key={tab.key}
                 type="button"
                 onClick={() => ui.setActiveTab(tab.key as any)}
-                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab.key
-                  ? "text-primary border-b-[3px] border-primary"
-                  : "text-muted border-b-[3px] border-transparent hover:text-main"
-                  }`}
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${
+                  ui.activeTab === tab.key
+                    ? "text-primary border-b-[3px] border-primary"
+                    : "text-muted border-b-[3px] border-transparent hover:text-main"
+                }`}
               >
                 {tab.label}
               </button>
@@ -120,7 +110,6 @@ const handleFormSubmit = async (e: React.FormEvent) => {
             <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
               <div className="">
                 <div className="grid grid-cols-6 gap-3 items-end">
-
                   {/* Customer */}
 
                   <CustomerSelect
@@ -128,8 +117,6 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                     onChange={actions.handleCustomerSelect}
                     className="w-full"
                   />
-
-
 
                   {/* Date of Quotation */}
                   <div>
@@ -155,10 +142,8 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                     />
                   </div>
 
-
                   {/* Currency */}
                   <div>
-
                     <ModalSelect
                       label="Currency "
                       name="currencyCode"
@@ -166,14 +151,11 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                       onChange={actions.handleInputChange}
                       options={[...currencyOptions]}
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                    >
-
-                    </ModalSelect>
+                    ></ModalSelect>
                   </div>
 
                   {/* Status */}
                   <div>
-
                     <ModalSelect
                       label="Status"
                       name="invoiceStatus"
@@ -181,9 +163,7 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                       onChange={actions.handleInputChange}
                       options={[...invoiceStatusOptions]}
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                    >
-
-                    </ModalSelect>
+                    ></ModalSelect>
                   </div>
 
                   {/* LPO Number */}
@@ -263,9 +243,7 @@ const amount = qty * price - discountAmount;
                               key={i}
                               className="border-b border-theme bg-card row-hover"
                             >
-                              <td className="px-3 py-2 text-[10px]">
-                                {i + 1}
-                              </td>
+                              <td className="px-3 py-2 text-[10px]">{i + 1}</td>
                               <td className="px-0.5 py-1">
                                 <ItemSelect
                                   taxCategory={ui.taxCategory}
@@ -365,8 +343,6 @@ const amount = qty * price - discountAmount;
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
-
-
                               </td>
                             </tr>
                           );
@@ -375,9 +351,7 @@ const amount = qty * price - discountAmount;
                     </table>
                   </div>
 
-
                   <div className="mt-3 flex justify-between items-center gap-3">
-
                     {/* Add Item Button */}
                     <button
                       type="button"
@@ -391,10 +365,10 @@ const amount = qty * price - discountAmount;
                     {/* Pagination Controls */}
                     {(ui.itemCount > 5 || ui.page > 0) && (
                       <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
-
                         <div className="text-[11px] text-muted whitespace-nowrap">
                           Showing {ui.page * 5 + 1} to{" "}
-                          {Math.min((ui.page + 1) * 5, ui.itemCount)} of {ui.itemCount} items
+                          {Math.min((ui.page + 1) * 5, ui.itemCount)} of{" "}
+                          {ui.itemCount} items
                         </div>
 
                         <div className="flex gap-1.5 items-center">
@@ -416,18 +390,13 @@ const amount = qty * price - discountAmount;
                             Next
                           </button>
                         </div>
-
                       </div>
                     )}
-
                   </div>
-
                 </div>
-
 
                 {/* RIGHT: CUSTOMER DETAILS + SUMMARY (STACKED) */}
                 <div className="flex flex-col gap-2">
-
                   <div className="flex flex-col gap-2">
                     {/* Customer Details */}
                     <div className="bg-card rounded-lg p-2 w-[220px]">
@@ -529,17 +498,13 @@ const amount = qty * price - discountAmount;
                             </span>
                           </div>
                         </div>
-
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
           )}
-
-
 
           {/* TERMS TAB */}
           {ui.activeTab === "terms" && (
@@ -551,12 +516,8 @@ const amount = qty * price - discountAmount;
             </div>
           )}
 
-
-
-
           {ui.activeTab === "address" && (
             <div className="space-y-6 overflow-hidden">
-
               {/* PAYMENT INFO */}
               <PaymentInfoBlock
                 data={formData.paymentInformation}
@@ -568,7 +529,6 @@ const amount = qty * price - discountAmount;
 
               {/* BILLING + SHIPPING */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
                 {/* Billing */}
                 <AddressBlock
                   type="billing"
@@ -587,14 +547,11 @@ const amount = qty * price - discountAmount;
                   subtitle="Delivery location"
                   data={formData.shippingAddress}
                   sameAsBilling={ui.sameAsBilling}
-                  onSameAsBillingChange={
-                    actions.handleSameAsBillingChange
-                  }
+                  onSameAsBillingChange={actions.handleSameAsBillingChange}
                   onChange={(e) =>
                     actions.handleInputChange(e, "shippingAddress")
                   }
                 />
-
               </div>
             </div>
           )}

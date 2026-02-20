@@ -89,7 +89,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
           required={selectConfig.required}
           className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
         >
-          {!selectConfig.required && <option value="">Select...</option>}
+          <option value="">Select...</option>
           {selectConfig.options.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -117,8 +117,26 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
               onChange(apiConfig.fieldName, name);
               onApiChange?.({ name, id });
             }}
+            required={apiConfig.required}
             className="w-full"
           />
+          {/* Hidden input for HTML5 validation */}
+          {apiConfig.required && (
+            <input
+              type="text"
+              value={value || ""}
+              required
+              style={{
+                position: "absolute",
+                opacity: 0,
+                height: 0,
+                width: 0,
+                pointerEvents: "none",
+              }}
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+          )}
         </div>
       );
     }
@@ -135,7 +153,25 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
             value={value}
             fetchData={fetchFn}
             onChange={({ id }) => onChange(apiConfig.fieldName, id)}
+            required={apiConfig.required}
           />
+          {/* Hidden input for HTML5 validation */}
+          {apiConfig.required && (
+            <input
+              type="text"
+              value={value || ""}
+              required
+              style={{
+                position: "absolute",
+                opacity: 0,
+                height: 0,
+                width: 0,
+                pointerEvents: "none",
+              }}
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+          )}
         </div>
       );
     }
@@ -152,7 +188,25 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
             value={value}
             fetchData={fetchFn}
             onChange={({ id }) => onChange(apiConfig.fieldName, id)}
+            required={apiConfig.required}
           />
+          {/* Hidden input for HTML5 validation */}
+          {apiConfig.required && (
+            <input
+              type="text"
+              value={value || ""}
+              required
+              style={{
+                position: "absolute",
+                opacity: 0,
+                height: 0,
+                width: 0,
+                pointerEvents: "none",
+              }}
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+          )}
         </div>
       );
     }

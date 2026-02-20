@@ -30,8 +30,8 @@ const emptyForm: Record<string, any> = {
   packagingUnitCode: "",
   svcCharge: "",
   ins: "",
-  sellingPrice: 0,
-  buyingPrice: 0,
+  sellingPrice: "",
+  buyingPrice: "",
   unitOfMeasureCd: "",
   description: "",
   sku: "",
@@ -105,13 +105,6 @@ const ItemModal: React.FC<{
   const isServiceItem = Number(form.itemTypeCode) === 3;
   const { companyCode } = useCompanySelection();
   const fieldConfigs = getItemFieldConfigs(companyCode);
-  console.log("=== ITEM MODAL RENDER ===");
-  console.log("isEditMode:", isEditMode);
-  console.log("initialData:", initialData);
-  console.log("itemClassCode from initialData:", initialData?.itemClassCode);
-  console.log("Company Code:", companyCode);
-  console.log("Field Configs:", fieldConfigs);
-  console.log("First 3 fields:", fieldConfigs.slice(0, 3));
 
   const [activeTab, setActiveTab] = useState<
     "details" | "taxDetails" | "inventoryDetails"
@@ -159,10 +152,6 @@ const ItemModal: React.FC<{
     const code = String(initialData.itemClassCode);
     const codeLength = code.length;
 
-    console.log("Populating cascading dropdowns for edit mode:");
-    console.log("Item Class Code:", code, "Length:", codeLength);
-    console.log("Available options count:", itemClassOptions.length);
-
     // Helper to check if a code exists in options
     const codeExists = (checkCode: string) => {
       return itemClassOptions.some((opt) => opt.cd === checkCode);
@@ -173,37 +162,25 @@ const ItemModal: React.FC<{
     if (codeLength >= 2) {
       const level1Code = code.substring(0, 2);
       if (codeExists(level1Code)) {
-        console.log("Setting Level 1:", level1Code);
         setSelectedLevel1(level1Code);
-      } else {
-        console.warn("Level 1 code not found:", level1Code);
       }
     }
     if (codeLength >= 4) {
       const level2Code = code.substring(0, 4);
       if (codeExists(level2Code)) {
-        console.log("Setting Level 2:", level2Code);
         setSelectedLevel2(level2Code);
-      } else {
-        console.warn("Level 2 code not found:", level2Code);
       }
     }
     if (codeLength >= 6) {
       const level3Code = code.substring(0, 6);
       if (codeExists(level3Code)) {
-        console.log("Setting Level 3:", level3Code);
         setSelectedLevel3(level3Code);
-      } else {
-        console.warn("Level 3 code not found:", level3Code);
       }
     }
     if (codeLength >= 8) {
       const level4Code = code.substring(0, 8);
       if (codeExists(level4Code)) {
-        console.log("Setting Level 4:", level4Code);
         setSelectedLevel4(level4Code);
-      } else {
-        console.warn("Level 4 code not found:", level4Code);
       }
     }
   }, [isEditMode, initialData, itemClassOptions]);
@@ -286,48 +263,183 @@ const ItemModal: React.FC<{
     setForm((prev) => ({ ...prev, itemClassCode: finalCode }));
   };
 
+  // Validate Item Details section
+  const validateItemDetails = () => {
+    // First, validate Item Class Level for ZRA company
+    if (companyCode === "ZRA") {
+      if (!selectedLevel3 && !selectedLevel4) {
+        if (selectedLevel1 && !selectedLevel2) {
+          toast.error(
+            "Item Class Level 1 alone is not sufficient. Please select at least Level 3 or higher.",
+          );
+          return false;
+        } else if (selectedLevel2 && !selectedLevel3) {
+          toast.error(
+            "Item Class Level 2 is not sufficient. Please select at least Level 3 or higher.",
+          );
+          return false;
+        } else if (!selectedLevel1) {
+          toast.error("Please select an Item Class Level.");
+          return false;
+        } else {
+          toast.error("Please select at least Item Class Level 3 to proceed.");
+          return false;
+        }
+      }
+    }
+
+    // Then validate other required Item Details and Sales & Purchase fields
+    const requiredFields = [
+      { field: "itemTypeCode", label: "Item Type" },
+      { field: "itemGroup", label: "Item Category" },
+      { field: "itemName", label: "Items Name" },
+      { field: "description", label: "Description" },
+      { field: "packagingUnitCode", label: "Packaging Unit" },
+      { field: "originNationCode", label: "Country Code" },
+      { field: "unitOfMeasureCd", label: "Unit of Measurement" },
+      { field: "svcCharge", label: "Service Charge" },
+      { field: "ins", label: "INSURANCE" },
+      { field: "sku", label: "SKU" },
+      { field: "sellingPrice", label: "Selling Price", isNumeric: true },
+      { field: "salesAccount", label: "Sales Account" },
+      { field: "buyingPrice", label: "Buying Price", isNumeric: true },
+      { field: "purchaseAccount", label: "Purchase Account" },
+      { field: "taxPreference", label: "Tax Preference" },
+      { field: "preferredVendor", label: "Preferred Vendor" },
+    ];
+
+    for (const { field, label, isNumeric } of requiredFields) {
+      const fieldValue = form[field];
+      const isEmpty = isNumeric
+        ? fieldValue === "" || fieldValue === null || fieldValue === undefined
+        : !fieldValue || String(fieldValue).trim() === "";
+
+      if (isEmpty) {
+        toast.error(
+          `${label} is required. Please fill in all required fields.`,
+        );
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  // Validate Tax Details section
+  const validateTaxDetails = () => {
+    if (!form.taxCategory || String(form.taxCategory).trim() === "") {
+      toast.error("Please select a Tax Category.");
+      return false;
+    }
+
+    return true;
+  };
+
+  // Handle form submission based on active tab
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate that at least Level 3 is selected for item class code
-    if (companyCode === "ZRA" && !selectedLevel3 && !selectedLevel4) {
-      toast.error("Please select at least Item Class Level 3");
+    // If on Item Details tab, validate and move to Tax Details
+    if (activeTab === "details") {
+      if (validateItemDetails()) {
+        toast.success("Item details validated. Please complete Tax Details.");
+        setActiveTab("taxDetails");
+      }
       return;
     }
 
-    try {
-      setLoading(true);
-
-      showLoading(isEditMode ? "Updating Item..." : "Creating Item...");
-
-      const payload = {
-        ...form,
-        itemTypeCode: Number(form.itemTypeCode),
-      };
-
-      let response;
-
-      if (isEditMode && initialData?.id) {
-        response = await updateItemByItemCode(initialData.id, payload);
-      } else {
-        response = await createItem(payload);
-      }
-
-      closeSwal();
-
-      if (!response || ![200, 201].includes(response.status_code)) {
-        showApiError(response);
+    // If on Tax Details tab, validate tax details and submit to API
+    if (activeTab === "taxDetails") {
+      if (!validateTaxDetails()) {
         return;
       }
 
-      onSubmit?.(response);
-      handleClose();
-    } catch (err: any) {
-      closeSwal();
-      console.error("Item save failed:", err);
-      showApiError(err);
-    } finally {
-      setLoading(false);
+      try {
+        setLoading(true);
+
+        showLoading(isEditMode ? "Updating Item..." : "Creating Item...");
+
+        const payload = {
+          ...form,
+          itemTypeCode: Number(form.itemTypeCode),
+        };
+
+        let response;
+
+        if (isEditMode && initialData?.id) {
+          response = await updateItemByItemCode(initialData.id, payload);
+        } else {
+          response = await createItem(payload);
+        }
+
+        closeSwal();
+
+        if (!response || ![200, 201].includes(response.status_code)) {
+          showApiError(response);
+          return;
+        }
+
+        onSubmit?.(response);
+
+        // Show success message and close modal
+        toast.success(
+          isEditMode
+            ? "Item updated successfully!"
+            : "Item created successfully!",
+        );
+        handleClose();
+      } catch (err: any) {
+        closeSwal();
+        console.error("Item save failed:", err);
+        showApiError(err);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // If on Inventory Details tab, just submit (inventory details are optional)
+    if (activeTab === "inventoryDetails") {
+      try {
+        setLoading(true);
+
+        showLoading(isEditMode ? "Updating Item..." : "Creating Item...");
+
+        const payload = {
+          ...form,
+          itemTypeCode: Number(form.itemTypeCode),
+        };
+
+        let response;
+
+        if (isEditMode && initialData?.id) {
+          response = await updateItemByItemCode(initialData.id, payload);
+        } else {
+          response = await createItem(payload);
+        }
+
+        closeSwal();
+
+        if (!response || ![200, 201].includes(response.status_code)) {
+          showApiError(response);
+          return;
+        }
+
+        onSubmit?.(response);
+
+        toast.success(
+          isEditMode
+            ? "Item updated successfully!"
+            : "Item created successfully!",
+        );
+        handleClose();
+      } catch (err: any) {
+        closeSwal();
+        console.error("Item save failed:", err);
+        showApiError(err);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -401,7 +513,7 @@ const ItemModal: React.FC<{
       maxWidth="6xl"
       height="90vh"
     >
-      <form onSubmit={handleSubmit} className="h-full flex flex-col">
+      <form onSubmit={handleSubmit} noValidate className="h-full flex flex-col">
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
@@ -463,7 +575,8 @@ const ItemModal: React.FC<{
                             {/* Level 1 */}
                             <div className="flex flex-col gap-1 text-sm">
                               <span className="font-medium text-muted">
-                                Item Class Level 1
+                                Item Class Level 1{" "}
+                                <span className="text-red-500">*</span>
                               </span>
                               <select
                                 value={selectedLevel1}
@@ -471,12 +584,13 @@ const ItemModal: React.FC<{
                                   handleLevelChange(1, e.target.value)
                                 }
                                 disabled={loadingItemClasses}
+                                required
                                 className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                               >
                                 <option value="">
                                   {loadingItemClasses
                                     ? "Loading..."
-                                    : "Select Level 1"}
+                                    : "Select Level 1 (Required)"}
                                 </option>
                                 {getCodesByLevel("1").map((option) => (
                                   <option key={option.cd} value={option.cd}>
@@ -612,9 +726,11 @@ const ItemModal: React.FC<{
                     <Input
                       label="Selling Price"
                       name="sellingPrice"
+                      type="number"
                       value={form.sellingPrice || ""}
                       onChange={handleForm}
                       className="w-full col-span-3"
+                      required
                     />
                     <Input
                       label="Sales Account"
@@ -622,13 +738,16 @@ const ItemModal: React.FC<{
                       value={form.salesAccount || ""}
                       onChange={handleForm}
                       className="w-full col-span-3"
+                      required
                     />
                     <Input
                       label="Buying Price"
                       name="buyingPrice"
+                      type="number"
                       value={form.buyingPrice || ""}
                       onChange={handleForm}
                       className="w-full"
+                      required
                     />
                     <Input
                       label="Purchase Account"
@@ -636,23 +755,31 @@ const ItemModal: React.FC<{
                       value={form.purchaseAccount || ""}
                       onChange={handleForm}
                       className="w-full"
-                    />
-                    <select
-                      name="taxPreference"
-                      value={form.taxPreference || ""}
-                      onChange={handleForm}
-                      className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                       required
-                    >
-                      <option value="Taxable">Taxable</option>
-                      <option value="Non-Taxable">Non-Taxable</option>
-                    </select>
+                    />
+                    <label className="flex flex-col gap-1 text-sm">
+                      <span className="font-medium text-muted">
+                        Tax Preference <span className="text-red-500">*</span>
+                      </span>
+                      <select
+                        name="taxPreference"
+                        value={form.taxPreference || ""}
+                        onChange={handleForm}
+                        className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                        required
+                      >
+                        <option value="">Select...</option>
+                        <option value="Taxable">Taxable</option>
+                        <option value="Non-Taxable">Non-Taxable</option>
+                      </select>
+                    </label>
                     <Input
                       label="Preferred Vendor"
                       name="preferredVendor"
                       value={form.preferredVendor || ""}
                       onChange={handleForm}
                       className="w-full col-span-3"
+                      required
                     />
                   </div>
                 </div>
@@ -725,6 +852,7 @@ const ItemModal: React.FC<{
                       onChange={handleForm}
                       placeholder="Standard VAT"
                       className="w-full"
+                      readOnly
                     />
                     <div className="md:col-span-2">
                       <Input
@@ -749,7 +877,7 @@ const ItemModal: React.FC<{
                           value={form.taxPerct || ""}
                           onChange={handleForm}
                           placeholder="12"
-                          className="w-full px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-app text-muted cursor-not-allowed"
+                          className="w-full px-3 py-2 pr-10 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-card text-muted cursor-not-allowed"
                           disabled
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted font-medium">
@@ -982,12 +1110,12 @@ const ItemModal: React.FC<{
             Cancel
           </Button>
 
-          <Button variant="ghost" type="button" onClick={reset}>
+          <Button variant="danger" type="button" onClick={reset}>
             Reset
           </Button>
 
           <Button variant="primary" loading={loading} type="submit">
-            Save Item
+            {activeTab === "details" ? "Next" : "Submit"}
           </Button>
         </div>
       </form>
@@ -995,13 +1123,16 @@ const ItemModal: React.FC<{
   );
 };
 
-// Input component unchanged
+// Input component with required support
 const Input = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement> & { label: string }
 >(({ label, className = "", ...props }, ref) => (
   <label className="flex flex-col gap-1 text-sm w-full">
-    <span className="font-medium text-muted">{label}</span>
+    <span className="font-medium text-muted">
+      {label}
+      {props.required && <span className="text-red-500 ml-1">*</span>}
+    </span>
     <input
       ref={ref}
       className={`rounded border border-theme px-3 py-2 bg-card text-main 

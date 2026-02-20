@@ -72,7 +72,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
           Reset
         </Button>
         <Button variant="primary" type="submit" onClick={handleFormSubmit}>
-          Save Invoice
+          Submit
         </Button>
       </div>
     </>

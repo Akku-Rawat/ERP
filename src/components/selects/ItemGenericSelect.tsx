@@ -11,6 +11,7 @@ interface Props {
   displayField?: "code" | "name";
   displayFormatter?: (option: any) => string;
   variant?: "default" | "modal";
+  required?: boolean;
 }
 
 export default function ItemGenericSelect({
@@ -23,6 +24,7 @@ export default function ItemGenericSelect({
   displayField,
   displayFormatter,
   variant = "default",
+  required = false,
 }: Props) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,7 +143,10 @@ export default function ItemGenericSelect({
 
   return (
     <div className={`${rootClassName} ${className}`}>
-      <span className={labelClassName}>{label}</span>
+      <span className={labelClassName}>
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </span>
 
 
       <div ref={ref} className="relative w-full">
