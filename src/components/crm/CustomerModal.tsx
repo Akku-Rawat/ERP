@@ -511,17 +511,13 @@ const CustomerModal: React.FC<{
                 <ModalSelect
                   label="Type"
                   name="type"
-                  value={form.type}
+                  value={form.type || ""}
                   onChange={handleChange}
-                  options={[
-                    { value: "", label: "Select" },
-                    { value: "Individual", label: "Individual" },
-                    { value: "Company", label: "Company" },
-                  ]}
-                  required
-                  error={errors.type}
-                />
-
+                  placeholder="Select Customer Type"
+                >
+                  <option value="Individual">Individual</option>
+                  <option value="Company">Company</option>
+                </ModalSelect>
                 <ModalInput
                   label="Customer Name"
                   name="name"

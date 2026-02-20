@@ -1,7 +1,12 @@
 
 import React, { useState } from "react";
 import { Search, UserPlus, AlertCircle } from "lucide-react";
-
+import {
+  showApiError,
+  showLoading,
+  showSuccess,
+  closeSwal,
+} from "../../../utils/alert";
 type IdentityVerificationModalProps = {
   onVerified: (data: any) => void;
   onManualEntry: () => void;
@@ -14,49 +19,57 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
   onManualEntry,
   onClose,
 }) => {
-  const [identityType, setIdentityType] = useState<"NRC" | "SSN">("NRC");
+
   const [identityValue, setIdentityValue] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleVerify = async () => {
-    setError(null);
 
-    if (!identityValue.trim()) {
-      setError("Please enter an NRC or SSN number");
-      return;
+
+ const handleVerify = async () => {
+  if (!identityValue.trim()) {
+    showApiError("Please enter an NRC Number");
+    return;
+  }
+
+  const nrcRegex = /^\d{6}\/\d{2}\/\d$/;
+  if (!nrcRegex.test(identityValue.trim())) {
+    showApiError("Invalid NRC format. Example: 123456/78/9");
+    return;
+  }
+
+  try {
+    showLoading("Verifying Identity...");
+
+    const result = await verifyEmployeeIdentity(
+      "NRC",
+      identityValue.trim()
+    );
+
+    if (result.status !== "success") {
+      throw new Error(result.message || "Verification failed");
     }
 
-    setLoading(true);
+    closeSwal();
 
-    try {
-      const result = await verifyEmployeeIdentity(
-        identityType,
-        identityValue.trim(),
-      );
+    const mappedData = {
+      identityInfo: {
+        nrc: identityValue.trim(),
+      },
+      personalInfo: {
+        firstName: result.data.firstName,
+        lastName: result.data.lastName,
+        gender: result.data.gender === "F" ? "Female" : "Male",
+      },
+    };
 
-      if (result.status !== "success") {
-        throw new Error(result.message || "Verification failed");
-      }
-      const mappedData = {
-        identityInfo: {
-          nrc: identityType === "NRC" ? identityValue : "",
-          ssn: result.data.ssn || "",
-        },
-        personalInfo: {
-          firstName: result.data.firstName,
-          lastName: result.data.lastName,
-          gender: result.data.gender === "F" ? "Female" : "Male",
-        },
-      };
+    showSuccess("Identity verified successfully");
 
-      onVerified(mappedData);
-    } catch (err: any) {
-      setError(err.message || "Unable to verify identity");
-    } finally {
-      setLoading(false);
-    }
-  };
+    onVerified(mappedData);
+
+  } catch (err: any) {
+    closeSwal();
+    showApiError(err);
+  }
+};
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -97,79 +110,40 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
             Verify Employee Identity
           </h2>
           <p className="text-sm text-muted">
-            🇿🇲 Search using NRC or NAPSA SSN
+          🇿🇲 Search using NRC
           </p>
         </div>
 
         {/* Form */}
         <div className="px-6 pb-6">
           {/* Identity Type Toggle */}
-          <div className="mb-5">
-            <label className="block text-xs font-medium text-main mb-2">
-              Identity Type
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setIdentityType("NRC")}
-                className={`py-3 px-4 rounded-lg font-semibold text-sm transition ${
-                  identityType === "NRC"
-                    ? "bg-primary text-white shadow-md"
-                    : "bg-app text-main hover:bg-primary/10"
-                }`}
-              >
-                NRC
-              </button>
-              <button
-                onClick={() => setIdentityType("SSN")}
-                className={`py-3 px-4 rounded-lg font-semibold text-sm transition ${
-                  identityType === "SSN"
-                    ? "bg-primary text-white shadow-md"
-                    : "bg-app text-main hover:bg-primary/10"
-                }`}
-              >
-                SSN (NAPSA)
-              </button>
-            </div>
-          </div>
+          
 
           {/* Input Field */}
           <div className="mb-4">
-            <label className="block text-xs font-medium text-main mb-2">
-              {identityType === "NRC"
-                ? "National Registration Card"
-                : "Social Security Number"}
-            </label>
+         <label className="block text-xs font-medium text-main mb-2">
+  National Registration Card (NRC)
+</label>
             <input
               type="text"
               value={identityValue}
               onChange={(e) => setIdentityValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder={
-                identityType === "NRC" ? "123456/78/9" : "SS2024001234"
-              }
+            onKeyDown={handleKeyPress}
+           placeholder="123456/78/9"
               className="w-full px-4 py-3 border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
             />
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-3 bg-danger/10 border border-danger/30 rounded-lg flex gap-2">
-              <AlertCircle className="w-4 h-4 text-danger flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-danger whitespace-pre-line">
-                {error}
-              </p>
-            </div>
-          )}
+          
 
           {/* Verify Button */}
-          <button
-            onClick={handleVerify}
-            disabled={loading}
-            className="w-full bg-primary text-white py-3 rounded-lg font-semibold  transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4"
-          >
-            <Search className="w-4 h-4" />
-            {loading ? "Verifying..." : "Verify Identity"}
-          </button>
+         <button
+  onClick={handleVerify}
+  className="w-full bg-primary text-white py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 mb-4"
+>
+  <Search className="w-4 h-4" />
+  Verify Identity
+</button>
 
           {/* Divider */}
           <div className="flex items-center gap-3 mb-4">
