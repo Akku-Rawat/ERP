@@ -112,7 +112,8 @@ export default function ReportTable() {
           const mappedQuotations: ReportRow[] = quotationsData.map((q: any) => ({
             type: "Quotations",
             documentNo: q?.id ?? q?.quotationNumber ?? "",
-            customerName: q?.customerName ?? "",
+            customerName:
+              q?.customerName ?? q?.customer?.name ?? q?.clientName ?? q?.name ?? "",
             date: q?.transactionDate ?? q?.quotationDate ?? "",
             dueDate: q?.validTill ?? q?.validUntil ?? "",
             currency: q?.currency ?? q?.currencyCode ?? "",
@@ -124,7 +125,8 @@ export default function ReportTable() {
             ? pRes.data.map((p: any) => ({
                 type: "Proforma Invoice",
                 documentNo: p?.proformaId ?? p?.id ?? "",
-                customerName: p?.customerName ?? "",
+                customerName:
+                  p?.customerName ?? p?.customer?.name ?? p?.clientName ?? p?.name ?? "",
                 date: p?.dateofinvoice ?? p?.dateOfInvoice ?? p?.createdAt ?? "",
                 dueDate: p?.dueDate ?? "",
                 currency: p?.currency ?? p?.currencyCode ?? "",
@@ -138,7 +140,8 @@ export default function ReportTable() {
             ? iRes.data.map((inv: any) => ({
                 type: "Invoices",
                 documentNo: inv?.invoiceNumber ?? "",
-                customerName: inv?.customerName ?? "",
+                customerName:
+                  inv?.customerName ?? inv?.customer?.name ?? inv?.clientName ?? inv?.name ?? "",
                 date: inv?.dateOfInvoice ?? "",
                 dueDate: inv?.dueDate ?? "",
                 currency: inv?.currency ?? inv?.currencyCode ?? "",
@@ -152,7 +155,8 @@ export default function ReportTable() {
             ? cRes.data.map((cn: any) => ({
                 type: "Credit Notes",
                 documentNo: cn?.invoiceNumber ?? cn?.creditNoteNumber ?? "",
-                customerName: cn?.customerName ?? "",
+                customerName:
+                  cn?.customerName ?? cn?.customer?.name ?? cn?.clientName ?? cn?.name ?? "",
                 date: cn?.dateOfInvoice ?? cn?.date ?? "",
                 currency: cn?.currency ?? cn?.currencyCode ?? "",
                 amount: Math.abs(Number(cn?.totalAmount ?? 0)),
@@ -165,7 +169,8 @@ export default function ReportTable() {
             ? dRes.data.map((dn: any) => ({
                 type: "Debit Notes",
                 documentNo: dn?.invoiceNumber ?? dn?.debitNoteNumber ?? "",
-                customerName: dn?.customerName ?? "",
+                customerName:
+                  dn?.customerName ?? dn?.customer?.name ?? dn?.clientName ?? dn?.name ?? "",
                 date: dn?.dateOfInvoice ?? dn?.date ?? "",
                 currency: dn?.currency ?? dn?.currencyCode ?? dn?.currCd ?? "",
                 amount: Number(dn?.totalAmount ?? 0),
@@ -195,7 +200,8 @@ export default function ReportTable() {
           const mapped: ReportRow[] = quotationsData.map((q: any) => ({
             type: "Quotations",
             documentNo: q?.id ?? q?.quotationNumber ?? "",
-            customerName: q?.customerName ?? "",
+            customerName:
+              q?.customerName ?? q?.customer?.name ?? q?.clientName ?? q?.name ?? "",
             date: q?.transactionDate ?? q?.quotationDate ?? "",
             dueDate: q?.validTill ?? q?.validUntil ?? "",
             currency: q?.currency ?? q?.currencyCode ?? "",
@@ -213,7 +219,8 @@ export default function ReportTable() {
             ? res.data.map((p: any) => ({
                 type: "Proforma Invoice",
                 documentNo: p?.proformaId ?? p?.id ?? "",
-                customerName: p?.customerName ?? "",
+                customerName:
+                  p?.customerName ?? p?.customer?.name ?? p?.clientName ?? p?.name ?? "",
                 date: p?.dateofinvoice ?? p?.dateOfInvoice ?? p?.createdAt ?? "",
                 dueDate: p?.dueDate ?? "",
                 currency: p?.currency ?? p?.currencyCode ?? "",
@@ -233,7 +240,8 @@ export default function ReportTable() {
             ? res.data.map((inv: any) => ({
                 type: "Invoices",
                 documentNo: inv?.invoiceNumber ?? "",
-                customerName: inv?.customerName ?? "",
+                customerName:
+                  inv?.customerName ?? inv?.customer?.name ?? inv?.clientName ?? inv?.name ?? "",
                 date: inv?.dateOfInvoice ?? "",
                 dueDate: inv?.dueDate ?? "",
                 currency: inv?.currency ?? inv?.currencyCode ?? "",
@@ -253,7 +261,8 @@ export default function ReportTable() {
             ? res.data.map((cn: any) => ({
                 type: "Credit Notes",
                 documentNo: cn?.invoiceNumber ?? cn?.creditNoteNumber ?? "",
-                customerName: cn?.customerName ?? "",
+                customerName:
+                  cn?.customerName ?? cn?.customer?.name ?? cn?.clientName ?? cn?.name ?? "",
                 date: cn?.dateOfInvoice ?? cn?.date ?? "",
                 currency: cn?.currency ?? cn?.currencyCode ?? "",
                 amount: Math.abs(Number(cn?.totalAmount ?? 0)),
@@ -272,7 +281,8 @@ export default function ReportTable() {
             ? res.data.map((dn: any) => ({
                 type: "Debit Notes",
                 documentNo: dn?.invoiceNumber ?? dn?.debitNoteNumber ?? "",
-                customerName: dn?.customerName ?? "",
+                customerName:
+                  dn?.customerName ?? dn?.customer?.name ?? dn?.clientName ?? dn?.name ?? "",
                 date: dn?.dateOfInvoice ?? dn?.date ?? "",
                 currency: dn?.currency ?? dn?.currencyCode ?? dn?.currCd ?? "",
                 amount: Number(dn?.totalAmount ?? 0),
@@ -306,20 +316,7 @@ export default function ReportTable() {
   const filteredData = useMemo(() => {
     return rows.filter((row) => {
       const term = searchTerm.trim().toLowerCase();
-      if (
-        term &&
-        !(
-          normalized(row.type).includes(term) ||
-          normalized(row.documentNo).includes(term) ||
-          normalized(row.customerName).includes(term) ||
-          normalized(row.date).includes(term) ||
-          normalized(row.dueDate).includes(term) ||
-          normalized(row.currency).includes(term) ||
-          normalized(row.status).includes(term) ||
-          normalized(row.receiptNo).includes(term)
-        )
-      )
-        return false;
+      if (term && !normalized(row.customerName).includes(term)) return false;
 
       if (filters.status !== "All" && String(row.status ?? "") !== filters.status)
         return false;
@@ -370,17 +367,17 @@ export default function ReportTable() {
       <div className="flex flex-col sm:flex-row gap-3 justify-between items-center mb-4">
         <div className="flex flex-wrap gap-3 items-center w-full">
           <div className="relative sm:max-w-xs w-full">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted text-sm" />
             <input
-              className="filter-input-refined pl-9"
-              placeholder="Search documents, customers…"
+              className="w-full pl-11 pr-4 py-2.5 bg-card border border-theme rounded-full text-sm text-main placeholder:text-muted/70 shadow-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition"
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
           <select
-            className="filter-input-refined appearance-none"
+            className="bg-card border border-theme rounded-full text-sm text-main shadow-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition px-4 py-2.5 pr-10 appearance-none"
             value={reportType}
             onChange={(e) => setReportType(e.target.value as ReportType)}
           >
@@ -394,7 +391,7 @@ export default function ReportTable() {
 
           <input
             type="date"
-            className="filter-input-refined sm:w-44"
+            className="bg-card border border-theme rounded-full text-sm text-main shadow-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition px-4 py-2.5 sm:w-44"
             value={filters.dateFrom}
             onChange={(e) =>
               setFilters((f) => ({ ...f, dateFrom: e.target.value }))
@@ -403,7 +400,7 @@ export default function ReportTable() {
 
           <input
             type="date"
-            className="filter-input-refined sm:w-44"
+            className="bg-card border border-theme rounded-full text-sm text-main shadow-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition px-4 py-2.5 sm:w-44"
             value={filters.dateTo}
             onChange={(e) =>
               setFilters((f) => ({ ...f, dateTo: e.target.value }))
@@ -411,7 +408,7 @@ export default function ReportTable() {
           />
 
           <select
-            className="filter-input-refined appearance-none sm:w-44"
+            className="bg-card border border-theme rounded-full text-sm text-main shadow-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition px-4 py-2.5 pr-10 appearance-none sm:w-44"
             value={filters.status}
             onChange={(e) =>
               setFilters((f) => ({ ...f, status: e.target.value }))
