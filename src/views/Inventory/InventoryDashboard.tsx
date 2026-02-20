@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Bar,
@@ -6,6 +7,8 @@ import {
   Cell,
   Legend,
   LabelList,
+  Line,
+  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -14,26 +17,20 @@ import {
   YAxis,
 } from "recharts";
 
-import {
-  FileText,
-  ShoppingCart,
-  Truck,
-  Users,
-  UsersRound,
-} from "lucide-react";
+import { AlertTriangle, Boxes, Package, Warehouse } from "lucide-react";
 
-import { getProcurementDashboardSummary } from "../../api/procurementDashboardApi";
+import { getInventoryDashboardSummary } from "../../api/inventoryDashboardApi";
 import { ChartSkeleton } from "../../components/ChartSkeleton";
 
-const ProcurementDashboard: React.FC = () => {
+const InventoryDashboard: React.FC = () => {
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const [summaryData, setSummaryData] = useState<{
-    totalSuppliers: number;
-    activeSuppliers: number;
-    inactiveSuppliers: number;
-    totalPurchaseInvoice: number;
-    totalPurchaseOrder: number;
+    totalItems: number;
+    serviceItems: number;
+    rawMaterialItems: number;
+    finishedProductsItems: number;
+    totalImportedItems: number;
   } | null>(null);
 
   const chartsLoading = summaryLoading || !summaryData;
@@ -50,6 +47,11 @@ const ProcurementDashboard: React.FC = () => {
     [],
   );
 
+  const pieColors = useMemo(
+    () => [palette.blue, palette.emerald, palette.purple, palette.amber, palette.red, palette.slate],
+    [palette],
+  );
+
   useEffect(() => {
     let mounted = true;
     const run = async () => {
@@ -57,12 +59,12 @@ const ProcurementDashboard: React.FC = () => {
         setSummaryLoading(true);
         setSummaryError(null);
         setSummaryData(null);
-        const resp = await getProcurementDashboardSummary();
+        const resp = await getInventoryDashboardSummary();
         if (!mounted) return;
         setSummaryData(resp.data);
       } catch (e: any) {
         if (!mounted) return;
-        setSummaryError(e?.message ?? "Failed to load procurement dashboard summary");
+        setSummaryError(e?.message ?? "Failed to load inventory dashboard summary");
       } finally {
         if (!mounted) return;
         setSummaryLoading(false);
@@ -74,6 +76,34 @@ const ProcurementDashboard: React.FC = () => {
       mounted = false;
     };
   }, []);
+
+  const itemTypeBreakdownData = useMemo(
+    () => [
+      { name: "Service", value: Number(summaryData?.serviceItems ?? 0) },
+      { name: "Raw Material", value: Number(summaryData?.rawMaterialItems ?? 0) },
+      { name: "Finished Products", value: Number(summaryData?.finishedProductsItems ?? 0) },
+      { name: "Imported", value: Number(summaryData?.totalImportedItems ?? 0) },
+    ],
+    [summaryData],
+  );
+
+  const importedVsLocalData = useMemo(() => {
+    const imported = Number(summaryData?.totalImportedItems ?? 0);
+    const total = Number(summaryData?.totalItems ?? 0);
+    const local = Math.max(0, total - imported);
+    return [
+      { name: "Imported", value: imported },
+      { name: "Local", value: local },
+    ];
+  }, [summaryData]);
+
+  const rawVsFinishedTrendData = useMemo(
+    () => [
+      { name: "Raw Materials", value: Number(summaryData?.rawMaterialItems ?? 0) },
+      { name: "Finished Products", value: Number(summaryData?.finishedProductsItems ?? 0) },
+    ],
+    [summaryData],
+  );
 
   const chartPlaneStyle = useMemo(
     () => ({
@@ -94,86 +124,57 @@ const ProcurementDashboard: React.FC = () => {
     );
   };
 
-  const TableSkeleton = () => (
-    <div className="animate-pulse space-y-3">
-      <div className="h-3 w-28 bg-gray-100 rounded" />
-      <div className="h-3 w-full bg-gray-100 rounded" />
-      <div className="h-3 w-5/6 bg-gray-100 rounded" />
-      <div className="h-3 w-2/3 bg-gray-100 rounded" />
-    </div>
-  );
-
   const kpiCards = useMemo(
     () =>
       [
         {
-          label: "Total Suppliers",
-          value: String(summaryData?.totalSuppliers ?? 0),
-          icon: Users,
+          label: "Total Items",
+          value: String(summaryData?.totalItems ?? 0),
+          icon: Package,
           gradient: "from-blue-500 to-blue-600",
         },
         {
-          label: "Active Suppliers",
-          value: String(summaryData?.activeSuppliers ?? 0),
-          icon: UsersRound,
-          gradient: "from-emerald-500 to-emerald-600",
-        },
-        {
-          label: "Inactive Suppliers",
-          value: String(summaryData?.inactiveSuppliers ?? 0),
-          icon: UsersRound,
-          gradient: "from-slate-500 to-slate-600",
-        },
-        {
-          label: "Purchase Orders",
-          value: String(summaryData?.totalPurchaseOrder ?? 0),
-          icon: ShoppingCart,
+          label: "Service Items",
+          value: String(summaryData?.serviceItems ?? 0),
+          icon: AlertTriangle,
           gradient: "from-purple-500 to-purple-600",
         },
         {
-          label: "Purchase Invoices",
-          value: String(summaryData?.totalPurchaseInvoice ?? 0),
-          icon: FileText,
+          label: "Raw Materials",
+          value: String(summaryData?.rawMaterialItems ?? 0),
+          icon: Boxes,
+          gradient: "from-emerald-500 to-emerald-600",
+        },
+        {
+          label: "Finished Products",
+          value: String(summaryData?.finishedProductsItems ?? 0),
+          icon: Package,
           gradient: "from-amber-500 to-amber-600",
+        },
+        {
+          label: "Imported Items",
+          value: String(summaryData?.totalImportedItems ?? 0),
+          icon: Warehouse,
+          gradient: "from-red-500 to-red-600",
         },
       ],
     [summaryData],
   );
 
-  const supplierStatusDonutData = useMemo(
-    () => [
-      { name: "Active", value: Number(summaryData?.activeSuppliers ?? 0) },
-      { name: "Inactive", value: Number(summaryData?.inactiveSuppliers ?? 0) },
-    ],
-    [summaryData],
-  );
-
-  const documentsPieData = useMemo(
-    () => [
-      { name: "Purchase Orders", value: Number(summaryData?.totalPurchaseOrder ?? 0) },
-      { name: "Purchase Invoices", value: Number(summaryData?.totalPurchaseInvoice ?? 0) },
-    ],
-    [summaryData],
-  );
-
-  const procurementBarData = useMemo(
-    () => [
-      { name: "Total Suppliers", value: Number(summaryData?.totalSuppliers ?? 0) },
-      { name: "Active", value: Number(summaryData?.activeSuppliers ?? 0) },
-      { name: "Inactive", value: Number(summaryData?.inactiveSuppliers ?? 0) },
-      { name: "Purchase Orders", value: Number(summaryData?.totalPurchaseOrder ?? 0) },
-      { name: "Purchase Invoices", value: Number(summaryData?.totalPurchaseInvoice ?? 0) },
-    ],
-    [summaryData],
-  );
-
-  const pieColors = useMemo(
-    () => [palette.purple, palette.emerald, palette.amber, palette.blue, palette.red, palette.slate],
-    [palette],
+  const legendProps = useMemo(
+    () => ({
+      wrapperStyle: { fontSize: 12 },
+      layout: "horizontal" as const,
+      verticalAlign: "bottom" as const,
+      align: "center" as const,
+      iconType: "square" as const,
+      height: 36,
+    }),
+    [],
   );
 
   return (
-    <div className="bg-app min-h-screen px-4 sm:px-6 pb-6 pt-3">
+    <div className="bg-app px-4 sm:px-6 pb-6 pt-3">
       <div className="max-w-[1600px] mx-auto flex flex-col">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
           {chartsLoading
@@ -218,8 +219,52 @@ const ProcurementDashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-gray-900">Procurement Overview</h3>
-              <Truck className="text-gray-400" size={18} />
+              <h3 className="text-sm font-bold text-gray-900">Items Breakdown</h3>
+            </div>
+
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
+              {chartsLoading ? (
+                <ChartSkeleton variant="pie" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                    <Tooltip
+                      formatter={(v: any) => Number(v ?? 0)}
+                      contentStyle={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 12,
+                        padding: "8px 12px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      }}
+                      itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
+                    />
+                    <Legend {...legendProps} />
+                    <Pie
+                      data={itemTypeBreakdownData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="45%"
+                      innerRadius={55}
+                      outerRadius={82}
+                      paddingAngle={2}
+                      label={renderDonutLabel}
+                      labelLine={false}
+                    >
+                      {itemTypeBreakdownData.map((_, idx) => (
+                        <Cell key={idx} fill={pieColors[idx % pieColors.length]} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-gray-900">Items Breakdown (Bar)</h3>
             </div>
 
             <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
@@ -227,20 +272,13 @@ const ProcurementDashboard: React.FC = () => {
                 <ChartSkeleton variant="bar" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={procurementBarData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
+                  <BarChart
+                    data={itemTypeBreakdownData}
+                    margin={{ top: 16, right: 18, left: 6, bottom: 8 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fontSize: 11 }}
-                      interval={0}
-                      angle={-12}
-                      textAnchor="end"
-                      height={48}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 12 }}
-                      width={52}
-                    />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} width={52} />
                     <Tooltip
                       formatter={(v: any) => Number(v ?? 0)}
                       contentStyle={{
@@ -253,8 +291,8 @@ const ProcurementDashboard: React.FC = () => {
                       itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
                       cursor={{ fill: "var(--primary)", opacity: 0.1 }}
                     />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="value" fill={palette.blue} radius={[6, 6, 0, 0]} name="Count">
+                    <Legend {...legendProps} />
+                    <Bar dataKey="value" fill={palette.emerald} radius={[6, 6, 0, 0]} name="Count">
                       <LabelList dataKey="value" position="top" fill="#6b7280" fontSize={10} />
                     </Bar>
                   </BarChart>
@@ -265,15 +303,15 @@ const ProcurementDashboard: React.FC = () => {
 
           <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-gray-900">Supplier Status</h3>
+              <h3 className="text-sm font-bold text-gray-900">Imported vs Local</h3>
             </div>
 
             <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
-              {chartsLoading ? (
+              {summaryLoading ? (
                 <ChartSkeleton variant="pie" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                     <Tooltip
                       formatter={(v: any) => Number(v ?? 0)}
                       contentStyle={{
@@ -285,67 +323,9 @@ const ProcurementDashboard: React.FC = () => {
                       }}
                       itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
                     />
-                    <Legend
-                      wrapperStyle={{ fontSize: 12 }}
-                      layout="horizontal"
-                      verticalAlign="bottom"
-                      align="center"
-                      iconType="square"
-                      height={36}
-                    />
+                    <Legend {...legendProps} />
                     <Pie
-                      data={supplierStatusDonutData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="45%"
-                      outerRadius={82}
-                      paddingAngle={2}
-                      label={renderDonutLabel}
-                      labelLine={false}
-                    >
-                      {supplierStatusDonutData.map((_, idx) => (
-                        <Cell key={idx} fill={idx === 0 ? palette.emerald : palette.slate} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-gray-900">Documents</h3>
-            </div>
-
-            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
-              {chartsLoading ? (
-                <ChartSkeleton variant="pie" />
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Tooltip
-                      formatter={(v: any) => Number(v ?? 0)}
-                      contentStyle={{
-                        background: "var(--card)",
-                        border: "1px solid var(--border)",
-                        borderRadius: 12,
-                        padding: "8px 12px",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      }}
-                      itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
-                    />
-                    <Legend
-                      wrapperStyle={{ fontSize: 12 }}
-                      layout="horizontal"
-                      verticalAlign="bottom"
-                      align="center"
-                      iconType="square"
-                      height={36}
-                    />
-                    <Pie
-                      data={documentsPieData}
+                      data={importedVsLocalData}
                       dataKey="value"
                       nameKey="name"
                       cx="50%"
@@ -356,7 +336,7 @@ const ProcurementDashboard: React.FC = () => {
                       label={renderDonutLabel}
                       labelLine={false}
                     >
-                      {documentsPieData.map((_, idx) => (
+                      {importedVsLocalData.map((_, idx) => (
                         <Cell key={idx} fill={pieColors[idx % pieColors.length]} />
                       ))}
                     </Pie>
@@ -368,45 +348,42 @@ const ProcurementDashboard: React.FC = () => {
 
           <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-gray-900">Documents Summary</h3>
+              <h3 className="text-sm font-bold text-gray-900">Raw Materials vs Finished Products</h3>
             </div>
 
-            <div className="h-72 rounded-lg border border-gray-200 bg-white overflow-auto" style={chartPlaneStyle}>
+            <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
               {chartsLoading ? (
-                <div className="p-4">
-                  <TableSkeleton />
-                </div>
+                <ChartSkeleton variant="line" />
               ) : (
-                <div className="p-4">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-left text-gray-600">
-                        <th className="py-2 font-semibold">Document</th>
-                        <th className="py-2 font-semibold text-right">Count</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-t">
-                        <td className="py-2 text-gray-700">Purchase Orders</td>
-                        <td className="py-2 text-right font-semibold text-gray-900">
-                          {Number(summaryData?.totalPurchaseOrder ?? 0)}
-                        </td>
-                      </tr>
-                      <tr className="border-t">
-                        <td className="py-2 text-gray-700">Purchase Invoices</td>
-                        <td className="py-2 text-right font-semibold text-gray-900">
-                          {Number(summaryData?.totalPurchaseInvoice ?? 0)}
-                        </td>
-                      </tr>
-                      <tr className="border-t">
-                        <td className="py-2 text-gray-700">Total Suppliers</td>
-                        <td className="py-2 text-right font-semibold text-gray-900">
-                          {Number(summaryData?.totalSuppliers ?? 0)}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={rawVsFinishedTrendData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} width={52} />
+                    <Tooltip
+                      formatter={(v: any) => Number(v ?? 0)}
+                      contentStyle={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 12,
+                        padding: "8px 12px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      }}
+                      itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
+                      cursor={{ fill: "var(--primary)", opacity: 0.1 }}
+                    />
+                    <Legend {...legendProps} />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke={palette.purple}
+                      strokeWidth={3}
+                      dot={false}
+                      name="Count"
+                      label={{ position: "top", fontSize: 10, fill: "#6b7280" }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               )}
             </div>
           </div>
@@ -416,4 +393,4 @@ const ProcurementDashboard: React.FC = () => {
   );
 };
 
-export default ProcurementDashboard;
+export default InventoryDashboard;

@@ -242,7 +242,7 @@ const handleSaved = async () => {
           setEditEmployee(null);
         }}
         onSuccess={handleSaved}
-        departments={uniqueDepartments}
+        
         level={[]}
         editData={editEmployee}
         mode={editEmployee ? "edit" : "add"}

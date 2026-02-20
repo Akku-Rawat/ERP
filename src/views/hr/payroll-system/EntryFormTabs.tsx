@@ -1,408 +1,297 @@
-// EntryFormTabs.tsx — Landscape layout, no vertical scroll
-
+// EntryFormTabs.tsx — New Payroll Entry: Overview, Employees, Accounting tabs
 import React from "react";
-import type { PayrollEntry, Employee } from "./types";
-import { Edit2, CheckSquare } from "lucide-react";
+import { Edit2 } from "lucide-react";
+import type { PayrollEntry, Employee } from "../../../types/payrolltypes";
 
-// ─── Shared field primitives ──────────────────────────────────────────────────
-const Label: React.FC<{ children: React.ReactNode; required?: boolean }> = ({
-  children,
-  required,
-}) => (
-  <label className="block text-[11px] font-semibold text-muted mb-1 uppercase tracking-wide">
-    {children}
-    {required && <span className="text-red-400 ml-0.5">*</span>}
+// ── Primitives ────────────────────────────────────────────────────────────────
+const Label: React.FC<{ children: React.ReactNode; required?: boolean }> = ({ children, required }) => (
+  <label className="block text-[10px] font-extrabold text-muted mb-1.5 uppercase tracking-wider">
+    {children}{required && <span className="text-danger ml-0.5">*</span>}
   </label>
 );
 
-const inputCls =
-  "w-full px-3 py-2 bg-app border border-theme rounded-lg text-sm text-main " +
-  "placeholder:text-muted focus:outline-none focus:border-primary transition";
+const inputCls = "w-full px-3 py-2.5 bg-app border border-theme rounded-lg text-sm text-main placeholder:text-muted focus:outline-none focus:border-primary transition";
+const selectCls = "w-full px-3 py-2.5 bg-app border border-theme rounded-lg text-sm text-main focus:outline-none focus:border-primary transition cursor-pointer";
 
-const selectCls =
-  "w-full px-3 py-2 bg-app border border-theme rounded-lg text-sm text-main " +
-  "focus:outline-none focus:border-primary transition cursor-pointer";
-
-// ─── Overview Tab — 3-column grid, everything above the fold ─────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// OVERVIEW TAB
+// ─────────────────────────────────────────────────────────────────────────────
 interface OverviewTabProps {
   data: PayrollEntry;
   onChange: (field: string, value: any) => void;
 }
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
-  <div className="space-y-4">
-    {/* Row 1 — 3 cols */}
-    <div className="grid grid-cols-3 gap-4">
+  <div className="space-y-5 animate-[fadeIn_0.2s_ease]">
+    <div className="grid grid-cols-3 gap-5">
       <div>
         <Label required>Payroll Name</Label>
-        <input
-          type="text"
-          value={data.payrollName}
-          onChange={(e) => onChange("payrollName", e.target.value)}
-          placeholder="e.g. March Payroll"
-          className={inputCls}
-        />
+        <input type="text" value={data.payrollName} onChange={e => onChange("payrollName", e.target.value)}
+          placeholder="e.g. January 2026 Payroll" className={inputCls} />
       </div>
       <div>
         <Label required>Posting Date</Label>
-        <input
-          type="date"
-          value={data.postingDate}
-          onChange={(e) => onChange("postingDate", e.target.value)}
-          className={inputCls}
-        />
+        <input type="date" value={data.postingDate} onChange={e => onChange("postingDate", e.target.value)} className={inputCls} />
       </div>
       <div>
         <Label required>Payroll Frequency</Label>
-        <select
-          value={data.payrollFrequency}
-          onChange={(e) => onChange("payrollFrequency", e.target.value)}
-          className={selectCls}
-        >
+        <select value={data.payrollFrequency} onChange={e => onChange("payrollFrequency", e.target.value)} className={selectCls}>
           <option value="">Select frequency</option>
           <option value="Monthly">Monthly</option>
           <option value="Biweekly">Biweekly</option>
+          <option value="Weekly">Weekly</option>
         </select>
       </div>
     </div>
 
-    {/* Row 2 — 3 cols */}
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-3 gap-5">
       <div>
         <Label required>Currency</Label>
-        <select
-          value={data.currency}
-          onChange={(e) => onChange("currency", e.target.value)}
-          className={selectCls}
-        >
+        <select value={data.currency} onChange={e => onChange("currency", e.target.value)} className={selectCls}>
           <option value="INR">INR — Indian Rupee</option>
           <option value="USD">USD — US Dollar</option>
+          <option value="EUR">EUR — Euro</option>
         </select>
       </div>
       <div>
         <Label required>Company</Label>
-        <input
-          type="text"
-          value={data.company}
-          onChange={(e) => onChange("company", e.target.value)}
-          className={inputCls}
-        />
+        <input type="text" value={data.company} onChange={e => onChange("company", e.target.value)} className={inputCls} />
       </div>
       <div>
         <Label required>Payroll Payable Account</Label>
-        <select
-          value={data.payrollPayableAccount}
-          onChange={(e) => onChange("payrollPayableAccount", e.target.value)}
-          className={selectCls}
-        >
+        <select value={data.payrollPayableAccount} onChange={e => onChange("payrollPayableAccount", e.target.value)} className={selectCls}>
           <option value="Payroll Payable - I">Payroll Payable - I</option>
           <option value="Payroll Payable - II">Payroll Payable - II</option>
         </select>
       </div>
     </div>
 
-    {/* Row 3 — date range + status + checkboxes */}
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-2 gap-5">
       <div>
-        <Label required>Start Date</Label>
-        <input
-          type="date"
-          value={data.startDate}
-          onChange={(e) => onChange("startDate", e.target.value)}
-          className={inputCls}
-        />
+        <Label required>Pay Period Start</Label>
+        <input type="date" value={data.startDate} onChange={e => onChange("startDate", e.target.value)} className={inputCls} />
       </div>
       <div>
-        <Label required>End Date</Label>
-        <input
-          type="date"
-          value={data.endDate}
-          onChange={(e) => onChange("endDate", e.target.value)}
-          className={inputCls}
-        />
-      </div>
-      <div>
-        <Label>Status</Label>
-        <div className="flex items-center gap-2 px-3 py-2 bg-app border border-theme rounded-lg">
-          <span className="w-2 h-2 rounded-full bg-[var(--warning)] shrink-0" />
-          <span className="text-sm text-muted">{data.status}</span>
-        </div>
+        <Label required>Pay Period End</Label>
+        <input type="date" value={data.endDate} onChange={e => onChange("endDate", e.target.value)} className={inputCls} />
       </div>
     </div>
 
-    {/* Row 4 — checkboxes inline */}
+    {/* Toggles */}
     <div className="grid grid-cols-2 gap-4">
-      <label className="flex items-center gap-3 px-4 py-3 bg-app border border-theme rounded-lg hover:border-primary cursor-pointer transition group">
-        <input
-          type="checkbox"
-          checked={data.salarySlipTimesheet}
-          onChange={(e) => onChange("salarySlipTimesheet", e.target.checked)}
-          className="w-4 h-4 accent-[var(--primary)] rounded"
-        />
-        <span className="text-sm text-main font-medium group-hover:text-primary transition">
-          Salary Slip Based on Timesheet
-        </span>
-      </label>
-      <label className="flex items-center gap-3 px-4 py-3 bg-app border border-theme rounded-lg hover:border-primary cursor-pointer transition group">
-        <input
-          type="checkbox"
-          checked={data.deductTaxForProof}
-          onChange={(e) => onChange("deductTaxForProof", e.target.checked)}
-          className="w-4 h-4 accent-[var(--primary)] rounded"
-        />
-        <span className="text-sm text-main font-medium group-hover:text-primary transition">
-          Deduct Tax For Unsubmitted Proof
-        </span>
-      </label>
+      {[
+        { field: "deductTaxForProof",   label: "Deduct Tax for Proof Submission", desc: "Apply TDS based on submitted investment proofs" },
+        { field: "salarySlipTimesheet", label: "Salary Slip Based on Timesheet",  desc: "Calculate pay using logged timesheet hours" },
+      ].map(({ field, label, desc }) => (
+        <label key={field} className="flex items-start gap-3 p-4 bg-app border border-theme rounded-xl cursor-pointer hover:border-primary/40 transition">
+          <input
+            type="checkbox"
+            checked={!!(data as any)[field]}
+            onChange={e => onChange(field, e.target.checked)}
+            className="mt-0.5 w-4 h-4 accent-primary cursor-pointer shrink-0"
+          />
+          <div>
+            <p className="text-xs font-bold text-main">{label}</p>
+            <p className="text-[10px] text-muted mt-0.5">{desc}</p>
+          </div>
+        </label>
+      ))}
     </div>
   </div>
 );
 
-// ─── Employees Tab — left filters + right scrollable list ─────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// EMPLOYEES TAB
+// ─────────────────────────────────────────────────────────────────────────────
 interface EmployeesTabProps {
   data: PayrollEntry;
   onChange: (field: string, value: any) => void;
   employees: Employee[];
-  onEditEmployee?: (employee: Employee) => void;
+  onEditEmployee?: (emp: Employee) => void;
 }
 
 export const EmployeesTab: React.FC<EmployeesTabProps> = ({
-  data,
-  onChange,
-  employees,
-  onEditEmployee,
+  data, onChange, employees, onEditEmployee,
 }) => {
-  const toggleEmployee = (empId: string) => {
-    const current = data.selectedEmployees || [];
-    onChange(
-      "selectedEmployees",
-      current.includes(empId)
-        ? current.filter((id) => id !== empId)
-        : [...current, empId],
-    );
+  const active = employees.filter(e => e.isActive);
+  const toggleEmp = (id: string) => {
+    const next = data.selectedEmployees.includes(id)
+      ? data.selectedEmployees.filter(i => i !== id)
+      : [...data.selectedEmployees, id];
+    onChange("selectedEmployees", next);
+  };
+  const selectAll = () => {
+    const all = active.map(e => e.id);
+    onChange("selectedEmployees", data.selectedEmployees.length === all.length ? [] : all);
   };
 
-  const filteredEmployees = employees;
-
-  const allIds = filteredEmployees.map((e) => e.id);
-  const selectedCount = data.selectedEmployees?.length || 0;
-  const allSelected = selectedCount === allIds.length && allIds.length > 0;
-
-  const selectAll = () =>
-    onChange("selectedEmployees", allSelected ? [] : allIds);
-
   return (
-    // Two-column: narrow filter panel | wide employee list
-    <div className="flex gap-4 h-full">
-      {/* ── Filter sidebar ── */}
-      <div className="w-52 shrink-0 flex flex-col gap-2">
-        <p className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">
-          Filter Employees
-        </p>
-        <input
-          placeholder="Branch"
-          value={data.branch || ""}
-          onChange={(e) => onChange("branch", e.target.value)}
-          className={inputCls}
-        />
-        <input
-          placeholder="Designation"
-          value={data.designation || ""}
-          onChange={(e) => onChange("designation", e.target.value)}
-          className={inputCls}
-        />
-        <input
-          placeholder="Department"
-          value={data.department || ""}
-          onChange={(e) => onChange("department", e.target.value)}
-          className={inputCls}
-        />
-        <input
-          placeholder="Grade"
-          value={data.grade || ""}
-          onChange={(e) => onChange("grade", e.target.value)}
-          className={inputCls}
-        />
-        <div className="mt-auto pt-2 border-t border-theme text-xs text-muted">
-          <span className="font-semibold text-primary">{filteredEmployees.length}</span> employees found
-        </div>
+    <div className="space-y-4 animate-[fadeIn_0.2s_ease]">
+      {/* Filter row */}
+      <div className="grid grid-cols-4 gap-4">
+        {[
+          { field: "branch",      label: "Branch",      ph: "All branches" },
+          { field: "department",  label: "Department",  ph: "All departments" },
+          { field: "designation", label: "Designation", ph: "All designations" },
+          { field: "grade",       label: "Grade",       ph: "All grades" },
+        ].map(({ field, label, ph }) => (
+          <div key={field}>
+            <Label>{label}</Label>
+            <input
+              type="text"
+              value={(data as any)[field] ?? ""}
+              onChange={e => onChange(field, e.target.value)}
+              placeholder={ph}
+              className={inputCls}
+            />
+          </div>
+        ))}
       </div>
 
-      {/* ── Employee list ── */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Select all header */}
-        <label className="flex items-center justify-between px-4 py-2.5 bg-[color-mix(in_srgb,var(--primary)_6%,transparent)] border border-[color-mix(in_srgb,var(--primary)_20%,transparent)] rounded-lg mb-2 cursor-pointer shrink-0">
-          <div className="flex items-center gap-2.5">
-            <input
-              type="checkbox"
-              checked={allSelected}
-              onChange={selectAll}
-              className="w-4 h-4 accent-[var(--primary)] rounded"
-            />
-            <span className="text-sm font-semibold text-main">Select All</span>
-          </div>
-          <span className="text-xs font-semibold text-primary bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] px-2 py-0.5 rounded-full">
-            {selectedCount} selected
-          </span>
+      {/* Select-all bar */}
+      <div className="flex items-center justify-between py-2.5 px-4 bg-app border border-theme rounded-xl">
+        <label className="flex items-center gap-2.5 cursor-pointer text-sm font-semibold text-main">
+          <input
+            type="checkbox"
+            checked={data.selectedEmployees.length === active.length && active.length > 0}
+            onChange={selectAll}
+            className="w-4 h-4 accent-primary cursor-pointer"
+          />
+          Select All Employees
         </label>
+        <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+          {data.selectedEmployees.length}/{active.length} selected
+        </span>
+      </div>
 
-        {/* Scrollable list */}
-        <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
-          {filteredEmployees.map((emp) => {
-            const isSelected = data.selectedEmployees?.includes(emp.id);
-            const gross = emp.basicSalary + emp.hra + emp.allowances;
+      {/* Employee list */}
+      <div className="border border-theme rounded-xl overflow-hidden">
+        {active.length === 0 ? (
+          <div className="py-12 text-center text-muted text-sm">No active employees found</div>
+        ) : (
+          active.map((emp, i) => {
+            const isSel  = data.selectedEmployees.includes(emp.id);
+            const gross  = emp.basicSalary + emp.hra + emp.allowances;
+            const initials = emp.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+
             return (
               <div
                 key={emp.id}
-                onClick={() => toggleEmployee(emp.id)}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-lg border cursor-pointer transition-all ${
-                  isSelected
-                    ? "border-primary bg-[color-mix(in_srgb,var(--primary)_8%,transparent)]"
-                    : "border-theme bg-app hover:border-primary/40"
+                onClick={() => toggleEmp(emp.id)}
+                className={`flex items-center gap-4 p-4 border-b border-theme last:border-0 cursor-pointer transition-colors ${
+                  isSel ? "bg-primary/5" : i % 2 === 1 ? "bg-app hover:bg-primary/3" : "bg-card hover:bg-app"
                 }`}
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <input
-                    type="checkbox"
-                    checked={!!isSelected}
-                    readOnly
-                    className="w-3.5 h-3.5 accent-[var(--primary)] rounded shrink-0"
-                  />
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-main truncate">{emp.name}</p>
-                    <p className="text-[11px] text-muted truncate">
-                      {emp.id} · {emp.designation}
-                    </p>
-                  </div>
+                <input type="checkbox" checked={isSel} onChange={() => {}} className="w-4 h-4 accent-primary cursor-pointer shrink-0" />
+
+                <div className={`w-9 h-9 rounded-full text-xs font-extrabold flex items-center justify-center shrink-0 transition-colors ${
+                  isSel ? "bg-primary text-white" : "bg-app text-muted"
+                }`}>
+                  {initials}
                 </div>
-                <div className="flex items-center gap-3 shrink-0 ml-3">
+
+                <div className="flex-1 min-w-0 grid grid-cols-5 gap-2 items-center">
+                  <div className="col-span-2">
+                    <p className="text-sm font-bold text-main leading-tight">{emp.name}</p>
+                    <p className="text-[11px] text-muted">{emp.id}</p>
+                  </div>
+                  <p className="text-xs text-muted">{emp.department}</p>
+                  <p className="text-xs text-muted">{emp.designation}</p>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-main">₹{gross.toLocaleString()}</p>
+                    <p className="text-sm font-extrabold text-main tabular-nums">₹{gross.toLocaleString("en-IN")}</p>
                     <p className="text-[10px] text-muted">Gross</p>
                   </div>
+                </div>
+
+                {onEditEmployee && (
                   <button
-                    onClick={(e) => { e.stopPropagation(); onEditEmployee?.(emp); }}
-                    className="p-1.5 rounded-md hover:bg-app border border-transparent hover:border-theme text-muted hover:text-main transition"
+                    onClick={e => { e.stopPropagation(); onEditEmployee(emp); }}
+                    className="p-1.5 text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition shrink-0"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
-                </div>
+                )}
               </div>
             );
-          })}
-        </div>
+          })
+        )}
       </div>
     </div>
   );
 };
 
-// ─── Accounting Tab — 2-col form + compact summary ────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// ACCOUNTING TAB
+// ─────────────────────────────────────────────────────────────────────────────
 interface AccountingTabProps {
   data: PayrollEntry;
   onChange: (field: string, value: any) => void;
   employees: Employee[];
 }
 
-export const AccountingTab: React.FC<AccountingTabProps> = ({
-  data,
-  onChange,
-  employees,
-}) => {
-  const selectedEmps = employees.filter((e) =>
-    data.selectedEmployees?.includes(e.id),
-  );
-  const grossTotal = selectedEmps.reduce(
-    (s, e) => s + e.basicSalary + e.hra + e.allowances,
-    0,
-  );
-  const netTotal = Math.round(grossTotal * 0.76);
+export const AccountingTab: React.FC<AccountingTabProps> = ({ data, onChange, employees }) => {
+  const selectedEmps = employees.filter(e => data.selectedEmployees.includes(e.id));
+  const totalGross   = selectedEmps.reduce((s, e) => s + e.basicSalary + e.hra + e.allowances, 0);
 
   return (
-    <div className="flex gap-6 h-full">
-      {/* ── Left: form fields ── */}
-      <div className="flex-1 grid grid-cols-2 gap-4 content-start">
+    <div className="space-y-5 animate-[fadeIn_0.2s_ease]">
+      <div className="grid grid-cols-2 gap-5">
         <div>
-          <Label required>Payment Account</Label>
-          <select
-            value={data.paymentAccount}
-            onChange={(e) => onChange("paymentAccount", e.target.value)}
-            className={selectCls}
-          >
-            <option value="">Select bank account</option>
-            <option value="HDFC Bank">HDFC Bank</option>
-            <option value="ICICI Bank">ICICI Bank</option>
+          <Label>Payment Account</Label>
+          <select value={data.paymentAccount} onChange={e => onChange("paymentAccount", e.target.value)} className={selectCls}>
+            <option value="">Select account</option>
+            <option value="current-hdfc">Current A/C — HDFC Bank</option>
+            <option value="current-icici">Current A/C — ICICI Bank</option>
+            <option value="current-sbi">Current A/C — SBI</option>
           </select>
         </div>
         <div>
           <Label>Cost Center</Label>
-          <select
-            value={data.costCenter}
-            onChange={(e) => onChange("costCenter", e.target.value)}
-            className={selectCls}
-          >
-            <option value="">Select cost center</option>
-            <option value="Engineering">Engineering</option>
-            <option value="Sales">Sales</option>
-          </select>
+          <input type="text" value={data.costCenter} onChange={e => onChange("costCenter", e.target.value)}
+            placeholder="e.g. HQ-Operations" className={inputCls} />
         </div>
         <div>
           <Label>Project</Label>
-          <select
-            value={data.project}
-            onChange={(e) => onChange("project", e.target.value)}
-            className={selectCls}
-          >
-            <option value="">Select project</option>
-            <option value="Project Alpha">Project Alpha</option>
-          </select>
+          <input type="text" value={data.project} onChange={e => onChange("project", e.target.value)}
+            placeholder="e.g. Internal Payroll Q1" className={inputCls} />
         </div>
         <div>
           <Label>Letter Head</Label>
-          <select
-            value={data.letterHead}
-            onChange={(e) => onChange("letterHead", e.target.value)}
-            className={selectCls}
-          >
-            <option value="">Select letter head</option>
-            <option value="Company">Company</option>
-          </select>
+          <input type="text" value={data.letterHead} onChange={e => onChange("letterHead", e.target.value)}
+            placeholder="e.g. Izyane Official" className={inputCls} />
         </div>
       </div>
 
-      {/* ── Right: payment summary card ── */}
-      <div className="w-60 shrink-0 bg-app border border-theme rounded-xl p-4 flex flex-col gap-3">
-        <p className="text-[11px] font-semibold text-muted uppercase tracking-wide">
-          Payment Summary
-        </p>
-
-        <div className="flex-1 flex flex-col gap-2">
-          {/* Employees */}
-          <div className="flex items-center justify-between py-2 border-b border-theme">
-            <span className="text-xs text-muted">Employees</span>
-            <span className="text-sm font-bold text-main">
-              {data.selectedEmployees?.length || 0}
-            </span>
-          </div>
-          {/* Gross */}
-          <div className="flex items-center justify-between py-2 border-b border-theme">
-            <span className="text-xs text-muted">Est. Gross</span>
-            <span className="text-sm font-bold text-main">
-              ₹{grossTotal.toLocaleString()}
-            </span>
-          </div>
-          {/* Net */}
-          <div className="flex items-center justify-between py-2">
-            <span className="text-xs text-muted">Est. Net Pay</span>
-            <span className="text-base font-bold text-primary">
-              ₹{netTotal.toLocaleString()}
-            </span>
+      {/* Summary card */}
+      {data.selectedEmployees.length > 0 && (
+        <div className="rounded-xl border border-success/30 bg-success/5 p-5">
+          <p className="text-xs font-extrabold text-success uppercase tracking-wider mb-4">Payroll Summary</p>
+          <div className="grid grid-cols-4 gap-4">
+            {[
+              { label: "Employees",   value: data.selectedEmployees.length },
+              { label: "Est. Gross",  value: `₹${totalGross.toLocaleString("en-IN")}` },
+              { label: "Currency",    value: data.currency },
+              { label: "Frequency",   value: data.payrollFrequency || "—" },
+            ].map(({ label, value }) => (
+              <div key={label}>
+                <p className="text-[10px] text-success/70 uppercase tracking-wider">{label}</p>
+                <p className="text-lg font-extrabold text-success mt-0.5">{value}</p>
+              </div>
+            ))}
           </div>
         </div>
+      )}
 
-        <div className="mt-auto pt-2 border-t border-theme">
-          <p className="text-[10px] text-muted opacity-60 leading-relaxed">
-            Net estimated after ~24% deductions (PF, ESI, TDS)
-          </p>
+      {/* Statutory note */}
+      <div className="rounded-xl bg-info/5 border border-info/20 p-4">
+        <p className="text-xs font-extrabold text-info mb-2">Statutory Deductions (Auto-calculated)</p>
+        <div className="grid grid-cols-3 gap-3 text-xs text-info/70">
+          <div>• Provident Fund (PF) — 12% of Basic</div>
+          <div>• ESI — 0.75% (if gross ≤ ₹21,000)</div>
+          <div>• Professional Tax — ₹200/month</div>
+          <div>• Income Tax — As per IT Declaration</div>
+          <div>• Employer PF — 12% (additional)</div>
+          <div>• Employer ESI — 3.25%</div>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
-// QuickCreateModal.tsx
+// QuickCreatePayrollModal.tsx
 import React from "react";
 import { X, CheckCircle } from "lucide-react";
-import type { Employee } from "../../../views/hr/payroll-system/types";
+import type { Employee } from "../../../types/payrolltypes";
 
 interface QuickCreateModalProps {
   show: boolean;
@@ -14,119 +14,107 @@ interface QuickCreateModalProps {
 }
 
 export const QuickCreateModal: React.FC<QuickCreateModalProps> = ({
-  show,
-  onClose,
-  employees,
-  selectedEmployees,
-  onToggleEmployee,
-  onSelectAll,
-  onCreate,
+  show, onClose, employees, selectedEmployees,
+  onToggleEmployee, onSelectAll, onCreate,
 }) => {
   if (!show) return null;
 
+  const active = employees.filter(e => e.isActive);
+  const allSelected = selectedEmployees.length === active.length;
+
   return (
-    <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-      onClick={onClose}
-    >
-      <div className="bg-card rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
-        <div className="bg-primary text-white p-6">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div
+        className="bg-card w-full max-w-lg rounded-2xl shadow-2xl border border-theme overflow-hidden max-h-[88vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="bg-primary px-6 py-5 text-white shrink-0">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">Quick Create Payroll</h2>
-              <p className="opacity-90 mt-1">Select employees</p>
+              <h2 className="text-base font-extrabold">Quick Create Payroll</h2>
+              <p className="text-xs text-white/70 mt-0.5">Select employees to include in this run</p>
             </div>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className="p-2 hover:bg-white/20 rounded-lg"
-            >
-              <X className="w-6 h-6" />
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/15 transition">
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
-        <div className="p-6 max-h-[calc(90vh-200px)] overflow-y-auto">
-          <div className="mb-4 flex items-center gap-3 border border-theme rounded-lg p-3 bg-app">
+
+        {/* Select-all bar */}
+        <div className="shrink-0 px-5 py-3 border-b border-theme bg-app flex items-center justify-between">
+          <button
+            onClick={onSelectAll}
+            className="flex items-center gap-2 text-sm font-semibold text-main"
+          >
             <input
               type="checkbox"
-              checked={
-                selectedEmployees.length ===
-                employees.filter((e) => e.isActive).length
-              }
-              onChange={onSelectAll}
-              className="w-5 h-5 text-primary rounded"
+              checked={allSelected}
+              onChange={() => {}}
+              className="w-4 h-4 accent-primary cursor-pointer"
             />
-            <span className="font-semibold text-main">Select All</span>
-          </div>
-          <div className="space-y-4">
-            {employees
-              .filter((e) => e.isActive)
-              .map((emp) => {
-                const isSelected = selectedEmployees.includes(emp.id);
-                return (
-                  <div
-                    key={emp.id}
-                    onClick={() => onToggleEmployee(emp.id)}
-                    className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
-                      isSelected
-                        ? "border-primary bg-app"
-                        : "border-theme row-hover"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => {}}
-                          className="w-5 h-5 text-primary rounded"
-                        />
-                        <div>
-                          <p className="font-semibold text-main">
-                            {emp.name}
-                          </p>
-                          <p className="text-sm text-muted">
-                            {emp.id} • {emp.designation}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-main">
-                          ₹
-                          {(
-                            emp.basicSalary +
-                            emp.hra +
-                            emp.allowances
-                          ).toLocaleString()}
-                        </p>
-                        <p className="text-xs text-muted">Gross</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-          </div>
+            {allSelected ? "Deselect All" : "Select All"}
+            <span className="text-xs text-muted font-normal">({active.length} employees)</span>
+          </button>
+          <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+            {selectedEmployees.length} selected
+          </span>
         </div>
-        <div className="border-t border-theme p-6 bg-app flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 px-6 py-3 border border-theme text-main rounded-lg row-hover"
-          >
+
+        {/* Employee list */}
+        <div className="flex-1 overflow-y-auto">
+          {active.map(emp => {
+            const isSel  = selectedEmployees.includes(emp.id);
+            const gross  = emp.basicSalary + emp.hra + emp.allowances;
+            const initials = emp.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+
+            return (
+              <div
+                key={emp.id}
+                onClick={() => onToggleEmployee(emp.id)}
+                className={`flex items-center gap-3 px-5 py-3.5 border-b border-theme cursor-pointer transition-colors ${
+                  isSel ? "bg-primary/5" : "hover:bg-app"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={isSel}
+                  onChange={() => {}}
+                  className="w-4 h-4 accent-primary cursor-pointer shrink-0"
+                />
+                <div className={`w-8 h-8 rounded-full text-xs font-extrabold flex items-center justify-center shrink-0 transition-colors ${
+                  isSel ? "bg-primary text-white" : "bg-app text-muted"
+                }`}>
+                  {initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-main leading-tight truncate">{emp.name}</p>
+                  <p className="text-[11px] text-muted">{emp.id} · {emp.designation}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-extrabold text-main tabular-nums">₹{gross.toLocaleString("en-IN")}</p>
+                  <p className="text-[10px] text-muted">Gross/month</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        <div className="shrink-0 border-t border-theme px-5 py-4 bg-app flex gap-3">
+          <button onClick={onClose} className="flex-1 py-2.5 border border-theme text-main rounded-xl text-sm font-semibold hover:bg-card transition">
             Cancel
           </button>
           <button
             onClick={onCreate}
             disabled={selectedEmployees.length === 0}
-            className={`flex-1 px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2.5 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 transition ${
               selectedEmployees.length === 0
                 ? "bg-app text-muted cursor-not-allowed"
-                : "bg-primary text-white hover:bg-[var(--primary-600)]"
+                : "bg-primary text-white hover:opacity-90 shadow-sm shadow-primary/30"
             }`}
           >
-            <CheckCircle className="w-5 h-5" />
+            <CheckCircle className="w-4 h-4" />
             Create ({selectedEmployees.length})
           </button>
         </div>

@@ -2,8 +2,54 @@ import { ENV } from "./env";
 
 export const ERP_BASE = ENV.apiBaseUrl;
 export const CODES_BASE = ENV.zraCodesBaseUrl;
+export const NAPSA_BASE = ENV.napsaBaseUrl;
 
 export const API = {
+
+
+   /* =========================
+   * DASHBOARD
+   * ========================= */
+  dashboard: {
+    summary: `${ERP_BASE}/api/method/erpnext.dashboards.main.api.summary`,
+  },
+
+  
+   /* =========================
+   * SALES DASHBOARD
+   * ========================= */
+  salesDashboard: {
+    summary: `${ERP_BASE}/api/method/erpnext.dashboards.sale.api.summary`,
+  },
+
+  /* =========================
+   * CUSTOMER DASHBOARD
+   * ========================= */
+  customerDashboard: {
+    summary: `${ERP_BASE}/api/method/erpnext.dashboards.customer.api.summary`,
+  },
+
+  /* =========================
+   * PROCUREMENT DASHBOARD
+   * ========================= */
+  procurementDashboard: {
+    summary: `${ERP_BASE}/api/method/erpnext.dashboards.procurement.api.summary`,
+  },
+
+  /* =========================
+   * INVENTORY DASHBOARD
+   * ========================= */
+  inventoryDashboard: {
+    summary: `${ERP_BASE}/api/method/erpnext.dashboards.inventory.api.summary`,
+  },
+
+  /* =========================
+   * HR DASHBOARD
+   * ========================= */
+  hrDashboard: {
+    summary: `${ERP_BASE}/api/method/hrms.dashboards.main.api.summary`,
+  },
+
   /* =========================
    * COMPANY
    * ========================= */
@@ -40,7 +86,10 @@ export const API = {
     update: `${ERP_BASE}/api/method/hrms.napsa_client.employee.api.update_employee`,
     delete: `${ERP_BASE}/api/method/hrms.napsa_client.employee.api.delete_employee`,
     updateDocuments: `${ERP_BASE}/api/method/hrms.napsa_client.employee.api.manage_employee_documents`,
-    getByNrc: `${ERP_BASE}/api/method/hrms.napsa_client.member.api.get_napsa_member`,
+    getByNrc: `${NAPSA_BASE}/v1/member/`,
+    getCurrentCeiling: `${NAPSA_BASE}/v1/ceiling`,
+    
+
   },
 
   /* =========================

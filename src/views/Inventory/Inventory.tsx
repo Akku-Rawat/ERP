@@ -1,17 +1,19 @@
 import React, { useState } from "react";
-import { FaBoxOpen, FaBoxes } from "react-icons/fa";
+import { FaBoxOpen, FaBoxes, FaChartBar } from "react-icons/fa";
 
 import Items from "./Items";
 import Movements from "./Movements";
 import ItemsCategory from "./ItemsCategory";
 import Stock from "./Stock";
 import Import from "./Import";
+import InventoryDashboard from "./InventoryDashboard";
 
 const inventory = {
   name: "Inventory",
   icon: <FaBoxes />,
-  defaultTab: "items",
+  defaultTab: "inventorydashboard",
   tabs: [
+    { id: "inventorydashboard", name: "Dashboard", icon: <FaChartBar /> },
     { id: "items", name: "Items", icon: <FaBoxOpen /> },
     { id: "itemsCategory", name: "Items Category", icon: <FaBoxOpen /> },
     { id: "stock", name: "Stock", icon: <FaBoxOpen /> },
@@ -110,6 +112,7 @@ const Inventory: React.FC = () => {
 
       {/* Content */}
       <div className="">
+        {activeTab === "inventorydashboard" && <InventoryDashboard />}
         {activeTab === "items" && (
           <Items
             products={inventory.products}
