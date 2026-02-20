@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  TrendingUp, TrendingDown, DollarSign, ShoppingCart, 
+import {
+  TrendingUp, TrendingDown, DollarSign, ShoppingCart,
   Users, FileText, ArrowUpRight, ArrowDownRight,
   Calendar, ChevronRight, Eye, Check, Clock,
   AlertCircle, Building2, UserCircle2
@@ -64,8 +64,8 @@ const Dashboard = () => {
   // All receivables with due dates
   const allReceivables = [
     { id: 'INV-8842', customer: 'ABC Corporation', amount: 125000, dueDate: '2026-01-08', status: 'overdue' },
-    { id: 'INV-8801', customer: 'XYZ Enterprises', amount: 68000, dueDate: '2026-01-12', status: 'overdue' },
-    { id: 'INV-8823', customer: 'Global Tech Inc', amount: 42000, dueDate: '2026-01-17', status: 'overdue' },
+    { id: 'INV-8801', customer: 'XYZ Enterprises', amount: 68000, dueDate: '2026-01-15', status: 'overdue' },
+    { id: 'INV-8823', customer: 'Global Tech Inc', amount: 42000, dueDate: '2026-01-18', status: 'overdue' },
     { id: 'INV-8890', customer: 'Retail Solutions Co', amount: 95000, dueDate: '2026-01-26', status: 'upcoming' },
     { id: 'INV-8901', customer: 'Manufacturing Ltd', amount: 78000, dueDate: '2026-01-30', status: 'upcoming' },
     { id: 'INV-8912', customer: 'Tech Innovations', amount: 62000, dueDate: '2026-02-03', status: 'upcoming' }
@@ -123,23 +123,39 @@ const Dashboard = () => {
   const totalPayableUpcoming = payableUpcoming.reduce((sum, item) => sum + item.amount, 0);
   const totalReceivableUpcoming = receivableUpcoming.reduce((sum, item) => sum + item.amount, 0);
 
+  // ─── Upcoming: consistent urgency badge & button styles ───────────────────
+  // Badge: single slate/indigo palette, differentiated only by shade
+  const getUpcomingBadgeClass = (urgency) => {
+    if (urgency === 'urgent') return 'bg-amber-50 text-amber-700 border-amber-200';
+    if (urgency === 'soon')   return 'bg-indigo-50 text-indigo-600 border-indigo-200';
+    return                           'bg-slate-50 text-slate-500 border-slate-200';
+  };
+
+  // CTA button for upcoming payables — tonal blue
+  const payableUpcomingBtnClass =
+    'w-full mt-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold transition-all';
+
+  // CTA button for upcoming receivables — tonal emerald
+  const receivableUpcomingBtnClass =
+    'w-full mt-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-semibold transition-all';
+
   return (
     <div className="min-h-screen bg-gray-50 p-3 md:p-4 lg:p-5">
       <div className="max-w-7xl mx-auto">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-0.5">Welcome back, Admin 👋</h1>
             <p className="text-gray-600 text-xs md:text-sm">Here's what's happening with your business today</p>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
               <Calendar className="text-gray-600" size={14} />
               <span className="text-gray-900 font-medium text-xs hidden md:inline">Jan 23, 2026</span>
             </div>
-            <select 
+            <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
               className="bg-white border border-gray-200 text-gray-900 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -159,28 +175,27 @@ const Dashboard = () => {
                 <div className={`p-2 bg-gradient-to-br ${card.gradient} rounded-lg shadow-sm group-hover:shadow-md transition-shadow`}>
                   <card.icon className="text-white" size={16} />
                 </div>
-                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold shadow-sm ${
-                  card.trend === 'up' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
-                }`}>
+                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold shadow-sm ${card.trend === 'up' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                  }`}>
                   {card.trend === 'up' ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                   {Math.abs(card.change)}%
                 </div>
               </div>
-              
+
               <div className="mb-2">
                 <p className="text-xs font-semibold text-gray-600 mb-1">{card.label}</p>
                 <p className="text-xl font-bold text-gray-900">{card.value}</p>
               </div>
-              
+
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs text-gray-600 font-medium">
                   <span>Target: {card.target}</span>
                   <span className="font-bold text-blue-600">{card.progress}%</span>
                 </div>
                 <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden shadow-inner">
-                  <div 
+                  <div
                     className={`h-full bg-gradient-to-r ${card.gradient} rounded-full transition-all duration-700 shadow-sm`}
-                    style={{width: `${card.progress}%`}}
+                    style={{ width: `${card.progress}%` }}
                   ></div>
                 </div>
               </div>
@@ -190,228 +205,197 @@ const Dashboard = () => {
 
         {/* OVERDUE SECTION + QUICK ACTIONS */}
         <div className="mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className={`p-1.5 rounded-lg border ${viewType === 'overdue' ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
-                <AlertCircle className={viewType === 'overdue' ? 'text-red-600' : 'text-blue-600'} size={16} />
-              </div>
-              <h2 className="text-base font-bold text-gray-900">
-                {viewType === 'overdue' ? 'Overdue Payments' : 'Upcoming Payments'}
-              </h2>
+          <div className="flex items-center gap-3 mb-3">
+            <div className={`p-1.5 rounded-lg border flex-shrink-0 ${viewType === 'overdue' ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
+              <AlertCircle className={viewType === 'overdue' ? 'text-red-600' : 'text-blue-600'} size={16} />
             </div>
-            
-            <div className="flex gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setViewType('overdue')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  viewType === 'overdue'
-                    ? 'bg-red-600 text-white shadow-sm'
-                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-                }`}
+                className={`text-base font-bold transition-colors ${viewType === 'overdue' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
               >
-                Overdue ({payableOverdues.length + receivableOverdues.length})
+                Overdue Payments
               </button>
+              <span className="text-gray-300 font-light text-base select-none">/</span>
               <button
                 onClick={() => setViewType('upcoming')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  viewType === 'upcoming'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-                }`}
+                className={`text-base font-bold transition-colors ${viewType === 'upcoming' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
               >
-                Due Soon ({payableUpcoming.length + receivableUpcoming.length})
+                Due Soon
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-10 gap-3">
-            {/* Payables Section */}
-            <div className="lg:col-span-4 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
-              <div className={`p-3 border-b border-gray-200 flex items-center justify-between ${
-                viewType === 'overdue' 
-                  ? 'bg-gradient-to-r from-red-50/50 to-transparent'
-                  : 'bg-gradient-to-r from-blue-50/50 to-transparent'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <div className={`p-1.5 rounded-lg ${
-                    viewType === 'overdue' ? 'bg-red-100' : 'bg-blue-100'
-                  }`}>
-                    <Building2 size={16} className={viewType === 'overdue' ? 'text-red-600' : 'text-blue-600'} />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-gray-900">You Owe</h3>
-                    <p className="text-xs text-gray-600">To vendors</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className={`text-lg font-bold ${viewType === 'overdue' ? 'text-red-600' : 'text-blue-600'}`}>
-                    ₹{((viewType === 'overdue' ? totalPayableOverdue : totalPayableUpcoming) / 1000).toFixed(0)}K
-                  </div>
-                  <div className="text-xs text-gray-600 font-medium">
-                    {viewType === 'overdue' ? payableOverdues.length : payableUpcoming.length} invoices
-                  </div>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-10 gap-3">
+            {/* Combined Payables + Receivables Section — single box */}
+            <div className="lg:col-span-8 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
 
-              <div className="divide-y divide-gray-200">
-                {viewType === 'overdue' ? (
-                  payableOverdues.map((item, idx) => (
-                    <div key={idx} className="p-2.5 hover:bg-gray-50 transition-all cursor-pointer">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-gray-900 text-xs">{item.id}</span>
-                            <span className={`text-xs px-1.5 py-0.5 font-bold rounded border ${
-                              item.severity === 'critical' 
-                                ? 'bg-red-100 text-red-700 border-red-300'
-                                : item.severity === 'high'
-                                ? 'bg-orange-100 text-orange-700 border-orange-300'
-                                : 'bg-yellow-100 text-yellow-700 border-yellow-300'
-                            }`}>
-                              {item.daysOverdue}d overdue
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-600 mt-1">{item.vendor}</p>
-                          <p className="text-xs text-rose-600 font-semibold mt-0.5">Due: {item.dueDate}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-gray-900">₹{(item.amount / 1000).toFixed(1)}K</p>
-                        </div>
-                      </div>
-                      <button className="w-full mt-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow">
-                        Pay Now
-                      </button>
+              {/* Combined header row */}
+             <div className="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+                {/* You Owe header */}
+                <div className="p-3 flex items-center justify-between border-r border-gray-200">
+                  <div className="flex items-center gap-2">
+                   <div className="p-1.5 rounded-lg bg-white border border-gray-200">
+                      <Building2 size={16} className={viewType === 'overdue' ? 'text-red-600' : 'text-blue-600'} />
                     </div>
-                  ))
-                ) : (
-                  payableUpcoming.map((item, idx) => (
-                    <div key={idx} className="p-2.5 hover:bg-gray-50 transition-all cursor-pointer">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-gray-900 text-xs">{item.id}</span>
-                            <span className={`text-xs px-1.5 py-0.5 font-bold rounded border ${
-                              item.urgency === 'urgent'
-                                ? 'bg-orange-100 text-orange-700 border-orange-300'
-                                : item.urgency === 'soon'
-                                ? 'bg-blue-100 text-blue-700 border-blue-300'
-                                : 'bg-gray-100 text-gray-700 border-gray-300'
-                            }`}>
-                              {item.daysUntilDue}d left
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-600 mt-1">{item.vendor}</p>
-                          <p className="text-xs text-blue-600 font-semibold mt-0.5">Due: {item.dueDate}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-gray-900">₹{(item.amount / 1000).toFixed(1)}K</p>
-                        </div>
-                      </div>
-                      <button className="w-full mt-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow">
-                        Schedule Payment
-                      </button>
+                    <div>
+                      <h3 className="text-xs font-bold text-gray-900">You Owe</h3>
+                      <p className="text-xs text-gray-600">To vendors</p>
                     </div>
-                  ))
-                )}
-              </div>
-
-              <div className="p-2 bg-gray-50 border-t border-gray-200">
-                <button className="w-full py-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1 transition-colors">
-                  View All <ChevronRight size={14} />
-                </button>
-              </div>
-            </div>
-
-            {/* Receivables Section */}
-            <div className="lg:col-span-4 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
-              <div className={`p-3 border-b border-gray-200 flex items-center justify-between ${
-                viewType === 'overdue'
-                  ? 'bg-gradient-to-r from-emerald-50/50 to-transparent'
-                  : 'bg-gradient-to-r from-green-50/50 to-transparent'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <div className={`p-1.5 rounded-lg ${
-                    viewType === 'overdue' ? 'bg-emerald-100' : 'bg-green-100'
-                  }`}>
-                    <UserCircle2 size={16} className={viewType === 'overdue' ? 'text-emerald-600' : 'text-green-600'} />
                   </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-gray-900">They Owe</h3>
-                    <p className="text-xs text-gray-600">From customers</p>
+                  <div className="text-right">
+                    <div className={`text-lg font-bold ${viewType === 'overdue' ? 'text-red-600' : 'text-blue-600'}`}>
+                      ₹{((viewType === 'overdue' ? totalPayableOverdue : totalPayableUpcoming) / 1000).toFixed(0)}K
+                    </div>
+                    <div className="text-xs text-gray-600 font-medium">
+                      {viewType === 'overdue' ? payableOverdues.length : payableUpcoming.length} invoices
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className={`text-lg font-bold ${viewType === 'overdue' ? 'text-emerald-600' : 'text-green-600'}`}>
-                    ₹{((viewType === 'overdue' ? totalReceivableOverdue : totalReceivableUpcoming) / 1000).toFixed(0)}K
+
+                {/* They Owe header */}
+                <div className="p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-white border border-gray-200">
+                      <UserCircle2 size={16} className={viewType === 'overdue' ? 'text-emerald-600' : 'text-green-600'} />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-bold text-gray-900">They Owe</h3>
+                      <p className="text-xs text-gray-600">From customers</p>
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-600 font-medium">
-                    {viewType === 'overdue' ? receivableOverdues.length : receivableUpcoming.length} invoices
+                  <div className="text-right">
+                    <div className={`text-lg font-bold ${viewType === 'overdue' ? 'text-emerald-600' : 'text-green-600'}`}>
+                      ₹{((viewType === 'overdue' ? totalReceivableOverdue : totalReceivableUpcoming) / 1000).toFixed(0)}K
+                    </div>
+                    <div className="text-xs text-gray-600 font-medium">
+                      {viewType === 'overdue' ? receivableOverdues.length : receivableUpcoming.length} invoices
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="divide-y divide-gray-200">
-                {viewType === 'overdue' ? (
-                  receivableOverdues.map((item, idx) => (
-                    <div key={idx} className="p-2.5 hover:bg-gray-50 transition-all cursor-pointer">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-gray-900 text-xs">{item.id}</span>
-                            <span className={`text-xs px-1.5 py-0.5 font-bold rounded border ${
-                              item.severity === 'critical'
-                                ? 'bg-red-100 text-red-700 border-red-300'
-                                : item.severity === 'high'
-                                ? 'bg-orange-100 text-orange-700 border-orange-300'
-                                : 'bg-yellow-100 text-yellow-700 border-yellow-300'
-                            }`}>
-                              {item.daysOverdue}d overdue
-                            </span>
+              {/* Combined rows */}
+              <div className="grid grid-cols-2 divide-x divide-gray-200">
+                {/* Payables rows */}
+                <div className="divide-y divide-gray-200">
+                  {viewType === 'overdue' ? (
+                    payableOverdues.map((item, idx) => (
+                      <div key={idx} className="p-2.5 hover:bg-gray-50 transition-all cursor-pointer">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-gray-900 text-xs">{item.id}</span>
+                              <span className={`text-xs px-2 py-0.5 font-semibold rounded border ${
+  item.severity === 'critical'
+    ? 'bg-red-100 text-red-700 border-red-300'
+    : item.severity === 'high'
+      ? 'bg-orange-100 text-orange-700 border-orange-300'
+      : 'bg-yellow-100 text-yellow-700 border-yellow-300'
+}`}>
+                                {item.daysOverdue}d overdue
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1">{item.vendor}</p>
+                           <p className="text-xs text-gray-500 font-medium mt-0.5">Due: {item.dueDate}</p>
                           </div>
-                          <p className="text-xs text-gray-600 mt-1">{item.customer}</p>
-                          <p className="text-xs text-rose-600 font-semibold mt-0.5">Due: {item.dueDate}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-gray-900">₹{(item.amount / 1000).toFixed(1)}K</p>
-                        </div>
-                      </div>
-                      <button className="w-full mt-1 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow">
-                        Follow Up Now
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  receivableUpcoming.map((item, idx) => (
-                    <div key={idx} className="p-2.5 hover:bg-gray-50 transition-all cursor-pointer">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-gray-900 text-xs">{item.id}</span>
-                            <span className={`text-xs px-1.5 py-0.5 font-bold rounded border ${
-                              item.urgency === 'urgent'
-                                ? 'bg-orange-100 text-orange-700 border-orange-300'
-                                : item.urgency === 'soon'
-                                ? 'bg-green-100 text-green-700 border-green-300'
-                                : 'bg-gray-100 text-gray-700 border-gray-300'
-                            }`}>
-                              {item.daysUntilDue}d left
-                            </span>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-gray-900">₹{(item.amount / 1000).toFixed(1)}K</p>
                           </div>
-                          <p className="text-xs text-gray-600 mt-1">{item.customer}</p>
-                          <p className="text-xs text-green-600 font-semibold mt-0.5">Due: {item.dueDate}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-gray-900">₹{(item.amount / 1000).toFixed(1)}K</p>
-                        </div>
+                        <button className="w-full mt-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-semibold transition-all">
+                          Pay Now
+                        </button>
                       </div>
-                      <button className="w-full mt-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm hover:shadow">
-                        Send Reminder
-                      </button>
-                    </div>
-                  ))
-                )}
+                    ))
+                  ) : (
+                    payableUpcoming.map((item, idx) => (
+                      <div key={idx} className="p-2.5 hover:bg-gray-50 transition-all cursor-pointer">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-gray-900 text-xs">{item.id}</span>
+                              {/* ── Upcoming payable badge: consistent amber/indigo/slate palette ── */}
+                              <span className={`text-xs px-1.5 py-0.5 font-semibold rounded border ${getUpcomingBadgeClass(item.urgency)}`}>
+                                {item.daysUntilDue}d left
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1">{item.vendor}</p>
+                            <p className="text-xs text-gray-500 font-medium mt-0.5">Due: {item.dueDate}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-gray-900">₹{(item.amount / 1000).toFixed(1)}K</p>
+                          </div>
+                        </div>
+                        {/* ── Upcoming payable CTA: tonal blue ── */}
+                        <button className={payableUpcomingBtnClass}>
+                          Schedule Payment
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Receivables rows */}
+                <div className="divide-y divide-gray-200">
+                  {viewType === 'overdue' ? (
+                    receivableOverdues.map((item, idx) => (
+                      <div key={idx} className="p-2.5 hover:bg-gray-50 transition-all cursor-pointer">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-gray-900 text-xs">{item.id}</span>
+                              <span className={`text-xs px-1.5 py-0.5 font-bold rounded border ${item.severity === 'critical'
+                                  ? 'bg-red-100 text-red-700 border-red-300'
+                                  : item.severity === 'high'
+                                    ? 'bg-orange-100 text-orange-700 border-orange-300'
+                                    : 'bg-yellow-100 text-yellow-700 border-yellow-300'
+                                }`}>
+                                {item.daysOverdue}d overdue
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1">{item.customer}</p>
+                            <p className="text-xs text-rose-600 font-semibold mt-0.5">Due: {item.dueDate}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-gray-900">₹{(item.amount / 1000).toFixed(1)}K</p>
+                          </div>
+                        </div>
+                        <button className="w-full mt-1 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs font-semibold transition-all">
+                          Follow Up Now
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    receivableUpcoming.map((item, idx) => (
+                      <div key={idx} className="p-2.5 hover:bg-gray-50 transition-all cursor-pointer">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-gray-900 text-xs">{item.id}</span>
+                              {/* ── Upcoming receivable badge: same consistent palette ── */}
+                              <span className={`text-xs px-1.5 py-0.5 font-semibold rounded border ${getUpcomingBadgeClass(item.urgency)}`}>
+                                {item.daysUntilDue}d left
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1">{item.customer}</p>
+                            <p className="text-xs text-green-600 font-semibold mt-0.5">Due: {item.dueDate}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-gray-900">₹{(item.amount / 1000).toFixed(1)}K</p>
+                          </div>
+                        </div>
+                        {/* ── Upcoming receivable CTA: tonal emerald ── */}
+                        <button className={receivableUpcomingBtnClass}>
+                          Send Reminder
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
 
+              {/* Combined footer */}
               <div className="p-2 bg-gray-50 border-t border-gray-200">
                 <button className="w-full py-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1 transition-colors">
                   View All <ChevronRight size={14} />
@@ -422,7 +406,7 @@ const Dashboard = () => {
             {/* Quick Actions */}
             <div className="lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-2.5 content-start">
               {quickActions.map((action, idx) => (
-                <button 
+                <button
                   key={idx}
                   className="bg-white border border-gray-200 rounded-xl p-3 hover:shadow-md transition-all duration-300 group flex lg:flex-col items-center justify-center lg:items-center gap-2 lg:gap-0"
                 >
@@ -489,53 +473,53 @@ const Dashboard = () => {
                 <svg className="absolute inset-0 bottom-8 md:bottom-10 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
                   <defs>
                     <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#1e40af" stopOpacity="0.9"/>
-                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="1"/>
+                      <stop offset="0%" stopColor="#1e40af" stopOpacity="0.9" />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="1" />
                     </linearGradient>
                     <linearGradient id="cyanGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#50a9b9" stopOpacity="0.9"/>
-                      <stop offset="100%" stopColor="#22d3ee" stopOpacity="1"/>
+                      <stop offset="0%" stopColor="#50a9b9" stopOpacity="0.9" />
+                      <stop offset="100%" stopColor="#22d3ee" stopOpacity="1" />
                     </linearGradient>
                     <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.9"/>
-                      <stop offset="100%" stopColor="#34d399" stopOpacity="1"/>
+                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.9" />
+                      <stop offset="100%" stopColor="#34d399" stopOpacity="1" />
                     </linearGradient>
-                    
+
                     <linearGradient id="blueArea" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2"/>
-                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0"/>
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
                     </linearGradient>
                     <linearGradient id="cyanArea" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.2"/>
-                      <stop offset="100%" stopColor="#22d3ee" stopOpacity="0"/>
+                      <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.2" />
+                      <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
                     </linearGradient>
                     <linearGradient id="greenArea" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#34d399" stopOpacity="0.2"/>
-                      <stop offset="100%" stopColor="#34d399" stopOpacity="0"/>
+                      <stop offset="0%" stopColor="#34d399" stopOpacity="0.2" />
+                      <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
                     </linearGradient>
-                    
+
                     <filter id="glow">
-                      <feGaussianBlur stdDeviation="0.8" result="coloredBlur"/>
+                      <feGaussianBlur stdDeviation="0.8" result="coloredBlur" />
                       <feMerge>
-                        <feMergeNode in="coloredBlur"/>
-                        <feMergeNode in="SourceGraphic"/>
+                        <feMergeNode in="coloredBlur" />
+                        <feMergeNode in="SourceGraphic" />
                       </feMerge>
                     </filter>
                   </defs>
-                  
-                  <path d="M 0,65 L 20,55 L 40,45 L 60,40 L 80,35 L 100,30 L 100,100 L 0,100 Z" fill="url(#blueArea)"/>
-                  <path d="M 0,75 L 20,65 L 40,50 L 60,35 L 80,25 L 100,15 L 100,100 L 0,100 Z" fill="url(#cyanArea)"/>
-                  <path d="M 0,80 L 20,77 L 40,75 L 60,70 L 80,65 L 100,55 L 100,100 L 0,100 Z" fill="url(#greenArea)"/>
-                  
-                  <path d="M 0,65 L 20,55 L 40,45 L 60,40 L 80,35 L 100,30" fill="none" stroke="url(#blueGradient)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" filter="url(#glow)"/>
-                  <path d="M 0,75 L 20,65 L 40,50 L 60,35 L 80,25 L 100,15" fill="none" stroke="url(#cyanGradient)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" filter="url(#glow)"/>
-                  <path d="M 0,80 L 20,77 L 40,75 L 60,70 L 80,65 L 100,55" fill="none" stroke="url(#greenGradient)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" filter="url(#glow)"/>
-                  
+
+                  <path d="M 0,65 L 20,55 L 40,45 L 60,40 L 80,35 L 100,30 L 100,100 L 0,100 Z" fill="url(#blueArea)" />
+                  <path d="M 0,75 L 20,65 L 40,50 L 60,35 L 80,25 L 100,15 L 100,100 L 0,100 Z" fill="url(#cyanArea)" />
+                  <path d="M 0,80 L 20,77 L 40,75 L 60,70 L 80,65 L 100,55 L 100,100 L 0,100 Z" fill="url(#greenArea)" />
+
+                  <path d="M 0,65 L 20,55 L 40,45 L 60,40 L 80,35 L 100,30" fill="none" stroke="url(#blueGradient)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" filter="url(#glow)" />
+                  <path d="M 0,75 L 20,65 L 40,50 L 60,35 L 80,25 L 100,15" fill="none" stroke="url(#cyanGradient)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" filter="url(#glow)" />
+                  <path d="M 0,80 L 20,77 L 40,75 L 60,70 L 80,65 L 100,55" fill="none" stroke="url(#greenGradient)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" filter="url(#glow)" />
+
                   {[0, 20, 40, 60, 80, 100].map((x, i) => (
                     <g key={i}>
-                      <circle cx={x} cy={[65,55,45,40,35,30][i]} r="1" fill="#3b82f6" className="drop-shadow"/>
-                      <circle cx={x} cy={[75,65,50,35,25,15][i]} r="1" fill="#22d3ee" className="drop-shadow"/>
-                      <circle cx={x} cy={[80,77,75,70,65,55][i]} r="1" fill="#34d399" className="drop-shadow"/>
+                      <circle cx={x} cy={[65, 55, 45, 40, 35, 30][i]} r="1" fill="#3b82f6" className="drop-shadow" />
+                      <circle cx={x} cy={[75, 65, 50, 35, 25, 15][i]} r="1" fill="#22d3ee" className="drop-shadow" />
+                      <circle cx={x} cy={[80, 77, 75, 70, 65, 55][i]} r="1" fill="#34d399" className="drop-shadow" />
                     </g>
                   ))}
                 </svg>
@@ -552,7 +536,7 @@ const Dashboard = () => {
           {/* Top Categories */}
           <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
             <h3 className="text-sm font-bold text-gray-900 mb-3">Sales by Category</h3>
-            
+
             <div className="space-y-3">
               {categories.map((cat, idx) => (
                 <div key={idx}>
@@ -567,9 +551,9 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden shadow-inner">
-                    <div 
+                    <div
                       className={`h-full ${cat.color} rounded-full transition-all duration-700 shadow-sm`}
-                      style={{width: `${cat.percentage}%`}}
+                      style={{ width: `${cat.percentage}%` }}
                     ></div>
                   </div>
                 </div>
@@ -580,7 +564,7 @@ const Dashboard = () => {
 
         {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          
+
           {/* Recent Activity */}
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
             <div className="p-3 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-transparent">
@@ -590,13 +574,12 @@ const Dashboard = () => {
               {recentActivity.map((item, idx) => (
                 <div key={idx} className="p-3 hover:bg-gray-50 transition-all cursor-pointer group">
                   <div className="flex items-start gap-2.5">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform ${
-                      item.status === 'completed' ? 'bg-emerald-50 border border-emerald-200' :
-                      item.status === 'pending' ? 'bg-amber-50 border border-amber-200' : 'bg-blue-50 border border-blue-200'
-                    }`}>
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform ${item.status === 'completed' ? 'bg-emerald-50 border border-emerald-200' :
+                        item.status === 'pending' ? 'bg-amber-50 border border-amber-200' : 'bg-blue-50 border border-blue-200'
+                      }`}>
                       {item.status === 'completed' ? <Check className="text-emerald-600" size={16} /> :
-                       item.status === 'pending' ? <Clock className="text-amber-600" size={16} /> :
-                       <FileText className="text-blue-600" size={16} />}
+                        item.status === 'pending' ? <Clock className="text-amber-600" size={16} /> :
+                          <FileText className="text-blue-600" size={16} />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-gray-900 truncate">{item.title}</p>
@@ -629,9 +612,8 @@ const Dashboard = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-xs font-bold text-emerald-600">₹{customer.amount.toLocaleString()}</p>
-                      <div className={`text-xs font-bold flex items-center justify-end gap-0.5 mt-0.5 ${
-                        customer.trend > 0 ? 'text-emerald-600' : 'text-rose-600'
-                      }`}>
+                      <div className={`text-xs font-bold flex items-center justify-end gap-0.5 mt-0.5 ${customer.trend > 0 ? 'text-emerald-600' : 'text-rose-600'
+                        }`}>
                         {customer.trend > 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
                         {Math.abs(customer.trend)}%
                       </div>
@@ -660,9 +642,8 @@ const Dashboard = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-xs font-bold text-rose-600">₹{supplier.amount.toLocaleString()}</p>
-                      <div className={`text-xs font-bold flex items-center justify-end gap-0.5 mt-0.5 ${
-                        supplier.trend > 0 ? 'text-emerald-600' : 'text-rose-600'
-                      }`}>
+                      <div className={`text-xs font-bold flex items-center justify-end gap-0.5 mt-0.5 ${supplier.trend > 0 ? 'text-emerald-600' : 'text-rose-600'
+                        }`}>
                         {supplier.trend > 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
                         {Math.abs(supplier.trend)}%
                       </div>
@@ -677,5 +658,4 @@ const Dashboard = () => {
     </div>
   );
 };
-
 export default Dashboard;
