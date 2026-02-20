@@ -15,6 +15,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
   departments,
   Level,
   managers,
+  hrManagers,
 }) => {
   const isContractBased =
     formData.employeeType === "Contract" ||
@@ -108,8 +109,8 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               <option value="">Select Reporting Manager</option>
 
               {managers.map((mgr) => (
-                <option value={mgr.employeeId}>{mgr.name}</option>
-              ))}
+  <option value={mgr.employeeId}>{mgr.name}</option>
+))}
             </select>
           </div>
           <div>
@@ -124,9 +125,9 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
             >
               <option value="">Select HR Manager</option>
 
-              {managers.map((mgr) => (
-                <option value={mgr.employeeId}>{mgr.name}</option>
-              ))}
+              {hrManagers.map((mgr) => (
+  <option value={mgr.employeeId}>{mgr.name}</option>
+))}
             </select>
           </div>
 

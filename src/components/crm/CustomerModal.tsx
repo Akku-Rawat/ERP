@@ -1,21 +1,18 @@
 // components/modals/CustomerModal.tsx
 import React, { useState, useEffect } from "react";
 import Modal from "../ui/modal/modal";
-import { showApiError, showSuccess, closeSwal, showLoading } from "../../utils/alert";
+import {
+  showApiError,
+  showSuccess,
+  closeSwal,
+  showLoading,
+} from "../../utils/alert";
 import { getCompanyById } from "../../api/companySetupApi";
 const companyId = import.meta.env.VITE_COMPANY_ID;
-import {
-  Card,
-  Button,
-} from "../ui/modal/formComponent";
+import { Card, Button } from "../ui/modal/formComponent";
 import TermsAndCondition from "../TermsAndCondition";
 import type { TermSection } from "../../types/termsAndCondition";
-import {
-  User,
-  Building2,
-  MapPin,
-  FileText,
-} from "lucide-react";
+import { User, Building2, MapPin, FileText } from "lucide-react";
 
 import {
   createCustomer,
@@ -24,7 +21,6 @@ import {
 import AddressBlock from "../ui/modal/AddressBlock";
 import type { CustomerDetail } from "../../types/customer";
 import { ModalInput, ModalSelect } from "../ui/modal/modalComponent";
-
 
 const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   id: "",
@@ -74,11 +70,12 @@ const CustomerModal: React.FC<{
   const [form, setForm] = useState<CustomerDetail & { sameAsBilling: boolean }>(
     emptyForm,
   );
-  const [errors, setErrors] = useState<{ mobile?: string; }>({});
+  const [errors, setErrors] = useState<{ mobile?: string }>({});
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
     "details",
   );
+  const [allowSubmit, setAllowSubmit] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !companyId || isEditMode) return;
@@ -121,8 +118,8 @@ const CustomerModal: React.FC<{
 
     setActiveTab("details");
     setLoading(false);
+    setAllowSubmit(false);
   }, [initialData, isOpen]);
-
 
   useEffect(() => {
     if (!form.displayName) {
@@ -159,19 +156,20 @@ const CustomerModal: React.FC<{
   // for next button
   const tabs: Array<"details" | "terms" | "address"> = [
     "details",
-    "terms",
     "address",
+    "terms",
   ];
 
   const handleNext = () => {
     const currentIndex = tabs.indexOf(activeTab);
     if (currentIndex < tabs.length - 1) {
       setActiveTab(tabs[currentIndex + 1]);
+      setAllowSubmit(false); // Reset submission flag when navigating
     }
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
 
@@ -201,9 +199,19 @@ const CustomerModal: React.FC<{
     }
   };
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // For new customers, only allow submission from the Terms tab (last tab)
+    if (!isEditMode && activeTab !== "terms") {
+      handleNext();
+      return;
+    }
+
+    // Prevent auto-submission when just navigating to terms tab
+    if (!isEditMode && !allowSubmit) {
+      return;
+    }
 
     if (loading) return; // prevent double submit
 
@@ -214,17 +222,10 @@ const CustomerModal: React.FC<{
 
     try {
       //  Loading
-      showLoading(
-        isEditMode
-          ? "Updating Customer..."
-          : "Creating Customer..."
-      );
+      showLoading(isEditMode ? "Updating Customer..." : "Creating Customer...");
 
       if (isEditMode && initialData?.id) {
-        await updateCustomerByCustomerCode(
-          initialData.id,
-          payload
-        );
+        await updateCustomerByCustomerCode(initialData.id, payload);
       } else {
         await createCustomer(payload);
       }
@@ -235,24 +236,20 @@ const CustomerModal: React.FC<{
       showSuccess(
         isEditMode
           ? "Customer updated successfully!"
-          : "Customer created successfully!"
+          : "Customer created successfully!",
       );
 
       onSubmit?.(payload);
       handleClose();
-
     } catch (error) {
       console.error("Customer save error:", error);
 
       closeSwal();
       showApiError(error);
-
     } finally {
       setLoading(false);
     }
   };
-
-
 
   const handleClose = () => {
     if (loading) return;
@@ -260,7 +257,6 @@ const CustomerModal: React.FC<{
     setForm(emptyForm);
     onClose();
   };
-
 
   const reset = () => {
     setForm(initialData ? { ...initialData, sameAsBilling: false } : emptyForm);
@@ -277,22 +273,24 @@ const CustomerModal: React.FC<{
           Reset
         </Button>
 
-        {/* NEXT BUTTON */}
-        <Button
-          variant="secondary"
-          onClick={handleNext}
-          disabled={activeTab === "address"}
-          type="button"
-        >
-          Next →
-        </Button>
         <Button
           variant="primary"
           loading={loading}
-          type="submit"
-          form="customerForm"
+          type={!isEditMode && activeTab !== "terms" ? "button" : "submit"}
+          form={
+            !isEditMode && activeTab !== "terms" ? undefined : "customerForm"
+          }
+          onClick={
+            !isEditMode && activeTab !== "terms"
+              ? handleNext
+              : () => setAllowSubmit(true)
+          }
         >
-          {isEditMode ? "Update Customer" : "Save Customer"}
+          {isEditMode
+            ? "Update Customer"
+            : activeTab === "terms"
+              ? "Submit"
+              : "Next"}
         </Button>
       </div>
     </>
@@ -313,20 +311,25 @@ const CustomerModal: React.FC<{
       maxWidth="6xl"
       height="75vh"
     >
-      <form id="customerForm" onSubmit={handleSubmit} className="h-full flex flex-col">
+      <form
+        id="customerForm"
+        onSubmit={handleSubmit}
+        className="h-full flex flex-col"
+      >
         {/* Tabs - Sticky Header */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
-            {(["details", "terms", "address"] as const).map((tab) => (
+            {(["details", "address", "terms"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
                 className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2
-          ${activeTab === tab
-                    ? "text-primary border-b-[3px] border-primary"
-                    : "text-muted border-b-[3px] border-transparent hover:text-main"
-                  }`}
+          ${
+            activeTab === tab
+              ? "text-primary border-b-[3px] border-primary"
+              : "text-muted border-b-[3px] border-transparent hover:text-main"
+          }`}
               >
                 {/* ICONS KEPT FROM LOGIC 1 */}
                 {tab === "details" && <User className="w-4 h-4" />}
@@ -343,7 +346,6 @@ const CustomerModal: React.FC<{
             ))}
           </div>
         </div>
-
 
         {/* Scrollable Content Area */}
         <div className=" px-4 py-2 bg-app mt-5">
@@ -467,7 +469,6 @@ const CustomerModal: React.FC<{
                   placeholder="+1234567890"
                   error={errors.mobile}
                 />
-
               </div>
             </Card>
           )}
@@ -486,7 +487,6 @@ const CustomerModal: React.FC<{
 
           {activeTab === "address" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
               {/* Billing Address */}
               <AddressBlock
                 type="billing"
@@ -518,7 +518,6 @@ const CustomerModal: React.FC<{
                   }));
                 }}
               />
-
 
               {/* Shipping Address */}
               <AddressBlock
@@ -558,11 +557,8 @@ const CustomerModal: React.FC<{
                   }));
                 }}
               />
-
-
             </div>
           )}
-
         </div>
       </form>
     </Modal>

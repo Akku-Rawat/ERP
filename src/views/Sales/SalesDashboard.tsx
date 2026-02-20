@@ -101,30 +101,38 @@ const SalesDashboard: React.FC = () => {
       .slice(0, 10);
   }, [recentSalesRows]);
 
-  const dailySalesChartData = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const r of recentSalesRows) {
-      const key = r.posting_date ?? "";
-      if (!key) continue;
-      map.set(key, (map.get(key) ?? 0) + Number(r.grand_total ?? 0));
-    }
+  const recentSalesChartData = useMemo(
+    () => {
+      const invoiceNumber = (name?: string) => {
+        const match = String(name ?? "").match(/(\d+)/g);
+        if (!match?.length) return 0;
+        return Number.parseInt(match[match.length - 1] ?? "0", 10) || 0;
+      };
 
-    return Array.from(map.entries())
-      .map(([posting_date, total]) => {
-        const d = new Date(posting_date);
-        const label = Number.isNaN(d.getTime()) ? posting_date : dateWithDay.format(d);
-        return { name: label, total };
-      })
-      .sort((a, b) => {
-        const da = new Date(a.name);
-        const db = new Date(b.name);
-        if (!Number.isNaN(da.getTime()) && !Number.isNaN(db.getTime())) {
-          return da.getTime() - db.getTime();
-        }
-        return a.name.localeCompare(b.name);
-      })
-      .slice(-10);
-  }, [recentSalesRows, dateWithDay]);
+      return [...recentSalesRows]
+        .sort((a, b) => {
+          const na = invoiceNumber(a.name);
+          const nb = invoiceNumber(b.name);
+          if (nb !== na) return nb - na;
+
+          const da = new Date(a.posting_date ?? "");
+          const db = new Date(b.posting_date ?? "");
+          const ta = Number.isNaN(da.getTime()) ? 0 : da.getTime();
+          const tb = Number.isNaN(db.getTime()) ? 0 : db.getTime();
+          if (tb !== ta) return tb - ta;
+
+          return Number(b.grand_total ?? 0) - Number(a.grand_total ?? 0);
+        })
+        .slice(0, 10)
+        .map((r) => ({
+          name: r.name,
+          total: Number(r.grand_total ?? 0),
+          customer: r.customer,
+          posting_date: r.posting_date,
+        }));
+    },
+    [recentSalesRows],
+  );
 
   const customerSharePieData = useMemo(() => {
     const base = topCustomersChartData;
@@ -350,14 +358,14 @@ const SalesDashboard: React.FC = () => {
 
           <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-gray-900">Daily Sales (Recent)</h3>
+              <h3 className="text-sm font-bold text-gray-900">Top 10 Recent Sales</h3>
             </div>
             <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
               {chartsLoading ? (
                 <ChartSkeleton variant="bar" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={dailySalesChartData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
+                  <BarChart data={recentSalesChartData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis
                       dataKey="name"
@@ -373,6 +381,22 @@ const SalesDashboard: React.FC = () => {
                     />
                     <Tooltip
                       formatter={(v: any) => currencyZMW.format(Number(v ?? 0))}
+                      labelFormatter={(
+                        _label: any,
+                        payload: readonly { payload?: { name?: string; customer?: string; posting_date?: string } }[],
+                      ) => {
+                        const p = payload?.[0]?.payload;
+                        const labelParts: string[] = [];
+                        if (p?.name) labelParts.push(p.name);
+                        if (p?.customer) labelParts.push(p.customer);
+                        if (p?.posting_date) {
+                          const d = new Date(p.posting_date);
+                          if (!Number.isNaN(d.getTime())) {
+                            labelParts.push(dateWithDay.format(d));
+                          }
+                        }
+                        return labelParts.join(" • ");
+                      }}
                       contentStyle={{
                         background: "var(--card)",
                         border: "1px solid var(--border)",
@@ -401,7 +425,7 @@ const SalesDashboard: React.FC = () => {
 
           <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-gray-900">Document Totals</h3>
+              <h3 className="text-sm font-bold text-gray-900">sales breakdown</h3>
             </div>
 
             <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
@@ -453,7 +477,7 @@ const SalesDashboard: React.FC = () => {
 
           <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-gray-900">Sales Breakdown</h3>
+              <h3 className="text-sm font-bold text-gray-900">Invoice breakdown</h3>
             </div>
 
             <div className="h-72 rounded-lg border border-gray-200 bg-white">

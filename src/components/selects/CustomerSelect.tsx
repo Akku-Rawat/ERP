@@ -9,7 +9,7 @@ type Customer = {
 
 interface CustomerSelectProps {
   value?: string;
-    selectedId?: string;
+  selectedId?: string;
   onChange: (customer: { id: string; name: string }) => void;
   className?: string;
   label?: string;
@@ -17,7 +17,7 @@ interface CustomerSelectProps {
 
 export default function CustomerSelect({
   value = "",
-    selectedId, 
+  selectedId,
   onChange,
   className = "",
   label = "Customer",
@@ -50,16 +50,15 @@ export default function CustomerSelect({
     loadCustomers();
   }, []);
 
-useEffect(() => {
-  setSearch(value);
-}, [value]);
+  useEffect(() => {
+    setSearch(value);
+  }, [value]);
 
-useEffect(() => {
-  if (!selectedId || customers.length === 0) return;
-  const selected = customers.find(c => c.id === selectedId);
-  if (selected) setSearch(selected.name);
-}, [selectedId, customers]);
-
+  useEffect(() => {
+    if (!selectedId || customers.length === 0) return;
+    const selected = customers.find((c) => c.id === selectedId);
+    if (selected) setSearch(selected.name);
+  }, [selectedId, customers]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -83,11 +82,9 @@ useEffect(() => {
     <div className={`flex flex-col gap-1 ${className}`}>
       <span className="block text-[10px] font-medium text-main ">{label}</span>
 
-
       <div ref={containerRef} className="relative w-full">
-    <input
-          className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-
+        <input
+          className="w-full py-2 px-3 border border-theme rounded text-[13px] text-main bg-card"
           placeholder={loading ? "Loading..." : "Search customer..."}
           value={search}
           onChange={(e) => {
@@ -98,13 +95,12 @@ useEffect(() => {
         />
 
         {open && !loading && (
-      <div className="absolute left-0 top-full mt-1 w-full bg-card border border-theme shadow-lg rounded z-30">
-            <ul className="max-h-56 overflow-y-auto text-sm">
+          <div className="absolute left-0 top-full mt-1 w-full bg-card border border-theme shadow-lg rounded z-30">
+            <ul className="max-h-56 overflow-y-auto text-[13px]">
               {filteredCustomers.map((customer) => (
                 <li
                   key={customer.id}
                   className="px-4 py-2 cursor-pointer hover:bg-row-hover text-main"
-
                   onClick={() => {
                     setSearch(customer.name);
                     setOpen(false);

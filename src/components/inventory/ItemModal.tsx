@@ -481,7 +481,12 @@ const ItemModal: React.FC<{
   };
 
   const handleDynamicFieldChange = (name: string, value: any) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
+    // If itemTypeCode changes, clear the itemGroup since it needs to be refiltered
+    if (name === "itemTypeCode") {
+      setForm((prev) => ({ ...prev, [name]: value, itemGroup: "" }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleCategoryChange = async (data: { name: string; id: string }) => {
@@ -712,6 +717,7 @@ const ItemModal: React.FC<{
                               ? handleCategoryChange
                               : undefined
                           }
+                          filterValue={form.itemTypeCode}
                         />
                       );
                     })}

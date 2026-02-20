@@ -1,7 +1,7 @@
 // PayrollConfirmationModal.tsx
 import React from "react";
 import { X, CheckCircle, AlertCircle, Users, DollarSign } from "lucide-react";
-import type { PayrollRecord } from "../../../views/hr/payroll-system/types";
+import type { PayrollRecord } from "../../../types/payrolltypes";
 
 interface PayrollConfirmationModalProps {
   show: boolean;

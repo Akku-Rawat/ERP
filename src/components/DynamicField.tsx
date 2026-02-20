@@ -9,6 +9,7 @@ interface DynamicFieldProps {
   value: any;
   onChange: (name: string, value: any) => void;
   onApiChange?: (data: any) => void; // For special components that need callbacks
+  filterValue?: string; // For filtering select options
 }
 
 export const DynamicField: React.FC<DynamicFieldProps> = ({
@@ -16,6 +17,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
   value,
   onChange,
   onApiChange,
+  filterValue,
 }) => {
   const colSpanClass = config.colSpan
     ? `col-span-${config.colSpan}`
@@ -119,6 +121,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
             }}
             required={apiConfig.required}
             className="w-full"
+            filterByItemType={filterValue}
           />
           {/* Hidden input for HTML5 validation */}
           {apiConfig.required && (

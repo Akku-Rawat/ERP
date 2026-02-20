@@ -11,7 +11,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useLogin } from "../hooks/useloginhooks";
-import erp2 from "../assets/erp2.png";
+import erp2 from "../assets/login-illustration.png";
 import "../login.css";
 
 const features = [
@@ -175,7 +175,12 @@ const Login = () => {
               <div className="animate-fade-in delay-650 fill-both opacity-0-start">
                 <button
                   type="submit"
-                  className="group flex w-full items-center justify-center gap-2 rounded-xl bg-[hsl(270,70%,55%)] px-6 py-3.5 text-sm font-semibold text-white shadow-primary-xl hover:shadow-primary-2xl hover-translate-up active:translate-y-0 transition-all duration-300"
+                  className="group relative flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[hsl(268,80%,58%)] to-[hsl(268,80%,48%)] px-6 py-3.5 text-sm font-semibold text-white 
+shadow-[0_8px_25px_rgba(124,58,237,0.35)] 
+hover:shadow-[0_12px_35px_rgba(124,58,237,0.45)] 
+hover:-translate-y-1 active:translate-y-0 
+transition-all duration-300 ease-out"
+
                 >
                   Sign In
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -185,23 +190,38 @@ const Login = () => {
           </div>
 
           {/* Right - Illustration */}
-          <div className="relative hidden md:block overflow-hidden bg-[hsl(270,70%,55%)]">
+<div className="relative hidden md:block overflow-hidden bg-white">
+
+
             {/* Animated gradient background */}
             <div className="absolute inset-0">
-              <div className="absolute -left-16 -top-16 h-[130%] w-[130%] rounded-blob-1 bg-[hsl(270,70%,55%)] opacity-90 animate-spin-slow origin-55-50" />
-              <div className="absolute -bottom-20 -right-20 h-[70%] w-[70%] rounded-blob-2 bg-[hsl(270,70%,45%)]/30 animate-spin-slower origin-45-50" />
+             <div className="absolute -left-16 -top-16 h-[130%] w-[130%] rounded-blob-1 bg-[hsl(255,80%,58%)] opacity-90 animate-spin-slow origin-55-50" />
+
+<div className="absolute -bottom-20 -right-20 h-[70%] w-[70%] rounded-blob-2 bg-[hsl(248,75%,50%)]/40 animate-spin-slower origin-45-50" />
+
               <div className="absolute top-10 right-10 h-[40%] w-[40%] rounded-full bg-white/5 animate-spin-slowest origin-50-60" />
             </div>
 
             {/* Content */}
             <div className="relative flex h-full flex-col items-center justify-center p-10">
               {/* Laptop */}
-              <img
-                src={erp2}
-                alt="ERP Dashboard Preview"
-                className="w-[85%] max-w-[380px] drop-shadow-2xl animate-fade-in delay-500 fill-both opacity-0-start duration-800 hover-scale"
-              />
+   <div className="flex w-full justify-center animate-float">
+  <div className="w-full max-w-[380px] 
+      rounded-2xl 
+      bg-white/10 
+      backdrop-blur-md 
+      border border-white/20 
+      p-3 
+      shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
 
+    <img
+      src={erp2}
+      alt="ERP Dashboard Preview"
+      className="w-full rounded-xl animate-fade-in delay-500 fill-both duration-800"
+    />
+    
+  </div>
+</div>
               {/* Feature pills */}
               <div className="mt-8 flex flex-wrap items-center justify-center gap-2 animate-fade-in delay-800 fill-both opacity-0-start">
                 {features.map((f, i) => (

@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "framer-motion";
 import { Building2, MapPin, FileText } from "lucide-react";
 import Modal from "../ui/modal/modal";
 import { Button } from "../ui/modal/formComponent";
@@ -23,7 +22,7 @@ const tabs: { key: POTab; icon: typeof Building2; label: string }[] = [
   // { key: "email", icon: Mail, label: "Email" },
   // { key: "tax", icon: Calculator, label: "Tax" },
   { key: "terms", icon: FileText, label: "Terms" },
-    { key: "address", icon: MapPin, label: "Address" },
+  { key: "address", icon: MapPin, label: "Address" },
 ];
 
 const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
@@ -80,7 +79,6 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
       height="81vh"
       footer={footer}
     >
-
       <form
         id="purchaseOrderForm"
         onSubmit={handleSubmit}
@@ -93,14 +91,13 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                 key={key}
                 type="button"
                 onClick={() => setActiveTab(key)}
-                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === key
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
+                  activeTab === key
                     ? "text-primary border-b-[3px] border-primary"
                     : "text-muted border-b-[3px] border-transparent hover:text-main"
-                  }`}
+                }`}
               >
-             
-                  {label}
-                    
+                {label}
               </button>
             ))}
           </div>
@@ -118,7 +115,6 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
               onRemoveItem={removeItem}
               getCurrencySymbol={getCurrencySymbol}
               onItemSelect={handleItemSelect}
-
             />
           )}
 
@@ -171,11 +167,9 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                 setForm((p) => ({ ...p, terms: { buying } }))
               }
             />
-
           )}
         </section>
       </form>
-
     </Modal>
   );
 };
