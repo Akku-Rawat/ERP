@@ -24,6 +24,8 @@ export const generateQuotationPDF = async (
   const doc = new jsPDF("p", "mm", "a4");
   const currency = quotation.currency || "ZMW";
 
+  doc.setTextColor(0, 0, 0);
+
   /* ================= HEADER ================= */
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
@@ -51,7 +53,9 @@ export const generateQuotationPDF = async (
     }
   }
 
+  doc.setTextColor(0, 0, 0);
   doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
   doc.text("QUOTATION", 105, 42, { align: "center" });
 
   /* ================= BILL TO ================= */
@@ -70,6 +74,7 @@ export const generateQuotationPDF = async (
     15,
     56,
   );
+
   doc.setFont("helvetica", "bold");
   doc.text(
     `Quotation No: ${quotation.quotationNumber || quotation.id}`,
@@ -95,19 +100,21 @@ export const generateQuotationPDF = async (
       const qty = Number(i.quantity || i.qty || 0);
       const price = Number(i.listPrice || i.price || i.unitPrice || 0);
       const discount = Number(i.discount || 0);
-      const lineTotal = qty * price - discount;
+      const discountAmount = qty * price * (discount / 100);
+      const totalInclusive = qty * price - discountAmount;
 
       return [
         idx + 1,
         i.description || i.productName || "",
         qty.toFixed(1),
         price.toFixed(2),
-        lineTotal.toFixed(2),
+        totalInclusive.toFixed(2),
       ];
     }),
     styles: {
       fontSize: 8,
       halign: "center",
+      textColor: [0, 0, 0],
     },
     headStyles: {
       fillColor: [44, 62, 80],
@@ -124,28 +131,48 @@ export const generateQuotationPDF = async (
 
   const y = (doc as any).lastAutoTable.finalY + 6;
 
-  /* ================= TOTALS ================= */
+  doc.setTextColor(0, 0, 0);
 
-  const total = quotation.items.reduce(
-    (s: number, i: any) => s + Number(i.quantity) * Number(i.price),
-    0,
+  /* ================= TOTALS ================= */
+  const summary = quotation.items.reduce(
+    (acc: any, i: any) => {
+      const qty = Number(i.quantity || i.qty || 0);
+      const price = Number(i.listPrice || i.price || i.unitPrice || 0);
+      const discount = Number(i.discount || 0);
+      const vatRate = Number(i.vatRate || 0);
+
+      const discountAmount = qty * price * (discount / 100);
+      const inclusive = qty * price - discountAmount;
+      const exclusive = inclusive / (1 + vatRate / 100);
+      const vat = inclusive - exclusive;
+
+      acc.taxable += exclusive;
+      acc.vat += vat;
+      acc.total += inclusive;
+      return acc;
+    },
+    { taxable: 0, vat: 0, total: 0 },
   );
 
   doc.setFont("helvetica", "bold");
-  doc.text(`Taxable (0%)`, 120, y);
-  doc.text(`${total.toFixed(2)} ${currency}`, 195, y, { align: "right" });
+  doc.setFontSize(9);
+
+  doc.text(`Taxable Standard Rated`, 120, y);
+  doc.text(`${summary.taxable.toFixed(2)} ${currency}`, 195, y, { align: "right" });
 
   doc.text("Sub-total", 120, y + 6);
-  doc.text(`${total.toFixed(2)} ${currency}`, 195, y + 6, { align: "right" });
+  doc.text(`${summary.taxable.toFixed(2)} ${currency}`, 195, y + 6, { align: "right" });
 
   doc.text("VAT Total", 120, y + 12);
-  doc.text(`0.00 ${currency}`, 195, y + 12, { align: "right" });
+  doc.text(`${summary.vat.toFixed(2)} ${currency}`, 195, y + 12, { align: "right" });
 
-  doc.text("Total Amount", 120, y + 18);
-  doc.text(`${total.toFixed(2)} ${currency}`, 195, y + 18, { align: "right" });
- 
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.text("Total Amount", 120, y + 20);
+  doc.text(`${summary.total.toFixed(2)} ${currency}`, 195, y + 20, { align: "right" });
 
   /* ================= QUOTATION INFO ================= */
+  doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
   doc.text("Quotation Information", 15, y + 32);
 
@@ -184,6 +211,7 @@ export const generateQuotationPDF = async (
   /* ================= TERMS & CONDITIONS ================= */
   if (quotation.termsAndConditions) {
     doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
     doc.text("Terms & Conditions", 15, y + 68);
 
     doc.setFont("helvetica", "normal");
@@ -194,11 +222,12 @@ export const generateQuotationPDF = async (
 
   /* ================= FOOTER ================= */
   doc.setFontSize(7);
-  doc.setTextColor(120);
+  doc.setTextColor(120, 120, 120);
   doc.text("Powered by LoremIpsum Smart Invoice!", 105, 287, {
     align: "center",
   });
   doc.text("Created By: Lorem Ipsum", 105, 292, { align: "center" });
+  doc.setTextColor(0, 0, 0);
 
   return resultType === "save"
     ? doc.save(`Quotation_${quotation.quotationNumber || quotation.id}.pdf`)

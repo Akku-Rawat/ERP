@@ -213,7 +213,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                             Unit Price
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[55px]">
-                            Discount
+                            Discount (%)
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">
                             Tax
@@ -232,9 +232,12 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       <tbody>
                         {paginatedItems.map((it, idx) => {
                           const i = ui.page * 5 + idx;
-                          const taxVal = parseFloat(it.vatRate || "0");
-                          const amount =
-                            it.quantity * it.price - it.discount + taxVal;
+                         const qty = Number(it.quantity) || 0;
+const price = Number(it.price) || 0;
+const discount = Number(it.discount) || 0;
+const vatRate = Number(it.vatRate) || 0;
+const discountAmount = qty * price * (discount / 100);
+const amount = qty * price - discountAmount;
                           return (
                             <tr
                               key={i}

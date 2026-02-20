@@ -1,4 +1,4 @@
-// types.ts - All TypeScript interfaces and types
+// types.ts — All TypeScript interfaces and types
 
 export interface Employee {
   id: string;
@@ -19,6 +19,7 @@ export interface Employee {
   hra: number;
   allowances: number;
   managerId?: string;
+  branch?: string;
 }
 
 export interface AttendanceRecord {
@@ -48,29 +49,6 @@ export interface LeaveRecord {
   isPaid: boolean;
 }
 
-export interface LoanRecord {
-  id: string;
-  employeeId: string;
-  loanType: "Personal" | "Home" | "Vehicle" | "Emergency";
-  amount: number;
-  remainingAmount: number;
-  emiAmount: number;
-  startDate: string;
-  endDate: string;
-  status: "Active" | "Completed" | "Closed";
-}
-
-export interface AdvanceRecord {
-  id: string;
-  employeeId: string;
-  amount: number;
-  deductionAmount: number;
-  remainingAmount: number;
-  reason: string;
-  date: string;
-  status: "Pending" | "Approved" | "Deducting" | "Completed";
-}
-
 export interface Bonus {
   id: string;
   label: string;
@@ -90,19 +68,9 @@ export interface Arrear {
   reason: string;
 }
 
-export interface TaxInvestment {
-  employeeId: string;
-  section80C: number;
-  section80D: number;
-  hra: number;
-  homeLoanInterest: number;
-  other: number;
-  regime: "Old" | "New";
-}
-
 export interface PayrollRecord {
   id: string;
-  payrollName: string;
+  payrollName?: string;
   employeeId: string;
   employeeName: string;
   email: string;
@@ -145,15 +113,8 @@ export interface PayrollRecord {
   totalDeductions: number;
   netPay: number;
 
-  // Status & Workflow
-  status:
-    | "Draft"
-    | "Pending"
-    | "Approved"
-    | "Rejected"
-    | "Processing"
-    | "Paid"
-    | "Failed";
+  // Status
+  status: "Draft" | "Pending" | "Approved" | "Rejected" | "Processing" | "Paid" | "Failed";
   paymentDate?: string;
   createdDate: string;
   approvedBy?: string;
@@ -183,59 +144,42 @@ export interface PayrollEntry {
   project: string;
   letterHead: string;
   selectedEmployees: string[];
-  // filters
   branch?: string;
   department?: string;
   designation?: string;
   grade?: string;
 }
 
-export interface ApprovalWorkflow {
+// ── Validation types (ERP-grade pre-payroll validation) ──────────────────────
+
+export type ValidationSeverity = "error" | "warning" | "info";
+
+export interface ValidationIssue {
   id: string;
-  payrollRecordId: string;
   employeeId: string;
   employeeName: string;
-  requestedBy: string;
-  requestDate: string;
-  approverIds: string[];
-  currentApprover: string;
-  status: "Pending" | "Approved" | "Rejected";
-  comments: string[];
-  approvalHistory: {
-    approverId: string;
-    action: "Approved" | "Rejected";
-    date: string;
-    comment: string;
-  }[];
+  department: string;
+  category: "attendance" | "salary" | "compliance" | "banking" | "tax";
+  severity: ValidationSeverity;
+  code: string;
+  title: string;
+  description: string;
+  field?: string;
+  suggestedAction?: string;
+  canProceed: boolean; // if false, blocks payroll run
 }
 
-export interface BankTransferRecord {
-  id: string;
-  payrollRecordId: string;
-  employeeId: string;
-  employeeName: string;
-  bankAccount: string;
-  ifscCode: string;
-  amount: number;
-  status: "Pending" | "Processed" | "Failed";
-  transactionId?: string;
-  processedDate?: string;
-}
-
-export interface PayrollReport {
-  month: string;
-  year: number;
-  totalEmployees: number;
-  totalGross: number;
-  totalDeductions: number;
-  totalNet: number;
-  departmentWise: {
-    department: string;
-    count: number;
-    gross: number;
-    net: number;
-  }[];
-  taxCollected: number;
-  pfCollected: number;
-  esiCollected: number;
+export interface ValidationResult {
+  isValid: boolean;
+  canProceed: boolean; // true even if warnings exist, false only on blocking errors
+  errors: ValidationIssue[];
+  warnings: ValidationIssue[];
+  infos: ValidationIssue[];
+  summary: {
+    totalChecked: number;
+    totalIssues: number;
+    blockers: number;
+    warnings: number;
+    infos: number;
+  };
 }

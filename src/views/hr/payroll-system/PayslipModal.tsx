@@ -1,6 +1,6 @@
 import React from "react";
 import { X, Download, Mail, Printer } from "lucide-react";
-import type { PayrollRecord } from "./types";
+import type { PayrollRecord } from "../../../types/payrolltypes";
 
 interface PayslipModalProps {
   record: PayrollRecord | null;

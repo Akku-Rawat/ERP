@@ -57,14 +57,27 @@ export async function updateEmployeeDocuments(payload: FormData): Promise<any> {
   return resp.data;
 }
 
-//verification of employee identity via NRC or SSN
 export async function verifyEmployeeIdentity(
   type: "NRC" | "SSN",
   value: string,
 ): Promise<any> {
-  const payload = type === "NRC" ? { nrc: value } : { ssn: value };
 
-  const resp: AxiosResponse = await api.post(EmployeeAPI.getByNrc, payload);
+  const paramKey = type === "NRC" ? "nrc" : "ssn";
+
+  const resp: AxiosResponse = await api.get(EmployeeAPI.getByNrc, {
+    params: { [paramKey]: value }
+  });
 
   return resp.data;
 }
+
+export async function getCurrentCeiling(): Promise<any> {
+  const resp: AxiosResponse = await api.get(
+    EmployeeAPI.getCurrentCeiling
+  );
+
+  return resp.data;
+}
+
+
+
