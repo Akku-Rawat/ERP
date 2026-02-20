@@ -71,6 +71,7 @@ const CustomerModal: React.FC<{
     emptyForm,
   );
   const [errors, setErrors] = useState<{
+    type?: string;
     name?: string;
     tpin?: string;
     mobile?: string;
@@ -178,6 +179,11 @@ const CustomerModal: React.FC<{
 
   const validateDetailsTab = (): boolean => {
     const newErrors: typeof errors = {};
+
+    // Validate Type
+    if (!form.type || form.type === "") {
+      newErrors.type = "Type is required";
+    }
 
     // Validate Customer Name
     if (!form.name || form.name.trim() === "") {
@@ -513,7 +519,7 @@ const CustomerModal: React.FC<{
                     { value: "Company", label: "Company" },
                   ]}
                   required
-                  // error={errors.type}
+                  error={errors.type}
                 />
 
                 <ModalInput
@@ -572,6 +578,7 @@ const CustomerModal: React.FC<{
                   value={form.customerTaxCategory}
                   onChange={handleChange}
                   required
+                  error={errors.customerTaxCategory}
                   options={[
                     { value: "Export", label: "Export" },
                     { value: "Non-Export", label: "Non-Export" },
@@ -585,6 +592,7 @@ const CustomerModal: React.FC<{
                   value={form.currency}
                   onChange={handleChange}
                   required
+                  error={errors.currency}
                   options={[
                     { value: "ZMW", label: "ZMW" },
                     { value: "USD", label: "USD" },

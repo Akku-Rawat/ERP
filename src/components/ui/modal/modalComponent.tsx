@@ -9,10 +9,11 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   icon?: React.ReactNode;
   options?: SelectOption[];
   children?: React.ReactNode;
+  error?: string;
 }
 
 export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, icon, options = [], children, className = "", ...props }, ref) => (
+  ({ label, icon, options = [], children, className = "", error, ...props }, ref) => (
     <label className="flex flex-col  text-sm w-full group">
       <span className="block text-[10px] font-medium text-main mb-1">
         {icon && (
@@ -29,10 +30,12 @@ export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
         {...props}
         value={props.value ?? ""}
         className={[
-          "w-full py-2 px-3 border border-theme rounded text-[13px] text-main bg-card",
-          props.disabled
-            ? "bg-app cursor-not-allowed opacity-60"
-            : "border-[var(--border)] hover:border-primary/40",
+          "w-full py-2 px-3 border rounded text-[13px] text-main bg-card",
+          error
+            ? "border-danger"
+            : props.disabled
+              ? "bg-app cursor-not-allowed opacity-60 border-theme"
+              : "border-[var(--border)] hover:border-primary/40",
           className,
         ].join(" ")}
       >
@@ -47,6 +50,7 @@ export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
       </select>
+      {error && <span className="text-danger text-[10px] mt-1">{error}</span>}
     </label>
   ),
 );
