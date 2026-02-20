@@ -248,8 +248,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                             Unit Price
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
-                            Discount
-                          </th>
+  Discount (%) 
+</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
                             Tax
                           </th>
@@ -265,10 +265,12 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       <tbody>
                         {paginatedItems.map((it, idx) => {
                           const i = ui.page * 5 + idx;
-                          const base = it.quantity * it.price - it.discount;
-                          const taxAmount =
-                            base * (Number(it.vatRate || 0) / 100);
-                          const amount = base + taxAmount;
+                          const discountAmount =
+                            it.quantity *
+                            it.price *
+                            (Number(it.discount || 0) / 100);
+                          const amount =
+                            it.quantity * it.price - discountAmount;
 
                           return (
                             <tr

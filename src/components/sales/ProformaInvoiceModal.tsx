@@ -295,7 +295,7 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">Description</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">Quantity</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Unit Price</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Discount</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Discount (%)</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax Code</th>
                           <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">Amount</th>
@@ -309,9 +309,8 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                           const price = Number(it.price) || 0;
                           const discount = Number(it.discount) || 0;
                           const vatRate = Number(it.vatRate) || 0;
-                          const base = qty * price - discount;
-                          const taxAmount = base * (vatRate / 100);
-                          const amount = base + taxAmount;
+                         const discountAmount = qty * price * (discount / 100);
+const amount = qty * price - discountAmount;
                           return (
                             <tr
                               key={i}

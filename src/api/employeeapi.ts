@@ -70,3 +70,14 @@ export async function verifyEmployeeIdentity(
 
   return resp.data;
 }
+
+export async function getCurrentCeiling(): Promise<any> {
+  const resp: AxiosResponse = await api.get(
+    EmployeeAPI.getCurrentCeiling
+  );
+
+  return resp.data;
+}
+
+
+

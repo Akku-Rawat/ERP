@@ -383,7 +383,8 @@ if (!formData.paymentInformation?.paymentTerms) {
   const price = Number(it.price);
   const discount = Number(it.discount || 0);
 
-  const totalInclusive = quantity * price - discount;
+  const discountAmount = quantity * price * (discount / 100);
+const totalInclusive = quantity * price - discountAmount;
   const exclusiveBase = Number(it.vatTaxableAmount || 0);
 
   const taxAmount = totalInclusive - exclusiveBase;
@@ -477,15 +478,12 @@ const { subTotal, totalTax, grandTotal } = useMemo(() => {
   let tax = 0;
 
   formData.items.forEach((item) => {
-    const inclusive = item.quantity * item.price - item.discount;
-
-    const exclusive =
-      inclusive / (1 + Number(item.vatRate || 0) / 100);
-
-    const taxAmt = inclusive - exclusive;
-
-    sub += exclusive;
-    tax += taxAmt;
+const discountAmount = item.quantity * item.price * (Number(item.discount || 0) / 100);
+const totalInclusive = item.quantity * item.price - discountAmount;
+const exclusive = totalInclusive / (1 + Number(item.vatRate || 0) / 100);
+const taxAmt = totalInclusive - exclusive;
+sub += exclusive;
+tax += taxAmt;
   });
 
   return {

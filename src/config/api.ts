@@ -42,6 +42,7 @@ export const API = {
     delete: `${ERP_BASE}/api/method/hrms.napsa_client.employee.api.delete_employee`,
     updateDocuments: `${ERP_BASE}/api/method/hrms.napsa_client.employee.api.manage_employee_documents`,
     getByNrc: `${NAPSA_BASE}/v1/member/`,
+    getCurrentCeiling: `${NAPSA_BASE}/v1/ceiling`,
     
 
   },
