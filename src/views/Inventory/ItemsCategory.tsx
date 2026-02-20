@@ -16,7 +16,8 @@ import ActionButton, {
   ActionGroup,
   ActionMenu,
 } from "../../components/ui/Table/ActionButton";
-
+import { FilterSelect } from "../../components/ui/modal/modalComponent";
+import { ItemGroupFilters } from "../../api/itemCategoryApi";
 import type { Column } from "../../components/ui/Table/type";
 import type { ItemGroupSummary, ItemGroup } from "../../types/itemCategory";
 
@@ -36,12 +37,25 @@ const ItemsCategory: React.FC = () => {
   const [initialLoad, setInitialLoad] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editGroup, setEditGroup] = useState<ItemGroup | null>(null);
-
+  const [filters, setFilters] = useState<ItemGroupFilters>({});
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState<ItemGroupSummary | null>(
     null,
   );
   const [deleting, setDeleting] = useState(false);
+
+
+  useEffect(() => {
+  const timer = setTimeout(() => {
+    setFilters((prev) => ({
+      ...prev,
+      search: searchTerm || undefined,
+    }));
+    setPage(1);
+  }, 600);
+
+  return () => clearTimeout(timer);
+}, [searchTerm]);
 
   /* 
      FETCH
@@ -50,7 +64,7 @@ const ItemsCategory: React.FC = () => {
   const fetchGroups = async () => {
     try {
       setLoading(true);
-      const res = await getAllItemGroups(page, pageSize);
+      const res = await getAllItemGroups(page, pageSize,filters);
       setGroups(res.data);
       setTotalPages(res.pagination?.total_pages || 1);
       setTotalItems(res.pagination?.total || 0);
@@ -64,7 +78,7 @@ const ItemsCategory: React.FC = () => {
 
   useEffect(() => {
     fetchGroups();
-  }, [page, pageSize]);
+  }, [page, pageSize,filters]);
 
   /* 
      HANDLERS
@@ -127,17 +141,6 @@ const confirmDelete = async () => {
   };
 
   /* 
-     FILTER
-   */
-
-  const filteredGroups = groups.filter((g) =>
-    [g.id, g.groupName, g.description, g.unitOfMeasurement, g.salesAccount]
-      .join(" ")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()),
-  );
-
-  /* 
      TABLE COLUMNS
    */
 
@@ -187,7 +190,7 @@ const confirmDelete = async () => {
           loading={loading || initialLoad}
           serverSide
           columns={columns}
-          data={filteredGroups}
+          data={groups}
           showToolbar
           enableColumnSelector
           searchValue={searchTerm}
@@ -205,6 +208,25 @@ const confirmDelete = async () => {
             setPage(1); // reset page
           }}
           onPageChange={setPage}
+          extraFilters={
+            <div className="w-48">
+              <FilterSelect
+                value={filters.itemType || ""}
+                onChange={(e) => {
+                  setFilters((prev) => ({
+                    ...prev,
+                    itemType: e.target.value || undefined,
+                  }));
+                  setPage(1);
+                }}
+                options={[
+                  { value: "1", label: "Raw Material" },
+                  { value: "2", label: "Finished Product" },
+                  { value: "3", label: "Service" },       
+                ]}
+              />
+            </div>
+}
         />
       
       {/* CATEGORY MODAL */}

@@ -21,6 +21,9 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { getPurchaseInvoiceById } from "../../api/procurement/PurchaseInvoiceApi";
+import {  FilterSelect} from "../../components/ui/modal/modalComponent";
+import DateRangeFilter from "../../components/ui/modal/DateRangeFilter";
+import { PurchaseInvoiceFilters } from "../../api/procurement/PurchaseInvoiceApi";
 interface Purchaseinvoice {
   pId: string;
   supplier: string;
@@ -70,6 +73,14 @@ const STATUS_TRANSITIONS: Record<PIStatus, PIStatus[]> = {
   Cancelled: [],
 };
 
+const invoiceStatusOptions = [
+  { label: "Draft", value: "Draft" },
+  { label: "Submitted", value: "Submitted" },
+  { label: "Paid", value: "Paid" },
+  { label: "Party Paid", value: "Party Paid" },
+  { label: "Cancelled", value: "Cancelled" },
+];
+
 const CRITICAL_STATUSES: PIStatus[] = ["Debit Note Issued", "Cancelled"];
 
 const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
@@ -85,38 +96,62 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
+  const [filters, setFilters] = useState<PurchaseInvoiceFilters>({});
+
+
+  useEffect(() => {
+  const timer = setTimeout(() => {
+    setFilters((prev) => ({
+      ...prev,
+      search: searchTerm || undefined,
+    }));
+    setPage(1);
+  }, 600);
+
+  return () => clearTimeout(timer);
+}, [searchTerm]);
+
 
   //  FETCH ORDERS
   const fetchInvoice = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await getPurchaseInvoices(page, pageSize);
+    const res = await getPurchaseInvoices(page, pageSize, filters);
 
-      setTotalPages(res.pagination?.total_pages || 1);
-      setTotalItems(res.pagination?.total || 0);
-
-      const mappedInvoice: Purchaseinvoice[] = res.data.map((pi: any) => ({
-        pId: pi.pId,
-        supplier: pi.supplierName,
-        podate: pi.poDate,
-        deliveryDate: pi.deliveryDate,
-        amount: pi.grandTotal,
-        status: pi.status,
-        registrationType: pi.registrationType,
-      }));
-
-      setOrders(mappedInvoice);
-    } catch (err) {
-      console.error("Failed to load Purchase Invoices");
-    } finally {
-      setLoading(false);
+   
+    if (!res?.data || res.data.length === 0) {
+      setOrders([]);        
+      setTotalItems(0);
+      setTotalPages(1);
+      return;
     }
-  };
+
+    setTotalPages(res.pagination?.total_pages || 1);
+    setTotalItems(res.pagination?.total || 0);
+
+    const mappedInvoice: Purchaseinvoice[] = res.data.map((pi: any) => ({
+      pId: pi.pId,
+      supplier: pi.supplierName,
+      podate: pi.poDate,
+      deliveryDate: pi.deliveryDate,
+      amount: pi.grandTotal,
+      status: pi.status,
+      registrationType: pi.registrationType,
+    }));
+
+    setOrders(mappedInvoice);
+
+  } catch (err) {
+    setOrders([]);   
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchInvoice();
-  }, [page, pageSize]);
+  }, [page, pageSize,filters]);
 
   const handleView = async (invoice: Purchaseinvoice) => {
     try {
@@ -154,7 +189,7 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
       let totalPagesLocal = 1;
 
       do {
-        const res = await getPurchaseInvoices(currentPage, 100);
+        const res = await getPurchaseInvoices(currentPage, 100,filters);
 
         if (res?.status_code === 200) {
           const mapped = res.data.map((pi: any) => ({
@@ -347,6 +382,33 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
         onPageChange={setPage}
         onPageSizeChange={(size) => setPageSize(size)}
         pageSizeOptions={[10, 25, 50, 100]}
+  extraFilters={
+  <>
+    <FilterSelect
+      value={filters.status}
+      options={invoiceStatusOptions}
+      onChange={(e) => {
+        setFilters((prev) => ({
+          ...prev,
+          status: e.target.value || undefined,
+        }));
+        setPage(1);
+      }}
+    />
+
+    <DateRangeFilter
+      from={filters.from_date}
+      to={filters.to_date}
+      onChange={(range) => {
+        setFilters((prev) => ({
+          ...prev,
+          ...range,
+        }));
+        setPage(1);
+      }}
+    />
+  </>
+}
       />
 
       {/* MODAL */}

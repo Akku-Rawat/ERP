@@ -111,7 +111,7 @@ function Table<T extends Record<string, any>>({
       {showToolbar && (
         <div className="px-5 py-4 border-b border-[var(--border)] bg-card flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shrink-0">
           {/* Search Input */}
-          <div className="relative w-full lg:max-w-sm group">
+          <div className="relative w-52 group">
             {loading ? (
               <div className="h-10 w-full bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded-xl" />
             ) : (

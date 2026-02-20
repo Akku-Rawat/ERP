@@ -10,7 +10,7 @@ import {
 
 import ItemModal from "../../components/inventory/ItemModal";
 import DeleteModal from "../../components/actionModal/DeleteModal";
-
+import { ItemFilters } from "../../api/itemApi";
 import Table from "../../components/ui/Table/Table";
 import ActionButton, {
   ActionGroup,
@@ -37,13 +37,25 @@ const Items: React.FC = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<ItemSummary | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [taxCategory, setTaxCategory] = useState<string>("");
+  const [filters, setFilters] = useState<ItemFilters>({});
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters((prev) => ({
+        ...prev,
+        search: searchTerm || undefined,
+      }));
+      setPage(1);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
 
   const fetchItems = async () => {
     try {
       setLoading(true);
-      const res = await getAllItems(page, pageSize,taxCategory );
+      const res = await getAllItems(page, pageSize, filters);
       setItems(res.data);
       setTotalPages(res.pagination?.total_pages || 1);
       setTotalItems(res.pagination?.total || 0);
@@ -57,7 +69,7 @@ const Items: React.FC = () => {
 
   useEffect(() => {
     fetchItems();
-  }, [page, pageSize,taxCategory]);
+  }, [page, pageSize, filters]);
 
   /*      HANDLERS
    */
@@ -84,46 +96,46 @@ const Items: React.FC = () => {
     setDeleteModalOpen(true);
   };
 
-const confirmDelete = async () => {
-  if (!itemToDelete) return;
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
 
-  try {
-    setDeleting(true);
+    try {
+      setDeleting(true);
 
-    const res = await deleteItemByItemCode(itemToDelete.id);
+      const res = await deleteItemByItemCode(itemToDelete.id);
 
-    if (!res || ![200, 201].includes(res.status_code)) {
-      showApiError(res);
-      return;
+      if (!res || ![200, 201].includes(res.status_code)) {
+        showApiError(res);
+        return;
+      }
+
+      setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
+
+      showSuccess(res.message || "Item deleted successfully");
+
+      setDeleteModalOpen(false);
+    } catch (err: any) {
+      showApiError(err);
+    } finally {
+      setDeleting(false);
+      setItemToDelete(null);
     }
-
-    setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
-
-    showSuccess(res.message || "Item deleted successfully");
-
-    setDeleteModalOpen(false);
-  } catch (err: any) {
-    showApiError(err);
-  } finally {
-    setDeleting(false);
-    setItemToDelete(null);
-  }
-};
+  };
 
 
-const handleSaved = async (res: any) => {
-  const wasEdit = !!editItem;
+  const handleSaved = async (res: any) => {
+    const wasEdit = !!editItem;
 
-  setShowModal(false);
-  setEditItem(null);
+    setShowModal(false);
+    setEditItem(null);
 
-  await fetchItems();
+    await fetchItems();
 
-  showSuccess(
-    res?.message ||
+    showSuccess(
+      res?.message ||
       (wasEdit ? "Item updated successfully" : "Item created successfully")
-  );
-};
+    );
+  };
 
 
   /*      FILTER
@@ -178,7 +190,7 @@ const handleSaved = async (res: any) => {
       align: "center",
       render: (i) => (
         <ActionGroup>
-          <ActionButton type="view" onClick={(e) => handleEdit(i.id, e)} iconOnly/>
+          <ActionButton type="view" onClick={(e) => handleEdit(i.id, e)} iconOnly />
           <ActionMenu
             onEdit={(e) => handleEdit(i.id, e as any)}
             onDelete={(e) => handleDeleteClick(i, e as any)}
@@ -215,24 +227,27 @@ const handleSaved = async (res: any) => {
           setPage(1); // reset page
         }}
         onPageChange={setPage}
-      extraFilters={
-  <div className="w-48">
-    <FilterSelect
-      value={taxCategory}
-      onChange={(e) => {
-        setPage(1);
-        setTaxCategory(e.target.value);
-      }}
-      options={[
-       
-        { label: "Export", value: "Export" },
-        { label: "Non-Export", value: "Non-Export" },
-        { label: "LPO", value: "LPO" },
-      ]}
-    />
-  </div>
-}
-/>
+        extraFilters={
+          <div className="w-48">
+            <FilterSelect
+              value={filters.taxCategory || ""}
+              onChange={(e) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  taxCategory: e.target.value || undefined,
+                }));
+                setPage(1);
+              }}
+              options={[
+
+                { label: "Export", value: "Export" },
+                { label: "Non-Export", value: "Non-Export" },
+                { label: "LPO", value: "LPO" },
+              ]}
+            />
+          </div>
+        }
+      />
 
       {/* ITEM MODAL */}
       <ItemModal

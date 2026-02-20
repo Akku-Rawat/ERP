@@ -25,7 +25,7 @@ import { ModalInput, ModalSelect } from "../ui/modal/modalComponent";
 const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   id: "",
   name: "",
-  type: "Individual",
+  type: "",
   tpin: "",
   currency: "",
   onboardingBalance: 0,
@@ -71,6 +71,7 @@ const CustomerModal: React.FC<{
     emptyForm,
   );
   const [errors, setErrors] = useState<{
+    type?: string;
     name?: string;
     tpin?: string;
     mobile?: string;
@@ -178,6 +179,11 @@ const CustomerModal: React.FC<{
 
   const validateDetailsTab = (): boolean => {
     const newErrors: typeof errors = {};
+
+    // Validate Type
+    if (!form.type || form.type === "") {
+      newErrors.type = "Type is required";
+    }
 
     // Validate Customer Name
     if (!form.name || form.name.trim() === "") {
@@ -505,14 +511,13 @@ const CustomerModal: React.FC<{
                 <ModalSelect
                   label="Type"
                   name="type"
-                  value={form.type}
+                  value={form.type || ""}
                   onChange={handleChange}
-                  options={[
-                    { value: "Individual", label: "Individual" },
-                    { value: "Company", label: "Company" },
-                  ]}
-                />
-
+                  placeholder="Select Customer Type"
+                >
+                  <option value="Individual">Individual</option>
+                  <option value="Company">Company</option>
+                </ModalSelect>
                 <ModalInput
                   label="Customer Name"
                   name="name"
@@ -569,6 +574,7 @@ const CustomerModal: React.FC<{
                   value={form.customerTaxCategory}
                   onChange={handleChange}
                   required
+                  error={errors.customerTaxCategory}
                   options={[
                     { value: "Export", label: "Export" },
                     { value: "Non-Export", label: "Non-Export" },
@@ -582,6 +588,7 @@ const CustomerModal: React.FC<{
                   value={form.currency}
                   onChange={handleChange}
                   required
+                  error={errors.currency}
                   options={[
                     { value: "ZMW", label: "ZMW" },
                     { value: "USD", label: "USD" },

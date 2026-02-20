@@ -148,7 +148,7 @@ export const emptyPOForm: PurchaseOrderFormData = {
   requiredBy: "",
   supplierContact: "",
   taxCategory: "",
-  currency: "INR",
+  currency: "ZMW",
   status: "Draft",
   destnCountryCd: "",
   shippingRule: "",

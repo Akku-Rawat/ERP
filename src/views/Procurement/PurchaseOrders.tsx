@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal";
 import toast from "react-hot-toast";
 import PurchaseOrderView from "../../views/Procurement/purchaseorderview";
@@ -10,12 +10,15 @@ import ActionButton, {
   ActionGroup,
   ActionMenu,
 } from "../../components/ui/Table/ActionButton";
+import { FilterSelect } from "../../components/ui/modal/modalComponent";
 import type { Column } from "../../components/ui/Table/type";
 import { showApiError,showSuccess ,showLoading,closeSwal } from "../../utils/alert";
 import { getPurchaseOrders ,updatePurchaseOrderStatus } from "../../api/procurement/PurchaseOrderApi";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { getPurchaseOrderById } from "../../api/procurement/PurchaseOrderApi";
+import type { PurchaseOrderFilters } from "../../api/procurement/PurchaseOrderApi";
+import DateRangeFilter from "../../components/ui/modal/DateRangeFilter";
 
 interface PurchaseOrder {
   id: string;
@@ -48,7 +51,13 @@ const STATUS_TRANSITIONS: Record<POStatus, POStatus[]> = {
 
 const CRITICAL_STATUSES: POStatus[] = ["Completed"];
 
-
+const statusOptions = [
+  { label: "Draft", value: "Draft" },
+  { label: "Approved", value: "Approved" },
+  { label: "Rejected", value: "Rejected" },
+  { label: "Cancelled", value: "Cancelled" },
+  { label: "Completed", value: "Completed" },
+];
 
 const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
@@ -60,20 +69,36 @@ const [page, setPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
-const [selectedOrder, setSelectedOrder] =  useState<any | null>(null);
+  const [selectedOrder, setSelectedOrder] =  useState<any | null>(null);
+  const [filters, setFilters] = useState<PurchaseOrderFilters>({});
 
 
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setFilters((prev) => ({
+      ...prev,
+      search: searchTerm || undefined,
+    }));
+    setPage(1);
+  }, 600);
 
-
+  return () => clearTimeout(timer);
+}, [searchTerm]);
 
   //  FETCH ORDERS 
 const fetchOrders = async () => {
   try {
     setLoading(true);
 
-    const res = await getPurchaseOrders(page, pageSize);
-    console.log("RAW PO:", res.data[0]);
+    const res = await getPurchaseOrders(page, pageSize, filters);
 
+    
+    if (!res?.data || res.data.length === 0) {
+      setOrders([]);                
+      setTotalItems(0);
+      setTotalPages(1);
+      return;
+    }
 
     setTotalPages(res.pagination?.total_pages || 1);
     setTotalItems(res.pagination?.total || 0);
@@ -86,20 +111,20 @@ const fetchOrders = async () => {
       amount: po.grandTotal,
       status: po.status,
     }));
-  
-
 
     setOrders(mappedOrders);
+
   } catch (err) {
-    console.error("Failed to load Purchase Orders");
+    setOrders([]); 
   } finally {
     setLoading(false);
   }
 };
 
+
 useEffect(() => {
   fetchOrders();
-}, [page, pageSize]);
+}, [page, pageSize,filters]);
 
 
 const handleView = async (order: PurchaseOrder) => {
@@ -126,16 +151,6 @@ const handleView = async (order: PurchaseOrder) => {
   }
 };
 
-  //  FILTER 
- const filteredOrders = useMemo(() => {
-  const term = searchTerm.toLowerCase();
-
-  return orders.filter((o) =>
-    (o.id ?? "").toLowerCase().includes(term) ||
-    (o.supplier ?? "").toLowerCase().includes(term) ||
-    (o.status ?? "").toLowerCase().includes(term)
-  );
-}, [orders, searchTerm]);
 
 
   //  MODAL HANDLERS 
@@ -171,7 +186,7 @@ const fetchAllPOsForExport = async () => {
     let totalPagesLocal = 1;
 
     do {
-      const res = await getPurchaseOrders(currentPage, 100);
+      const res = await getPurchaseOrders(currentPage, 100,filters);
 
       if (res?.status_code === 200) {
         const mapped = res.data.map((po: any) => ({
@@ -342,9 +357,11 @@ const handleStatusChange = async (
 
   return (
     <div className="p-6">
+
       <Table
         columns={columns}
-        data={filteredOrders}
+        data={orders}
+        serverSide
         showToolbar
         loading={loading}
         searchValue={searchTerm}
@@ -362,8 +379,33 @@ const handleStatusChange = async (
               onPageChange={setPage}
               onPageSizeChange={(size) => setPageSize(size)}
               pageSizeOptions={[10, 25, 50, 100]}
+     extraFilters={
+  <>
+    <FilterSelect
+      value={filters.status}
+      options={statusOptions}
+      onChange={(e) => {
+        setFilters((prev) => ({
+          ...prev,
+          status: e.target.value || undefined,
+        }));
+        setPage(1);
+      }}
+    />
 
-
+    <DateRangeFilter
+      from={filters.from_date}
+      to={filters.to_date}
+      onChange={(range) => {
+        setFilters((prev) => ({
+          ...prev,
+          ...range,
+        }));
+        setPage(1);
+      }}
+    />
+  </>
+}
       />
 
       {/* MODAL */}

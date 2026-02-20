@@ -4,7 +4,6 @@ import { showApiError, showSuccess } from "../utils/alert";
 import type {
   PurchaseOrderFormData,
   POTab,
-  ItemRow,
   TaxRow,
   PaymentRow,
 } from "../types/Supply/purchaseOrder";
@@ -19,16 +18,13 @@ import { mapUIToCreatePO } from "../types/Supply/purchaseOrderMapper";
 import { validatePO } from "./poValidator";
 import { getPurchaseOrderById } from "../api/procurement/PurchaseOrderApi";
 import { mapApiToUI } from "../types/Supply/purchaseOrderMapper";
-import { getCountryList } from "../api/lookupApi";
 import { getSupplierById } from "../../src/api/procurement/supplierApi";
 import { getCompanyById } from "../api/companySetupApi";
-import { mapSupplierToAddress } from "../types/Supply/purchaseOrderMapper"
+import { mapSupplierToAddress } from "../types/Supply/purchaseOrderMapper";
 import type { AddressBlock } from "../types/Supply/purchaseOrder";
 import { getItemByItemCode } from "../api/itemApi";
 
-
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
-
 
 interface UsePurchaseOrderFormProps {
   isOpen: boolean;
@@ -56,7 +52,6 @@ export const usePurchaseOrderForm = ({
 
   const isEditMode = !!poId;
 
-
   useEffect(() => {
     if (!isOpen) return;
 
@@ -79,21 +74,18 @@ export const usePurchaseOrderForm = ({
     loadCompanyBuyingTerms();
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
 
-useEffect(() => {
-  if (!isOpen) return;
-
-  setForm((prev) => ({
-    ...prev,
-    taxCategory: "Non-Export",
-    items: prev.items.map((item) => ({
-      ...item,
-      vatCd: "A",
-    })),
-  }));
-}, [isOpen]);
-
-
+    setForm((prev) => ({
+      ...prev,
+      taxCategory: "Non-Export",
+      items: prev.items.map((item) => ({
+        ...item,
+        vatCd: "A",
+      })),
+    }));
+  }, [isOpen]);
 
   // Load PO Data in Edit Mode
   useEffect(() => {
@@ -117,7 +109,6 @@ useEffect(() => {
     loadPO();
   }, [isOpen, poId]);
 
-
   // Set default date on create mode
   useEffect(() => {
     if (!isOpen || poId) return;
@@ -129,7 +120,7 @@ useEffect(() => {
   useEffect(() => {
     const subTotal = form.items.reduce(
       (sum, item) => sum + item.quantity * item.rate,
-      0
+      0,
     );
 
     const itemTaxTotal = form.items.reduce((sum, item) => {
@@ -145,13 +136,11 @@ useEffect(() => {
 
     const totalQuantity = form.items.reduce(
       (sum, item) => sum + (Number(item.quantity) || 0),
-      0
+      0,
     );
 
     const roundedTotal = Math.round(grandTotal);
-    const roundingAdjustment = Number(
-      (roundedTotal - grandTotal).toFixed(2)
-    );
+    const roundingAdjustment = Number((roundedTotal - grandTotal).toFixed(2));
 
     setForm((p) => ({
       ...p,
@@ -162,15 +151,14 @@ useEffect(() => {
     }));
   }, [form.items, form.taxRows]);
 
-
   type AddressKey = keyof PurchaseOrderFormData["addresses"];
 
   const updateAddress = (
     key: AddressKey,
     field: keyof AddressBlock,
-    value: string
+    value: string,
   ) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       addresses: {
         ...prev.addresses,
@@ -182,10 +170,10 @@ useEffect(() => {
     }));
   };
 
-
-
   const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
 
@@ -193,7 +181,7 @@ useEffect(() => {
       const parts = name.split(".") as [
         "addresses",
         AddressKey,
-        keyof AddressBlock
+        keyof AddressBlock,
       ];
 
       const [, key, field] = parts;
@@ -201,10 +189,8 @@ useEffect(() => {
       return;
     }
 
-
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
-
 
   const handleSupplierChange = async (sup: any) => {
     if (!sup) return;
@@ -214,9 +200,7 @@ useEffect(() => {
       const supplier = res?.data;
       if (!supplier) return;
 
-      let destCode = "";
-
-
+      const destCode = "";
 
       setForm((p) => ({
         ...p,
@@ -237,25 +221,24 @@ useEffect(() => {
         destnCountryCd: "",
         placeOfSupply: "",
 
-
         /*  ADDRESS AUTO FILL  */
         addresses: {
           ...p.addresses,
           supplierAddress: mapSupplierToAddress(
             supplier,
-            p.addresses.supplierAddress
+            p.addresses.supplierAddress,
           ),
         },
-
       }));
     } catch (e) {
       console.error("Supplier detail fetch failed", e);
     }
   };
 
-
-
-  const handleItemChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
+  const handleItemChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    idx: number,
+  ) => {
     const { name, value } = e.target;
     const isNum = ["quantity", "rate"].includes(name);
     const items = [...form.items];
@@ -291,19 +274,29 @@ useEffect(() => {
     setForm((p) => ({ ...p, taxRows: p.taxRows.filter((_, i) => i !== idx) }));
   };
 
-  const handlePaymentRowChange = (idx: number, key: keyof PaymentRow, value: any) => {
+  const handlePaymentRowChange = (
+    idx: number,
+    key: keyof PaymentRow,
+    value: any,
+  ) => {
     const paymentRows = [...form.paymentRows];
     paymentRows[idx] = { ...paymentRows[idx], [key]: value };
     setForm((p) => ({ ...p, paymentRows }));
   };
 
   const addPaymentRow = () => {
-    setForm((p) => ({ ...p, paymentRows: [...p.paymentRows, { ...emptyPaymentRow }] }));
+    setForm((p) => ({
+      ...p,
+      paymentRows: [...p.paymentRows, { ...emptyPaymentRow }],
+    }));
   };
 
   const removePaymentRow = (idx: number) => {
     if (form.paymentRows.length === 1) return;
-    setForm((p) => ({ ...p, paymentRows: p.paymentRows.filter((_, i) => i !== idx) }));
+    setForm((p) => ({
+      ...p,
+      paymentRows: p.paymentRows.filter((_, i) => i !== idx),
+    }));
   };
 
   const handleSaveTemplate = (html: string) => {
@@ -340,11 +333,9 @@ useEffect(() => {
       case "ZMW":
         return "K";
       default:
-        return "₹";
+        return "K";
     }
   };
-
-
 
   const handleItemSelect = async (itemId: string, idx: number) => {
     try {
@@ -364,9 +355,7 @@ useEffect(() => {
           rate: Number(data.sellingPrice || 0),
           vatRate: Number(data.taxPerct || 0),
           vatCd: "A",
-
         };
-
 
         return { ...prev, items };
       });
@@ -375,7 +364,6 @@ useEffect(() => {
       toast.error("Failed to load item details");
     }
   };
-
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -432,14 +420,10 @@ useEffect(() => {
     }
   };
 
-
-
-
   const reset = () => {
     setForm(emptyPOForm);
     setActiveTab("details");
   };
-
 
   return {
     form,
@@ -474,14 +458,10 @@ function getCountryCode(list: any[], countryName?: string): string {
   const byCode = list.find((c: any) => c.code?.toLowerCase() === n);
   if (byCode) return byCode.code;
 
-  const byName = list.find((c: any) =>
-    c.name?.toLowerCase().includes(n)
-  );
+  const byName = list.find((c: any) => c.name?.toLowerCase().includes(n));
   if (byName) return byName.code;
 
-  const reverse = list.find((c: any) =>
-    n.includes(c.name?.toLowerCase())
-  );
+  const reverse = list.find((c: any) => n.includes(c.name?.toLowerCase()));
   if (reverse) return reverse.code;
 
   return "";
