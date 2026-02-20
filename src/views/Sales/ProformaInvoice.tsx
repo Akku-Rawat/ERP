@@ -10,7 +10,6 @@ import { saveAs } from "file-saver";
 import { getCompanyById } from "../../api/companySetupApi";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 import type {
-  ProformaInvoice,
   ProformaInvoiceSummary,
 } from "../../types/proformaInvoice";
 import { generateProformaInvoicePDF } from "../../components/template/proformatemplete/ProformaInvoiceTemplate";
@@ -22,9 +21,10 @@ import ActionButton, {
 } from "../../components/ui/Table/ActionButton";
 
 import type { Column } from "../../components/ui/Table/type";
-import PdfPreviewModal from "./PdfPreviewModal";
 import { showApiError, showSuccess, showLoading , closeSwal} from "../../utils/alert";
 import Swal from "sweetalert2";
+
+import InvoiceDetailsModal, { type InvoiceDetails } from "./InvoiceDetailsModal";
 
 type InvoiceStatus = "Draft" | "Rejected" | "Paid" | "Cancelled" | "Approved";
 
@@ -49,10 +49,6 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   onAddProformaInvoice,
   refreshKey,
 }) => {
-  const [openStatusMenuFor, setOpenStatusMenuFor] = useState<string | null>(
-    null,
-  );
-
   const [searchTerm, setSearchTerm] = useState("");
   const [invoices, setInvoices] = useState<ProformaInvoiceSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,10 +58,9 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [selectedInvoice, setSelectedInvoice] =
-    useState<ProformaInvoice | null>(null);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [pdfOpen, setPdfOpen] = useState(false);
+
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsId, setDetailsId] = useState<string | null>(null);
 
   // Company data state
   const [company, setCompany] = useState<any>(null);
@@ -118,6 +113,30 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
   useEffect(() => {
     fetchInvoices();
   }, [page, pageSize, refreshKey]);
+
+  const handleOpenReceipt = (receiptUrl: string) => {
+    const normalizedUrl = receiptUrl.startsWith("http://")
+      ? receiptUrl.replace(/^http:\/\//i, "https://")
+      : receiptUrl;
+
+    const urlWithoutPort = (() => {
+      try {
+        const u = new URL(normalizedUrl);
+        u.port = "";
+        return u.toString();
+      } catch {
+        return normalizedUrl.replace(/^(https?:\/\/[^\/]+):\d+(\/.*)?$/i, "$1$2");
+      }
+    })();
+
+    const a = document.createElement("a");
+    a.href = urlWithoutPort;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
 
   const fetchAllInvoicesForExport = async () => {
   try {
@@ -217,44 +236,8 @@ const handleExportExcel = async () => {
 ) => {
   e?.stopPropagation();
 
-  try {
-   
-    showLoading("Loading proforma invoice preview...");
-
-    if (!company) {
-      closeSwal();
-      console.error("Company data not loaded");
-      return;
-    }
-
-    const res = await getProformaInvoiceById(
-      proformaId
-    );
-
-    if (!res || res.status_code !== 200) {
-      closeSwal();
-      showApiError("Failed to load invoice");
-      return;
-    }
-
-    setSelectedInvoice(res.data);
-
-    const url = await generateProformaInvoicePDF(
-      res.data,
-      company,
-      "bloburl"
-    );
-
-    setPdfUrl(url as string);
-    setPdfOpen(true);
-
-    
-    closeSwal();
-
-  } catch (err: any) {
-    closeSwal();
-    showApiError(err);
-  }
+  setDetailsId(proformaId);
+  setDetailsOpen(true);
 };
 
 
@@ -374,11 +357,43 @@ const handleExportExcel = async () => {
   };
 
 
-  const handleClosePdf = () => {
-    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-    setPdfUrl(null);
-    setSelectedInvoice(null);
-    setPdfOpen(false);
+
+  const mapProformaToInvoiceDetails = (raw: any): InvoiceDetails => {
+    const items = Array.isArray(raw?.items)
+      ? raw.items.map((it: any) => ({
+          itemCode: it?.itemCode ?? it?.productName,
+          quantity: Number(it?.quantity ?? 0),
+          description: it?.description,
+          discount: Number(it?.discount ?? 0),
+          price: Number(it?.price ?? it?.listPrice ?? 0),
+          vatCode: it?.vatCode,
+        }))
+      : [];
+
+    return {
+      invoiceNumber: raw?.invoiceNumber ?? raw?.proformaId ?? raw?.id,
+      invoiceType: raw?.invoiceType ?? "Proforma",
+      originInvoice: raw?.originInvoice ?? null,
+      customerName: raw?.customerName ?? raw?.customer?.name,
+      customerTpin: raw?.customerTpin ?? raw?.customer?.tpin,
+      currencyCode: raw?.currencyCode ?? raw?.currency,
+      exchangeRt: raw?.exchangeRt ?? raw?.exchangeRate,
+      dateOfInvoice: raw?.dateOfInvoice ?? raw?.dateofinvoice ?? raw?.createdAt,
+      dueDate: raw?.dueDate,
+      invoiceStatus: raw?.invoiceStatus ?? raw?.status,
+      Receipt: raw?.Receipt ?? raw?.receipt,
+      ReceiptNo: raw?.ReceiptNo ?? raw?.receiptNo,
+      TotalAmount: raw?.TotalAmount ?? raw?.totalAmount,
+      discountPercentage: raw?.discountPercentage,
+      discountAmount: raw?.discountAmount,
+      lpoNumber: raw?.lpoNumber,
+      destnCountryCd: raw?.destnCountryCd,
+      billingAddress: raw?.billingAddress,
+      shippingAddress: raw?.shippingAddress,
+      paymentInformation: raw?.paymentInformation,
+      items,
+      terms: raw?.terms,
+    };
   };
   const handleRowStatusChange = async (
     invoiceNumber: string,
@@ -409,7 +424,6 @@ const handleExportExcel = async () => {
 
 
     showSuccess(`Invoice marked as ${status}`);
-    setOpenStatusMenuFor(null);
   };
   /*    FILTER
 */
@@ -531,17 +545,16 @@ const handleExportExcel = async () => {
         onPageChange={setPage}
       />
 
-
-      <PdfPreviewModal
-        open={pdfOpen}
-        title="Proforma Invoice Preview"
-        pdfUrl={pdfUrl}
-        onClose={handleClosePdf}
-        onDownload={() =>
-          selectedInvoice &&
-          company &&
-          generateProformaInvoicePDF(selectedInvoice, company, "save")
-        }
+      <InvoiceDetailsModal
+        open={detailsOpen}
+        invoiceId={detailsId}
+        onClose={() => {
+          setDetailsOpen(false);
+          setDetailsId(null);
+        }}
+        onOpenReceiptPdf={handleOpenReceipt}
+        fetchDetails={getProformaInvoiceById}
+        mapDetails={mapProformaToInvoiceDetails}
       />
     </div>
   );
