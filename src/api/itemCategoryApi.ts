@@ -9,9 +9,14 @@ export const ItemGroupAPI = API.itemGroup;
 
 export async function getAllItemGroups(
   page: number = 1,
-  page_size: number = 10,
+  page_size: number = 130,
+  itemType?: string,
 ): Promise<any> {
-  const url = `${ItemGroupAPI.getAll}?page=${page}&page_size=${page_size}`;
+  let url = `${ItemGroupAPI.getAll}?page=${page}&page_size=${page_size}`;
+  
+  if (itemType) {
+    url += `&itemType=${itemType}`;
+  }
 
   const resp = await api.get(url);
   return resp.data;
