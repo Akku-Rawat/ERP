@@ -41,7 +41,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [allCustomers, setAllCustomers] = useState<CustomerSummary[]>([]);
-  const [taxCategory, setTaxCategory] = useState<string>("");
+  const [taxCategory, setTaxCategory] = useState<string>("Non-Export");
 
 
 const fetchCustomers = async () => {
@@ -75,7 +75,7 @@ const fetchCustomers = async () => {
 
   const fetchAllCustomers = async () => {
     try {
-      const resp = await getAllCustomers(1, 1000);
+      const resp = await getAllCustomers(1, 1000, taxCategory);
       setAllCustomers(resp.data || []);
     } catch (err) {
       console.error("Error loading all customers:", err);
@@ -267,9 +267,7 @@ const fetchCustomers = async () => {
                     setTaxCategory(e.target.value);
                   }}
                   options={[
-                    { label: "Export", value: "Export" },
                     { label: "Non-Export", value: "Non-Export" },
-                    { label: "LPO", value: "LPO" },
                   ]}
                 />
               </div>

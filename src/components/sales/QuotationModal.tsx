@@ -116,6 +116,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     value={customerNameDisplay}
                     onChange={actions.handleCustomerSelect}
                     className="w-full"
+                    taxCategory="Non-Export"
                   />
 
                   {/* Date of Quotation */}

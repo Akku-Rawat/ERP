@@ -13,6 +13,15 @@ interface Address {
   country: string;
 }
 
+interface AddressErrors {
+  line1?: string;
+  line2?: string;
+  postalCode?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+}
+
 interface AddressBlockProps {
   type: "billing" | "shipping";
   title: string;
@@ -22,6 +31,7 @@ interface AddressBlockProps {
   sameAsBilling?: boolean;
   onSameAsBillingChange?: (checked: boolean) => void;
   disableAll?: boolean;
+  errors?: AddressErrors;
 }
 
 const AddressBlock: React.FC<AddressBlockProps> = ({
@@ -33,6 +43,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
   sameAsBilling,
   onSameAsBillingChange,
   disableAll = false,
+  errors,
 }) => {
   const isShipping = type === "shipping";
 
@@ -94,6 +105,8 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
           value={data.line1}
           onChange={onChange}
           disabled={disableAll || sameAsBilling}
+          required
+          error={errors?.line1}
         />
 
         <ModalInput
@@ -102,6 +115,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
           value={data.line2}
           onChange={onChange}
           disabled={disableAll || sameAsBilling}
+          error={errors?.line2}
         />
 
         <div className="grid grid-cols-2 gap-4">
@@ -111,6 +125,8 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             value={data.postalCode}
             onChange={onChange}
             disabled={disableAll || sameAsBilling}
+            required
+            error={errors?.postalCode}
           />
 
           <SearchSelect
@@ -123,6 +139,8 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             }
             fetchOptions={fetchTownOptions}
             disabled={disableAll || sameAsBilling}
+            required
+            error={errors?.city}
           />
 
         </div>
@@ -138,6 +156,8 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             }
             fetchOptions={fetchProvinceOptions}
             disabled={disableAll || sameAsBilling}
+            required
+            error={errors?.state}
           />
 
 
@@ -151,6 +171,8 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             }
             fetchOptions={fetchCountryOptions}
             disabled={disableAll || sameAsBilling}
+            required
+            error={errors?.country}
           />
 
         </div>

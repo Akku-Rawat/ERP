@@ -14,7 +14,7 @@ export async function getAllCustomers(
     params: {
       page,
       page_size,
-      ...(taxCategory && { taxCategory }), 
+      ...(taxCategory && { taxCategory }),
     },
   });
 

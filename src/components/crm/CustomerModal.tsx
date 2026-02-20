@@ -70,7 +70,23 @@ const CustomerModal: React.FC<{
   const [form, setForm] = useState<CustomerDetail & { sameAsBilling: boolean }>(
     emptyForm,
   );
-  const [errors, setErrors] = useState<{ mobile?: string }>({});
+  const [errors, setErrors] = useState<{
+    type?: string;
+    name?: string;
+    tpin?: string;
+    mobile?: string;
+    email?: string;
+    currency?: string;
+    displayName?: string;
+    contactPerson?: string;
+    customerTaxCategory?: string;
+    accountNumber?: string;
+    billingAddressLine1?: string;
+    billingPostalCode?: string;
+    billingCity?: string;
+    billingState?: string;
+    billingCountry?: string;
+  }>({});
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "terms" | "address">(
     "details",
@@ -119,6 +135,7 @@ const CustomerModal: React.FC<{
     setActiveTab("details");
     setLoading(false);
     setAllowSubmit(false);
+    setErrors({}); // Clear errors when modal opens/closes
   }, [initialData, isOpen]);
 
   useEffect(() => {
@@ -160,7 +177,116 @@ const CustomerModal: React.FC<{
     "terms",
   ];
 
+  const validateDetailsTab = (): boolean => {
+    const newErrors: typeof errors = {};
+
+    // Validate Type
+    if (!form.type || form.type === "") {
+      newErrors.type = "Type is required";
+    }
+
+    // Validate Customer Name
+    if (!form.name || form.name.trim() === "") {
+      newErrors.name = "Customer name is required";
+    }
+
+    // Validate Contact Person
+    if (!form.contactPerson || form.contactPerson.trim() === "") {
+      newErrors.contactPerson = "Contact person is required";
+    }
+
+    // Validate Display Name
+    if (!form.displayName || form.displayName === "") {
+      newErrors.displayName = "Display name is required";
+    }
+
+    // Validate TPIN
+    if (!form.tpin || form.tpin.trim() === "") {
+      newErrors.tpin = "TPIN is required";
+    } else if (form.tpin.length !== 10) {
+      newErrors.tpin = "TPIN must be 10 characters";
+    }
+
+    // Validate Tax Category
+    if (!form.customerTaxCategory || form.customerTaxCategory === "") {
+      newErrors.customerTaxCategory = "Tax category is required";
+    }
+
+    // Validate Currency
+    if (!form.currency || form.currency === "") {
+      newErrors.currency = "Currency is required";
+    }
+
+    // Validate Bank Account
+    if (!form.accountNumber || form.accountNumber.trim() === "") {
+      newErrors.accountNumber = "Bank account is required";
+    }
+
+    // Validate Email
+    if (!form.email || form.email.trim() === "") {
+      newErrors.email = "Email is required";
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(form.email)) {
+        newErrors.email = "Invalid email format";
+      }
+    }
+
+    // Validate Mobile
+    if (!form.mobile || form.mobile.trim() === "") {
+      newErrors.mobile = "Mobile number is required";
+    } else if (form.mobile.length !== 10) {
+      newErrors.mobile = "Mobile number must be exactly 10 digits";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateAddressTab = (): boolean => {
+    const newErrors: typeof errors = {};
+
+    // Validate Billing Address Line 1 (required)
+    if (!form.billingAddressLine1 || form.billingAddressLine1.trim() === "") {
+      newErrors.billingAddressLine1 = "Billing address line 1 is required";
+    }
+
+    // Line 2 is optional - no validation
+
+    // Validate Postal Code (required)
+    if (!form.billingPostalCode || form.billingPostalCode.trim() === "") {
+      newErrors.billingPostalCode = "Postal code is required";
+    }
+
+    // Validate City (required)
+    if (!form.billingCity || form.billingCity.trim() === "") {
+      newErrors.billingCity = "City is required";
+    }
+
+    // Validate State (required)
+    if (!form.billingState || form.billingState.trim() === "") {
+      newErrors.billingState = "State is required";
+    }
+
+    // Validate Country (required)
+    if (!form.billingCountry || form.billingCountry.trim() === "") {
+      newErrors.billingCountry = "Country is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleNext = () => {
+    // Validate current tab before proceeding
+    if (activeTab === "details" && !validateDetailsTab()) {
+      return; // Don't proceed if validation fails
+    }
+
+    if (activeTab === "address" && !validateAddressTab()) {
+      return; // Don't proceed if validation fails
+    }
+
     const currentIndex = tabs.indexOf(activeTab);
     if (currentIndex < tabs.length - 1) {
       setActiveTab(tabs[currentIndex + 1]);
@@ -178,22 +304,36 @@ const CustomerModal: React.FC<{
       [name]: name === "onboardingBalance" ? Number(value) : value,
     }));
 
+    // Clear errors when user starts typing
+    if (errors[name as keyof typeof errors]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: undefined,
+      }));
+    }
+
     // 🔹 Mobile validation
     if (name === "mobile") {
-      if (!/^\d*$/.test(value)) {
+      if (value && !/^\d*$/.test(value)) {
         setErrors((prev) => ({
           ...prev,
           mobile: "Only numbers allowed",
         }));
-      } else if (value.length > 0 && value.length < 10) {
+      } else if (value.length > 0 && value.length !== 10) {
         setErrors((prev) => ({
           ...prev,
-          mobile: "Mobile number must be 10 digits",
+          mobile: "Mobile number must be exactly 10 digits",
         }));
-      } else {
+      }
+    }
+
+    // 🔹 Email validation
+    if (name === "email" && value) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
         setErrors((prev) => ({
           ...prev,
-          mobile: "",
+          email: "Invalid email format",
         }));
       }
     }
@@ -211,6 +351,18 @@ const CustomerModal: React.FC<{
     // Prevent auto-submission when just navigating to terms tab
     if (!isEditMode && !allowSubmit) {
       return;
+    }
+
+    // Validate all tabs before submission
+    if (!isEditMode) {
+      if (!validateDetailsTab()) {
+        setActiveTab("details"); // Go back to details tab if validation fails
+        return;
+      }
+      if (!validateAddressTab()) {
+        setActiveTab("address"); // Go back to address tab if validation fails
+        return;
+      }
     }
 
     if (loading) return; // prevent double submit
@@ -373,6 +525,7 @@ const CustomerModal: React.FC<{
                   onChange={handleChange}
                   required
                   placeholder="Enter full name"
+                  error={errors.name}
                 />
 
                 <ModalInput
@@ -380,7 +533,9 @@ const CustomerModal: React.FC<{
                   name="contactPerson"
                   value={form.contactPerson}
                   onChange={handleChange}
+                  required
                   placeholder="Primary contact"
+                  error={errors.contactPerson}
                 />
 
                 <ModalSelect
@@ -388,6 +543,7 @@ const CustomerModal: React.FC<{
                   name="displayName"
                   value={form.displayName}
                   onChange={handleChange}
+                  required
                   options={[
                     { value: "", label: "Select Display Name" },
                     {
@@ -408,6 +564,8 @@ const CustomerModal: React.FC<{
                   onChange={handleChange}
                   required
                   placeholder="Tax identification"
+                  maxLength={10}
+                  error={errors.tpin}
                 />
 
                 <ModalSelect
@@ -415,6 +573,8 @@ const CustomerModal: React.FC<{
                   name="customerTaxCategory"
                   value={form.customerTaxCategory}
                   onChange={handleChange}
+                  required
+                  error={errors.customerTaxCategory}
                   options={[
                     { value: "Export", label: "Export" },
                     { value: "Non-Export", label: "Non-Export" },
@@ -427,6 +587,8 @@ const CustomerModal: React.FC<{
                   name="currency"
                   value={form.currency}
                   onChange={handleChange}
+                  required
+                  error={errors.currency}
                   options={[
                     { value: "ZMW", label: "ZMW" },
                     { value: "USD", label: "USD" },
@@ -439,7 +601,9 @@ const CustomerModal: React.FC<{
                   name="accountNumber"
                   value={form.accountNumber}
                   onChange={handleChange}
+                  required
                   placeholder="Account number"
+                  error={errors.accountNumber}
                 />
 
                 <ModalInput
@@ -457,7 +621,9 @@ const CustomerModal: React.FC<{
                   type="email"
                   value={form.email}
                   onChange={handleChange}
+                  required
                   placeholder="email@example.com"
+                  error={errors.email}
                 />
 
                 <ModalInput
@@ -466,7 +632,9 @@ const CustomerModal: React.FC<{
                   type="tel"
                   value={form.mobile}
                   onChange={handleChange}
+                  required
                   placeholder="+1234567890"
+                  maxLength={10}
                   error={errors.mobile}
                 />
               </div>
@@ -500,6 +668,13 @@ const CustomerModal: React.FC<{
                   state: form.billingState ?? "",
                   country: form.billingCountry ?? "",
                 }}
+                errors={{
+                  line1: errors.billingAddressLine1,
+                  postalCode: errors.billingPostalCode,
+                  city: errors.billingCity,
+                  state: errors.billingState,
+                  country: errors.billingCountry,
+                }}
                 onChange={(e) => {
                   const { name, value } = e.target;
 
@@ -516,6 +691,14 @@ const CustomerModal: React.FC<{
                     ...prev,
                     [map[name]]: value,
                   }));
+
+                  // Clear error when user types
+                  if (errors[map[name] as keyof typeof errors]) {
+                    setErrors((prev) => ({
+                      ...prev,
+                      [map[name]]: undefined,
+                    }));
+                  }
                 }}
               />
 

@@ -375,7 +375,7 @@ export const DetailsTab = ({
 
                   <div className="flex flex-col gap-1">
                     {/* Tax Category */}
-                    <div className="flex items-center gap-15 text-xs">
+                    <div className="flex items-center justify-between text-xs">
                       <span className="text-muted">Tax Category</span>
                       <span className="font-medium text-main">
                         {form.taxCategory}
@@ -383,7 +383,7 @@ export const DetailsTab = ({
                     </div>
 
                     {/* Currency  */}
-                    <div className="flex items-center gap-21 text-xs">
+                    <div className="flex items-center justify-between text-xs">
                       <span className="text-muted">Currency</span>
                       <span className="font-medium text-main">
                         {form.currency || "-"}
@@ -402,26 +402,26 @@ export const DetailsTab = ({
             </h3>
 
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-19 text-xs">
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-muted">Total Items</span>
                 <span className="font-medium text-main">{items.length}</span>
               </div>
 
-              <div className="flex items-center gap-19 text-xs">
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-muted">Total Quantity</span>
                 <span className="font-medium text-main">
                   {form.totalQuantity}
                 </span>
               </div>
 
-              <div className="flex items-center gap-19 text-xs">
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-muted">Grand Total</span>
                 <span className="font-medium text-main">
                   {symbol} {form.grandTotal.toFixed(2)}
                 </span>
               </div>
 
-              <div className="flex items-center gap-19 text-xs">
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-muted">Rounding Adj</span>
                 <span className="font-medium text-main">
                   {symbol} {form.roundingAdjustment.toFixed(2)}

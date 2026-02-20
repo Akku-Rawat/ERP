@@ -13,6 +13,8 @@ interface SearchSelectProps {
   fetchOptions: (q: string) => Promise<Option[]>;
   placeholder?: string;
   disabled?: boolean;
+  error?: string;
+  required?: boolean;
 }
 
 const SearchSelect: React.FC<SearchSelectProps> = ({
@@ -22,6 +24,8 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
   fetchOptions,
   placeholder = "Type to search...",
   disabled,
+  error,
+  required,
 }) => {
   const [search, setSearch] = useState("");
   const [options, setOptions] = useState<Option[]>([]);
@@ -95,7 +99,10 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
     <>
       {/* Input Wrapper */}
       <div ref={wrapperRef} className="flex flex-col text- w-full">
-        <label className="text-[10px] font-medium mb-1">{label}</label>
+        <label className="text-[10px] font-medium mb-1">
+          {label}
+          {required && <span className="text-danger">*</span>}
+        </label>
 
         <input
           value={search}
@@ -107,8 +114,11 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
             onChange("");
           }}
           onFocus={() => search && setOpen(true)}
-          className="w-full py-2 px-3 border border-theme rounded text-[13px] text-main bg-card"
+          className={`w-full py-2 px-3 border rounded text-[13px] text-main bg-card ${
+            error ? "border-danger" : "border-theme"
+          }`}
         />
+        {error && <span className="text-danger text-[10px] mt-1">{error}</span>}
       </div>
 
       {/* Portal Dropdown */}
