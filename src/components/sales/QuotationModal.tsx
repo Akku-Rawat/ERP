@@ -50,6 +50,13 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
   const handlePrint = () => {
     showSuccess("Print functionality - Opens print dialog");
   };
+  const handleNext = () => {
+  if (ui.activeTab === "details") {
+    ui.setActiveTab("address");
+  } else if (ui.activeTab === "address") {
+    ui.setActiveTab("terms");
+  }
+};
 
   const footerContent = (
     <>
@@ -57,9 +64,17 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
         Cancel
       </Button>
       <div className="flex gap-2">
-        <Button variant="ghost" onClick={actions.handleReset} type="button">
+        <Button variant="secondary" onClick={actions.handleReset} type="button">
           Reset
         </Button>
+        <Button
+                  variant="secondary"
+                  type="button"
+                   onClick={handleNext}
+                    disabled={ui.activeTab === "terms"}
+                >
+                  Next →
+                </Button>
         <Button variant="primary" type="submit" onClick={handleFormSubmit}>
           Submit
         </Button>
@@ -84,8 +99,8 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
           <div className="flex gap-8">
             {[
               { key: "details", label: "Details" },
-              { key: "terms", label: "Terms & Conditions" },
               { key: "address", label: "Additional Details" },
+              { key: "terms", label: "Terms & Conditions" },
             ].map((tab) => (
               <button
                 key={tab.key}
