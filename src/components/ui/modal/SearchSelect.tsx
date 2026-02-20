@@ -1,174 +1,151 @@
-import React, {
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface Option {
-    label: string;
-    value: string;
+  label: string;
+  value: string;
 }
 
 interface SearchSelectProps {
-    label: string;
-    value?: string;
-    onChange: (value: string) => void;
-    fetchOptions: (q: string) => Promise<Option[]>;
-    placeholder?: string;
-    disabled?: boolean;
+  label: string;
+  value?: string;
+  onChange: (value: string) => void;
+  fetchOptions: (q: string) => Promise<Option[]>;
+  placeholder?: string;
+  disabled?: boolean;
 }
 
 const SearchSelect: React.FC<SearchSelectProps> = ({
-    label,
-    value,
-    onChange,
-    fetchOptions,
-    placeholder = "Type to search...",
-    disabled,
+  label,
+  value,
+  onChange,
+  fetchOptions,
+  placeholder = "Type to search...",
+  disabled,
 }) => {
-    const [search, setSearch] = useState("");
-    const [options, setOptions] = useState<Option[]>([]);
-    const [open, setOpen] = useState(false);
-    const [justSelected, setJustSelected] = useState(false);
-    const [isTyping, setIsTyping] = useState(false);
-    const [dropdownPos, setDropdownPos] =
-        useState({ top: 0, left: 0, width: 0 });
+  const [search, setSearch] = useState("");
+  const [options, setOptions] = useState<Option[]>([]);
+  const [open, setOpen] = useState(false);
+  const [justSelected, setJustSelected] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
 
-    const wrapperRef = useRef<HTMLDivElement>(null);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
+  /*  Fetch Options  */
 
-    /*  Fetch Options  */
+  useEffect(() => {
+    setSearch(value || "");
+  }, [value]);
 
-    useEffect(() => {
-        setSearch(value || "");
-    }, [value]);
+  useEffect(() => {
+    if (justSelected) {
+      setJustSelected(false);
+      return;
+    }
 
-    useEffect(() => {
-        if (justSelected) {
-            setJustSelected(false);
-            return;
-        }
+    if (!isTyping) return;
 
-        if (!isTyping) return;
+    if (!search) {
+      setOptions([]);
+      return;
+    }
 
-        if (!search) {
-            setOptions([]);
-            return;
-        }
+    const delay = setTimeout(async () => {
+      const data = await fetchOptions(search);
+      setOptions(data);
+      setOpen(true);
+    }, 400);
 
-        const delay = setTimeout(async () => {
-            const data = await fetchOptions(search);
-            setOptions(data);
-            setOpen(true);
-        }, 400);
+    return () => clearTimeout(delay);
+  }, [search, fetchOptions, justSelected, isTyping]);
 
-        return () => clearTimeout(delay);
-    }, [search, fetchOptions, justSelected, isTyping]);
+  /*  Position Calculation  */
+  useEffect(() => {
+    if (open && wrapperRef.current) {
+      const rect = wrapperRef.current.getBoundingClientRect();
 
+      setDropdownPos({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  }, [open, options]);
 
+  /*  Outside Click  */
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
 
-    /*  Position Calculation  */
-    useEffect(() => {
-        if (open && wrapperRef.current) {
-            const rect =
-                wrapperRef.current.getBoundingClientRect();
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
-            setDropdownPos({
-                top: rect.bottom + window.scrollY,
-                left: rect.left + window.scrollX,
-                width: rect.width,
-            });
-        }
-    }, [open, options]);
+  return (
+    <>
+      {/* Input Wrapper */}
+      <div ref={wrapperRef} className="flex flex-col text- w-full">
+        <label className="text-[10px] font-medium mb-1">{label}</label>
 
-    /*  Outside Click  */
-    useEffect(() => {
-        const handleClick = (e: MouseEvent) => {
-            if (
-                wrapperRef.current &&
-                !wrapperRef.current.contains(e.target as Node) &&
-                dropdownRef.current &&
-                !dropdownRef.current.contains(e.target as Node)
-            ) {
-                setOpen(false);
-            }
+        <input
+          value={search}
+          placeholder={placeholder}
+          disabled={disabled}
+          onChange={(e) => {
+            setIsTyping(true);
+            setSearch(e.target.value);
+            onChange("");
+          }}
+          onFocus={() => search && setOpen(true)}
+          className="w-full py-2 px-3 border border-theme rounded text-[13px] text-main bg-card"
+        />
+      </div>
 
-        };
-
-        document.addEventListener(
-            "mousedown",
-            handleClick
-        );
-        return () =>
-            document.removeEventListener(
-                "mousedown",
-                handleClick
-            );
-    }, []);
-
-    return (
-        <>
-            {/* Input Wrapper */}
-            <div
-                ref={wrapperRef}
-                className="flex flex-col text-sm w-full"
-            >
-                <label className="text-[10px] font-medium mb-1">
-                    {label}
-                </label>
-
-                <input
-                    value={search}
-                    placeholder={placeholder}
-                    disabled={disabled}
-                    onChange={(e) => {
-                        setIsTyping(true);
-                        setSearch(e.target.value);
-                        onChange("");
-                    }}
-                    onFocus={() => search && setOpen(true)}
-                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                />
-
-            </div>
-
-            {/* Portal Dropdown */}
-            {open &&
-                options.length > 0 &&
-                createPortal(
-                    <div
-                        ref={dropdownRef}
-                        style={{
-                            position: "absolute",
-                            top: dropdownPos.top,
-                            left: dropdownPos.left,
-                            width: dropdownPos.width,
-                            zIndex: 9999,
-                        }}
-                        className="  bg-white border rounded shadow-lg max-h-48 overflow-auto  "
-                    >
-                        {options.map((opt) => (
-                            <div
-                                key={opt.value}
-                                onClick={() => {
-                                    setIsTyping(false);
-                                    setJustSelected(true);
-                                    onChange(opt.value);
-                                    setSearch(opt.label);
-                                    setOpen(false);
-                                }}
-                                className="px-2 py-1 cursor-pointer text-[11px] hover:bg-gray-100"
-                            >
-                                {opt.label}
-                            </div>
-                        ))}
-                    </div>,
-                    document.body
-                )}
-        </>
-    );
+      {/* Portal Dropdown */}
+      {open &&
+        options.length > 0 &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            style={{
+              position: "absolute",
+              top: dropdownPos.top,
+              left: dropdownPos.left,
+              width: dropdownPos.width,
+              zIndex: 9999,
+            }}
+            className="  bg-white border rounded shadow-lg max-h-48 overflow-auto  "
+          >
+            {options.map((opt) => (
+              <div
+                key={opt.value}
+                onClick={() => {
+                  setIsTyping(false);
+                  setJustSelected(true);
+                  onChange(opt.value);
+                  setSearch(opt.label);
+                  setOpen(false);
+                }}
+                className="px-3 py-2 cursor-pointer text-[13px] hover:bg-gray-100"
+              >
+                {opt.label}
+              </div>
+            ))}
+          </div>,
+          document.body,
+        )}
+    </>
+  );
 };
 
 export default SearchSelect;

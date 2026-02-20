@@ -1,14 +1,15 @@
 import React from "react";
-import { DollarSign } from "lucide-react";
-import { Input, Card } from "../../ui/modal/formComponent";
-import Select from "../../ui/Select";
 import type { SupplierFormData } from "../../../types/Supply/supplier";
 import { currencyOptions } from "../../../types/Supply/supplier";
 import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
 
 interface PaymentInfoTabProps {
   form: SupplierFormData;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => void;
 }
 
 const currencySelectOptions = currencyOptions.map((c) => ({
@@ -16,7 +17,10 @@ const currencySelectOptions = currencyOptions.map((c) => ({
   label: c,
 }));
 
-export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }) => {
+export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
+  form,
+  onChange,
+}) => {
   return (
     <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
       {/* Payment Details */}
@@ -29,19 +33,16 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
             name="currency"
             value={form.currency}
             onChange={onChange}
-            options={[
-              ...currencySelectOptions,
-            ]}
+            options={[...currencySelectOptions]}
           />
 
           <ModalInput
             label="Payment Terms "
             name="paymentTerms"
-            min={0}        // UI block
+            min={0} // UI block
             value={form.paymentTerms}
             onChange={onChange}
           />
-
 
           <ModalInput
             label="Date of Addition"
@@ -68,8 +69,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({ form, onChange }
         <h3 className="text-sm font-semibold text-gray-700">Bank Details</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-
-            <ModalInput
+          <ModalInput
             label="Bank"
             name="bankAccount"
             value={form.bankAccount}
