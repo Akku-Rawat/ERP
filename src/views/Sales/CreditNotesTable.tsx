@@ -8,6 +8,8 @@ import { getAllCreditNotes } from "../../api/salesApi";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { showLoading, closeSwal , showApiError , showSuccess } from "../../utils/alert";
+import InvoiceDetailsModal from "./InvoiceDetailsModal";
+import ActionButton, { ActionGroup } from "../../components/ui/Table/ActionButton";
 
 
 type CreditNote = {
@@ -30,6 +32,32 @@ const CreditNotesTable: React.FC = () => {
   const [totalItems, setTotalItems] = useState(0);
 
   const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsId, setDetailsId] = useState<string | null>(null);
+
+  const handleOpenReceipt = (receiptUrl: string) => {
+    const normalizedUrl = receiptUrl.startsWith("http://")
+      ? receiptUrl.replace(/^http:\/\//i, "https://")
+      : receiptUrl;
+
+    const urlWithoutPort = (() => {
+      try {
+        const u = new URL(normalizedUrl);
+        u.port = "";
+        return u.toString();
+      } catch {
+        return normalizedUrl.replace(/^(https?:\/\/[^\/]+):\d+(\/.*)?$/i, "$1$2");
+      }
+    })();
+
+    const a = document.createElement("a");
+    a.href = urlWithoutPort;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
 
   const columns: Column<CreditNote>[] = [
     { key: "noteNo", header: "Credit invoice No" },
@@ -51,6 +79,24 @@ const CreditNotesTable: React.FC = () => {
       key: "status",
       header: "Status",
       render: (r) => <StatusBadge status={r.status} />,
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      align: "center",
+      render: (r) => (
+        <ActionGroup>
+          <ActionButton
+            type="view"
+            iconOnly
+            variant="secondary"
+            onClick={() => {
+              setDetailsId(r.noteNo);
+              setDetailsOpen(true);
+            }}
+          />
+        </ActionGroup>
+      ),
     },
   ];
   const fetchCreditNotes = async () => {
@@ -195,6 +241,16 @@ const handleExportExcel = async () => {
           setPage(1); // reset page
         }}
         onPageChange={setPage}
+      />
+
+      <InvoiceDetailsModal
+        open={detailsOpen}
+        invoiceId={detailsId}
+        onClose={() => {
+          setDetailsOpen(false);
+          setDetailsId(null);
+        }}
+        onOpenReceiptPdf={handleOpenReceipt}
       />
 
 
