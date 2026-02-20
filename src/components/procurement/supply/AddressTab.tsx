@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import React from "react";
 import type { SupplierFormData } from "../../../types/Supply/supplier";
 import { ModalInput } from "../../ui/modal/modalComponent";
@@ -8,15 +12,11 @@ interface AddressTabProps {
   onChange: (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => void;
 }
 
-export const AddressTab: React.FC<AddressTabProps> = ({
-  form,
-  onChange,
-}) => {
-
+export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange }) => {
   const fetchCountryOptions = async (q: string) => {
     const res = await getCountry(q);
     return (res.data || []).map((c: string) => ({
@@ -59,7 +59,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({
             value={form.billingAddressLine2}
             onChange={onChange}
           />
-          
+
           <SearchSelect
             label="City / Town"
             value={form.billingCity}
@@ -100,8 +100,6 @@ export const AddressTab: React.FC<AddressTabProps> = ({
             fetchOptions={fetchProvinceOptions}
           />
 
-
-
           <ModalInput
             label="Postal Code"
             name="billingPostalCode"
@@ -109,7 +107,6 @@ export const AddressTab: React.FC<AddressTabProps> = ({
             onChange={onChange}
           />
         </div>
-
       </div>
     </section>
   );

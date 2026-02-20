@@ -1,13 +1,16 @@
 import React from "react";
-import { Building2, DollarSign , MapPin} from "lucide-react";
+import { Building2, DollarSign, MapPin } from "lucide-react";
 import Modal from "../../ui/modal/modal";
 import { Button } from "../../ui/modal/formComponent";
 import { SupplierInfoTab } from "./SupplierInfoTab";
 import { PaymentInfoTab } from "./PaymentInfoTab";
 import { useSupplierForm } from "../../../hooks/useSupplierForm";
-import type { SupplierTab, SupplierFormData, Supplier } from "../../../types/Supply/supplier";
+import type {
+  SupplierTab,
+  SupplierFormData,
+  Supplier,
+} from "../../../types/Supply/supplier";
 import { AddressTab } from "./AddressTab";
-
 
 interface SupplierModalProps {
   isOpen: boolean;
@@ -19,7 +22,7 @@ interface SupplierModalProps {
 const tabs: { key: SupplierTab; icon: typeof Building2; label: string }[] = [
   { key: "supplier", icon: Building2, label: "Supplier" },
   { key: "payment", icon: DollarSign, label: "Payment" },
-   {key : "address",icon: MapPin, label: "Address"}
+  { key: "address", icon: MapPin, label: "Address" },
 ];
 
 const SupplierModal: React.FC<SupplierModalProps> = ({
@@ -59,8 +62,6 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
           variant="secondary"
           onClick={goToNextTab}
           disabled={activeTab === "address"}
-
-
           type="button"
         >
           Next →
@@ -73,9 +74,6 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         >
           {isEditMode ? "Update Supplier" : "Save Supplier"}
         </Button>
-
-
-
       </div>
     </>
   );
@@ -100,7 +98,6 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         onSubmit={handleSubmit}
         className="h-full flex flex-col"
       >
-
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
@@ -110,12 +107,12 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
                 type="button"
                 onClick={() => setActiveTab(key)}
                 className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2
-          ${activeTab === key
-                    ? "text-primary border-b-[3px] border-primary"
-                    : "text-muted border-b-[3px] border-transparent hover:text-main"
-                  }`}
+          ${
+            activeTab === key
+              ? "text-primary border-b-[3px] border-primary"
+              : "text-muted border-b-[3px] border-transparent hover:text-main"
+          }`}
               >
-                
                 {/* LABEL */}
                 {label}
               </button>
@@ -125,7 +122,6 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
 
         {/* Content */}
         <div className="gap-6  p-4">
-
           {activeTab === "supplier" && (
             <SupplierInfoTab form={form} onChange={handleChange} />
           )}
@@ -135,10 +131,8 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
           {activeTab === "address" && (
             <AddressTab form={form} onChange={handleChange} />
           )}
-
         </div>
       </form>
-
     </Modal>
   );
 };

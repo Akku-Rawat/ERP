@@ -46,37 +46,36 @@ const ItemsCategoryModal: React.FC<{
     }
     setActiveTab("type");
   }, [initialData, isOpen]);
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const payload = { ...form };
-    delete payload.id;
+    try {
+      const payload = { ...form };
+      delete payload.id;
 
-    let response;
+      let response;
 
-    if (isEditMode && initialData?.id) {
-      response = await updateItemGroupById(initialData.id, payload);
-    } else {
-      response = await createItemGroup(payload);
+      if (isEditMode && initialData?.id) {
+        response = await updateItemGroupById(initialData.id, payload);
+      } else {
+        response = await createItemGroup(payload);
+      }
+
+      if (!response || ![200, 201].includes(response.status_code)) {
+        showApiError(response);
+        return;
+      }
+
+      onSubmit?.(payload);
+      handleClose();
+    } catch (err: any) {
+      console.error("Category save failed:", err);
+      showApiError(err);
+    } finally {
+      setLoading(false);
     }
-
-    if (!response || ![200, 201].includes(response.status_code)) {
-      showApiError(response);
-      return;
-    }
-
- 
-    onSubmit?.(payload);
-    handleClose();
-  } catch (err: any) {
-    console.error("Category save failed:", err);
-    showApiError(err);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleChange = (
     e: React.ChangeEvent<

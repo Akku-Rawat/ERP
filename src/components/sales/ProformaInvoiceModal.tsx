@@ -276,33 +276,15 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                     <table className="w-full border-collapse text-[10px]">
                       <thead>
                         <tr className="border-b border-theme">
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">
-                            #
-                          </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">
-                            Item
-                          </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">
-                            Description
-                          </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">
-                            Quantity
-                          </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
-                            Unit Price
-                          </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
-                            Discount
-                          </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
-                            Tax
-                          </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
-                            Tax Code
-                          </th>
-                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">
-                            Amount
-                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">#</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">Item</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">Description</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">Quantity</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Unit Price</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Discount (%)</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax Code</th>
+                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">Amount</th>
                           <th></th>
                         </tr>
                       </thead>

@@ -7,6 +7,7 @@ import {
 import type { InvoiceSummary, Invoice } from "../../types/invoice";
 import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTemplate1";
 import PdfPreviewModal from "./PdfPreviewModal";
+import InvoiceDetailsModal from "./InvoiceDetailsModal";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 import Table from "../../components/ui/Table/Table";
 
@@ -56,10 +57,9 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
+  const [invoiceDetailsOpen, setInvoiceDetailsOpen] = useState(false);
+  const [invoiceDetailsId, setInvoiceDetailsId] = useState<string | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
-  const [openStatusMenuFor, setOpenStatusMenuFor] = useState<string | null>(
-    null,
-  );
   const fetchCompany = async () => {
     const res = await getCompanyById(COMPANY_ID); // valid ID
     if (!res || res.status_code !== 200) {
@@ -200,47 +200,39 @@ const handleExportExcel = async () => {
 ) => {
   e?.stopPropagation();
 
-  try {
-    
-    showLoading("Loading invoice preview...");
-
-    if (!company) {
-      closeSwal(); 
-      console.error("Company data not loaded");
-      return;
-    }
-
-    const invoiceRes = await getSalesInvoiceById(
-      invoiceNumber
-    );
-
-    if (!invoiceRes || invoiceRes.status_code !== 200) {
-      closeSwal();
-      showApiError("Failed to load invoice");
-      return;
-    }
-
-    const invoice = invoiceRes.data as Invoice;
-
-    setSelectedInvoice(invoice);
-
-    const url = await generateInvoicePDF(
-      invoice,
-      company,
-      "bloburl"
-    );
-
-    setPdfUrl(url as string);
-    setPdfOpen(true);
-
-    
-    closeSwal();
-
-  } catch (err: any) {
-    closeSwal(); 
-    showApiError(err);
-  }
+  setInvoiceDetailsId(invoiceNumber);
+  setInvoiceDetailsOpen(true);
 };
+
+  const handleOpenReceiptPdf = async (receiptUrl: string) => {
+    try {
+      const normalizedUrl = receiptUrl.startsWith("http://")
+        ? receiptUrl.replace(/^http:\/\//i, "https://")
+        : receiptUrl;
+
+      const urlWithoutPort = (() => {
+        try {
+          const u = new URL(normalizedUrl);
+          u.port = "";
+          return u.toString();
+        } catch {
+          return normalizedUrl.replace(/^(https?:\/\/[^\/]+):\d+(\/.*)?$/i, "$1$2");
+        }
+      })();
+
+      const a = document.createElement("a");
+      a.href = urlWithoutPort;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setInvoiceDetailsOpen(false);
+    } catch (err: any) {
+      showApiError(err);
+    }
+  };
 
 
   const handleDownload = async (
@@ -288,10 +280,15 @@ const handleExportExcel = async () => {
 
 
   const handleClosePdf = () => {
-    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    if (pdfUrl?.startsWith("blob:")) URL.revokeObjectURL(pdfUrl);
     setPdfUrl(null);
     setSelectedInvoice(null);
     setPdfOpen(false);
+  };
+
+  const handleCloseInvoiceDetails = () => {
+    setInvoiceDetailsOpen(false);
+    setInvoiceDetailsId(null);
   };
 
   const handleRowStatusChange = async (
@@ -322,7 +319,6 @@ const handleExportExcel = async () => {
     );
 
     showSuccess(`Invoice marked as ${status}`);
-    setOpenStatusMenuFor(null);
   };
 
   const handleDelete = async (invoiceNumber: string, e?: React.MouseEvent) => {
@@ -477,6 +473,13 @@ const handleExportExcel = async () => {
           company &&
           generateInvoicePDF(selectedInvoice, company, "save")
         }
+      />
+
+      <InvoiceDetailsModal
+        open={invoiceDetailsOpen}
+        invoiceId={invoiceDetailsId}
+        onClose={handleCloseInvoiceDetails}
+        onOpenReceiptPdf={handleOpenReceiptPdf}
       />
     </div>
   );
