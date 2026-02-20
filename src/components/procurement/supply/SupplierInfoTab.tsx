@@ -1,24 +1,29 @@
 import React, { useState } from "react";
-import { taxCategorySelectOptions, type SupplierFormData } from "../../../types/Supply/supplier";
+import {
+  taxCategorySelectOptions,
+  type SupplierFormData,
+} from "../../../types/Supply/supplier";
 import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
-
 
 interface SupplierInfoTabProps {
   form: SupplierFormData;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => void;
 }
 
-export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange }) => {
-
+export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
+  form,
+  onChange,
+}) => {
   const [errors, setErrors] = useState<{
     phoneNo?: string;
     alternateNo?: string;
   }>({});
 
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     // parent form change
@@ -50,7 +55,9 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
       <div className="space-y-6">
         {/* Supplier Details */}
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-gray-700">Supplier Details</h3>
+          <h3 className="text-sm font-semibold text-gray-700">
+            Supplier Details
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
             <ModalInput
               label="Tax Id / TPIN"
@@ -78,18 +85,16 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               name="taxCategory"
               value={form.taxCategory}
               onChange={onChange}
-              options={[
-                ...taxCategorySelectOptions,
-              ]}
+              options={[...taxCategorySelectOptions]}
             />
-
           </div>
         </div>
 
-
         {/* Contact Details */}
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-gray-700">Contact Details</h3>
+          <h3 className="text-sm font-semibold text-gray-700">
+            Contact Details
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
             <ModalInput
               label="Contact Person Name"
@@ -124,11 +129,9 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({ form, onChange
               value={form.emailId}
               onChange={onChange}
               type="email"
-
             />
           </div>
         </div>
-
       </div>
     </section>
   );
