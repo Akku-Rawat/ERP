@@ -13,6 +13,7 @@ interface CustomerSelectProps {
   onChange: (customer: { id: string; name: string }) => void;
   className?: string;
   label?: string;
+  taxCategory?: string;
 }
 
 export default function CustomerSelect({
@@ -21,6 +22,7 @@ export default function CustomerSelect({
   onChange,
   className = "",
   label = "Customer",
+  taxCategory,
 }: CustomerSelectProps) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ export default function CustomerSelect({
     const loadCustomers = async () => {
       try {
         setLoading(true);
-        const res = await getAllCustomers(1, 100);
+        const res = await getAllCustomers(1, 100, taxCategory);
         if (res?.status_code !== 200) return;
 
         setCustomers(
@@ -48,7 +50,7 @@ export default function CustomerSelect({
     };
 
     loadCustomers();
-  }, []);
+  }, [taxCategory]);
 
   useEffect(() => {
     setSearch(value);
