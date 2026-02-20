@@ -578,7 +578,9 @@ const amount = qty * price - discountAmount;
                   title="Billing Address"
                   subtitle="Invoice and payment details"
                   data={formData.billingAddress}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(
+                    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+                  ) =>
                     actions.handleInputChange(e, "billingAddress")
                   }
                 />
@@ -591,7 +593,9 @@ const amount = qty * price - discountAmount;
                   data={formData.shippingAddress}
                   sameAsBilling={ui.sameAsBilling}
                   onSameAsBillingChange={actions.handleSameAsBillingChange}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(
+                    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+                  ) =>
                     actions.handleInputChange(e, "shippingAddress")
                   }
                 />
