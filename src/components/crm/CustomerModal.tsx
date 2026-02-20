@@ -25,7 +25,7 @@ import { ModalInput, ModalSelect } from "../ui/modal/modalComponent";
 const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   id: "",
   name: "",
-  type: "Individual",
+  type: "",
   tpin: "",
   currency: "",
   onboardingBalance: 0,
@@ -508,9 +508,12 @@ const CustomerModal: React.FC<{
                   value={form.type}
                   onChange={handleChange}
                   options={[
+                    { value: "", label: "Select" },
                     { value: "Individual", label: "Individual" },
                     { value: "Company", label: "Company" },
                   ]}
+                  required
+                  // error={errors.type}
                 />
 
                 <ModalInput
