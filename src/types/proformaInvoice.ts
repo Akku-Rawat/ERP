@@ -13,6 +13,8 @@ export interface ProformaInvoice {
   invoiceType: string;
   destnCountryCd?: string;
   lpoNumber?: string;
+  receipt?: string;
+  receiptNo?: string;
 
   billingAddress: Address;
   shippingAddress: Address;
