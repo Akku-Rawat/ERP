@@ -32,10 +32,10 @@ const getVariant = (): BadgeVariant => {
 
 
 const variantStyles: Record<BadgeVariant, string> = {
-  success: "bg-success text-success border-theme",
-  danger: "bg-danger text-danger border-theme",
-  warning: "bg-warning text-warning border-theme",
-  info: "bg-info text-info border-theme",
+  success: "bg-success border-theme",
+  danger: "bg-danger border-theme",
+  warning: "bg-warning border-theme",
+  info: "bg-info border-theme",
   default: "bg-row-hover text-muted border-theme",
 };
 
