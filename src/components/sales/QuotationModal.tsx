@@ -84,8 +84,8 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
           <div className="flex gap-8">
             {[
               { key: "details", label: "Details" },
-              { key: "terms", label: "Terms & Conditions" },
               { key: "address", label: "Additional Details" },
+              { key: "terms", label: "Terms & Conditions" },
             ].map((tab) => (
               <button
                 key={tab.key}
