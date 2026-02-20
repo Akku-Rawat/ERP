@@ -1,6 +1,5 @@
 // PayrollValidationModal.tsx
-// ERP-grade pre-payroll validation screen — shows blockers, warnings, and infos
-// before allowing a payroll run. Inspired by Darwinbox / SAP SuccessFactors patterns.
+
 
 import React, { useState, useMemo } from "react";
 import {
@@ -119,27 +118,32 @@ const CatTab: React.FC<{ label: string; count: number; active: boolean; onClick:
 export const PayrollValidationModal: React.FC<PayrollValidationModalProps> = ({
   show, result, isRunning, onClose, onProceed, onRevalidate,
 }) => {
-  const [activeFilter, setActiveFilter] = useState<"all" | ValidationSeverity>("all");
-  const [activeCat, setActiveCat] = useState<string>("all");
+ const [activeFilter, setActiveFilter] = useState<"all" | ValidationSeverity>("all");
+const [activeCat, setActiveCat] = useState<string>("all");
 
-  if (!show || !result) return null;
+// Always define safe fallback before condition
+const allIssues = result
+  ? [...result.errors, ...result.warnings, ...result.infos]
+  : [];
 
-  const allIssues = [...result.errors, ...result.warnings, ...result.infos];
+const filteredIssues = useMemo(() => {
+  if (!result) return [];
 
-  const filteredIssues = useMemo(() => {
-    let out = allIssues;
-    if (activeFilter !== "all") out = out.filter(i => i.severity === activeFilter);
-    if (activeCat    !== "all") out = out.filter(i => i.category === activeCat);
-    return out;
-  }, [allIssues, activeFilter, activeCat]);
+  let out = allIssues;
+  if (activeFilter !== "all") out = out.filter(i => i.severity === activeFilter);
+  if (activeCat !== "all") out = out.filter(i => i.category === activeCat);
+  return out;
+}, [allIssues, activeFilter, activeCat, result]);
 
-  const categories = useMemo(() => {
-    const cats = new Set(allIssues.map(i => i.category));
-    return Array.from(cats);
-  }, [allIssues]);
+const categories = useMemo(() => {
+  if (!result) return [];
+  const cats = new Set(allIssues.map(i => i.category));
+  return Array.from(cats);
+}, [allIssues, result]);
 
-  const { canProceed, summary } = result;
+if (!show || !result) return null;
 
+const { canProceed, summary } = result;
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center p-4 pt-8 overflow-y-auto">
       <div

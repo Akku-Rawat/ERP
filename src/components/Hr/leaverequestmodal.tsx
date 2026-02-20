@@ -2,8 +2,7 @@
 import React, { useState } from "react";
 import { Modal } from "../../ui/Modal";
 import { Input, Select, Textarea, Button } from "../../ui/FormComponents";
-import { CalendarPlus } from "lucide-react";
-import { useToast } from "../../hooks/use-toast";
+import { CalendarPlus } from "lucide-react"
 
 interface LeaveRequestModalProps {
   isOpen: boolean;
