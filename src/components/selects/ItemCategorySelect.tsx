@@ -7,6 +7,7 @@ interface ItemCategorySelectProps {
   className?: string;
   label?: string;
   required?: boolean;
+  filterByItemType?: string;
 }
 
 export default function ItemCategorySelect({
@@ -15,6 +16,7 @@ export default function ItemCategorySelect({
   className = "",
   label = "Item Category",
   required = false,
+  filterByItemType,
 }: ItemCategorySelectProps) {
   const [categories, setCategories] = useState<{ name: string; id: string }[]>(
     [],
@@ -29,7 +31,7 @@ export default function ItemCategorySelect({
     const load = async () => {
       try {
         setLoading(true);
-        const res = await getAllItemGroups();
+        const res = await getAllItemGroups(1, 130, filterByItemType);
 
         if (!res || res?.status_code !== 200 || !Array.isArray(res.data)) {
           console.warn("Invalid API response, setting empty categories");
@@ -54,7 +56,7 @@ export default function ItemCategorySelect({
     };
 
     load();
-  }, []);
+  }, [filterByItemType]);
   /* -------- Close dropdown when clicking outside -------- */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
