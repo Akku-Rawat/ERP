@@ -271,7 +271,7 @@ export const EmployeeDetailPage: React.FC<EmployeeDetailPageProps> = ({
                 </div>
 
                 {/* Net pay highlight */}
-                <div className="rounded-2xl bg-gradient-to-r from-primary to-violet-600 p-5 flex items-center justify-between text-white">
+                <div className="rounded-2xl bg-primary to-violet-600 p-5 flex items-center justify-between text-white">
                   <div>
                     <p className="text-xs font-extrabold text-white/65 uppercase tracking-wider">Final Net Pay</p>
                     <p className="text-xs text-white/50 mt-0.5">Gross Earnings − Total Deductions</p>
