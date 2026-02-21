@@ -5,6 +5,7 @@ import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
 import { getCountryList } from "../api/lookupApi";
 import { getItemByItemCode } from "../api/itemApi";
+import { getExchangeRate } from "../api/exchangeRateApi";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 
@@ -46,6 +47,8 @@ const [companyData, setCompanyData] = useState<any>(null);
   const [sameAsBilling, setSameAsBilling] = useState(true);
   const [itemMaster, setItemMaster] = useState<any[]>([]);
   const [itemMasterLoading, setItemMasterLoading] = useState(false);
+  const [exchangeRateLoading, setExchangeRateLoading] = useState(false);
+  const [exchangeRateError, setExchangeRateError] = useState<string | null>(null);
 
   const shippingEditedRef = useRef(false);
 
@@ -96,6 +99,45 @@ useEffect(() => {
     companyLoadedRef.current = false;
   }
 }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const code = String(formData.currencyCode ?? "").trim().toUpperCase();
+    if (!code || code === "ZMW") {
+      setExchangeRateLoading(false);
+      setExchangeRateError(null);
+      setFormData((prev) => ({ ...prev, exchangeRt: "1" }));
+      return;
+    }
+
+    let cancelled = false;
+    setExchangeRateLoading(true);
+    setExchangeRateError(null);
+
+    getExchangeRate(code)
+      .then((res) => {
+        if (cancelled) return;
+        const rate = Number(res?.exchange_rate);
+        if (!Number.isFinite(rate) || rate <= 0) {
+          setExchangeRateError("Invalid exchange rate");
+          return;
+        }
+        setFormData((prev) => ({ ...prev, exchangeRt: String(rate) }));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setExchangeRateError("Failed to load exchange rate");
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setExchangeRateLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, formData.currencyCode]);
   useEffect(() => {
     const maxPage = Math.max(
       0,
@@ -466,7 +508,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     const payload = {
       customerId: formData.customerId,
       currencyCode: formData.currencyCode,
-      exchangeRt: "1",
+      exchangeRt: String(formData.exchangeRt ?? "1"),
       dateOfQuotation: formData.dateOfInvoice,
       validUntil: formData.dueDate,
       industryBases: formData.industryBases || "Service",
@@ -551,12 +593,13 @@ const handleSubmit = async (e: React.FormEvent) => {
       sameAsBilling,
       itemCount: formData.items.length,
       isExport: formData.invoiceType === "Export",
-      isLocal: formData.invoiceType === "LPO",
+      isLocal: formData.invoiceType === "Lpo",
       isNonExport: formData.invoiceType === "Non-Export",
+      exchangeRateLoading,
+      exchangeRateError,
       hasC1: formData.items.some(
         (it) => String(it?.vatCode ?? "").toUpperCase() === "C1",
       ),
-      isQuotation: true,
     },
     actions: {
       handleInputChange,

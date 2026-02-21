@@ -272,6 +272,13 @@ export const API = {
     getUnitOfMeasure: `${CODES_BASE}/unit-of-measure-list/`,
     getItemClasses: `${CODES_BASE}/item-class-list/`,
   },
+
+  /* =========================
+   * EXCHANGE RATE
+   * ========================= */ 
+  exchangeRate: {
+    get: `${CODES_BASE}/exchange/`,
+  },
   rolaLookup: {
     getPackagingUnits: `${ERP_BASE}/api//`,
     getCountries: `${ERP_BASE}/api/country-list/`,

@@ -111,7 +111,7 @@ export const invoiceTypeOptions = [
 export const currencyOptions = [
   { value: "ZMW", label: "ZMW (ZK)" },
   { value: "USD", label: "USD ($)" },
-  { value: "ZAR", label: "ZAR (R)" },
+  { value: "ZRA", label: "ZRA (R)" },
   { value: "GBP", label: "GBP (£)" },
   { value: "CNY", label: "CNY (¥)" },
   { value: "EUR", label: "EUR (€)" },
@@ -121,6 +121,7 @@ export const currencySymbols: Record<string, string> = {
   ZMW: "ZK",
  
   USD: "$",
+  ZRA: "R",
   ZAR: "R",
   GBP: "£",
   CNY: "¥",

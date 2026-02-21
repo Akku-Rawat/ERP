@@ -5,13 +5,13 @@ import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
 import { getCountryList } from "../api/lookupApi";
 import { getItemByItemCode } from "../api/itemApi";
+import { getExchangeRate } from "../api/exchangeRateApi";
 
 import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
   EMPTY_TERMS,
 } from "../constants/invoice.constants";
-type InvoiceMode = "invoice" | "proforma";
 
 const ITEMS_PER_PAGE = 5;
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
@@ -23,8 +23,8 @@ type NestedSection =
 
 export const useInvoiceForm = (
   isOpen: boolean,
-  onClose: () => void,
-  onSubmit?: (data: any) => void,
+  _onClose: () => void,
+  _onSubmit?: (data: any) => void,
   mode?: "invoice" | "proforma",
   initialData?: any,
 ) => {
@@ -42,6 +42,8 @@ export const useInvoiceForm = (
   const [taxCategory, setTaxCategory] = useState<string | undefined>("");
   const [isShippingOpen, setIsShippingOpen] = useState(false);
   const [sameAsBilling, setSameAsBilling] = useState(true);
+  const [exchangeRateLoading, setExchangeRateLoading] = useState(false);
+  const [exchangeRateError, setExchangeRateError] = useState<string | null>(null);
 
   const shippingEditedRef = useRef(false);
 useEffect(() => {
@@ -79,6 +81,45 @@ useEffect(() => {
   loadCompanyData();
 }, [isOpen, mode]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const code = String(formData.currencyCode ?? "").trim().toUpperCase();
+    if (!code || code === "ZMW") {
+      setExchangeRateLoading(false);
+      setExchangeRateError(null);
+      setFormData((prev) => ({ ...prev, exchangeRt: "1" }));
+      return;
+    }
+
+    let cancelled = false;
+    setExchangeRateLoading(true);
+    setExchangeRateError(null);
+
+    getExchangeRate(code)
+      .then((res) => {
+        if (cancelled) return;
+        const rate = Number(res?.exchange_rate);
+        if (!Number.isFinite(rate) || rate <= 0) {
+          setExchangeRateError("Invalid exchange rate");
+          return;
+        }
+        setFormData((prev) => ({ ...prev, exchangeRt: String(rate) }));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setExchangeRateError("Failed to load exchange rate");
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setExchangeRateLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, formData.currencyCode]);
+
   const setInvoiceFromApi = (invoice: any) => {
     setFormData((prev: any) => ({
       ...prev,
@@ -93,6 +134,8 @@ useEffect(() => {
     const hasC1 = formData.items.some(
       (it) => String(it?.vatCode ?? "").toUpperCase() === "C1",
     );
+
+    const invoiceType = String(formData.invoiceType ?? "").trim().toLowerCase();
 
     if (!formData.customerId) {
       throw new Error("Please select a customer");
@@ -125,6 +168,13 @@ if (!formData.paymentInformation?.paymentTerms) {
         throw new Error(`Item ${idx + 1}: Price must be greater than 0`);
       }
     });
+
+    if (invoiceType === "lpo") {
+      const lpoNumber = String(formData.lpoNumber ?? "").trim();
+      if (!/^\d{10}$/.test(lpoNumber)) {
+        throw new Error("LPO Number must be exactly 10 digits");
+      }
+    }
 
     if (hasC1 && !formData.destnCountryCd) {
       throw new Error(
@@ -164,6 +214,12 @@ if (!formData.paymentInformation?.paymentTerms) {
         shippingEditedRef.current = true;
       }
     } else {
+      if (name === "lpoNumber") {
+        const digitsOnly = String(value ?? "").replace(/\D/g, "").slice(0, 10);
+        setFormData((prev) => ({ ...prev, [name]: digitsOnly }));
+        return;
+      }
+
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
@@ -315,9 +371,26 @@ if (!formData.paymentInformation?.paymentTerms) {
       setFormData((prev) => {
         const items = [...prev.items];
 
+        const resolvedId = String(data?.id ?? itemId).trim();
+        const existingIdx = items.findIndex(
+          (it, i) =>
+            i !== index && String(it?.itemCode ?? "").trim() === resolvedId,
+        );
+
+        if (existingIdx !== -1) {
+          const currentQty = Number(items[existingIdx]?.quantity) || 0;
+          items[existingIdx] = {
+            ...items[existingIdx],
+            quantity: currentQty + 1,
+          };
+
+          items[index] = { ...EMPTY_ITEM };
+          return { ...prev, items };
+        }
+
         items[index] = {
           ...items[index],
-          itemCode: data.id,
+          itemCode: resolvedId,
           description: data.itemDescription ?? data.itemName ?? "",
            price: Number(data.sellingPrice ?? items[index].price),   
         vatRate: Number(data.taxPerct ?? 0), 
@@ -526,9 +599,13 @@ tax += taxAmt;
       setIsShippingOpen,
       sameAsBilling,
       itemCount: formData.items.length,
-      isExport: formData.invoiceType === "Export",
-      isLocal: formData.invoiceType === "Lpo",
-      isNonExport: formData.invoiceType === "Non-Export",
+      isExport:
+        String(formData.invoiceType ?? "").trim().toLowerCase() === "export",
+      isLocal: String(formData.invoiceType ?? "").trim().toLowerCase() === "lpo",
+      isNonExport:
+        String(formData.invoiceType ?? "").trim().toLowerCase() === "non-export",
+      exchangeRateLoading,
+      exchangeRateError,
       hasC1: formData.items.some(
         (it) => String(it?.vatCode ?? "").toUpperCase() === "C1",
       ),

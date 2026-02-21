@@ -41,6 +41,8 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
   } = useQuotationForm(isOpen, onClose, onSubmit);
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
+  const showExchangeRate =
+    String(formData.currencyCode ?? "").trim().toUpperCase() !== "ZMW";
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,7 +111,9 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
           {ui.activeTab === "details" && (
             <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
               <div className="">
-                <div className="grid grid-cols-6 gap-3 items-end">
+                <div
+                  className={`grid ${showExchangeRate ? "grid-cols-7" : "grid-cols-6"} gap-3 items-end`}
+                >
                   {/* Customer */}
 
                   <CustomerSelect
@@ -155,6 +159,27 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     ></ModalSelect>
                   </div>
 
+                  {showExchangeRate && (
+                    <div>
+                      <ModalInput
+                        label={
+                          ui.exchangeRateLoading
+                            ? "Exchange Rate (Loading...)"
+                            : "Exchange Rate"
+                        }
+                        name="exchangeRt"
+                        value={formData.exchangeRt}
+                        onChange={actions.handleInputChange}
+                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                      />
+                      {!!ui.exchangeRateError && (
+                        <div className="mt-1 text-[10px] text-danger">
+                          {ui.exchangeRateError}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Status */}
                   <div>
                     <ModalSelect
@@ -165,6 +190,21 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       options={[...invoiceStatusOptions]}
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     ></ModalSelect>
+                  </div>
+
+                  <div>
+                    <ModalSelect
+                      label="Payment Method"
+                      name="paymentMethod"
+                      value={formData.paymentInformation?.paymentMethod}
+                      onChange={(
+                        e: React.ChangeEvent<
+                          HTMLInputElement | HTMLSelectElement
+                        >,
+                      ) => actions.handleInputChange(e, "paymentInformation")}
+                      options={[...paymentMethodOptions]}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    />
                   </div>
 
                   {(ui.isExport || ui.hasC1) && (
@@ -539,6 +579,7 @@ const amount = qty * price - discountAmount;
                   actions.handleInputChange(e, "paymentInformation")
                 }
                 paymentMethodOptions={paymentMethodOptions}
+                showPaymentMethod={false}
               />
 
               {/* BILLING + SHIPPING */}
