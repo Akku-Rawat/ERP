@@ -1,6 +1,7 @@
 import React from "react";
 import { FileText, Users, CheckCircle } from "lucide-react";
-import type { PayrollRecord } from "../../../views/hr/payroll/types";
+import type { PayrollRecord } from "../../../types/payrolltypes";
+
 
 interface ProcessingModalProps {
   show: boolean;
