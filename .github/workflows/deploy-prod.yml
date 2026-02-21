@@ -33,6 +33,7 @@ jobs:
             VITE_ZRA_CODES_BASE_URL=${{ secrets.ERP_ZRA_CODES_BASE_URL }}
             VITE_API_AUTH_TOKEN=${{ secrets.ERP_AUTH_TOKEN }}
             VITE_COMPANY_ID=${{ secrets.ERP_COMPANY_ID }}
+            VITE_NAPSA_BASE_URL=${{ secrets.ERP_NAPSA_BASE_URL }}
 
       - name: Copy deploy script to VPS
         uses: appleboy/scp-action@master
