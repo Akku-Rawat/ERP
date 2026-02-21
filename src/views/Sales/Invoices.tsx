@@ -10,201 +10,225 @@ import PdfPreviewModal from "./PdfPreviewModal";
 import InvoiceDetailsModal from "./InvoiceDetailsModal";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 import Table from "../../components/ui/Table/Table";
-
 import ActionButton, {
   ActionGroup,
   ActionMenu,
 } from "../../components/ui/Table/ActionButton";
-
 import type { Column } from "../../components/ui/Table/type";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { Company } from "../../types/company";
-import { showApiError, showSuccess , showLoading,closeSwal} from "../../utils/alert";
+import { showApiError, showSuccess, showLoading, closeSwal } from "../../utils/alert";
 import type { InvoiceStatus } from "../../types/invoice";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 
 const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
-  Draft: ["Rejected", "Approved"],
+  Draft:    ["Rejected", "Approved"],
   Rejected: ["Draft", "Approved"],
-  Paid: [],
-  Cancelled: ["Draft"],
+  Paid:     [],
+  Cancelled:["Draft"],
   Approved: ["Paid", "Cancelled"],
 };
 
 const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
-// const InvoicesTable: React.FC<{ onAdd?: () => void }> = ({ onAdd }) => {
+
+
 
 interface InvoiceTableProps {
   onAddInvoice?: () => void;
   onExportInvoice?: () => void;
 }
-const InvoiceTable: React.FC<InvoiceTableProps> = ({
-  onAddInvoice,
-}) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+
+
+const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
+
+  // ── Data ─────────────────────────────────────────────────────────────────
+  const [invoices, setInvoices]       = useState<InvoiceSummary[]>([]);
+  const [loading, setLoading]         = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [company, setCompany]         = useState<Company | null>(null);
+
+  // ── PDF preview (kept — do not remove) ───────────────────────────────────
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [pdfUrl, setPdfUrl]                   = useState<string | null>(null);
+  const [pdfOpen, setPdfOpen]                 = useState(false);
+
+  // ── Invoice details modal ─────────────────────────────────────────────────
+  const [invoiceDetailsOpen, setInvoiceDetailsOpen] = useState(false);
+  const [invoiceDetailsId, setInvoiceDetailsId]     = useState<string | null>(null);
+
+  // ── Pagination (server) ──────────────────────────────────────────────────
+  const [page, setPage]           = useState(1);
+  const [pageSize, setPageSize]   = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [pdfOpen, setPdfOpen] = useState(false);
-  const [invoiceDetailsOpen, setInvoiceDetailsOpen] = useState(false);
-  const [invoiceDetailsId, setInvoiceDetailsId] = useState<string | null>(null);
-  const [company, setCompany] = useState<Company | null>(null);
-  const fetchCompany = async () => {
-    const res = await getCompanyById(COMPANY_ID); // valid ID
-    if (!res || res.status_code !== 200) {
-      throw new Error("Company fetch failed");
-    }
-    setCompany(res.data);
-    return res.data;
-  };
+  // ── Search (server) ──────────────────────────────────────────────────────
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // ── Sort (server) — always store column key ──────────────────────────────
+  const [sortBy, setSortBy]       = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  // ── Reset page when search changes ───────────────────────────────────────
+  useEffect(() => { setPage(1); }, [searchTerm]);
+
+  // ── Fetch company once ────────────────────────────────────────────────────
+  useEffect(() => {
+    getCompanyById(COMPANY_ID)
+      .then((res) => {
+        if (res?.status_code === 200) setCompany(res.data);
+      })
+      .catch(() => console.error("Failed to load company data"));
+  }, []);
+
+  // ── Fetch invoices ────────────────────────────────────────────────────────
   const fetchInvoices = async () => {
     try {
       setLoading(true);
-      const res = await getAllSalesInvoices(page, pageSize);
+
+      // NOTE: add `search` param to getAllSalesInvoices in salesApi.ts
+      // signature: getAllSalesInvoices(page, page_size, sortBy, sortOrder, search)
+      const res = await getAllSalesInvoices(page, pageSize, sortBy, sortOrder, searchTerm);
       if (!res || res.status_code !== 200) return;
 
       const mapped: InvoiceSummary[] = res.data.map((inv: any) => ({
-        invoiceNumber: inv.invoiceNumber,
-        customerName: inv.customerName,
-        receiptNumber: inv.receiptNumber,
-        currency: inv.currency,
-        exchangeRate: inv.exchangeRate,
-        dueDate: inv.dueDate,
-        dateOfInvoice: new Date(inv.dateOfInvoice),
-        total: Number(inv.totalAmount),
-        totalTax: inv.totalTax,
-        invoiceStatus: inv.invoiceStatus,
-        invoiceTypeParent: inv.invoiceTypeParent,
-        invoiceType: inv.invoiceType,
+        invoiceNumber:    inv.invoiceNumber,
+        customerName:     inv.customerName,
+        receiptNumber:    inv.receiptNumber,
+        currency:         inv.currency,
+        exchangeRate:     inv.exchangeRate,
+        dueDate:          inv.dueDate,
+        dateOfInvoice:    new Date(inv.dateOfInvoice),
+        total:            Number(inv.totalAmount),
+        totalTax:         inv.totalTax,
+        invoiceStatus:    inv.invoiceStatus,
+        invoiceTypeParent:inv.invoiceTypeParent,
+        invoiceType:      inv.invoiceType,
       }));
 
       setInvoices(mapped);
       setTotalPages(res.pagination?.total_pages || 1);
-      setTotalItems(res.pagination?.total || mapped.length);
+      setTotalItems(res.pagination?.total       || mapped.length);
     } finally {
       setLoading(false);
       setInitialLoad(false);
     }
   };
-  useEffect(() => {
-    fetchCompany().catch(() => console.error("Failed to load company data"));
-  }, []);
 
   useEffect(() => {
     fetchInvoices();
-  }, [page, pageSize]);
+  }, [page, pageSize, sortBy, sortOrder, searchTerm]); // ← searchTerm included
 
-  const fetchAllInvoicesForExport = async () => {
-  try {
-    let allData: InvoiceSummary[] = [];
-    let currentPage = 1;
-    let totalPagesLocal = 1;
 
-    do {
-      const res = await getAllSalesInvoices(currentPage, 100);
+  const handleSortChange = ({
+    sortBy: colKey,
+    sortOrder: order,
+  }: {
+    sortBy: string;
+    sortOrder: "asc" | "desc";
+  }) => {
+    setSortBy(colKey);   // store column key, not a backend alias
+    setSortOrder(order);
+    setPage(1);
+  };
 
-      if (res?.status_code === 200) {
-        const mapped: InvoiceSummary[] = res.data.map((inv: any) => ({
-          invoiceNumber: inv.invoiceNumber,
-          customerName: inv.customerName,
-          receiptNumber: inv.receiptNumber,
-          currency: inv.currency,
-          exchangeRate: inv.exchangeRate,
-          dueDate: inv.dueDate,
-          dateOfInvoice: new Date(inv.dateOfInvoice),
-          total: Number(inv.totalAmount),
-          totalTax: inv.totalTax,
-          invoiceStatus: inv.invoiceStatus,
-          invoiceTypeParent: inv.invoiceTypeParent,
-          invoiceType: inv.invoiceType,
-        }));
 
-        allData = [...allData, ...mapped];
-        totalPagesLocal = res.pagination?.total_pages || 1;
+  const fetchAllInvoicesForExport = async (): Promise<InvoiceSummary[]> => {
+    try {
+      let allData: InvoiceSummary[] = [];
+      let current = 1;
+      let total   = 1;
+
+      do {
+        const res = await getAllSalesInvoices(current, 100, sortBy, sortOrder, searchTerm);
+
+        if (res?.status_code === 200) {
+          const mapped: InvoiceSummary[] = res.data.map((inv: any) => ({
+            invoiceNumber:    inv.invoiceNumber,
+            customerName:     inv.customerName,
+            receiptNumber:    inv.receiptNumber,
+            currency:         inv.currency,
+            exchangeRate:     inv.exchangeRate,
+            dueDate:          inv.dueDate,
+            dateOfInvoice:    new Date(inv.dateOfInvoice),
+            total:            Number(inv.totalAmount),
+            totalTax:         inv.totalTax,
+            invoiceStatus:    inv.invoiceStatus,
+            invoiceTypeParent:inv.invoiceTypeParent,
+            invoiceType:      inv.invoiceType,
+          }));
+
+          allData = [...allData, ...mapped];
+          total   = res.pagination?.total_pages || 1;
+        }
+
+        current++;
+      } while (current <= total);
+
+      return allData;
+    } catch (error) {
+      showApiError(error);
+      return [];
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      showLoading("Exporting Sales Invoices...");
+
+      const dataToExport = await fetchAllInvoicesForExport();
+
+      if (!dataToExport.length) {
+        closeSwal();
+        showApiError("No invoices to export");
+        return;
       }
 
-      currentPage++;
-    } while (currentPage <= totalPagesLocal);
+      const worksheet = XLSX.utils.json_to_sheet(
+        dataToExport.map((inv) => ({
+          "Invoice No": inv.invoiceNumber,
+          Type:         inv.invoiceType,
+          Customer:     inv.customerName,
+          Date:         inv.dateOfInvoice.toLocaleDateString(),
+          "Due Date":   inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "",
+          Amount:       inv.total,
+          Currency:     inv.currency,
+          Status:       inv.invoiceStatus,
+        }))
+      );
 
-    return allData;
-  } catch (error) {
-    showApiError(error);
-    return [];
-  }
-};
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Invoices");
 
-const handleExportExcel = async () => {
-  try {
-    showLoading("Exporting Sales Invoices...");
+      saveAs(
+        new Blob(
+          [XLSX.write(workbook, { bookType: "xlsx", type: "array" })],
+          { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+        ),
+        "Sales_Invoices.xlsx"
+      );
 
-    const dataToExport = await fetchAllInvoicesForExport();
-
-    if (!dataToExport.length) {
       closeSwal();
-      showApiError("No invoices to export");
-      return;
+      showSuccess("Invoices exported successfully");
+    } catch (error) {
+      closeSwal();
+      showApiError(error);
     }
-
-    const formattedData = dataToExport.map((inv) => ({
-      "Invoice No": inv.invoiceNumber,
-      Type: inv.invoiceType,
-      Customer: inv.customerName,
-      Date: inv.dateOfInvoice.toLocaleDateString(),
-      "Due Date": inv.dueDate
-        ? new Date(inv.dueDate).toLocaleDateString()
-        : "",
-      Amount: inv.total,
-      Currency: inv.currency,
-      Status: inv.invoiceStatus,
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(formattedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Invoices");
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-
-    const fileData = new Blob([excelBuffer], {
-      type:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-
-    saveAs(fileData, "Sales_Invoices.xlsx");
-
-    closeSwal();
-    showSuccess("Invoices exported successfully");
-  } catch (error) {
-    closeSwal();
-    showApiError(error);
-  }
-};
+  };
 
 
-  const handleViewClick = async (
-  invoiceNumber: string,
-  e?: React.MouseEvent,
-) => {
-  e?.stopPropagation();
 
-  setInvoiceDetailsId(invoiceNumber);
-  setInvoiceDetailsOpen(true);
-};
+  const handleViewClick = (invoiceNumber: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setInvoiceDetailsId(invoiceNumber);
+    setInvoiceDetailsOpen(true);
+  };
 
-  const handleOpenReceiptPdf = async (receiptUrl: string) => {
+  const handleOpenReceiptPdf = (receiptUrl: string) => {
     try {
       const normalizedUrl = receiptUrl.startsWith("http://")
         ? receiptUrl.replace(/^http:\/\//i, "https://")
@@ -234,51 +258,34 @@ const handleExportExcel = async () => {
     }
   };
 
+  const handleDownload = async (inv: InvoiceSummary, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    try {
+      showLoading("Preparing invoice download...");
 
-  const handleDownload = async (
-  inv: InvoiceSummary,
-  e?: React.MouseEvent
-) => {
-  e?.stopPropagation();
+      if (!company) {
+        closeSwal();
+        showApiError("Company data not loaded");
+        return;
+      }
 
-  try {
-    
-    showLoading("Preparing invoice download...");
+      const invoiceRes = await getSalesInvoiceById(inv.invoiceNumber);
+      if (!invoiceRes || invoiceRes.status_code !== 200) {
+        closeSwal();
+        showApiError("Failed to load invoice");
+        return;
+      }
 
-    if (!company) {
+      await generateInvoicePDF(invoiceRes.data as Invoice, company, "save");
       closeSwal();
-      showApiError("Company data not loaded");
-      return;
-    }
-
-    const invoiceRes = await getSalesInvoiceById(
-      inv.invoiceNumber
-    );
-
-    if (!invoiceRes || invoiceRes.status_code !== 200) {
+      showSuccess("Invoice downloaded successfully!");
+    } catch (err: any) {
       closeSwal();
-      showApiError("Failed to load invoice");
-      return;
+      showApiError(err);
     }
+  };
 
-    const invoice = invoiceRes.data as Invoice;
-
-    await generateInvoicePDF(
-      invoice,
-      company,
-      "save"
-    );
-
-    closeSwal(); 
-    showSuccess("Invoice downloaded successfully!");
-
-  } catch (err: any) {
-    closeSwal();
-    showApiError(err);
-  }
-};
-
-
+  // PDF preview modal close (kept — do not remove)
   const handleClosePdf = () => {
     if (pdfUrl?.startsWith("blob:")) URL.revokeObjectURL(pdfUrl);
     setPdfUrl(null);
@@ -297,9 +304,7 @@ const handleExportExcel = async () => {
   ) => {
     if (
       CRITICAL_STATUSES.includes(status) &&
-      !window.confirm(
-        `Mark invoice ${invoiceNumber} as ${status}? This action cannot be undone.`,
-      )
+      !window.confirm(`Mark invoice ${invoiceNumber} as ${status}? This action cannot be undone.`)
     ) {
       return;
     }
@@ -312,10 +317,8 @@ const handleExportExcel = async () => {
 
     setInvoices((prev) =>
       prev.map((inv) =>
-        inv.invoiceNumber === invoiceNumber
-          ? { ...inv, invoiceStatus: status }
-          : inv,
-      ),
+        inv.invoiceNumber === invoiceNumber ? { ...inv, invoiceStatus: status } : inv
+      )
     );
 
     showSuccess(`Invoice marked as ${status}`);
@@ -324,25 +327,20 @@ const handleExportExcel = async () => {
   const handleDelete = async (invoiceNumber: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (!window.confirm(`Delete invoice ${invoiceNumber}?`)) return;
-
-    // Add your delete API call here
+    // TODO: wire up delete API call
     showSuccess("Invoice deleted successfully");
     console.log("Delete invoice:", invoiceNumber);
   };
 
-  const filteredInvoices = invoices.filter(
-    (inv) =>
-      inv.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inv.customerName.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
 
-  // Table columns definition
+
   const columns: Column<InvoiceSummary>[] = [
     {
       key: "invoiceNumber",
       header: "Invoice No",
       align: "left",
-      render: (inv: InvoiceSummary) => (
+      sortable: true,
+      render: (inv) => (
         <span className="font-semibold text-main">{inv.invoiceNumber}</span>
       ),
     },
@@ -350,7 +348,7 @@ const handleExportExcel = async () => {
       key: "invoiceType",
       header: "Type",
       align: "left",
-      render: (inv: InvoiceSummary) => (
+      render: (inv) => (
         <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
           {inv.invoiceType}
         </code>
@@ -360,7 +358,8 @@ const handleExportExcel = async () => {
       key: "customerName",
       header: "Customer",
       align: "left",
-      render: (inv: InvoiceSummary) => (
+      sortable: true,
+      render: (inv) => (
         <span className="text-sm text-main">{inv.customerName}</span>
       ),
     },
@@ -369,16 +368,17 @@ const handleExportExcel = async () => {
       header: "Date",
       align: "left",
       render: (inv) => (
-  <span className="text-xs text-muted">
-    {inv.dateOfInvoice.toLocaleDateString()}
-  </span>
-),
+        <span className="text-xs text-muted">
+          {inv.dateOfInvoice.toLocaleDateString()}
+        </span>
+      ),
     },
     {
       key: "dueDate",
       header: "Due Date",
       align: "left",
-      render: (inv: InvoiceSummary) => (
+      sortable: true,
+      render: (inv) => (
         <span className="text-xs text-muted">
           {inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "—"}
         </span>
@@ -388,7 +388,8 @@ const handleExportExcel = async () => {
       key: "total",
       header: "Amount",
       align: "right",
-      render: (inv: InvoiceSummary) => (
+      sortable: true,
+      render: (inv) => (
         <code className="text-xs px-2 py-1 rounded bg-row-hover text-main font-semibold whitespace-nowrap">
           {inv.total.toLocaleString()} {inv.currency}
         </code>
@@ -400,30 +401,22 @@ const handleExportExcel = async () => {
       align: "left",
       render: (inv) => <StatusBadge status={inv.invoiceStatus} />,
     },
-
     {
       key: "actions",
       header: "Actions",
       align: "center",
-      render: (inv: InvoiceSummary) => (
+      render: (inv) => (
         <ActionGroup>
           <ActionButton
             type="view"
             onClick={(e) => handleViewClick(inv.invoiceNumber, e)}
             iconOnly
           />
-          {/* <ActionButton
-            type="download"
-            onClick={(e) => handleDownload(inv, e)}
-            iconOnly={false}
-          /> */}
           <ActionMenu
             onDelete={(e) => handleDelete(inv.invoiceNumber, e)}
             showDownload
             onDownload={(e) => handleDownload(inv, e)}
-            customActions={(
-              STATUS_TRANSITIONS[inv.invoiceStatus] ?? []
-            ).map((status) => ({
+            customActions={(STATUS_TRANSITIONS[inv.invoiceStatus] ?? []).map((status) => ({
               label: `Mark as ${status}`,
               danger: status === "Paid",
               onClick: () => handleRowStatusChange(inv.invoiceNumber, status),
@@ -434,15 +427,18 @@ const handleExportExcel = async () => {
     },
   ];
 
+
+
   return (
     <div className="p-8">
       <Table
         columns={columns}
-        data={filteredInvoices}
+        data={invoices}                        // ← raw server data, no local filter
         rowKey={(row) => row.invoiceNumber}
-        showToolbar
         loading={loading || initialLoad}
-        serverSide
+        showToolbar
+        searchValue={searchTerm}
+        onSearch={(q) => { setSearchTerm(q); setPage(1); }}
         enableAdd
         addLabel="Add Invoice"
         onAdd={onAddInvoice}
@@ -450,27 +446,25 @@ const handleExportExcel = async () => {
         enableExport
         onExport={handleExportExcel}
         currentPage={page}
-        searchValue={searchTerm}
-        onSearch={setSearchTerm}
         totalPages={totalPages}
         pageSize={pageSize}
         totalItems={totalItems}
         pageSizeOptions={[10, 25, 50, 100]}
-        onPageSizeChange={(size) => {
-          setPageSize(size);
-          setPage(1); // reset page
-        }}
+        onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
         onPageChange={setPage}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={handleSortChange}
       />
 
+      {/* PDF Preview modal — kept, used by handleClosePdf */}
       <PdfPreviewModal
         open={pdfOpen}
         title="Invoice Preview"
         pdfUrl={pdfUrl}
         onClose={handleClosePdf}
         onDownload={() =>
-          selectedInvoice &&
-          company &&
+          selectedInvoice && company &&
           generateInvoicePDF(selectedInvoice, company, "save")
         }
       />
