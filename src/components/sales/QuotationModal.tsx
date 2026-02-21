@@ -211,7 +211,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                         >,
                       ) => actions.handleInputChange(e, "paymentInformation")}
                       options={[
-                        { value: "", label: "Select" },
+                        { value: "", label: "Select Payment..." },
                         ...paymentMethodOptions,
                       ]}
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"

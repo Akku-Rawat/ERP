@@ -43,9 +43,9 @@ export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
           className,
         ].join(" ")}
       >
-        <option value="" disabled>
+        {/* <option value="" disabled>
           {props.placeholder || "Select"}
-        </option>
+        </option> */}
 
         {children ??
           options.map((opt, idx) => (
