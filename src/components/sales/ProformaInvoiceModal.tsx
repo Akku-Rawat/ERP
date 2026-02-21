@@ -131,20 +131,19 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
-            {(["details", "address" ,"terms"] as const).map((tab) => (
+            {(["details", "address", "terms"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => ui.setActiveTab(tab)}
-                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${
-                  ui.activeTab === tab
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab
                     ? "text-primary border-b-[3px] border-primary"
                     : "text-muted border-b-[3px] border-transparent hover:text-main"
-                }`}
+                  }`}
               >
                 {tab === "details" && "Details"}
                 {tab === "address" && "Additional Details"}
-               {tab === "terms" && "Terms & Conditions"}
+                {tab === "terms" && "Terms & Conditions"}
               </button>
             ))}
           </div>
@@ -297,7 +296,9 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                       name="lpoNumber"
                       value={formData.lpoNumber}
                       onChange={actions.handleInputChange}
-                      placeholder="local purchase order number"
+                      inputMode="numeric"
+                      pattern="\d{10}"
+                      placeholder="Enter 10 digits"
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   )}
@@ -335,8 +336,8 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                           const price = Number(it.price) || 0;
                           const discount = Number(it.discount) || 0;
                           const vatRate = Number(it.vatRate) || 0;
-                         const discountAmount = qty * price * (discount / 100);
-const amount = qty * price - discountAmount;
+                          const discountAmount = qty * price * (discount / 100);
+                          const amount = qty * price - discountAmount;
                           return (
                             <tr
                               key={i}

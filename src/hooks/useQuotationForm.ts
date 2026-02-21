@@ -51,6 +51,8 @@ const [companyData, setCompanyData] = useState<any>(null);
   const [exchangeRateError, setExchangeRateError] = useState<string | null>(null);
 
   const shippingEditedRef = useRef(false);
+  const lastCurrencyRef = useRef<string>("ZMW");
+  const lastRateRef = useRef<number>(1);
 
   // Initialize form data when modal opens
   useEffect(() => {
@@ -138,6 +140,46 @@ useEffect(() => {
       cancelled = true;
     };
   }, [isOpen, formData.currencyCode]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const newCurrency = String(formData.currencyCode ?? "").trim().toUpperCase();
+    const prevCurrency = String(lastCurrencyRef.current ?? "").trim().toUpperCase();
+
+    if (!newCurrency || newCurrency === prevCurrency) return;
+    if (exchangeRateLoading) return;
+    if (exchangeRateError) return;
+
+    const newRate =
+      newCurrency === "ZMW" ? 1 : Number(String(formData.exchangeRt ?? "").trim());
+    const prevRate = prevCurrency === "ZMW" ? 1 : Number(lastRateRef.current);
+
+    if (!Number.isFinite(prevRate) || prevRate <= 0) return;
+    if (!Number.isFinite(newRate) || newRate <= 0) return;
+
+    setFormData((prev) => {
+      const items = prev.items.map((it) => {
+        if (!it?.itemCode) return it;
+
+        const price = Number(it.price);
+        if (!Number.isFinite(price)) return it;
+
+        const priceInZmw = prevCurrency === "ZMW" ? price : price * prevRate;
+        const nextPrice = newCurrency === "ZMW" ? priceInZmw : priceInZmw / newRate;
+
+        return {
+          ...it,
+          price: Number(nextPrice.toFixed(2)),
+        };
+      });
+
+      return { ...prev, items };
+    });
+
+    lastCurrencyRef.current = newCurrency;
+    lastRateRef.current = newRate;
+  }, [isOpen, formData.currencyCode, formData.exchangeRt, exchangeRateLoading, exchangeRateError]);
   useEffect(() => {
     const maxPage = Math.max(
       0,
@@ -205,7 +247,17 @@ useEffect(() => {
         shippingEditedRef.current = true;
       }
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      if (name === "currencyCode") {
+        setExchangeRateLoading(true);
+        setExchangeRateError(null);
+        setFormData((prev) => ({ ...prev, [name]: value }));
+        return;
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
     }
   };
 
@@ -336,14 +388,22 @@ if (!company) return;
       setFormData((prev) => {
         const items = [...prev.items];
 
+        const currency = String(prev.currencyCode ?? "").trim().toUpperCase();
+        const rate = Number(String(prev.exchangeRt ?? "1").trim());
+        const baseSellingPrice = Number(data.sellingPrice ?? items[index].price);
+        const convertedPrice =
+          currency !== "ZMW" && Number.isFinite(rate) && rate > 0
+            ? baseSellingPrice / rate
+            : baseSellingPrice;
+
         items[index] = {
           ...items[index],
           itemCode: data.id,
           description: data.itemDescription ?? data.itemName ?? "",
-          price: Number(data.sellingPrice ?? items[index].price),
+          price: Number(convertedPrice),
           vatRate: Number(data.taxPerct ?? 0),
           vatCode:
-            formData.invoiceType === "Export" ? "C1" : (data.taxCode ?? ""),
+            prev.invoiceType === "Export" ? "C1" : (data.taxCode ?? ""),
         };
 
         return { ...prev, items };
@@ -434,6 +494,8 @@ const handleReset = () => {
   setPage(0);
   setCustomerNameDisplay("");
   setCustomerDetails(null);
+  lastCurrencyRef.current = "ZMW";
+  lastRateRef.current = 1;
 };
 
 

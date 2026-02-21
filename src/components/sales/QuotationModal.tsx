@@ -93,11 +93,10 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                 key={tab.key}
                 type="button"
                 onClick={() => ui.setActiveTab(tab.key as any)}
-                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${
-                  ui.activeTab === tab.key
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab.key
                     ? "text-primary border-b-[3px] border-primary"
                     : "text-muted border-b-[3px] border-transparent hover:text-main"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -286,12 +285,12 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       <tbody>
                         {paginatedItems.map((it, idx) => {
                           const i = ui.page * 5 + idx;
-                         const qty = Number(it.quantity) || 0;
-const price = Number(it.price) || 0;
-const discount = Number(it.discount) || 0;
-const vatRate = Number(it.vatRate) || 0;
-const discountAmount = qty * price * (discount / 100);
-const amount = qty * price - discountAmount;
+                          const qty = Number(it.quantity) || 0;
+                          const price = Number(it.price) || 0;
+                          const discount = Number(it.discount) || 0;
+                          const vatRate = Number(it.vatRate) || 0;
+                          const discountAmount = qty * price * (discount / 100);
+                          const amount = qty * price - discountAmount;
                           return (
                             <tr
                               key={i}

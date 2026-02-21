@@ -191,14 +191,14 @@ const Dashboard = () => {
             Business overview and key performance trends
           </p>
         </div>
-<div className="flex items-center gap-3">
-  <div className="text-right leading-tight hidden sm:block">
-    <div className="text-sm font-bold text-gray-900">Admin User</div>
-    <div className="text-xs text-gray-600 font-semibold">Administrator</div>
-  </div>
+        <div className="flex items-center gap-3">
+          <div className="text-right leading-tight hidden sm:block">
+            <div className="text-sm font-bold text-gray-900">Admin User</div>
+            <div className="text-xs text-gray-600 font-semibold">Administrator</div>
+          </div>
 
-  <UserMenu />
-</div>
+          <UserMenu />
+        </div>
       </div>
 
       {summaryLoading && (
@@ -216,35 +216,35 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-5">
         {chartsLoading
           ? Array.from({ length: 5 }).map((_, idx) => (
-              <div
-                key={idx}
-                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px] animate-pulse"
-              >
-                <div className="flex items-center justify-between h-full">
-                  <div>
-                    <div className="h-3 w-28 bg-gray-300 rounded" />
-                    <div className="h-7 w-20 bg-gray-300 rounded mt-2" />
-                  </div>
-                  <div className="h-12 w-12 bg-gray-300 rounded-xl border border-gray-400" />
+            <div
+              key={idx}
+              className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px] animate-pulse"
+            >
+              <div className="flex items-center justify-between h-full">
+                <div>
+                  <div className="h-3 w-28 bg-gray-300 rounded" />
+                  <div className="h-7 w-20 bg-gray-300 rounded mt-2" />
                 </div>
+                <div className="h-12 w-12 bg-gray-300 rounded-xl border border-gray-400" />
               </div>
-            ))
+            </div>
+          ))
           : kpiCards.map((card, idx) => (
-              <div
-                key={idx}
-                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px]"
-              >
-                <div className="flex items-center justify-between h-full">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-600">{card.label}</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
-                  </div>
-                  <div className={`p-3 bg-gradient-to-br ${card.gradient} rounded-xl shadow-sm`}>
-                    <card.icon className="text-white" size={22} />
-                  </div>
+            <div
+              key={idx}
+              className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px]"
+            >
+              <div className="flex items-center justify-between h-full">
+                <div>
+                  <p className="text-sm font-semibold text-gray-600">{card.label}</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
+                </div>
+                <div className={`p-3 bg-gradient-to-br ${card.gradient} rounded-xl shadow-sm`}>
+                  <card.icon className="text-white" size={22} />
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

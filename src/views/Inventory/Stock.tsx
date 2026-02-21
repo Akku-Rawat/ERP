@@ -207,15 +207,15 @@ const Items: React.FC = () => {
     { key: "registrationType", header: "Registration Type", align: "left" },
     { key: "stockEntryType", header: "Stock Entry Type", align: "left" },
     {
-  key: "totalTaxableAmount",
-  header: "Total Taxable Amount",
-  align: "right",
-  render: (i) => (
-    <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
-      ZMW {Number(i.totalTaxableAmount || 0).toLocaleString()}
-    </code>
-  ),
-},
+      key: "totalTaxableAmount",
+      header: "Total Taxable Amount",
+      align: "right",
+      render: (i) => (
+        <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
+          ZMW {Number(i.totalTaxableAmount || 0).toLocaleString()}
+        </code>
+      ),
+    },
 
     { key: "warehouse", header: "Warehouse", align: "left" },
     {
