@@ -40,7 +40,8 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
     handleChange,
     handleSubmit,
     reset,
-    goToNextTab,
+    handleNext,
+    errors,
   } = useSupplierForm({
     initialData,
     isEditMode,
@@ -58,22 +59,20 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         <Button variant="secondary" onClick={reset} type="button">
           Reset
         </Button>
-        <Button
-          variant="secondary"
-          onClick={goToNextTab}
-          disabled={activeTab === "address"}
-          type="button"
-        >
-          Next →
-        </Button>
-        <Button
-          variant="primary"
-          loading={loading}
-          type="submit"
-          form="supplierForm"
-        >
-          {isEditMode ? "Update Supplier" : "Save Supplier"}
-        </Button>
+        {!isEditMode && activeTab !== "address" ? (
+          <Button variant="primary" onClick={handleNext} type="button">
+            Next →
+          </Button>
+        ) : (
+          <Button
+            variant="primary"
+            loading={loading}
+            type="submit"
+            form="supplierForm"
+          >
+            {isEditMode ? "Update Supplier" : "Save Supplier"}
+          </Button>
+        )}
       </div>
     </>
   );
@@ -96,12 +95,13 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
       <form
         id="supplierForm"
         onSubmit={handleSubmit}
+        noValidate
         className="h-full flex flex-col"
       >
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
-            {tabs.map(({ key, icon: Icon, label }) => (
+            {tabs.map(({ key, label }) => (
               <button
                 key={key}
                 type="button"
@@ -123,13 +123,21 @@ const SupplierModal: React.FC<SupplierModalProps> = ({
         {/* Content */}
         <div className="gap-6  p-4">
           {activeTab === "supplier" && (
-            <SupplierInfoTab form={form} onChange={handleChange} />
+            <SupplierInfoTab
+              form={form}
+              onChange={handleChange}
+              errors={errors}
+            />
           )}
           {activeTab === "payment" && (
-            <PaymentInfoTab form={form} onChange={handleChange} />
+            <PaymentInfoTab
+              form={form}
+              onChange={handleChange}
+              errors={errors}
+            />
           )}
           {activeTab === "address" && (
-            <AddressTab form={form} onChange={handleChange} />
+            <AddressTab form={form} onChange={handleChange} errors={errors} />
           )}
         </div>
       </form>

@@ -9,7 +9,8 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   icon?: React.ReactNode;
   options?: SelectOption[];
   children?: React.ReactNode;
-  placeholder? : string
+  placeholder? : string;
+  error?: string;
 }
 
 export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
