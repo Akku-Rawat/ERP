@@ -19,7 +19,6 @@ import ItemSelect from "../selects/ItemSelect";
 import { createProformaInvoice } from "../../api/proformaInvoiceApi";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
-  invoiceStatusOptions,
   currencySymbols,
   paymentMethodOptions,
   currencyOptions,
@@ -124,10 +123,10 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
           </div>
         </>
       }
-      maxWidth="6xl"
+      maxWidth="wide"
       height="79vh"
     >
-      <form id="proforma-form" onSubmit={handleFormSubmit}>
+      <form id="proforma-form" onSubmit={handleFormSubmit} className="h-full flex flex-col min-w-0">
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
@@ -137,8 +136,8 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                 type="button"
                 onClick={() => ui.setActiveTab(tab)}
                 className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab
-                    ? "text-primary border-b-[3px] border-primary"
-                    : "text-muted border-b-[3px] border-transparent hover:text-main"
+                  ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
                   }`}
               >
                 {tab === "details" && "Details"}
@@ -150,13 +149,13 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
         </div>
 
         {/* Tab Content */}
-        <div className="flex-1 overflow-y-auto px-8 py-4">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-8 py-4 min-w-0">
           {/* ===== DETAILS ===== */}
           {ui.activeTab === "details" && (
             <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
               <div className="">
                 <div
-                  className={`grid ${showExchangeRate ? "grid-cols-7" : "grid-cols-6"} gap-3 items-end`}
+                  className={`grid ${showExchangeRate ? "grid-cols-6" : "grid-cols-5"} gap-3 items-end`}
                 >
                   <CustomerSelect
                     value={customerNameDisplay}
@@ -215,17 +214,6 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                       )}
                     </div>
                   )}
-
-                  <div>
-                    <ModalSelect
-                      label="Invoice Status"
-                      name="invoiceStatus"
-                      value={formData.invoiceStatus}
-                      onChange={actions.handleInputChange}
-                      options={[...invoiceStatusOptions]}
-                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                    />
-                  </div>
 
                   <div>
                     <ModalSelect
@@ -306,15 +294,15 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
               </div>
 
               {/* ITEMS */}
-              <div className="grid grid-cols-[4fr_1fr] gap-4">
-                <div className="bg-card rounded-lg p-2 shadow-sm flex-1">
+              <div className="grid grid-cols-1 lg:grid-cols-[4fr_1fr] gap-4 min-w-0">
+                <div className="bg-card rounded-lg p-2 shadow-sm flex-1 min-w-0">
                   <div className="flex items-center gap-1 ">
                     <h3 className="text-sm font-semibold text-main">
                       Invoiced Items
                     </h3>
                   </div>
-                  <div className="mt-2 overflow-x-auto">
-                    <table className="w-full min-w-[920px] border-collapse text-[10px]">
+                  <div className="mt-2 overflow-x-hidden">
+                    <table className="w-full border-collapse table-fixed text-[10px]">
                       <thead>
                         <tr className="border-b border-theme">
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px] whitespace-nowrap">#</th>
@@ -498,8 +486,8 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                   </div>
                 </div>
                 {/* RIGHT SIDE */}
-                <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
-                  <div className="bg-card rounded-lg p-2 w-[220px]">
+                <div className="col-span-1 lg:sticky lg:top-0 flex flex-col items-center gap-6 px-0 lg:px-6 h-fit">
+                  <div className="bg-card rounded-lg p-2 w-full lg:w-[220px]">
                     <h3 className="text-[12px] font-semibold text-main mb-2">
                       Customer Details
                     </h3>
@@ -551,7 +539,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                     </div>
                   </div>
 
-                  <div className="bg-card rounded-lg p-3 w-[220px]">
+                  <div className="bg-card rounded-lg p-3 w-full lg:w-[220px]">
                     <h3 className="text-[13px] font-semibold text-main mb-2">
                       Summary
                     </h3>

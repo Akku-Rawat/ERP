@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Table from "../../components/ui/Table/Table";
 import type { Column } from "../../components/ui/Table/type";
-import StatusBadge from "../../components/ui/Table/StatusBadge";
 import CreateDebitNoteModal from "./createDebitNoteModal";
 import { getAllDebitNotes } from "../../api/salesApi";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+
 import { showLoading, closeSwal, showSuccess, showApiError } from "../../utils/alert";
 import InvoiceDetailsModal from "./InvoiceDetailsModal";
 import ActionButton, { ActionGroup } from "../../components/ui/Table/ActionButton";
@@ -14,33 +14,35 @@ import ActionButton, { ActionGroup } from "../../components/ui/Table/ActionButto
 // Types
 // ---------------------------------------------------------------------------
 
-type DebitNote = {
+type DebitNoteRow = {
   noteNo:    string;
   invoiceNo: string;
   customer:  string;
   date:      string;
   amount:    number;
-  status:    "Draft" | "Approved" | "Rejected";
   currency:  string;
 };
 
+// ---------------------------------------------------------------------------
+// Mapping
+// ---------------------------------------------------------------------------
 
-
-const mapItem = (item: any): DebitNote => ({
+const mapRow = (item: any): DebitNoteRow => ({
   noteNo:    item.invoiceNumber,
   invoiceNo: item.receiptNumber,
   customer:  item.customerName,
   date:      item.dateOfInvoice,
   amount:    item.totalAmount,
   currency:  item.currency || item.currencyCode || item.currCd || "",
-  status:    item.invoiceStatus ?? "Draft",
 });
 
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 const DebitNotesTable: React.FC = () => {
 
-
-  const [data, setData]               = useState<DebitNote[]>([]);
+  const [data, setData]               = useState<DebitNoteRow[]>([]);
   const [loading, setLoading]         = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
 
@@ -72,7 +74,7 @@ const DebitNotesTable: React.FC = () => {
 
       const resp = await getAllDebitNotes(page, pageSize, sortBy, sortOrder, searchTerm);
 
-      setData(resp.data.map(mapItem));
+      setData(resp.data.map(mapRow));
       setTotalPages(resp.pagination.total_pages);
       setTotalItems(resp.pagination.total);
     } catch (error: any) {
@@ -124,16 +126,16 @@ const DebitNotesTable: React.FC = () => {
     a.remove();
   };
 
-  const fetchAllDebitNotesForExport = async (): Promise<DebitNote[]> => {
+  const fetchAllDebitNotesForExport = async (): Promise<DebitNoteRow[]> => {
     try {
-      let allData: DebitNote[] = [];
+      let allData: DebitNoteRow[] = [];
       let current = 1;
       let total   = 1;
 
       do {
         const resp = await getAllDebitNotes(current, 100, sortBy, sortOrder, searchTerm);
 
-        allData = [...allData, ...resp.data.map(mapItem)];
+        allData = [...allData, ...resp.data.map(mapRow)];
         total   = resp.pagination.total_pages;
         current++;
       } while (current <= total);
@@ -165,7 +167,6 @@ const DebitNotesTable: React.FC = () => {
           Date:            r.date,
           Amount:          r.amount,
           Currency:        r.currency,
-          Status:          r.status,
         }))
       );
 
@@ -188,8 +189,7 @@ const DebitNotesTable: React.FC = () => {
     }
   };
 
-
-  const columns: Column<DebitNote>[] = [
+  const columns: Column<DebitNoteRow>[] = [
     { key: "noteNo",    header: "Debit Invoice No", sortable: true },
     { key: "invoiceNo", header: "Receipt No" },
     { key: "customer",  header: "Customer", sortable: true },
@@ -205,11 +205,6 @@ const DebitNotesTable: React.FC = () => {
       ),
     },
     { key: "date",   header: "Date",   sortable: true },
-    {
-      key: "status",
-      header: "Status",
-      render: (r) => <StatusBadge status={r.status} />,
-    },
     {
       key: "actions",
       header: "Actions",

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   getAllProformaInvoices,
-  updateProformaInvoiceStatus,
   getProformaInvoiceById,
   deleteProformaInvoiceById,
 } from "../../api/proformaInvoiceApi";
@@ -12,7 +11,6 @@ const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 import type { ProformaInvoiceSummary } from "../../types/proformaInvoice";
 import { generateProformaInvoicePDF } from "../../components/template/proformatemplete/ProformaInvoiceTemplate";
 import Table from "../../components/ui/Table/Table";
-import StatusBadge from "../../components/ui/Table/StatusBadge";
 import ActionButton, {
   ActionGroup,
   ActionMenu,
@@ -21,22 +19,6 @@ import type { Column } from "../../components/ui/Table/type";
 import { showApiError, showSuccess, showLoading, closeSwal } from "../../utils/alert";
 import Swal from "sweetalert2";
 import InvoiceDetailsModal, { type InvoiceDetails } from "./InvoiceDetailsModal";
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-type InvoiceStatus = "Draft" | "Rejected" | "Paid" | "Cancelled" | "Approved";
-
-const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
-  Draft:     ["Rejected", "Approved"],
-  Rejected:  ["Draft", "Approved"],
-  Paid:      [],
-  Cancelled: ["Draft"],
-  Approved:  ["Paid", "Cancelled"],
-};
-
-const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
 
 // Column key → backend field mapping
 // All keys are identical here so the map is 1:1,
@@ -47,7 +29,6 @@ const SORT_FIELD_MAP: Record<string, string> = {
   createdAt:    "createdAt",
   dueDate:      "dueDate",
   totalAmount:  "totalAmount",
-  status:       "status",
 };
 
 // ---------------------------------------------------------------------------
@@ -128,7 +109,6 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
         exchangeRate: inv.exchangeRate,
         dueDate:      inv.dueDate,
         totalAmount:  Number(inv.totalAmount),
-        status:       inv.status as InvoiceStatus,
         createdAt:    new Date(inv.createdAt.replace(" ", "T")),
       }));
 
@@ -207,7 +187,6 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
             exchangeRate: inv.exchangeRate,
             dueDate:      inv.dueDate,
             totalAmount:  Number(inv.totalAmount),
-            status:       inv.status as InvoiceStatus,
             createdAt:    new Date(inv.createdAt.replace(" ", "T")),
           }));
 
@@ -245,7 +224,6 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
           "Due Date":    inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "",
           Amount:        inv.totalAmount,
           Currency:      inv.currency,
-          Status:        inv.status,
         }))
       );
 
@@ -345,32 +323,6 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
     }
   };
 
-  const handleRowStatusChange = async (
-    invoiceNumber: string,
-    status: InvoiceStatus,
-  ) => {
-    if (
-      CRITICAL_STATUSES.includes(status) &&
-      !window.confirm(`Mark invoice ${invoiceNumber} as ${status}? This action cannot be undone.`)
-    ) {
-      return;
-    }
-
-    const res = await updateProformaInvoiceStatus(invoiceNumber, status);
-    if (!res || res.status_code !== 200) {
-      showApiError(res?.message || "Failed to update proforma invoice status");
-      return;
-    }
-
-    setInvoices((prev) =>
-      prev.map((inv) =>
-        inv.proformaId === invoiceNumber ? { ...inv, status } : inv
-      )
-    );
-
-    showSuccess(`Invoice marked as ${status}`);
-  };
-
   // ── Detail modal mapper (kept — do not remove) ────────────────────────────
   const mapProformaToInvoiceDetails = (raw: any): InvoiceDetails => {
     const items = Array.isArray(raw?.items)
@@ -385,26 +337,16 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
       : [];
 
     return {
-      invoiceNumber:      raw?.invoiceNumber ?? raw?.proformaId ?? raw?.id,
-      invoiceType:        raw?.invoiceType ?? "Proforma",
-      originInvoice:      raw?.originInvoice ?? null,
-      customerName:       raw?.customerName ?? raw?.customer?.name,
-      customerTpin:       raw?.customerTpin ?? raw?.customer?.tpin,
-      currencyCode:       raw?.currencyCode ?? raw?.currency,
-      exchangeRt:         raw?.exchangeRt ?? raw?.exchangeRate,
-      dateOfInvoice:      raw?.dateOfInvoice ?? raw?.dateofinvoice ?? raw?.createdAt,
-      dueDate:            raw?.dueDate,
-      invoiceStatus:      raw?.invoiceStatus ?? raw?.status,
-      Receipt:            raw?.Receipt ?? raw?.receipt,
-      ReceiptNo:          raw?.ReceiptNo ?? raw?.receiptNo,
-      TotalAmount:        raw?.TotalAmount ?? raw?.totalAmount,
-      discountPercentage: raw?.discountPercentage,
-      discountAmount:     raw?.discountAmount,
-      lpoNumber:          raw?.lpoNumber,
-      destnCountryCd:     raw?.destnCountryCd,
-      billingAddress:     raw?.billingAddress,
-      shippingAddress:    raw?.shippingAddress,
-      paymentInformation: raw?.paymentInformation,
+      invoiceNumber: raw?.proformaId ?? raw?.proformaID ?? raw?.id,
+      invoiceType: raw?.invoiceType ?? "Proforma",
+      customerName: raw?.customerName,
+      currencyCode: raw?.currencyCode ?? raw?.currency,
+      exchangeRt: raw?.exchangeRt ?? raw?.exchangeRate,
+      dateOfInvoice: raw?.dateOfInvoice ?? raw?.createdAt,
+      dueDate: raw?.dueDate,
+      Receipt: raw?.Receipt ?? raw?.receipt,
+      ReceiptNo: raw?.ReceiptNo ?? raw?.receiptNo,
+      TotalAmount: raw?.TotalAmount ?? raw?.totalAmount,
       items,
       terms: raw?.terms,
     };
@@ -465,17 +407,12 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
       ),
     },
     {
-      key: "status",
-      header: "Status",
-      align: "left",
-      render: (inv) => <StatusBadge status={inv.status} />,
-    },
-    {
       key: "actions",
       header: "Actions",
       align: "center",
       render: (inv) => (
         <ActionGroup>
+
           <ActionButton
             type="view"
             onClick={(e) => handleView(inv.proformaId, e)}
@@ -485,11 +422,6 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
             showDownload
             onDownload={(e) => handleDownload(inv.proformaId, e)}
             onDelete={(e) => handleDelete(inv.proformaId, e)}
-            customActions={(STATUS_TRANSITIONS[inv.status] ?? []).map((status) => ({
-              label: `Mark as ${status}`,
-              danger: status === "Paid",
-              onClick: () => handleRowStatusChange(inv.proformaId, status),
-            }))}
           />
         </ActionGroup>
       ),

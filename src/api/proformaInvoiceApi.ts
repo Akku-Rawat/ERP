@@ -10,22 +10,10 @@ export async function createProformaInvoice(payload: any): Promise<any> {
   return resp.data;
 }
 
-export async function getProformaInvoiceById(id: string): Promise<any | null> {
-  const url = `${ProformaAPI.getById}?id=${encodeURIComponent(id)}`;
+export async function getProformaInvoiceById(proformaId: string) {
+  const url = `${ProformaAPI.getById}?id=${encodeURIComponent(proformaId)}`;
   const resp: AxiosResponse = await api.get(url);
   return resp.data ?? null;
-}
-
-export async function updateProformaInvoiceStatus(
-  proformaId: string,
-  status: string,
-) {
-  const resp = await api.patch(ProformaAPI.updateStatus, {
-    proformaId: proformaId,
-    proformaStatus: status,
-  });
-
-  return resp.data;
 }
 
 export async function getAllProformaInvoices(

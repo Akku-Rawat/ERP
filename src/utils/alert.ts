@@ -36,20 +36,21 @@ const toUserFriendlyMessage = (message: string): string => {
   const m = (message ?? "").trim();
   if (!m) return "Something went wrong. Please try again.";
 
-  const normalized = m.toLowerCase();
+  const currencyFixed = m.replace(/\bZRA\b/g, "ZAR");
+  const normalized = currencyFixed.toLowerCase();
 
   if (normalized.includes("destncountrycd") && normalized.includes("c1")) {
     return "Export To Country is required when using Tax Code C1.";
   }
 
   if (normalized.includes("destncountrycd")) {
-    return m
+    return currencyFixed
       .replace(/\(\s*destnCountryCd\s*\)/gi, "")
       .replace(/destnCountryCd/gi, "Export To Country")
       .trim();
   }
 
-  return m;
+  return currencyFixed;
 };
 
 

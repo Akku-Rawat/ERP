@@ -1,6 +1,4 @@
 import type { TermSection } from "./termsAndCondition";
-type InvoiceStatus = "Draft" | "Rejected" | "Paid" | "Cancelled" | "Approved";
-
 
 export interface ProformaInvoice {
   proformaId?: string;
@@ -9,7 +7,6 @@ export interface ProformaInvoice {
   exchangeRt: string;
   dateOfInvoice: string;
   dueDate: string;
-  invoiceStatus: InvoiceStatus;
   invoiceType: string;
   destnCountryCd?: string;
   lpoNumber?: string;
@@ -31,7 +28,6 @@ export interface ProformaInvoiceSummary {
   exchangeRate: string;
   dueDate: string | null;
   totalAmount: number;
-  status: InvoiceStatus;   
   createdAt: Date;    
 }
 

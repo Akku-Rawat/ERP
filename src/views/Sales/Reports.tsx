@@ -8,7 +8,6 @@ import {
   getAllDebitNotes,
   getAllSalesInvoices,
 } from "../../api/salesApi";
-import StatusBadge from "../../components/ui/Table/StatusBadge";
 
 /*  TYPES  */
 
@@ -28,7 +27,6 @@ type ReportRow = {
   dueDate?: string;
   currency?: string;
   amount?: number;
-  status?: string;
   receiptNo?: string;
 };
 
@@ -69,7 +67,6 @@ export default function ReportTable() {
   const [filters, setFilters] = useState({
     dateFrom: "",
     dateTo: "",
-    status: "All",
   });
   const [rows, setRows] = useState<ReportRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -118,7 +115,6 @@ export default function ReportTable() {
             dueDate: q?.validTill ?? q?.validUntil ?? "",
             currency: q?.currency ?? q?.currencyCode ?? "",
             amount: Number(q?.grandTotal ?? q?.totalAmount ?? 0),
-            status: q?.status ?? q?.invoiceStatus,
           }));
 
           const mappedProforma: ReportRow[] = Array.isArray(pRes?.data)
@@ -131,7 +127,6 @@ export default function ReportTable() {
                 dueDate: p?.dueDate ?? "",
                 currency: p?.currency ?? p?.currencyCode ?? "",
                 amount: Number(p?.totalAmount ?? 0),
-                status: p?.status ?? p?.invoiceStatus,
                 receiptNo: p?.receiptNo ?? p?.receiptNumber,
               }))
             : [];
@@ -146,7 +141,6 @@ export default function ReportTable() {
                 dueDate: inv?.dueDate ?? "",
                 currency: inv?.currency ?? inv?.currencyCode ?? "",
                 amount: Number(inv?.totalAmount ?? 0),
-                status: inv?.invoiceStatus ?? inv?.status,
                 receiptNo: inv?.receiptNumber ?? inv?.receiptNo,
               }))
             : [];
@@ -160,7 +154,6 @@ export default function ReportTable() {
                 date: cn?.dateOfInvoice ?? cn?.date ?? "",
                 currency: cn?.currency ?? cn?.currencyCode ?? "",
                 amount: Math.abs(Number(cn?.totalAmount ?? 0)),
-                status: cn?.invoiceStatus ?? cn?.status,
                 receiptNo: cn?.receiptNumber ?? cn?.receiptNo,
               }))
             : [];
@@ -174,7 +167,6 @@ export default function ReportTable() {
                 date: dn?.dateOfInvoice ?? dn?.date ?? "",
                 currency: dn?.currency ?? dn?.currencyCode ?? dn?.currCd ?? "",
                 amount: Number(dn?.totalAmount ?? 0),
-                status: dn?.invoiceStatus ?? dn?.status,
                 receiptNo: dn?.receiptNumber ?? dn?.receiptNo,
               }))
             : [];
@@ -206,7 +198,6 @@ export default function ReportTable() {
             dueDate: q?.validTill ?? q?.validUntil ?? "",
             currency: q?.currency ?? q?.currencyCode ?? "",
             amount: Number(q?.grandTotal ?? q?.totalAmount ?? 0),
-            status: q?.status ?? q?.invoiceStatus,
           }));
 
           if (!cancelled) setRows(mapped);
@@ -225,7 +216,6 @@ export default function ReportTable() {
                 dueDate: p?.dueDate ?? "",
                 currency: p?.currency ?? p?.currencyCode ?? "",
                 amount: Number(p?.totalAmount ?? 0),
-                status: p?.status ?? p?.invoiceStatus,
                 receiptNo: p?.receiptNo ?? p?.receiptNumber,
               }))
             : [];
@@ -246,7 +236,6 @@ export default function ReportTable() {
                 dueDate: inv?.dueDate ?? "",
                 currency: inv?.currency ?? inv?.currencyCode ?? "",
                 amount: Number(inv?.totalAmount ?? 0),
-                status: inv?.invoiceStatus ?? inv?.status,
                 receiptNo: inv?.receiptNumber ?? inv?.receiptNo,
               }))
             : [];
@@ -266,7 +255,6 @@ export default function ReportTable() {
                 date: cn?.dateOfInvoice ?? cn?.date ?? "",
                 currency: cn?.currency ?? cn?.currencyCode ?? "",
                 amount: Math.abs(Number(cn?.totalAmount ?? 0)),
-                status: cn?.invoiceStatus ?? cn?.status,
                 receiptNo: cn?.receiptNumber ?? cn?.receiptNo,
               }))
             : [];
@@ -286,7 +274,6 @@ export default function ReportTable() {
                 date: dn?.dateOfInvoice ?? dn?.date ?? "",
                 currency: dn?.currency ?? dn?.currencyCode ?? dn?.currCd ?? "",
                 amount: Number(dn?.totalAmount ?? 0),
-                status: dn?.invoiceStatus ?? dn?.status,
                 receiptNo: dn?.receiptNumber ?? dn?.receiptNo,
               }))
             : [];
@@ -304,15 +291,6 @@ export default function ReportTable() {
     };
   }, [reportType]);
 
-  const uniqueStatuses = useMemo(() => {
-    const set = new Set<string>();
-    rows.forEach((r) => {
-      const s = String(r.status ?? "").trim();
-      if (s) set.add(s);
-    });
-    return Array.from(set);
-  }, [rows]);
-
   const filteredData = useMemo(() => {
     return rows.filter((row) => {
       const term = searchTerm.trim().toLowerCase();
@@ -325,9 +303,6 @@ export default function ReportTable() {
   if (!matches) return false;
 }
 
-      if (filters.status !== "All" && String(row.status ?? "") !== filters.status)
-        return false;
-
       const rowDate = dateStringForInput(row.date);
       if (filters.dateFrom && rowDate && rowDate < filters.dateFrom) return false;
       if (filters.dateTo && rowDate && rowDate > filters.dateTo) return false;
@@ -338,7 +313,7 @@ export default function ReportTable() {
 
   useEffect(() => {
     setPage(1);
-  }, [reportType, filters.dateFrom, filters.dateTo, filters.status, searchTerm, pageSize]);
+  }, [reportType, filters.dateFrom, filters.dateTo, searchTerm, pageSize]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -414,20 +389,7 @@ export default function ReportTable() {
             }
           />
 
-          <select
-            className="bg-card border border-theme rounded-full text-sm text-main shadow-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition px-4 py-2.5 pr-10 appearance-none sm:w-44"
-            value={filters.status}
-            onChange={(e) =>
-              setFilters((f) => ({ ...f, status: e.target.value }))
-            }
-          >
-            <option value="All">All Statuses</option>
-            {uniqueStatuses.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+          
         </div>
 
         <div className="flex items-center justify-end">
@@ -492,7 +454,6 @@ export default function ReportTable() {
                 "Date",
                 "Due Date",
                 "Receipt No",
-                "Status",
                 "Currency",
                 "Amount",
               ].map((h) => (
@@ -510,7 +471,7 @@ export default function ReportTable() {
           <tbody>
             {loading ? (
               Array.from({ length: pageSize }).map((_, idx) => (
-                <SkeletonRow key={idx} columnsCount={9} />
+                <SkeletonRow key={idx} columnsCount={8} />
               ))
             ) : paginatedData.length ? (
               paginatedData.map((row, i) => (
@@ -539,9 +500,6 @@ export default function ReportTable() {
                     {row.receiptNo || "—"}
                   </td>
                   <td className="px-4 py-3 text-sm text-main whitespace-nowrap">
-                    {row.status ? <StatusBadge status={row.status} /> : "—"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-main whitespace-nowrap">
                     {row.currency || "—"}
                   </td>
                   <td className="px-4 py-3 text-sm text-main text-right whitespace-nowrap">
@@ -559,7 +517,7 @@ export default function ReportTable() {
             ) : (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={8}
                   className="py-10 text-center text-muted text-sm"
                 >
                   No records found

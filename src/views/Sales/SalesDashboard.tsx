@@ -241,66 +241,66 @@ const SalesDashboard: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
           {chartsLoading
             ? Array.from({ length: 5 }).map((_, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px] animate-pulse"
-                >
-                  <div className="flex items-center justify-between h-full">
-                    <div>
-                      <div className="h-3 w-28 bg-gray-300 rounded" />
-                      <div className="h-7 w-20 bg-gray-300 rounded mt-2" />
-                    </div>
-                    <div className="h-12 w-12 bg-gray-300 rounded-xl border border-gray-400" />
+              <div
+                key={idx}
+                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px] animate-pulse"
+              >
+                <div className="flex items-center justify-between h-full">
+                  <div>
+                    <div className="h-3 w-28 bg-gray-300 rounded" />
+                    <div className="h-7 w-20 bg-gray-300 rounded mt-2" />
                   </div>
+                  <div className="h-12 w-12 bg-gray-300 rounded-xl border border-gray-400" />
                 </div>
-              ))
+              </div>
+            ))
             : [
-                {
-                  label: "Proforma Invoices",
-                  value: String(summaryData?.totalProformaInvoices ?? 0),
-                  icon: FileSignature,
-                  gradient: "from-blue-500 to-blue-600",
-                },
-                {
-                  label: "Quotations",
-                  value: String(summaryData?.totalQuotations ?? 0),
-                  icon: ScrollText,
-                  gradient: "from-amber-500 to-amber-600",
-                },
-                {
-                  label: "Sales Invoices",
-                  value: String(summaryData?.totalSalesInvoices ?? 0),
-                  icon: Receipt,
-                  gradient: "from-emerald-500 to-emerald-600",
-                },
-                {
-                  label: "Credit Notes",
-                  value: String(summaryData?.totalSalesCreditNotes ?? 0),
-                  icon: FileText,
-                  gradient: "from-sky-500 to-sky-600",
-                },
-                {
-                  label: "Debit Notes",
-                  value: String(summaryData?.totalSalesDebitNotes ?? 0),
-                  icon: DollarSign,
-                  gradient: "from-purple-500 to-purple-600",
-                },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px]"
-                >
-                  <div className="flex items-center justify-between h-full">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-600">{stat.label}</p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                    </div>
-                    <div className={`p-3 bg-gradient-to-br ${stat.gradient} rounded-xl shadow-sm`}>
-                      <stat.icon className="text-white" size={22} />
-                    </div>
+              {
+                label: "Proforma Invoices",
+                value: String(summaryData?.totalProformaInvoices ?? 0),
+                icon: FileSignature,
+                gradient: "from-blue-500 to-blue-600",
+              },
+              {
+                label: "Quotations",
+                value: String(summaryData?.totalQuotations ?? 0),
+                icon: ScrollText,
+                gradient: "from-amber-500 to-amber-600",
+              },
+              {
+                label: "Sales Invoices",
+                value: String(summaryData?.totalSalesInvoices ?? 0),
+                icon: Receipt,
+                gradient: "from-emerald-500 to-emerald-600",
+              },
+              {
+                label: "Credit Notes",
+                value: String(summaryData?.totalSalesCreditNotes ?? 0),
+                icon: FileText,
+                gradient: "from-sky-500 to-sky-600",
+              },
+              {
+                label: "Debit Notes",
+                value: String(summaryData?.totalSalesDebitNotes ?? 0),
+                icon: DollarSign,
+                gradient: "from-purple-500 to-purple-600",
+              },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px]"
+              >
+                <div className="flex items-center justify-between h-full">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-600">{stat.label}</p>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                  </div>
+                  <div className={`p-3 bg-gradient-to-br ${stat.gradient} rounded-xl shadow-sm`}>
+                    <stat.icon className="text-white" size={22} />
                   </div>
                 </div>
-              ))}
+              </div>
+            ))}
         </div>
 
         {summaryError && (

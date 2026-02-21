@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 import { Plus, Trash2, User, Mail, Phone } from "lucide-react";
-import { showApiError, showSuccess , showLoading , closeSwal } from "../../utils/alert";
+import { showApiError, showSuccess } from "../../utils/alert";
 // import TermsAndCondition from "../TermsAndCondition";
 import { useEffect } from "react";
 import { getSalesInvoiceById } from "../../api/salesApi";
@@ -9,15 +9,11 @@ import { getAllSalesInvoices } from "../../api/salesApi";
 import { createCreditNoteFromInvoice } from "../../api/salesApi";
 import PaymentInfoBlock from "../../components/sales/PaymentInfoBlock";
 import AddressBlock from "../../components/ui/modal/AddressBlock";
-import {
-  Textarea,
-} from "../../components/ui/modal/formComponent";
 import { ModalInput, ModalSelect, ModalTextarea } from "../../components/ui/modal/modalComponent";
 import SearchSelect from "../../components/ui/modal/SearchSelect";
 import ItemSelect from "../../components/selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
-  invoiceStatusOptions,
   currencySymbols,
   paymentMethodOptions,
   currencyOptions,
@@ -54,7 +50,7 @@ const TRANSACTION_PROGRESS = [
 
 const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
   onSubmit,
-  invoiceId,
+  invoiceId: _invoiceId,
   saving,
   setSaving,
 }) => {
@@ -62,7 +58,6 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
   const {
     formData,
     customerDetails,
-    customerNameDisplay,
     paginatedItems,
     totals,
     ui,
@@ -72,30 +67,15 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
     creditNoteReasonCode: "",
     invcAdjustReason: "",
     transactionProgress: "02",
-    invoiceStatus: "Approved",
   });
-  const mapStatusToTransactionProgress = (status?: string) => {
-  switch (status) {
-    case "Approved":
-      return "02";
-    case "Rejected":
-      return "04";
-    case "Refunded":
-      return "05";
-    case "Transferred":
-      return "06";
-    default:
-      return "02";
-  }
-};
 
   const fetchInvoiceOptions = async (q: string) => {
     try {
       const res = await getAllSalesInvoices(1, 50);
       const invoices = res?.data || [];
-      
+
       return invoices
-        .filter((inv: any) => 
+        .filter((inv: any) =>
           inv.invoiceNumber?.toLowerCase().includes(q.toLowerCase())
         )
         .map((inv: any) => ({
@@ -107,36 +87,34 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
       return [];
     }
   };
- useEffect(() => {
-  if (!formData.invoiceNumber) return;
+  useEffect(() => {
+    if (!formData.invoiceNumber) return;
 
-  const invoiceNumber = formData.invoiceNumber;
+    const invoiceNumber = formData.invoiceNumber;
 
-  const fetchInvoice = async () => {
-    try {
-      const res = await getSalesInvoiceById(invoiceNumber);
+    const fetchInvoice = async () => {
+      try {
+        const res = await getSalesInvoiceById(invoiceNumber);
 
-      if (res?.status_code === 200) {
-        const data = res.data;
+        if (res?.status_code === 200) {
+          const data = res.data;
 
-        
-        actions.setFormDataFromInvoice(data);
+          if (data) {
+            actions.setInvoiceFromApi(data);
 
-       
-        setCreditMeta((prev) => ({
-          ...prev,
-          transactionProgress: mapStatusToTransactionProgress(
-            data.invoiceStatus
-          ),
-        }));
+            setCreditMeta((prev) => ({
+              ...prev,
+              transactionProgress: "02",
+            }));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch invoice", err);
       }
-    } catch (err) {
-      console.error("Failed to fetch invoice", err);
-    }
-  };
+    };
 
-  fetchInvoice();
-}, [formData.invoiceNumber]);
+    fetchInvoice();
+  }, [formData.invoiceNumber]);
 
 
   const getInvoiceAdjustReason = () => {
@@ -183,11 +161,13 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
         CreditNoteReasonCode: creditMeta.creditNoteReasonCode,
         invcAdjustReason,
         transactionProgress: creditMeta.transactionProgress,
-        items: formData.items.map((it: any) => ({
-          itemCode: it.itemCode,
-          quantity: Number(it.quantity),
-          price: Number(it.price),
-        })),
+        items: formData.items
+          .filter((item) => item.itemCode)
+          .map((item) => ({
+            itemCode: item.itemCode,
+            quantity: item.quantity,
+            price: item.price,
+          })),
       };
 
       setSaving(true);
@@ -331,17 +311,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   />
                 </div>
 
-                <div >
-                  <ModalSelect
-                    label="Invoice Status"
-                    name="invoiceStatus"
-                    disabled
-                    value={formData.invoiceStatus}
-                    onChange={actions.handleInputChange}
-                    options={[...invoiceStatusOptions]}
-                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                  />
-                </div>
+
 
                 {/* <div>
                     <ModalInput

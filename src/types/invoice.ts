@@ -1,14 +1,5 @@
 import type { TermSection } from "./termsAndCondition";
 
-
-export type InvoiceStatus =
-  | "Draft"
-  | "Rejected"
-  | "Paid"
-  | "Cancelled"
-  | "Approved";
-
-  
 export interface Invoice {
   invoiceNumber?: string;
   customerId: string;
@@ -16,7 +7,6 @@ export interface Invoice {
   exchangeRt: string;
   dateOfInvoice: string;
   dueDate: string;
-  invoiceStatus: InvoiceStatus;
   invoiceType: string;
   destnCountryCd?: string;
   lpoNumber?: string;
@@ -39,7 +29,6 @@ export interface InvoiceSummary {
   dateOfInvoice: Date;
   total: number;
   totalTax: string;
-   invoiceStatus: InvoiceStatus;
   invoiceTypeParent: string;
   invoiceType: string;
 }

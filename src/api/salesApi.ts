@@ -11,17 +11,6 @@ export async function createSalesInvoice(payload: any): Promise<any> {
   return resp.data;
 }
 
-export async function updateInvoiceStatus(
-  invoiceNumber: string,
-  status: string,
-) {
-  const resp: AxiosResponse = await api.patch(InvoiceAPI.updateStatus, {
-    invoiceNumber,
-    invoiceStatus: status,
-  });
-  return resp.data;
-}
-
 export async function getAllSalesInvoices(
   page: number = 1,
   page_size: number = 10,

@@ -44,7 +44,7 @@ const CreateCreditNoteModal: React.FC<Props> = ({
       subtitle="Sales Invoice Adjustment"
       footer={footerContent}
       icon={FileMinus}
-      maxWidth="6xl"
+      maxWidth="wide"
       height="82vh"
     >
       <CreditNoteInvoiceLikeForm

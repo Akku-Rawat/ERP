@@ -67,7 +67,6 @@ export type InvoiceDetails = {
   exchangeRt?: string;
   dateOfInvoice?: string;
   dueDate?: string;
-  invoiceStatus?: string;
   Receipt?: string;
   ReceiptNo?: string;
   TotalAmount?: number;
@@ -127,20 +126,6 @@ const InvoiceDetailsModal: React.FC<Props> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<InvoiceDetails | null>(null);
-
-  const statusBadgeClass = (status?: string) => {
-    const s = (status ?? "").toLowerCase();
-    if (s.includes("approve") || s.includes("paid") || s.includes("success")) {
-      return "bg-emerald-50 text-emerald-700";
-    }
-    if (s.includes("reject") || s.includes("cancel") || s.includes("fail")) {
-      return "bg-red-50 text-red-700";
-    }
-    if (s.includes("draft") || s.includes("pending")) {
-      return "bg-slate-100 text-slate-700";
-    }
-    return "bg-amber-50 text-amber-700";
-  };
 
   useEffect(() => {
     let mounted = true;
@@ -255,23 +240,10 @@ const InvoiceDetailsModal: React.FC<Props> = ({
               <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Field label="Invoice Number" value={data.invoiceNumber ?? "—"} />
                 <Field label="Invoice Type" value={data.invoiceType ?? "—"} />
-                <Field
-                  label="Invoice Status"
-                  value={
-                    <span
-                      className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold ${statusBadgeClass(
-                        data.invoiceStatus,
-                      )}`}
-                    >
-                      {data.invoiceStatus ?? "—"}
-                    </span>
-                  }
-                />
-
-                <Field label="Invoice Date" value={data.dateOfInvoice ?? "—"} />
+              </div>
+              <Field label="Invoice Date" value={data.dateOfInvoice ?? "—"} />
                 <Field label="Due Date" value={data.dueDate ?? "—"} />
                 <Field label="Origin Invoice" value={data.originInvoice ?? "—"} />
-              </div>
             </div>
 
             <div className="lg:col-span-3">

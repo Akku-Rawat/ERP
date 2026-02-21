@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Table from "../../components/ui/Table/Table";
 import type { Column } from "../../components/ui/Table/type";
-import StatusBadge from "../../components/ui/Table/StatusBadge";
 import CreateCreditNoteModal from "./CreateCreditNoteModal";
 import { getAllCreditNotes } from "../../api/salesApi";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+
 import { showLoading, closeSwal, showApiError, showSuccess } from "../../utils/alert";
 import InvoiceDetailsModal from "./InvoiceDetailsModal";
 import ActionButton, { ActionGroup } from "../../components/ui/Table/ActionButton";
@@ -15,13 +15,12 @@ import ActionButton, { ActionGroup } from "../../components/ui/Table/ActionButto
 // ---------------------------------------------------------------------------
 
 type CreditNote = {
-  noteNo:    string;
+  noteNo: string;
   invoiceNo: string;
-  customer:  string;
-  date:      string;
-  amount:    number;
-  currency:  string;
-  status:    "Draft" | "Approved" | "Refunded";
+  customer: string;
+  date: string;
+  amount: number;
+  currency: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -31,13 +30,13 @@ type CreditNote = {
 const CreditNotesTable: React.FC = () => {
 
   // ── Data ──────────────────────────────────────────────────────────────────
-  const [data, setData]           = useState<CreditNote[]>([]);
-  const [loading, setLoading]     = useState(false);
+  const [data, setData] = useState<CreditNote[]>([]);
+  const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
 
   // ── Pagination (server) ───────────────────────────────────────────────────
-  const [page, setPage]           = useState(1);
-  const [pageSize, setPageSize]   = useState(10);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -45,13 +44,13 @@ const CreditNotesTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   // ── Sort (server) ─────────────────────────────────────────────────────────
-  const [sortBy, setSortBy]       = useState("");
+  const [sortBy, setSortBy] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   // ── Modals ────────────────────────────────────────────────────────────────
   const [openCreateModal, setOpenCreateModal] = useState(false);
-  const [detailsOpen, setDetailsOpen]         = useState(false);
-  const [detailsId, setDetailsId]             = useState<string | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsId, setDetailsId] = useState<string | null>(null);
 
   // ── Reset page when search changes ───────────────────────────────────────
   useEffect(() => { setPage(1); }, [searchTerm]);
@@ -65,13 +64,12 @@ const CreditNotesTable: React.FC = () => {
       const resp = await getAllCreditNotes(page, pageSize, sortBy, sortOrder, searchTerm);
 
       const mappedData: CreditNote[] = resp.data.map((item: any) => ({
-        noteNo:    item.invoiceNumber,
+        noteNo: item.invoiceNumber,
         invoiceNo: item.receiptNumber,
-        customer:  item.customerName,
-        date:      item.dateOfInvoice,
-        amount:    Math.abs(item.totalAmount),
-        currency:  item.currency,
-        status:    item.invoiceStatus ?? "",
+        customer: item.customerName,
+        date: item.dateOfInvoice,
+        amount: Math.abs(item.totalAmount),
+        currency: item.currency,
       }));
 
       setData(mappedData);
@@ -133,23 +131,22 @@ const CreditNotesTable: React.FC = () => {
     try {
       let allData: CreditNote[] = [];
       let current = 1;
-      let total   = 1;
+      let total = 1;
 
       do {
         const resp = await getAllCreditNotes(current, 100, sortBy, sortOrder, searchTerm);
 
         const mappedData: CreditNote[] = resp.data.map((item: any) => ({
-          noteNo:    item.invoiceNumber,
+          noteNo: item.invoiceNumber,
           invoiceNo: item.receiptNumber,
-          customer:  item.customerName,
-          date:      item.dateOfInvoice,
-          amount:    Math.abs(item.totalAmount),
-          currency:  item.currency,
-          status:    item.invoiceStatus ?? "",
+          customer: item.customerName,
+          date: item.dateOfInvoice,
+          amount: Math.abs(item.totalAmount),
+          currency: item.currency,
         }));
 
         allData = [...allData, ...mappedData];
-        total   = resp.pagination.total_pages;
+        total = resp.pagination.total_pages;
         current++;
       } while (current <= total);
 
@@ -175,12 +172,11 @@ const CreditNotesTable: React.FC = () => {
       const worksheet = XLSX.utils.json_to_sheet(
         dataToExport.map((r) => ({
           "Credit Note No": r.noteNo,
-          "Receipt No":     r.invoiceNo,
-          Customer:         r.customer,
-          Date:             r.date,
-          Amount:           r.amount,
-          Currency:         r.currency,
-          Status:           r.status,
+          "Receipt No": r.invoiceNo,
+          Customer: r.customer,
+          Date: r.date,
+          Amount: r.amount,
+          Currency: r.currency,
         }))
       );
 
@@ -206,9 +202,9 @@ const CreditNotesTable: React.FC = () => {
   // ── Columns ───────────────────────────────────────────────────────────────
 
   const columns: Column<CreditNote>[] = [
-    { key: "noteNo",    header: "Credit Invoice No", sortable: true },
+    { key: "noteNo", header: "Credit Invoice No", sortable: true },
     { key: "invoiceNo", header: "Receipt No" },
-    { key: "customer",  header: "Customer", sortable: true },
+    { key: "customer", header: "Customer", sortable: true },
     {
       key: "amount",
       header: "Amount",
@@ -220,12 +216,7 @@ const CreditNotesTable: React.FC = () => {
         </code>
       ),
     },
-    { key: "date",   header: "Date",   sortable: true },
-    {
-      key: "status",
-      header: "Status",
-      render: (r) => <StatusBadge status={r.status} />,
-    },
+    { key: "date", header: "Date", sortable: true },
     {
       key: "actions",
       header: "Actions",

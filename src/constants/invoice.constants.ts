@@ -6,7 +6,7 @@ export const EMPTY_ITEM: InvoiceItem = {
   quantity: 1,
   price: 0,
   discount: 0,
- vatRate: 0,
+  vatRate: 0,
   vatCode: "",
 };
 
@@ -48,7 +48,6 @@ export const DEFAULT_INVOICE_FORM: Invoice = {
   exchangeRt: "1",
   dateOfInvoice: "",
   dueDate: "",
-  invoiceStatus: "Draft",
   invoiceType: "Non-Export",
   destnCountryCd: "",
   lpoNumber: "",
@@ -90,18 +89,6 @@ export const DEFAULT_INVOICE_FORM: Invoice = {
   },
 };
 
-
-/* =========================
-   INVOICE STATUS
-========================= */
-
-export const invoiceStatusOptions = [
-  { value: "Draft", label: "Draft" },
-  { value: "Sent", label: "Sent" },
-  { value: "Paid", label: "Paid" },
-  { value: "Overdue", label: "Overdue" },
-] as const;
-
 export const invoiceTypeOptions = [
   { value: "LPO", label: "LPO" },
   { value: "Export", label: "Export" },
@@ -119,7 +106,7 @@ export const currencyOptions = [
 
 export const currencySymbols: Record<string, string> = {
   ZMW: "ZK",
- 
+
   USD: "$",
   ZAR: "R",
   GBP: "£",

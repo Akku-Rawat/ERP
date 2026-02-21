@@ -14,7 +14,6 @@ import { ModalInput, ModalSelect, ModalTextarea } from "../../components/ui/moda
 import ItemSelect from "../../components/selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
-  invoiceStatusOptions,
   currencySymbols,
   paymentMethodOptions,
   currencyOptions,
@@ -289,16 +288,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                   />
                 </div>
 
-                <div>
-                  <ModalSelect
-                    label="Invoice Status"
-                    name="invoiceStatus"
-                    disabled
-                    value={formData.invoiceStatus}
-                    onChange={actions.handleInputChange}
-                    options={[...invoiceStatusOptions]}
-                  />
-                </div>
+                
 
                 {/* <div className="flex flex-col gap-1">
                           <ModalSelect
@@ -674,7 +664,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                 subtitle="Invoice and payment details"
                 data={formData.billingAddress}
                 onChange={(
-                  e: React.ChangeEvent<HTMLInputElement>
+                  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
                 ) =>
                   actions.handleInputChange(e, "billingAddress")
                 }
@@ -691,7 +681,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                   actions.handleSameAsBillingChange
                 }
                 onChange={(
-                  e: React.ChangeEvent<HTMLInputElement>
+                  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
                 ) =>
                   actions.handleInputChange(e, "shippingAddress")
                 }

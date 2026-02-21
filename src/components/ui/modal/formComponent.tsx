@@ -1,9 +1,7 @@
 
-import React,{useState} from "react";
+import React, { useState } from "react";
 
-// 
-// Input Component
-// 
+
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   icon?: React.ReactNode;
@@ -274,7 +272,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { variant = "primary", icon, loading, children, className = "", type = "button",...props },
+    { variant = "primary", icon, loading, children, className = "", type = "button", ...props },
     ref,
   ) => {
     const baseClasses =
@@ -294,7 +292,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-         type={type} 
+        type={type}
         {...props}
         className={`${baseClasses} ${variantClasses[variant]} ${className}`}
         disabled={loading || props.disabled}

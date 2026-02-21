@@ -59,7 +59,6 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   // ── Filter state (server) ────────────────────────────────────────────────
-  const [status]   = useState("");
   const [fromDate] = useState("");
   const [toDate]   = useState("");
 
@@ -79,14 +78,12 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
       .catch(() => console.error("Failed to load company data"));
   }, []);
 
-
   const fetchQuotations = async () => {
     try {
       setLoading(true);
 
       const res = await getAllQuotations(page, pageSize, {
         search:    searchTerm,
-        status,
         fromDate,
         toDate,
         sortBy:    SORT_FIELD_MAP[sortBy] || sortBy,  // ← map here, not in state
@@ -124,7 +121,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
 
   useEffect(() => {
     fetchQuotations();
-  }, [page, pageSize, searchTerm, status, fromDate, toDate, sortBy, sortOrder]);
+  }, [page, pageSize, searchTerm, fromDate, toDate, sortBy, sortOrder]);
 
   // ── Sort handler — store column key in state, map to backend at call site ─
   const handleSortChange = ({
@@ -139,7 +136,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
     setPage(1);
   };
 
-    const handleOpenReceipt = (receiptUrl: string) => {
+  const handleOpenReceipt = (receiptUrl: string) => {
     const normalizedUrl = receiptUrl.startsWith("http://")
       ? receiptUrl.replace(/^http:\/\//i, "https://")
       : receiptUrl;
@@ -171,7 +168,6 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
     do {
       const res = await getAllQuotations(current, 100, {
         search:    searchTerm,
-        status,
         fromDate,
         toDate,
         sortBy:    SORT_FIELD_MAP[sortBy] || sortBy,  // ← same mapping
@@ -215,12 +211,12 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
       const worksheet = XLSX.utils.json_to_sheet(
         data.map((q) => ({
           "Quotation No": q.quotationNumber,
-          Customer:       q.customerName,
-          Industry:       q.industryBases,
-          Date:           q.transactionDate,
-          "Valid Till":   q.validTill,
-          Amount:         q.grandTotal,
-          Currency:       q.currency,
+          Customer: q.customerName,
+          Industry: q.industryBases,
+          Date: q.transactionDate,
+          "Valid Till": q.validTill,
+          Amount: q.grandTotal,
+          Currency: q.currency,
         }))
       );
 
@@ -230,7 +226,10 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
       saveAs(
         new Blob(
           [XLSX.write(workbook, { bookType: "xlsx", type: "array" })],
-          { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+          {
+            type:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          }
         ),
         "All_Quotations.xlsx"
       );
@@ -253,10 +252,16 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
     e?.stopPropagation();
     try {
       showLoading("Preparing download...");
-      if (!company) { closeSwal(); return; }
+      if (!company) {
+        closeSwal();
+        return;
+      }
 
       const res = await getQuotationById(quotationNumber);
-      if (!res || res.status_code !== 200) { closeSwal(); return; }
+      if (!res || res.status_code !== 200) {
+        closeSwal();
+        return;
+      }
 
       await generateQuotationPDF(res.data, company, "save");
       closeSwal();
@@ -267,43 +272,39 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
     }
   };
 
-
   const mapQuotationToInvoiceDetails = (raw: any): InvoiceDetails => ({
-    invoiceNumber:      raw?.id ?? raw?.quotationNumber ?? raw?.quotationId,
-    invoiceType:        raw?.invoiceType ?? "Quotation",
-    originInvoice:      null,
-    customerName:       raw?.customerName ?? raw?.customerId,
-    customerTpin:       raw?.customerTpin,
-    currencyCode:       raw?.currencyCode ?? raw?.currency,
-    exchangeRt:         raw?.exchangeRt,
-    dateOfInvoice:      raw?.transactionDate ?? raw?.quotationDate,
-    dueDate:            raw?.validUntil ?? raw?.validTill,
-    invoiceStatus:      raw?.invoiceStatus ?? raw?.status ?? "—",
-    Receipt:            raw?.Receipt ?? raw?.receipt,
-    ReceiptNo:          raw?.ReceiptNo ?? raw?.receiptNo,
-    TotalAmount:        raw?.TotalAmount ?? raw?.grandTotal ?? raw?.totalAmount,
+    invoiceNumber: raw?.id ?? raw?.quotationNumber ?? raw?.quotationId,
+    invoiceType: raw?.invoiceType ?? "Quotation",
+    customerName: raw?.customerName ?? raw?.customer ?? raw?.Customer,
+    currencyCode: raw?.currencyCode ?? raw?.currency,
+    exchangeRt: raw?.exchangeRt,
+    dateOfInvoice: raw?.transactionDate ?? raw?.quotationDate,
+    dueDate: raw?.validUntil ?? raw?.validTill,
+    Receipt: raw?.Receipt ?? raw?.receipt,
+    ReceiptNo: raw?.ReceiptNo ?? raw?.receiptNo,
+    TotalAmount: raw?.TotalAmount ?? raw?.grandTotal ?? raw?.totalAmount,
     discountPercentage: raw?.discountPercentage,
-    discountAmount:     raw?.discountAmount ?? raw?.totalDiscount,
-    lpoNumber:          raw?.lpoNumber ?? raw?.poNumber,
-    destnCountryCd:     raw?.destnCountryCd ?? null,
-    billingAddress:     raw?.billingAddress,
-    shippingAddress:    raw?.shippingAddress,
+    discountAmount: raw?.discountAmount ?? raw?.totalDiscount,
+    lpoNumber: raw?.lpoNumber ?? raw?.poNumber,
+    destnCountryCd: raw?.destnCountryCd ?? null,
+    billingAddress: raw?.billingAddress,
+    shippingAddress: raw?.shippingAddress,
     paymentInformation: raw?.paymentInformation ?? {
-      paymentTerms:  raw?.paymentTerms,
+      paymentTerms: raw?.paymentTerms,
       paymentMethod: raw?.paymentMethod,
-      bankName:      raw?.bankName,
+      bankName: raw?.bankName,
       accountNumber: raw?.accountNumber,
       routingNumber: raw?.routingNumber,
-      swiftCode:     raw?.swiftCode,
+      swiftCode: raw?.swiftCode,
     },
     items: Array.isArray(raw?.items)
       ? raw.items.map((it: any) => ({
-          itemCode:    it?.itemCode ?? it?.productName,
-          quantity:    Number(it?.quantity ?? 0),
+          itemCode: it?.itemCode ?? it?.productName,
+          quantity: Number(it?.quantity ?? 0),
           description: it?.description,
-          discount:    Number(it?.discount ?? 0),
-          price:       Number(it?.price ?? it?.listPrice ?? 0),
-          vatCode:     it?.vatCode,
+          discount: Number(it?.discount ?? 0),
+          price: Number(it?.price ?? it?.listPrice ?? 0),
+          vatCode: it?.vatCode,
         }))
       : [],
     terms: raw?.terms ?? {
@@ -311,19 +312,30 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
     },
   });
 
- 
   const columns: Column<QuotationSummary>[] = [
     {
       key: "quotationNumber",
       header: "Quotation No",
       align: "left",
       sortable: true,
-      render: (q) => <span className="font-semibold text-main">{q.quotationNumber}</span>,
+      render: (q) => (
+        <span className="font-semibold text-main">{q.quotationNumber}</span>
+      ),
     },
-    { key: "customerName",    header: "Customer",    align: "left",  sortable: true },
-    { key: "industryBases",   header: "Industry",    align: "left" },
-    { key: "transactionDate", header: "Date",        align: "left",  sortable: true },
-    { key: "validTill",       header: "Valid Till",  align: "left",  sortable: true },
+    {
+      key: "customerName",
+      header: "Customer",
+      align: "left",
+      sortable: true,
+    },
+    { key: "industryBases", header: "Industry", align: "left" },
+    {
+      key: "transactionDate",
+      header: "Date",
+      align: "left",
+      sortable: true,
+    },
+    { key: "validTill", header: "Valid Till", align: "left", sortable: true },
     {
       key: "grandTotal",
       header: "Amount",
@@ -355,7 +367,6 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
     },
   ];
 
-
   return (
     <div className="p-8">
       <Table
@@ -365,7 +376,10 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
         loading={loading || initialLoad}
         showToolbar
         searchValue={searchTerm}
-        onSearch={(q) => { setSearchTerm(q); setPage(1); }}
+        onSearch={(q) => {
+          setSearchTerm(q);
+          setPage(1);
+        }}
         enableColumnSelector
         enableAdd
         addLabel="Add Quotation"
@@ -377,7 +391,10 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
         pageSize={pageSize}
         totalItems={totalItems}
         pageSizeOptions={[10, 25, 50, 100]}
-        onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
         onPageChange={setPage}
         sortBy={sortBy}
         sortOrder={sortOrder}
@@ -387,10 +404,12 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
       <InvoiceDetailsModal
         open={detailsOpen}
         invoiceId={detailsId}
-        onClose={() => { setDetailsOpen(false); setDetailsId(null); }}
+        onClose={() => {
+          setDetailsOpen(false);
+          setDetailsId(null);
+        }}
         fetchDetails={getQuotationById}
         onOpenReceiptPdf={handleOpenReceipt}
-
         mapDetails={mapQuotationToInvoiceDetails}
       />
     </div>

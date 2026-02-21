@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
   getAllSalesInvoices,
-  updateInvoiceStatus,
   getSalesInvoiceById,
 } from "../../api/salesApi";
+
 import type { InvoiceSummary, Invoice } from "../../types/invoice";
 import { generateInvoicePDF } from "../../components/template/invoice/InvoiceTemplate1";
 import PdfPreviewModal from "./PdfPreviewModal";
@@ -15,54 +15,40 @@ import ActionButton, {
   ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
-import StatusBadge from "../../components/ui/Table/StatusBadge";
 import { getCompanyById } from "../../api/companySetupApi";
 import type { Company } from "../../types/company";
 import { showApiError, showSuccess, showLoading, closeSwal } from "../../utils/alert";
-import type { InvoiceStatus } from "../../types/invoice";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-
-
-const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
-  Draft:    ["Rejected", "Approved"],
-  Rejected: ["Draft", "Approved"],
-  Paid:     [],
-  Cancelled:["Draft"],
-  Approved: ["Paid", "Cancelled"],
-};
-
-const CRITICAL_STATUSES: InvoiceStatus[] = ["Paid"];
-
-
 
 interface InvoiceTableProps {
   onAddInvoice?: () => void;
   onExportInvoice?: () => void;
 }
 
-
-
-const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
+const InvoiceTable: React.FC<InvoiceTableProps> = ({
+  onAddInvoice,
+  onExportInvoice,
+}) => {
 
   // ── Data ─────────────────────────────────────────────────────────────────
-  const [invoices, setInvoices]       = useState<InvoiceSummary[]>([]);
-  const [loading, setLoading]         = useState(true);
+  const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
+  const [loading, setLoading] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [company, setCompany]         = useState<Company | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
 
   // ── PDF preview (kept — do not remove) ───────────────────────────────────
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [pdfUrl, setPdfUrl]                   = useState<string | null>(null);
-  const [pdfOpen, setPdfOpen]                 = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfOpen, setPdfOpen] = useState(false);
 
   // ── Invoice details modal ─────────────────────────────────────────────────
   const [invoiceDetailsOpen, setInvoiceDetailsOpen] = useState(false);
-  const [invoiceDetailsId, setInvoiceDetailsId]     = useState<string | null>(null);
+  const [invoiceDetailsId, setInvoiceDetailsId] = useState<string | null>(null);
 
   // ── Pagination (server) ──────────────────────────────────────────────────
-  const [page, setPage]           = useState(1);
-  const [pageSize, setPageSize]   = useState(10);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -70,7 +56,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   // ── Sort (server) — always store column key ──────────────────────────────
-  const [sortBy, setSortBy]       = useState("");
+  const [sortBy, setSortBy] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   // ── Reset page when search changes ───────────────────────────────────────
@@ -95,24 +81,23 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
       const res = await getAllSalesInvoices(page, pageSize, sortBy, sortOrder, searchTerm);
       if (!res || res.status_code !== 200) return;
 
-      const mapped: InvoiceSummary[] = res.data.map((inv: any) => ({
-        invoiceNumber:    inv.invoiceNumber,
-        customerName:     inv.customerName,
-        receiptNumber:    inv.receiptNumber,
-        currency:         inv.currency,
-        exchangeRate:     inv.exchangeRate,
-        dueDate:          inv.dueDate,
-        dateOfInvoice:    new Date(inv.dateOfInvoice),
-        total:            Number(inv.totalAmount),
-        totalTax:         inv.totalTax,
-        invoiceStatus:    inv.invoiceStatus,
-        invoiceTypeParent:inv.invoiceTypeParent,
-        invoiceType:      inv.invoiceType,
+      const mapped: InvoiceSummary[] = (res?.data ?? []).map((inv: any) => ({
+        invoiceNumber: inv.invoiceNumber,
+        customerName: inv.customerName,
+        receiptNumber: inv.receiptNumber,
+        currency: inv.currency,
+        exchangeRate: inv.exchangeRate,
+        dueDate: inv.dueDate,
+        dateOfInvoice: new Date(inv.dateOfInvoice),
+        total: Number(inv.totalAmount),
+        totalTax: inv.totalTax,
+        invoiceTypeParent: inv.invoiceTypeParent,
+        invoiceType: inv.invoiceType,
       }));
 
       setInvoices(mapped);
       setTotalPages(res.pagination?.total_pages || 1);
-      setTotalItems(res.pagination?.total       || mapped.length);
+      setTotalItems(res.pagination?.total || mapped.length);
     } finally {
       setLoading(false);
       setInitialLoad(false);
@@ -131,7 +116,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
     sortBy: string;
     sortOrder: "asc" | "desc";
   }) => {
-    setSortBy(colKey);   // store column key, not a backend alias
+    setSortBy(colKey); // store column key, not a backend alias
     setSortOrder(order);
     setPage(1);
   };
@@ -141,29 +126,28 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
     try {
       let allData: InvoiceSummary[] = [];
       let current = 1;
-      let total   = 1;
+      let total = 1;
 
       do {
         const res = await getAllSalesInvoices(current, 100, sortBy, sortOrder, searchTerm);
 
         if (res?.status_code === 200) {
-          const mapped: InvoiceSummary[] = res.data.map((inv: any) => ({
-            invoiceNumber:    inv.invoiceNumber,
-            customerName:     inv.customerName,
-            receiptNumber:    inv.receiptNumber,
-            currency:         inv.currency,
-            exchangeRate:     inv.exchangeRate,
-            dueDate:          inv.dueDate,
-            dateOfInvoice:    new Date(inv.dateOfInvoice),
-            total:            Number(inv.totalAmount),
-            totalTax:         inv.totalTax,
-            invoiceStatus:    inv.invoiceStatus,
-            invoiceTypeParent:inv.invoiceTypeParent,
-            invoiceType:      inv.invoiceType,
+          const mapped: InvoiceSummary[] = (res?.data ?? []).map((inv: any) => ({
+            invoiceNumber: inv.invoiceNumber,
+            customerName: inv.customerName,
+            receiptNumber: inv.receiptNumber,
+            currency: inv.currency,
+            exchangeRate: inv.exchangeRate,
+            dueDate: inv.dueDate,
+            dateOfInvoice: new Date(inv.dateOfInvoice),
+            total: Number(inv.totalAmount),
+            totalTax: inv.totalTax,
+            invoiceTypeParent: inv.invoiceTypeParent,
+            invoiceType: inv.invoiceType,
           }));
 
           allData = [...allData, ...mapped];
-          total   = res.pagination?.total_pages || 1;
+          total = res.pagination?.total_pages || 1;
         }
 
         current++;
@@ -191,13 +175,12 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
       const worksheet = XLSX.utils.json_to_sheet(
         dataToExport.map((inv) => ({
           "Invoice No": inv.invoiceNumber,
-          Type:         inv.invoiceType,
-          Customer:     inv.customerName,
-          Date:         inv.dateOfInvoice.toLocaleDateString(),
-          "Due Date":   inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "",
-          Amount:       inv.total,
-          Currency:     inv.currency,
-          Status:       inv.invoiceStatus,
+          Type: inv.invoiceType,
+          Customer: inv.customerName,
+          Date: inv.dateOfInvoice.toLocaleDateString(),
+          "Due Date": inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "",
+          Amount: inv.total,
+          Currency: inv.currency,
         }))
       );
 
@@ -298,32 +281,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
     setInvoiceDetailsId(null);
   };
 
-  const handleRowStatusChange = async (
-    invoiceNumber: string,
-    status: InvoiceStatus,
-  ) => {
-    if (
-      CRITICAL_STATUSES.includes(status) &&
-      !window.confirm(`Mark invoice ${invoiceNumber} as ${status}? This action cannot be undone.`)
-    ) {
-      return;
-    }
-
-    const res = await updateInvoiceStatus(invoiceNumber, status);
-    if (!res || res.status_code !== 200) {
-      showApiError(res?.message || "Failed to update invoice status");
-      return;
-    }
-
-    setInvoices((prev) =>
-      prev.map((inv) =>
-        inv.invoiceNumber === invoiceNumber ? { ...inv, invoiceStatus: status } : inv
-      )
-    );
-
-    showSuccess(`Invoice marked as ${status}`);
-  };
-
   const handleDelete = async (invoiceNumber: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (!window.confirm(`Delete invoice ${invoiceNumber}?`)) return;
@@ -396,12 +353,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
       ),
     },
     {
-      key: "invoiceStatus",
-      header: "Status",
-      align: "left",
-      render: (inv) => <StatusBadge status={inv.invoiceStatus} />,
-    },
-    {
       key: "actions",
       header: "Actions",
       align: "center",
@@ -416,11 +367,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
             onDelete={(e) => handleDelete(inv.invoiceNumber, e)}
             showDownload
             onDownload={(e) => handleDownload(inv, e)}
-            customActions={(STATUS_TRANSITIONS[inv.invoiceStatus] ?? []).map((status) => ({
-              label: `Mark as ${status}`,
-              danger: status === "Paid",
-              onClick: () => handleRowStatusChange(inv.invoiceNumber, status),
-            }))}
           />
         </ActionGroup>
       ),
@@ -433,7 +379,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
     <div className="p-8">
       <Table
         columns={columns}
-        data={invoices}                        // ← raw server data, no local filter
+        data={invoices} // ← raw server data, no local filter
         rowKey={(row) => row.invoiceNumber}
         loading={loading || initialLoad}
         showToolbar
@@ -444,11 +390,12 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
         onAdd={onAddInvoice}
         enableColumnSelector
         enableExport
-        onExport={handleExportExcel}
+        onExport={onExportInvoice ?? handleExportExcel}
         currentPage={page}
         totalPages={totalPages}
         pageSize={pageSize}
         totalItems={totalItems}
+
         pageSizeOptions={[10, 25, 50, 100]}
         onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
         onPageChange={setPage}
