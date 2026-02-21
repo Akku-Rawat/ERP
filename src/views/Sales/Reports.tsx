@@ -316,7 +316,14 @@ export default function ReportTable() {
   const filteredData = useMemo(() => {
     return rows.filter((row) => {
       const term = searchTerm.trim().toLowerCase();
-      if (term && !normalized(row.customerName).includes(term)) return false;
+      if (term) {
+  const matches =
+    normalized(row.customerName).includes(term) ||
+    normalized(row.documentNo).includes(term) ||
+    normalized(row.type).includes(term);
+
+  if (!matches) return false;
+}
 
       if (filters.status !== "All" && String(row.status ?? "") !== filters.status)
         return false;
