@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-
 import { getDashboardSummary } from '../api/dashboardApi';
 import { ChartSkeleton } from '../components/ChartSkeleton';
-
+import UserMenu from '../layout/UserMenu';
 import {
   Bar,
   BarChart,
@@ -20,9 +18,6 @@ import {
 import { DollarSign, FileText, TrendingUp, Users } from 'lucide-react';
 
 const Dashboard = () => {
-  const { logout } = useAuth();
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const [summaryData, setSummaryData] = useState<{
@@ -196,39 +191,14 @@ const Dashboard = () => {
             Business overview and key performance trends
           </p>
         </div>
+<div className="flex items-center gap-3">
+  <div className="text-right leading-tight hidden sm:block">
+    <div className="text-sm font-bold text-gray-900">Admin User</div>
+    <div className="text-xs text-gray-600 font-semibold">Administrator</div>
+  </div>
 
-        <div className="flex items-center gap-3">
-          <div className="text-right leading-tight hidden sm:block">
-            <div className="text-sm font-bold text-gray-900">Admin User</div>
-            <div className="text-xs text-gray-600 font-semibold">Administrator</div>
-          </div>
-
-          <div className="relative">
-            <button
-              type="button"
-              className="w-10 h-10 rounded-full bg-amber-600 text-white font-bold shadow-sm border border-amber-700/20"
-              title="User"
-              onClick={() => setUserMenuOpen((s) => !s)}
-            >
-              U
-            </button>
-
-            {userMenuOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
-                <button
-                  type="button"
-                  className="w-full text-left px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-50"
-                  onClick={async () => {
-                    setUserMenuOpen(false);
-                    await logout();
-                  }}
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+  <UserMenu />
+</div>
       </div>
 
       {summaryLoading && (

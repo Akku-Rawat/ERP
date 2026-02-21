@@ -165,14 +165,17 @@ export const generateProformaInvoicePDF = async (
   doc.text("Proforma Invoice Information", 15, y + 32);
 
   doc.setFont("helvetica", "normal");
+  const proformaInfoLines = [
+    `Issue Date: ${proformaInvoice.dateofinvoice}`,
+    `Proforma ID: ${proformaInvoice.proformaId}`,
+    `Status: ${proformaInvoice.status}`,
+    `Currency: ${currency}`,
+    `Exchange Rate: ${proformaInvoice.exchangeRate}`,
+    proformaInvoice.receiptNo ? `Receipt No: ${proformaInvoice.receiptNo}` : null,
+    proformaInvoice.receipt ? `Receipt: ${proformaInvoice.receipt}` : null,
+  ].filter(Boolean) as string[];
   doc.text(
-    [
-      `Issue Date: ${proformaInvoice.dateofinvoice}`,
-      `Proforma ID: ${proformaInvoice.proformaId}`,
-      `Status: ${proformaInvoice.status}`,
-      `Currency: ${currency}`,
-      `Exchange Rate: ${proformaInvoice.exchangeRate}`,
-    ],
+    proformaInfoLines,
     15,
     y + 38,
   );

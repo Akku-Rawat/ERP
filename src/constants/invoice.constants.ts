@@ -40,7 +40,9 @@ export const paymentMethodOptions = [
 export const getPaymentMethodLabel = (code?: string) =>
   paymentMethodOptions.find((p) => p.value === code)?.label ?? "UNKNOWN";
 
-export const DEFAULT_INVOICE_FORM = {
+import type { Invoice } from "../types/invoice";
+
+export const DEFAULT_INVOICE_FORM: Invoice = {
   customerId: "",
   currencyCode: "ZMW",
   exchangeRt: "1",

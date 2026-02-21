@@ -268,7 +268,8 @@ if (!company) return;
 
         return {
           ...prev,
-          destnCountryCd: invoiceType === "Export" ? countryCode : "",
+          destnCountryCd:
+            invoiceType === "Export" ? countryCode : prev.destnCountryCd,
           invoiceType,
           billingAddress: billing,
           shippingAddress: shipping,
@@ -421,6 +422,10 @@ const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
   try {
+    const hasC1 = formData.items.some(
+      (it) => String(it?.vatCode ?? "").toUpperCase() === "C1",
+    );
+
     //  VALIDATION 
     if (!formData.customerId) {
       throw new Error("Please select a customer");
@@ -448,6 +453,12 @@ const handleSubmit = async (e: React.FormEvent) => {
       throw new Error("Please add at least one item");
     }
 
+    if (hasC1 && !formData.destnCountryCd) {
+      throw new Error(
+        "Destination country (destnCountryCd) is required for VAT code C1 transactions",
+      );
+    }
+
     //  LOADING 
     showLoading("Saving quotation...");
 
@@ -462,7 +473,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       invoiceType: formData.invoiceType,
       invoiceStatus: formData.invoiceStatus,
 
-      ...(formData.invoiceType === "Export" && {
+      ...((formData.invoiceType === "Export" || hasC1) && {
         destnCountryCd: formData.destnCountryCd,
       }),
 
@@ -542,6 +553,9 @@ const handleSubmit = async (e: React.FormEvent) => {
       isExport: formData.invoiceType === "Export",
       isLocal: formData.invoiceType === "LPO",
       isNonExport: formData.invoiceType === "Non-Export",
+      hasC1: formData.items.some(
+        (it) => String(it?.vatCode ?? "").toUpperCase() === "C1",
+      ),
       isQuotation: true,
     },
     actions: {

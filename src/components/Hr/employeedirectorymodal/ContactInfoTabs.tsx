@@ -56,7 +56,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-main mb-1 font-medium">
-              Alternate Phone *<span className="text-danger">*</span>
+              Alternate Phone
             </label>
             <input
               type="tel"

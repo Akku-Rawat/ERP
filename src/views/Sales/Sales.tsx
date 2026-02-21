@@ -138,19 +138,14 @@ const handleInvoiceSubmit = async (payload: any) => {
     const response = await createQuotation(payload);
 
     if (!response || ![200, 201].includes(response.status_code)) {
-      showApiError(response);
-      return;
+      throw response;
     }
-
-    showSuccess(
-      response.message || "Quotation created successfully"
-    );
 
     setRefreshKey((prev) => prev + 1);
     setOpenModal(null);
 
   } catch (error: any) {
-    showApiError(error);
+    throw error;
   }
 };
 

@@ -167,6 +167,19 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     ></ModalSelect>
                   </div>
 
+                  {(ui.isExport || ui.hasC1) && (
+                    <div>
+                      <ModalInput
+                        label="Export To Country"
+                        name="destnCountryCd"
+                        type="text"
+                        value={formData.destnCountryCd}
+                        onChange={actions.handleInputChange}
+                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                      />
+                    </div>
+                  )}
+
                   {/* LPO Number */}
                   {ui.isLocal && (
                     <div>

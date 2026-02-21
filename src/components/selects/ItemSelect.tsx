@@ -43,7 +43,11 @@ export default function ItemSelect({
       setLoading(true);
 
       try {
-        const res = await getAllItems(1, 1000, taxCategory || undefined);
+        const res = await getAllItems(
+          1,
+          1000,
+          taxCategory ? { taxCategory } : undefined,
+        );
 
         if (!cancelled && res?.status_code === 200) {
           setItems(
