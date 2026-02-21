@@ -247,7 +247,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     </h3>
                   </div>
                   <div className="mt-2 overflow-x-auto">
-                    <table className="w-full min-w-[780px] border-collapse text-[10px]">
+                    <table className="w-full min-w-[920px] border-collapse text-[10px]">
                       <thead>
                         <tr className="border-b border-theme">
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px] whitespace-nowrap">
@@ -262,19 +262,19 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
                             Qty
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[90px] md:w-[110px] whitespace-nowrap">
                             Unit Price
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[55px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[80px] md:w-[100px] whitespace-nowrap">
                             Discount (%)
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
                             Tax
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[55px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[80px] md:w-[100px] whitespace-nowrap">
                             Tax Code
                           </th>
-                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[90px] md:w-[120px] whitespace-nowrap">
                             Amount
                           </th>
                           <th className="px-2 py-3 text-center text-muted font-medium text-[11px] w-[35px] whitespace-nowrap">
@@ -341,7 +341,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   min="0"
                                   step="0.01"
                                   disabled
-                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[90px] md:w-[110px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -354,7 +354,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   }
                                   min="0"
                                   placeholder="0"
-                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[80px] md:w-[100px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -380,7 +380,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                     actions.handleItemChange(i, e)
                                   }
                                   disabled
-                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[80px] md:w-[100px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
                               <td className="px-1 py-1.5 text-right">
