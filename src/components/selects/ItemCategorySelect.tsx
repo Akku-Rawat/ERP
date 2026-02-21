@@ -31,7 +31,11 @@ export default function ItemCategorySelect({
     const load = async () => {
       try {
         setLoading(true);
-        const res = await getAllItemGroups(1, 130, filterByItemType);
+        const res = await getAllItemGroups(
+          1,
+          130,
+          filterByItemType ? { itemType: filterByItemType } : undefined
+        );
 
         if (!res || res?.status_code !== 200 || !Array.isArray(res.data)) {
           console.warn("Invalid API response, setting empty categories");

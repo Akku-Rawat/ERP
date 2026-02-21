@@ -17,7 +17,7 @@ const CreateCreditNoteModal: React.FC<Props> = ({
   onSubmit,
   invoiceId,
 }) => {
-  const [saving, setSaving] = useState(false); 
+  const [saving, setSaving] = useState(false);
 
   const footerContent = (
     <>
