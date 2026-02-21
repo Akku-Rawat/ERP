@@ -275,7 +275,7 @@ export const API = {
   rolaLookup: {
     getPackagingUnits: `${ERP_BASE}/api//`,
     getCountries: `${ERP_BASE}/api/country-list/`,
-    getUnitOfMeasure: `${ERP_BASE}/api/resource/UOM'`,
+    getUnitOfMeasure: `${ERP_BASE}/api/resource/UOM`,
     getItemClasses: `${ERP_BASE}/api/item-class-list/`,
   },
 } as const;
