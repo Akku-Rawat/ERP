@@ -388,15 +388,24 @@ if (!company) return;
       setFormData((prev) => {
         const items = [...prev.items];
 
+        const resolvedId = String(data?.id ?? itemId).trim();
+        const currentCode = String(items[index]?.itemCode ?? "").trim();
+        if (currentCode && currentCode === resolvedId) {
+          return prev;
+        }
+
         const currency = String(prev.currencyCode ?? "").trim().toUpperCase();
         const rate = Number(String(prev.exchangeRt ?? "1").trim());
-        const baseSellingPrice = Number(data.sellingPrice ?? items[index].price);
-        const convertedPrice =
-          currency !== "ZMW" && Number.isFinite(rate) && rate > 0
-            ? baseSellingPrice / rate
-            : baseSellingPrice;
+        const apiSellingPrice = Number(data.sellingPrice);
+        const hasApiPrice = Number.isFinite(apiSellingPrice) && apiSellingPrice > 0;
+        const convertedPrice = (() => {
+          if (!hasApiPrice) return Number(items[index].price);
+          if (currency !== "ZMW" && Number.isFinite(rate) && rate > 0) {
+            return apiSellingPrice / rate;
+          }
+          return apiSellingPrice;
+        })();
 
-        const resolvedId = String(data?.id ?? itemId).trim();
         const existingIdx = items.findIndex(
           (it, i) => i !== index && String(it?.itemCode ?? "").trim() === resolvedId,
         );
