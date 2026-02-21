@@ -31,9 +31,12 @@ export async function updateProformaInvoiceStatus(
 export async function getAllProformaInvoices(
   page: number = 1,
   page_size: number = 10,
+  sortBy: string = "",
+  sortOrder: "asc" | "desc" = "asc",
+  search?: string,
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(ProformaAPI.getAll, {
-    params: { page, page_size },
+    params: { page, page_size, sortBy, sortOrder, search},
   });
   return resp.data;
 }

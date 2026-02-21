@@ -25,9 +25,12 @@ export async function updateInvoiceStatus(
 export async function getAllSalesInvoices(
   page: number = 1,
   page_size: number = 10,
+  sortBy: string = "",
+  sortOrder: "asc" | "desc" = "asc",
+  search?: string,
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(InvoiceAPI.getAll, {
-    params: { page, page_size },
+    params: { page, page_size, sortBy, sortOrder, search},
   });
   return resp.data;
 }
@@ -80,18 +83,24 @@ export async function createDebitNoteFromInvoice(payload: {
 export async function getAllDebitNotes(
   page: number = 1,
   page_size: number = 10,
+  sortBy: string = "",
+  sortOrder: "asc" | "desc" = "asc",
+  search: string = "",
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(InvoiceAPI.getDebitNotes, {
-    params: { page, page_size },
+    params: { page, page_size, sortBy, sortOrder, search },
   });
   return resp.data;
 }
 export async function getAllCreditNotes(
   page: number = 1,
   page_size: number = 10,
+  sortBy: string = "",
+  sortOrder: "asc" | "desc" = "asc",
+  search: string = "",
 ): Promise<any> {
   const resp: AxiosResponse = await api.get(InvoiceAPI.getCreditNotes, {
-    params: { page, page_size },
+    params: { page, page_size, sortBy, sortOrder, search },
   });
   return resp.data;
 }

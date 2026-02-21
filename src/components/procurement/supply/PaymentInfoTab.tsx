@@ -10,6 +10,18 @@ interface PaymentInfoTabProps {
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) => void;
+  errors?: {
+    currency?: string;
+    paymentTerms?: string;
+    dateOfAddition?: string;
+    openingBalance?: string;
+    bankAccount?: string;
+    accountNumber?: string;
+    accountHolder?: string;
+    sortCode?: string;
+    swiftCode?: string;
+    branchAddress?: string;
+  };
 }
 
 const currencySelectOptions = currencyOptions.map((c) => ({
@@ -20,6 +32,7 @@ const currencySelectOptions = currencyOptions.map((c) => ({
 export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
   form,
   onChange,
+  errors = {},
 }) => {
   return (
     <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
@@ -34,6 +47,8 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             value={form.currency}
             onChange={onChange}
             options={[...currencySelectOptions]}
+            required
+            error={errors.currency}
           />
 
           <ModalInput
@@ -42,6 +57,8 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             min={0} // UI block
             value={form.paymentTerms}
             onChange={onChange}
+            required
+            error={errors.paymentTerms}
           />
 
           <ModalInput
@@ -50,6 +67,8 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             type="date"
             value={form.dateOfAddition}
             onChange={onChange}
+            required
+            error={errors.dateOfAddition}
           />
 
           <ModalInput
@@ -58,6 +77,8 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             type="number"
             value={form.openingBalance}
             onChange={onChange}
+            required
+            error={errors.openingBalance}
           />
         </div>
       </div>
@@ -75,6 +96,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             value={form.bankAccount}
             onChange={onChange}
             required
+            error={errors.bankAccount}
           />
 
           <ModalInput
@@ -83,6 +105,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             value={form.accountNumber}
             onChange={onChange}
             required
+            error={errors.accountNumber}
           />
 
           <ModalInput
@@ -91,6 +114,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             value={form.accountHolder}
             onChange={onChange}
             required
+            error={errors.accountHolder}
           />
 
           <ModalInput
@@ -98,6 +122,8 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             name="sortCode"
             value={form.sortCode}
             onChange={onChange}
+            required
+            error={errors.sortCode}
           />
 
           <ModalInput
@@ -105,6 +131,8 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             name="swiftCode"
             value={form.swiftCode}
             onChange={onChange}
+            required
+            error={errors.swiftCode}
           />
 
           <ModalInput
@@ -112,6 +140,8 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             name="branchAddress"
             value={form.branchAddress}
             onChange={onChange}
+            required
+            error={errors.branchAddress}
           />
         </div>
       </div>

@@ -5,25 +5,32 @@ import { API, ERP_BASE } from "../config/api";
 const api = createAxiosInstance(ERP_BASE);
 export const QuotationAPI = API.quotation;
 
-export type QuotationFilters = {
-  search?: string;
-  status?: string;
-  fromDate?: string;
-  toDate?: string;
-};
-
 export async function getAllQuotations(
-  page: number = 1,
-  page_size: number = 10,
-  filters?: QuotationFilters,
-): Promise<any> {
-  const resp = await api.get(QuotationAPI.getAll, {
-    params: {
-      page,
-      page_size,
-      ...filters,
-    },
-  });
+  page = 1,
+  page_size = 10,
+  options?: {
+    search?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+  }
+) {
+  const params: Record<string, any> = {
+    page,
+    page_size,
+  };
+
+  if (options?.search) params.search = options.search;
+  if (options?.status) params.status = options.status;
+  if (options?.fromDate) params.fromDate = options.fromDate;
+  if (options?.toDate) params.toDate = options.toDate;
+  if (options?.sortBy) params.sortBy = options.sortBy;
+  if (options?.sortOrder) params.sortOrder = options.sortOrder;
+
+  const resp = await api.get(QuotationAPI.getAll, { params });
+
   return resp.data;
 }
 

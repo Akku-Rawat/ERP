@@ -14,9 +14,17 @@ interface AddressTabProps {
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) => void;
+  errors?: {
+    billingAddressLine1?: string;
+    billingCity?: string;
+    billingCountry?: string;
+    district?: string;
+    province?: string;
+    billingPostalCode?: string;
+  };
 }
 
-export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange }) => {
+export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors = {} }) => {
   const fetchCountryOptions = async (q: string) => {
     const res = await getCountry(q);
     return (res.data || []).map((c: string) => ({
@@ -51,6 +59,8 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange }) => {
             name="billingAddressLine1"
             value={form.billingAddressLine1}
             onChange={onChange}
+            required
+            error={errors.billingAddressLine1}
           />
 
           <ModalInput
@@ -69,6 +79,8 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange }) => {
               } as any)
             }
             fetchOptions={fetchTownOptions}
+            required
+            error={errors.billingCity}
           />
 
           <SearchSelect
@@ -80,6 +92,8 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange }) => {
               } as any)
             }
             fetchOptions={fetchCountryOptions}
+            required
+            error={errors.billingCountry}
           />
 
           <ModalInput
@@ -87,6 +101,8 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange }) => {
             name="district"
             value={form.district}
             onChange={onChange}
+            required
+            error={errors.district}
           />
 
           <SearchSelect
@@ -98,6 +114,8 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange }) => {
               } as any)
             }
             fetchOptions={fetchProvinceOptions}
+            required
+            error={errors.province}
           />
 
           <ModalInput
@@ -105,6 +123,8 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange }) => {
             name="billingPostalCode"
             value={form.billingPostalCode}
             onChange={onChange}
+            required
+            error={errors.billingPostalCode}
           />
         </div>
       </div>

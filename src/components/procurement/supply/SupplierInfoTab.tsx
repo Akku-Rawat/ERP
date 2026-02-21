@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   taxCategorySelectOptions,
   type SupplierFormData,
@@ -12,43 +12,22 @@ interface SupplierInfoTabProps {
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) => void;
+  errors?: {
+    tpin?: string;
+    supplierName?: string;
+    taxCategory?: string;
+    contactPerson?: string;
+    phoneNo?: string;
+    alternateNo?: string;
+    emailId?: string;
+  };
 }
 
 export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
   form,
   onChange,
+  errors = {},
 }) => {
-  const [errors, setErrors] = useState<{
-    phoneNo?: string;
-    alternateNo?: string;
-  }>({});
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    // parent form change
-    onChange(e);
-
-    // validation
-    if (name === "phoneNo" || name === "alternateNo") {
-      if (!/^\d*$/.test(value)) {
-        setErrors((prev) => ({
-          ...prev,
-          [name]: "Only numbers allowed",
-        }));
-      } else if (value.length > 0 && value.length < 10) {
-        setErrors((prev) => ({
-          ...prev,
-          [name]: "Must be 10 digits",
-        }));
-      } else {
-        setErrors((prev) => ({
-          ...prev,
-          [name]: "",
-        }));
-      }
-    }
-  };
 
   return (
     <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
@@ -65,7 +44,9 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               value={form.tpin}
               onChange={onChange}
               placeholder="maximum 10 digit"
+              maxLength={10}
               required
+              error={errors.tpin}
             />
             <ModalInput
               label="Supplier Name"
@@ -73,6 +54,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               value={form.supplierName}
               onChange={onChange}
               required
+              error={errors.supplierName}
             />
             <ModalInput
               label="Supplier Code"
@@ -86,6 +68,8 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               value={form.taxCategory}
               onChange={onChange}
               options={[...taxCategorySelectOptions]}
+              required
+              error={errors.taxCategory}
             />
           </div>
         </div>
@@ -102,14 +86,16 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               value={form.contactPerson}
               onChange={onChange}
               required
+              error={errors.contactPerson}
             />
             <ModalInput
               label="Phone No"
               name="phoneNo"
               value={form.phoneNo}
-              onChange={handleInputChange}
+              onChange={onChange}
               type="tel"
               maxLength={10}
+              required
               error={errors.phoneNo}
             />
 
@@ -117,7 +103,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               label="Alternate No"
               name="alternateNo"
               value={form.alternateNo}
-              onChange={handleInputChange}
+              onChange={onChange}
               type="tel"
               maxLength={10}
               error={errors.alternateNo}
@@ -129,6 +115,8 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               value={form.emailId}
               onChange={onChange}
               type="email"
+              required
+              error={errors.emailId}
             />
           </div>
         </div>
