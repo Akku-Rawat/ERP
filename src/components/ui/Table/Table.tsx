@@ -1,316 +1,359 @@
-import React from "react";
-import { useTableLogic } from "./useTableLogic";
+import React, { useState } from "react";
 import type { Column } from "./type";
 import ColumnSelector from "./ColumnSelector";
 import Pagination from "../../Pagination";
-import { FaSortAmountDown, FaSortAmountUp, FaSearch } from "react-icons/fa";
+import {
+  FaSearch,
+  FaSort,
+  FaSortUp,
+  FaSortDown,
+} from "react-icons/fa";
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface SortState {
+  sortBy: string;
+  sortOrder: "asc" | "desc";
+}
 
 interface TableProps<T> {
+  // Core data
   columns: Column<T>[];
   data: T[];
-  onRowClick?: (item: T) => void;
+  rowKey?: (row: T) => string;
   loading?: boolean;
   emptyMessage?: string;
-  extraFilters?: React.ReactNode;
+
+  // Row interaction
+  onRowClick?: (item: T) => void;
+
+  // Toolbar
   showToolbar?: boolean;
-  enableAdd?: boolean;
-  enableExport?: boolean;
-  onExport?: () => void;
-  onAdd?: () => void;
+  extraFilters?: React.ReactNode;
+  toolbarPlaceholder?: string;
+
+  // Search — controlled by parent (backend)
   searchValue?: string;
   onSearch?: (q: string) => void;
-  toolbarPlaceholder?: string;
+
+  // Add button
+  enableAdd?: boolean;
+  addLabel?: string;
+  onAdd?: () => void;
+
+  // Export button
+  enableExport?: boolean;
+  onExport?: () => void;
+
+  // Column visibility selector (UI-only, stays local)
   enableColumnSelector?: boolean;
-  initialVisibleColumns?: string[];
+
+  // Server-side sort — controlled by parent (backend)
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  onSortChange?: (sort: SortState) => void;
+
+  // Server-side pagination — controlled by parent (backend)
   currentPage?: number;
   totalPages?: number;
   pageSize?: number;
   totalItems?: number;
+  pageSizeOptions?: number[];
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
-  pageSizeOptions?: number[];
-  addLabel?: string;
-  rowKey?: (row: T) => string;
-  serverSide?: boolean;
 }
 
-/**
- * Skeleton Loading Row Component
- */
+// ---------------------------------------------------------------------------
+// Skeleton Row
+// ---------------------------------------------------------------------------
+
 const SkeletonRow: React.FC<{ columnsCount: number }> = ({ columnsCount }) => (
   <tr className="bg-transparent">
     {Array.from({ length: columnsCount }).map((_, idx) => (
-      <td key={idx} className="px-3 sm:px-5 py-3.5 border-b border-[var(--border)]/20">
-        <div className="h-4 bg-gray-300 animate-pulse rounded"/>
+      <td
+        key={idx}
+        className="px-3 sm:px-5 py-3.5 border-b border-[var(--border)]/20"
+      >
+        <div className="h-4 bg-gray-300 animate-pulse rounded" />
       </td>
     ))}
   </tr>
 );
 
-/**
- * Main Table Component
- */
+// ---------------------------------------------------------------------------
+// Table
+// ---------------------------------------------------------------------------
+
 function Table<T extends Record<string, any>>({
+  // Core
   columns,
   data,
-  onRowClick,
-  extraFilters,
   rowKey,
   loading = false,
   emptyMessage = "No records found.",
+
+  // Row
+  onRowClick,
+
+  // Toolbar
   showToolbar = false,
+  extraFilters,
+  toolbarPlaceholder = "Search...",
+
+  // Search
+  searchValue = "",
+  onSearch,
+
+  // Add
   enableAdd = false,
+  addLabel = "+ Add",
   onAdd,
+
+  // Export
   enableExport = false,
   onExport,
-  searchValue,
-  toolbarPlaceholder = "Search...",
+
+  // Column selector
   enableColumnSelector = false,
-  addLabel = "+ Add",
-  currentPage,
-  totalPages,
+
+  // Sort (server)
+  sortBy,
+  sortOrder: sortOrderProp,
+  onSortChange,
+
+  // Pagination (server)
+  currentPage = 1,
+  totalPages = 1,
   pageSize = 10,
   totalItems = 0,
+  pageSizeOptions = [10, 20, 50, 100],
   onPageChange,
   onPageSizeChange,
-  pageSizeOptions = [10, 20, 50, 100],
-  onSearch,
 }: TableProps<T>) {
-  const {
-    effectiveSearch,
-    setSearch,
-    visibleKeys,
-    setVisibleKeys,
-    allKeys,
-    toggleColumn,
 
-    sortOrder,
-    setSortOrder,
-    processedData,
-  } = useTableLogic<T>({ columns, data, searchValue });
+  // Column visibility is the only local UI state that remains
+  const allKeys = columns.map((col) => col.key);
+  const [visibleKeys, setVisibleKeys] = useState<string[]>(allKeys);
+
+  const toggleColumn = (key: string) => {
+    setVisibleKeys((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
+
+  // ---------------------------------------------------------------------------
+  // Sort handler — delegates entirely to parent
+  // ---------------------------------------------------------------------------
+
+  const handleColumnSort = (colKey: string) => {
+    if (!onSortChange) return;
+    const isSameColumn = sortBy === colKey;
+    const newOrder: "asc" | "desc" =
+      isSameColumn && sortOrderProp === "asc" ? "desc" : "asc";
+    onSortChange({ sortBy: colKey, sortOrder: newOrder });
+  };
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
 
   const getAlignment = (align?: "left" | "center" | "right"): string => {
     switch (align) {
-      case "center":
-        return "text-center";
-      case "right":
-        return "text-right";
-      default:
-        return "text-left";
+      case "center": return "text-center";
+      case "right":  return "text-right";
+      default:       return "text-left";
     }
   };
 
-  const displayData = processedData ?? [];
-  const visibleColumns = loading
-    ? columns
-    : columns.filter((col) => visibleKeys.includes(col.key));
+  const visibleColumns = columns.filter((col) => visibleKeys.includes(col.key));
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
 
   return (
     <div className="bg-card rounded-2xl border border-[var(--border)] flex flex-col shadow-sm transition-all relative z-10 w-full overflow-hidden">
-      {/* Toolbar Section */}
+
+      {/* ── Toolbar ── */}
       {showToolbar && (
         <div className="px-5 py-4 border-b border-[var(--border)] bg-card flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 shrink-0">
-          {/* Search Input */}
+
+          {/* Search — value and handler always come from parent */}
           <div className="relative w-52 group">
-            {loading ? (
-              <div className="h-10 w-full bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded-xl" />
-            ) : (
-              <>
-                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs group-focus-within:text-primary transition-colors" />
-                <input
-                  value={effectiveSearch}
-                  onChange={(e) =>
-                    typeof onSearch === "function"
-                      ? onSearch(e.target.value)
-                      : setSearch(e.target.value)
-                  }
-                  placeholder={toolbarPlaceholder}
-                  className="w-full pl-10 pr-4 py-2 bg-card border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
-                />
-              </>
-            )}
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs group-focus-within:text-primary transition-colors" />
+            <input
+              value={searchValue}
+              onChange={(e) => onSearch?.(e.target.value)}
+              placeholder={toolbarPlaceholder}
+              className="w-full pl-10 pr-4 py-2 bg-card border border-[var(--border)] rounded-xl text-xs font-medium text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+            />
           </div>
 
+          {/* Extra filters slot */}
           {extraFilters && (
             <div className="flex items-center gap-4 shrink-0">
               {extraFilters}
             </div>
           )}
 
+          {/* Right-side buttons */}
           <div className="flex items-center gap-2 shrink-0">
-            {loading ? (
-              <>
-                <div className="h-10 w-20 bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded-xl" />
-                <div className="h-10 w-24 bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded-xl" />
-                {enableColumnSelector && (
-                  <div className="h-10 w-28 bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded-xl" />
-                )}
-                {enableAdd && (
-                  <div className="h-10 w-32 bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded-xl ml-2" />
-                )}
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() =>
-                    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
-                  }
-                  className={`p-2 rounded-xl border border-[var(--border)] bg-app text-muted hover:text-primary hover:border-primary transition-all flex items-center gap-2 px-3 whitespace-nowrap ${sortOrder ? "border-primary text-primary" : ""
-                    }`}
-                >
-                  {sortOrder === "asc" ? (
-                    <FaSortAmountUp size={12} />
-                  ) : (
-                    <FaSortAmountDown size={12} />
-                  )}
-                  <span className="text-[10px] font-black uppercase tracking-widest">
-                    Sort
-                  </span>
-                </button>
 
-                {enableColumnSelector && (
-                  <ColumnSelector
-                    columns={columns}
-                    visibleKeys={visibleKeys}
-                    toggleColumn={toggleColumn}
-                    setVisibleKeys={setVisibleKeys}
-                    allKeys={allKeys}
-                  />
-                )}
-
-                {enableAdd && (
-                  <button
-                    onClick={onAdd}
-                    className="bg-primary text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:opacity-90 transition-all whitespace-nowrap ml-2"
-                  >
-                    {addLabel}
-                  </button>
-                )}
-
-                {enableExport && (
-                  <button
-                    onClick={onExport}
-                    className="bg-primary text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:opacity-90 transition-all"
-                  >
-                    Export
-                  </button>
-                )}
-              </>
+            {enableColumnSelector && (
+              <ColumnSelector
+                columns={columns}
+                visibleKeys={visibleKeys}
+                toggleColumn={toggleColumn}
+                setVisibleKeys={setVisibleKeys}
+                allKeys={allKeys}
+              />
             )}
+
+            {enableAdd && (
+              <button
+                onClick={onAdd}
+                className="bg-primary text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:opacity-90 transition-all whitespace-nowrap"
+              >
+                {addLabel}
+              </button>
+            )}
+
+            {enableExport && (
+              <button
+                onClick={onExport}
+                className="bg-primary text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:opacity-90 transition-all"
+              >
+                Export
+              </button>
+            )}
+
           </div>
         </div>
       )}
 
-      {/* Scrollable Table Container */}
+      {/* ── Table ── */}
       <div className="w-full overflow-x-auto custom-scrollbar">
         <div className="max-h-[420px] overflow-y-auto min-w-full md:min-w-[800px] relative">
           <table className="w-full min-w-full border-separate border-spacing-0">
-            {/* Table Header */}
+
+            {/* Header */}
             <thead className="sticky top-0 z-30 shadow-sm">
               <tr>
-                {visibleColumns.map((column) => (
-                  <th
-                    key={column.key}
-                    className={`px-3 sm:px-5 py-3.5 sm:py-4 text-[10px] font-black uppercase tracking-[0.08em] sm:tracking-[0.12em] text-muted border-b border-[var(--border)] bg-card whitespace-nowrap ${getAlignment(column.align)}`}
-                  >
-                    {loading ? (
-                      <div className="h-3 bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded" />
-                    ) : (
-                      column.header
-                    )}
-                  </th>
-                ))}
+                {visibleColumns.map((column) => {
+                  const isSortable = !!column.sortable && !!onSortChange;
+                  const isActive   = sortBy === column.key;
+                  const isAsc      = isActive && sortOrderProp === "asc";
+                  const isDesc     = isActive && sortOrderProp === "desc";
+
+                  return (
+                    <th
+                      key={column.key}
+                      onClick={isSortable ? () => handleColumnSort(column.key) : undefined}
+                      className={[
+                        "px-3 sm:px-5 py-3.5 sm:py-4",
+                        "text-[10px] font-black uppercase tracking-[0.08em] sm:tracking-[0.12em]",
+                        "text-muted border-b border-[var(--border)] bg-card whitespace-nowrap",
+                        getAlignment(column.align),
+                        isSortable ? "cursor-pointer select-none hover:text-primary transition-colors" : "",
+                        isActive   ? "text-primary" : "",
+                      ].join(" ")}
+                    >
+                      <span className="inline-flex items-center gap-1.5">
+                        {column.header}
+                        {isSortable && (
+                          <span className="inline-flex opacity-60">
+                            {isAsc  ? <FaSortUp   size={10} className="text-primary opacity-100" /> :
+                             isDesc ? <FaSortDown size={10} className="text-primary opacity-100" /> :
+                                      <FaSort     size={10} />}
+                          </span>
+                        )}
+                      </span>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
 
-            {/* Table Body */}
+            {/* Body */}
             <tbody className="relative z-10">
               {loading ? (
                 Array.from({ length: pageSize }).map((_, idx) => (
                   <SkeletonRow key={idx} columnsCount={visibleColumns.length} />
                 ))
-              ) : displayData.length === 0 ? (
+              ) : data.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={columns.length}
-                    className="px-6 py-24 text-center"
-                  >
+                  <td colSpan={visibleColumns.length} className="px-6 py-24 text-center">
                     <p className="text-xs font-bold text-muted uppercase tracking-widest opacity-40">
                       {emptyMessage}
                     </p>
                   </td>
                 </tr>
               ) : (
-                displayData.map((item, idx) => (
+                data.map((item, idx) => (
                   <tr
                     key={rowKey ? rowKey(item) : JSON.stringify(item)}
                     onClick={() => onRowClick?.(item)}
-                    className={`group transition-none cursor-pointer ${idx % 2 === 0 ? "bg-transparent" : "bg-row-hover/10"
-                      } hover:bg-row-hover`}
+                    className={[
+                      "group transition-none",
+                      onRowClick ? "cursor-pointer" : "",
+                      idx % 2 === 0 ? "bg-transparent" : "bg-row-hover/10",
+                      "hover:bg-row-hover",
+                    ].join(" ")}
                   >
                     {visibleColumns.map((column) => (
                       <td
                         key={column.key}
                         className={`px-3 sm:px-5 py-3.5 text-xs font-medium text-main border-b border-[var(--border)]/20 ${getAlignment(column.align)}`}
                       >
-                        {column.render ? (
-                          column.render(item)
-                        ) : (
-                          <span className="opacity-90">{item[column.key]}</span>
-                        )}
+                        {column.render
+                          ? column.render(item)
+                          : <span className="opacity-90">{item[column.key]}</span>
+                        }
                       </td>
                     ))}
                   </tr>
                 ))
               )}
             </tbody>
+
           </table>
         </div>
       </div>
 
-      {/* Footer with Pagination */}
+      {/* ── Footer / Pagination ── */}
       <div className="px-5 py-3 border-t border-[var(--border)] bg-card flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-        {loading ? (
-          <>
-            <div className="h-4 w-32 bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded" />
-            <div className="h-8 w-64 bg-gradient-to-r from-app via-row-hover to-app bg-[length:200%_100%] animate-shimmer rounded" />
-          </>
-        ) : (
-          <>
-            <div className="flex items-center gap-4">
-              <div className="text-[9px] font-black uppercase text-muted tracking-[0.2em] opacity-50">
-                Total: {totalItems}
-              </div>
-            </div>
-            {/* Action Buttons */}
-            {onPageSizeChange && (
-              <div className="flex items-center gap-2">
-                <label className="text-[9px] font-black uppercase text-muted tracking-[0.2em] opacity-50">
-                  Show:
-                </label>
-                <select
-                  value={pageSize}
-                  onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                 className="px-3 py-1.5 bg-card border border-[var(--border)] rounded-lg text-[10px] font-black uppercase text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
-                >
-                  {pageSizeOptions.map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
 
-            <Pagination
-              currentPage={currentPage || 1}
-              totalPages={totalPages || 1}
-              pageSize={pageSize}
-              totalItems={totalItems}
-              onPageChange={onPageChange || (() => { })}
-            />
-          </>
+        <div className="text-[9px] font-black uppercase text-muted tracking-[0.2em] opacity-50">
+          Total: {totalItems}
+        </div>
+
+        {onPageSizeChange && (
+          <div className="flex items-center gap-2">
+            <label className="text-[9px] font-black uppercase text-muted tracking-[0.2em] opacity-50">
+              Show:
+            </label>
+            <select
+              value={pageSize}
+              onChange={(e) => onPageSizeChange(Number(e.target.value))}
+              className="px-3 py-1.5 bg-card border border-[var(--border)] rounded-lg text-[10px] font-black uppercase text-main focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all cursor-pointer"
+            >
+              {pageSizeOptions.map((size) => (
+                <option key={size} value={size}>{size}</option>
+              ))}
+            </select>
+          </div>
         )}
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          onPageChange={onPageChange ?? (() => {})}
+        />
+
       </div>
     </div>
   );
