@@ -122,21 +122,23 @@ export const PayrollValidationModal: React.FC<PayrollValidationModalProps> = ({
   const [activeFilter, setActiveFilter] = useState<"all" | ValidationSeverity>("all");
   const [activeCat, setActiveCat] = useState<string>("all");
 
-  if (!show || !result) return null;
+ const allIssues = result
+  ? [...result.errors, ...result.warnings, ...result.infos]
+  : [];
 
-  const allIssues = [...result.errors, ...result.warnings, ...result.infos];
+const filteredIssues = useMemo(() => {
+  let out = allIssues;
+  if (activeFilter !== "all") out = out.filter(i => i.severity === activeFilter);
+  if (activeCat !== "all") out = out.filter(i => i.category === activeCat);
+  return out;
+}, [allIssues, activeFilter, activeCat]);
 
-  const filteredIssues = useMemo(() => {
-    let out = allIssues;
-    if (activeFilter !== "all") out = out.filter(i => i.severity === activeFilter);
-    if (activeCat    !== "all") out = out.filter(i => i.category === activeCat);
-    return out;
-  }, [allIssues, activeFilter, activeCat]);
+const categories = useMemo(() => {
+  const cats = new Set(allIssues.map(i => i.category));
+  return Array.from(cats);
+}, [allIssues]);
 
-  const categories = useMemo(() => {
-    const cats = new Set(allIssues.map(i => i.category));
-    return Array.from(cats);
-  }, [allIssues]);
+if (!show || !result) return null;
 
   const { canProceed, summary } = result;
 
