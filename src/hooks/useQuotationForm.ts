@@ -396,9 +396,25 @@ if (!company) return;
             ? baseSellingPrice / rate
             : baseSellingPrice;
 
+        const resolvedId = String(data?.id ?? itemId).trim();
+        const existingIdx = items.findIndex(
+          (it, i) => i !== index && String(it?.itemCode ?? "").trim() === resolvedId,
+        );
+
+        if (existingIdx !== -1) {
+          const currentQty = Number(items[existingIdx]?.quantity) || 0;
+          items[existingIdx] = {
+            ...items[existingIdx],
+            quantity: currentQty + 1,
+          };
+
+          items[index] = { ...EMPTY_ITEM };
+          return { ...prev, items };
+        }
+
         items[index] = {
           ...items[index],
-          itemCode: data.id,
+          itemCode: resolvedId,
           description: data.itemDescription ?? data.itemName ?? "",
           price: Number(convertedPrice),
           vatRate: Number(data.taxPerct ?? 0),

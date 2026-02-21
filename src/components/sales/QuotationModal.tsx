@@ -301,6 +301,9 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                 <ItemSelect
                                   taxCategory={ui.taxCategory}
                                   value={it.itemCode}
+                                  excludeItemCodes={formData.items
+                                    .map((x, j) => (j === i ? "" : x?.itemCode))
+                                    .filter(Boolean) as string[]}
                                   onChange={(item) => {
                                     actions.handleItemSelect(i, item.id);
                                   }}
