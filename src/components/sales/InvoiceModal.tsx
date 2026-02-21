@@ -286,7 +286,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   </div>
 
                   <div className="mt-2 overflow-x-auto">
-                    <table className="w-full min-w-[780px] border-collapse text-[10px]">
+                    <table className="w-full min-w-[920px] border-collapse text-[10px]">
                       <thead>
                         <tr className="border-b border-theme">
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px] whitespace-nowrap">
@@ -301,19 +301,19 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
                             Quantity
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[90px] md:w-[110px] whitespace-nowrap">
                             Unit Price
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[80px] md:w-[100px] whitespace-nowrap">
  Discount (%) 
 </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
                             Tax
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[80px] md:w-[100px] whitespace-nowrap">
                             Tax Code
                           </th>
-                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[90px] md:w-[120px] whitespace-nowrap">
                             Amount
                           </th>
                           <th></th>
@@ -379,7 +379,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
-                                  className="w-[70px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[90px] md:w-[110px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="price"
                                   value={it.price}
                                   disabled
@@ -391,7 +391,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
-                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[80px] md:w-[100px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="discount"
                                   value={it.discount}
                                   onChange={(e) =>
@@ -414,7 +414,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                               <td className="px-0.5 py-1">
                                 <input
                                   type="string"
-                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[80px] md:w-[100px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="vatCode"
                                   value={it.vatCode}
                                   disabled
