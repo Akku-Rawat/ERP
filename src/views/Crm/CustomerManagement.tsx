@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import CustomerDetailView from "./CustomerDetailView";
 import { showLoading,showApiError,showSuccess,closeSwal } from "../../utils/alert";
 import {
@@ -26,6 +26,25 @@ interface Props {
   onAdd: () => void;
 }
 
+function exportToCsv(rows: Record<string, any>[], filename: string) {
+  if (!rows.length) return;
+  const header = Object.keys(rows[0]).join(",") + "\n";
+  const body = rows
+    .map((row) =>
+      Object.values(row)
+        .map((s) => `"${String(s ?? "").replace(/"/g, '""')}"`)
+        .join(","),
+    )
+    .join("\n");
+  const blob = new Blob([header + body], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [customers, setCustomers] = useState<CustomerSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,7 +60,8 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [allCustomers, setAllCustomers] = useState<CustomerSummary[]>([]);
-  const [taxCategory, setTaxCategory] = useState<string>("Non-Export");
+  const [taxCategory, setTaxCategory] = useState<string>("");
+  const [typeFilter, setTypeFilter] = useState<string>("");
 
 
 const fetchCustomers = async () => {
@@ -51,7 +71,7 @@ const fetchCustomers = async () => {
     const response = await getAllCustomers(
       page,
       pageSize,
-      taxCategory
+      taxCategory || undefined
     );
 
     setCustomers(response.data);
@@ -70,12 +90,11 @@ const fetchCustomers = async () => {
 
   useEffect(() => {
     fetchCustomers();
-  }, [page, pageSize, taxCategory]);
-
+  }, [page, pageSize, taxCategory, searchTerm, typeFilter]);
 
   const fetchAllCustomers = async () => {
     try {
-      const resp = await getAllCustomers(1, 1000, taxCategory);
+      const resp = await getAllCustomers(1, 1000, taxCategory || undefined);
       setAllCustomers(resp.data || []);
     } catch (err) {
       console.error("Error loading all customers:", err);
@@ -85,6 +104,97 @@ const fetchCustomers = async () => {
   const ensureAllCustomers = async () => {
     if (!allCustomers.length) {
       await fetchAllCustomers();
+    }
+  };
+
+  const filteredCustomers = useMemo(() => {
+    const q = (searchTerm ?? "").trim().toLowerCase();
+    const tf = (typeFilter ?? "").trim().toLowerCase();
+
+    return customers.filter((c) => {
+      if (q) {
+        const hay = [
+          c.id,
+          c.name,
+          c.displayName,
+          c.email,
+          c.mobile,
+          c.customerTaxCategory,
+          c.currency,
+          c.tpin,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+
+      if (tf) {
+        const t = String(c.type ?? "").toLowerCase();
+        if (t !== tf) return false;
+      }
+
+      return true;
+    });
+  }, [customers, searchTerm, typeFilter]);
+
+  const handleExportCsv = async () => {
+    try {
+      showLoading("Preparing CSV...");
+      const resp = await getAllCustomers(1, 5000, taxCategory || undefined);
+      const rows: CustomerSummary[] = Array.isArray(resp?.data) ? resp.data : [];
+      const q = (searchTerm ?? "").trim().toLowerCase();
+      const tf = (typeFilter ?? "").trim().toLowerCase();
+
+      const filtered = rows.filter((c) => {
+        if (q) {
+          const hay = [
+            c.id,
+            c.name,
+            c.displayName,
+            c.email,
+            c.mobile,
+            c.customerTaxCategory,
+            c.currency,
+            c.tpin,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+
+        if (tf) {
+          const t = String(c.type ?? "").toLowerCase();
+          if (t !== tf) return false;
+        }
+
+        return true;
+      });
+
+      const exportRows = filtered.map((c) => ({
+        id: c.id,
+        name: c.name,
+        type: c.type,
+        taxCategory: c.customerTaxCategory,
+        currency: c.currency,
+        onboardingBalance: c.onboardingBalance,
+        status: c.status,
+        email: c.email,
+        mobile: c.mobile,
+        tpin: c.tpin,
+      }));
+
+      exportToCsv(
+        exportRows,
+        taxCategory
+          ? `customers_${String(taxCategory).replace(/\s+/g, "_")}.csv`
+          : "customers_all.csv",
+      );
+      closeSwal();
+    } catch (err) {
+      closeSwal();
+      showApiError(err);
     }
   };
 
@@ -242,13 +352,15 @@ const fetchCustomers = async () => {
         <>
           <Table
             columns={columns}
-            data={customers}
+            data={filteredCustomers}
             showToolbar
             loading={custLoading || initialLoad}
             onPageSizeChange={(size) => setPageSize(size)}
             pageSizeOptions={[10, 25, 50, 100]}
             searchValue={searchTerm}
             onSearch={setSearchTerm}
+            enableExport
+            onExport={handleExportCsv}
             enableAdd
             addLabel="Add Customer"
             onAdd={handleAddCustomer}
@@ -259,15 +371,28 @@ const fetchCustomers = async () => {
             totalItems={totalItems}
             onPageChange={setPage}
             extraFilters={
-              <div>
+              <div className="flex items-center gap-3 flex-wrap">
                 <FilterSelect
                   value={taxCategory}
                   onChange={(e) => {
                     setPage(1);
+                    setAllCustomers([]);
                     setTaxCategory(e.target.value);
                   }}
                   options={[
-                    { label: "Non-Export", value: "Non-Export" },
+                    { label: "All", value: "" },
+                    { label: "Non-export", value: "Non-Export" },
+                    { label: "Export", value: "Export" },
+                    { label: "Lpo", value: "LPO" },
+                  ]}
+                />
+
+                <FilterSelect
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  options={[
+                    { label: "Company", value: "Company" },
+                    { label: "Individual", value: "Individual" },
                   ]}
                 />
               </div>
