@@ -13,6 +13,7 @@ interface ItemSelectProps {
   }) => void;
   onAddNew?: () => void;
   className?: string;
+  disabled?: boolean;
 }
 
 export default function ItemSelect({
@@ -21,6 +22,7 @@ export default function ItemSelect({
   onChange,
   onAddNew,
   className = "",
+  disabled = false,
 }: ItemSelectProps) {
   const [items, setItems] = useState<Array<{
     id: string;
@@ -116,7 +118,7 @@ export default function ItemSelect({
   );
 
   const openDropdown = () => {
-    if (!inputRef.current) return;
+    if (!inputRef.current || disabled) return;
 
     setRect(inputRef.current.getBoundingClientRect());
     setOpen(true);
@@ -135,6 +137,7 @@ export default function ItemSelect({
           openDropdown();
         }}
         onFocus={openDropdown}
+        disabled={disabled}
       />
 
       {open &&

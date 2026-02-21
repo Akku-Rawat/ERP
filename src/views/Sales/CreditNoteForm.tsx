@@ -13,6 +13,7 @@ import {
   Textarea,
 } from "../../components/ui/modal/formComponent";
 import { ModalInput, ModalSelect, ModalTextarea } from "../../components/ui/modal/modalComponent";
+import SearchSelect from "../../components/ui/modal/SearchSelect";
 import ItemSelect from "../../components/selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
@@ -88,29 +89,24 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
   }
 };
 
-  const [invoiceOptions, setInvoiceOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
-
-  useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        const res = await getAllSalesInvoices(1, 50);
-
-        const options =
-          res?.data?.map((inv: any) => ({
-            value: inv.invoiceNumber,
-            label: inv.invoiceNumber,
-          })) ?? [];
-
-        setInvoiceOptions(options);
-      } catch (err) {
-        console.error("Failed to load invoices", err);
-      }
-    };
-
-    fetchInvoices();
-  }, []);
+  const fetchInvoiceOptions = async (q: string) => {
+    try {
+      const res = await getAllSalesInvoices(1, 50);
+      const invoices = res?.data || [];
+      
+      return invoices
+        .filter((inv: any) => 
+          inv.invoiceNumber?.toLowerCase().includes(q.toLowerCase())
+        )
+        .map((inv: any) => ({
+          value: inv.invoiceNumber,
+          label: inv.invoiceNumber,
+        }));
+    } catch (err) {
+      console.error("Failed to load invoices", err);
+      return [];
+    }
+  };
  useEffect(() => {
   if (!formData.invoiceNumber) return;
 
@@ -262,19 +258,20 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
 
 
 
-                <ModalSelect
+                <SearchSelect
                   label="Invoice Number"
-                  options={invoiceOptions}
                   value={formData.invoiceNumber ?? ""}
-                  onChange={(e) =>
+                  onChange={(value) =>
                     actions.handleInputChange({
                       target: {
                         name: "invoiceNumber",
-                        value: e.target.value,
+                        value,
                       },
                     } as any)
                   }
-                  className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                  fetchOptions={fetchInvoiceOptions}
+                  placeholder="Search invoice..."
+                  required
                 />
 
 
@@ -462,6 +459,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                                 onChange={(item) => {
                                   actions.handleItemSelect(i, item.id);
                                 }}
+                                disabled
                               />
                             </td>
 
@@ -471,6 +469,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                                 name="description"
                                 value={it.description}
                                 onChange={(e) => actions.handleItemChange(i, e)}
+                                disabled
                               />
                             </td>
                             <td className="px-0.5 py-1">
@@ -499,6 +498,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                                 name="discount"
                                 value={it.discount}
                                 onChange={(e) => actions.handleItemChange(i, e)}
+                                disabled
                               />
                             </td>
                             <td className="px-0.5 py-1">
