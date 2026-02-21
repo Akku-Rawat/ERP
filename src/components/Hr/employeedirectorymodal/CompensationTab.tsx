@@ -111,7 +111,7 @@ type BankNameFieldProps = {
 };
 
 const BankNameField: React.FC<BankNameFieldProps> = ({ value, onChange }) => {
-  const [open, setOpen]       = useState(false);
+  const [open, setOpen] = useState(false);
   const [isOther, setIsOther] = useState(false);
   const [isEditing, setIsEditing] = useState(false); // tracks active typing state
   const ref = React.useRef<HTMLDivElement>(null);
@@ -169,8 +169,8 @@ const BankNameField: React.FC<BankNameFieldProps> = ({ value, onChange }) => {
   const displayLabel = isKnownBank
     ? value
     : isOther && value
-    ? value
-    : "Select a bank";
+      ? value
+      : "Select a bank";
 
   return (
     <div ref={ref}>
@@ -184,7 +184,11 @@ const BankNameField: React.FC<BankNameFieldProps> = ({ value, onChange }) => {
         onClick={handleButtonClick}
         className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:ring-2 focus:ring-primary/20 flex items-center justify-between"
       >
-        <span className={displayLabel === "Select a bank" ? "text-muted" : "text-main"}>
+        <span
+          className={
+            displayLabel === "Select a bank" ? "text-muted" : "text-main"
+          }
+        >
           {displayLabel}
         </span>
         <svg
@@ -193,7 +197,12 @@ const BankNameField: React.FC<BankNameFieldProps> = ({ value, onChange }) => {
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
@@ -209,9 +218,10 @@ const BankNameField: React.FC<BankNameFieldProps> = ({ value, onChange }) => {
                 key={bank}
                 onClick={() => handleSelect(bank)}
                 className={`px-3 py-2.5 text-sm cursor-pointer hover:bg-primary/10 hover:text-primary transition
-                  ${value === bank && isKnownBank
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-main"
+                  ${
+                    value === bank && isKnownBank
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-main"
                   }`}
               >
                 {bank}
@@ -254,9 +264,13 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
   const [ceilingLoading, setCeilingLoading] = useState(false);
   const [ceilingError, setCeilingError] = useState(false);
 
-  const [housingType, setHousingType] = useState<"percentage" | "amount">("amount");
+  const [housingType, setHousingType] = useState<"percentage" | "amount">(
+    "amount",
+  );
   const [mealType, setMealType] = useState<"percentage" | "amount">("amount");
-  const [transportType, setTransportType] = useState<"percentage" | "amount">("amount");
+  const [transportType, setTransportType] = useState<"percentage" | "amount">(
+    "amount",
+  );
   const [otherType, setOtherType] = useState<"percentage" | "amount">("amount");
 
   // Fetch the current NAPSA ceiling on mount (skipped if already populated, e.g. edit mode)
@@ -275,7 +289,8 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
       const ceilingYear =
         res?.data?.year ?? res?.year ?? String(new Date().getFullYear());
 
-      if (ceilingAmount) handleInputChange("ceilingAmount", String(ceilingAmount));
+      if (ceilingAmount)
+        handleInputChange("ceilingAmount", String(ceilingAmount));
       if (ceilingYear) handleInputChange("ceilingYear", String(ceilingYear));
     } catch (err) {
       console.error("Ceiling fetch failed:", err);
@@ -292,7 +307,11 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
   }, []);
 
   // Resolves an allowance value to its ZMW amount based on input type
-  const resolve = (val: string, type: "percentage" | "amount", basic: number) => {
+  const resolve = (
+    val: string,
+    type: "percentage" | "amount",
+    basic: number,
+  ) => {
     const n = parseFloat(val || "0");
     return type === "percentage" ? (basic * n) / 100 : n;
   };
@@ -325,10 +344,8 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
   return (
     <div className="w-full max-w-5xl mx-auto space-y-5">
       <div className="grid grid-cols-2 gap-6">
-
         {/* ═══════════════ LEFT — Salary & Payroll ═══════════════ */}
         <div className="space-y-5">
-
           {/* Salary breakdown */}
           <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
             <div className="flex items-center justify-between">
@@ -345,7 +362,9 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               <input
                 type="number"
                 value={formData.basicSalary || ""}
-                onChange={(e) => handleInputChange("basicSalary", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("basicSalary", e.target.value)
+                }
                 onBlur={handleFieldBlur}
                 placeholder="e.g., 14500"
                 className="w-full px-4 py-2 text-sm border border-theme bg-card rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
@@ -408,11 +427,15 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                 </div>
                 <div className="text-2xl font-bold text-primary">
                   ZMW{" "}
-                  {grossSalary.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  {grossSalary.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
                 </div>
                 <div className="text-xs text-primary/70 mt-0.5">
                   Monthly: ZMW{" "}
-                  {monthlySalary.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  {monthlySalary.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
                 </div>
               </div>
             </div>
@@ -426,19 +449,35 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
             <div className="grid grid-cols-3 gap-3">
               {(
                 [
-                  { label: "Currency",  field: "currency",         options: ["ZMW", "USD"] },
-                  { label: "Frequency", field: "paymentFrequency", options: ["Monthly", "Bi-weekly"] },
-                  { label: "Method",    field: "paymentMethod",    options: ["Bank Transfer", "Cash", "Mobile Money"] },
+                  {
+                    label: "Currency",
+                    field: "currency",
+                    options: ["ZMW", "USD"],
+                  },
+                  {
+                    label: "Frequency",
+                    field: "paymentFrequency",
+                    options: ["Monthly", "Bi-weekly"],
+                  },
+                  {
+                    label: "Method",
+                    field: "paymentMethod",
+                    options: ["Bank Transfer", "Cash", "Mobile Money"],
+                  },
                 ] as const
               ).map(({ label, field, options }) => (
                 <div key={field}>
-                  <label className="block text-xs text-main mb-1 font-medium">{label}</label>
+                  <label className="block text-xs text-main mb-1 font-medium">
+                    {label}
+                  </label>
                   <select
                     value={formData[field] || options[0]}
                     onChange={(e) => handleInputChange(field, e.target.value)}
                     className="w-full px-3 py-2 text-sm border border-theme bg-card rounded-lg focus:ring-2 focus:ring-primary/20"
                   >
-                    {options.map((o) => <option key={o}>{o}</option>)}
+                    {options.map((o) => (
+                      <option key={o}>{o}</option>
+                    ))}
                   </select>
                 </div>
               ))}
@@ -448,7 +487,6 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
 
         {/* ═══════════════ RIGHT — Bank & NAPSA ═══════════════ */}
         <div className="space-y-5">
-
           {/* Bank account details */}
           <div className="bg-card p-5 rounded-lg border border-theme space-y-3">
             <h4 className="text-xs font-semibold text-main uppercase tracking-wide">
@@ -462,7 +500,9 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               </label>
               <select
                 value={formData.accountType || "Savings"}
-                onChange={(e) => handleInputChange("accountType", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("accountType", e.target.value)
+                }
                 className="w-full px-3 py-2 text-sm border border-theme bg-card rounded-lg focus:ring-2 focus:ring-primary/20"
               >
                 <option value="Savings">Savings</option>
@@ -473,8 +513,16 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
             {/* Account Name & Number */}
             {(
               [
-                { label: "Account Name",   field: "accountName",   placeholder: "Account holder name" },
-                { label: "Account Number", field: "accountNumber", placeholder: "Bank account number" },
+                {
+                  label: "Account Name",
+                  field: "accountName",
+                  placeholder: "Account holder name",
+                },
+                {
+                  label: "Account Number",
+                  field: "accountNumber",
+                  placeholder: "Bank account number",
+                },
               ] as const
             ).map(({ label, field, placeholder }) => (
               <div key={field}>
@@ -505,7 +553,9 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               <input
                 type="text"
                 value={formData.branchCode || ""}
-                onChange={(e) => handleInputChange("branchCode", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("branchCode", e.target.value)
+                }
                 placeholder="e.g., 027"
                 className="w-full px-3 py-2 text-sm border border-theme bg-card rounded-lg focus:ring-2 focus:ring-primary/20"
               />
@@ -529,7 +579,9 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                 disabled={ceilingLoading}
                 className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 disabled:opacity-50"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${ceilingLoading ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`w-3.5 h-3.5 ${ceilingLoading ? "animate-spin" : ""}`}
+                />
                 {ceilingLoading ? "Fetching..." : "Refresh"}
               </button>
             </div>
@@ -544,12 +596,16 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               <div>
                 <label className="block text-xs text-main mb-1 font-medium">
                   Ceiling Amount
-                  {ceilingLocked && <Lock className="inline w-3 h-3 ml-1 text-muted" />}
+                  {ceilingLocked && (
+                    <Lock className="inline w-3 h-3 ml-1 text-muted" />
+                  )}
                 </label>
                 <input
                   type="number"
                   value={formData.ceilingAmount || ""}
-                  onChange={(e) => handleInputChange("ceilingAmount", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("ceilingAmount", e.target.value)
+                  }
                   placeholder={ceilingLoading ? "Fetching..." : "e.g., 50000"}
                   readOnly={ceilingLocked}
                   className={`w-full px-3 py-2 text-sm border border-theme rounded-lg focus:ring-2 focus:ring-primary/20 ${ceilingLocked ? lockedClass : editableClass}`}
@@ -558,12 +614,16 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               <div>
                 <label className="block text-xs text-main mb-1 font-medium">
                   Ceiling Year
-                  {ceilingLocked && <Lock className="inline w-3 h-3 ml-1 text-muted" />}
+                  {ceilingLocked && (
+                    <Lock className="inline w-3 h-3 ml-1 text-muted" />
+                  )}
                 </label>
                 <input
                   type="number"
                   value={formData.ceilingYear || ""}
-                  onChange={(e) => handleInputChange("ceilingYear", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("ceilingYear", e.target.value)
+                  }
                   placeholder={ceilingLoading ? "Fetching..." : "e.g., 2025"}
                   readOnly={ceilingLocked}
                   className={`w-full px-3 py-2 text-sm border border-theme rounded-lg focus:ring-2 focus:ring-primary/20 ${ceilingLocked ? lockedClass : editableClass}`}
@@ -575,7 +635,6 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
               <p className="text-[11px] text-success">✓ Fetched from NAPSA</p>
             )}
           </div>
-
         </div>
       </div>
     </div>
