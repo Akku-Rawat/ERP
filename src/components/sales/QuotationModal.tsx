@@ -246,38 +246,38 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       Quoted Items
                     </h3>
                   </div>
-                  <div>
-                    <table className="w-full border-collapse text-[10px]">
+                  <div className="mt-2 overflow-x-auto">
+                    <table className="w-full min-w-[780px] border-collapse text-[10px]">
                       <thead>
                         <tr className="border-b border-theme">
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px] whitespace-nowrap">
                             #
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
                             Item
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px] whitespace-nowrap">
                             Description
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
                             Qty
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
                             Unit Price
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[55px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[55px] whitespace-nowrap">
                             Discount (%)
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
                             Tax
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[55px]">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[55px] whitespace-nowrap">
                             Tax Code
                           </th>
-                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">
+                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
                             Amount
                           </th>
-                          <th className="px-2 py-3 text-center text-muted font-medium text-[11px] w-[35px]">
+                          <th className="px-2 py-3 text-center text-muted font-medium text-[11px] w-[35px] whitespace-nowrap">
                             -
                           </th>
                         </tr>
