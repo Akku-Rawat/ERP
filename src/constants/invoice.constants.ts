@@ -73,7 +73,7 @@ export const DEFAULT_INVOICE_FORM: Invoice = {
 
   paymentInformation: {
     paymentTerms: "",
-    paymentMethod: paymentMethodOptions[0].value,
+    paymentMethod: "",
     bankName: "",
     accountNumber: "",
     routingNumber: "",

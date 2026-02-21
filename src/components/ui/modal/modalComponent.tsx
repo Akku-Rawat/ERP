@@ -9,12 +9,15 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   icon?: React.ReactNode;
   options?: SelectOption[];
   children?: React.ReactNode;
-  placeholder? : string;
+  placeholder?: string;
   error?: string;
 }
 
 export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, icon, options = [], children, className = "", error, ...props }, ref) => (
+  (
+    { label, icon, options = [], children, className = "", error, ...props },
+    ref,
+  ) => (
     <label className="flex flex-col  text-sm w-full group">
       <span className="block text-[10px] font-medium text-main mb-1">
         {icon && (
