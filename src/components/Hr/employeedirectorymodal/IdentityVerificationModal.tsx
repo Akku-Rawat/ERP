@@ -53,6 +53,7 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
     const mappedData = {
       identityInfo: {
         nrc: identityValue.trim(),
+         ssn: result.data.ssn || result.data.socialSecurityNumber || "", 
       },
       personalInfo: {
         firstName: result.data.firstName,

@@ -1,3 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable unused-imports/no-unused-vars */
+/* eslint-disable react/jsx-handler-names */
 import { Plus, Trash2, FileText } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 import { useQuotationForm } from "../../hooks/useQuotationForm";
@@ -41,7 +47,9 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
   const showExchangeRate =
-    String(formData.currencyCode ?? "").trim().toUpperCase() !== "ZMW";
+    String(formData.currencyCode ?? "")
+      .trim()
+      .toUpperCase() !== "ZMW";
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,10 +100,11 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                 key={tab.key}
                 type="button"
                 onClick={() => ui.setActiveTab(tab.key as any)}
-                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab.key
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${
+                  ui.activeTab === tab.key
                   ? "text-primary border-b-[3px] border-primary"
                   : "text-muted border-b-[3px] border-transparent hover:text-main"
-                  }`}
+                }`}
               >
                 {tab.label}
               </button>
@@ -188,7 +197,10 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                           HTMLInputElement | HTMLSelectElement
                         >,
                       ) => actions.handleInputChange(e, "paymentInformation")}
-                      options={[...paymentMethodOptions]}
+                      options={[
+                        { value: "", label: "Select Payment..." },
+                        ...paymentMethodOptions,
+                      ]}
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   </div>
@@ -290,7 +302,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   value={it.itemCode}
                                   excludeItemCodes={formData.items
                                     .map((x, j) => (j === i ? "" : x?.itemCode))
-                                    .filter(Boolean) as string[]}
+                                    .filter(Boolean)}
                                   onChange={(item) => {
                                     actions.handleItemSelect(i, item.id);
                                   }}

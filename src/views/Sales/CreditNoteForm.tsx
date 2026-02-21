@@ -71,13 +71,10 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
 
   const fetchInvoiceOptions = async (q: string) => {
     try {
-      const res = await getAllSalesInvoices(1, 50);
+      const res = await getAllSalesInvoices(1, 100, "", "asc", q);
       const invoices = res?.data || [];
 
       return invoices
-        .filter((inv: any) =>
-          inv.invoiceNumber?.toLowerCase().includes(q.toLowerCase())
-        )
         .map((inv: any) => ({
           value: inv.invoiceNumber,
           label: inv.invoiceNumber,
