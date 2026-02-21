@@ -34,6 +34,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   onSubmit,
 }) => {
   if (!isOpen) return null;
+  const [submitting, setSubmitting] = useState(false);
   const {
     formData,
     customerDetails,
@@ -45,10 +46,15 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   } = useInvoiceForm(isOpen, onClose, onSubmit);
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
+  const showExchangeRate =
+    String(formData.currencyCode ?? "").trim().toUpperCase() !== "ZMW";
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (submitting) return;
+
     try {
+      setSubmitting(true);
       const payload = await actions.handleSubmit(e);
 
       if (!payload) return;
@@ -57,6 +63,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
       await onSubmit?.(payload);
     } catch (err: any) {
       showApiError(err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -64,15 +72,25 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
   const footerContent = (
     <>
-      <Button variant="secondary" onClick={onClose} type="button">
+      <Button variant="secondary" onClick={onClose} type="button" disabled={submitting}>
         Cancel
       </Button>
       <div className="flex gap-2">
-        <Button variant="ghost" onClick={actions.handleReset} type="button">
+        <Button
+          variant="ghost"
+          onClick={actions.handleReset}
+          type="button"
+          disabled={submitting}
+        >
           Reset
         </Button>
-        <Button variant="primary" type="submit" onClick={handleFormSubmit}>
-          Submit
+        <Button
+          variant="primary"
+          type="submit"
+          onClick={handleFormSubmit}
+          disabled={submitting}
+        >
+          {submitting ? "Submitting..." : "Submit"}
         </Button>
       </div>
     </>
@@ -119,7 +137,9 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
           {ui.activeTab === "details" && (
             <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
               <div className="">
-                <div className="grid grid-cols-6 gap-3 items-end">
+                <div
+                  className={`grid ${showExchangeRate ? "grid-cols-7" : "grid-cols-6"} gap-3 items-end`}
+                >
                   <CustomerSelect
                     value={customerNameDisplay}
                     onChange={actions.handleCustomerSelect}
@@ -157,6 +177,27 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     />
                   </div>
 
+                  {showExchangeRate && (
+                    <div>
+                      <ModalInput
+                        label={
+                          ui.exchangeRateLoading
+                            ? "Exchange Rate (Loading...)"
+                            : "Exchange Rate"
+                        }
+                        name="exchangeRt"
+                        value={formData.exchangeRt}
+                        onChange={actions.handleInputChange}
+                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                      />
+                      {!!ui.exchangeRateError && (
+                        <div className="mt-1 text-[10px] text-danger">
+                          {ui.exchangeRateError}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div>
                     <ModalSelect
                       label="Invoice Status"
@@ -164,6 +205,21 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       value={formData.invoiceStatus}
                       onChange={actions.handleInputChange}
                       options={[...invoiceStatusOptions]}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    />
+                  </div>
+
+                  <div>
+                    <ModalSelect
+                      label="Payment Method"
+                      name="paymentMethod"
+                      value={formData.paymentInformation?.paymentMethod}
+                      onChange={(
+                        e: React.ChangeEvent<
+                          HTMLInputElement | HTMLSelectElement
+                        >,
+                      ) => actions.handleInputChange(e, "paymentInformation")}
+                      options={[...paymentMethodOptions]}
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   </div>
@@ -211,7 +267,9 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       name="lpoNumber"
                       value={formData.lpoNumber}
                       onChange={actions.handleInputChange}
-                      placeholder="local purchase order number"
+                      inputMode="numeric"
+                      pattern="\d{10}"
+                      placeholder="Enter 10 digits"
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   )}
@@ -545,6 +603,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
                 ) => actions.handleInputChange(e, "paymentInformation")}
                 paymentMethodOptions={paymentMethodOptions}
+                showPaymentMethod={false}
               />
 
               {/* BILLING + SHIPPING */}

@@ -21,12 +21,14 @@ interface Props {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
  paymentMethodOptions: readonly SelectOption[];
+  showPaymentMethod?: boolean;
 }
 
 const PaymentInfoBlock: React.FC<Props> = ({
   data,
   onChange,
   paymentMethodOptions,
+  showPaymentMethod = true,
 }) => {
   return (
     <div className="grid grid-cols-6 gap-3">
@@ -37,13 +39,15 @@ const PaymentInfoBlock: React.FC<Props> = ({
         onChange={onChange}
       />
 
-      <ModalSelect
-        label="Payment Method"
-        name="paymentMethod"
-        value={data.paymentMethod}
-        onChange={onChange}
-        options={[...paymentMethodOptions]}
-      />
+      {showPaymentMethod && (
+        <ModalSelect
+          label="Payment Method"
+          name="paymentMethod"
+          value={data.paymentMethod}
+          onChange={onChange}
+          options={[...paymentMethodOptions]}
+        />
+      )}
 
       <ModalInput
         label="Bank Name"
