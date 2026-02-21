@@ -215,7 +215,21 @@ const CRMReports: React.FC = () => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
-    const buckets: Array<{ key: string; label: string; start: Date; end: Date }> = [];
+    const buckets: Array<{ key: string; label: string; tooltipLabel: string; start: Date; end: Date }> = [];
+
+    const fmtDay = (d: Date) =>
+      d.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+      });
+
+    const fmtAxisDay = (d: Date) =>
+      d.toLocaleDateString(undefined, {
+        year: "2-digit",
+        month: "short",
+        day: "2-digit",
+      });
 
     if (filters.dateRange === "last_7") {
       for (let i = 0; i < 7; i++) {
@@ -225,7 +239,8 @@ const CRMReports: React.FC = () => {
         e.setDate(e.getDate() + 1);
         buckets.push({
           key: toDateInput(d),
-          label: d.toLocaleDateString(undefined, { weekday: "short" }),
+          label: fmtAxisDay(d),
+          tooltipLabel: fmtDay(d),
           start: d,
           end: e,
         });
@@ -239,6 +254,7 @@ const CRMReports: React.FC = () => {
         buckets.push({
           key: `${year}-${String(m + 1).padStart(2, "0")}`,
           label: d.toLocaleDateString(undefined, { month: "short" }),
+          tooltipLabel: d.toLocaleDateString(undefined, { year: "numeric", month: "long" }),
           start: d,
           end: e,
         });
@@ -252,9 +268,12 @@ const CRMReports: React.FC = () => {
         d.setDate(d.getDate() + w * step);
         const e = new Date(d);
         e.setDate(e.getDate() + step);
+        const eInclusive = new Date(e);
+        eInclusive.setDate(eInclusive.getDate() - 1);
         buckets.push({
           key: `w${w + 1}`,
-          label: d.toLocaleDateString(undefined, { month: "short", day: "2-digit" }),
+          label: fmtAxisDay(d),
+          tooltipLabel: `${fmtDay(d)} - ${fmtDay(eInclusive)}`,
           start: d,
           end: e,
         });
@@ -269,7 +288,7 @@ const CRMReports: React.FC = () => {
         return acc;
       }, 0);
 
-      return { name: b.label, value: c };
+      return { name: b.label, value: c, tooltipLabel: b.tooltipLabel };
     });
 
     return counts;
@@ -543,6 +562,9 @@ const CRMReports: React.FC = () => {
                   cursor={{ stroke: "rgba(37,99,235,0.2)", strokeWidth: 1 }}
                   contentStyle={tooltipLight}
                   labelStyle={{ color: "rgba(15,23,42,1)", fontWeight: 600 }}
+                  labelFormatter={(_: any, payload: any) =>
+                    payload?.[0]?.payload?.tooltipLabel || ""
+                  }
                   formatter={(v: any) => [String(v), "Invoices"]}
                 />
                 <Area
