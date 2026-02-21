@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "framer-motion";
 import { Building2, MapPin, FileText } from "lucide-react";
 import Modal from "../ui/modal/modal";
 import { Button } from "../ui/modal/formComponent";
@@ -23,7 +22,7 @@ const tabs: { key: POTab; icon: typeof Building2; label: string }[] = [
   // { key: "email", icon: Mail, label: "Email" },
   // { key: "tax", icon: Calculator, label: "Tax" },
   { key: "address", icon: MapPin, label: "Address" },
-      { key: "terms", icon: FileText, label: "Terms" },
+  { key: "terms", icon: FileText, label: "Terms" },
 ];
 
 const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
@@ -75,33 +74,30 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
       height="87vh"
       footer={footer}
     >
-
       <form
         id="purchaseOrderForm"
         onSubmit={handleSubmit}
-       className="h-full flex flex-col"
+        className="h-full flex flex-col"
       >
         <div className=" sticky  bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
-          {tabs.map(({ key, icon: Icon, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveTab(key)}
-              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === key
-                     ? "text-primary border-b-[3px] border-primary"
+            {tabs.map(({ key, icon: Icon, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveTab(key)}
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
+                  activeTab === key
+                    ? "text-primary border-b-[3px] border-primary"
                     : "text-muted border-b-[3px] border-transparent hover:text-main"
                 }`}
-
-
-            >           
+              >
                 {label}
-            </button>
-          ))}
-        </div>
+              </button>
+            ))}
+          </div>
         </div>
 
-        
         <section className="flex-1 overflow-y-auto p-4 space-y-6 ">
           {activeTab === "details" && (
             <DetailsTab
@@ -114,7 +110,6 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
               onRemoveItem={removeItem}
               getCurrencySymbol={getCurrencySymbol}
               onItemSelect={handleItemSelect}
-
             />
           )}
 
@@ -167,11 +162,9 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
                 setForm((p) => ({ ...p, terms: { buying } }))
               }
             />
-
           )}
         </section>
       </form>
-
     </Modal>
   );
 };

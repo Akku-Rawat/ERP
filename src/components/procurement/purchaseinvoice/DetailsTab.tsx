@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, User, Mail, Phone } from "lucide-react";
-import { Button, Card } from "../../ui/modal/formComponent";
-import Select from "../../ui/Select";
-import type { ItemRow, PurchaseInvoiceFormData } from "../../../types/Supply/purchaseInvoice";
+import type {
+  ItemRow,
+  PurchaseInvoiceFormData,
+} from "../../../types/Supply/purchaseInvoice";
 import { currencyOptions } from "../../../types/Supply/supplier";
 import SupplierSelect from "../../selects/procurement/SupplierSelect";
 import POItemSelect from "../../selects/procurement/POItemSelect";
 import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
-import Modal from "../../ui/modal/modal";
 
 interface DetailsTabProps {
   form: PurchaseInvoiceFormData;
   items: ItemRow[];
   onItemSelect: (item: any, idx: number) => void;
-  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onFormChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => void;
   onSupplierChange: (s: any) => void;
   onItemChange: (e: React.ChangeEvent<HTMLInputElement>, idx: number) => void;
   onAddItem: () => void;
@@ -38,12 +40,11 @@ export const DetailsTab = ({
   const ITEMS_PER_PAGE = 5;
   const [page, setPage] = useState(0);
 
-
   // Helper function to get VAT description
   const getVatDescription = (vatCd: string): string => {
-   const descriptions: Record<string, string> = {
-  A: "Standard Rate",
-};
+    const descriptions: Record<string, string> = {
+      A: "Standard Rate",
+    };
 
     return descriptions[vatCd] || "Standard";
   };
@@ -55,11 +56,10 @@ export const DetailsTab = ({
 
   const paginatedItems = items.slice(
     page * ITEMS_PER_PAGE,
-    (page + 1) * ITEMS_PER_PAGE
+    (page + 1) * ITEMS_PER_PAGE,
   );
 
   const currencySelectOptions = [
-
     ...currencyOptions.map((c) => ({
       value: c,
       label: c,
@@ -77,7 +77,6 @@ export const DetailsTab = ({
               onChange={onSupplierChange}
             />
           </div>
-
 
           {/* Date */}
           <div>
@@ -103,7 +102,6 @@ export const DetailsTab = ({
             />
           </div>
 
-
           {/* Status */}
           <div>
             <ModalSelect
@@ -112,15 +110,14 @@ export const DetailsTab = ({
               value={form.status}
               onChange={onFormChange}
               options={[
-                {value: "Draft", label: "Draft"},
+                { value: "Draft", label: "Draft" },
                 { value: "Return", label: "Return" },
                 { value: "Submitted", label: "Submitted" },
                 { value: "Paid", label: "Paid" },
                 { value: "Cancelled", label: "Cancelled" },
                 { value: "Internal Transfer", label: "Internal Transfer" },
                 { value: "Debit Note Issued", label: "Debit Note Issued" },
-                {value : "Party Paid", label:"Party Paid"}
-                
+                { value: "Party Paid", label: "Party Paid" },
               ]}
             />
           </div>
@@ -131,7 +128,6 @@ export const DetailsTab = ({
               value={form.costCenter}
               onChange={onFormChange}
               options={[
-
                 { value: "Main - I", label: "Main - I" },
                 { value: "Manufacturing - I", label: "Manufacturing - I" },
                 { value: "manufacturineh - I", label: "manufacturineh - I" },
@@ -153,42 +149,45 @@ export const DetailsTab = ({
               label="Transaction Progress"
               name="transactionProgress"
               value={form.transactionProgress}
-              onChange={onFormChange} 
+              onChange={onFormChange}
               options={[
                 { value: "APPROVED", label: "Approved" },
                 { value: "REFUNDED", label: "Refunded" },
-                {value:"TRANSFERRED", label:"Transferred"},
-                {value:"REJECTED", label:"Rejected"},
+                { value: "TRANSFERRED", label: "Transferred" },
+                { value: "REJECTED", label: "Rejected" },
               ]}
             />
           </div>
 
           <div>
-              <ModalSelect
-                label="Payment Type"
-                name="paymentType"
-                value={form.paymentType}
-                onChange={onFormChange} 
-                options={[
-                  { value: "CASH", label: "CASH" },
-                  { value: "CREDIT", label: "CREDIT" },
-                  { value: "Bank transfer", label: "Bank transfer" },
-                  { value: "CASH/CREDIT", label: "CASH/CREDIT" },
-                  {value:"BANK CHECK", label:"BANK CHECK"},
-                  {value:"MOBILE MONEY", label:"Any Transaction Using Mobile Money System"},
-                  {value:"DEBIT & CREDIT CARD", label:"PAYMENT USING CARD"},
-                  {value:"OTHER", label:"Other Payment Methods"}
-                ]}
-              />  
+            <ModalSelect
+              label="Payment Type"
+              name="paymentType"
+              value={form.paymentType}
+              onChange={onFormChange}
+              options={[
+                { value: "CASH", label: "CASH" },
+                { value: "CREDIT", label: "CREDIT" },
+                { value: "Bank transfer", label: "Bank transfer" },
+                { value: "CASH/CREDIT", label: "CASH/CREDIT" },
+                { value: "BANK CHECK", label: "BANK CHECK" },
+                {
+                  value: "MOBILE MONEY",
+                  label: "Any Transaction Using Mobile Money System",
+                },
+                { value: "DEBIT & CREDIT CARD", label: "PAYMENT USING CARD" },
+                { value: "OTHER", label: "Other Payment Methods" },
+              ]}
+            />
           </div>
 
           <div>
-                <ModalInput
-                  label="Supplier Invoice No"
-                  name="supplierInvoiceNumber"
-                  value={form.supplierInvoiceNumber}
-                  onChange={onFormChange}
-                />
+            <ModalInput
+              label="Supplier Invoice No"
+              name="supplierInvoiceNumber"
+              value={form.supplierInvoiceNumber}
+              onChange={onFormChange}
+            />
           </div>
         </div>
       </div>
@@ -202,35 +201,55 @@ export const DetailsTab = ({
             <h3 className="text-sm font-semibold text-main">Order Items</h3>
           </div>
 
-
-
           <div>
             <table className="w-full border-collapse text-[10px]">
               <thead>
                 <tr className="border-b border-theme">
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">#</th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">Item Code</th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">Required By</th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">Qty</th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">UOM</th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Rate</th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">Tax </th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]">Tax Code</th>
-                  <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">Amount</th>
-                  <th className="px-2 py-3 text-center text-muted font-medium text-[11px] w-[35px]">-</th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">
+                    #
+                  </th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">
+                    Item Code
+                  </th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">
+                    Required By
+                  </th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">
+                    Qty
+                  </th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
+                    UOM
+                  </th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
+                    Rate
+                  </th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
+                    Tax{" "}
+                  </th>
+                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]">
+                    Tax Code
+                  </th>
+                  <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">
+                    Amount
+                  </th>
+                  <th className="px-2 py-3 text-center text-muted font-medium text-[11px] w-[35px]">
+                    -
+                  </th>
                 </tr>
               </thead>
 
-              <tbody >
+              <tbody>
                 {paginatedItems.map((it, idx) => {
                   const i = page * ITEMS_PER_PAGE + idx;
                   const base = it.quantity * it.rate;
                   const tax = (base * (it.vatRate || 0)) / 100;
                   const amount = base + tax;
 
-
                   return (
-                    <tr key={i} className="border-b border-theme bg-card row-hover">
+                    <tr
+                      key={i}
+                      className="border-b border-theme bg-card row-hover"
+                    >
                       <td className="px-3 py-2 text-[10px]">{i + 1}</td>
 
                       <td className="px-0.5 py-1">
@@ -287,7 +306,6 @@ export const DetailsTab = ({
                         />
                       </td>
 
-
                       <td className="px-0.5 py-1">
                         <div className="relative">
                           <input
@@ -297,7 +315,6 @@ export const DetailsTab = ({
                             readOnly
                             disabled
                             title="VAT Code: A (Standard Rate)"
-
                           />
                         </div>
                       </td>
@@ -324,7 +341,6 @@ export const DetailsTab = ({
             </table>
           </div>
 
-
           <div className="mt-3 flex justify-between items-center gap-3">
             {/* Add Item Button */}
             <button
@@ -340,7 +356,8 @@ export const DetailsTab = ({
               <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
                 <div className="text-[11px] text-muted whitespace-nowrap">
                   Showing {page * ITEMS_PER_PAGE + 1} to{" "}
-                  {Math.min((page + 1) * ITEMS_PER_PAGE, items.length)} of {items.length} items
+                  {Math.min((page + 1) * ITEMS_PER_PAGE, items.length)} of{" "}
+                  {items.length} items
                 </div>
 
                 <div className="flex gap-1.5 items-center">
@@ -366,7 +383,6 @@ export const DetailsTab = ({
             )}
           </div>
         </div>
-
 
         {/* RIGHT: Supplier Details + Summary */}
         <div className="flex flex-col gap-2">
@@ -396,7 +412,6 @@ export const DetailsTab = ({
                 <span>{form.supplierPhone || "-"}</span>
               </div>
 
-
               {/* Tax Category Info */}
               {form.taxCategory && (
                 <div className="bg-card rounded-lg mt-1">
@@ -405,7 +420,6 @@ export const DetailsTab = ({
                   </h3>
 
                   <div className="flex flex-col gap-1">
-
                     {/* Tax Category */}
                     <div className="flex items-center gap-15 text-xs">
                       <span className="text-muted">Tax Category</span>
@@ -421,38 +435,39 @@ export const DetailsTab = ({
                         {form.currency || "-"}
                       </span>
                     </div>
-
-                   
                   </div>
                 </div>
               )}
-
             </div>
           </div>
 
           {/* Summary */}
           <div className="bg-card rounded-lg p-3 w-[220px]">
-            <h3 className="text-[13px] font-semibold text-main mb-2">Summary</h3>
+            <h3 className="text-[13px] font-semibold text-main mb-2">
+              Summary
+            </h3>
 
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-19 text-xs">
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-muted">Total Items</span>
                 <span className="font-medium text-main">{items.length}</span>
               </div>
 
-              <div className="flex items-center gap-19 text-xs">
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-muted">Total Quantity</span>
-                <span className="font-medium text-main">{form.totalQuantity}</span>
+                <span className="font-medium text-main">
+                  {form.totalQuantity}
+                </span>
               </div>
 
-              <div className="flex items-center gap-19 text-xs">
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-muted">Grand Total</span>
                 <span className="font-medium text-main">
                   {symbol} {form.grandTotal.toFixed(2)}
                 </span>
               </div>
 
-              <div className="flex items-center gap-19 text-xs">
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-muted">Rounding Adj</span>
                 <span className="font-medium text-main">
                   {symbol} {form.roundingAdjustment.toFixed(2)}
@@ -475,6 +490,5 @@ export const DetailsTab = ({
         </div>
       </div>
     </div>
-
   );
 };
