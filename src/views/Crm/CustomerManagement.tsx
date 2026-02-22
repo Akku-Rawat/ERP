@@ -15,7 +15,6 @@ import Table from "../../components/ui/Table/Table";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import ActionButton, {
   ActionGroup,
-  ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 
 import type { Column } from "../../components/ui/Table/type";
@@ -337,9 +336,16 @@ const fetchCustomers = async () => {
             onClick={() => handleRowClick(c)}
             iconOnly
           />
-          <ActionMenu
-            onEdit={(e) => handleEditCustomer(c.id, e as any)}
-            onDelete={(e) => handleDelete(c.id, e as any)}
+          <ActionButton
+            type="edit"
+            onClick={(e) => handleEditCustomer(c.id, e as any)}
+            iconOnly
+          />
+          <ActionButton
+            type="delete"
+            onClick={(e) => handleDelete(c.id, e as any)}
+            iconOnly
+            variant="danger"
           />
         </ActionGroup>
       ),
