@@ -26,6 +26,7 @@ type PaymentInformation = {
 
 type InvoiceItem = {
   itemCode?: string;
+  itemName?: string;
   quantity?: number;
   description?: string;
   discount?: number;
@@ -197,6 +198,29 @@ const InvoiceDetailsModal: React.FC<Props> = ({
       ? Number(data.TotalAmount)
       : computedTotals.total;
 
+  const paymentPhases = useMemo(() => {
+    const phases = data?.terms?.selling?.payment?.phases;
+    if (!Array.isArray(phases)) return [];
+
+    const seen = new Set<string>();
+    const out: typeof phases = [];
+
+    for (const p of phases) {
+      const key = `${String(p?.name ?? "").trim().toLowerCase()}|${String(
+        p?.percentage ?? "",
+      )
+        .trim()
+        .toLowerCase()}|${String(p?.condition ?? "")
+        .trim()
+        .toLowerCase()}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(p);
+    }
+
+    return out;
+  }, [data?.terms?.selling?.payment?.phases]);
+
   const footer = (
     <div className="w-full flex items-center justify-end gap-2">
       <Button variant="secondary" type="button" onClick={onClose}>
@@ -251,28 +275,34 @@ const InvoiceDetailsModal: React.FC<Props> = ({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-3">
               <SectionTitle title="Basic Information" />
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Field label="Invoice Number" value={data.invoiceNumber ?? "—"} />
                 <Field label="Invoice Type" value={data.invoiceType ?? "—"} />
-              </div>
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Field label="Invoice Date" value={data.dateOfInvoice ?? "—"} />
-                <Field label="Due Date" value={data.dueDate ?? "—"} />
+              </div>
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {!isQuoteOrProforma ? (
                   <Field label="Origin Invoice" value={data.originInvoice ?? "—"} />
-                ) : null}
+                ) : (
+                  <div />
+                )}
+                <div />
+                <div />
               </div>
             </div>
 
             <div className="lg:col-span-3">
               <SectionTitle title="Customer" />
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Field label="Due Date" value={data.dueDate ?? "—"} />
                 <Field label="Customer Name" value={data.customerName ?? "—"} />
                 <Field label="Customer TPIN" value={data.customerTpin ?? "—"} />
-                {isLpoType ? (
-                  <Field label="LPO Number" value={data.lpoNumber ?? "—"} />
-                ) : null}
               </div>
+              {isLpoType ? (
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <Field label="LPO Number" value={data.lpoNumber ?? "—"} />
+                </div>
+              ) : null}
             </div>
 
             <div className="lg:col-span-3">
@@ -343,12 +373,17 @@ const InvoiceDetailsModal: React.FC<Props> = ({
                 <Field label="SWIFT Code" value={data.paymentInformation?.swiftCode ?? "—"} />
               </div>
 
-              {!!data.terms?.selling?.payment?.phases?.length && (
+              {!!paymentPhases.length && (
                 <div className="mt-4 bg-white border border-gray-200 rounded-xl p-4">
                   <div className="text-[11px] font-semibold text-muted uppercase tracking-wide">Payment Phases</div>
                   <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {data.terms.selling.payment.phases.map((p, idx) => (
-                      <div key={idx} className="border border-gray-200 rounded-xl p-4 bg-[#fbf7f2]">
+                    {paymentPhases.map((p, idx) => (
+                      <div
+                        key={`${String(p?.name ?? "").trim()}-${String(
+                          p?.percentage ?? "",
+                        ).trim()}-${String(p?.condition ?? "").trim()}-${idx}`}
+                        className="border border-gray-200 rounded-xl p-4 bg-[#fbf7f2]"
+                      >
                         {p.name && p.name.trim() !== "-" ? (
                           <div className="text-sm font-bold text-main">{p.name}</div>
                         ) : null}
@@ -399,16 +434,23 @@ const InvoiceDetailsModal: React.FC<Props> = ({
                             <Field label="Discount %" value={String(discountPct)} />
                             <Field label="Line Total" value={`${currency} ${lineTotal.toFixed(2)}`} />
                             <Field label="VAT Code" value={it.vatCode ?? "—"} />
-                            <Field
-                              label="VAT Taxable Amount"
-                              value={
-                                vatTaxableAmountNum !== undefined && !Number.isNaN(vatTaxableAmountNum)
-                                  ? `${currency} ${vatTaxableAmountNum.toFixed(2)}`
-                                  : it.vatTaxableAmount ?? "—"
-                              }
-                            />
-                            <div className="md:col-span-3">
-                              <Field label="Description" value={it.description ?? "—"} />
+                            <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                              <Field
+                                label="VAT Taxable Amount"
+                                value={
+                                  vatTaxableAmountNum !== undefined && !Number.isNaN(vatTaxableAmountNum)
+                                    ? `${currency} ${vatTaxableAmountNum.toFixed(2)}`
+                                    : it.vatTaxableAmount ?? "—"
+                                }
+                              />
+                              <Field
+                                label="Item Name"
+                                value={it.itemName ?? it.description ?? "—"}
+                              />
+                              <Field
+                                label="Description"
+                                value={it.description ?? it.itemName ?? "—"}
+                              />
                             </div>
                           </div>
                         </div>

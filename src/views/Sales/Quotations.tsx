@@ -279,6 +279,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
     const items = Array.isArray(raw?.items)
       ? raw.items.map((it: any) => ({
           itemCode: it?.itemCode,
+          itemName: it?.itemName,
           quantity: Number(it?.quantity ?? 0),
           description: it?.description,
           discount: Number(it?.discount ?? 0),
