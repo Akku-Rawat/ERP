@@ -306,6 +306,16 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   />
                 </div>
 
+                <ModalSelect
+                  label="Payment Method"
+                  required
+                  options={[...paymentMethodOptions]}
+                  name="paymentMethod"
+                  value={formData.paymentInformation?.paymentMethod || ""}
+                  onChange={(e) => actions.handleInputChange(e, "paymentInformation")}
+                  className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                />
+
 
 
                 {/* <div>
@@ -661,6 +671,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                 actions.handleInputChange(e, "paymentInformation")
               }
               paymentMethodOptions={paymentMethodOptions}
+              showPaymentMethod={false}
             />
 
             {/*  BILLING + SHIPPING  */}

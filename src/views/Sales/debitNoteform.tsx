@@ -278,6 +278,15 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                   />
                 </div>
 
+                <ModalSelect
+                  label="Payment Method"
+                  required
+                  options={[...paymentMethodOptions]}
+                  name="paymentMethod"
+                  value={formData.paymentInformation?.paymentMethod || ""}
+                  onChange={(e) => actions.handleInputChange(e, "paymentInformation")}
+                />
+
                 
 
                 {/* <div className="flex flex-col gap-1">
@@ -635,6 +644,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                 actions.handleInputChange(e, "paymentInformation")
               }
               paymentMethodOptions={paymentMethodOptions}
+              showPaymentMethod={false}
             />
 
             {/*  BILLING + SHIPPING  */}
