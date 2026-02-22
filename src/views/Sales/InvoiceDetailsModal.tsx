@@ -321,11 +321,7 @@ const InvoiceDetailsModal: React.FC<Props> = ({
                 <Field label="Discount Amount" value={String(data.discountAmount ?? 0)} />
                 <Field
                   label="Total After Discount"
-                  value={
-                    data.TotalAmount !== undefined && data.TotalAmount !== null
-                      ? `${currency} ${Number(data.TotalAmount).toFixed(2)}`
-                      : "—"
-                  }
+                  value={`${currency || ""} ${Number(totalForDisplay).toFixed(2)}`.trim()}
                 />
 
                 {!isQuoteOrProforma ? (
