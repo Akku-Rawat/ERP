@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Plus, Trash2, User, Mail, Phone } from "lucide-react";
+import { Trash2, User, Mail, Phone } from "lucide-react";
 import { showApiError, showSuccess } from "../../utils/alert";
 // import TermsAndCondition from "../TermsAndCondition";
 import { useEffect } from "react";
@@ -508,13 +508,6 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                 </div>
 
                 <div className="flex justify-between mt-3">
-                  <button
-                    type="button"
-                    onClick={actions.addItem}
-                    className="px-4 py-1.5 bg-primary hover:bg-[var(--primary-600)] text-white rounded text-xs font-medium flex items-center gap-1.5 transition-colors"
-                  >
-                    <Plus className="w-4 h-4" /> Add Item
-                  </button>
                   {(ui.itemCount > 5 || ui.page > 0) && (
                     <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
 

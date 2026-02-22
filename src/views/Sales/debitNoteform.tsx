@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Plus, Trash2, User, Mail, Phone } from "lucide-react";
+import { Trash2, User, Mail, Phone } from "lucide-react";
 
 // import TermsAndCondition from "../TermsAndCondition";
 import { useEffect } from "react";
@@ -10,6 +10,7 @@ import { showApiError, showSuccess } from "../../utils/alert";
 
 import { createDebitNoteFromInvoice } from "../../api/salesApi";
 import { ModalInput, ModalSelect, ModalTextarea } from "../../components/ui/modal/modalComponent";
+import SearchSelect from "../../components/ui/modal/SearchSelect";
 
 import ItemSelect from "../../components/selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
@@ -58,31 +59,20 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
     transactionProgress: "",
   });
 
-  const [invoiceOptions, setInvoiceOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const fetchInvoiceOptions = async (q: string) => {
+    try {
+      const res = await getAllSalesInvoices(1, 100, "", "asc", q);
+      const invoices = res?.data || [];
 
-  useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        const res = await getAllSalesInvoices(1, 50);
-
-        const options =
-          res?.data?.map((inv: any) => ({
-            value: inv.invoiceNumber,
-            label: inv.invoiceNumber,
-          })) ?? [];
-
-        setInvoiceOptions(options);
-      } catch (err: any) {
-        console.error("Failed to load invoices", err);
-        showApiError(err);
-      }
-
-    };
-
-    fetchInvoices();
-  }, []);
+      return invoices.map((inv: any) => ({
+        value: inv.invoiceNumber,
+        label: inv.invoiceNumber,
+      }));
+    } catch (err) {
+      console.error("Failed to load invoices", err);
+      return [];
+    }
+  };
   useEffect(() => {
     if (!formData.invoiceNumber) return;
 
@@ -218,18 +208,20 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
               <div className="grid grid-cols-6 gap-3 items-end">
 
 
-                <ModalSelect
+                <SearchSelect
                   label="Invoice Number"
-                  options={invoiceOptions}
                   value={formData.invoiceNumber ?? ""}
-                  onChange={(e) =>
+                  onChange={(value) =>
                     actions.handleInputChange({
                       target: {
                         name: "invoiceNumber",
-                        value: e.target.value,
+                        value,
                       },
                     } as any)
                   }
+                  fetchOptions={fetchInvoiceOptions}
+                  placeholder="Search invoice..."
+                  required
                 />
 
                 <ModalSelect
@@ -490,13 +482,6 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                 </div>
 
                 <div className="flex justify-between mt-3">
-                  <button
-                    type="button"
-                    onClick={actions.addItem}
-                    className="px-4 py-1.5 bg-primary hover:bg-[var(--primary-600)] text-white rounded text-xs font-medium flex items-center gap-1.5 transition-colors"
-                  >
-                    <Plus className="w-4 h-4" /> Add Item
-                  </button>
                   {(ui.itemCount > 5 || ui.page > 0) && (
                     <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
 
