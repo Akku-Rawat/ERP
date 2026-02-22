@@ -199,6 +199,15 @@ const InvoiceDetailsModal: React.FC<Props> = ({
       ? Number(data.TotalAmount)
       : computedTotals.total;
 
+  const discountPctForDisplay =
+    data?.discountPercentage !== undefined && data?.discountPercentage !== null
+      ? Number(data.discountPercentage)
+      : undefined;
+  const discountAmountForDisplay =
+    data?.discountAmount !== undefined && data?.discountAmount !== null
+      ? Number(data.discountAmount)
+      : undefined;
+
   const paymentPhases = useMemo(() => {
     const phases = data?.terms?.selling?.payment?.phases;
     if (!Array.isArray(phases)) return [];
@@ -318,8 +327,22 @@ const InvoiceDetailsModal: React.FC<Props> = ({
                   />
                 ) : null}
 
-                <Field label="Discount %" value={String(data.discountPercentage ?? 0)} />
-                <Field label="Discount Amount" value={String(data.discountAmount ?? 0)} />
+                <Field
+                  label="Discount %"
+                  value={
+                    discountPctForDisplay !== undefined && !Number.isNaN(discountPctForDisplay)
+                      ? `${discountPctForDisplay}%`
+                      : "—"
+                  }
+                />
+                <Field
+                  label="Discount Amount"
+                  value={
+                    discountAmountForDisplay !== undefined && !Number.isNaN(discountAmountForDisplay)
+                      ? `${currency} ${discountAmountForDisplay.toFixed(2)}`.trim()
+                      : "—"
+                  }
+                />
                 <Field
                   label="Total After Discount"
                   value={`${currency || ""} ${Number(totalForDisplay).toFixed(2)}`.trim()}

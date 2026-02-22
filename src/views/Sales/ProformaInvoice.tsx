@@ -345,6 +345,14 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
       exchangeRt: raw?.exchangeRt,
       dateOfInvoice: raw?.dateOfInvoice ?? raw?.dateofinvoice,
       dueDate: raw?.dueDate,
+      discountPercentage:
+        raw?.discountPercentage !== undefined && raw?.discountPercentage !== null
+          ? Number(raw.discountPercentage)
+          : undefined,
+      discountAmount:
+        raw?.discountAmount !== undefined && raw?.discountAmount !== null
+          ? Number(raw.discountAmount)
+          : undefined,
       Receipt: raw?.Receipt ?? raw?.receipt,
       ReceiptNo: raw?.ReceiptNo ?? raw?.receiptNo,
       TotalAmount: raw?.TotalAmount ?? raw?.totalAmount,
