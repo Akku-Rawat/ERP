@@ -54,6 +54,30 @@ export async function getPurchaseOrderById(id: string | number): Promise<any> {
 }
 
 
+export async function deletePurchaseOrder(id: string | number): Promise<any> {
+  try {
+    const resp = await api.delete(purchaseorderapi.delete, {
+      params: { id },
+      validateStatus: () => true,
+    });
+
+    return (
+      resp.data ?? {
+        status: resp.status >= 200 && resp.status < 300 ? "success" : "error",
+        status_code: resp.status,
+        message: resp.statusText || "Operation failed",
+      }
+    );
+  } catch (error: any) {
+    return error?.response?.data ?? {
+      status: "error",
+      status_code: error?.response?.status,
+      message: error?.message || "Operation failed",
+    };
+  }
+}
+
+
 
 
 

@@ -235,6 +235,7 @@ export const API = {
 
     update: `${ERP_BASE}/api/method/erpnext.zra_client.update_purchase_order`,
     updateStatus: `${ERP_BASE}/api/method/erpnext.zra_client.purchase.order.update_purchase_order_status`,
+    delete: `${ERP_BASE}/api/method/erpnext.zra_client.purchase.order.delete_purchase_order`,
   },
   //purchase invoice
   purchaseIvoice: {
@@ -244,6 +245,7 @@ export const API = {
     create: `${ERP_BASE}/api/method/erpnext.zra_client.purchase.invoice.create_purchase_invoice`,
 
     updateStatus: `${ERP_BASE}/api/method/erpnext.zra_client.purchase.invoice.update_purchase_invoices_status`,
+    delete: `${ERP_BASE}/api/method/erpnext.zra_client.purchase.invoice.delete_purchase_invoice`,
   },
 
   /* =========================

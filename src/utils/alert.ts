@@ -54,12 +54,15 @@ const toUserFriendlyMessage = (message: string): string => {
 };
 
 
-export const showApiError = (error: any) => {
+export const getUserFriendlyErrorMessage = (error: any) => {
   const rawMessage = extractErrorMessage(error);
+  const cleanMessage = String(rawMessage ?? "").replace(/<[^>]+>/g, "");
+  return toUserFriendlyMessage(cleanMessage);
+};
 
-  // Strip HTML tags (clean version)
-  const cleanMessage = rawMessage.replace(/<[^>]+>/g, "");
-  const userMessage = toUserFriendlyMessage(cleanMessage);
+
+export const showApiError = (error: any) => {
+  const userMessage = getUserFriendlyErrorMessage(error);
 
   Swal.fire({
     icon: "error",

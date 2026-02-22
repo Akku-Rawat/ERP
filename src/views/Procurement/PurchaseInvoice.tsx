@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import PurchaseInvoiceView from "../../views/Procurement/PurchaseInvoiceView";
 import PurchaseInvoiceModal from "../../components/procurement/PurchaseInvoiceModal";
 // Shared UI Table Components
@@ -7,13 +8,14 @@ import ActionButton, {
   ActionGroup,
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
-import { getPurchaseInvoices } from "../../api/procurement/PurchaseInvoiceApi";
+import { deletePurchaseInvoice, getPurchaseInvoices } from "../../api/procurement/PurchaseInvoiceApi";
 import {
   showApiError,
   showSuccess,
   showLoading,
   closeSwal,
 } from "../../utils/alert";
+import { getUserFriendlyErrorMessage } from "../../utils/alert";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { getPurchaseInvoiceById } from "../../api/procurement/PurchaseInvoiceApi";
@@ -214,6 +216,53 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
     setModalOpen(true);
   };
 
+  const handleDelete = (Invoice: Purchaseinvoice, e: React.MouseEvent) => {
+    e.stopPropagation();
+    toast.dismiss();
+    toast(
+      (t) => (
+        <div className="bg-card border border-[var(--border)] rounded-xl shadow-xl p-4 w-[320px]">
+          <div className="text-sm font-semibold text-main">Delete Purchase Invoice</div>
+          <div className="text-xs text-muted mt-1">Are you sure you want to delete "{Invoice.pId}"?</div>
+          <div className="flex items-center justify-end gap-2 mt-4">
+            <button
+              type="button"
+              onClick={() => toast.dismiss(t.id)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] text-main hover:bg-row-hover"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                (async () => {
+                  try {
+                    toast.dismiss(t.id);
+                    const res = await deletePurchaseInvoice(Invoice.pId);
+
+                    if (!res || res.status_code !== 200 || res.status !== "success") {
+                      toast.error(getUserFriendlyErrorMessage(res));
+                      return;
+                    }
+
+                    toast.success(res.message || "Purchase Invoice deleted");
+                    await fetchInvoice();
+                  } catch (err) {
+                    toast.error(getUserFriendlyErrorMessage(err));
+                  }
+                })();
+              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-600"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity },
+    );
+  };
+
   const handleCloseModal = () => setModalOpen(false);
 
   const handlePISaved = async () => {
@@ -255,6 +304,13 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
             type="edit"
             onClick={(e) => handleEdit(o, e as any)}
             iconOnly
+          />
+
+          <ActionButton
+            type="delete"
+            onClick={(e) => handleDelete(o, e as any)}
+            iconOnly
+            variant="danger"
           />
         </ActionGroup>
       ),
