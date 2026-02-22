@@ -168,6 +168,15 @@ const InvoiceDetailsModal: React.FC<Props> = ({
 
   const currency = data?.currencyCode ?? "";
 
+  const docNo = String(data?.invoiceNumber ?? "");
+  const docNoUpper = docNo.trim().toUpperCase();
+  const invoiceTypeUpper = String(data?.invoiceType ?? "").trim().toUpperCase();
+  const isQuoteOrProforma =
+    docNoUpper.startsWith("QUO-") || docNoUpper.startsWith("PRO-");
+  const isLpoType = invoiceTypeUpper === "LPO" || invoiceTypeUpper.includes("LPO");
+  const isExportType =
+    invoiceTypeUpper.includes("EXPORT") && !invoiceTypeUpper.includes("NON");
+
   const computedTotals = useMemo(() => {
     const subTotal = items.reduce((sum, it) => sum + Number(it.price ?? 0) * Number(it.quantity ?? 0), 0);
     const discount = items.reduce((sum, it) => {
@@ -179,9 +188,14 @@ const InvoiceDetailsModal: React.FC<Props> = ({
     return {
       subTotal,
       discount,
-      total: Math.max(0, subTotal - discount),
+      total: subTotal - discount,
     };
   }, [items]);
+
+  const totalForDisplay =
+    data?.TotalAmount !== undefined && data?.TotalAmount !== null
+      ? Number(data.TotalAmount)
+      : computedTotals.total;
 
   const footer = (
     <div className="w-full flex items-center justify-end gap-2">
@@ -241,9 +255,13 @@ const InvoiceDetailsModal: React.FC<Props> = ({
                 <Field label="Invoice Number" value={data.invoiceNumber ?? "—"} />
                 <Field label="Invoice Type" value={data.invoiceType ?? "—"} />
               </div>
-              <Field label="Invoice Date" value={data.dateOfInvoice ?? "—"} />
+              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Field label="Invoice Date" value={data.dateOfInvoice ?? "—"} />
                 <Field label="Due Date" value={data.dueDate ?? "—"} />
-                <Field label="Origin Invoice" value={data.originInvoice ?? "—"} />
+                {!isQuoteOrProforma ? (
+                  <Field label="Origin Invoice" value={data.originInvoice ?? "—"} />
+                ) : null}
+              </div>
             </div>
 
             <div className="lg:col-span-3">
@@ -251,7 +269,9 @@ const InvoiceDetailsModal: React.FC<Props> = ({
               <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Field label="Customer Name" value={data.customerName ?? "—"} />
                 <Field label="Customer TPIN" value={data.customerTpin ?? "—"} />
-                <Field label="LPO Number" value={data.lpoNumber ?? "—"} />
+                {isLpoType ? (
+                  <Field label="LPO Number" value={data.lpoNumber ?? "—"} />
+                ) : null}
               </div>
             </div>
 
@@ -260,7 +280,12 @@ const InvoiceDetailsModal: React.FC<Props> = ({
               <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Field label="Currency" value={currency || "—"} />
                 <Field label="Exchange Rate" value={data.exchangeRt ?? "—"} />
-                <Field label="Destination Country" value={data.destnCountryCd ?? "—"} />
+                {isExportType ? (
+                  <Field
+                    label="Destination Country"
+                    value={data.destnCountryCd ?? "—"}
+                  />
+                ) : null}
 
                 <Field label="Discount %" value={String(data.discountPercentage ?? 0)} />
                 <Field label="Discount Amount" value={String(data.discountAmount ?? 0)} />
@@ -273,7 +298,9 @@ const InvoiceDetailsModal: React.FC<Props> = ({
                   }
                 />
 
-                <Field label="Receipt No" value={data.ReceiptNo ?? "—"} />
+                {!isQuoteOrProforma ? (
+                  <Field label="Receipt No" value={data.ReceiptNo ?? "—"} />
+                ) : null}
                 <Field
                   label="Receipt"
                   value={
@@ -344,27 +371,49 @@ const InvoiceDetailsModal: React.FC<Props> = ({
                     Items Count: {items.length}
                   </div>
                   <div className="text-[11px] font-bold text-main uppercase tracking-wide">
-                    Total: {currency} {computedTotals.total.toFixed(2)}
+                    Total: {currency} {Number(totalForDisplay).toFixed(2)}
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   {items.length ? (
-                    items.map((it, idx) => (
-                      <div key={idx} className="border border-gray-200 rounded-xl p-4 bg-[#fbf7f2]">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <Field label="Item Code" value={it.itemCode ?? "—"} />
-                          <Field label="Quantity" value={String(Number(it.quantity ?? 0))} />
-                          <Field label="Unit Price" value={Number(it.price ?? 0).toFixed(2)} />
-                          <Field label="Discount %" value={String(Number(it.discount ?? 0))} />
-                          <Field label="VAT Code" value={it.vatCode ?? "—"} />
-                          <Field label="VAT Taxable Amount" value={it.vatTaxableAmount ?? "—"} />
-                          <div className="md:col-span-3">
-                            <Field label="Description" value={it.description ?? "—"} />
+                    items.map((it, idx) => {
+                      const qty = Number(it.quantity ?? 0);
+                      const unitPrice = Number(it.price ?? 0);
+                      const discountPct = Number(it.discount ?? 0);
+                      const lineSubTotal = qty * unitPrice;
+                      const lineDiscount = lineSubTotal * (discountPct / 100);
+                      const lineTotal = lineSubTotal - lineDiscount;
+
+                      const vatTaxableAmountNum =
+                        it.vatTaxableAmount === undefined || it.vatTaxableAmount === null
+                          ? undefined
+                          : Number(it.vatTaxableAmount);
+
+                      return (
+                        <div key={idx} className="border border-gray-200 rounded-xl p-4 bg-[#fbf7f2]">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <Field label="Item Code" value={it.itemCode ?? "—"} />
+                            <Field label="Quantity" value={String(qty)} />
+                            <Field label="Unit Price" value={`${currency} ${unitPrice.toFixed(2)}`} />
+                            <Field label="Discount %" value={String(discountPct)} />
+                            <Field label="Line Total" value={`${currency} ${lineTotal.toFixed(2)}`} />
+                            <Field label="VAT Code" value={it.vatCode ?? "—"} />
+                            <Field
+                              label="VAT Taxable Amount"
+                              value={
+                                vatTaxableAmountNum !== undefined && !Number.isNaN(vatTaxableAmountNum)
+                                  ? `${currency} ${vatTaxableAmountNum.toFixed(2)}`
+                                  : it.vatTaxableAmount ?? "—"
+                              }
+                            />
+                            <div className="md:col-span-3">
+                              <Field label="Description" value={it.description ?? "—"} />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="text-sm text-muted">No items</div>
                   )}

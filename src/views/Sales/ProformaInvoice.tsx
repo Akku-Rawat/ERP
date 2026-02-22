@@ -314,7 +314,6 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
         return;
       }
 
-      // Optimistic remove from table
       setInvoices((prev) => prev.filter((inv) => inv.proformaId !== proformaId));
       showSuccess("Proforma invoice deleted successfully");
     } catch (err) {
@@ -323,36 +322,38 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
     }
   };
 
-  // ── Detail modal mapper (kept — do not remove) ────────────────────────────
   const mapProformaToInvoiceDetails = (raw: any): InvoiceDetails => {
     const items = Array.isArray(raw?.items)
       ? raw.items.map((it: any) => ({
-          itemCode:    it?.itemCode ?? it?.productName,
-          quantity:    Number(it?.quantity ?? 0),
+          itemCode: it?.itemCode,
+          quantity: Number(it?.quantity ?? 0),
           description: it?.description,
-          discount:    Number(it?.discount ?? 0),
-          price:       Number(it?.price ?? it?.listPrice ?? 0),
-          vatCode:     it?.vatCode,
+          discount: Number(it?.discount ?? 0),
+          price: Number(it?.price ?? 0),
+          vatCode: it?.vatCode ?? it?.tax,
+          vatTaxableAmount: it?.vatTaxableAmount ?? it?.itemTotal,
         }))
       : [];
 
     return {
-      invoiceNumber: raw?.proformaId ?? raw?.proformaID ?? raw?.id,
+      invoiceNumber: raw?.proformaId,
       invoiceType: raw?.invoiceType ?? "Proforma",
       customerName: raw?.customerName,
-      currencyCode: raw?.currencyCode ?? raw?.currency,
-      exchangeRt: raw?.exchangeRt ?? raw?.exchangeRate,
-      dateOfInvoice: raw?.dateOfInvoice ?? raw?.createdAt,
+      customerTpin: raw?.customerTpin,
+      currencyCode: raw?.currencyCode,
+      exchangeRt: raw?.exchangeRt,
+      dateOfInvoice: raw?.dateOfInvoice ?? raw?.dateofinvoice,
       dueDate: raw?.dueDate,
       Receipt: raw?.Receipt ?? raw?.receipt,
       ReceiptNo: raw?.ReceiptNo ?? raw?.receiptNo,
       TotalAmount: raw?.TotalAmount ?? raw?.totalAmount,
+      billingAddress: raw?.billingAddress,
+      shippingAddress: raw?.shippingAddress,
+      paymentInformation: raw?.paymentInformation,
       items,
       terms: raw?.terms,
     };
   };
-
-  // ── Columns ───────────────────────────────────────────────────────────────
 
   const columns: Column<ProformaInvoiceSummary>[] = [
     {
@@ -379,9 +380,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
       align: "left",
       sortable: true,
       render: (inv) => (
-        <span className="text-xs text-muted">
-          {inv.createdAt.toLocaleDateString()}
-        </span>
+        <span className="text-xs text-muted">{inv.createdAt.toLocaleDateString()}</span>
       ),
     },
     {
@@ -412,7 +411,6 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
       align: "center",
       render: (inv) => (
         <ActionGroup>
-
           <ActionButton
             type="view"
             onClick={(e) => handleView(inv.proformaId, e)}
@@ -435,11 +433,14 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
       <Table
         loading={loading || initialLoad}
         columns={columns}
-        data={invoices}                      // ← raw server data, no local filter
+        data={invoices}
         rowKey={(row) => row.proformaId}
         showToolbar
         searchValue={searchTerm}
-        onSearch={(q) => { setSearchTerm(q); setPage(1); }}
+        onSearch={(q) => {
+          setSearchTerm(q);
+          setPage(1);
+        }}
         enableAdd
         addLabel="Add Proforma Invoice"
         onAdd={onAddProformaInvoice}
@@ -451,7 +452,10 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
         pageSize={pageSize}
         totalItems={totalItems}
         pageSizeOptions={[10, 25, 50, 100]}
-        onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
         onPageChange={setPage}
         sortBy={sortBy}
         sortOrder={sortOrder}
@@ -461,7 +465,10 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
       <InvoiceDetailsModal
         open={detailsOpen}
         invoiceId={detailsId}
-        onClose={() => { setDetailsOpen(false); setDetailsId(null); }}
+        onClose={() => {
+          setDetailsOpen(false);
+          setDetailsId(null);
+        }}
         onOpenReceiptPdf={handleOpenReceipt}
         fetchDetails={getProformaInvoiceById}
         mapDetails={mapProformaToInvoiceDetails}

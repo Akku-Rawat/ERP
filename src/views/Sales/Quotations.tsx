@@ -251,66 +251,66 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
   const handleDownload = async (quotationNumber: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     try {
-      showLoading("Preparing download...");
+      showLoading("Preparing quotation download...");
+
       if (!company) {
         closeSwal();
+        console.error("Company data not loaded");
         return;
       }
 
       const res = await getQuotationById(quotationNumber);
       if (!res || res.status_code !== 200) {
         closeSwal();
+        showApiError("Failed to load quotation");
         return;
       }
 
       await generateQuotationPDF(res.data, company, "save");
       closeSwal();
       showSuccess("Quotation downloaded");
-    } catch (err) {
+    } catch (err: any) {
       closeSwal();
       showApiError(err);
     }
   };
 
-  const mapQuotationToInvoiceDetails = (raw: any): InvoiceDetails => ({
-    invoiceNumber: raw?.id ?? raw?.quotationNumber ?? raw?.quotationId,
-    invoiceType: raw?.invoiceType ?? "Quotation",
-    customerName: raw?.customerName ?? raw?.customer ?? raw?.Customer,
-    currencyCode: raw?.currencyCode ?? raw?.currency,
-    exchangeRt: raw?.exchangeRt,
-    dateOfInvoice: raw?.transactionDate ?? raw?.quotationDate,
-    dueDate: raw?.validUntil ?? raw?.validTill,
-    Receipt: raw?.Receipt ?? raw?.receipt,
-    ReceiptNo: raw?.ReceiptNo ?? raw?.receiptNo,
-    TotalAmount: raw?.TotalAmount ?? raw?.grandTotal ?? raw?.totalAmount,
-    discountPercentage: raw?.discountPercentage,
-    discountAmount: raw?.discountAmount ?? raw?.totalDiscount,
-    lpoNumber: raw?.lpoNumber ?? raw?.poNumber,
-    destnCountryCd: raw?.destnCountryCd ?? null,
-    billingAddress: raw?.billingAddress,
-    shippingAddress: raw?.shippingAddress,
-    paymentInformation: raw?.paymentInformation ?? {
-      paymentTerms: raw?.paymentTerms,
-      paymentMethod: raw?.paymentMethod,
-      bankName: raw?.bankName,
-      accountNumber: raw?.accountNumber,
-      routingNumber: raw?.routingNumber,
-      swiftCode: raw?.swiftCode,
-    },
-    items: Array.isArray(raw?.items)
+  const mapQuotationToInvoiceDetails = (raw: any): InvoiceDetails => {
+    const items = Array.isArray(raw?.items)
       ? raw.items.map((it: any) => ({
-          itemCode: it?.itemCode ?? it?.productName,
+          itemCode: it?.itemCode,
           quantity: Number(it?.quantity ?? 0),
           description: it?.description,
           discount: Number(it?.discount ?? 0),
-          price: Number(it?.price ?? it?.listPrice ?? 0),
+          price: Number(it?.price ?? 0),
           vatCode: it?.vatCode,
+          vatTaxableAmount: it?.vatTaxableAmount ?? it?.itemTotal,
         }))
-      : [],
-    terms: raw?.terms ?? {
-      selling: { general: raw?.termsAndConditions ?? raw?.notes },
-    },
-  });
+      : [];
+
+    return {
+      invoiceNumber: raw?.id ?? raw?.quotationNumber,
+      invoiceType: raw?.invoiceType ?? "Quotation",
+      customerName: raw?.customerName ?? raw?.customerId,
+      customerTpin: raw?.customerTpin,
+      currencyCode: raw?.currencyCode,
+      exchangeRt: raw?.exchangeRt,
+      dateOfInvoice: raw?.transactionDate,
+      dueDate: raw?.validUntil ?? raw?.validTill,
+      Receipt: raw?.Receipt ?? raw?.receipt,
+      ReceiptNo: raw?.ReceiptNo ?? raw?.receiptNo,
+      TotalAmount: raw?.TotalAmount ?? raw?.grandTotal ?? raw?.totalAmount,
+      discountPercentage: raw?.discountPercentage,
+      discountAmount: raw?.discountAmount,
+      lpoNumber: raw?.lpoNumber,
+      destnCountryCd: raw?.destnCountryCd,
+      billingAddress: raw?.billingAddress,
+      shippingAddress: raw?.shippingAddress,
+      paymentInformation: raw?.paymentInformation,
+      items,
+      terms: raw?.terms,
+    };
+  };
 
   const columns: Column<QuotationSummary>[] = [
     {

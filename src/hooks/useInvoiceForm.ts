@@ -481,11 +481,23 @@ export const useInvoiceForm = (
   ) => {
     const { name, value } = e.target;
     const isNum = ["quantity", "price", "discount", "vatRate"].includes(name);
+
+    const clampItemNumber = (field: string, raw: string) => {
+      const n = Number(raw);
+      if (Number.isNaN(n)) return 0;
+
+      if (field === "quantity") return Math.max(1, n);
+      if (field === "price") return Math.max(0, n);
+      if (field === "discount") return Math.min(100, Math.max(0, n));
+      if (field === "vatRate") return Math.max(0, n);
+      return n;
+    };
+
     setFormData((prev) => {
       const items = [...prev.items];
       items[idx] = {
         ...items[idx],
-        [name]: isNum ? Number(value) : value,
+        [name]: isNum ? clampItemNumber(name, value) : value,
       };
       return { ...prev, items };
     });
