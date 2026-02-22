@@ -16,7 +16,6 @@ import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
   currencySymbols,
   paymentMethodOptions,
-  currencyOptions,
 } from "../../constants/invoice.constants";
 
 // import ModalInput from "../ui/ModalInput";
@@ -66,7 +65,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
   const [creditMeta, setCreditMeta] = useState({
     creditNoteReasonCode: "",
     invcAdjustReason: "",
-    transactionProgress: "02",
+    transactionProgress: "",
   });
 
   const fetchInvoiceOptions = async (q: string) => {
@@ -297,13 +296,12 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   />
                 )}
                 <div >
-                  <ModalSelect
+                  <ModalInput
                     label="Currency"
                     name="currencyCode"
-                    value={formData.currencyCode}
+                    value={formData.currencyCode || ""}
                     disabled
-                    onChange={actions.handleInputChange}
-                    options={[...currencyOptions]}
+                    placeholder="Select"
                     className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                   />
                 </div>

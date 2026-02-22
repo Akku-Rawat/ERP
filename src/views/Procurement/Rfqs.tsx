@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import { Search, Plus, Edit2, Trash2 } from "lucide-react";
 import RfqTabsModal from "../../components/procurement/rfq/RfqModal";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
@@ -8,7 +7,6 @@ import Table from "../../components/ui/Table/Table";
 import StatusBadge from "../../components/ui/Table/StatusBadge";  
 import ActionButton, {
   ActionGroup,
-  ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 
 interface RFQ {
@@ -30,7 +28,6 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedRFQ, setSelectedRFQ] = useState<RFQ | null>(null);
 
   // ================= FETCH RFQs =================
   const fetchRFQs = async () => {
@@ -66,14 +63,12 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
 
   // ================= MODAL HANDLERS =================
   const handleAddClick = () => {
-    setSelectedRFQ(null);
     setModalOpen(true);
     onAdd?.();
   };
 
-  const handleEdit = (rfq: RFQ, e: React.MouseEvent) => {
+  const handleEdit = (_rfq: RFQ, e: React.MouseEvent) => {
     e.stopPropagation();
-    setSelectedRFQ(rfq);
     setModalOpen(true);
   };
 
@@ -85,6 +80,10 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
   };
 
   const handleCloseModal = () => setModalOpen(false);
+
+  const handleView = (_rfq: RFQ) => {
+    setModalOpen(true);
+  };
 
   // ================= TABLE COLUMNS =================
   const columns: Column<RFQ>[] = [
@@ -118,12 +117,9 @@ const RFQsTable: React.FC<RFQsTableProps> = ({ onAdd }) => {
       align: "center",
       render: (r) => (
         <ActionGroup>
-          <ActionButton type="view" onClick={() => setSelectedRFQ(r)} />
-
-          <ActionMenu
-            onEdit={(e) => handleEdit(r, e as any)}
-            onDelete={(e) => handleDelete(r, e as any)}
-          />
+          <ActionButton type="view" onClick={() => handleView(r)} iconOnly />
+          <ActionButton type="edit" onClick={(e) => handleEdit(r, e as any)} iconOnly />
+          <ActionButton type="delete" onClick={(e) => handleDelete(r, e as any)} iconOnly variant="danger" />
         </ActionGroup>
       ),
     },

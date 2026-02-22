@@ -30,7 +30,6 @@ export const useQuotationForm = (
 ) => {
   const [formData, setFormData] = useState<Invoice>({
     ...DEFAULT_INVOICE_FORM,
-    invoiceType: "Non-Export",
   });
   const companyLoadedRef = useRef(false);
   const [companyData, setCompanyData] = useState<any>(null);
@@ -63,7 +62,6 @@ export const useQuotationForm = (
       ...prev,
       dateOfInvoice: prev.dateOfInvoice || today,
       validUntil: "",
-      invoiceType: "Non-Export",
     }));
 
     setPage(0);

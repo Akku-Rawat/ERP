@@ -43,9 +43,9 @@ export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
           className,
         ].join(" ")}
       >
-        {/* <option value="" disabled>
+        <option value="" disabled>
           {props.placeholder || "Select"}
-        </option> */}
+        </option>
 
         {children ??
           options.map((opt, idx) => (
@@ -166,6 +166,7 @@ ModalTextarea.displayName = "ModalTextarea";
 
 interface FilterSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   options?: SelectOption[];
+  placeholder?: string;
 }
 
 export const FilterSelect = React.forwardRef<
@@ -188,7 +189,9 @@ export const FilterSelect = React.forwardRef<
         className,
       ].join(" ")}
     >
-      <option value="">ALL</option>
+      <option value="">
+        {props.placeholder || "Select"}
+      </option>
 
       {options.map((opt, idx) => (
         <option key={`${opt.value}-${idx}`} value={opt.value}>

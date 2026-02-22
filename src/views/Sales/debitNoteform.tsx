@@ -16,7 +16,6 @@ import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
   currencySymbols,
   paymentMethodOptions,
-  currencyOptions,
 } from "../../constants/invoice.constants";
 import PaymentInfoBlock from "../../components/sales/PaymentInfoBlock";
 import AddressBlock from "../../components/ui/modal/AddressBlock";
@@ -56,7 +55,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
   const [debitMeta, setDebitMeta] = useState({
     debitNoteReasonCode: "",
     invcAdjustReason: "",
-    transactionProgress: "02",
+    transactionProgress: "",
   });
 
   const [invoiceOptions, setInvoiceOptions] = useState<
@@ -278,13 +277,12 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
 
 
                 <div>
-                  <ModalSelect
+                  <ModalInput
                     label="Currency"
                     name="currencyCode"
-                    value={formData.currencyCode}
+                    value={formData.currencyCode || ""}
                     disabled
-                    onChange={actions.handleInputChange}
-                    options={[...currencyOptions]}
+                    placeholder="Select"
                   />
                 </div>
 

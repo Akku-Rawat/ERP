@@ -59,7 +59,6 @@ export const useInvoiceForm = (
 
         setFormData((prev) => ({
           ...prev,
-          invoiceType: prev.invoiceType || (mode === "proforma" ? "Non-Export" : prev.invoiceType),
           terms: {
             selling: company?.terms?.selling ?? EMPTY_TERMS.selling,
           },

@@ -44,11 +44,11 @@ import type { Invoice } from "../types/invoice";
 
 export const DEFAULT_INVOICE_FORM: Invoice = {
   customerId: "",
-  currencyCode: "ZMW",
+  currencyCode: "",
   exchangeRt: "1",
   dateOfInvoice: "",
   dueDate: "",
-  invoiceType: "Non-Export",
+  invoiceType: "",
   destnCountryCd: "",
   lpoNumber: "",
 

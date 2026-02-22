@@ -7,7 +7,6 @@ import Table from "../../components/ui/Table/Table";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import ActionButton, {
   ActionGroup,
-  ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
 import { getPurchaseInvoices } from "../../api/procurement/PurchaseInvoiceApi";
@@ -24,6 +23,16 @@ import { getPurchaseInvoiceById } from "../../api/procurement/PurchaseInvoiceApi
 import {  FilterSelect} from "../../components/ui/modal/modalComponent";
 import DateRangeFilter from "../../components/ui/modal/DateRangeFilter";
 import { PurchaseInvoiceFilters } from "../../api/procurement/PurchaseInvoiceApi";
+import {
+  CheckCircle2,
+  Ban,
+  RotateCcw,
+  ArrowLeftRight,
+  Receipt,
+  Banknote,
+  HandCoins,
+  Send,
+} from "lucide-react";
 interface Purchaseinvoice {
   pId: string;
   supplier: string;
@@ -80,8 +89,6 @@ const invoiceStatusOptions = [
   { label: "Party Paid", value: "Party Paid" },
   { label: "Cancelled", value: "Cancelled" },
 ];
-
-const CRITICAL_STATUSES: PIStatus[] = ["Debit Note Issued", "Cancelled"];
 
 const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
   onAdd,
@@ -270,9 +277,35 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
 
   const handleDelete = (Invoice: Purchaseinvoice, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm(`Delete Purchase Invoice "${Invoice.pId}"?`)) {
-      toast.success("Delete");
-    }
+    toast.dismiss();
+    toast(
+      (t) => (
+        <div className="bg-card border border-[var(--border)] rounded-xl shadow-xl p-4 w-[320px]">
+          <div className="text-sm font-semibold text-main">Delete Purchase Invoice</div>
+          <div className="text-xs text-muted mt-1">Are you sure you want to delete "{Invoice.pId}"?</div>
+          <div className="flex items-center justify-end gap-2 mt-4">
+            <button
+              type="button"
+              onClick={() => toast.dismiss(t.id)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] text-main hover:bg-row-hover"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                toast.dismiss(t.id);
+                toast.success("Delete");
+              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-600"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity },
+    );
   };
 
   const handleCloseModal = () => setModalOpen(false);
@@ -342,19 +375,52 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
         <ActionGroup>
           <ActionButton type="view" onClick={() => handleView(o)} iconOnly />
 
-          <ActionMenu
-            // onEdit={(e) => handleEdit(o, e as any)}
-            onDelete={(e) => handleDelete(o, e as any)}
-            customActions={(STATUS_TRANSITIONS[o.status as PIStatus] ?? []).map(
-              (status) => ({
-                label: `Mark as ${status}`,
-                danger:
-                  status === "Cancelled" || status === "Debit Note Issued",
-
-                onClick: () => handleStatusChange(o.pId, status),
-              }),
-            )}
+          <ActionButton
+            type="edit"
+            onClick={(e) => handleEdit(o, e as any)}
+            iconOnly
           />
+
+          <ActionButton
+            type="delete"
+            onClick={(e) => handleDelete(o, e as any)}
+            iconOnly
+            variant="danger"
+          />
+
+          {(STATUS_TRANSITIONS[o.status as PIStatus] ?? []).map((status) => (
+            <ActionButton
+              key={status}
+              type="custom"
+              label={`Mark as ${status}`}
+              icon={
+                status === "Submitted" ? (
+                  <Send className="w-4 h-4" />
+                ) : status === "Cancelled" ? (
+                  <Ban className="w-4 h-4" />
+                ) : status === "Return" ? (
+                  <RotateCcw className="w-4 h-4" />
+                ) : status === "Internal Transfer" ? (
+                  <ArrowLeftRight className="w-4 h-4" />
+                ) : status === "Paid" ? (
+                  <Banknote className="w-4 h-4" />
+                ) : status === "Party Paid" ? (
+                  <HandCoins className="w-4 h-4" />
+                ) : status === "Debit Note Issued" ? (
+                  <Receipt className="w-4 h-4" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4" />
+                )
+              }
+              variant={
+                status === "Cancelled" || status === "Debit Note Issued"
+                  ? "danger"
+                  : "secondary"
+              }
+              onClick={() => handleStatusChange(o.pId, status)}
+              iconOnly
+            />
+          ))}
         </ActionGroup>
       ),
     },

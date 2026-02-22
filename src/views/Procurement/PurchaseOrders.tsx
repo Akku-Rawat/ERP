@@ -8,7 +8,6 @@ import Table from "../../components/ui/Table/Table";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import ActionButton, {
   ActionGroup,
-  ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 import { FilterSelect } from "../../components/ui/modal/modalComponent";
 import type { Column } from "../../components/ui/Table/type";
@@ -19,6 +18,10 @@ import { saveAs } from "file-saver";
 import { getPurchaseOrderById } from "../../api/procurement/PurchaseOrderApi";
 import type { PurchaseOrderFilters } from "../../api/procurement/PurchaseOrderApi";
 import DateRangeFilter from "../../components/ui/modal/DateRangeFilter";
+import {
+  Ban,
+  CircleCheck,
+} from "lucide-react";
 
 interface PurchaseOrder {
   id: string;
@@ -42,14 +45,12 @@ type POStatus =
 
 
 const STATUS_TRANSITIONS: Record<POStatus, POStatus[]> = {
-  Draft: ["Approved", "Rejected"],
+  Draft: [],
   Approved: ["Cancelled", "Completed"],
   Rejected: [],
   Cancelled: [],
   Completed: [],
 };
-
-const CRITICAL_STATUSES: POStatus[] = ["Completed"];
 
 const statusOptions = [
   { label: "Draft", value: "Draft" },
@@ -168,9 +169,35 @@ const handleView = async (order: PurchaseOrder) => {
 
   const handleDelete = (order: PurchaseOrder, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm(`Delete Purchase Order "${order.id}"?`)) {
-      toast.success("Delete API ready — connect backend later");
-    }
+    toast.dismiss();
+    toast(
+      (t) => (
+        <div className="bg-card border border-[var(--border)] rounded-xl shadow-xl p-4 w-[320px]">
+          <div className="text-sm font-semibold text-main">Delete Purchase Order</div>
+          <div className="text-xs text-muted mt-1">Are you sure you want to delete "{order.id}"?</div>
+          <div className="flex items-center justify-end gap-2 mt-4">
+            <button
+              type="button"
+              onClick={() => toast.dismiss(t.id)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] text-main hover:bg-row-hover"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                toast.dismiss(t.id);
+                toast.success("Delete API ready — connect backend later");
+              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-600"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity },
+    );
   };
 
   const handleCloseModal = () => setModalOpen(false);
@@ -337,17 +364,38 @@ const handleStatusChange = async (
     <ActionGroup>
       <ActionButton type="view" onClick={() => handleView(o)} iconOnly />
 
-<ActionMenu
-  // onEdit={(e) => handleEdit(o, e as any)}
-  onDelete={(e) => handleDelete(o, e as any)}
-  customActions={(
-    STATUS_TRANSITIONS[o.status as POStatus] ?? []
-  ).map((status) => ({
-    label: `Mark as ${status}`,
-    danger: status === "Completed",
-    onClick: () => handleStatusChange(o.id, status),
-  }))}
-/>
+      <ActionButton
+        type="edit"
+        onClick={(e) => handleEdit(o, e as any)}
+        iconOnly
+      />
+
+      <ActionButton
+        type="delete"
+        onClick={(e) => handleDelete(o, e as any)}
+        iconOnly
+        variant="danger"
+      />
+
+      {(STATUS_TRANSITIONS[o.status as POStatus] ?? []).map((status) => (
+        <ActionButton
+          key={status}
+          type="custom"
+          label={`Mark as ${status}`}
+          icon={
+            status === "Cancelled" ? (
+              <Ban className="w-4 h-4" />
+            ) : status === "Completed" ? (
+              <CircleCheck className="w-4 h-4" />
+            ) : (
+              <span className="w-4 h-4" />
+            )
+          }
+          variant={status === "Completed" ? "danger" : "secondary"}
+          onClick={() => handleStatusChange(o.id, status)}
+          iconOnly
+        />
+      ))}
 
     </ActionGroup>
   ),
@@ -361,7 +409,6 @@ const handleStatusChange = async (
       <Table
         columns={columns}
         data={orders}
-        serverSide
         showToolbar
         loading={loading}
         searchValue={searchTerm}
