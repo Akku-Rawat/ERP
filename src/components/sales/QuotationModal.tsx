@@ -46,10 +46,8 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
   } = useQuotationForm(isOpen, onClose, onSubmit);
 
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
-  const showExchangeRate =
-    String(formData.currencyCode ?? "")
-      .trim()
-      .toUpperCase() !== "ZMW";
+  const currencyCode = String(formData.currencyCode ?? "").trim().toUpperCase();
+  const showExchangeRate = !!currencyCode && currencyCode !== "ZMW";
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

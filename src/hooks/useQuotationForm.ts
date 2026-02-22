@@ -102,7 +102,14 @@ export const useQuotationForm = (
     if (!isOpen) return;
 
     const code = String(formData.currencyCode ?? "").trim().toUpperCase();
-    if (!code || code === "ZMW") {
+    if (!code) {
+      setExchangeRateLoading(false);
+      setExchangeRateError(null);
+      setFormData((prev) => ({ ...prev, exchangeRt: "" }));
+      return;
+    }
+
+    if (code === "ZMW") {
       setExchangeRateLoading(false);
       setExchangeRateError(null);
       setFormData((prev) => ({ ...prev, exchangeRt: "1" }));

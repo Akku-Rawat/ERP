@@ -45,7 +45,7 @@ import type { Invoice } from "../types/invoice";
 export const DEFAULT_INVOICE_FORM: Invoice = {
   customerId: "",
   currencyCode: "",
-  exchangeRt: "1",
+  exchangeRt: "",
   dateOfInvoice: "",
   dueDate: "",
   invoiceType: "",
