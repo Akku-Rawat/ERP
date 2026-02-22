@@ -8,7 +8,6 @@ import Table from "../../components/ui/Table/Table";
 import StatusBadge from "../../components/ui/Table/StatusBadge";
 import ActionButton, {
   ActionGroup,
-  ActionMenu,
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
 import type { Supplier } from "../../types/Supply/supplier";
@@ -125,7 +124,9 @@ const SupplierManagement: React.FC<Props> = () => {
 
 
   const handleRowClick = async (supplier: Supplier) => {
-    if (!supplier.supplierId) return;
+    const supplierId =
+      supplier.supplierId ?? (supplier as any)?.id ?? (supplier as any)?.supplier_id;
+    if (!supplierId) return;
 
     try {
       setLoading(true);
@@ -134,11 +135,11 @@ const SupplierManagement: React.FC<Props> = () => {
       await ensureAllSuppliers();
 
       //  Fetch selected supplier detail
-      const res = await getSupplierById(supplier.supplierId);
+      const res = await getSupplierById(supplierId);
       const mapped = mapSupplierApi(res.data || res);
 
-      setSelectedSupplier(mapped);
-      setViewMode("detail");
+      setEditSupplier(mapped);
+      setShowModal(true);
     } catch (err) {
       console.error(err);
       console.error("Failed to load supplier detail");
@@ -159,10 +160,12 @@ const SupplierManagement: React.FC<Props> = () => {
   };
 
   const handleEditSupplier = async (supplier: Supplier) => {
-    if (!supplier.supplierId) return;
+    const supplierId =
+      supplier.supplierId ?? (supplier as any)?.id ?? (supplier as any)?.supplier_id;
+    if (!supplierId) return;
 
     setLoading(true);
-    const res = await getSupplierById(supplier.supplierId);
+    const res = await getSupplierById(supplierId);
     const mapped = mapSupplierApi(res.data || res);
 
     setEditSupplier(mapped);
@@ -232,10 +235,7 @@ const SupplierManagement: React.FC<Props> = () => {
             onClick={() => handleRowClick(s)}
             iconOnly
           />
-
-          <ActionMenu
-            onEdit={(e) => handleEditSupplier(s)}
-          />
+          <ActionButton type="edit" onClick={() => handleEditSupplier(s)} iconOnly />
         </ActionGroup>
       ),
     },
@@ -250,7 +250,7 @@ const SupplierManagement: React.FC<Props> = () => {
           data={suppliers}
           showToolbar
           loading={loading}
-          serverSide
+          onRowClick={handleRowClick}
           onPageSizeChange={(size) => setPageSize(size)}
           pageSizeOptions={[10, 25, 50, 100]}
           searchValue={searchTerm}
