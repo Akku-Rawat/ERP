@@ -53,6 +53,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               name="supplierName"
               value={form.supplierName}
               onChange={onChange}
+              placeholder="e.g. ABC Trading Ltd"
               required
               error={errors.supplierName}
             />
@@ -61,6 +62,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               name="supplierCode"
               value={form.supplierCode}
               onChange={onChange}
+              placeholder="e.g. SUP-001"
             />
             <ModalSelect
               label="Tax Category"
@@ -68,6 +70,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               value={form.taxCategory}
               onChange={onChange}
               options={[...taxCategorySelectOptions]}
+              placeholder="Select tax category"
               required
               error={errors.taxCategory}
             />
@@ -85,6 +88,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               name="contactPerson"
               value={form.contactPerson}
               onChange={onChange}
+              placeholder="e.g. John Banda"
               required
               error={errors.contactPerson}
             />
@@ -94,6 +98,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               value={form.phoneNo}
               onChange={onChange}
               type="tel"
+              placeholder="e.g. 0978123456"
               maxLength={10}
               required
               error={errors.phoneNo}
@@ -105,6 +110,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               value={form.alternateNo}
               onChange={onChange}
               type="tel"
+              placeholder="e.g. 0966123456"
               maxLength={10}
               error={errors.alternateNo}
             />
@@ -115,6 +121,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               value={form.emailId}
               onChange={onChange}
               type="email"
+              placeholder="e.g. accounts@abctrading.com"
               required
               error={errors.emailId}
             />

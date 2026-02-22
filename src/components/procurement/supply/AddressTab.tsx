@@ -59,6 +59,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors =
             name="billingAddressLine1"
             value={form.billingAddressLine1}
             onChange={onChange}
+            placeholder="e.g. Plot 10, Main Street"
             required
             error={errors.billingAddressLine1}
           />
@@ -68,6 +69,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors =
             name="billingAddressLine2"
             value={form.billingAddressLine2}
             onChange={onChange}
+            placeholder="e.g. Suite 2A (optional)"
           />
 
           <SearchSelect
@@ -79,6 +81,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors =
               } as any)
             }
             fetchOptions={fetchTownOptions}
+            placeholder="Type to search..."
             required
             error={errors.billingCity}
           />
@@ -92,6 +95,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors =
               } as any)
             }
             fetchOptions={fetchCountryOptions}
+            placeholder="Type to search..."
             required
             error={errors.billingCountry}
           />
@@ -101,6 +105,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors =
             name="district"
             value={form.district}
             onChange={onChange}
+            placeholder="e.g. Lusaka"
             required
             error={errors.district}
           />
@@ -114,6 +119,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors =
               } as any)
             }
             fetchOptions={fetchProvinceOptions}
+            placeholder="Type to search..."
             required
             error={errors.province}
           />
@@ -123,6 +129,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors =
             name="billingPostalCode"
             value={form.billingPostalCode}
             onChange={onChange}
+            placeholder="e.g. 10101"
             required
             error={errors.billingPostalCode}
           />

@@ -29,6 +29,15 @@ const currencySelectOptions = currencyOptions.map((c) => ({
   label: c,
 }));
 
+const paymentTermsSelectOptions = [
+  { value: "Due on Receipt", label: "Pay immediately (Due on receipt)" },
+  { value: "Net 7", label: "Pay within 7 days (Net 7)" },
+  { value: "Net 14", label: "Pay within 14 days (Net 14)" },
+  { value: "Net 30", label: "Pay within 30 days (Net 30)" },
+  { value: "Net 60", label: "Pay within 60 days (Net 60)" },
+  { value: "Net 90", label: "Pay within 90 days (Net 90)" },
+];
+
 export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
   form,
   onChange,
@@ -47,16 +56,18 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             value={form.currency}
             onChange={onChange}
             options={[...currencySelectOptions]}
+            placeholder="Select currency"
             required
             error={errors.currency}
           />
 
-          <ModalInput
+          <ModalSelect
             label="Payment Terms "
             name="paymentTerms"
-            min={0} // UI block
             value={form.paymentTerms}
             onChange={onChange}
+            options={[...paymentTermsSelectOptions]}
+            placeholder="Select payment terms"
             required
             error={errors.paymentTerms}
           />
@@ -77,6 +88,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             type="number"
             value={form.openingBalance}
             onChange={onChange}
+            placeholder="e.g. 0"
             required
             error={errors.openingBalance}
           />
@@ -95,6 +107,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             name="bankAccount"
             value={form.bankAccount}
             onChange={onChange}
+            placeholder="e.g. Zanaco Bank"
             required
             error={errors.bankAccount}
           />
@@ -104,6 +117,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             name="accountNumber"
             value={form.accountNumber}
             onChange={onChange}
+            placeholder="e.g. 1234567890"
             required
             error={errors.accountNumber}
           />
@@ -113,6 +127,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             name="accountHolder"
             value={form.accountHolder}
             onChange={onChange}
+            placeholder="e.g. John Banda"
             required
             error={errors.accountHolder}
           />
@@ -122,6 +137,7 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             name="sortCode"
             value={form.sortCode}
             onChange={onChange}
+            placeholder="e.g. 111000111"
             required
             error={errors.sortCode}
           />
@@ -131,15 +147,17 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             name="swiftCode"
             value={form.swiftCode}
             onChange={onChange}
+            placeholder="e.g. ZANAZMLU"
             required
             error={errors.swiftCode}
           />
 
           <ModalInput
-            label="Branch Address"
+            label="Branch Name"
             name="branchAddress"
             value={form.branchAddress}
             onChange={onChange}
+            placeholder="e.g. Cairo Road Branch"
             required
             error={errors.branchAddress}
           />
