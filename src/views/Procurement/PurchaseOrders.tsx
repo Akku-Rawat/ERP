@@ -1,64 +1,32 @@
 import React, { useState, useEffect } from "react";
 import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal";
-import toast from "react-hot-toast";
 import PurchaseOrderView from "../../views/Procurement/purchaseorderview";
 
 // Shared UI Table Components
 import Table from "../../components/ui/Table/Table";
-import StatusBadge from "../../components/ui/Table/StatusBadge";
 import ActionButton, {
   ActionGroup,
 } from "../../components/ui/Table/ActionButton";
-import { FilterSelect } from "../../components/ui/modal/modalComponent";
 import type { Column } from "../../components/ui/Table/type";
 import { showApiError,showSuccess ,showLoading,closeSwal } from "../../utils/alert";
-import { getPurchaseOrders ,updatePurchaseOrderStatus } from "../../api/procurement/PurchaseOrderApi";
+import { getPurchaseOrders } from "../../api/procurement/PurchaseOrderApi";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { getPurchaseOrderById } from "../../api/procurement/PurchaseOrderApi";
 import type { PurchaseOrderFilters } from "../../api/procurement/PurchaseOrderApi";
 import DateRangeFilter from "../../components/ui/modal/DateRangeFilter";
-import {
-  Ban,
-  CircleCheck,
-} from "lucide-react";
 
 interface PurchaseOrder {
   id: string;
   supplier: string;
   date: string;
   amount: number;
-  status: string;
   deliveryDate: string;
 }
 
 interface PurchaseOrdersTableProps {
   onAdd?: () => void;
 }
-
-type POStatus =
-  | "Draft"
-  | "Approved"
-  | "Rejected"
-  | "Cancelled"
-  | "Completed";
-
-
-const STATUS_TRANSITIONS: Record<POStatus, POStatus[]> = {
-  Draft: [],
-  Approved: ["Cancelled", "Completed"],
-  Rejected: [],
-  Cancelled: [],
-  Completed: [],
-};
-
-const statusOptions = [
-  { label: "Draft", value: "Draft" },
-  { label: "Approved", value: "Approved" },
-  { label: "Rejected", value: "Rejected" },
-  { label: "Cancelled", value: "Cancelled" },
-  { label: "Completed", value: "Completed" },
-];
 
 const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({ onAdd }) => {
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
@@ -110,7 +78,6 @@ const fetchOrders = async () => {
       date: po.poDate,
       deliveryDate: po.deliveryDate,
       amount: po.grandTotal,
-      status: po.status,
     }));
 
     setOrders(mappedOrders);
@@ -167,39 +134,6 @@ const handleView = async (order: PurchaseOrder) => {
     setModalOpen(true);
   };
 
-  const handleDelete = (order: PurchaseOrder, e: React.MouseEvent) => {
-    e.stopPropagation();
-    toast.dismiss();
-    toast(
-      (t) => (
-        <div className="bg-card border border-[var(--border)] rounded-xl shadow-xl p-4 w-[320px]">
-          <div className="text-sm font-semibold text-main">Delete Purchase Order</div>
-          <div className="text-xs text-muted mt-1">Are you sure you want to delete "{order.id}"?</div>
-          <div className="flex items-center justify-end gap-2 mt-4">
-            <button
-              type="button"
-              onClick={() => toast.dismiss(t.id)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] text-main hover:bg-row-hover"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                toast.dismiss(t.id);
-                toast.success("Delete API ready — connect backend later");
-              }}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-600"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      ),
-      { duration: Infinity },
-    );
-  };
-
   const handleCloseModal = () => setModalOpen(false);
   const handlePOSaved = async () => {
   await fetchOrders();   //  Refresh table
@@ -222,7 +156,6 @@ const fetchAllPOsForExport = async () => {
           date: po.poDate,
           deliveryDate: po.deliveryDate,
           amount: po.grandTotal,
-          status: po.status,
         }));
 
         allData = [...allData, ...mapped];
@@ -257,7 +190,6 @@ const handleExportExcel = async () => {
       Date: po.date,
       "Delivery Date": po.deliveryDate,
       Amount: po.amount,
-      Status: po.status,
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(formattedData);
@@ -291,45 +223,6 @@ const handleExportExcel = async () => {
 
 
 
-const handleStatusChange = async (
-  poId: string,
-  newStatus: POStatus,
-) => {
-  try {
-    const res = await updatePurchaseOrderStatus(
-      poId,
-      newStatus
-    );
-
- 
-    if (!res || res.status_code !== 200) {
-      showApiError(res);
-      return;
-    }
-
- 
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === poId
-          ? { ...o, status: res.data?.status || newStatus }
-          : o,
-      ),
-    );
-
-  
-    showSuccess(
-      res.message ||
-        `Purchase Order marked as ${newStatus}`,
-    );
-
-  } catch (error: any) {
-    showApiError(error);
-  }
-};
-
-
-
-
   //  TABLE COLUMNS 
   const columns: Column<PurchaseOrder>[] = [
     { key: "id", header: "PO ID", align: "left" },
@@ -347,13 +240,6 @@ const handleStatusChange = async (
       ),
     },
 
-    {
-      key: "status",
-      header: "Status",
-      align: "left",
-      render: (o) => <StatusBadge status={o.status} />,
-    },
-
     { key: "deliveryDate", header: "Delivery Date", align: "left" },
 
     {
@@ -369,33 +255,6 @@ const handleStatusChange = async (
         onClick={(e) => handleEdit(o, e as any)}
         iconOnly
       />
-
-      <ActionButton
-        type="delete"
-        onClick={(e) => handleDelete(o, e as any)}
-        iconOnly
-        variant="danger"
-      />
-
-      {(STATUS_TRANSITIONS[o.status as POStatus] ?? []).map((status) => (
-        <ActionButton
-          key={status}
-          type="custom"
-          label={`Mark as ${status}`}
-          icon={
-            status === "Cancelled" ? (
-              <Ban className="w-4 h-4" />
-            ) : status === "Completed" ? (
-              <CircleCheck className="w-4 h-4" />
-            ) : (
-              <span className="w-4 h-4" />
-            )
-          }
-          variant={status === "Completed" ? "danger" : "secondary"}
-          onClick={() => handleStatusChange(o.id, status)}
-          iconOnly
-        />
-      ))}
 
     </ActionGroup>
   ),
@@ -428,18 +287,6 @@ const handleStatusChange = async (
               pageSizeOptions={[10, 25, 50, 100]}
      extraFilters={
   <>
-    <FilterSelect
-      value={filters.status}
-      options={statusOptions}
-      onChange={(e) => {
-        setFilters((prev) => ({
-          ...prev,
-          status: e.target.value || undefined,
-        }));
-        setPage(1);
-      }}
-    />
-
     <DateRangeFilter
       from={filters.from_date}
       to={filters.to_date}

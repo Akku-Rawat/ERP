@@ -102,25 +102,6 @@ export const DetailsTab = ({
             />
           </div>
 
-          {/* Status */}
-          <div>
-            <ModalSelect
-              label="Status"
-              name="status"
-              value={form.status}
-              onChange={onFormChange}
-              options={[
-                { value: "Draft", label: "Draft" },
-                { value: "Return", label: "Return" },
-                { value: "Submitted", label: "Submitted" },
-                { value: "Paid", label: "Paid" },
-                { value: "Cancelled", label: "Cancelled" },
-                { value: "Internal Transfer", label: "Internal Transfer" },
-                { value: "Debit Note Issued", label: "Debit Note Issued" },
-                { value: "Party Paid", label: "Party Paid" },
-              ]}
-            />
-          </div>
           <div>
             <ModalSelect
               label="Cost Center"

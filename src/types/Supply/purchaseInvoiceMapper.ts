@@ -21,7 +21,7 @@ export const mapUIToCreatePI = (form: PurchaseInvoiceFormData) => {
   });
 
 
-  const items = validItems.map((it, idx) => {
+  const items = validItems.map((it, _idx) => {
     // Force number conversion
     const quantity = Number(it.quantity);
     const rate = Number(it.rate);
@@ -70,7 +70,6 @@ const payload: any = {
   requiredBy: form.requiredBy,
   supplierId: form.supplierId,
   currency: form.currency,
-  status: form.status,
 
   taxCategory: "Non-Export",   
 

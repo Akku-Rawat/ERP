@@ -19,7 +19,7 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
   });
 
 
-  const items = validItems.map((it, idx) => {
+  const items = validItems.map((it, _idx) => {
     // Force number conversion
     const quantity = Number(it.quantity);
     const rate = Number(it.rate);
@@ -66,7 +66,6 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     requiredBy: form.requiredBy,
     supplierId: form.supplierId,
     currency: form.currency,
-    status: form.status,
     taxCategory: "Non-Export",
     
     // Optional fields

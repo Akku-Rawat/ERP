@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from "react";
-import toast from "react-hot-toast";
 import PurchaseInvoiceView from "../../views/Procurement/PurchaseInvoiceView";
 import PurchaseInvoiceModal from "../../components/procurement/PurchaseInvoiceModal";
 // Shared UI Table Components
 import Table from "../../components/ui/Table/Table";
-import StatusBadge from "../../components/ui/Table/StatusBadge";
 import ActionButton, {
   ActionGroup,
 } from "../../components/ui/Table/ActionButton";
 import type { Column } from "../../components/ui/Table/type";
 import { getPurchaseInvoices } from "../../api/procurement/PurchaseInvoiceApi";
-import { updatePurchaseinvoiceStatus } from "../../api/procurement/PurchaseInvoiceApi";
 import {
   showApiError,
   showSuccess,
@@ -20,25 +17,13 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { getPurchaseInvoiceById } from "../../api/procurement/PurchaseInvoiceApi";
-import {  FilterSelect} from "../../components/ui/modal/modalComponent";
 import DateRangeFilter from "../../components/ui/modal/DateRangeFilter";
 import { PurchaseInvoiceFilters } from "../../api/procurement/PurchaseInvoiceApi";
-import {
-  CheckCircle2,
-  Ban,
-  RotateCcw,
-  ArrowLeftRight,
-  Receipt,
-  Banknote,
-  HandCoins,
-  Send,
-} from "lucide-react";
 interface Purchaseinvoice {
   pId: string;
   supplier: string;
   podate: string;
   amount: number;
-  status: string;
   deliveryDate: string;
   registrationType: string;
 }
@@ -46,49 +31,6 @@ interface Purchaseinvoice {
 interface PurchaseinvoicesTableProps {
   onAdd?: () => void;
 }
-
-export type PIStatus =
-  | "Draft"
-  | "Return"
-  | "Submitted"
-  | "Paid"
-  | "Party Paid"
-  | "Cancelled"
-  | "Internal Transfer"
-  | "Debit Note Issued";
-
-const STATUS_TRANSITIONS: Record<PIStatus, PIStatus[]> = {
-  Draft: [
-    "Submitted",
-    "Cancelled",
-    "Paid",
-    "Party Paid",
-    "Internal Transfer",
-    "Debit Note Issued",
-    "Return",
-  ],
-  Submitted: ["Paid", "Party Paid", "Cancelled", "Return"],
-
-  Paid: ["Debit Note Issued", "Return"],
-
-  "Party Paid": ["Paid", "Debit Note Issued"],
-
-  Return: ["Debit Note Issued"],
-
-  "Debit Note Issued": [],
-
-  "Internal Transfer": [],
-
-  Cancelled: [],
-};
-
-const invoiceStatusOptions = [
-  { label: "Draft", value: "Draft" },
-  { label: "Submitted", value: "Submitted" },
-  { label: "Paid", value: "Paid" },
-  { label: "Party Paid", value: "Party Paid" },
-  { label: "Cancelled", value: "Cancelled" },
-];
 
 const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
   onAdd,
@@ -143,7 +85,6 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
       podate: pi.poDate,
       deliveryDate: pi.deliveryDate,
       amount: pi.grandTotal,
-      status: pi.status,
       registrationType: pi.registrationType,
     }));
 
@@ -205,7 +146,6 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
             podate: pi.poDate,
             deliveryDate: pi.deliveryDate,
             amount: pi.grandTotal,
-            status: pi.status,
             registrationType: pi.registrationType,
           }));
 
@@ -242,7 +182,6 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
         "Delivery Date": pi.deliveryDate,
         "Registration Type": pi.registrationType,
         Amount: pi.amount,
-        Status: pi.status,
       }));
 
       const worksheet = XLSX.utils.json_to_sheet(formattedData);
@@ -275,66 +214,10 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
     setModalOpen(true);
   };
 
-  const handleDelete = (Invoice: Purchaseinvoice, e: React.MouseEvent) => {
-    e.stopPropagation();
-    toast.dismiss();
-    toast(
-      (t) => (
-        <div className="bg-card border border-[var(--border)] rounded-xl shadow-xl p-4 w-[320px]">
-          <div className="text-sm font-semibold text-main">Delete Purchase Invoice</div>
-          <div className="text-xs text-muted mt-1">Are you sure you want to delete "{Invoice.pId}"?</div>
-          <div className="flex items-center justify-end gap-2 mt-4">
-            <button
-              type="button"
-              onClick={() => toast.dismiss(t.id)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] text-main hover:bg-row-hover"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                toast.dismiss(t.id);
-                toast.success("Delete");
-              }}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-600"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      ),
-      { duration: Infinity },
-    );
-  };
-
   const handleCloseModal = () => setModalOpen(false);
 
   const handlePISaved = async () => {
     await fetchInvoice();
-  };
-
-  const handleStatusChange = async (pId: string, newStatus: PIStatus) => {
-    try {
-      const res = await updatePurchaseinvoiceStatus(pId, newStatus);
-
-      if (!res || res.status_code !== 200) {
-        showApiError({
-          message: "Failed to update Purchase Invoice status",
-        });
-
-        return;
-      }
-
-      // OPTIMISTIC UPDATE
-      setOrders((prev) =>
-        prev.map((o) => (o.pId === pId ? { ...o, status: newStatus } : o)),
-      );
-
-      showSuccess(`Purchase Invoice marked as ${newStatus}`);
-    } catch (err) {
-      toast.error("Failed to update Purchase Invoice status");
-    }
   };
 
   //  TABLE COLUMNS
@@ -358,13 +241,6 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
       ),
     },
 
-    {
-      key: "status",
-      header: "Status",
-      align: "left",
-      render: (o) => <StatusBadge status={o.status} />,
-    },
-
     { key: "deliveryDate", header: "Delivery Date", align: "left" },
 
     {
@@ -380,47 +256,6 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
             onClick={(e) => handleEdit(o, e as any)}
             iconOnly
           />
-
-          <ActionButton
-            type="delete"
-            onClick={(e) => handleDelete(o, e as any)}
-            iconOnly
-            variant="danger"
-          />
-
-          {(STATUS_TRANSITIONS[o.status as PIStatus] ?? []).map((status) => (
-            <ActionButton
-              key={status}
-              type="custom"
-              label={`Mark as ${status}`}
-              icon={
-                status === "Submitted" ? (
-                  <Send className="w-4 h-4" />
-                ) : status === "Cancelled" ? (
-                  <Ban className="w-4 h-4" />
-                ) : status === "Return" ? (
-                  <RotateCcw className="w-4 h-4" />
-                ) : status === "Internal Transfer" ? (
-                  <ArrowLeftRight className="w-4 h-4" />
-                ) : status === "Paid" ? (
-                  <Banknote className="w-4 h-4" />
-                ) : status === "Party Paid" ? (
-                  <HandCoins className="w-4 h-4" />
-                ) : status === "Debit Note Issued" ? (
-                  <Receipt className="w-4 h-4" />
-                ) : (
-                  <CheckCircle2 className="w-4 h-4" />
-                )
-              }
-              variant={
-                status === "Cancelled" || status === "Debit Note Issued"
-                  ? "danger"
-                  : "secondary"
-              }
-              onClick={() => handleStatusChange(o.pId, status)}
-              iconOnly
-            />
-          ))}
         </ActionGroup>
       ),
     },
@@ -450,18 +285,6 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = ({
         pageSizeOptions={[10, 25, 50, 100]}
   extraFilters={
   <>
-    <FilterSelect
-      value={filters.status}
-      options={invoiceStatusOptions}
-      onChange={(e) => {
-        setFilters((prev) => ({
-          ...prev,
-          status: e.target.value || undefined,
-        }));
-        setPage(1);
-      }}
-    />
-
     <DateRangeFilter
       from={filters.from_date}
       to={filters.to_date}
