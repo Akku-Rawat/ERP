@@ -5,6 +5,7 @@ import { FileText, ExternalLink } from "lucide-react";
 import Modal from "../../components/ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
 import { getSalesInvoiceById } from "../../api/salesApi";
+import { getPaymentMethodLabel } from "../../constants/invoice.constants";
 
 type Address = {
   line1?: string;
@@ -362,11 +363,18 @@ const InvoiceDetailsModal: React.FC<Props> = ({
               <SectionTitle title="Payment Information" />
               <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Field label="Payment Terms" value={data.paymentInformation?.paymentTerms ?? "—"} />
-                <Field label="Payment Method" value={data.paymentInformation?.paymentMethod ?? "—"} />
+                <Field
+                  label="Payment Method"
+                  value={
+                    data.paymentInformation?.paymentMethod
+                      ? getPaymentMethodLabel(String(data.paymentInformation.paymentMethod))
+                      : "—"
+                  }
+                />
                 <Field label="Bank Name" value={data.paymentInformation?.bankName ?? "—"} />
                 <Field label="Account Number" value={data.paymentInformation?.accountNumber ?? "—"} />
-                <Field label="Routing Number" value={data.paymentInformation?.routingNumber ?? "—"} />
-                <Field label="SWIFT Code" value={data.paymentInformation?.swiftCode ?? "—"} />
+                <Field label="Routing Number / IBAN" value={data.paymentInformation?.routingNumber ?? "—"} />
+                <Field label="SWIFT / BIC" value={data.paymentInformation?.swiftCode ?? "—"} />
               </div>
 
               {!!paymentPhases.length && (
