@@ -16,6 +16,7 @@ import { showSuccess } from "../../utils/alert";
 import { User, Mail, Phone } from "lucide-react";
 import AddressBlock from "../ui/modal/AddressBlock";
 import PaymentInfoBlock from "./PaymentInfoBlock";
+import React, { useState } from "react";
 import {
   currencySymbols,
   paymentMethodOptions,
@@ -35,6 +36,8 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const {
     formData,
     customerDetails,
@@ -51,7 +54,12 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await actions.handleSubmit(e);
+    try {
+      setIsSubmitting(true);
+      await actions.handleSubmit(e);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePrint = () => {
@@ -60,15 +68,25 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
 
   const footerContent = (
     <>
-      <Button variant="secondary" onClick={onClose} type="button">
+      <Button variant="secondary" onClick={onClose} type="button" disabled={isSubmitting}>
         Cancel
       </Button>
       <div className="flex gap-2">
-        <Button variant="ghost" onClick={actions.handleReset} type="button">
+        <Button
+          variant="ghost"
+          onClick={actions.handleReset}
+          type="button"
+          disabled={isSubmitting}
+        >
           Reset
         </Button>
-        <Button variant="primary" type="submit" onClick={handleFormSubmit}>
-          Submit
+        <Button
+          variant="primary"
+          type="submit"
+          onClick={handleFormSubmit}
+          loading={isSubmitting}
+        >
+          {isSubmitting ? "Submitting..." : "Submit"}
         </Button>
       </div>
     </>

@@ -29,6 +29,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
   onClose,
   onSubmit,
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     formData,
     customerDetails,
@@ -43,6 +44,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
     e.preventDefault();
 
     try {
+      setIsSubmitting(true);
       const payload = await actions.handleSubmit(e);
       if (!payload) return;
 
@@ -60,10 +62,13 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
       onClose();
     } catch (error: any) {
       showApiError(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleClose = () => {
+    if (isSubmitting) return;
     actions.handleReset();
     onClose();
   };
@@ -109,16 +114,25 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
       subtitle="Create and manage proforma invoice details"
       footer={
         <>
-          <Button variant="secondary" onClick={handleClose}>
+          <Button variant="secondary" onClick={handleClose} disabled={isSubmitting}>
             Cancel
           </Button>
 
           <div className="flex gap-2">
-            <Button variant="ghost" onClick={actions.handleReset}>
+            <Button
+              variant="ghost"
+              onClick={actions.handleReset}
+              disabled={isSubmitting}
+            >
               Reset
             </Button>
-            <Button variant="primary" type="submit" form="proforma-form">
-              Submit
+            <Button
+              variant="primary"
+              type="submit"
+              form="proforma-form"
+              loading={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           </div>
         </>

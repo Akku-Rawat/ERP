@@ -25,6 +25,8 @@ import AddressBlock from "../../components/ui/modal/AddressBlock";
 interface DebitNoteFormProps {
   onSubmit?: (data: any) => void;
   invoiceId: string;
+  saving: boolean;
+  setSaving: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const DEBIT_NOTE_REASONS = [
   { value: "01", label: "Wrong quantity invoiced" },
@@ -43,11 +45,12 @@ const TRANSACTION_PROGRESS = [
 const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
   onSubmit,
   invoiceId,
+  saving,
+  setSaving,
 }) => {
   const {
     formData,
     customerDetails,
-    customerNameDisplay,
     paginatedItems,
     totals,
     ui,
@@ -73,6 +76,16 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
       return [];
     }
   };
+
+  useEffect(() => {
+    if (!invoiceId) return;
+    if (String(formData.invoiceNumber ?? "").trim()) return;
+
+    actions.handleInputChange({
+      target: { name: "invoiceNumber", value: invoiceId },
+    } as any);
+  }, [invoiceId, formData.invoiceNumber, actions]);
+
   useEffect(() => {
     if (!formData.invoiceNumber) return;
 
@@ -106,6 +119,8 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
   };
 
   const handleCreateDebitNote = async () => {
+    if (saving) return;
+
     try {
       // Invoice validation
       if (!formData.invoiceNumber) {
@@ -143,6 +158,8 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
           price: Number(it.price),
         })),
       };
+
+      setSaving(true);
       const res = await createDebitNoteFromInvoice(payload);
 
       if (!res || ![200, 201].includes(res.status_code)) {
@@ -162,6 +179,8 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
 
       //  Backend error message
       showApiError(err);
+    } finally {
+      setSaving(false);
     }
   };
 

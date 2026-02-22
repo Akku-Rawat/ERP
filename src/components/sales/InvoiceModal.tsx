@@ -67,8 +67,6 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     }
   };
 
-  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
-
   const footerContent = (
     <>
       <Button variant="secondary" onClick={onClose} type="button" disabled={submitting}>
@@ -87,7 +85,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
           variant="primary"
           type="submit"
           onClick={handleFormSubmit}
-          disabled={submitting}
+          loading={submitting}
         >
           {submitting ? "Submitting..." : "Submit"}
         </Button>

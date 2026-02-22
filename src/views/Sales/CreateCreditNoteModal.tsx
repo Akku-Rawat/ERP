@@ -21,7 +21,7 @@ const CreateCreditNoteModal: React.FC<Props> = ({
 
   const footerContent = (
     <>
-      <Button variant="secondary" onClick={onClose} type="button">
+      <Button variant="secondary" onClick={onClose} type="button" disabled={saving}>
         Cancel
       </Button>
 
@@ -29,7 +29,7 @@ const CreateCreditNoteModal: React.FC<Props> = ({
         variant="primary"
         type="submit"
         form="credit-note-form"
-        disabled={saving}
+        loading={saving}
       >
         {saving ? "Saving..." : "Create Credit Note"}
       </Button>

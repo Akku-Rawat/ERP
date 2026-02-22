@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Modal from "../../components/ui/modal/modal";
 import DebitNoteForm from "./debitNoteform";
 import { FileMinus } from "lucide-react";
@@ -19,9 +19,11 @@ const CreateDebitNoteModal: React.FC<Props> = ({
   onSubmit,
   invoiceId,
 }) => {
+  const [saving, setSaving] = useState(false);
+
   const footerContent = (
   <>
-    <Button variant="secondary" onClick={onClose} type="button">
+    <Button variant="secondary" onClick={onClose} type="button" disabled={saving}>
       Cancel
     </Button>
 
@@ -29,8 +31,9 @@ const CreateDebitNoteModal: React.FC<Props> = ({
       variant="primary"
       type="submit"
       form="debit-note-form"
+      loading={saving}
     >
-      Create Debit Note
+      {saving ? "Saving..." : "Create Debit Note"}
     </Button>
   </>
 );
@@ -46,7 +49,12 @@ const CreateDebitNoteModal: React.FC<Props> = ({
       maxWidth="wide"
       height="84vh"
     >
-      <DebitNoteForm onSubmit={onSubmit} invoiceId={invoiceId} />
+      <DebitNoteForm
+        onSubmit={onSubmit}
+        invoiceId={invoiceId}
+        saving={saving}
+        setSaving={setSaving}
+      />
     </Modal>
   );
 };
