@@ -40,11 +40,18 @@ const ViewStockModal: React.FC<ViewStockModalProps> = ({
   };
 
   const stockEntryTypeMap: Record<string, string> = {
-    "01": "Opening Stock",
-    "02": "Goods Receipt",
-    "03": "Goods Issue",
-    "04": "Material Transfer",
-    "05": "Stock Adjustment",
+    "01": "Import",
+    "02": "Purchase",
+    "03": "Return",
+    "04": "Stock Movement",
+    "05": "Processing",
+    "06": "Adjustment",
+    "11": "Sale",
+    "12": "Return",
+    "13": "Stock Movement",
+    "14": "Processing",
+    "15": "Discarding",
+    "16": "Adjustment",
   };
 
   return (

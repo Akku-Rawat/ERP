@@ -32,6 +32,21 @@ import type { Column } from "../../components/ui/Table/type";
 
 import type { ItemSummary, Item } from "../../types/item";
 
+const stockEntryTypeLabel: Record<string, string> = {
+  "01": "Import",
+  "02": "Purchase",
+  "03": "Return",
+  "04": "Stock Movement",
+  "05": "Processing",
+  "06": "Adjustment",
+  "11": "Sale",
+  "12": "Return",
+  "13": "Stock Movement",
+  "14": "Processing",
+  "15": "Discarding",
+  "16": "Adjustment",
+};
+
 const Items: React.FC = () => {
   const [items, setItems] = useState<ItemSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -205,7 +220,12 @@ const Items: React.FC = () => {
     },
     { key: "orgSarNo", header: "orgSarNo", align: "left" },
     { key: "registrationType", header: "Registration Type", align: "left" },
-    { key: "stockEntryType", header: "Stock Entry Type", align: "left" },
+    {
+      key: "stockEntryType",
+      header: "Stock Entry Type",
+      align: "left",
+      render: (i) => stockEntryTypeLabel[String(i.stockEntryType ?? "")] || i.stockEntryType,
+    },
     {
       key: "totalTaxableAmount",
       header: "Total Taxable Amount",
