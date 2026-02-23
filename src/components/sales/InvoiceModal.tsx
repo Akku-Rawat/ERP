@@ -290,7 +290,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     </h3>
                   </div>
 
-                  <div className="mt-2 overflow-x-hidden">
+                  <div className="mt-2 overflow-x-auto hide-scrollbar">
                     <table className="w-full border-collapse table-fixed text-[10px]">
                       <thead>
                         <tr className="border-b border-theme">
@@ -451,6 +451,11 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       </tbody>
                     </table>
                   </div>
+
+                  <style>{`
+                    .hide-scrollbar::-webkit-scrollbar { display:none }
+                    .hide-scrollbar { scrollbar-width:none; -ms-overflow-style:none }
+                  `}</style>
 
                   <div className="flex justify-between mt-3">
                     <button

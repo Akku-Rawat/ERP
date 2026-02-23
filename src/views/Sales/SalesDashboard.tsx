@@ -11,6 +11,8 @@ import {
   PieChart,
   Pie,
   Cell,
+  Bar,
+  BarChart,
 } from "recharts";
 
 import {
@@ -118,6 +120,42 @@ const SalesDashboard: React.FC = () => {
     },
     [recentSalesRows],
   );
+
+  const recentSalesHistogramData = useMemo(() => {
+    const values = recentSalesChartData
+      .map((r) => Number(r.total ?? 0))
+      .filter((n) => Number.isFinite(n) && n >= 0);
+
+    if (!values.length) return [];
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    if (min === max) {
+      const label = `${currencyZMWCompact.format(min)} - ${currencyZMWCompact.format(max)}`;
+      return [{ range: label, count: values.length }];
+    }
+
+    const BIN_COUNT = 8;
+    const width = (max - min) / BIN_COUNT;
+    const bins = Array.from({ length: BIN_COUNT }, (_, i) => {
+      const start = min + i * width;
+      const end = i === BIN_COUNT - 1 ? max : min + (i + 1) * width;
+      return { start, end, count: 0 };
+    });
+
+    for (const v of values) {
+      const idx = Math.min(
+        BIN_COUNT - 1,
+        Math.max(0, Math.floor((v - min) / width)),
+      );
+      bins[idx].count += 1;
+    }
+
+    return bins.map((b) => ({
+      range: `${currencyZMWCompact.format(b.start)} - ${currencyZMWCompact.format(b.end)}`,
+      count: b.count,
+    }));
+  }, [recentSalesChartData, currencyZMWCompact]);
 
   const customerSharePieData = useMemo(() => {
     const base = topCustomersChartData;
@@ -347,12 +385,17 @@ const SalesDashboard: React.FC = () => {
             </div>
             <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
               {chartsLoading ? (
-                <ChartSkeleton variant="pie" />
+                <ChartSkeleton variant="bar" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                  <BarChart
+                    data={recentSalesHistogramData}
+                    margin={{ top: 16, right: 18, left: 6, bottom: 8 }}
+                    barCategoryGap={0}
+                    barGap={0}
+                  >
                     <Tooltip
-                      formatter={(v: any) => currencyZMW.format(Number(v ?? 0))}
+                      formatter={(v: any) => Number(v ?? 0)}
                       contentStyle={{
                         background: "var(--card)",
                         border: "1px solid var(--border)",
@@ -362,31 +405,19 @@ const SalesDashboard: React.FC = () => {
                       }}
                       itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
                     />
-                    <Legend
-                      wrapperStyle={{ fontSize: 12 }}
-                      layout="horizontal"
-                      verticalAlign="bottom"
-                      align="center"
-                      iconType="square"
-                      height={36}
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis
+                      dataKey="range"
+                      tick={{ fontSize: 10 }}
+                      interval={0}
+                      angle={-15}
+                      textAnchor="end"
+                      height={60}
                     />
-                    <Pie
-                      data={recentSalesChartData}
-                      dataKey="total"
-                      nameKey="name"
-                      cx="50%"
-                      cy="45%"
-                      innerRadius={55}
-                      outerRadius={82}
-                      paddingAngle={2}
-                      label={false}
-                      labelLine={false}
-                    >
-                      {recentSalesChartData.map((_, idx) => (
-                        <Cell key={idx} fill={pieColors[idx % pieColors.length]} />
-                      ))}
-                    </Pie>
-                  </PieChart>
+                    <YAxis tick={{ fontSize: 12 }} width={42} allowDecimals={false} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Bar dataKey="count" name="Invoices" fill="#10b981" radius={[2, 2, 0, 0]} />
+                  </BarChart>
                 </ResponsiveContainer>
               )}
             </div>

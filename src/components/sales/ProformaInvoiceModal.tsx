@@ -330,7 +330,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                       Invoiced Items
                     </h3>
                   </div>
-                  <div className="mt-2 overflow-x-hidden">
+                  <div className="mt-2 overflow-x-auto hide-scrollbar">
                     <table className="w-full border-collapse table-fixed text-[10px]">
                       <thead>
                         <tr className="border-b border-theme">
@@ -471,6 +471,11 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                       </tbody>
                     </table>
                   </div>
+
+                  <style>{`
+                    .hide-scrollbar::-webkit-scrollbar { display:none }
+                    .hide-scrollbar { scrollbar-width:none; -ms-overflow-style:none }
+                  `}</style>
 
                   {/* ---------- ADD ITEM + SUBTOTAL ---------- */}
                   <div className="flex justify-between mt-3">
