@@ -78,17 +78,28 @@ export default function ItemGenericSelect({
   //   if (item.itemClsNm) return item.itemClsNm;
   //   return getId(item);
   // };
-  const getId = (item: any): string => {
-    return item.code ?? item.itemClsCd ?? String(item);
-  };
+ const getId = (item: any): string => {
+  return (
+    item.code ??
+    item.itemClsCd ??
+    item.name ??     
+    String(item)
+  );
+};
 
   const getCodeForDisplay = (item: any): string => {
     return item.code ?? item.itemClsCd ?? "";
   };
 
-  const getNameForDisplay = (item: any): string => {
-    return item.name ?? item.code_name ?? item.itemClsNm ?? "";
-  };
+ const getNameForDisplay = (item: any): string => {
+  return (
+    item.country_name ??  
+    item.name ??
+    item.code_name ??
+    item.itemClsNm ??
+    ""
+  );
+};
 
   const getDisplayName = (item: any): string => {
     if (displayFormatter) {

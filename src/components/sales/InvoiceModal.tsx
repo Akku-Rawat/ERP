@@ -45,9 +45,9 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     actions,
   } = useInvoiceForm(isOpen, onClose, onSubmit);
 
-  const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
+  const symbol = currencySymbols[formData.currencyCode] ?? "₹";
   const showExchangeRate =
-    String(formData.currencyCode ?? "").trim().toUpperCase() !== "ZMW";
+    String(formData.currencyCode ?? "").trim().toUpperCase() !== "INR";
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

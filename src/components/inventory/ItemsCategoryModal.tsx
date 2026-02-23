@@ -5,7 +5,7 @@ import {
 } from "../../api/itemCategoryApi";
 import { getUOMs } from "../../api/itemZraApi";
 import { showApiError } from "../../utils/alert";
-
+import { getRolaUOMs } from "../../api/itemZraApi";
 import ItemGenericSelect from "../selects/ItemGenericSelect";
 import Modal from "../ui/modal/modal";
 import { Button } from "../ui/modal/formComponent";
@@ -17,7 +17,7 @@ const emptyForm: Record<string, any> = {
   description: "",
   salesAccount: "",
   customSellingPrice: "",
-  unitOfMeasurement: "",
+  unitOfMeasureCd: "",
   itemType: "",
 };
 const itemTypeOptions = [
@@ -210,15 +210,18 @@ const ItemsCategoryModal: React.FC<{
                           setForm(p => ({ ...p, unitOfMeasurement: id }));
                         }}
                       /> */}
-                  <ItemGenericSelect
-                    label="Unit of Measure"
-                    value={form.unitOfMeasurement}
-                    fetchData={getUOMs}
-                    variant="modal"
-                    onChange={({ id }) =>
-                      setForm((p) => ({ ...p, unitOfMeasurement: id }))
-                    }
-                  />
+    <ItemGenericSelect
+  label="Unit of Measure"
+  value={form.unitOfMeasureCd}
+  fetchData={getRolaUOMs}   // ✅ change here
+  variant="modal"
+  onChange={(item) =>
+    setForm((p) => ({
+      ...p,
+      unitOfMeasureCd: item.code || item.id,
+    }))
+  }
+/>
                 </div>
               </div>
             </>

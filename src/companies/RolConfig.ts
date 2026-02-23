@@ -1,6 +1,6 @@
 import type { FieldConfig } from '../types/fieldConfig.types';
 
-// COMP-00004 Configuration - Uses TEXT INPUTS (no API calls)
+
 export const COMP_00004_ITEM_FIELDS: FieldConfig[] = [
   // Item Type - Static dropdown
   {
@@ -64,13 +64,15 @@ export const COMP_00004_ITEM_FIELDS: FieldConfig[] = [
   },
 
   // Country Code - TEXT INPUT (no API)
-  {
-    fieldName: 'originNationCode',
-    fieldType: 'text-input',
-    label: 'Country Code',
-    colSpan: 1,
-    placeholder: 'e.g., US, UK, IN',
-  },
+{
+  fieldName: 'originNationCode',
+  fieldType: 'api-select',
+  label: 'Country Code',
+  required: true,
+  colSpan: 1,
+  apiFunctionName: 'getRolaCountries',  
+  customComponent: 'ItemGenericSelect',
+},
 
   // Unit of Measure - TEXT INPUT (no API)
     {
