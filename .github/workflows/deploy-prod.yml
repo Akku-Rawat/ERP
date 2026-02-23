@@ -1,4 +1,4 @@
-name: Deploy ERP Frontend To VPS
+name: Deploy PROD ERP Frontend To VPS
 
 on:
   push:
