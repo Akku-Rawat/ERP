@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 type EmploymentTabProps = {
   formData: any;
@@ -21,11 +21,71 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
     formData.employeeType === "Contract" ||
     formData.employeeType === "Temporary" ||
     formData.employeeType === "Intern";
+
   useEffect(() => {
     if (!isContractBased && formData.contractEndDate) {
       handleInputChange("contractEndDate", "");
     }
   }, [formData.employeeType]);
+
+  const initRows = (raw: string): string[] => {
+    if (!raw) return [""];
+    const parts = raw.split("\n");
+    return parts.length > 0 ? parts : [""];
+  };
+
+  const [addressRows, setAddressRows] = useState<string[]>(() =>
+    initRows(formData.workAddress ?? "")
+  );
+  const [locationRows, setLocationRows] = useState<string[]>(() =>
+    initRows(formData.workLocation ?? "")
+  );
+
+  const rowCount = Math.max(addressRows.length, locationRows.length);
+
+  // sync to formData whenever rows change
+  const syncAddress = (rows: string[]) => {
+    handleInputChange("workAddress", rows.join("\n"));
+  };
+  const syncLocation = (rows: string[]) => {
+    handleInputChange("workLocation", rows.join("\n"));
+  };
+
+  const handleAddressChange = (index: number, value: string) => {
+    const updated = [...addressRows];
+    updated[index] = value;
+    setAddressRows(updated);
+    syncAddress(updated);
+  };
+
+  const handleLocationChange = (index: number, value: string) => {
+    const updated = [...locationRows];
+    updated[index] = value;
+    setLocationRows(updated);
+    syncLocation(updated);
+  };
+
+  const addRow = () => {
+    const newAddr = [...addressRows, ""];
+    const newLoc = [...locationRows, ""];
+    setAddressRows(newAddr);
+    setLocationRows(newLoc);
+    syncAddress(newAddr);
+    syncLocation(newLoc);
+  };
+
+  const removeRow = (index: number) => {
+    const newAddr = addressRows.filter((_, i) => i !== index);
+    const newLoc = locationRows.filter((_, i) => i !== index);
+    const safeAddr = newAddr.length ? newAddr : [""];
+    const safeLoc = newLoc.length ? newLoc : [""];
+    setAddressRows(safeAddr);
+    setLocationRows(safeLoc);
+    syncAddress(safeAddr);
+    syncLocation(safeLoc);
+  };
+
+
   return (
     <div className="w-full max-w-5xl mx-auto space-y-5">
       <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
@@ -33,19 +93,6 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
           Employment Details
         </h4>
         <div className="grid grid-cols-2 gap-4">
-          {/* <div>
-            <label className="block text-xs text-main mb-1 font-medium">
-              Employee ID
-            </label>
-            <input
-              type="text"
-              value={formData.employeeId}
-              onChange={(e) => handleInputChange("employeeId", e.target.value)}
-              disabled
-              className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg focus:outline-none focus:outline-none focus:border-primary  focus:ring-primary/20"
-            />
-          </div> */}
-
           <div>
             <label className="block text-xs text-main mb-1 font-medium">
               Department * <span className="text-danger">*</span>
@@ -97,7 +144,6 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
             <label className="block text-xs text-main mb-1 font-medium">
               Reporting Manager <span className="text-danger">*</span>
             </label>
-
             <select
               value={formData.reportingManager}
               onChange={(e) =>
@@ -107,10 +153,11 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
    focus:outline-none focus:border-primary  focus:ring-primary/20"
             >
               <option value="">Select Reporting Manager</option>
-
               {managers.map((mgr) => (
-  <option value={mgr.employeeId}>{mgr.name}</option>
-))}
+                <option key={mgr.employeeId} value={mgr.employeeId}>
+                  {mgr.name}
+                </option>
+              ))}
             </select>
           </div>
           <div>
@@ -124,10 +171,11 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
       focus:outline-none focus:border-primary  focus:ring-primary/20"
             >
               <option value="">Select HR Manager</option>
-
               {hrManagers.map((mgr) => (
-  <option value={mgr.employeeId}>{mgr.name}</option>
-))}
+                <option key={mgr.employeeId} value={mgr.employeeId}>
+                  {mgr.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -184,7 +232,6 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               Contract End Date
               {isContractBased && <span className="text-danger"> *</span>}
             </label>
-
             <input
               type="date"
               value={formData.contractEndDate}
@@ -214,32 +261,74 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg focus:outline-none focus:border-primary  focus:ring-primary/20"
             />
           </div>
-          <div>
-            <label className="block text-xs text-main mb-1 font-medium">
-              Work Address
-            </label>
-            <input
-              type="text"
-              value={formData.workAddress}
-              onChange={(e) => handleInputChange("workAddress", e.target.value)}
-              placeholder="Office Address"
-              className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg  focus:outline-none focus:border-primary  focus:ring-primary/20"
-            />
+
+          {/* ── Work Address & Work Location — paired side-by-side rows ── */}
+          <div className="col-span-2 space-y-2">
+
+            {/* Column headers */}
+            <div className="grid grid-cols-2 gap-4 px-7">
+              <label className="block text-xs text-main font-medium">
+                Work Address
+              </label>
+              <label className="block text-xs text-main font-medium">
+                Work Location
+              </label>
+            </div>
+
+            {/* Paired rows */}
+            {Array.from({ length: rowCount }).map((_, index) => (
+              <div key={index} className="flex items-center gap-2">
+                {/* Row number */}
+                <span className="text-xs text-muted w-5 shrink-0 text-right">
+                  {index + 1}.
+                </span>
+
+                {/* Address input */}
+                <input
+                  type="text"
+                  value={addressRows[index] ?? ""}
+                  onChange={(e) => handleAddressChange(index, e.target.value)}
+                  placeholder="Office Address"
+                  className="flex-1 px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:border-primary focus:ring-primary/20"
+                />
+
+                {/* Location input */}
+                <input
+                  type="text"
+                  value={locationRows[index] ?? ""}
+                  onChange={(e) => handleLocationChange(index, e.target.value)}
+                  placeholder="Office Location"
+                  className="flex-1 px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:border-primary focus:ring-primary/20"
+                />
+
+                {/* Remove row button */}
+                {rowCount > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => removeRow(index)}
+                    className="shrink-0 text-danger hover:opacity-75 text-lg leading-none w-5"
+                    title="Remove row"
+                  >
+                    &times;
+                  </button>
+                ) : (
+                  <span className="w-5 shrink-0" />
+                )}
+              </div>
+            ))}
+
+            {/* Add More button */}
+            <div className="flex justify-center pt-1">
+              <button
+                type="button"
+                onClick={addRow}
+                className="text-xs text-primary border border-primary/40 hover:bg-primary/10 px-4 py-1.5 rounded-md transition-colors"
+              >
+                + Add More
+              </button>
+            </div>
           </div>
-          <div>
-            <label className="block text-xs text-main mb-1 font-medium">
-              Work Location
-            </label>
-            <input
-              type="text"
-              value={formData.workLocation}
-              onChange={(e) =>
-                handleInputChange("workLocation", e.target.value)
-              }
-              placeholder="Office location"
-              className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg  focus:outline-none focus:border-primary  focus:ring-primary/20"
-            />
-          </div>
+
         </div>
       </div>
     </div>
