@@ -1,14 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Bar,
-  BarChart,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   Legend,
-  LabelList,
   Line,
   LineChart,
   PieChart,
@@ -21,7 +18,6 @@ import {
   FileText,
   FileSignature,
   Receipt,
-  ScrollText,
 } from "lucide-react";
 
 import { getSalesDashboardSummary } from "../../api/salesDashboardApi";
@@ -65,17 +61,6 @@ const SalesDashboard: React.FC = () => {
         notation: "compact",
         compactDisplay: "short",
         maximumFractionDigits: 1,
-      }),
-    [],
-  );
-
-  const dateWithDay = useMemo(
-    () =>
-      new Intl.DateTimeFormat("en-US", {
-        weekday: "long",
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
       }),
     [],
   );
@@ -264,7 +249,7 @@ const SalesDashboard: React.FC = () => {
               {
                 label: "Quotations",
                 value: String(summaryData?.totalQuotations ?? 0),
-                icon: ScrollText,
+                icon: Receipt,
                 gradient: "from-amber-500 to-amber-600",
               },
               {
@@ -362,41 +347,12 @@ const SalesDashboard: React.FC = () => {
             </div>
             <div className="h-72 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
               {chartsLoading ? (
-                <ChartSkeleton variant="bar" />
+                <ChartSkeleton variant="pie" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={recentSalesChartData} margin={{ top: 16, right: 18, left: 6, bottom: 8 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fontSize: 11 }}
-                      interval={0}
-                      angle={-15}
-                      textAnchor="end"
-                      height={54}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 12 }}
-                      width={52}
-                    />
+                  <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                     <Tooltip
                       formatter={(v: any) => currencyZMW.format(Number(v ?? 0))}
-                      labelFormatter={(
-                        _label: any,
-                        payload: readonly { payload?: { name?: string; customer?: string; posting_date?: string } }[],
-                      ) => {
-                        const p = payload?.[0]?.payload;
-                        const labelParts: string[] = [];
-                        if (p?.name) labelParts.push(p.name);
-                        if (p?.customer) labelParts.push(p.customer);
-                        if (p?.posting_date) {
-                          const d = new Date(p.posting_date);
-                          if (!Number.isNaN(d.getTime())) {
-                            labelParts.push(dateWithDay.format(d));
-                          }
-                        }
-                        return labelParts.join(" • ");
-                      }}
                       contentStyle={{
                         background: "var(--card)",
                         border: "1px solid var(--border)",
@@ -405,19 +361,32 @@ const SalesDashboard: React.FC = () => {
                         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                       }}
                       itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
-                      cursor={{ fill: "var(--primary)", opacity: 0.1 }}
                     />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="total" fill="#10b981" radius={[6, 6, 0, 0]} name="Sales">
-                      <LabelList
-                        dataKey="total"
-                        position="top"
-                        formatter={(v: any) => currencyZMWCompact.format(Number(v ?? 0))}
-                        fill="#6b7280"
-                        fontSize={10}
-                      />
-                    </Bar>
-                  </BarChart>
+                    <Legend
+                      wrapperStyle={{ fontSize: 12 }}
+                      layout="horizontal"
+                      verticalAlign="bottom"
+                      align="center"
+                      iconType="square"
+                      height={36}
+                    />
+                    <Pie
+                      data={recentSalesChartData}
+                      dataKey="total"
+                      nameKey="name"
+                      cx="50%"
+                      cy="45%"
+                      innerRadius={55}
+                      outerRadius={82}
+                      paddingAngle={2}
+                      label={false}
+                      labelLine={false}
+                    >
+                      {recentSalesChartData.map((_, idx) => (
+                        <Cell key={idx} fill={pieColors[idx % pieColors.length]} />
+                      ))}
+                    </Pie>
+                  </PieChart>
                 </ResponsiveContainer>
               )}
             </div>
