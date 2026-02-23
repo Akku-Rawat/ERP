@@ -315,7 +315,7 @@ const handleStatusChange = async (
       align: "right",
       render: (o) => (
           <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
-    ZMW {Number(o.amount || 0).toFixed(2)}
+    INR {Number(o.amount || 0).toFixed(2)}
   </code>
       ),
     },
