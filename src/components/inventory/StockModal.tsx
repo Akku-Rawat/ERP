@@ -142,6 +142,8 @@ const ItemModal: React.FC<{
     e.preventDefault();
 
     try {
+      if (loading) return;
+
       if (!form.id) {
         showApiError("Please select an item");
         return;
@@ -172,6 +174,8 @@ const ItemModal: React.FC<{
 
       showLoading("Creating Stock Entry...");
 
+      setLoading(true);
+
       await createItemStock(payload);
 
       closeSwal();
@@ -182,6 +186,8 @@ const ItemModal: React.FC<{
     } catch (error: any) {
       closeSwal();
       showApiError(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -211,18 +217,18 @@ const ItemModal: React.FC<{
       onClose={handleClose}
       title={isEditMode ? "Edit Stock Entry" : "Add Stock Entry"}
       subtitle="Create and manage stock entry details"
-      maxWidth="6xl"
-      height="90vh"
+      maxWidth="4xl"
+      height="70vh"
     >
       <form onSubmit={handleSubmit} className="h-full flex flex-col">
         {/* Tabs */}
-        <div className="flex border-b bg-gray-50">
+        <div className="flex bg-gray-50">
           <button
             type="button"
             onClick={() => setActiveTab("details")}
             className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
               activeTab === "details"
-                ? "text-indigo-600 border-b-2 border-indigo-600 bg-white"
+                ? "text-indigo-600 bg-white"
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
@@ -231,25 +237,36 @@ const ItemModal: React.FC<{
         </div>
 
         {/* Tab Content */}
-        <section className="flex-1 overflow-y-auto p-4 space-y-6">
-          <div className="gap-6 max-h-screen overflow-auto p-4">
+        <section className="flex-1 overflow-y-auto p-3 space-y-4">
+          <div className="max-h-screen overflow-auto p-3">
             {activeTab === "details" && (
               <>
-                <h3 className="mb-4 text-lg font-semibold text-gray-700 underline">
-                  Stock Information
-                </h3>
-                <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
+                <div className="bg-card border border-theme rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="text-xs font-bold text-main uppercase tracking-wide">
+                        Stock Information
+                      </div>
+                      <div className="text-xs text-muted mt-1">
+                        Select an item and enter quantity and price
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="flex flex-col gap-1 text-sm col-span-1">
                       <SearchSelect
                         label="Select Item"
                         value={form.itemName}
+                        placeholder="Type to search items..."
                         required
                         fetchOptions={async (q: string) => {
+                          const query = (q || "").toLowerCase();
                           return itemOptions
                             .filter((item) =>
-                              item.label.toLowerCase().includes(q.toLowerCase())
+                              item.label.toLowerCase().includes(query)
                             )
+                            .slice(0, 50)
                             .map((item) => ({
                               label: item.label,
                               value: item.id,
@@ -275,6 +292,7 @@ const ItemModal: React.FC<{
                       name="itemClassCode"
                       value={form.itemClassCode || ""}
                       onChange={handleForm}
+                      placeholder="Auto-filled after selecting item"
                       className="w-full"
                       readOnly
                     />
@@ -284,7 +302,8 @@ const ItemModal: React.FC<{
                       name="itemName"
                       value={form.itemName || ""}
                       onChange={handleForm}
-                      className="w-full col-span-2"
+                      placeholder="Auto-filled after selecting item"
+                      className="w-full"
                       readOnly
                     />
 
@@ -295,7 +314,7 @@ const ItemModal: React.FC<{
                       step="1"
                       value={form.quantity || ""}
                       onChange={handleForm}
-                      placeholder="Enter Item quantity"
+                      placeholder="e.g. 10"
                       className="w-full"
                       required
                     />
@@ -307,7 +326,7 @@ const ItemModal: React.FC<{
                       step="0.01"
                       value={form.rate || ""}
                       onChange={handleForm}
-                      placeholder="Enter Item price"
+                      placeholder="e.g. 25.00"
                       className="w-full"
                       required
                     />
@@ -318,12 +337,22 @@ const ItemModal: React.FC<{
           </div>
         </section>
         {/* FOOTER INSIDE FORM */}
-        <div className="flex justify-end gap-2 border-t px-6 py-4">
-          <Button variant="secondary" type="button" onClick={handleClose}>
+        <div className="flex justify-end gap-2 px-6 py-4">
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={handleClose}
+            disabled={loading}
+          >
             Cancel
           </Button>
 
-          <Button variant="ghost" type="button" onClick={reset}>
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={reset}
+            disabled={loading}
+          >
             Reset
           </Button>
 
