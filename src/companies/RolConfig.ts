@@ -10,7 +10,7 @@ export const COMP_00004_ITEM_FIELDS: FieldConfig[] = [
     required: true,
     colSpan: 1,
     options: [
-      { value: '', label: 'select type' },
+      
       { value: '1', label: 'Raw Material' },
       { value: '2', label: 'Finished Product' },
       { value: '3', label: 'Service' },

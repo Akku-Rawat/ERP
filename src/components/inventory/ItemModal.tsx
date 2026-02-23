@@ -16,6 +16,7 @@ import { useCompanySelection } from "../../hooks/useCompanySelection";
 import { getItemFieldConfigs } from "../../config/companyConfigResolver";
 import { DynamicField } from "../DynamicField";
 import { API } from "../../config/api";
+import { getTaxConfigs } from "../../taxconfig/taxConfigResolver";
 
 type FormState = Record<string, any>;
 
@@ -64,29 +65,7 @@ const itemTypeCodeOptions = [
   { value: "3", label: "Service" },
 ];
 
-const TAX_CONFIGS = {
-  "Non-Export": {
-    taxType: "Standard Rated",
-    taxPerct: "16",
-    taxCode: "A",
-    taxDescription:
-      "Applies to products and services subject to VAT at 16% by default.",
-  },
-  LPO: {
-    taxType: "Zero-Rated",
-    taxPerct: "0",
-    taxCode: "C2",
-    taxDescription:
-      "Applies to transactions involving customers or projects granted exemption from paying taxes.",
-  },
-  Export: {
-    taxType: "Export",
-    taxPerct: "0",
-    taxCode: "C1",
-    taxDescription:
-      "Applies to goods or services exported outside the country and exempt from VAT.",
-  },
-};
+
 
 const ItemModal: React.FC<{
   isOpen: boolean;
@@ -104,7 +83,7 @@ const ItemModal: React.FC<{
   const isServiceItem = Number(form.itemTypeCode) === 3;
   const { companyCode } = useCompanySelection();
   const fieldConfigs = getItemFieldConfigs(companyCode);
-
+const taxConfigs = getTaxConfigs(companyCode);
   const [activeTab, setActiveTab] = useState<
     "details" | "taxDetails" | "inventoryDetails"
   >("details");
@@ -443,20 +422,36 @@ const ItemModal: React.FC<{
     const { name, value } = e.target;
 
     // Auto-populate tax details when tax category changes
-    if (name === "taxCategory") {
-      const taxConfig = TAX_CONFIGS[value as keyof typeof TAX_CONFIGS];
-      if (taxConfig) {
-        setForm((prev) => ({
-          ...prev,
-          [name]: value,
-          taxType: taxConfig.taxType,
-          taxPerct: taxConfig.taxPerct,
-          taxCode: taxConfig.taxCode,
-          taxDescription: taxConfig.taxDescription,
-        }));
-        return;
-      }
-    }
+if (name === "taxCategory") {
+  const taxConfig = taxConfigs[value];
+
+  if (!taxConfig) {
+    // If user selects empty option → clear tax fields
+    setForm((prev) => ({
+      ...prev,
+      taxCategory: "",
+      taxType: "",
+      taxPerct: "",
+      taxCode: "",
+      taxDescription: "",
+      taxName: "",
+    }));
+    return;
+  }
+
+  // Auto populate everything
+  setForm((prev) => ({
+    ...prev,
+    taxCategory: value,
+    taxType: taxConfig.taxType,
+    taxPerct: taxConfig.taxPerct,
+    taxCode: taxConfig.taxCode,
+    taxDescription: taxConfig.taxDescription,
+    taxName: value, // or use taxConfig.taxCode if you prefer
+  }));
+
+  return;
+}
 
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -663,36 +658,32 @@ const ItemModal: React.FC<{
                     Tax Category
                   </label>
                   <select
-                    name="taxCategory"
-                    value={form.taxCategory}
-                    onChange={handleForm}
-                    className="w-full md:w-96 px-4 py-3 text-base border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                  >
-                    <option value="">Select...</option>
-                    <option value="Non-Export">Non-Export</option>
-                    <option value="Export">Export</option>
-                    <option value="LPO">Local Purchase Order</option>
-                  </select>
+  name="taxCategory"
+  value={form.taxCategory}
+  onChange={handleForm}
+  className="w-full md:w-96 px-4 py-3 text-base border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+>
+  <option value="">Select...</option>
 
+  {Object.keys(taxConfigs).map((key) => (
+    <option key={key} value={key}>
+      {key}
+    </option>
+  ))}
+</select>
                   <p className="mt-2 text-sm text-muted">
-                    {form.taxCategory === "Non-Export" &&
-                      "Standard tax rates for domestic sales"}
-                    {form.taxCategory === "Export" &&
-                      "Zero-rated or exempt tax for international sales"}
-                    {form.taxCategory === "LPO" &&
-                      "Tax rates applicable to local purchases"}
-                  </p>
+  {form.taxCategory &&
+    taxConfigs[form.taxCategory]?.taxDescription}
+</p>
                 </div>
 
                 {/* Dynamic Tax Form based on selected category */}
                 <div className="bg-app rounded-lg p-6 border border-theme">
                   <h3 className="text-lg font-semibold text-main mb-4 flex items-center gap-2">
                     <span className="w-2 h-2 bg-primary rounded-full"></span>
-                    {form.taxCategory === "Non-Export" &&
-                      "Non-Export Tax Details"}
-                    {form.taxCategory === "Export" && "Export Tax Details"}
-                    {form.taxCategory === "LPO" &&
-                      "Local Purchase Order Tax Details"}
+                    {form.taxCategory
+  ? `${form.taxCategory} Tax Details`
+  : "Tax Details"}
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -765,9 +756,7 @@ const ItemModal: React.FC<{
                   <div className="text-sm text-muted space-y-1">
                     <p>
                       <span className="font-medium">Category:</span>{" "}
-                      {form.taxCategory === "Non-Export" && "Non-Export"}
-                      {form.taxCategory === "Export" && "Export"}
-                      {form.taxCategory === "LPO" && "Local Purchase Order"}
+                      {form.taxCategory || "N/A"}
                     </p>
                     <p>
                       <span className="font-medium">Tax Type:</span>{" "}
