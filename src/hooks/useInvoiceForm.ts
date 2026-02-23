@@ -434,7 +434,7 @@ const countryCode = getCountryCode(
         const hasApiPrice = Number.isFinite(apiSellingPrice) && apiSellingPrice > 0;
         const convertedPrice = (() => {
           if (!hasApiPrice) return Number(items[index].price);
-          if (currency !== "ZMW" && Number.isFinite(rate) && rate > 0) {
+          if (currency !== "INR" && Number.isFinite(rate) && rate > 0) {
             return apiSellingPrice / rate;
           }
           return apiSellingPrice;

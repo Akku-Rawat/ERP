@@ -159,7 +159,7 @@ const confirmDelete = async () => {
       align: "right",
       render: (g) => (
         <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
-          ZMW {g.sellingPrice}
+          INR {g.sellingPrice}
         </code>
       ),
     },

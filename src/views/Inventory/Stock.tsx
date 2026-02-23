@@ -212,7 +212,7 @@ const Items: React.FC = () => {
       align: "right",
       render: (i) => (
         <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
-          ZMW {Number(i.totalTaxableAmount || 0).toLocaleString()}
+          INR {Number(i.totalTaxableAmount || 0).toLocaleString()}
         </code>
       ),
     },
