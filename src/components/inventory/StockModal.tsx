@@ -20,8 +20,7 @@ import { createItemStock } from "../../api/stockApi";
 import { getStockById, getAllStockItems } from "../../api/stockItemApi";
 import Modal from "../ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
-import Select from "../../components/ui/Select";
-
+import SearchSelect from "../ui/modal/SearchSelect";
 import { getAllItems } from "../../api/itemApi";
 
 type FormState = Record<string, any>;
@@ -242,15 +241,23 @@ const ItemModal: React.FC<{
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
                     <div className="flex flex-col gap-1 text-sm col-span-1">
-                       <Select
+                      <SearchSelect
                         label="Select Item"
-                        name="id"
-                        value={form.id}
-                        onChange={(e) => {
-                          const selectedId = e.target.value;
-
+                        value={form.itemName}
+                        required
+                        fetchOptions={async (q: string) => {
+                          return itemOptions
+                            .filter((item) =>
+                              item.label.toLowerCase().includes(q.toLowerCase())
+                            )
+                            .map((item) => ({
+                              label: item.label,
+                              value: item.id,
+                            }));
+                        }}
+                        onChange={(selectedId: string) => {
                           const selectedItem = itemOptions.find(
-                            (item) => item.id === selectedId,
+                            (item) => item.id === selectedId
                           );
 
                           setForm((prev) => ({
@@ -260,10 +267,6 @@ const ItemModal: React.FC<{
                             itemClassCode: selectedItem?.itemClassCode || "",
                           }));
                         }}
-                        options={[
-                          { value: "", label: "Select an item" },
-                          ...itemOptions,
-                        ]}
                       />
                     </div>
 
