@@ -1,14 +1,7 @@
-/* eslint-disable unused-imports/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-misused-promises */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React, { useState, useEffect, useCallback } from "react";
 import { showApiError, showLoading, closeSwal } from "../../utils/alert";
 import { toast } from "sonner";
 import { updateItemByItemCode, createItem } from "../../api/itemApi";
-
 import { getItemGroupById } from "../../api/itemCategoryApi";
 import Modal from "../ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
@@ -17,7 +10,7 @@ import { getItemFieldConfigs } from "../../config/companyConfigResolver";
 import { DynamicField } from "../DynamicField";
 import { API } from "../../config/api";
 import { getTaxConfigs } from "../../taxconfig/taxConfigResolver";
-
+import { getRolaPackagingUnitCodes } from "../../api/lookupApi";
 type FormState = Record<string, any>;
 
 const emptyForm: Record<string, any> = {
@@ -83,11 +76,12 @@ const ItemModal: React.FC<{
   const isServiceItem = Number(form.itemTypeCode) === 3;
   const { companyCode } = useCompanySelection();
   const fieldConfigs = getItemFieldConfigs(companyCode);
-const taxConfigs = getTaxConfigs(companyCode);
+  const taxConfigs = getTaxConfigs(companyCode);
   const [activeTab, setActiveTab] = useState<
     "details" | "taxDetails" | "inventoryDetails"
   >("details");
-
+  const [packagingOptions, setPackagingOptions] = useState<any[]>([]);
+  const [loadingPackaging, setLoadingPackaging] = useState(false);
   // Cascading item class dropdown states
   const [itemClassOptions, setItemClassOptions] = useState<
     Array<{ cd: string; cdNm: string; lvl: string }>
@@ -186,6 +180,27 @@ const taxConfigs = getTaxConfigs(companyCode);
     }
   }, []);
 
+
+ const fetchPackagingUnits = async () => {
+  try {
+    setLoadingPackaging(true);
+    const data = await getRolaPackagingUnitCodes();
+    setPackagingOptions(data);
+  } catch (err) {
+    console.error("Packaging API error:", err);
+    setPackagingOptions([]);
+  } finally {
+    setLoadingPackaging(false);
+  }
+};
+
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    fetchPackagingUnits();
+  }, [isOpen]);
+
   // Helper function to get codes by level and parent
   const getCodesByLevel = (level: string, parentCode?: string) => {
     return itemClassOptions.filter((option) => {
@@ -243,10 +258,10 @@ const taxConfigs = getTaxConfigs(companyCode);
 
   // Validate Item Details section
   const validateItemDetails = () => {
-   if (!form.itemClassCode || String(form.itemClassCode).trim() === "") {
-  toast.error("Item Class Code is required.");
-  return false;
-}
+    if (!form.itemClassCode || String(form.itemClassCode).trim() === "") {
+      toast.error("Item Class Code is required.");
+      return false;
+    }
 
     // Then validate other required Item Details and Sales & Purchase fields
     const requiredFields = [
@@ -422,36 +437,36 @@ const taxConfigs = getTaxConfigs(companyCode);
     const { name, value } = e.target;
 
     // Auto-populate tax details when tax category changes
-if (name === "taxCategory") {
-  const taxConfig = taxConfigs[value];
+    if (name === "taxCategory") {
+      const taxConfig = taxConfigs[value];
 
-  if (!taxConfig) {
-    // If user selects empty option → clear tax fields
-    setForm((prev) => ({
-      ...prev,
-      taxCategory: "",
-      taxType: "",
-      taxPerct: "",
-      taxCode: "",
-      taxDescription: "",
-      taxName: "",
-    }));
-    return;
-  }
+      if (!taxConfig) {
+        // If user selects empty option → clear tax fields
+        setForm((prev) => ({
+          ...prev,
+          taxCategory: "",
+          taxType: "",
+          taxPerct: "",
+          taxCode: "",
+          taxDescription: "",
+          taxName: "",
+        }));
+        return;
+      }
 
-  // Auto populate everything
-  setForm((prev) => ({
-    ...prev,
-    taxCategory: value,
-    taxType: taxConfig.taxType,
-    taxPerct: taxConfig.taxPerct,
-    taxCode: taxConfig.taxCode,
-    taxDescription: taxConfig.taxDescription,
-    taxName: value, // or use taxConfig.taxCode if you prefer
-  }));
+      // Auto populate everything
+      setForm((prev) => ({
+        ...prev,
+        taxCategory: value,
+        taxType: taxConfig.taxType,
+        taxPerct: taxConfig.taxPerct,
+        taxCode: taxConfig.taxCode,
+        taxDescription: taxConfig.taxDescription,
+        taxName: value, // or use taxConfig.taxCode if you prefer
+      }));
 
-  return;
-}
+      return;
+    }
 
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -501,22 +516,20 @@ if (name === "taxCategory") {
             <button
               type="button"
               onClick={() => setActiveTab("details")}
-              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
-                activeTab === "details"
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === "details"
                   ? "text-primary border-b-[3px] border-primary"
                   : "text-muted border-b-[3px] border-transparent hover:text-main"
-              }`}
+                }`}
             >
               Item Details
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("taxDetails")}
-              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
-                activeTab === "taxDetails"
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === "taxDetails"
                   ? "text-primary border-b-[3px] border-primary"
                   : "text-muted border-b-[3px] border-transparent hover:text-main"
-              }`}
+                }`}
             >
               Tax Details
             </button>
@@ -525,11 +538,10 @@ if (name === "taxCategory") {
               disabled={isServiceItem}
               onClick={() => !isServiceItem && setActiveTab("inventoryDetails")}
               className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2
-    ${
-      activeTab === "inventoryDetails" && !isServiceItem
-        ? "text-primary border-b-[3px] border-primary"
-        : "text-muted border-b-[3px] border-transparent hover:text-main"
-    }
+    ${activeTab === "inventoryDetails" && !isServiceItem
+                  ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
+                }
     ${isServiceItem ? "opacity-50 cursor-not-allowed" : ""}
   `}
             >
@@ -549,20 +561,54 @@ if (name === "taxCategory") {
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {fieldConfigs.map((fieldConfig) => {
+
+                      if (fieldConfig.fieldName === "packagingUnitCode") {
+                        return (
+                          <label
+                            key="packagingUnitCode"
+                            className="flex flex-col gap-1 text-sm"
+                          >
+                            <span className="font-medium text-muted">
+                              Packaging Unit <span className="text-red-500 ml-1">*</span>
+                            </span>
+
+                            <select
+                              value={form.packagingUnitCode || ""}
+                              onChange={(e) =>
+                                setForm((prev) => ({
+                                  ...prev,
+                                  packagingUnitCode: e.target.value,
+                                }))
+                              }
+                              className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            >
+                              <option value="">
+                                {loadingPackaging ? "Loading..." : "Select..."}
+                              </option>
+
+                              {packagingOptions.map((item: any) => (
+                                <option key={item.code} value={item.code}>
+                                  {item.code} - {item.code_name}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        );
+                      }
                       // Special rendering for itemClassCode - use cascading dropdowns
-                     if (fieldConfig.fieldName === "itemClassCode") {
-  return (
-    <Input
-      key="itemClassCode"
-      label="Item Class Code"
-      name="itemClassCode"
-      value={form.itemClassCode || ""}
-      onChange={handleForm}
-      required
-      className="w-full"
-    />
-  );
-}
+                      if (fieldConfig.fieldName === "itemClassCode") {
+                        return (
+                          <Input
+                            key="itemClassCode"
+                            label="Item Class Code"
+                            name="itemClassCode"
+                            value={form.itemClassCode || ""}
+                            onChange={handleForm}
+                            required
+                            className="w-full"
+                          />
+                        );
+                      }
                       // Regular DynamicField for other fields
                       return (
                         <DynamicField
@@ -658,23 +704,23 @@ if (name === "taxCategory") {
                     Tax Category
                   </label>
                   <select
-  name="taxCategory"
-  value={form.taxCategory}
-  onChange={handleForm}
-  className="w-full md:w-96 px-4 py-3 text-base border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
->
-  <option value="">Select...</option>
+                    name="taxCategory"
+                    value={form.taxCategory}
+                    onChange={handleForm}
+                    className="w-full md:w-96 px-4 py-3 text-base border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  >
+                    <option value="">Select...</option>
 
-  {Object.keys(taxConfigs).map((key) => (
-    <option key={key} value={key}>
-      {key}
-    </option>
-  ))}
-</select>
+                    {Object.keys(taxConfigs).map((key) => (
+                      <option key={key} value={key}>
+                        {key}
+                      </option>
+                    ))}
+                  </select>
                   <p className="mt-2 text-sm text-muted">
-  {form.taxCategory &&
-    taxConfigs[form.taxCategory]?.taxDescription}
-</p>
+                    {form.taxCategory &&
+                      taxConfigs[form.taxCategory]?.taxDescription}
+                  </p>
                 </div>
 
                 {/* Dynamic Tax Form based on selected category */}
@@ -682,8 +728,8 @@ if (name === "taxCategory") {
                   <h3 className="text-lg font-semibold text-main mb-4 flex items-center gap-2">
                     <span className="w-2 h-2 bg-primary rounded-full"></span>
                     {form.taxCategory
-  ? `${form.taxCategory} Tax Details`
-  : "Tax Details"}
+                      ? `${form.taxCategory} Tax Details`
+                      : "Tax Details"}
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -994,9 +1040,8 @@ const Input = React.forwardRef<
     <input
       ref={ref}
       className={`rounded border border-theme px-3 py-2 bg-card text-main 
-focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
-        props.disabled ? "bg-app text-muted cursor-not-allowed" : ""
-      } ${className}`}
+focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${props.disabled ? "bg-app text-muted cursor-not-allowed" : ""
+        } ${className}`}
       {...props}
     />
   </label>
