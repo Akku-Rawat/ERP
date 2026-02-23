@@ -283,7 +283,7 @@ export const API = {
   rolaLookup: {
     getUnitOfMeasure: `${ERP_BASE}/api/resource/UOM`,
     getItemClasses: `${ERP_BASE}/api/item-class-list/`,
-    getCountries: `${ERP_BASE}/api/resource/Country?fields=["name","country_name"]&limit_page_length=300`,
+    getCountries: `${ERP_BASE}/api/resource/Country?fields=["name","country_name","code"]&limit_page_length=300`,
     getPackagingUnits : `${ERP_BASE}/api/method/erpnext.packaging_unit.get_all_packaging_units`
   },
 } as const;
