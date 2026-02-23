@@ -17,7 +17,7 @@ const emptyForm: Record<string, any> = {
   description: "",
   salesAccount: "",
   customSellingPrice: "",
-  unitOfMeasureCd: "",
+  unitOfMeasurement: "",
   itemType: "",
 };
 const itemTypeOptions = [
@@ -210,15 +210,15 @@ const ItemsCategoryModal: React.FC<{
                           setForm(p => ({ ...p, unitOfMeasurement: id }));
                         }}
                       /> */}
-    <ItemGenericSelect
+  <ItemGenericSelect
   label="Unit of Measure"
-  value={form.unitOfMeasureCd}
-  fetchData={getRolaUOMs}   // ✅ change here
+  value={form.unitOfMeasurement}
+  fetchData={getRolaUOMs}
   variant="modal"
   onChange={(item) =>
     setForm((p) => ({
       ...p,
-      unitOfMeasureCd: item.code || item.id,
+      unitOfMeasurement: item.id,
     }))
   }
 />
