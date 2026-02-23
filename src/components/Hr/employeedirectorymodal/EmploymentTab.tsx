@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import HrDateInput from "../HrDateInput";
 
 type EmploymentTabProps = {
   formData: any;
@@ -351,13 +352,11 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
             <label className="block text-xs text-main mb-1 font-medium">
               Engagement Date *<span className="text-danger">*</span>
             </label>
-            <input
-              type="date"
+            <HrDateInput
               value={formData.engagementDate}
-              onChange={(e) =>
-                handleInputChange("engagementDate", e.target.value)
-              }
-              className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg  focus:outline-none focus:border-primary  focus:ring-primary/20"
+              onChange={(v) => handleInputChange("engagementDate", v)}
+              placeholder="DD/MM/YYYY"
+              inputClassName="px-3 py-2 border border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
 
@@ -366,19 +365,16 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               Contract End Date
               {isContractBased && <span className="text-danger"> *</span>}
             </label>
-            <input
-              type="date"
+            <HrDateInput
               value={formData.contractEndDate}
-              onChange={(e) =>
-                handleInputChange("contractEndDate", e.target.value)
-              }
+              onChange={(v) => handleInputChange("contractEndDate", v)}
               disabled={!isContractBased}
-              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none 
-      ${
-        isContractBased
-          ? "border-theme bg-card text-main focus:border-primary  focus:ring-primary/20"
-          : "bg-app text-muted cursor-not-allowed border-theme opacity-70"
-      }`}
+              placeholder="DD/MM/YYYY"
+              inputClassName={`px-3 py-2 ${
+                isContractBased
+                  ? "border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  : "bg-app text-muted cursor-not-allowed border-theme opacity-70"
+              }`}
             />
           </div>
 

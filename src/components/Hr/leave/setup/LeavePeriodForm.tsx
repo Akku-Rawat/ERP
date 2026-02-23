@@ -1,6 +1,7 @@
 // LeavePeriodForm.tsx
 import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import HrDateInput from "../../HrDateInput";
 
 export const LeavePeriodForm: React.FC<{ onClose: () => void }> = ({
   onClose,
@@ -39,9 +40,9 @@ export const LeavePeriodForm: React.FC<{ onClose: () => void }> = ({
               <label className="block text-sm font-medium text-main mb-2">
                 From Date <span className="text-red-500">*</span>
               </label>
-              <input
-                type="date"
-                className="w-full px-4 py-3 rounded-xl border border-theme bg-app text-main outline-none focus:border-primary transition"
+              <HrDateInput
+                placeholder="DD/MM/YYYY"
+                inputClassName="px-4 py-3 rounded-xl border border-theme bg-app text-main outline-none focus:border-primary transition"
               />
             </div>
 
@@ -49,9 +50,9 @@ export const LeavePeriodForm: React.FC<{ onClose: () => void }> = ({
               <label className="block text-sm font-medium text-main mb-2">
                 To Date <span className="text-red-500">*</span>
               </label>
-              <input
-                type="date"
-                className="w-full px-4 py-3 rounded-xl border border-theme bg-app text-main outline-none focus:border-primary transition"
+              <HrDateInput
+                placeholder="DD/MM/YYYY"
+                inputClassName="px-4 py-3 rounded-xl border border-theme bg-app text-main outline-none focus:border-primary transition"
               />
             </div>
 

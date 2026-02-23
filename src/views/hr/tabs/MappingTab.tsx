@@ -9,6 +9,7 @@ import {
   Clock,
   CheckCircle,
 } from "lucide-react";
+import HrDateInput from "../../../components/Hr/HrDateInput";
 
 export default function CompanyMappingTab() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -205,11 +206,11 @@ export default function CompanyMappingTab() {
               </h3>
               <p className="text-sm text-gray-600 mb-4">Apply changes from:</p>
 
-              <input
-                type="date"
+              <HrDateInput
                 value={effectiveDate}
-                onChange={(e) => setEffectiveDate(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                onChange={(v) => setEffectiveDate(v)}
+                placeholder="DD/MM/YYYY"
+                inputClassName="px-4 py-2.5 border border-gray-300 rounded-lg text-sm"
               />
 
               <div className="mt-3 p-3 bg-amber-50 rounded border border-amber-200 flex items-start">
@@ -309,11 +310,11 @@ export default function CompanyMappingTab() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Applied to new employees starting from:
                 </label>
-                <input
-                  type="date"
+                <HrDateInput
                   value={effectiveDate}
-                  onChange={(e) => setEffectiveDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  onChange={(v) => setEffectiveDate(v)}
+                  placeholder="DD/MM/YYYY"
+                  inputClassName="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                 />
               </div>
             </div>

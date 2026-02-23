@@ -1,6 +1,7 @@
 import React from "react";
 import { useCompanySelection } from "../../../hooks/useCompanySelection";
 import { getEmployeeFeatures } from "../../../config/employeeFeatures";
+import HrDateInput from "../HrDateInput";
 
 
 
@@ -180,29 +181,27 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             <label className="block text-xs text-main mb-1 font-medium">
               Date of Birth <span className="text-danger">*</span>
             </label>
-            <input
-              type="date"
+            <HrDateInput
               value={formData.dateOfBirth}
-              onChange={(e) => {
-                const selectedDate = e.target.value;
+              onChange={(selectedDate) => {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
 
                 const dob = new Date(selectedDate);
-
                 if (dob >= today) {
                   setDobError("Date of birth cannot be today or a future date");
-                } else {
-                  setDobError(null);
-                  handleInputChange("dateOfBirth", selectedDate);
+                  return;
                 }
+
+                setDobError(null);
+                handleInputChange("dateOfBirth", selectedDate);
               }}
-              className={`w-full px-3 py-2 text-sm rounded-lg border focus:outline-none
-    ${
-      dobError
-        ? "border-danger focus:ring-2 focus:ring-danger/30"
-        : "border border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
-    }`}
+              placeholder="DD/MM/YYYY"
+              inputClassName={`px-3 py-2 ${
+                dobError
+                  ? "border-danger focus:ring-2 focus:ring-danger/30"
+                  : "border border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              }`}
             />
             {dobError && (
               <p className="text-[10px] text-danger mt-1 font-medium">

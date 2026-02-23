@@ -1,6 +1,7 @@
 // LeaveBlockList.tsx
 import React, { useState } from "react";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import HrDateInput from "../../HrDateInput";
 
 export interface LeaveBlockListProps {
   onAdd: () => void;
@@ -241,9 +242,17 @@ export const LeaveBlockListForm: React.FC<{ onClose: () => void }> = ({
                         {index + 1}
                       </td>
                       <td className="px-4 py-3">
-                        <input
-                          type="date"
-                          className="w-full px-3 py-2 rounded-lg border border-theme bg-app text-main outline-none focus:border-primary transition"
+                        <HrDateInput
+                          value={block.date}
+                          onChange={(v) =>
+                            setBlockDates((prev) =>
+                              prev.map((b) =>
+                                b.id === block.id ? { ...b, date: v } : b,
+                              ),
+                            )
+                          }
+                          placeholder="DD/MM/YYYY"
+                          inputClassName="px-3 py-2 rounded-lg border border-theme bg-app text-main outline-none focus:border-primary transition"
                         />
                       </td>
                       <td className="px-4 py-3">
