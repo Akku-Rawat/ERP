@@ -38,7 +38,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      {/* ✅ CONDITIONAL RENDERING - Only show for companies with statutory fields */}
+      {/* CONDITIONAL RENDERING - Only show for companies with statutory fields */}
       {features.showStatutoryFields && (
         <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
           <h4 className="text-xs font-semibold text-main uppercase tracking-wide mb-3">
