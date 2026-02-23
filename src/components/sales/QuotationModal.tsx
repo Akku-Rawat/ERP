@@ -147,18 +147,6 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     taxCategory="Non-Export"
                   />
 
-                  {/* Date of Quotation */}
-                  <div>
-                    <ModalInput
-                      label="Date of Quotation"
-                      type="date"
-                      name="dateOfInvoice"
-                      value={formData.dateOfInvoice}
-                      onChange={actions.handleInputChange}
-                      required
-                    />
-                  </div>
-
                   {/* Valid Until */}
                   <div>
                     <ModalInput

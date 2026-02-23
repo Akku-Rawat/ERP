@@ -174,15 +174,6 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                     className="w-full"
                   />
 
-                  <ModalInput
-                    label="Date of Invoice"
-                    name="dateOfInvoice"
-                    type="date"
-                    value={formData.dateOfInvoice}
-                    onChange={actions.handleInputChange}
-                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                  />
-
                   <div>
                     <ModalInput
                       label="Due Date"

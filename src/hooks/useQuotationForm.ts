@@ -569,20 +569,18 @@ export const useQuotationForm = (
         (it) => String(it?.vatCode ?? "").toUpperCase() === "C1",
       );
 
+      const quotationDate = formData.dateOfInvoice || new Date().toISOString().slice(0, 10);
+
       //  VALIDATION 
       if (!formData.customerId) {
         throw new Error("Please select a customer");
-      }
-
-      if (!formData.dateOfInvoice) {
-        throw new Error("Please select quotation date");
       }
 
       if (!formData.dueDate) {
         throw new Error("Please select valid until date");
       }
 
-      if (formData.dueDate < formData.dateOfInvoice) {
+      if (formData.dueDate < quotationDate) {
         throw new Error("Valid until date cannot be before quotation date");
       }
 
@@ -614,7 +612,7 @@ export const useQuotationForm = (
         customerId: formData.customerId,
         currencyCode: formData.currencyCode,
         exchangeRt: String(formData.exchangeRt ?? "1"),
-        dateOfQuotation: formData.dateOfInvoice,
+        dateOfQuotation: quotationDate,
         validUntil: formData.dueDate,
         industryBases: formData.industryBases || "Service",
         invoiceType: formData.invoiceType,
