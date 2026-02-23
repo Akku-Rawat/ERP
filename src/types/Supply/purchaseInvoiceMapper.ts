@@ -72,8 +72,7 @@ const payload: any = {
   currency: form.currency,
   status: form.status,
 
-  taxCategory: "Non-Export",   
-
+ taxCategory: form.taxCategory,
   spplrInvcNo: form.supplierInvoiceNumber,
   paymentType: form.paymentType,
   transactionProgress: form.transactionProgress,
