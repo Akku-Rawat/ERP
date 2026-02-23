@@ -342,8 +342,7 @@ export const usePurchaseOrderForm = ({
           itemName: data.itemName,
           uom: data.unitOfMeasureCd || "Unit",
           rate: Number(data.sellingPrice || 0),
-          vatRate: Number(data.taxPerct || 0),
-          vatCd: "A",
+      
         };
 
         return { ...prev, items };

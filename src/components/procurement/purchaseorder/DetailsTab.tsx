@@ -129,7 +129,6 @@ export const DetailsTab = ({
               onChange={onFormChange}
               options={[
                 { value: "UD-001 - Udvil - RI", label: "UD-001 - Udvil - RI" },
-                
               ]}
             />
           </div>
@@ -253,9 +252,11 @@ export const DetailsTab = ({
                       </td>
                       <td className="px-0.5 py-1">
                         <input
-                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card"
+                          type="number"
+                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          name="vatRate"
                           value={it.vatRate}
-                          disabled
+                          onChange={(e) => onItemChange(e, i)}
                         />
                       </td>
 
@@ -264,10 +265,8 @@ export const DetailsTab = ({
                           <input
                             className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                             name="vatCd"
-                            value={it.vatCd || "-"}
-                            readOnly
-                            disabled
-                            title="VAT Code: A (Standard Rate)"
+                            value={it.vatCd || ""}
+                            onChange={(e) => onItemChange(e, i)}
                           />
                         </div>
                       </td>

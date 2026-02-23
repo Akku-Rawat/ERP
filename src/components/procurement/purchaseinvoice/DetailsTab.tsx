@@ -298,22 +298,22 @@ export const DetailsTab = ({
                         />
                       </td>
                       <td className="px-0.5 py-1">
-                        <input
-                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card"
-                          value={it.vatRate}
-                          disabled
+                    <input
+                          type="number"
+                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          name="rate"
+                          value={it.rate}
+                          onChange={(e) => onItemChange(e, i)}
                         />
                       </td>
 
                       <td className="px-0.5 py-1">
                         <div className="relative">
-                          <input
+                           <input
                             className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                             name="vatCd"
-                            value={it.vatCd || "-"}
-                            readOnly
-                            disabled
-                            title="VAT Code: A (Standard Rate)"
+                            value={it.vatCd || ""}
+                            onChange={(e) => onItemChange(e, i)}
                           />
                         </div>
                       </td>
