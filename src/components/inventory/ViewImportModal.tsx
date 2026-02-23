@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { getImportItemById, updateStockAutomatic } from "../../api/importApi";
+import { getCountryList } from "../../api/lookupApi";
 import { API } from "../../config/api";
 import Modal from "../ui/modal/modal";
 import { Button } from "../ui/modal/formComponent";
@@ -54,6 +55,9 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
     Array<{ cd: string; cdNm: string; lvl: string }>
   >([]);
   const [loadingItemClasses, setLoadingItemClasses] = useState(false);
+  const [countryNameByCode, setCountryNameByCode] = useState<
+    Record<string, string>
+  >({});
 
   // Cascading dropdown states
   const [selectedLevel1, setSelectedLevel1] = useState("");
@@ -101,6 +105,25 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
       void fetchImportDetails();
     }
   }, [isOpen, importId, fetchImportDetails]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    (async () => {
+      try {
+        const list = await getCountryList();
+        const map: Record<string, string> = {};
+        (list ?? []).forEach((c: any) => {
+          const code = String(c?.code ?? "").trim();
+          const name = String(c?.name ?? "").trim();
+          if (code) map[code] = name;
+        });
+        setCountryNameByCode(map);
+      } catch {
+        setCountryNameByCode({});
+      }
+    })();
+  }, [isOpen]);
 
   useEffect(() => {
     if (showApprovalForm) {
@@ -363,11 +386,19 @@ const ViewImportModal: React.FC<ViewImportModalProps> = ({
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoField
                           label="Origin Country Code"
-                          value={importData.originCountryCode}
+                          value={
+                            countryNameByCode[
+                              String(importData.originCountryCode ?? "")
+                            ] || importData.originCountryCode
+                          }
                         />
                         <InfoField
                           label="Export Country Code"
-                          value={importData.exportCountryCode}
+                          value={
+                            countryNameByCode[
+                              String(importData.exportCountryCode ?? "")
+                            ] || importData.exportCountryCode
+                          }
                         />
                       </div>
                     </div>
