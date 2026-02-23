@@ -19,6 +19,7 @@ const DAYS = [
 
 const TIME_SLOTS = [
   "Off",
+  "Half Day",
   "08:00-17:00",
   "09:00-18:00",
   "07:00-16:00",
@@ -95,7 +96,7 @@ export const WorkScheduleTab: React.FC<WorkScheduleTabProps> = ({
                 onChange={(e) => handleInputChange(day.field, e.target.value)}
                 className="col-span-2 px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               >
-                <option value="">Select schedule...</option>
+                <option value="">Select schedule</option>
                 {TIME_SLOTS.map((slot) => (
                   <option key={slot} value={slot}>
                     {slot}

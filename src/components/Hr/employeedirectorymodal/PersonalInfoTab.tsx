@@ -20,6 +20,18 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
   const { companyCode } = useCompanySelection();
   const features = getEmployeeFeatures(companyCode);
 
+  const formatNrc = (raw: string): string => {
+    const digits = String(raw ?? "").replace(/\D/g, "").slice(0, 9);
+    const part1 = digits.slice(0, 6);
+    const part2 = digits.slice(6, 8);
+    const part3 = digits.slice(8, 9);
+
+    let out = part1;
+    if (part2) out += `/${part2}`;
+    if (part3) out += `/${part3}`;
+    return out;
+  };
+
   const verifiedInputStyle =
     "bg-app text-main cursor-not-allowed border-theme";
 
@@ -41,7 +53,10 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 type="text"
                 value={formData.nrcId}
                 disabled={verifiedFields.nrcId}
-                onChange={(e) => handleInputChange("nrcId", e.target.value)}
+                placeholder="e.g., 123456/78/9"
+                onChange={(e) =>
+                  handleInputChange("nrcId", formatNrc(e.target.value))
+                }
                 className={`w-full px-3 py-2 text-sm rounded-lg border focus:outline-none
                   ${verifiedFields.nrcId
                     ? verifiedInputStyle
@@ -64,6 +79,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 type="text"
                 value={formData.socialSecurityNapsa}
                 disabled={verifiedFields.socialSecurityNapsa}
+                placeholder="Enter SSN"
                 onChange={(e) =>
                   handleInputChange("socialSecurityNapsa", e.target.value)
                 }
@@ -121,6 +137,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             <input
               value={formData.firstName}
               disabled={verifiedFields.firstName}
+              placeholder="Enter first name"
               onChange={(e) => handleInputChange("firstName", e.target.value)}
               className={`w-full px-3 py-2 text-sm rounded-lg border
     ${
@@ -137,6 +154,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             <input
               type="text"
               value={formData.otherNames}
+              placeholder="Enter other names"
               onChange={(e) => handleInputChange("otherNames", e.target.value)}
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
@@ -148,6 +166,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             <input
               value={formData.lastName}
               disabled={verifiedFields.lastName}
+              placeholder="Enter last name"
               onChange={(e) => handleInputChange("lastName", e.target.value)}
               className={`w-full px-3 py-2 text-sm rounded-lg border
     ${
@@ -206,7 +225,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
         : "border border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
     }`}
             >
-              <option value="">Select</option>
+              <option value="">Select gender</option>
               <option>Male</option>
               <option>Female</option>
               <option>Other</option>

@@ -10,7 +10,6 @@ type CompensationTabProps = {
 
 // Zambian banks list — update here if new banks are added
 const ZAMBIAN_BANKS = [
-  "BANK OF ZAMBIA",
   "ZANACO",
   "STANBIC BANK ZAMBIA",
   "STANDARD CHARTERED BANK ZAMBIA",

@@ -9,6 +9,42 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
   formData,
   handleInputChange,
 }) => {
+  const formatZmPhone = (raw: string): string => {
+    const s = String(raw ?? "").replace(/\s+/g, "");
+    const leadingPlus = s.startsWith("+");
+    const digits = s.replace(/\D/g, "");
+
+    if (!digits) return "";
+
+    // If user types +260..., keep it.
+    if (leadingPlus) return `+${digits}`;
+
+    // If they typed 260..., normalize to +260...
+    if (digits.startsWith("260")) return `+${digits}`;
+
+    // If they typed a local number starting with 0, convert to +260 (drop leading 0)
+    if (digits.startsWith("0")) return `+260${digits.slice(1)}`;
+
+    // If they typed 9 digits (common for ZM mobile without leading 0), prefix +260
+    if (digits.length === 9) return `+260${digits}`;
+
+    // Fallback: still prefix +260
+    return `+260${digits}`;
+  };
+
+  const phonePlaceholder = "e.g., 0977123456 or 0771234567";
+
+  const relationshipOptions = [
+    "Spouse",
+    "Parent",
+    "Sibling",
+    "Child",
+    "Relative",
+    "Friend",
+    "Guardian",
+    "Other",
+  ];
+
   return (
     <div className="max-w-3xl mx-auto space-y-5">
       {/* Contact Information */}
@@ -25,6 +61,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
+              placeholder="e.g., name@gmail.com"
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -49,8 +86,10 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
             <input
               type="tel"
               value={formData.phoneNumber}
-              onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-              placeholder="+260971234567"
+              onChange={(e) =>
+                handleInputChange("phoneNumber", formatZmPhone(e.target.value))
+              }
+              placeholder={phonePlaceholder}
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -62,8 +101,12 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
               type="tel"
               value={formData.alternatePhone}
               onChange={(e) =>
-                handleInputChange("alternatePhone", e.target.value)
+                handleInputChange(
+                  "alternatePhone",
+                  formatZmPhone(e.target.value),
+                )
               }
+              placeholder={phonePlaceholder}
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -97,6 +140,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
                 type="text"
                 value={formData.city}
                 onChange={(e) => handleInputChange("city", e.target.value)}
+                placeholder="Enter city"
                 className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -132,6 +176,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
                 onChange={(e) =>
                   handleInputChange("postalCode", e.target.value)
                 }
+                placeholder="Enter postal code"
                 className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -155,6 +200,7 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
               onChange={(e) =>
                 handleInputChange("emergencyContactName", e.target.value)
               }
+              placeholder="Enter contact name"
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -166,9 +212,12 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
               type="tel"
               value={formData.emergencyContactPhone}
               onChange={(e) =>
-                handleInputChange("emergencyContactPhone", e.target.value)
+                handleInputChange(
+                  "emergencyContactPhone",
+                  formatZmPhone(e.target.value),
+                )
               }
-              placeholder="+260"
+              placeholder={phonePlaceholder}
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -176,18 +225,20 @@ const ContactInfoTab: React.FC<ContactInfoTabProps> = ({
             <label className="block text-xs text-main mb-1 font-medium">
               Relationship
             </label>
-            <input
-              type="text"
+            <select
               value={formData.emergencyContactRelationship}
               onChange={(e) =>
-                handleInputChange(
-                  "emergencyContactRelationship",
-                  e.target.value,
-                )
+                handleInputChange("emergencyContactRelationship", e.target.value)
               }
-              placeholder="e.g., Spouse, Parent"
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
+            >
+              <option value="">Select relationship</option>
+              {relationshipOptions.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
