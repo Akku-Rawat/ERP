@@ -87,12 +87,19 @@ const ItemModal: React.FC<{
 
         const items = response?.data || [];
 
-        const mappedOptions = items.map((item: any) => ({
-          label: item.itemName,
-          value: item.id,
-          id: item.id,
-          itemClassCode: item.itemClassCode,
-        }));
+        const mappedOptions = items
+          .filter((item: any) => {
+            const t = String(item?.itemType ?? item?.item_type ?? "").trim();
+            return t === "1" || t === "2";
+          })
+          .map((item: any) => ({
+            label: String(item?.itemName ?? item?.item_name ?? "").trim(),
+            value: String(item?.id ?? item?.name ?? "").trim(),
+            id: String(item?.id ?? item?.name ?? "").trim(),
+            itemClassCode: String(
+              item?.itemClassCode ?? item?.item_class_code ?? "",
+            ).trim(),
+          }));
 
         setItemOptions(mappedOptions);
       } catch (err) {
@@ -279,6 +286,15 @@ const ItemModal: React.FC<{
                             }));
                         }}
                         onChange={(selectedId: string) => {
+                          if (!selectedId) {
+                            setForm((prev) => ({
+                              ...prev,
+                              id: "",
+                              itemClassCode: "",
+                            }));
+                            return;
+                          }
+
                           const selectedItem = itemOptions.find(
                             (item) => item.id === selectedId
                           );

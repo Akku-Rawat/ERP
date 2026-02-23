@@ -113,7 +113,14 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
             setSearch(e.target.value);
             onChange("");
           }}
-          onFocus={() => search && setOpen(true)}
+          onFocus={() => {
+            if (disabled) return;
+            (async () => {
+              const data = await fetchOptions(search);
+              setOptions(data);
+              setOpen(true);
+            })();
+          }}
           className={`w-full py-2 px-3 border rounded text-[13px] text-main bg-card ${
             error ? "border-danger" : "border-theme"
           }`}
