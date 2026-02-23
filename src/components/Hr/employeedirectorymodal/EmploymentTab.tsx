@@ -35,10 +35,10 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
   };
 
   const [addressRows, setAddressRows] = useState<string[]>(() =>
-    initRows(formData.workAddress ?? "")
+    initRows(formData.workAddress ?? ""),
   );
   const [locationRows, setLocationRows] = useState<string[]>(() =>
-    initRows(formData.workLocation ?? "")
+    initRows(formData.workLocation ?? ""),
   );
 
   const rowCount = Math.max(addressRows.length, locationRows.length);
@@ -84,7 +84,6 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
     syncAddress(safeAddr);
     syncLocation(safeLoc);
   };
-
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-5">
@@ -264,7 +263,6 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
 
           {/* ── Work Address & Work Location — paired side-by-side rows ── */}
           <div className="col-span-2 space-y-2">
-
             {/* Column headers */}
             <div className="grid grid-cols-2 gap-4 px-7">
               <label className="block text-xs text-main font-medium">
@@ -328,7 +326,6 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </div>
