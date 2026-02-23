@@ -290,38 +290,38 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     </h3>
                   </div>
 
-                  <div className="mt-2 overflow-x-auto hide-scrollbar">
+                  <div className="mt-2 overflow-x-hidden">
                     <table className="w-full border-collapse table-fixed text-[10px]">
                       <thead>
                         <tr className="border-b border-theme">
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px] whitespace-nowrap">
                             #
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[120px] whitespace-nowrap">
                             Item
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[120px] whitespace-nowrap hidden xl:table-cell">
                             Description
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
                             Quantity
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[90px] md:w-[110px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[80px] md:w-[90px] whitespace-nowrap">
                             Unit Price
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[80px] md:w-[100px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] md:w-[80px] whitespace-nowrap">
  Discount (%) 
 </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
                             Tax
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[80px] md:w-[100px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px] md:w-[70px] whitespace-nowrap hidden lg:table-cell">
                             Tax Code
                           </th>
-                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[90px] md:w-[120px] whitespace-nowrap">
+                          <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[90px] md:w-[100px] whitespace-nowrap">
                             Amount
                           </th>
-                          <th></th>
+                          <th className="px-2 py-3 text-center text-muted font-medium text-[11px] w-[42px] whitespace-nowrap"></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -340,7 +340,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                               className="border-b border-theme bg-card row-hover"
                             >
                               <td className="px-3 py-2 text-center">{i + 1}</td>
-                              <td className="px-0.5 py-1">
+                              <td className="px-0.5 py-1 min-w-0">
                                 {/* <ItemSelect
                                     taxCategory={ui.taxCategory}
                                     value={it.itemCode}
@@ -363,7 +363,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                                 />
                               </td>
 
-                              <td className="px-0.5 py-1">
+                              <td className="px-0.5 py-1 hidden xl:table-cell">
                                 <input
                                   className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="description"
@@ -387,7 +387,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
-                                  className="w-[90px] md:w-[110px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[80px] md:w-[90px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="price"
                                   value={it.price}
                                   disabled
@@ -399,7 +399,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
-                                  className="w-[80px] md:w-[100px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[70px] md:w-[80px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="discount"
                                   value={it.discount}
                                   onChange={(e) =>
@@ -419,10 +419,10 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                                   }
                                 />
                               </td>
-                              <td className="px-0.5 py-1">
+                              <td className="px-0.5 py-1 hidden lg:table-cell">
                                 <input
                                   type="string"
-                                  className="w-[80px] md:w-[100px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[60px] md:w-[70px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="vatCode"
                                   value={it.vatCode}
                                   disabled
