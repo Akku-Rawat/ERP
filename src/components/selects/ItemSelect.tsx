@@ -5,6 +5,7 @@ import { getAllItems } from "../../api/itemApi";
 interface ItemSelectProps {
   taxCategory?: string | undefined;
   value?: string;
+  excludeItemCodes?: string[];
   onChange: (item: {
     id: string;
     itemCode: string;
@@ -19,6 +20,7 @@ interface ItemSelectProps {
 export default function ItemSelect({
   taxCategory = "",
   value = "",
+  excludeItemCodes = [],
   onChange,
   onAddNew,
   className = "",
@@ -113,9 +115,13 @@ export default function ItemSelect({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const filtered = items.filter((it) =>
-    it.itemName.toLowerCase().includes(search.toLowerCase()),
+  const exclude = new Set(
+    (excludeItemCodes ?? []).map((c) => String(c ?? "").trim()).filter(Boolean),
   );
+
+  const filtered = items
+    .filter((it) => !exclude.has(String(it.itemCode ?? "").trim()))
+    .filter((it) => it.itemName.toLowerCase().includes(search.toLowerCase()));
 
   const openDropdown = () => {
     if (!inputRef.current || disabled) return;

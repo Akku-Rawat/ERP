@@ -416,22 +416,30 @@ if (!formData.paymentInformation?.paymentTerms) {
       if (!res || res.status_code !== 200) return;
 
       const data = res.data;
-      console.log('RAW API DATA:', JSON.stringify(data));
       setFormData((prev) => {
         const items = [...prev.items];
 
+        const resolvedId = String(data?.id ?? itemId).trim();
+        const currentCode = String(items[index]?.itemCode ?? "").trim();
+        if (currentCode && currentCode === resolvedId) {
+          return prev;
+        }
+
         const currency = String(prev.currencyCode ?? "").trim().toUpperCase();
         const rate = Number(String(prev.exchangeRt ?? "1").trim());
-        const baseSellingPrice = Number(data.sellingPrice ?? items[index].price);
-        const convertedPrice =
-          currency !== "INR" && Number.isFinite(rate) && rate > 0
-            ? baseSellingPrice / rate
-            : baseSellingPrice;
 
-        const resolvedId = String(data?.id ?? itemId).trim();
+        const apiSellingPrice = Number(data.sellingPrice);
+        const hasApiPrice = Number.isFinite(apiSellingPrice) && apiSellingPrice > 0;
+        const convertedPrice = (() => {
+          if (!hasApiPrice) return Number(items[index].price);
+          if (currency !== "ZMW" && Number.isFinite(rate) && rate > 0) {
+            return apiSellingPrice / rate;
+          }
+          return apiSellingPrice;
+        })();
+
         const existingIdx = items.findIndex(
-          (it, i) =>
-            i !== index && String(it?.itemCode ?? "").trim() === resolvedId,
+          (it, i) => i !== index && String(it?.itemCode ?? "").trim() === resolvedId,
         );
 
         if (existingIdx !== -1) {
@@ -449,11 +457,11 @@ if (!formData.paymentInformation?.paymentTerms) {
           ...items[index],
           itemCode: resolvedId,
           description: data.itemDescription ?? data.itemName ?? "",
-           price: Number(convertedPrice),   
-        vatRate: Number(data.taxPerct ?? 0), 
+          price: Number(convertedPrice),
+          vatRate: Number(data.taxPerct ?? 0),
           vatCode: prev.invoiceType === "Export" ? "C1" : (data.taxCode ?? ""),
-            quantity: Number(items[index].quantity) || 1,  
-  discount: Number(items[index].discount) || 0,
+          quantity: Number(items[index].quantity) || 1,
+          discount: Number(items[index].discount) || 0,
         };
 
         return { ...prev, items };
