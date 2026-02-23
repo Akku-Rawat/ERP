@@ -365,6 +365,10 @@ const [step, setStep] = useState<"verification" | "form">(
           if (!formData.nrcId) return "NRC number is required";
           if (!isValidNrc(formData.nrcId))
             return "NRC number must be in the format 123456/78/9";
+          if (!formData.nhimaHealthInsurance)
+            return "NHIMA number is required";
+          if (!formData.tpinId)
+            return "TPIN is required";
         }
         return null;
 

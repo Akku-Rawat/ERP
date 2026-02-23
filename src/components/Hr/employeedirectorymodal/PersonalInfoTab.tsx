@@ -95,7 +95,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             {/* NHIMA Field */}
             <div>
               <label className="block text-xs text-main mb-1 font-medium">
-                NHIMA Number
+                NHIMA Number {features.statutoryFieldsRequired && <span className="text-danger">*</span>}
               </label>
               <input
                 type="text"
@@ -104,6 +104,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                   handleInputChange("nhimaHealthInsurance", e.target.value)
                 }
                 placeholder="e.g., 91897177171"
+                required={features.statutoryFieldsRequired}
                className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
             </div>
@@ -111,13 +112,14 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             {/* TPIN Field */}
             <div>
               <label className="block text-xs text-main mb-1 font-medium">
-                TPIN
+                TPIN {features.statutoryFieldsRequired && <span className="text-danger">*</span>}
               </label>
               <input
                 type="text"
                 value={formData.tpinId}
                 onChange={(e) => handleInputChange("tpinId", e.target.value)}
                 placeholder="e.g., 10000000000"
+                required={features.statutoryFieldsRequired}
                 className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
             </div>
