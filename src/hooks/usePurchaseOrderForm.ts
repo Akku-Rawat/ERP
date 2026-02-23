@@ -74,18 +74,7 @@ export const usePurchaseOrderForm = ({
     loadCompanyBuyingTerms();
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
 
-    setForm((prev) => ({
-      ...prev,
-      taxCategory: "Non-Export",
-      items: prev.items.map((item) => ({
-        ...item,
-        vatCd: "A",
-      })),
-    }));
-  }, [isOpen]);
 
   // Load PO Data in Edit Mode
   useEffect(() => {
@@ -211,7 +200,7 @@ export const usePurchaseOrderForm = ({
         supplierCode: supplier.supplierCode,
         supplierEmail: supplier.emailId,
         supplierPhone: supplier.phoneNo,
-        taxCategory: "Non-Export",
+        taxCategory: supplier.taxCategory || "",
 
         /*   AUTO FETCHED FIELDS  */
         currency: supplier.currency || p.currency,
