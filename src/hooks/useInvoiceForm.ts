@@ -3,7 +3,7 @@ import { getCustomerByCustomerCode } from "../api/customerApi";
 import { getCompanyById } from "../api/companySetupApi";
 import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
-import { getCountryList } from "../api/lookupApi";
+import { getRolaCountryList } from "../api/lookupApi";
 import { getItemByItemCode } from "../api/itemApi";
 import { getExchangeRate } from "../api/exchangeRateApi";
 
@@ -325,15 +325,17 @@ if (!formData.paymentInformation?.paymentTerms) {
 
       setTaxCategory(invoiceType);
 
-      const countryLookupRes = await getCountryList();
-      const countryLookupList = Array.isArray(countryLookupRes)
-        ? countryLookupRes
-        : (countryLookupRes?.data ?? []);
+      const countryLookupList = await getRolaCountryList();
 
-      const countryCode = getCountryCode(
-        countryLookupList,
-        data.shippingCountry || data.billingCountry,
-      );
+const formattedCountries = countryLookupList.map((c: any) => ({
+  code: c.code || c.name,
+  name: c.country_name || c.name,
+}));
+
+const countryCode = getCountryCode(
+  formattedCountries,
+  data.shippingCountry || data.billingCountry,
+);
 
       setCustomerDetails(data);
 

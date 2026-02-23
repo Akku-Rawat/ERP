@@ -3,7 +3,7 @@ import { getCustomerByCustomerCode } from "../api/customerApi";
 import { getCompanyById } from "../api/companySetupApi";
 import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
-import { getCountryList } from "../api/lookupApi";
+import { getRolaCountryList } from "../api/lookupApi";
 import { getItemByItemCode } from "../api/itemApi";
 import { getExchangeRate } from "../api/exchangeRateApi";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
@@ -13,7 +13,7 @@ import {
   DEFAULT_INVOICE_FORM,
   EMPTY_ITEM,
 } from "../constants/invoice.constants";
-import { showApiError, showLoading ,showSuccess,closeSwal } from "../utils/alert";
+import { showApiError, showLoading, showSuccess, closeSwal } from "../utils/alert";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -33,8 +33,8 @@ export const useQuotationForm = (
     invoiceStatus: "Draft",
     invoiceType: "Non-Export",
   });
-const companyLoadedRef = useRef(false);
-const [companyData, setCompanyData] = useState<any>(null);
+  const companyLoadedRef = useRef(false);
+  const [companyData, setCompanyData] = useState<any>(null);
 
   const [customerDetails, setCustomerDetails] = useState<any>(null);
   const [customerNameDisplay, setCustomerNameDisplay] = useState("");
@@ -71,36 +71,36 @@ const [companyData, setCompanyData] = useState<any>(null);
     setPage(0);
   }, [isOpen]);
 
-useEffect(() => {
-  if (!isOpen || companyLoadedRef.current) return;
+  useEffect(() => {
+    if (!isOpen || companyLoadedRef.current) return;
 
-  companyLoadedRef.current = true;
+    companyLoadedRef.current = true;
 
-  getCompanyById(COMPANY_ID).then((res) => {
-    const company = res?.data;
-    setCompanyData(company);   // store it
+    getCompanyById(COMPANY_ID).then((res) => {
+      const company = res?.data;
+      setCompanyData(company);   // store it
 
-    setFormData((prev) => ({
-      ...prev,
-      paymentInformation: {
-        ...prev.paymentInformation,
-        paymentTerms:
-          company?.terms?.selling?.payment?.dueDates ?? "",
-        bankName: company?.bankAccounts?.[0]?.bankName ?? "",
-        accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
-        routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
-        swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
-      },
-    }));
-  });
-}, [isOpen]);
+      setFormData((prev) => ({
+        ...prev,
+        paymentInformation: {
+          ...prev.paymentInformation,
+          paymentTerms:
+            company?.terms?.selling?.payment?.dueDates ?? "",
+          bankName: company?.bankAccounts?.[0]?.bankName ?? "",
+          accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
+          routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
+          swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
+        },
+      }));
+    });
+  }, [isOpen]);
 
 
-useEffect(() => {
-  if (!isOpen) {
-    companyLoadedRef.current = false;
-  }
-}, [isOpen]);
+  useEffect(() => {
+    if (!isOpen) {
+      companyLoadedRef.current = false;
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -295,16 +295,16 @@ useEffect(() => {
     setFormData((p) => ({ ...p, customerId: id }));
 
     try {
-     const customerRes = await getCustomerByCustomerCode(id);
-const company = companyData;
-if (!company) return;
+      const customerRes = await getCustomerByCustomerCode(id);
+      const company = companyData;
+      if (!company) return;
 
 
       if (!customerRes || customerRes.status_code !== 200) return;
 
       const data = customerRes.data;
 
-  
+
       const invoiceType = data.customerTaxCategory as
         | "Export"
         | "Non-Export"
@@ -312,13 +312,15 @@ if (!company) return;
 
       setTaxCategory(invoiceType);
 
-      const countryLookupRes = await getCountryList();
-      const countryLookupList = Array.isArray(countryLookupRes)
-        ? countryLookupRes
-        : (countryLookupRes?.data ?? []);
+      const countryLookupList = await getRolaCountryList();
+
+      const formattedCountries = countryLookupList.map((c: any) => ({
+        code: c.code || c.name,
+        name: c.country_name || c.name,
+      }));
 
       const countryCode = getCountryCode(
-        countryLookupList,
+        formattedCountries,
         data.shippingCountry || data.billingCountry,
       );
 
@@ -492,169 +494,169 @@ if (!company) return;
     if (!checked) shippingEditedRef.current = false;
   };
 
-const handleReset = () => {
-  if (!companyData) return;
+  const handleReset = () => {
+    if (!companyData) return;
 
-  const company = companyData;
+    const company = companyData;
 
-  setFormData({
-    ...DEFAULT_INVOICE_FORM,
-    invoiceStatus: "Draft",
-    invoiceType: "Non-Export",
-    shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
+    setFormData({
+      ...DEFAULT_INVOICE_FORM,
+      invoiceStatus: "Draft",
+      invoiceType: "Non-Export",
+      shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
 
-    paymentInformation: {
-      paymentTerms:
-        company?.terms?.selling?.payment?.dueDates ?? "",
-      paymentMethod: "",
-      bankName: company?.bankAccounts?.[0]?.bankName ?? "",
-      accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
-      routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
-      swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
-    },
-  });
+      paymentInformation: {
+        paymentTerms:
+          company?.terms?.selling?.payment?.dueDates ?? "",
+        paymentMethod: "",
+        bankName: company?.bankAccounts?.[0]?.bankName ?? "",
+        accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
+        routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
+        swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
+      },
+    });
 
-  setSameAsBilling(true);
-  shippingEditedRef.current = false;
-  setPage(0);
-  setCustomerNameDisplay("");
-  setCustomerDetails(null);
-  lastCurrencyRef.current = "INR";
-  lastRateRef.current = 1;
-};
-
-
-
-const { subTotal, totalTax, grandTotal } = useMemo(() => {
-  let sub = 0;
-  let tax = 0;
-
-  formData.items.forEach((item) => {
-    const discountAmount =
-      item.quantity * item.price * (Number(item.discount || 0) / 100);
-    const totalInclusive = item.quantity * item.price - discountAmount;
-    const exclusive = totalInclusive / (1 + Number(item.vatRate || 0) / 100);
-    const taxAmt = totalInclusive - exclusive;
-
-    sub += exclusive;
-    tax += taxAmt;
-  });
-
-  return {
-    subTotal: sub,
-    totalTax: tax,
-    grandTotal: sub + tax,
+    setSameAsBilling(true);
+    shippingEditedRef.current = false;
+    setPage(0);
+    setCustomerNameDisplay("");
+    setCustomerDetails(null);
+    lastCurrencyRef.current = "INR";
+    lastRateRef.current = 1;
   };
-}, [formData.items]);
-
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  try {
-    const hasC1 = formData.items.some(
-      (it) => String(it?.vatCode ?? "").toUpperCase() === "C1",
-    );
-
-    //  VALIDATION 
-    if (!formData.customerId) {
-      throw new Error("Please select a customer");
-    }
-
-    if (!formData.dateOfInvoice) {
-      throw new Error("Please select quotation date");
-    }
-
-    if (!formData.dueDate) {
-  throw new Error("Please select valid until date");
-}
-
-   if (formData.dueDate < formData.dateOfInvoice) {
-  throw new Error("Valid until date cannot be before quotation date");
-}
 
 
-    if (!formData.paymentInformation?.paymentTerms) {
-  throw new Error("Please select payment terms");
-}
 
+  const { subTotal, totalTax, grandTotal } = useMemo(() => {
+    let sub = 0;
+    let tax = 0;
 
-    if (formData.items.length === 0 || !formData.items[0].itemCode) {
-      throw new Error("Please add at least one item");
-    }
+    formData.items.forEach((item) => {
+      const discountAmount =
+        item.quantity * item.price * (Number(item.discount || 0) / 100);
+      const totalInclusive = item.quantity * item.price - discountAmount;
+      const exclusive = totalInclusive / (1 + Number(item.vatRate || 0) / 100);
+      const taxAmt = totalInclusive - exclusive;
 
-    if (hasC1 && !formData.destnCountryCd) {
-      throw new Error(
-        "Destination country (destnCountryCd) is required for VAT code C1 transactions",
-      );
-    }
+      sub += exclusive;
+      tax += taxAmt;
+    });
 
-    //  LOADING 
-    showLoading("Saving quotation...");
-
-    //  PAYLOAD 
-    const payload = {
-      customerId: formData.customerId,
-      currencyCode: formData.currencyCode,
-      exchangeRt: String(formData.exchangeRt ?? "1"),
-      dateOfQuotation: formData.dateOfInvoice,
-      validUntil: formData.dueDate,
-      industryBases: formData.industryBases || "Service",
-      invoiceType: formData.invoiceType,
-      invoiceStatus: formData.invoiceStatus,
-
-      ...((formData.invoiceType === "Export" || hasC1) && {
-        destnCountryCd: formData.destnCountryCd,
-      }),
-
-      ...(formData.invoiceType === "Lpo" && {
-        lpoNumber: formData.lpoNumber,
-      }),
-
-      billingAddress: formData.billingAddress,
-      shippingAddress: formData.shippingAddress,
-      paymentInformation: formData.paymentInformation,
-
-      items: formData.items
-        .filter((item) => item.itemCode) // Only include items with itemCode
-        .map((item) => ({
-          itemCode: item.itemCode,
-          quantity: item.quantity,
-          description: item.description,
-          discount: item.discount,
-          vatRate: item.vatRate.toString(),
-          price: item.price,
-          vatCode: item.vatCode,
-        })),
-
-      terms: formData.terms,
-      subTotal,
-      totalTax,
-      grandTotal,
-      documentType: "quotation",
+    return {
+      subTotal: sub,
+      totalTax: tax,
+      grandTotal: sub + tax,
     };
+  }, [formData.items]);
 
-    //  API CALL 
-    if (onSubmit) {
-      await onSubmit(payload);
-    } else {
-      throw new Error(
-        "No onSubmit handler provided. Please check QuotationModal usage.",
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const hasC1 = formData.items.some(
+        (it) => String(it?.vatCode ?? "").toUpperCase() === "C1",
       );
+
+      //  VALIDATION 
+      if (!formData.customerId) {
+        throw new Error("Please select a customer");
+      }
+
+      if (!formData.dateOfInvoice) {
+        throw new Error("Please select quotation date");
+      }
+
+      if (!formData.dueDate) {
+        throw new Error("Please select valid until date");
+      }
+
+      if (formData.dueDate < formData.dateOfInvoice) {
+        throw new Error("Valid until date cannot be before quotation date");
+      }
+
+
+      if (!formData.paymentInformation?.paymentTerms) {
+        throw new Error("Please select payment terms");
+      }
+
+
+      if (formData.items.length === 0 || !formData.items[0].itemCode) {
+        throw new Error("Please add at least one item");
+      }
+
+      if (hasC1 && !formData.destnCountryCd) {
+        throw new Error(
+          "Destination country (destnCountryCd) is required for VAT code C1 transactions",
+        );
+      }
+
+      //  LOADING 
+      showLoading("Saving quotation...");
+
+      //  PAYLOAD 
+      const payload = {
+        customerId: formData.customerId,
+        currencyCode: formData.currencyCode,
+        exchangeRt: String(formData.exchangeRt ?? "1"),
+        dateOfQuotation: formData.dateOfInvoice,
+        validUntil: formData.dueDate,
+        industryBases: formData.industryBases || "Service",
+        invoiceType: formData.invoiceType,
+        invoiceStatus: formData.invoiceStatus,
+
+        ...((formData.invoiceType === "Export" || hasC1) && {
+          destnCountryCd: formData.destnCountryCd,
+        }),
+
+        ...(formData.invoiceType === "Lpo" && {
+          lpoNumber: formData.lpoNumber,
+        }),
+
+        billingAddress: formData.billingAddress,
+        shippingAddress: formData.shippingAddress,
+        paymentInformation: formData.paymentInformation,
+
+        items: formData.items
+          .filter((item) => item.itemCode) // Only include items with itemCode
+          .map((item) => ({
+            itemCode: item.itemCode,
+            quantity: item.quantity,
+            description: item.description,
+            discount: item.discount,
+            vatRate: item.vatRate.toString(),
+            price: item.price,
+            vatCode: item.vatCode,
+          })),
+
+        terms: formData.terms,
+        subTotal,
+        totalTax,
+        grandTotal,
+        documentType: "quotation",
+      };
+
+      //  API CALL 
+      if (onSubmit) {
+        await onSubmit(payload);
+      } else {
+        throw new Error(
+          "No onSubmit handler provided. Please check QuotationModal usage.",
+        );
+      }
+
+      //  SUCCESS 
+      closeSwal();
+
+      showSuccess("Quotation saved successfully");
+
+      onClose?.();
+
+    } catch (error: any) {
+      closeSwal();
+      showApiError(error);
     }
 
-    //  SUCCESS 
-    closeSwal();
-
-    showSuccess("Quotation saved successfully");
-
-    onClose?.();
-
-  } catch (error: any) {
-  closeSwal();
-  showApiError(error);
-}
-
-};
+  };
 
 
   const paginatedItems = formData.items.slice(
