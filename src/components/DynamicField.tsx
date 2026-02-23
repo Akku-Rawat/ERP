@@ -91,7 +91,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
           required={selectConfig.required}
           className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
         >
-          <option value="">Select...</option>
+          <option value="">{selectConfig.placeholder || "Select..."}</option>
           {selectConfig.options.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -122,6 +122,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
             required={apiConfig.required}
             className="w-full"
             filterByItemType={filterValue}
+            placeholder={apiConfig.placeholder}
           />
           {/* Hidden input for HTML5 validation */}
           {apiConfig.required && (
@@ -157,6 +158,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
             fetchData={fetchFn}
             onChange={({ id }) => onChange(apiConfig.fieldName, id)}
             required={apiConfig.required}
+            placeholder={apiConfig.placeholder}
           />
           {/* Hidden input for HTML5 validation */}
           {apiConfig.required && (
@@ -192,6 +194,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
             fetchData={fetchFn}
             onChange={({ id }) => onChange(apiConfig.fieldName, id)}
             required={apiConfig.required}
+            placeholder={apiConfig.placeholder}
           />
           {/* Hidden input for HTML5 validation */}
           {apiConfig.required && (

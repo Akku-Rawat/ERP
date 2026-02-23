@@ -173,6 +173,7 @@ const ItemsCategoryModal: React.FC<{
                     name="itemType"
                     value={form.itemType || ""}
                     onChange={handleChange}
+                    placeholder="Select item type"
                     required
                   >
                     {itemTypeOptions.map((option) => (
@@ -186,6 +187,7 @@ const ItemsCategoryModal: React.FC<{
                     name="groupName"
                     value={form.groupName}
                     onChange={handleChange}
+                    placeholder="Enter category name"
                     // required
                   />
                   <ModalInput
@@ -193,6 +195,7 @@ const ItemsCategoryModal: React.FC<{
                     name="description"
                     value={form.description}
                     onChange={handleChange}
+                    placeholder="Enter category description"
                   />
                   {/* <Input
                         label="Unit of Measurement"
@@ -215,6 +218,7 @@ const ItemsCategoryModal: React.FC<{
                     value={form.unitOfMeasurement}
                     fetchData={getUOMs}
                     variant="modal"
+                    placeholder="Search unit of measure"
                     onChange={({ id }) =>
                       setForm((p) => ({ ...p, unitOfMeasurement: id }))
                     }
@@ -237,12 +241,14 @@ const ItemsCategoryModal: React.FC<{
                     name="sellingPrice"
                     value={form.sellingPrice || ""}
                     onChange={handleChange}
+                    placeholder="Enter selling price"
                   />
                   <ModalInput
                     label="Sales Account"
                     name="salesAccount"
                     value={form.salesAccount || ""}
                     onChange={handleChange}
+                    placeholder="Enter sales account"
                   />
                 </div>
               </div>

@@ -8,6 +8,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     label: "Item Type",
     required: true,
     colSpan: 1,
+    placeholder: "Select item type",
     options: [
       { value: "1", label: "Raw Material" },
       { value: "2", label: "Finished Product" },
@@ -22,6 +23,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     label: "Item Category",
     required: true,
     colSpan: 1,
+    placeholder: "Search item category",
     apiFunctionName: "ItemCategorySelect", // Special component
     customComponent: "ItemCategorySelect",
   },
@@ -33,6 +35,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     label: "Items Name",
     required: true,
     colSpan: 1,
+    placeholder: "Enter item name",
   },
 
   // Description
@@ -42,6 +45,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     label: "Description",
     required: true,
     colSpan: 1,
+    placeholder: "Enter description",
   },
 
   // Item Class - API driven
@@ -51,6 +55,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     label: "Item Class",
     required: true,
     colSpan: 1,
+    placeholder: "Search item class",
     apiFunctionName: "getItemClasses",
     customComponent: "ItemTreeSelect",
   },
@@ -62,6 +67,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     label: "Packaging Unit",
     required: true,
     colSpan: 1,
+    placeholder: "Search packaging unit",
     apiFunctionName: "getPackagingUnits",
     customComponent: "ItemGenericSelect",
   },
@@ -73,6 +79,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     label: "Country Code",
     required: true,
     colSpan: 1,
+    placeholder: "Search country",
     apiFunctionName: "getCountries",
     customComponent: "ItemGenericSelect",
   },
@@ -84,6 +91,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     label: "Unit of Measurement",
     required: true,
     colSpan: 1,
+    placeholder: "Search unit of measure",
     apiFunctionName: "getUOMs",
     customComponent: "ItemGenericSelect",
   },
@@ -95,6 +103,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     label: "Service Charge",
     required: true,
     colSpan: 1,
+    placeholder: "Select",
     options: [
       { value: "Y", label: "Yes" },
       { value: "N", label: "No" },
@@ -108,6 +117,7 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     label: "Insurance",
     required: true,
     colSpan: 1,
+    placeholder: "Select",
     options: [
       { value: "Y", label: "Yes" },
       { value: "N", label: "No" },
@@ -121,5 +131,6 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     label: "SKU",
     required: true,
     colSpan: 1,
+    placeholder: "Enter SKU",
   },
 ];
