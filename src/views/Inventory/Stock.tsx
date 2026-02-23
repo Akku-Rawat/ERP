@@ -47,6 +47,11 @@ const stockEntryTypeLabel: Record<string, string> = {
   "16": "Adjustment",
 };
 
+const registrationTypeLabel: Record<string, string> = {
+  A: "Automatic",
+  M: "Manual",
+};
+
 const Items: React.FC = () => {
   const [items, setItems] = useState<ItemSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -219,7 +224,13 @@ const Items: React.FC = () => {
       ),
     },
     { key: "orgSarNo", header: "orgSarNo", align: "left" },
-    { key: "registrationType", header: "Registration Type", align: "left" },
+    {
+      key: "registrationType",
+      header: "Registration Type",
+      align: "left",
+      render: (i) =>
+        registrationTypeLabel[String(i.registrationType ?? "")] || i.registrationType,
+    },
     {
       key: "stockEntryType",
       header: "Stock Entry Type",
