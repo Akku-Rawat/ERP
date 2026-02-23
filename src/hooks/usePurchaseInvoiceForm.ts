@@ -75,20 +75,8 @@ export const usePurchaseInvoiceForm = ({
     loadCompanyBuyingTerms();
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    setForm((prev) => ({
-      ...prev,
-      taxCategory: "Non-Export",
-      destnCountryCd: "",
-      placeOfSupply: "",
-      items: prev.items.map((item) => ({
-        ...item,
-        vatCd: "A",
-      })),
-    }));
-  }, [isOpen]);
+ 
+  
 
   useEffect(() => {
     if (!isOpen || !pId) return;
@@ -204,7 +192,7 @@ export const usePurchaseInvoiceForm = ({
         supplierCode: supplier.supplierCode,
         supplierEmail: supplier.emailId,
         supplierPhone: supplier.phoneNo,
-        taxCategory: "Non-Export",
+        taxCategory: supplier.taxCategory || "",
 
         /*   AUTO FETCHED FIELDS  */
         currency: supplier.currency || p.currency,
