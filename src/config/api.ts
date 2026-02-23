@@ -1,3 +1,4 @@
+
 import { ENV } from "./env";
 
 export const ERP_BASE = ENV.apiBaseUrl;
@@ -280,9 +281,9 @@ export const API = {
     get: `${CODES_BASE}/exchange/`,
   },
   rolaLookup: {
-    getPackagingUnits: `${ERP_BASE}/api//`,
     getUnitOfMeasure: `${ERP_BASE}/api/resource/UOM`,
     getItemClasses: `${ERP_BASE}/api/item-class-list/`,
-    getCountries: `${ERP_BASE}/api/resource/Country?fields=["name","country_name"]&limit_page_length=300`
+    getCountries: `${ERP_BASE}/api/resource/Country?fields=["name","country_name"]&limit_page_length=300`,
+    getPackagingUnits : `${ERP_BASE}/api/method/erpnext.packaging_unit.get_all_packaging_units`
   },
 } as const;

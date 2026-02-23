@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-import React from "react";
+import React, { useEffect, useState } from "react";
 import type { SupplierFormData } from "../../../types/Supply/supplier";
 import { ModalInput } from "../../ui/modal/modalComponent";
 import SearchSelect from "../../ui/modal/SearchSelect";
-import { getCountry, getProvinces, getTowns } from "../../../api/PlacesApi";
+import { getRolaCountryList } from "../../../api/lookupApi";
+
 interface AddressTabProps {
   form: SupplierFormData;
   onChange: (
@@ -24,35 +21,39 @@ interface AddressTabProps {
   };
 }
 
-export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors = {} }) => {
-  const fetchCountryOptions = async (q: string) => {
-    const res = await getCountry(q);
-    return (res.data || []).map((c: string) => ({
-      label: c,
-      value: c,
-    }));
-  };
+interface Country {
+  name: string;
+  country_name: string;
+}
 
-  const fetchProvinceOptions = async (q: string) => {
-    const res = await getProvinces(q);
-    return (res.data || []).map((p: string) => ({
-      label: p,
-      value: p,
-    }));
-  };
+export const AddressTab: React.FC<AddressTabProps> = ({
+  form,
+  onChange,
+  errors = {},
+}) => {
+  const [countriesCache, setCountriesCache] = useState<Country[]>([]);
 
-  const fetchTownOptions = async (q: string) => {
-    const res = await getTowns(q);
-    return (res.data || []).map((t: string) => ({
-      label: t,
-      value: t,
-    }));
-  };
+  useEffect(() => {
+    const loadCountries = async () => {
+      try {
+        const result = await getRolaCountryList();
+        setCountriesCache(result || []);
+      } catch (error) {
+        console.error("Failed to load countries:", error);
+        setCountriesCache([]);
+      }
+    };
+
+    loadCountries();
+  }, []);
 
   return (
     <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-gray-700">Address Details</h3>
+        <h3 className="text-sm font-semibold text-gray-700">
+          Address Details
+        </h3>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           <ModalInput
             label="Address Line 1"
@@ -69,6 +70,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors =
             value={form.billingAddressLine2}
             onChange={onChange}
           />
+
           <ModalInput
             label="City / Town"
             name="billingCity"
@@ -77,13 +79,35 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors =
             error={errors.billingCity}
           />
 
-          <ModalInput
+          <SearchSelect
             label="Country"
-            name="billingCountry"
             value={form.billingCountry}
-            onChange={onChange}
+            onChange={(val) =>
+              onChange({
+                target: {
+                  name: "billingCountry",
+                  value: val,
+                },
+              } as React.ChangeEvent<HTMLInputElement>)
+            }
+            fetchOptions={async (q: string) => {
+              const lowerQ = q.toLowerCase();
+
+              return countriesCache
+                .filter(
+                  (c) =>
+                    c?.country_name &&
+                    c.country_name.toLowerCase().includes(lowerQ)
+                )
+                .map((c) => ({
+                  label: c.country_name,
+                  value: c.name,
+                }));
+            }}
             error={errors.billingCountry}
+            required
           />
+
           <ModalInput
             label="District"
             name="district"
@@ -100,6 +124,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors =
             onChange={onChange}
             error={errors.province}
           />
+
           <ModalInput
             label="Postal Code"
             name="billingPostalCode"

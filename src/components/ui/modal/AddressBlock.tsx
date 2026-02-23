@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Checkbox } from "./formComponent";
-import { ModalInput, ModalSelect } from "./modalComponent";
-import { getCountry, getProvinces, getTowns } from "../../../api/PlacesApi";
-
+import { ModalInput } from "./modalComponent";
+import { getRolaCountryList } from "../../../api/lookupApi";
+import SearchSelect from "./SearchSelect";
 
 interface Address {
   line1: string;
@@ -34,6 +34,11 @@ interface AddressBlockProps {
   errors?: AddressErrors;
 }
 
+interface Country {
+  name: string;
+  country_name: string;
+}
+
 const AddressBlock: React.FC<AddressBlockProps> = ({
   type,
   title,
@@ -47,46 +52,24 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
 }) => {
   const isShipping = type === "shipping";
 
+  const [countriesCache, setCountriesCache] = useState<Country[]>([]);
 
+  useEffect(() => {
+    const loadCountries = async () => {
+      try {
+        const result = await getRolaCountryList();
+        setCountriesCache(result || []);
+      } catch (error) {
+        console.error("Failed to load countries:", error);
+        setCountriesCache([]);
+      }
+    };
 
-
-  const fetchCountryOptions = async (q: string) => {
-    const res = await getCountry(q);
-
-    return (res.data || []).map((c: string) => ({
-      label: c,
-      value: c,
-    }));
-  };
-
-
-  const fetchProvinceOptions = async (q: string) => {
-    const res = await getProvinces(q);
-
-    return (res.data || []).map((p: string) => ({
-      label: p,
-      value: p,
-    }));
-  };
-
-
-  const fetchTownOptions = async (q: string) => {
-    const res = await getTowns(q);
-
-    return (res.data || []).map((t: string) => ({
-      label: t,
-      value: t,
-    }));
-  };
-
+    loadCountries();
+  }, []);
 
   return (
-    <Card
-      title={title}
-      subtitle={subtitle}
-      className="relative"
-    >
-      {/* Same as billing toggle */}
+    <Card title={title} subtitle={subtitle} className="relative">
       {isShipping && onSameAsBillingChange && (
         <div className="absolute top-6 right-6">
           <Checkbox
@@ -94,7 +77,6 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             checked={!!sameAsBilling}
             onChange={onSameAsBillingChange}
           />
-
         </div>
       )}
 
@@ -137,7 +119,6 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             disabled={disableAll || sameAsBilling}
             error={errors?.city}
           />
-
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -150,15 +131,35 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             error={errors?.state}
           />
 
-          <ModalInput
+          <SearchSelect
             label="Country"
-            name="country"
             value={data.country}
-            onChange={onChange}
+            onChange={(val) =>
+              onChange({
+                target: {
+                  name: "country",
+                  value: val,
+                },
+              } as React.ChangeEvent<HTMLInputElement>)
+            }
+            fetchOptions={async (q: string) => {
+              const lowerQ = q.toLowerCase();
+
+              return countriesCache
+                .filter(
+                  (c) =>
+                    c?.country_name &&
+                    c.country_name.toLowerCase().includes(lowerQ)
+                )
+                .map((c) => ({
+                  label: c.country_name,
+                  value: c.name,
+                }));
+            }}
             disabled={disableAll || sameAsBilling}
             error={errors?.country}
+            required
           />
-
         </div>
       </div>
     </Card>
