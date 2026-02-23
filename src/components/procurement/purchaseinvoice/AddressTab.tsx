@@ -3,8 +3,8 @@ import { Checkbox } from "../../ui/modal/formComponent";
 import type { PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
 import { MapPin, Truck, Building2, Plus, Minus } from "lucide-react";
 import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
-import { getCountry, getProvinces, getTowns } from "../../../api/PlacesApi";
 import SearchSelect from "../../ui/modal/SearchSelect";
+import { getRolaCountryList } from "../../../api/lookupApi";
 
 interface AddressTabProps {
   form: PurchaseOrderFormData;
@@ -12,6 +12,11 @@ interface AddressTabProps {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
 }
+ interface Country {
+  name: string;
+  country_name: string;
+}
+
 
 type AddressKey = keyof PurchaseOrderFormData["addresses"];
 
@@ -45,29 +50,24 @@ const AddressBlock: React.FC<{
   onCopyToggle,
 }) => {
 
-    const fetchCountryOptions = async (q: string) => {
-      const res = await getCountry(q);
-      return (res.data || []).map((c: string) => ({
-        label: c,
-        value: c,
-      }));
-    };
 
-    const fetchProvinceOptions = async (q: string) => {
-      const res = await getProvinces(q);
-      return (res.data || []).map((p: string) => ({
-        label: p,
-        value: p,
-      }));
-    };
+ 
+const [countriesCache, setCountriesCache] = useState<Country[]>([]);
 
-    const fetchTownOptions = async (q: string) => {
-      const res = await getTowns(q);
-      return (res.data || []).map((t: string) => ({
-        label: t,
-        value: t,
-      }));
-    };
+useEffect(() => {
+  const loadCountries = async () => {
+    try {
+      const result = await getRolaCountryList();
+      setCountriesCache(result || []);
+    } catch (error) {
+      console.error("Failed to load countries:", error);
+      setCountriesCache([]);
+    }
+  };
+
+  loadCountries();
+}, []);
+  
 
     return (
       <div className="bg-card border border-theme rounded-xl shadow-sm overflow-hidden">
@@ -154,11 +154,31 @@ const AddressBlock: React.FC<{
             />
 
 
-            <ModalInput
+            <SearchSelect
               label="Country"
-              name={`addresses.${keyName}.country`}
               value={data?.country || ""}
-              onChange={onFormChange}
+              onChange={(val) =>
+                onFormChange({
+                  target: {
+                    name: `addresses.${keyName}.country`,
+                    value: val,
+                  },
+                } as React.ChangeEvent<HTMLInputElement>)
+              }
+              fetchOptions={async (q: string) => {
+                const lowerQ = q.toLowerCase();
+
+                return countriesCache
+                  .filter(
+                    (c) =>
+                      c?.country_name &&
+                      c.country_name.toLowerCase().includes(lowerQ)
+                  )
+                  .map((c) => ({
+                    label: c.country_name,
+                    value: c.name,
+                  }));
+              }}
             />
 
 

@@ -37,12 +37,12 @@ export async function getRolaItemClassList(): Promise<any> {
   return resp.data || [];
 }
 
-export async function getRolaPackagingUnitCodes(): Promise<any> {
+export async function getRolaPackagingUnitCodes(): Promise<any[]> {
   const resp: AxiosResponse = await api.get(RolaLookupAPI.getPackagingUnits);
-  return resp.data || [];
+  return resp.data?.message || []; 
 }
 
 export async function getRolaCountryList(): Promise<any[]> {
   const resp: AxiosResponse = await api.get(RolaLookupAPI.getCountries);
-  return resp.data?.data || []; 
+  return resp.data?.data || [];
 }
