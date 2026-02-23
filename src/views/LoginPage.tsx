@@ -11,7 +11,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useLogin } from "../hooks/useloginhooks";
-import erp2 from "../assets/login-illustration.png";
+import erp2 from "../assets/login-illustration2.png";
+import logo from "../assets/iZyane_Icon.png";
 import "../login.css";
 
 const features = [
@@ -37,25 +38,28 @@ const Login = () => {
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[hsl(240,20%,95%)] p-4 overflow-hidden">
+    <div className="flex min-h-screen items-center justify-center bg-[hsl(210,20%,95%)] p-4 overflow-hidden">
       {/* Ambient background blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-[hsl(270,70%,55%)]/10 blur-3xl animate-pulse-slow" />
-        <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-[hsl(270,60%,50%)]/8 blur-3xl animate-pulse-slower" />
+        <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-[hsl(210, 80%, 62%)]/10 blur-3xl animate-pulse-slow" />
+        <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-[hsl(210, 60%, 50%)]/8 blur-3xl animate-pulse-slower" />
       </div>
 
-      <div className="relative w-full max-w-[1100px] overflow-hidden rounded-3xl bg-white shadow-2xl shadow-[hsl(270,70%,55%)]/10 animate-scale-in">
+      <div className="relative w-full max-w-[1100px] overflow-hidden rounded-3xl bg-white shadow-2xl shadow-[hsl(210, 70%, 55%)]/10 animate-scale-in">
         <div className="grid min-h-[640px] md:grid-cols-[1fr_1.1fr]">
           {/* Left - Form */}
           <div className="flex flex-col justify-center px-8 py-12 md:px-14">
             {/* Logo */}
             <div className="mb-8 flex items-center gap-3 animate-fade-in delay-100 fill-both opacity-0-start">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(270,70%,55%)] shadow-primary-lg hover-scale cursor-pointer">
-                <span className="text-base font-bold text-white">⬡</span>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(210 , 70%, 55%)] shadow-primary-lg hover-scale cursor-pointer">
+                <img
+                    src={logo}
+                    alt="ERP Dashboard Preview"
+                  />
               </div>
               <div>
                 <span className="text-xl font-bold text-[hsl(240,10%,20%)] tracking-tight">
-                  ERP
+                  iZyane ERP
                 </span>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(240,5%,50%)] font-medium">
                   Enterprise Suite
@@ -84,11 +88,10 @@ const Login = () => {
               {/* Username */}
               <div className="relative mb-4 animate-fade-in delay-350 fill-both opacity-0-start">
                 <User
-                  className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-300 ${
-                    focusedField === "user"
-                      ? "text-[hsl(270,70%,55%)]"
+                  className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-300 ${focusedField === "user"
+                      ? "text-[hsl(200,70%,55%)]"
                       : "text-[hsl(240,5%,50%)]"
-                  }`}
+                    }`}
                 />
                 <input
                   type="text"
@@ -97,7 +100,7 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   onFocus={() => setFocusedField("user")}
                   onBlur={() => setFocusedField(null)}
-                  className="w-full rounded-xl border border-[hsl(270,20%,88%)] bg-[hsl(270,30%,97%)] py-3 pl-11 pr-4 text-sm text-[hsl(240,10%,20%)] placeholder:text-[hsl(240,5%,50%)]/60 outline-none focus:border-[hsl(270,70%,55%)] focus:ring-2 focus:ring-[hsl(270,70%,55%)]/10 focus:bg-white transition-all duration-300"
+                  className="w-full rounded-xl border border-[hsl(270,20%,88%)] bg-[hsl(270,30%,97%)] py-3 pl-11 pr-4 text-sm text-[hsl(240,10%,20%)] placeholder:text-[hsl(240,5%,50%)]/60 outline-none focus:border-[hsl(210,70%,55%)] focus:ring-2 focus:ring-[hsl(210,70%,55%)]/10 focus:bg-white transition-all duration-300"
                   required
                 />
               </div>
@@ -105,11 +108,10 @@ const Login = () => {
               {/* Password */}
               <div className="relative mb-5 animate-fade-in delay-450 fill-both opacity-0-start">
                 <Lock
-                  className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-300 ${
-                    focusedField === "pass"
-                      ? "text-[hsl(270,70%,55%)]"
+                  className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-300 ${focusedField === "pass"
+                      ? "text-[hsl(220,70%,55%)]"
                       : "text-[hsl(240,5%,50%)]"
-                  }`}
+                    }`}
                 />
                 <input
                   type={showPassword ? "text" : "password"}
@@ -118,12 +120,12 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   onFocus={() => setFocusedField("pass")}
                   onBlur={() => setFocusedField(null)}
-                  className="w-full rounded-xl border border-[hsl(270,20%,88%)] bg-[hsl(270,30%,97%)] py-3 pl-11 pr-11 text-sm text-[hsl(240,10%,20%)] placeholder:text-[hsl(240,5%,50%)]/60 outline-none focus:border-[hsl(270,70%,55%)] focus:ring-2 focus:ring-[hsl(270,70%,55%)]/10 focus:bg-white transition-all duration-300"
+                  className="w-full rounded-xl border border-[hsl(270,20%,88%)] bg-[hsl(270,30%,97%)] py-3 pl-11 pr-11 text-sm text-[hsl(240,10%,20%)] placeholder:text-[hsl(240,5%,50%)]/60 outline-none focus:border-[hsl(210,70%,55%)] focus:ring-2 focus:ring-[hsl(210,70%,55%)]/10 focus:bg-white transition-all duration-300"
                   required
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword(!showPassword)} 
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[hsl(240,5%,50%)] hover:text-[hsl(240,10%,20%)] transition-colors"
                 >
                   {showPassword ? (
@@ -138,11 +140,10 @@ const Login = () => {
               <div className="mb-6 flex items-center justify-between animate-fade-in delay-550 fill-both opacity-0-start">
                 <label className="flex cursor-pointer items-center gap-2 text-sm text-[hsl(240,5%,50%)] group">
                   <div
-                    className={`flex h-4 w-4 items-center justify-center rounded border transition-all duration-200 ${
-                      rememberMe
-                        ? "border-[hsl(270,70%,55%)] bg-[hsl(270,70%,55%)]"
-                        : "border-[hsl(270,20%,88%)] group-hover:border-[hsl(270,70%,55%)]/50"
-                    }`}
+                    className={`flex h-4 w-4 items-center justify-center rounded border transition-all duration-200 ${rememberMe
+                        ? "border-[hsl(210,70%,55%)] bg-[hsl(210,70%,55%)]"
+                        : "border-[hsl(270,20%,88%)] group-hover:border-[hsl(210,70%,55%)]/50"
+                      }`}
                     onClick={() => setRememberMe(!rememberMe)}
                   >
                     {rememberMe && (
@@ -165,7 +166,7 @@ const Login = () => {
                 </label>
                 <button
                   type="button"
-                  className="text-sm font-medium text-[hsl(270,70%,55%)] hover:text-[hsl(270,70%,45%)] transition-colors"
+                  className="text-sm font-medium text-[hsl(210,70%,55%)] hover:text-[hsl(210,70%,45%)] transition-colors"
                 >
                   Reset Password
                 </button>
@@ -175,12 +176,11 @@ const Login = () => {
               <div className="animate-fade-in delay-650 fill-both opacity-0-start">
                 <button
                   type="submit"
-                  className="group relative flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[hsl(268,80%,58%)] to-[hsl(268,80%,48%)] px-6 py-3.5 text-sm font-semibold text-white 
-shadow-[0_8px_25px_rgba(124,58,237,0.35)] 
-hover:shadow-[0_12px_35px_rgba(124,58,237,0.45)] 
-hover:-translate-y-1 active:translate-y-0 
-transition-all duration-300 ease-out"
-
+                  className="group relative flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[hsl(210,80%,58%)] to-[hsl(210,80%,48%)] px-6 py-3.5 text-sm font-semibold text-white 
+                      shadow-[0_8px_25px_rgba(124,58,237,0.35)] 
+                        hover:shadow-[0_12px_35px_rgba(124,58,237,0.45)] 
+                          hover:-translate-y-1 active:translate-y-0 
+                            transition-all duration-300 ease-out"
                 >
                   Sign In
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -190,14 +190,14 @@ transition-all duration-300 ease-out"
           </div>
 
           {/* Right - Illustration */}
-<div className="relative hidden md:block overflow-hidden bg-white">
+          <div className="relative hidden md:block overflow-hidden bg-white">
 
 
             {/* Animated gradient background */}
             <div className="absolute inset-0">
-             <div className="absolute -left-16 -top-16 h-[130%] w-[130%] rounded-blob-1 bg-[hsl(255,80%,58%)] opacity-90 animate-spin-slow origin-55-50" />
+              <div className="absolute -left-16 -top-16 h-[130%] w-[130%] rounded-blob-1 bg-[hsl(205,80%,58%)] opacity-90 animate-spin-slow origin-55-50" />
 
-<div className="absolute -bottom-20 -right-20 h-[70%] w-[70%] rounded-blob-2 bg-[hsl(248,75%,50%)]/40 animate-spin-slower origin-45-50" />
+              <div className="absolute -bottom-20 -right-20 h-[70%] w-[70%] rounded-blob-2 bg-[hsl(210,75%,50%)]/40 animate-spin-slower origin-45-50" />
 
               <div className="absolute top-10 right-10 h-[40%] w-[40%] rounded-full bg-white/5 animate-spin-slowest origin-50-60" />
             </div>
@@ -205,8 +205,8 @@ transition-all duration-300 ease-out"
             {/* Content */}
             <div className="relative flex h-full flex-col items-center justify-center p-10">
               {/* Laptop */}
-   <div className="flex w-full justify-center animate-float">
-  <div className="w-full max-w-[380px] 
+              <div className="flex w-full justify-center animate-float">
+                <div className="w-full max-w-[380px] 
       rounded-2xl 
       bg-white/10 
       backdrop-blur-md 
@@ -214,14 +214,14 @@ transition-all duration-300 ease-out"
       p-3 
       shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
 
-    <img
-      src={erp2}
-      alt="ERP Dashboard Preview"
-      className="w-full rounded-xl animate-fade-in delay-500 fill-both duration-800"
-    />
-    
-  </div>
-</div>
+                  <img
+                    src={erp2}
+                    alt="ERP Dashboard Preview"
+                    className="w-full rounded-xl animate-fade-in delay-500 fill-both duration-800"
+                  />
+
+                </div>
+              </div>
               {/* Feature pills */}
               <div className="mt-8 flex flex-wrap items-center justify-center gap-2 animate-fade-in delay-800 fill-both opacity-0-start">
                 {features.map((f, i) => (
