@@ -4,7 +4,6 @@ import type {
   ItemRow,
   PurchaseOrderFormData,
 } from "../../../types/Supply/purchaseOrder";
-import { currencyOptions } from "../../../types/Supply/supplier";
 import SupplierSelect from "../../selects/procurement/SupplierSelect";
 import POItemSelect from "../../selects/procurement/POItemSelect";
 import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
@@ -40,15 +39,6 @@ export const DetailsTab = ({
   const ITEMS_PER_PAGE = 5;
   const [page, setPage] = useState(0);
 
-  // Helper function to get VAT description
-  const getVatDescription = (vatCd: string): string => {
-    const descriptions: Record<string, string> = {
-      A: "Standard Rate",
-    };
-
-    return descriptions[vatCd] || "Standard";
-  };
-
   useEffect(() => {
     const newPage = Math.floor((items.length - 1) / ITEMS_PER_PAGE);
     if (newPage !== page) setPage(newPage);
@@ -58,13 +48,6 @@ export const DetailsTab = ({
     page * ITEMS_PER_PAGE,
     (page + 1) * ITEMS_PER_PAGE,
   );
-
-  const currencySelectOptions = [
-    ...currencyOptions.map((c) => ({
-      value: c,
-      label: c,
-    })),
-  ];
 
   return (
     <div className="flex flex-col gap-4 max-h-screen overflow-auto p-4 bg-app text-main">
@@ -99,6 +82,38 @@ export const DetailsTab = ({
               value={form.requiredBy}
               onChange={onFormChange}
               required
+            />
+          </div>
+
+          <div>
+            <ModalSelect
+              label="Shipping Rule"
+              name="shippingRule"
+              value={form.shippingRule || ""}
+              onChange={onFormChange}
+              placeholder="Select shipping rule"
+              options={[
+                { value: "STANDARD", label: "Standard Shipping" },
+                { value: "EXPRESS", label: "Express Shipping" },
+                { value: "OVERNIGHT", label: "Overnight Shipping" },
+                { value: "SAME_DAY", label: "Same Day Delivery" },
+                { value: "ECONOMY", label: "Economy Shipping" },
+                { value: "FREIGHT", label: "Freight" },
+                { value: "SEA", label: "Sea Freight" },
+                { value: "AIR", label: "Air Freight" },
+                { value: "ROAD", label: "Road Transport" },
+                { value: "PICKUP", label: "Self Pickup" },
+              ]}
+            />
+          </div>
+
+          <div>
+            <ModalInput
+              label="Incoterm"
+              name="incoterm"
+              value={form.incoterm || ""}
+              onChange={onFormChange}
+              placeholder="Enter incoterm"
             />
           </div>
 

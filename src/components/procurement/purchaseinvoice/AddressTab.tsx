@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Checkbox } from "../../ui/modal/formComponent";
 import type { PurchaseOrderFormData } from "../../../types/Supply/purchaseOrder";
 import { MapPin, Truck, Building2, Plus, Minus } from "lucide-react";
-import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
+import { ModalInput } from "../../ui/modal/modalComponent";
 import { getCountry, getProvinces, getTowns } from "../../../api/PlacesApi";
 import SearchSelect from "../../ui/modal/SearchSelect";
 
@@ -292,33 +292,6 @@ export const AddressTab: React.FC<AddressTabProps> = ({
 
       {/* Top fields */}
       <div className="grid grid-cols-4 gap-4 p-4">
-
-        <ModalSelect
-          label="Shipping Rule"
-          name="shippingRule"
-          value={form.shippingRule || ""}
-          onChange={onFormChange}
-          options={[
-            { value: "STANDARD", label: "Standard Shipping" },
-            { value: "EXPRESS", label: "Express Shipping" },
-            { value: "OVERNIGHT", label: "Overnight Shipping" },
-            { value: "SAME_DAY", label: "Same Day Delivery" },
-            { value: "ECONOMY", label: "Economy Shipping" },
-            { value: "FREIGHT", label: "Freight" },
-            { value: "SEA", label: "Sea Freight" },
-            { value: "AIR", label: "Air Freight" },
-            { value: "ROAD", label: "Road Transport" },
-            { value: "PICKUP", label: "Self Pickup" },
-          ]}
-        />
-
-        <ModalInput
-          label="Incoterm"
-          name="incoterm"
-          value={form.incoterm || ""}
-          onChange={onFormChange}
-        />
-
         <ModalInput
           label="Supplier Contact"
           name="supplierContact"

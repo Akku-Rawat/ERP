@@ -55,12 +55,6 @@ export const TaxTab: React.FC<TaxTabProps> = ({
         Taxes and Charges
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-       
-        <Input label="Shipping Rule" name="shippingRule" value={form.shippingRule} onChange={onFormChange} />
-        <Input label="Incoterm" name="incoterm" value={form.incoterm} onChange={onFormChange} />
-      </div>
-
       <div className="grid grid-cols-2 gap-4">
         <Input
           label="Purchase Taxes and Charges Template"
