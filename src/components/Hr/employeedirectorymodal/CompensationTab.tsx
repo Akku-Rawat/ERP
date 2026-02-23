@@ -1,6 +1,6 @@
 // CompensationTab.tsx
 import React, { useState, useEffect } from "react";
-import { DollarSign, Calculator, RefreshCw, Lock } from "lucide-react";
+import { Calculator, RefreshCw, Lock } from "lucide-react";
 import { getCurrentCeiling } from "../../../api/employeeapi";
 
 type CompensationTabProps = {
@@ -422,13 +422,10 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
                   <span className="text-xs font-semibold text-primary uppercase">
                     Gross Salary (Annual)
                   </span>
-                  <DollarSign className="w-4 h-4 text-primary/70" />
                 </div>
                 <div className="text-2xl font-bold text-primary">
                   ZMW{" "}
-                  {grossSalary.toLocaleString(undefined, {
-                    maximumFractionDigits: 2,
-                  })}
+                  {Number(formData.grossSalary || 0).toLocaleString()}
                 </div>
                 <div className="text-xs text-primary/70 mt-0.5">
                   Monthly: ZMW{" "}

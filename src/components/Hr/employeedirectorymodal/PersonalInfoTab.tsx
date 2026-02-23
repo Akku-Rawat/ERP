@@ -227,7 +227,6 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
               <option value="">Select gender</option>
               <option>Male</option>
               <option>Female</option>
-              <option>Other</option>
             </select>
           </div>
           <div>
