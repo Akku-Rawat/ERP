@@ -176,7 +176,13 @@ const ItemModal: React.FC<{
 
       setLoading(true);
 
-      await createItemStock(payload);
+      const res = await createItemStock(payload);
+
+      if (!res || ![200, 201].includes(res.status_code)) {
+        closeSwal();
+        showApiError(res);
+        return;
+      }
 
       closeSwal();
       showSuccess("Stock entry created successfully");

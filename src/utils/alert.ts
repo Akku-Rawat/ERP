@@ -39,6 +39,16 @@ const toUserFriendlyMessage = (message: string): string => {
   const currencyFixed = m.replace(/\bZRA\b/g, "ZAR");
   const normalized = currencyFixed.toLowerCase();
 
+  if (
+    normalized.includes("httpconnectionpool") ||
+    normalized.includes("read timed out") ||
+    normalized.includes("timed out") ||
+    normalized.includes("timeout") ||
+    normalized.includes("max retries exceeded")
+  ) {
+    return "Request timed out while processing your request. Please try again.";
+  }
+
   if (normalized.includes("destncountrycd") && normalized.includes("c1")) {
     return "Export To Country is required when using Tax Code C1.";
   }
