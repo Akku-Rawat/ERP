@@ -41,7 +41,7 @@ const CustomerManagement: React.FC<Props> = ({ onAdd }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [allCustomers, setAllCustomers] = useState<CustomerSummary[]>([]);
-  const [taxCategory, setTaxCategory] = useState<string>("Non-Export");
+  const [taxCategory, setTaxCategory] = useState<string>("");
 
 
 const fetchCustomers = async () => {
@@ -51,7 +51,7 @@ const fetchCustomers = async () => {
     const response = await getAllCustomers(
       page,
       pageSize,
-      taxCategory
+      taxCategory || undefined
     );
 
     setCustomers(response.data);
@@ -268,6 +268,7 @@ const fetchCustomers = async () => {
                   }}
                   options={[
                     { label: "Non-Export", value: "Non-Export" },
+                    {label: "Export", value:"Export"}
                   ]}
                 />
               </div>
