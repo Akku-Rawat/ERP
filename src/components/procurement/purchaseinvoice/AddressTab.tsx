@@ -139,48 +139,26 @@ const AddressBlock: React.FC<{
               onChange={onFormChange}
             />
 
-            <SearchSelect
+            <ModalInput
               label="City / Town"
+              name={`addresses.${keyName}.city`}
               value={data?.city || ""}
-              onChange={(val) =>
-                onFormChange({
-                  target: {
-                    name: `addresses.${keyName}.city`,
-                    value: val,
-                  },
-                } as any)
-              }
-              fetchOptions={fetchTownOptions}
+              onChange={onFormChange}
             />
 
-
-            <SearchSelect
+            <ModalInput
               label="State / Province"
+              name={`addresses.${keyName}.state`}
               value={data?.state || ""}
-              onChange={(val) =>
-                onFormChange({
-                  target: {
-                    name: `addresses.${keyName}.state`,
-                    value: val,
-                  },
-                } as any)
-              }
-              fetchOptions={fetchProvinceOptions}
+              onChange={onFormChange}
             />
 
 
-            <SearchSelect
+            <ModalInput
               label="Country"
+              name={`addresses.${keyName}.country`}
               value={data?.country || ""}
-              onChange={(val) =>
-                onFormChange({
-                  target: {
-                    name: `addresses.${keyName}.country`,
-                    value: val,
-                  },
-                } as any)
-              }
-              fetchOptions={fetchCountryOptions}
+              onChange={onFormChange}
             />
 
 

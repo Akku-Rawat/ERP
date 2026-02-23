@@ -46,7 +46,7 @@ export const useInvoiceForm = (
   const [exchangeRateError, setExchangeRateError] = useState<string | null>(null);
 
   const shippingEditedRef = useRef(false);
-  const lastCurrencyRef = useRef<string>("ZMW");
+  const lastCurrencyRef = useRef<string>("INR");
   const lastRateRef = useRef<number>(1);
 useEffect(() => {
   if (!isOpen || initialData) return;
@@ -87,7 +87,7 @@ useEffect(() => {
     if (!isOpen) return;
 
     const code = String(formData.currencyCode ?? "").trim().toUpperCase();
-    if (!code || code === "ZMW") {
+    if (!code || code === "INR") {
       setExchangeRateLoading(false);
       setExchangeRateError(null);
       setFormData((prev) => ({ ...prev, exchangeRt: "1" }));
@@ -133,8 +133,8 @@ useEffect(() => {
     if (exchangeRateError) return;
 
     const newRate =
-      newCurrency === "ZMW" ? 1 : Number(String(formData.exchangeRt ?? "").trim());
-    const prevRate = prevCurrency === "ZMW" ? 1 : Number(lastRateRef.current);
+      newCurrency === "INR" ? 1 : Number(String(formData.exchangeRt ?? "").trim());
+    const prevRate = prevCurrency === "INR" ? 1 : Number(lastRateRef.current);
 
     if (!Number.isFinite(prevRate) || prevRate <= 0) return;
     if (!Number.isFinite(newRate) || newRate <= 0) return;
@@ -146,8 +146,8 @@ useEffect(() => {
         const price = Number(it.price);
         if (!Number.isFinite(price)) return it;
 
-        const priceInZmw = prevCurrency === "ZMW" ? price : price * prevRate;
-        const nextPrice = newCurrency === "ZMW" ? priceInZmw : priceInZmw / newRate;
+        const priceInZmw = prevCurrency === "INR" ? price : price * prevRate;
+        const nextPrice = newCurrency === "INR" ? priceInZmw : priceInZmw / newRate;
 
         return {
           ...it,
@@ -424,7 +424,7 @@ if (!formData.paymentInformation?.paymentTerms) {
         const rate = Number(String(prev.exchangeRt ?? "1").trim());
         const baseSellingPrice = Number(data.sellingPrice ?? items[index].price);
         const convertedPrice =
-          currency !== "ZMW" && Number.isFinite(rate) && rate > 0
+          currency !== "INR" && Number.isFinite(rate) && rate > 0
             ? baseSellingPrice / rate
             : baseSellingPrice;
 
@@ -594,7 +594,7 @@ const handleReset = async () => {
   setIsShippingOpen(false);
   setPage(0);
   shippingEditedRef.current = false;
-  lastCurrencyRef.current = "ZMW";
+  lastCurrencyRef.current = "INR";
   lastRateRef.current = 1;
 };
 

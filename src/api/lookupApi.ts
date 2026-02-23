@@ -42,7 +42,7 @@ export async function getRolaPackagingUnitCodes(): Promise<any> {
   return resp.data || [];
 }
 
-export async function getRolaCountryList(): Promise<any> {
+export async function getRolaCountryList(): Promise<any[]> {
   const resp: AxiosResponse = await api.get(RolaLookupAPI.getCountries);
-  return resp.data || [];
+  return resp.data?.data || []; 
 }

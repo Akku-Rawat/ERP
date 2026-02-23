@@ -69,33 +69,21 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors =
             value={form.billingAddressLine2}
             onChange={onChange}
           />
-
-          <SearchSelect
+          <ModalInput
             label="City / Town"
+            name="billingCity"
             value={form.billingCity}
-            onChange={(val) =>
-              onChange({
-                target: { name: "billingCity", value: val },
-              } as any)
-            }
-            fetchOptions={fetchTownOptions}
-            required
+            onChange={onChange}
             error={errors.billingCity}
           />
 
-          <SearchSelect
+          <ModalInput
             label="Country"
+            name="billingCountry"
             value={form.billingCountry}
-            onChange={(val) =>
-              onChange({
-                target: { name: "billingCountry", value: val },
-              } as any)
-            }
-            fetchOptions={fetchCountryOptions}
-            required
+            onChange={onChange}
             error={errors.billingCountry}
           />
-
           <ModalInput
             label="District"
             name="district"
@@ -105,19 +93,13 @@ export const AddressTab: React.FC<AddressTabProps> = ({ form, onChange, errors =
             error={errors.district}
           />
 
-          <SearchSelect
+          <ModalInput
             label="Province"
+            name="province"
             value={form.province}
-            onChange={(val) =>
-              onChange({
-                target: { name: "province", value: val },
-              } as any)
-            }
-            fetchOptions={fetchProvinceOptions}
-            required
+            onChange={onChange}
             error={errors.province}
           />
-
           <ModalInput
             label="Postal Code"
             name="billingPostalCode"

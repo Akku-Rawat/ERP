@@ -70,9 +70,9 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
   };
 
   const [custLoading, setCustLoading] = useState(true);
-  const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
+  const symbol = currencySymbols[formData.currencyCode] ?? "₹";
   const showExchangeRate =
-    String(formData.currencyCode ?? "").trim().toUpperCase() !== "ZMW";
+    String(formData.currencyCode ?? "").trim().toUpperCase() !== "INR";
   useEffect(() => {
     if (!isOpen) return;
 

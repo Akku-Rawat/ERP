@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Card, Checkbox } from "./formComponent";
 import { ModalInput, ModalSelect } from "./modalComponent";
 import { getCountry, getProvinces, getTowns } from "../../../api/PlacesApi";
-import SearchSelect from "./SearchSelect";
+
 
 interface Address {
   line1: string;
@@ -129,49 +129,33 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             error={errors?.postalCode}
           />
 
-          <SearchSelect
+          <ModalInput
             label="City / Town"
+            name="city"
             value={data.city}
-            onChange={(val) =>
-              onChange({
-                target: { name: "city", value: val },
-              } as any)
-            }
-            fetchOptions={fetchTownOptions}
+            onChange={onChange}
             disabled={disableAll || sameAsBilling}
-            required
             error={errors?.city}
           />
 
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <SearchSelect
+          <ModalInput
             label="State / Province"
+            name="state"
             value={data.state}
-            onChange={(val) =>
-              onChange({
-                target: { name: "state", value: val },
-              } as any)
-            }
-            fetchOptions={fetchProvinceOptions}
+            onChange={onChange}
             disabled={disableAll || sameAsBilling}
-            required
             error={errors?.state}
           />
 
-
-          <SearchSelect
+          <ModalInput
             label="Country"
+            name="country"
             value={data.country}
-            onChange={(val) =>
-              onChange({
-                target: { name: "country", value: val },
-              } as any)
-            }
-            fetchOptions={fetchCountryOptions}
+            onChange={onChange}
             disabled={disableAll || sameAsBilling}
-            required
             error={errors?.country}
           />
 

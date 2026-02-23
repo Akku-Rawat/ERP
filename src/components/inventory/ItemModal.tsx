@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { updateItemByItemCode, createItem } from "../../api/itemApi";
 
 import { getItemGroupById } from "../../api/itemCategoryApi";
-
 import Modal from "../ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
 import { useCompanySelection } from "../../hooks/useCompanySelection";
@@ -265,28 +264,10 @@ const ItemModal: React.FC<{
 
   // Validate Item Details section
   const validateItemDetails = () => {
-    // First, validate Item Class Level for ZRA company
-    if (companyCode === "ZRA") {
-      if (!selectedLevel3 && !selectedLevel4) {
-        if (selectedLevel1 && !selectedLevel2) {
-          toast.error(
-            "Item Class Level 1 alone is not sufficient. Please select at least Level 3 or higher.",
-          );
-          return false;
-        } else if (selectedLevel2 && !selectedLevel3) {
-          toast.error(
-            "Item Class Level 2 is not sufficient. Please select at least Level 3 or higher.",
-          );
-          return false;
-        } else if (!selectedLevel1) {
-          toast.error("Please select an Item Class Level.");
-          return false;
-        } else {
-          toast.error("Please select at least Item Class Level 3 to proceed.");
-          return false;
-        }
-      }
-    }
+   if (!form.itemClassCode || String(form.itemClassCode).trim() === "") {
+  toast.error("Item Class Code is required.");
+  return false;
+}
 
     // Then validate other required Item Details and Sales & Purchase fields
     const requiredFields = [
@@ -574,137 +555,19 @@ const ItemModal: React.FC<{
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {fieldConfigs.map((fieldConfig) => {
                       // Special rendering for itemClassCode - use cascading dropdowns
-                      if (fieldConfig.fieldName === "itemClassCode") {
-                        return (
-                          <React.Fragment key="itemClassCode">
-                            {/* Level 1 */}
-                            <div className="flex flex-col gap-1 text-sm">
-                              <span className="font-medium text-muted">
-                                Item Class Level 1{" "}
-                                <span className="text-red-500">*</span>
-                              </span>
-                              <select
-                                value={selectedLevel1}
-                                onChange={(e) =>
-                                  handleLevelChange(1, e.target.value)
-                                }
-                                disabled={loadingItemClasses}
-                                required
-                                className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                              >
-                                <option value="">
-                                  {loadingItemClasses
-                                    ? "Loading..."
-                                    : "Select Level 1 (Required)"}
-                                </option>
-                                {getCodesByLevel("1").map((option) => (
-                                  <option key={option.cd} value={option.cd}>
-                                    {option.cd} - {option.cdNm}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-
-                            {/* Level 2 */}
-                            {selectedLevel1 &&
-                              getCodesByLevel("2", selectedLevel1).length >
-                                0 && (
-                                <div className="flex flex-col gap-1 text-sm">
-                                  <span className="font-medium text-muted">
-                                    Item Class Level 2
-                                  </span>
-                                  <select
-                                    value={selectedLevel2}
-                                    onChange={(e) =>
-                                      handleLevelChange(2, e.target.value)
-                                    }
-                                    className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                  >
-                                    <option value="">
-                                      Select Level 2 (Optional)
-                                    </option>
-                                    {getCodesByLevel("2", selectedLevel1).map(
-                                      (option) => (
-                                        <option
-                                          key={option.cd}
-                                          value={option.cd}
-                                        >
-                                          {option.cd} - {option.cdNm}
-                                        </option>
-                                      ),
-                                    )}
-                                  </select>
-                                </div>
-                              )}
-
-                            {/* Level 3 */}
-                            {selectedLevel2 &&
-                              getCodesByLevel("3", selectedLevel2).length >
-                                0 && (
-                                <div className="flex flex-col gap-1 text-sm">
-                                  <span className="font-medium text-muted">
-                                    Item Class Level 3{" "}
-                                    <span className="text-red-500">*</span>
-                                  </span>
-                                  <select
-                                    value={selectedLevel3}
-                                    onChange={(e) =>
-                                      handleLevelChange(3, e.target.value)
-                                    }
-                                    className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                  >
-                                    <option value="">
-                                      Select Level 3 (Required)
-                                    </option>
-                                    {getCodesByLevel("3", selectedLevel2).map(
-                                      (option) => (
-                                        <option
-                                          key={option.cd}
-                                          value={option.cd}
-                                        >
-                                          {option.cd} - {option.cdNm}
-                                        </option>
-                                      ),
-                                    )}
-                                  </select>
-                                </div>
-                              )}
-
-                            {/* Level 4 */}
-                            {selectedLevel3 &&
-                              getCodesByLevel("4", selectedLevel3).length >
-                                0 && (
-                                <div className="flex flex-col gap-1 text-sm">
-                                  <span className="font-medium text-muted">
-                                    Item Class Level 4
-                                  </span>
-                                  <select
-                                    value={selectedLevel4}
-                                    onChange={(e) =>
-                                      handleLevelChange(4, e.target.value)
-                                    }
-                                    className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                  >
-                                    <option value="">
-                                      Select Level 4 (Optional)
-                                    </option>
-                                    {getCodesByLevel("4", selectedLevel3).map(
-                                      (option) => (
-                                        <option
-                                          key={option.cd}
-                                          value={option.cd}
-                                        >
-                                          {option.cd} - {option.cdNm}
-                                        </option>
-                                      ),
-                                    )}
-                                  </select>
-                                </div>
-                              )}
-                          </React.Fragment>
-                        );
-                      }
-
+                     if (fieldConfig.fieldName === "itemClassCode") {
+  return (
+    <Input
+      key="itemClassCode"
+      label="Item Class Code"
+      name="itemClassCode"
+      value={form.itemClassCode || ""}
+      onChange={handleForm}
+      required
+      className="w-full"
+    />
+  );
+}
                       // Regular DynamicField for other fields
                       return (
                         <DynamicField
