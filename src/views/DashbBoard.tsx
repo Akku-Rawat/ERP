@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getDashboardSummary } from '../api/dashboardApi';
 import { ChartSkeleton } from '../components/ChartSkeleton';
-import UserMenu from '../layout/UserMenu';
 import {
   Bar,
   BarChart,
@@ -182,22 +181,14 @@ const Dashboard = () => {
 
   return (
     <div className="p-6 bg-app min-h-screen">
-      <div className="mb-4 flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-0.5">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900">
             Dashboard
           </h1>
           <p className="text-gray-600 text-xs md:text-sm">
             Business overview and key performance trends
           </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="text-right leading-tight hidden sm:block">
-            <div className="text-sm font-bold text-gray-900">Admin User</div>
-            <div className="text-xs text-gray-600 font-semibold">Administrator</div>
-          </div>
-
-          <UserMenu />
         </div>
       </div>
 
