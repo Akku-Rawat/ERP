@@ -42,9 +42,18 @@ const TRANSACTION_PROGRESS = [
   { value: "06", label: "Transferred" },
 ];
 
+const paymentTermsSelectOptions = [
+  { value: "Due on Receipt", label: "Pay immediately (Due on receipt)" },
+  { value: "Net 7", label: "Pay within 7 days (Net 7)" },
+  { value: "Net 14", label: "Pay within 14 days (Net 14)" },
+  { value: "Net 30", label: "Pay within 30 days (Net 30)" },
+  { value: "Net 60", label: "Pay within 60 days (Net 60)" },
+  { value: "Net 90", label: "Pay within 90 days (Net 90)" },
+];
+
 const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
   onSubmit,
-  invoiceId,
+  invoiceId: _invoiceId,
   saving,
   setSaving,
 }) => {
@@ -76,15 +85,6 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
       return [];
     }
   };
-
-  useEffect(() => {
-    if (!invoiceId) return;
-    if (String(formData.invoiceNumber ?? "").trim()) return;
-
-    actions.handleInputChange({
-      target: { name: "invoiceNumber", value: invoiceId },
-    } as any);
-  }, [invoiceId, formData.invoiceNumber, actions]);
 
   useEffect(() => {
     if (!formData.invoiceNumber) return;
@@ -290,6 +290,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                 <div>
                   <ModalInput
                     label="Currency"
+                    required
                     name="currencyCode"
                     value={formData.currencyCode || ""}
                     disabled
@@ -303,6 +304,15 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                   options={[...paymentMethodOptions]}
                   name="paymentMethod"
                   value={formData.paymentInformation?.paymentMethod || ""}
+                  onChange={(e) => actions.handleInputChange(e, "paymentInformation")}
+                />
+
+                <ModalSelect
+                  label="Payment Terms"
+                  required
+                  options={[...paymentTermsSelectOptions]}
+                  name="paymentTerms"
+                  value={formData.paymentInformation?.paymentTerms || ""}
                   onChange={(e) => actions.handleInputChange(e, "paymentInformation")}
                 />
 
@@ -664,6 +674,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
               }
               paymentMethodOptions={paymentMethodOptions}
               showPaymentMethod={false}
+              showPaymentTerms={false}
             />
 
             {/*  BILLING + SHIPPING  */}

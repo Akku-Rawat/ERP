@@ -174,6 +174,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                   <div>
                     <ModalSelect
                       label="Currency "
+                      required
                       name="currencyCode"
                       value={formData.currencyCode}
                       onChange={actions.handleInputChange}
