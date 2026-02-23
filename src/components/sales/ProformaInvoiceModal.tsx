@@ -233,6 +233,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                   <div>
                     <ModalSelect
                       label="Payment Method"
+                      required
                       name="paymentMethod"
                       value={formData.paymentInformation?.paymentMethod}
                       onChange={(

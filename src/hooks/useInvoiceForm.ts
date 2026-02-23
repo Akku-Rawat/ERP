@@ -64,9 +64,6 @@ export const useInvoiceForm = (
           },
           paymentInformation: {
             ...prev.paymentInformation,
-            paymentTerms:
-              company?.terms?.selling?.payment?.dueDates ?? "",
-
             bankName: company?.bankAccounts?.[0]?.bankName ?? "",
             accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
             routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
@@ -208,6 +205,10 @@ export const useInvoiceForm = (
 
       if (!formData.paymentInformation?.paymentTerms) {
         throw new Error("Please select payment terms");
+      }
+
+      if (!formData.paymentInformation?.paymentMethod) {
+        throw new Error("Please select payment method");
       }
 
       if (!it.quantity || it.quantity <= 0) {

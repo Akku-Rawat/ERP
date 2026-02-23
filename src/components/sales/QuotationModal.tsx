@@ -207,6 +207,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                   <div>
                     <ModalSelect
                       label="Payment Method"
+                      required
                       name="paymentMethod"
                       value={formData.paymentInformation?.paymentMethod}
                       onChange={(

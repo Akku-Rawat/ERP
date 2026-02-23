@@ -199,6 +199,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   <div>
                     <ModalSelect
                       label="Payment Method"
+                      required
                       name="paymentMethod"
                       value={formData.paymentInformation?.paymentMethod}
                       onChange={(

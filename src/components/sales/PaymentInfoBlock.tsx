@@ -46,6 +46,7 @@ const PaymentInfoBlock: React.FC<PaymentInfoBlockProps> = ({
       {showPaymentMethod && (
         <ModalSelect
           label="Payment Method"
+          required
           name="paymentMethod"
           value={data.paymentMethod}
           onChange={onChange}
