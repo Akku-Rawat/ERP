@@ -3,6 +3,7 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
 import { createLeaveAllocation } from "../../../../api/leaveApi";
 import { getAllEmployees } from "../../../../api/employeeapi";
+import HrDateInput from "../../HrDateInput";
 
 interface Props {
   employeeId: string;
@@ -188,12 +189,17 @@ const LeaveAllocationForm: React.FC<Props> = ({ onClose, onSuccess }) => {
             <label className="text-sm font-medium text-main mb-2 block">
               From Date *
             </label>
-            <input
-              type="date"
+            <HrDateInput
               name="fromDate"
               value={formData.fromDate}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border bg-app"
+              onChange={(v) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  fromDate: v,
+                }))
+              }
+              placeholder="DD/MM/YYYY"
+              inputClassName="px-4 py-3 rounded-xl border bg-app"
             />
           </div>
 
@@ -201,12 +207,17 @@ const LeaveAllocationForm: React.FC<Props> = ({ onClose, onSuccess }) => {
             <label className="text-sm font-medium text-main mb-2 block">
               To Date *
             </label>
-            <input
-              type="date"
+            <HrDateInput
               name="toDate"
               value={formData.toDate}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border bg-app"
+              onChange={(v) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  toDate: v,
+                }))
+              }
+              placeholder="DD/MM/YYYY"
+              inputClassName="px-4 py-3 rounded-xl border bg-app"
             />
           </div>
         </div>

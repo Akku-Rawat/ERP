@@ -17,6 +17,7 @@ import {
 } from "../../../views/hr/tabs/salarystructure";
 import type { SalaryStructure } from "../../../views/hr/tabs/salarystructure";
 import type { SalaryComponent } from "../../../views/hr/tabs/salarystructure";
+import HrDateInput from "../../../components/Hr/HrDateInput";
 
 export default function SalaryStructureTab() {
   const [structures, setStructures] = useState<SalaryStructure[]>(
@@ -41,6 +42,7 @@ export default function SalaryStructureTab() {
       effectiveFrom: new Date().toISOString().split("T")[0],
       status: "Draft",
       usedBy: 0,
+      level: "",
       components: [
         {
           id: `c_${Date.now()}`,
@@ -419,16 +421,16 @@ function StructureModal({
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Effective From *
                     </label>
-                    <input
-                      type="date"
+                    <HrDateInput
                       value={formData.effectiveFrom}
-                      onChange={(e) =>
+                      onChange={(v: string) =>
                         setFormData({
                           ...formData,
-                          effectiveFrom: e.target.value,
+                          effectiveFrom: v,
                         })
                       }
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                      placeholder="DD/MM/YYYY"
+                      inputClassName="px-3 py-2 text-sm border border-gray-300 rounded-lg"
                     />
                   </div>
                   <div>

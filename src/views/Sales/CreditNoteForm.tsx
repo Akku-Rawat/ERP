@@ -298,6 +298,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                 <div >
                   <ModalInput
                     label="Currency"
+                    required
                     name="currencyCode"
                     value={formData.currencyCode || ""}
                     disabled

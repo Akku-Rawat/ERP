@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   Check,
 } from "lucide-react";
+import HrDateInput from "../../../components/Hr/HrDateInput";
 
 type LeaveType = {
   id: string;
@@ -423,16 +424,16 @@ function PolicyModal({
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Applicable From *
                     </label>
-                    <input
-                      type="date"
+                    <HrDateInput
                       value={formData.applicableFrom}
-                      onChange={(e) =>
+                      onChange={(v: string) =>
                         setFormData({
                           ...formData,
-                          applicableFrom: e.target.value,
+                          applicableFrom: v,
                         })
                       }
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                      placeholder="DD/MM/YYYY"
+                      inputClassName="px-3 py-2 text-sm border border-gray-300 rounded-lg"
                     />
                   </div>
                   <div>

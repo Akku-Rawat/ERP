@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { createHoliday } from "../../../../api/HolidayApi";
+import HrDateInput from "../../HrDateInput";
 export const HolidayListForm: React.FC<{
   onClose: () => void;
   onSuccess?: () => void;
@@ -65,22 +66,18 @@ export const HolidayListForm: React.FC<{
           className="w-full px-4 py-3 border rounded-xl"
         />
 
-        <input
-          type="date"
+        <HrDateInput
           value={fromDate}
-          onChange={(e) =>
-            setFromDate(e.target.value)
-          }
-          className="w-full px-4 py-3 border rounded-xl"
+          onChange={(v) => setFromDate(v)}
+          placeholder="DD/MM/YYYY"
+          inputClassName="px-4 py-3 border rounded-xl"
         />
 
-        <input
-          type="date"
+        <HrDateInput
           value={toDate}
-          onChange={(e) =>
-            setToDate(e.target.value)
-          }
-          className="w-full px-4 py-3 border rounded-xl"
+          onChange={(v) => setToDate(v)}
+          placeholder="DD/MM/YYYY"
+          inputClassName="px-4 py-3 border rounded-xl"
         />
 
         <div className="flex gap-3 pt-4">

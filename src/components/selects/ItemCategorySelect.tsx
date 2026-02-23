@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAllItemGroups } from "../../api/itemCategoryApi";
 
 interface ItemCategorySelectProps {
@@ -6,6 +6,7 @@ interface ItemCategorySelectProps {
   onChange: (category: { name: string; id: string }) => void;
   className?: string;
   label?: string;
+  placeholder?: string;
   required?: boolean;
   filterByItemType?: string;
 }
@@ -15,6 +16,7 @@ export default function ItemCategorySelect({
   onChange,
   className = "",
   label = "Item Category",
+  placeholder = "Search category...",
   required = false,
   filterByItemType,
 }: ItemCategorySelectProps) {
@@ -90,7 +92,7 @@ export default function ItemCategorySelect({
         <input
           className="w-full rounded border border-theme bg-card text-main px-3 py-2 text-sm 
            focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-          placeholder={loading ? "Loading..." : "Search category..."}
+          placeholder={loading ? "Loading..." : placeholder}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);

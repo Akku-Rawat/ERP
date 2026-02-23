@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Search, UserPlus, AlertCircle } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 import {
   showApiError,
   showLoading,
@@ -21,6 +21,18 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
 }) => {
 
   const [identityValue, setIdentityValue] = useState("");
+
+  const formatNrc = (raw: string): string => {
+    const digits = String(raw ?? "").replace(/\D/g, "").slice(0, 9);
+    const part1 = digits.slice(0, 6);
+    const part2 = digits.slice(6, 8);
+    const part3 = digits.slice(8, 9);
+
+    let out = part1;
+    if (part2) out += `/${part2}`;
+    if (part3) out += `/${part3}`;
+    return out;
+  };
 
 
 
@@ -128,7 +140,7 @@ const IdentityVerificationModal: React.FC<IdentityVerificationModalProps> = ({
             <input
               type="text"
               value={identityValue}
-              onChange={(e) => setIdentityValue(e.target.value)}
+              onChange={(e) => setIdentityValue(formatNrc(e.target.value))}
             onKeyDown={handleKeyPress}
            placeholder="123456/78/9"
               className="w-full px-4 py-3 border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"

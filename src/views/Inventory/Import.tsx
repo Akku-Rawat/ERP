@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { getAllImportItems } from "../../api/importApi";
+import { getCountryList } from "../../api/lookupApi";
 
 import ViewImportModal from "../../components/inventory/ViewImportModal";
 import DeleteModal from "../../components/actionModal/DeleteModal";
@@ -34,6 +35,9 @@ const Items: React.FC = () => {
   const [items, setItems] = useState<ImportItemSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [countryNameByCode, setCountryNameByCode] = useState<
+    Record<string, string>
+  >({});
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -84,6 +88,23 @@ const Items: React.FC = () => {
 
   useEffect(() => {
     fetchItems();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const list = await getCountryList();
+        const map: Record<string, string> = {};
+        (list ?? []).forEach((c: any) => {
+          const code = String(c?.code ?? "").trim();
+          const name = String(c?.name ?? "").trim();
+          if (code) map[code] = name;
+        });
+        setCountryNameByCode(map);
+      } catch {
+        setCountryNameByCode({});
+      }
+    })();
   }, []);
 
   /*      HANDLERS
@@ -157,8 +178,22 @@ const Items: React.FC = () => {
     { key: "id", header: "ID", align: "left" },
     { key: "itemName", header: "Item Name", align: "left" },
     { key: "quantity", header: "Quantity", align: "left" },
-    { key: "originCountryCode", header: "Origin Country", align: "left" },
-    { key: "exportCountryCode", header: "Export Country", align: "left" },
+    {
+      key: "originCountryCode",
+      header: "Origin Country",
+      align: "left",
+      render: (i) =>
+        countryNameByCode[String(i.originCountryCode ?? "")] ||
+        i.originCountryCode,
+    },
+    {
+      key: "exportCountryCode",
+      header: "Export Country",
+      align: "left",
+      render: (i) =>
+        countryNameByCode[String(i.exportCountryCode ?? "")] ||
+        i.exportCountryCode,
+    },
     {
       key: "invoiceAmount",
       header: "Invoice Amount",
@@ -197,7 +232,6 @@ const Items: React.FC = () => {
     <div className="p-8">
       <Table
         loading={loading || initialLoad}
-        serverSide={false}
         columns={columns}
         data={filteredItems}
         showToolbar

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Upload, User, CheckCircle2, AlertCircle } from "lucide-react";
+import { X, Upload, User, CheckCircle2 } from "lucide-react";
 import IdentityVerificationModal from "./IdentityVerificationModal";
 import PersonalInfoTab from "./PersonalInfoTab";
 import ContactInfoTab from "./ContactInfoTabs";
@@ -139,8 +139,6 @@ const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
   onSuccess,
  
   editData,
-  level,
-  mode = "add",
 }) => {
   //   - Conditional based on company
 const { companyCode } = useCompanySelection();
@@ -175,7 +173,7 @@ const [step, setStep] = useState<"verification" | "form">(
 
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
 
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
  
 
   // Auto-set salary structure when job title changes
@@ -341,6 +339,20 @@ const [step, setStep] = useState<"verification" | "form">(
     };
   }, [isOpen]);
 
+  const isValidNrc = (value: string): boolean => {
+    const v = String(value ?? "").trim();
+    if (!v) return false;
+    return /^\d{6}\/\d{2}\/\d$/.test(v);
+  };
+
+  const isValidPhone = (value: string): boolean => {
+    const v = String(value ?? "").trim();
+    if (!v) return false;
+    if (!/^\+?\d{9,15}$/.test(v)) return false;
+    if (v.startsWith("+260")) return v.length === 13;
+    return true;
+  };
+
   const validateCurrentTab = (): string | null => {
     switch (activeTab) {
       case "Personal":
@@ -348,11 +360,36 @@ const [step, setStep] = useState<"verification" | "form">(
           return "First name and last name are required";
         if (!formData.dateOfBirth || !formData.gender)
           return "Date of birth and gender are required";
+
+        if (features.showStatutoryFields && features.statutoryFieldsRequired) {
+          if (!formData.nrcId) return "NRC number is required";
+          if (!isValidNrc(formData.nrcId))
+            return "NRC number must be in the format 123456/78/9";
+          if (!formData.nhimaHealthInsurance)
+            return "NHIMA number is required";
+          if (!formData.tpinId)
+            return "TPIN is required";
+        }
         return null;
 
       case "Contact":
         if (!formData.email || !formData.phoneNumber)
           return "Email and phone number are required";
+
+        if (formData.phoneNumber && !isValidPhone(formData.phoneNumber)) {
+          return "Phone number must contain only digits and may start with + (e.g., +260971234567)";
+        }
+
+        if (formData.alternatePhone && !isValidPhone(formData.alternatePhone)) {
+          return "Alternate phone number must contain only digits and may start with +";
+        }
+
+        if (
+          formData.emergencyContactPhone &&
+          !isValidPhone(formData.emergencyContactPhone)
+        ) {
+          return "Emergency contact phone must contain only digits and may start with +";
+        }
         return null;
 
       case "Employment":

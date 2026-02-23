@@ -80,8 +80,6 @@ export const useQuotationForm = (
         ...prev,
         paymentInformation: {
           ...prev.paymentInformation,
-          paymentTerms:
-            company?.terms?.selling?.payment?.dueDates ?? "",
           bankName: company?.bankAccounts?.[0]?.bankName ?? "",
           accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
           routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
@@ -591,6 +589,10 @@ export const useQuotationForm = (
 
       if (!formData.paymentInformation?.paymentTerms) {
         throw new Error("Please select payment terms");
+      }
+
+      if (!formData.paymentInformation?.paymentMethod) {
+        throw new Error("Please select payment method");
       }
 
 

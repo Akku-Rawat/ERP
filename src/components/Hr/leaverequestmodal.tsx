@@ -1,9 +1,10 @@
 // src/components/Hr/Leave/LeaveRequestModal.tsx
 import React, { useState } from "react";
-import { Modal } from "../../ui/Modal";
-import { Input, Select, Textarea, Button } from "../../ui/FormComponents";
+import Modal from "../ui/modal/modal";
+import { Select, Textarea, Button } from "../ui/modal/formComponent";
 import { CalendarPlus } from "lucide-react";
-import { useToast } from "../../hooks/use-toast";
+import HrDateInput from "./HrDateInput";
+import { showApiError, showSuccess } from "../../utils/alert";
 
 interface LeaveRequestModalProps {
   isOpen: boolean;
@@ -29,16 +30,11 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
   const [endDate, setEndDate] = useState("");
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!startDate || !endDate || !reason) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
+      showApiError("Please fill in all fields");
       return;
     }
 
@@ -52,16 +48,9 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
         reason,
       });
       onClose();
-      toast({
-        title: "Leave Requested",
-        description: "Your leave request has been submitted successfully",
-      });
+      showSuccess("Your leave request has been submitted successfully");
     } catch (error: any) {
-      toast({
-        title: "Request Failed",
-        description: error.message || "Something went wrong",
-        variant: "destructive",
-      });
+      showApiError(error);
     } finally {
       setLoading(false);
     }
@@ -99,19 +88,19 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
         </Select>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
+          <HrDateInput
             label="Start Date"
-            type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(v) => setStartDate(v)}
             required
+            placeholder="DD/MM/YYYY"
           />
-          <Input
+          <HrDateInput
             label="End Date"
-            type="date"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            onChange={(v) => setEndDate(v)}
             required
+            placeholder="DD/MM/YYYY"
           />
         </div>
 

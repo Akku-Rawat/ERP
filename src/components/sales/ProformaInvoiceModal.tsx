@@ -200,6 +200,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                   <div>
                     <ModalSelect
                       label="Currency"
+                      required
                       name="currencyCode"
                       value={formData.currencyCode}
                       onChange={actions.handleInputChange}
@@ -232,6 +233,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                   <div>
                     <ModalSelect
                       label="Payment Method"
+                      required
                       name="paymentMethod"
                       value={formData.paymentInformation?.paymentMethod}
                       onChange={(

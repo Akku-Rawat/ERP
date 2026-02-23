@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Calendar, Clock, FileText, CheckCircle2, X } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import AdvancedCalendar from "../../../components/Hr/leave/Calendar";
+import HrDateInput from "../../../components/Hr/HrDateInput";
 import { applyLeave } from "../../../api/leaveApi";
 import { getAllEmployees } from "../../../api/employeeapi";
 import { getEmployeeById } from "../../../api/employeeapi";
@@ -440,25 +441,33 @@ useEffect(() => {
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="text-sm font-semibold">START DATE</label>
-                  <input
-                    type="date"
-                    id="startDate"
-                    value={formData.startDate}
-                    onChange={handleChange}
-                    className="w-full mt-2 px-2 py-1 rounded-xl border bg-app"
-                  />
+                  <div className="mt-2">
+                    <HrDateInput
+                      id="startDate"
+                      value={formData.startDate}
+                      onChange={(v: string) =>
+                        setFormData((prev) => ({ ...prev, startDate: v }))
+                      }
+                      placeholder="DD/MM/YYYY"
+                      inputClassName="px-2 py-1 rounded-xl border bg-app"
+                    />
+                  </div>
                 </div>
 
                 <div>
                   <label className="text-sm font-semibold">END DATE</label>
-                  <input
-                    type="date"
-                    id="endDate"
-                    value={formData.endDate}
-                    onChange={handleChange}
-                    disabled={formData.isHalfDay}
-                    className="w-full mt-2 px-2 py-1 rounded-xl border bg-app"
-                  />
+                  <div className="mt-2">
+                    <HrDateInput
+                      id="endDate"
+                      value={formData.endDate}
+                      onChange={(v: string) =>
+                        setFormData((prev) => ({ ...prev, endDate: v }))
+                      }
+                      disabled={formData.isHalfDay}
+                      placeholder="DD/MM/YYYY"
+                      inputClassName="px-2 py-1 rounded-xl border bg-app"
+                    />
+                  </div>
 
                   {showSummary && (
                     <div className="mt-2 flex items-center gap-4 text-xs">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Save } from "lucide-react";
+import HrDateInput from "../../../components/Hr/HrDateInput";
 
 type WorkDay = {
   day: string;
@@ -95,10 +96,10 @@ export default function WorkScheduleTab() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Effective From *
                 </label>
-                <input
-                  type="date"
+                <HrDateInput
                   defaultValue="2025-01-01"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="DD/MM/YYYY"
+                  inputClassName="px-4 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
               <div>

@@ -1,6 +1,7 @@
 // LeaveEncashmentForm.tsx
 import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import HrDateInput from "../../HrDateInput";
 
 export const LeaveEncashmentForm: React.FC<{ onClose: () => void }> = ({
   onClose,
@@ -135,10 +136,10 @@ export const LeaveEncashmentForm: React.FC<{ onClose: () => void }> = ({
             <label className="block text-sm font-medium text-main mb-2">
               Encashment Date
             </label>
-            <input
-              type="date"
+            <HrDateInput
               defaultValue="2026-01-15"
-              className="w-full px-4 py-3 rounded-xl border border-theme bg-app text-main outline-none focus:border-primary transition"
+              placeholder="DD/MM/YYYY"
+              inputClassName="px-4 py-3 rounded-xl border border-theme bg-app text-main outline-none focus:border-primary transition"
             />
           </div>
         </div>

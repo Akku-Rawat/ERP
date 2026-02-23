@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import HrDateInput from "../HrDateInput";
 
 type EmploymentTabProps = {
   formData: any;
@@ -7,6 +8,153 @@ type EmploymentTabProps = {
   Level: string[];
   managers: { name: string; employeeId: string }[];
   hrManagers: { name: string; employeeId: string }[];
+};
+
+type DepartmentFieldProps = {
+  value: string;
+  options: string[];
+  onChange: (val: string) => void;
+};
+
+const DepartmentField: React.FC<DepartmentFieldProps> = ({
+  value,
+  options,
+  onChange,
+}) => {
+  const [open, setOpen] = useState(false);
+  const [isOther, setIsOther] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  const isKnown = options.includes(value);
+
+  useEffect(() => {
+    if (value !== "" && !isKnown) {
+      setIsOther(true);
+      setIsEditing(false);
+    }
+  }, [isKnown, value]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleSelect = (dept: string) => {
+    if (dept === "__other__") {
+      setIsOther(true);
+      setIsEditing(true);
+      onChange("");
+    } else {
+      setIsOther(false);
+      setIsEditing(false);
+      onChange(dept);
+    }
+    setOpen(false);
+  };
+
+  const handleInputBlur = () => {
+    if (value.trim() !== "") {
+      setIsEditing(false);
+    }
+  };
+
+  const handleButtonClick = () => {
+    if (isOther && value !== "") {
+      setIsEditing(true);
+    }
+    setOpen((prev) => !prev);
+  };
+
+  const displayLabel = isKnown
+    ? value
+    : isOther && value
+      ? value
+      : "Select a department";
+
+  return (
+    <div ref={ref}>
+      <label className="block text-xs text-main mb-1 font-medium">
+        Department * <span className="text-danger">*</span>
+      </label>
+
+      <button
+        type="button"
+        onClick={handleButtonClick}
+        className="w-full px-3 py-2 text-sm border border-theme bg-card text-main rounded-lg focus:ring-2 focus:ring-primary/20 flex items-center justify-between"
+      >
+        <span
+          className={
+            displayLabel === "Select a department" ? "text-muted" : "text-main"
+          }
+        >
+          {displayLabel}
+        </span>
+        <svg
+          className={`w-4 h-4 text-muted transition-transform flex-shrink-0 ${open ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="relative z-50">
+          <ul
+            className="absolute top-1 left-0 w-full bg-card border border-theme rounded-lg shadow-lg overflow-y-auto"
+            style={{ maxHeight: "185px" }}
+          >
+            {options.map((dept) => (
+              <li
+                key={dept}
+                onClick={() => handleSelect(dept)}
+                className={`px-3 py-2.5 text-sm cursor-pointer hover:bg-primary/10 hover:text-primary transition
+                  ${
+                    value === dept && isKnown
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-main"
+                  }`}
+              >
+                {dept}
+              </li>
+            ))}
+
+            <li
+              onClick={() => handleSelect("__other__")}
+              className={`px-3 py-2.5 text-sm cursor-pointer hover:bg-app border-t border-theme transition
+                ${isOther ? "text-primary font-medium" : "text-muted"}`}
+            >
+              Not listed (enter manually)
+            </li>
+          </ul>
+        </div>
+      )}
+
+      {isOther && isEditing && (
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={handleInputBlur}
+          placeholder="Type department name here..."
+          autoFocus
+          className="w-full mt-2 px-3 py-2 text-sm border border-primary bg-card text-main rounded-lg focus:ring-2 focus:ring-primary/20"
+        />
+      )}
+    </div>
+  );
 };
 
 const EmploymentTab: React.FC<EmploymentTabProps> = ({
@@ -92,23 +240,11 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
           Employment Details
         </h4>
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs text-main mb-1 font-medium">
-              Department * <span className="text-danger">*</span>
-            </label>
-            <select
-              value={formData.department}
-              onChange={(e) => handleInputChange("department", e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg  focus:outline-none focus:border-primary  focus:ring-primary/20"
-            >
-              <option value="">Select Department</option>
-              {departments.map((dept) => (
-                <option key={dept} value={dept}>
-                  {dept}
-                </option>
-              ))}
-            </select>
-          </div>
+          <DepartmentField
+            value={String(formData.department ?? "")}
+            options={departments}
+            onChange={(val) => handleInputChange("department", val)}
+          />
           <div>
             <label className="block text-xs text-main mb-1 font-medium">
               Level <span className="text-danger">*</span>
@@ -118,7 +254,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               onChange={(e) => handleInputChange("level", e.target.value)}
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg  focus:outline-none focus:border-primary  focus:ring-primary/20"
             >
-              <option value="">Select Level</option>
+              <option value="">Select level</option>
               {Level.map((lvl) => (
                 <option key={lvl} value={lvl}>
                   {lvl}
@@ -149,9 +285,9 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                 handleInputChange("reportingManager", e.target.value)
               }
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg
-   focus:outline-none focus:border-primary  focus:ring-primary/20"
+  focus:outline-none focus:border-primary  focus:ring-primary/20"
             >
-              <option value="">Select Reporting Manager</option>
+              <option value="">Select reporting manager</option>
               {managers.map((mgr) => (
                 <option key={mgr.employeeId} value={mgr.employeeId}>
                   {mgr.name}
@@ -169,7 +305,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg
       focus:outline-none focus:border-primary  focus:ring-primary/20"
             >
-              <option value="">Select HR Manager</option>
+              <option value="">Select HR manager</option>
               {hrManagers.map((mgr) => (
                 <option key={mgr.employeeId} value={mgr.employeeId}>
                   {mgr.name}
@@ -216,13 +352,11 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
             <label className="block text-xs text-main mb-1 font-medium">
               Engagement Date *<span className="text-danger">*</span>
             </label>
-            <input
-              type="date"
+            <HrDateInput
               value={formData.engagementDate}
-              onChange={(e) =>
-                handleInputChange("engagementDate", e.target.value)
-              }
-              className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg  focus:outline-none focus:border-primary  focus:ring-primary/20"
+              onChange={(v) => handleInputChange("engagementDate", v)}
+              placeholder="DD/MM/YYYY"
+              inputClassName="px-3 py-2 border border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
 
@@ -231,19 +365,16 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               Contract End Date
               {isContractBased && <span className="text-danger"> *</span>}
             </label>
-            <input
-              type="date"
+            <HrDateInput
               value={formData.contractEndDate}
-              onChange={(e) =>
-                handleInputChange("contractEndDate", e.target.value)
-              }
+              onChange={(v) => handleInputChange("contractEndDate", v)}
               disabled={!isContractBased}
-              className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none 
-      ${
-        isContractBased
-          ? "border-theme bg-card text-main focus:border-primary  focus:ring-primary/20"
-          : "bg-app text-muted cursor-not-allowed border-theme opacity-70"
-      }`}
+              placeholder="DD/MM/YYYY"
+              inputClassName={`px-3 py-2 ${
+                isContractBased
+                  ? "border-theme bg-card text-main focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  : "bg-app text-muted cursor-not-allowed border-theme opacity-70"
+              }`}
             />
           </div>
 
@@ -257,6 +388,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               onChange={(e) =>
                 handleInputChange("probationPeriod", e.target.value)
               }
+              placeholder="e.g., 3"
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg focus:outline-none focus:border-primary  focus:ring-primary/20"
             />
           </div>

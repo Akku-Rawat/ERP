@@ -2,6 +2,7 @@
 import React from "react";
 import { Edit2 } from "lucide-react";
 import type { PayrollEntry, Employee } from "../../../types/payrolltypes";
+import HrDateInput from "../../../components/Hr/HrDateInput";
 
 // ── Primitives ────────────────────────────────────────────────────────────────
 const Label: React.FC<{ children: React.ReactNode; required?: boolean }> = ({ children, required }) => (
@@ -31,7 +32,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
       </div>
       <div>
         <Label required>Posting Date</Label>
-        <input type="date" value={data.postingDate} onChange={e => onChange("postingDate", e.target.value)} className={inputCls} />
+        <HrDateInput
+          value={data.postingDate}
+          onChange={(v: string) => onChange("postingDate", v)}
+          placeholder="DD/MM/YYYY"
+          inputClassName={inputCls}
+        />
       </div>
       <div>
         <Label required>Payroll Frequency</Label>
@@ -69,11 +75,21 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
     <div className="grid grid-cols-2 gap-5">
       <div>
         <Label required>Pay Period Start</Label>
-        <input type="date" value={data.startDate} onChange={e => onChange("startDate", e.target.value)} className={inputCls} />
+        <HrDateInput
+          value={data.startDate}
+          onChange={(v: string) => onChange("startDate", v)}
+          placeholder="DD/MM/YYYY"
+          inputClassName={inputCls}
+        />
       </div>
       <div>
         <Label required>Pay Period End</Label>
-        <input type="date" value={data.endDate} onChange={e => onChange("endDate", e.target.value)} className={inputCls} />
+        <HrDateInput
+          value={data.endDate}
+          onChange={(v: string) => onChange("endDate", v)}
+          placeholder="DD/MM/YYYY"
+          inputClassName={inputCls}
+        />
       </div>
     </div>
 

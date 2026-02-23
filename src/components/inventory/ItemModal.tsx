@@ -733,6 +733,7 @@ const ItemModal: React.FC<{
                       label="Selling Price"
                       name="sellingPrice"
                       type="number"
+                      placeholder="Enter selling price"
                       value={form.sellingPrice || ""}
                       onChange={handleForm}
                       className="w-full col-span-3"
@@ -741,6 +742,7 @@ const ItemModal: React.FC<{
                     <Input
                       label="Sales Account"
                       name="salesAccount"
+                      placeholder="Enter sales account"
                       value={form.salesAccount || ""}
                       onChange={handleForm}
                       className="w-full col-span-3"
@@ -750,6 +752,7 @@ const ItemModal: React.FC<{
                       label="Buying Price"
                       name="buyingPrice"
                       type="number"
+                      placeholder="Enter buying price"
                       value={form.buyingPrice || ""}
                       onChange={handleForm}
                       className="w-full"
@@ -758,6 +761,7 @@ const ItemModal: React.FC<{
                     <Input
                       label="Purchase Account"
                       name="purchaseAccount"
+                      placeholder="Enter purchase account"
                       value={form.purchaseAccount || ""}
                       onChange={handleForm}
                       className="w-full"
@@ -774,7 +778,7 @@ const ItemModal: React.FC<{
                         className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                         required
                       >
-                        <option value="">Select...</option>
+                        <option value="">Select tax preference</option>
                         <option value="Taxable">Taxable</option>
                         <option value="Non-Taxable">Non-Taxable</option>
                       </select>
@@ -782,6 +786,7 @@ const ItemModal: React.FC<{
                     <Input
                       label="Preferred Vendor"
                       name="preferredVendor"
+                      placeholder="Enter preferred vendor"
                       value={form.preferredVendor || ""}
                       onChange={handleForm}
                       className="w-full col-span-3"
