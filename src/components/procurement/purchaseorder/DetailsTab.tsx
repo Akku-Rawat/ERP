@@ -128,9 +128,8 @@ export const DetailsTab = ({
               value={form.costCenter}
               onChange={onFormChange}
               options={[
-                { value: "Main - I", label: "Main - I" },
-                { value: "Manufacturing - I", label: "Manufacturing - I" },
-                { value: "manufacturineh - I", label: "manufacturineh - I" },
+                { value: "UD-001 - Udvil - RI", label: "UD-001 - Udvil - RI" },
+                
               ]}
             />
           </div>
