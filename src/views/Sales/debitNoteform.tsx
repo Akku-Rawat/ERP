@@ -17,6 +17,7 @@ import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
   currencySymbols,
   paymentMethodOptions,
+  paymentTermsOptions,
 } from "../../constants/invoice.constants";
 import PaymentInfoBlock from "../../components/sales/PaymentInfoBlock";
 import AddressBlock from "../../components/ui/modal/AddressBlock";
@@ -40,15 +41,6 @@ const TRANSACTION_PROGRESS = [
   { value: "04", label: "Rejected" },
   { value: "05", label: "Refunded" },
   { value: "06", label: "Transferred" },
-];
-
-const paymentTermsSelectOptions = [
-  { value: "Due on Receipt", label: "Pay immediately (Due on receipt)" },
-  { value: "Net 7", label: "Pay within 7 days (Net 7)" },
-  { value: "Net 14", label: "Pay within 14 days (Net 14)" },
-  { value: "Net 30", label: "Pay within 30 days (Net 30)" },
-  { value: "Net 60", label: "Pay within 60 days (Net 60)" },
-  { value: "Net 90", label: "Pay within 90 days (Net 90)" },
 ];
 
 const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
@@ -310,7 +302,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                 <ModalSelect
                   label="Payment Terms"
                   required
-                  options={[...paymentTermsSelectOptions]}
+                  options={[...paymentTermsOptions]}
                   name="paymentTerms"
                   value={formData.paymentInformation?.paymentTerms || ""}
                   onChange={(e) => actions.handleInputChange(e, "paymentInformation")}

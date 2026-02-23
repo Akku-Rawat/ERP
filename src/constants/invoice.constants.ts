@@ -37,6 +37,15 @@ export const paymentMethodOptions = [
   { value: "08", label: "BANK TRANSFER" },
 ] as const;
 
+export const paymentTermsOptions = [
+  { value: "Due on Receipt", label: "Pay immediately (Due on receipt)" },
+  { value: "Net 7", label: "Pay within 7 days (Net 7)" },
+  { value: "Net 14", label: "Pay within 14 days (Net 14)" },
+  { value: "Net 30", label: "Pay within 30 days (Net 30)" },
+  { value: "Net 60", label: "Pay within 60 days (Net 60)" },
+  { value: "Net 90", label: "Pay within 90 days (Net 90)" },
+] as const;
+
 export const getPaymentMethodLabel = (code?: string) =>
   paymentMethodOptions.find((p) => p.value === code)?.label ?? "UNKNOWN";
 

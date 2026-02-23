@@ -21,6 +21,7 @@ import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
   currencySymbols,
   paymentMethodOptions,
+  paymentTermsOptions,
   currencyOptions,
 } from "../../constants/invoice.constants";
 
@@ -73,7 +74,6 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
     onClose();
   };
 
-  const [custLoading, setCustLoading] = useState(true);
   const symbol = currencySymbols[formData.currencyCode] ?? "ZK";
   const currencyCode = String(formData.currencyCode ?? "").trim().toUpperCase();
   const showExchangeRate = !!currencyCode && currencyCode !== "ZMW";
@@ -84,8 +84,6 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
 
     const loadCustomers = async () => {
       try {
-        setCustLoading(true);
-
         const response = await getAllCustomers();
 
         if (response.status_code !== 200)
@@ -95,7 +93,6 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
           console.error("Error loading customers:", err);
         }
       } finally {
-        setCustLoading(false);
       }
     };
 
@@ -246,6 +243,22 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                     />
                   </div>
 
+                  <div>
+                    <ModalSelect
+                      label="Payment Terms"
+                      required
+                      name="paymentTerms"
+                      value={formData.paymentInformation?.paymentTerms}
+                      onChange={(
+                        e: React.ChangeEvent<
+                          HTMLInputElement | HTMLSelectElement
+                        >,
+                      ) => actions.handleInputChange(e, "paymentInformation")}
+                      options={[...paymentTermsOptions]}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    />
+                  </div>
+
                   {/* <div >
                                             <ModalSelect
                                               label="Invoice Type"
@@ -339,7 +352,6 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                           const qty = Number(it.quantity) || 0;
                           const price = Number(it.price) || 0;
                           const discount = Number(it.discount) || 0;
-                          const vatRate = Number(it.vatRate) || 0;
                           const discountAmount = qty * price * (discount / 100);
                           const amount = qty * price - discountAmount;
                           return (
@@ -616,6 +628,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
                 ) => actions.handleInputChange(e, "paymentInformation")}
                 paymentMethodOptions={paymentMethodOptions}
+                showPaymentTerms={false}
                 showPaymentMethod={false}
               />
 

@@ -16,6 +16,7 @@ import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
   currencySymbols,
   paymentMethodOptions,
+  paymentTermsOptions,
 } from "../../constants/invoice.constants";
 
 // import ModalInput from "../ui/ModalInput";
@@ -313,6 +314,16 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                   options={[...paymentMethodOptions]}
                   name="paymentMethod"
                   value={formData.paymentInformation?.paymentMethod || ""}
+                  onChange={(e) => actions.handleInputChange(e, "paymentInformation")}
+                  className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                />
+
+                <ModalSelect
+                  label="Payment Terms"
+                  required
+                  options={[...paymentTermsOptions]}
+                  name="paymentTerms"
+                  value={formData.paymentInformation?.paymentTerms || ""}
                   onChange={(e) => actions.handleInputChange(e, "paymentInformation")}
                   className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                 />
@@ -673,6 +684,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
               }
               paymentMethodOptions={paymentMethodOptions}
               showPaymentMethod={false}
+              showPaymentTerms={false}
             />
 
             {/*  BILLING + SHIPPING  */}
