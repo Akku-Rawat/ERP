@@ -86,14 +86,13 @@ const ItemModal: React.FC<{
       try {
         const response = await getAllItems(1, 1000);
 
-        const items = response?.data || [];
+    const items = response?.data?.data ?? [];
 
-        const mappedOptions = items.map((item: any) => ({
-          label: item.itemName,
-          value: item.id,
-          id: item.id,
-          itemClassCode: item.itemClassCode,
-        }));
+      const mappedOptions = items.map((item: any) => ({
+  label: item.itemName,
+  value: item.id,
+  itemClassCode: item.itemClassCode,
+}));
 
         setItemOptions(mappedOptions);
       } catch (err) {
@@ -249,10 +248,9 @@ const ItemModal: React.FC<{
                         onChange={(e) => {
                           const selectedId = e.target.value;
 
-                          const selectedItem = itemOptions.find(
-                            (item) => item.id === selectedId,
-                          );
-
+ const selectedItem = itemOptions.find(
+  (item) => item.value === selectedId,
+);
                           setForm((prev) => ({
                             ...prev,
                             id: selectedId,
