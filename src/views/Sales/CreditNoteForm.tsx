@@ -153,11 +153,29 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
         return;
       }
 
+      const normalizeAddress = (addr: any) => {
+        if (addr && typeof addr === "object" && !Array.isArray(addr)) return addr;
+        return {
+          line1: "",
+          line2: "",
+          postalCode: "",
+          city: "",
+          state: "",
+          country: "",
+        };
+      };
+
+      const billingAddress = normalizeAddress(formData.billingAddress);
+      const shippingAddress = normalizeAddress(formData.shippingAddress);
+
       const payload = {
         originalSalesInvoiceNumber: formData.invoiceNumber,
         CreditNoteReasonCode: creditMeta.creditNoteReasonCode,
         invcAdjustReason,
         transactionProgress: creditMeta.transactionProgress,
+        billingAddress,
+        shippingAddress,
+        paymentInformation: formData.paymentInformation,
         terms: formData.terms,
         items: formData.items
           .filter((item) => item.itemCode)

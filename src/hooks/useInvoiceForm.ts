@@ -594,8 +594,11 @@ export const useInvoiceForm = (
       const companyRes = await getCompanyById(COMPANY_ID);
       const company = companyRes?.data;
 
+      const today = new Date().toISOString().slice(0, 10);
+
       setFormData({
         ...(DEFAULT_INVOICE_FORM as Invoice),
+        dateOfInvoice: today,
         terms: {
           selling:
             company?.terms?.selling ?? EMPTY_TERMS.selling,
@@ -605,8 +608,10 @@ export const useInvoiceForm = (
         },
       });
     } catch (err) {
+      const today = new Date().toISOString().slice(0, 10);
       setFormData({
         ...(DEFAULT_INVOICE_FORM as Invoice),
+        dateOfInvoice: today,
         terms: { ...EMPTY_TERMS },
         shippingAddress: {
           ...DEFAULT_INVOICE_FORM.billingAddress,
@@ -631,8 +636,13 @@ export const useInvoiceForm = (
 
     validateForm();
 
+    const resolvedDateOfInvoice =
+      String(formData.dateOfInvoice ?? "").trim() ||
+      new Date().toISOString().slice(0, 10);
+
     const payload = {
       ...(formData as any),
+      dateOfInvoice: resolvedDateOfInvoice,
       items: formData.items.map((item) => ({
         ...item,
         vatRate: String(item.vatRate), // convert to string only here

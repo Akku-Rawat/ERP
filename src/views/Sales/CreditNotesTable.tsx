@@ -45,7 +45,7 @@ const CreditNotesTable: React.FC = () => {
 
   // ── Sort (server) ─────────────────────────────────────────────────────────
   const [sortBy, setSortBy] = useState("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // ── Modals ────────────────────────────────────────────────────────────────
   const [openCreateModal, setOpenCreateModal] = useState(false);

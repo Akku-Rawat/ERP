@@ -57,7 +57,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
   // ── Sort (server) — always store column key ──────────────────────────────
   const [sortBy, setSortBy] = useState("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
 
   // ── Reset page when search changes ───────────────────────────────────────
   useEffect(() => { setPage(1); }, [searchTerm]);

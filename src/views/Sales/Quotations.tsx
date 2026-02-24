@@ -56,7 +56,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
 
   // ── Sort state (server) — always store column key, not backend field ─────
   const [sortBy, setSortBy]       = useState("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // ── Filter state (server) ────────────────────────────────────────────────
   const [fromDate] = useState("");
@@ -86,7 +86,7 @@ const QuotationsTable: React.FC<QuotationTableProps> = ({ onAddQuotation }) => {
         search:    searchTerm,
         fromDate,
         toDate,
-        sortBy:    SORT_FIELD_MAP[sortBy] || sortBy,  // ← map here, not in state
+        sortBy:    SORT_FIELD_MAP[sortBy] || sortBy,
         sortOrder,
       });
 

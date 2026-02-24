@@ -67,7 +67,7 @@ const ProformaInvoicesTable: React.FC<ProformaInvoiceTableProps> = ({
 
   // ── Sort (server) — always store column key, map to backend at call site ──
   const [sortBy, setSortBy]       = useState("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // ── Modal ─────────────────────────────────────────────────────────────────
   const [detailsOpen, setDetailsOpen] = useState(false);

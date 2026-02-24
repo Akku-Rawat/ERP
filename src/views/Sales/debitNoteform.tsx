@@ -65,7 +65,7 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
 
   const fetchInvoiceOptions = async (q: string) => {
     try {
-      const res = await getAllSalesInvoices(1, 100, "", "asc", q);
+      const res = await getAllSalesInvoices(1, 100, "", "desc", q);
       const invoices = res?.data || [];
 
       return invoices.map((inv: any) => ({
@@ -139,11 +139,29 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
         return;
       }
 
+      const normalizeAddress = (addr: any) => {
+        if (addr && typeof addr === "object" && !Array.isArray(addr)) return addr;
+        return {
+          line1: "",
+          line2: "",
+          postalCode: "",
+          city: "",
+          state: "",
+          country: "",
+        };
+      };
+
+      const billingAddress = normalizeAddress(formData.billingAddress);
+      const shippingAddress = normalizeAddress(formData.shippingAddress);
+
       const payload = {
         originalSalesInvoiceNumber: formData.invoiceNumber,
         DebitNoteReasonCode: debitMeta.debitNoteReasonCode,
         invcAdjustReason,
         transactionProgress: debitMeta.transactionProgress,
+        billingAddress,
+        shippingAddress,
+        paymentInformation: formData.paymentInformation,
         terms: formData.terms,
         items: formData.items.map((it: any) => ({
           itemCode: it.itemCode,
