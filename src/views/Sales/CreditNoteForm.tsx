@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { getSalesInvoiceById } from "../../api/salesApi";
 import { getAllSalesInvoices } from "../../api/salesApi";
 import { createCreditNoteFromInvoice } from "../../api/salesApi";
+import { getCountryList } from "../../api/lookupApi";
 import PaymentInfoBlock from "../../components/sales/PaymentInfoBlock";
 import AddressBlock from "../../components/ui/modal/AddressBlock";
 import { ModalInput, ModalSelect, ModalTextarea } from "../../components/ui/modal/modalComponent";
@@ -68,6 +69,8 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
     transactionProgress: "",
   });
 
+  const [countryNameMap, setCountryNameMap] = useState<Record<string, string>>({});
+
   const fetchInvoiceOptions = async (q: string) => {
     try {
       const res = await getAllSalesInvoices(1, 100, "", "asc", q);
@@ -111,6 +114,35 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
 
     fetchInvoice();
   }, [formData.invoiceNumber]);
+
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      const code = String(formData.destnCountryCd ?? "").trim().toUpperCase();
+      if (!code) return;
+      if (countryNameMap[code]) return;
+
+      try {
+        const resp = await getCountryList();
+        const list = Array.isArray(resp) ? resp : (resp?.data ?? []);
+        const next: Record<string, string> = {};
+        (list ?? []).forEach((c: any) => {
+          const cc = String(c?.code ?? "").trim().toUpperCase();
+          const name = String(c?.name ?? "").trim();
+          if (cc) next[cc] = name || cc;
+        });
+        if (!mounted) return;
+        setCountryNameMap((prev) => ({ ...next, ...prev }));
+      } catch {
+        // ignore lookup failures
+      }
+    };
+
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [formData.destnCountryCd, countryNameMap]);
 
 
   const getInvoiceAdjustReason = () => {
@@ -610,7 +642,10 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                                 Destination Country
                               </span>
                               <span className="font-medium text-main">
-                                {formData.destnCountryCd || "-"}
+                                {formData.destnCountryCd
+                                  ? countryNameMap[String(formData.destnCountryCd).trim().toUpperCase()] ??
+                                    formData.destnCountryCd
+                                  : "-"}
                               </span>
                             </div>
                           )}

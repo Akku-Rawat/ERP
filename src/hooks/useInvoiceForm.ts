@@ -557,6 +557,7 @@ export const useInvoiceForm = (
       ...prev,
       invoiceNumber: invoice.invoiceNumber,
       invoiceType: invoice.invoiceType ?? "",
+      destnCountryCd: invoice.destnCountryCd ?? "",
       currencyCode: invoice.currencyCode,
       dateOfInvoice: invoice.dateOfInvoice,
       dueDate: invoice.dueDate,

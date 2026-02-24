@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAllCustomers } from "../../api/customerApi";
 
 type Customer = {
   id: string;
   name: string;
   customerCode?: string;
+  taxCategory?: string;
 };
 
 interface CustomerSelectProps {
@@ -42,6 +43,8 @@ export default function CustomerSelect({
             id: c.id,
             name: c.name,
             customerCode: c.code ?? c.customerCode,
+            taxCategory:
+              c.customerTaxCategory ?? c.customer_tax_category ?? c.taxCategory,
           })),
         );
       } finally {
@@ -111,9 +114,9 @@ export default function CustomerSelect({
                 >
                   <div className="flex justify-between items-center">
                     <span>{customer.name}</span>
-                    {customer.customerCode && (
+                    {!!customer.taxCategory && (
                       <span className="text-xs text-muted">
-                        {customer.customerCode}
+                        {customer.taxCategory}
                       </span>
                     )}
                   </div>
