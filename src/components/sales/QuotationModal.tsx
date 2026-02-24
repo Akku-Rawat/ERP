@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { Plus, Trash2, FileText } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
 import { useQuotationForm } from "../../hooks/useQuotationForm";
@@ -22,7 +23,6 @@ interface QuotationModalProps {
   onClose: () => void;
   onSubmit?: (data: any) => void;
 }
-
 const QuotationModal: React.FC<QuotationModalProps> = ({
   isOpen,
   onClose,
@@ -39,15 +39,37 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     ui,
     actions,
   } = useQuotationForm(isOpen, onClose, onSubmit);
+  const [allowSubmit, setAllowSubmit] = React.useState(false);
+
+const tabs: Array<"details" | "address" | "terms"> = [
+  "details",
+  "address",
+  "terms",
+];
+  const handleNext = () => {
+  const currentIndex = tabs.indexOf(ui.activeTab as any);
+  if (currentIndex < tabs.length - 1) {
+    ui.setActiveTab(tabs[currentIndex + 1]);
+    setAllowSubmit(false);
+  }
+};
 
  const symbol = currencySymbols[formData.currencyCode] ?? "₹";
   const showExchangeRate =
   formData.currencyCode?.toUpperCase() !== "INR";
+const handleFormSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await actions.handleSubmit(e);
-  };
+  if (ui.activeTab !== "terms") {
+    handleNext();
+    return;
+  }
+  if (!allowSubmit) {
+    return;
+  }
+
+  await actions.handleSubmit(e);
+};
 
   const handlePrint = () => {
     showSuccess("Print functionality - Opens print dialog");
@@ -59,12 +81,21 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
         Cancel
       </Button>
       <div className="flex gap-2">
-        <Button variant="ghost" onClick={actions.handleReset} type="button">
+        <Button variant="secondary" onClick={actions.handleReset} type="button">
           Reset
         </Button>
-        <Button variant="primary" type="submit" onClick={handleFormSubmit}>
-          Submit
-        </Button>
+       <Button
+  variant="primary"
+  type={ui.activeTab !== "terms" ? "button" : "submit"}
+  form={ui.activeTab !== "terms" ? undefined : "quotationForm"}
+  onClick={
+    ui.activeTab !== "terms"
+      ? handleNext
+      : () => setAllowSubmit(true)
+  }
+>
+  {ui.activeTab === "terms" ? "Submit" : "Next"}
+</Button>
       </div>
     </>
   );
@@ -80,7 +111,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
       maxWidth="6xl"
       height="79vh"
     >
-      <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
+      <form  id="quotationForm" onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
