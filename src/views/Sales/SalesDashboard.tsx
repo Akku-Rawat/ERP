@@ -121,42 +121,6 @@ const SalesDashboard: React.FC = () => {
     [recentSalesRows],
   );
 
-  const recentSalesHistogramData = useMemo(() => {
-    const values = recentSalesChartData
-      .map((r) => Number(r.total ?? 0))
-      .filter((n) => Number.isFinite(n) && n >= 0);
-
-    if (!values.length) return [];
-
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    if (min === max) {
-      const label = `${currencyZMWCompact.format(min)} - ${currencyZMWCompact.format(max)}`;
-      return [{ range: label, count: values.length }];
-    }
-
-    const BIN_COUNT = 8;
-    const width = (max - min) / BIN_COUNT;
-    const bins = Array.from({ length: BIN_COUNT }, (_, i) => {
-      const start = min + i * width;
-      const end = i === BIN_COUNT - 1 ? max : min + (i + 1) * width;
-      return { start, end, count: 0 };
-    });
-
-    for (const v of values) {
-      const idx = Math.min(
-        BIN_COUNT - 1,
-        Math.max(0, Math.floor((v - min) / width)),
-      );
-      bins[idx].count += 1;
-    }
-
-    return bins.map((b) => ({
-      range: `${currencyZMWCompact.format(b.start)} - ${currencyZMWCompact.format(b.end)}`,
-      count: b.count,
-    }));
-  }, [recentSalesChartData, currencyZMWCompact]);
-
   const customerSharePieData = useMemo(() => {
     const base = topCustomersChartData;
     if (!base.length) return [];
@@ -389,34 +353,22 @@ const SalesDashboard: React.FC = () => {
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={recentSalesHistogramData}
+                    data={recentSalesChartData}
                     margin={{ top: 16, right: 18, left: 6, bottom: 8 }}
-                    barCategoryGap={0}
-                    barGap={0}
                   >
-                    <Tooltip
-                      formatter={(v: any) => Number(v ?? 0)}
-                      contentStyle={{
-                        background: "var(--card)",
-                        border: "1px solid var(--border)",
-                        borderRadius: 12,
-                        padding: "8px 12px",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      }}
-                      itemStyle={{ color: "var(--text)", fontSize: 12, fontWeight: 600 }}
-                    />
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis
-                      dataKey="range"
-                      tick={{ fontSize: 10 }}
-                      interval={0}
-                      angle={-15}
-                      textAnchor="end"
-                      height={60}
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={56} />
+                    <Tooltip
+                      formatter={(v: any) => currencyZMW.format(Number(v ?? 0))}
+                      labelFormatter={(label: any) => String(label ?? "")}
                     />
-                    <YAxis tick={{ fontSize: 12 }} width={42} allowDecimals={false} />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      width={52}
+                      tickFormatter={(v) => currencyZMWCompact.format(Number(v))}
+                    />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="count" name="Invoices" fill="#10b981" radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="total" name="Amount" fill="#10b981" radius={[2, 2, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}
