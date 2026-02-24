@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { AxiosResponse } from "axios";
 
 interface Props {
@@ -31,6 +32,8 @@ export default function ItemGenericSelect({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
+const inputRef = useRef<HTMLInputElement>(null);
+const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
   // Load data
   useEffect(() => {
@@ -54,12 +57,30 @@ export default function ItemGenericSelect({
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
+      if (
+        ref.current && !ref.current.contains(e.target as Node) &&
+        !(e.target as Element).closest?.("[data-uom-dropdown]")
+      ) {
         setOpen(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  const handleFocus = () => {
+    if (inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownStyle({
+        position: "fixed",
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 99999,
+      });
+    }
+    setOpen(true);
+  };
 
   // const getId = (item: any): string => {
   //   return item.code ?? item.itemClsCd ?? String(item);
@@ -161,7 +182,8 @@ export default function ItemGenericSelect({
 
 
       <div ref={ref} className="relative w-full">
-        <input
+          <input
+          ref={inputRef}
           className={inputClassName}
           placeholder={loading ? "Loading..." : placeholder}
           value={open ? search : displayValue}
@@ -169,18 +191,22 @@ export default function ItemGenericSelect({
             setSearch(e.target.value);
             setOpen(true);
           }}
-          onFocus={() => setOpen(true)}
+          onFocus={handleFocus}
           disabled={loading}
         />
 
-        {open && !loading && (
-      <div className="absolute left-0 top-full mt-1 w-full bg-card border border-theme shadow-lg rounded z-30 max-h-60 overflow-y-auto">
+        {open && !loading && createPortal(
+          <div
+            data-uom-dropdown="true"
+            style={dropdownStyle}
+            className="bg-card border border-theme shadow-lg rounded max-h-60 overflow-y-auto"
+          >
             <ul className="text-sm">
               {filtered.length > 0 ? (
                 filtered.map((item) => (
                   <li
-                    className={`px-4 py-2 cursor-pointer hover:bg-row-hover ${getId(item) === value ? "bg-primary/10 text-primary font-medium" : "text-main"
-                      }`}
+                    key={getId(item)}
+                    className={`px-4 py-2 cursor-pointer hover:bg-row-hover ${getId(item) === value ? "bg-primary/10 text-primary font-medium" : "text-main"}`}
                     onClick={() => {
                       setSearch("");
                       setOpen(false);
@@ -196,7 +222,8 @@ export default function ItemGenericSelect({
                 </li>
               )}
             </ul>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>

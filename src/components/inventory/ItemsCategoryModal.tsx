@@ -210,18 +210,18 @@ const ItemsCategoryModal: React.FC<{
                           setForm(p => ({ ...p, unitOfMeasurement: id }));
                         }}
                       /> */}
-  <ItemGenericSelect
-  label="Unit of Measure"
-  value={form.unitOfMeasurement}
-  fetchData={getRolaUOMs}
-  variant="modal"
-  onChange={(item) =>
-    setForm((p) => ({
-      ...p,
-      unitOfMeasurement: item.id,
-    }))
-  }
-/>
+                  <ItemGenericSelect
+                    label="Unit of Measure"
+                    value={form.unitOfMeasurement}
+                    fetchData={getRolaUOMs}
+                    variant="modal"
+                    onChange={(item) =>
+                      setForm((p) => ({
+                        ...p,
+                        unitOfMeasurement: item.id,
+                      }))
+                    }
+                  />
                 </div>
               </div>
             </>
