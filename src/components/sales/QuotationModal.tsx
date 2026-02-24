@@ -20,7 +20,6 @@ import React, { useState } from "react";
 import {
   currencySymbols,
   paymentMethodOptions,
-  paymentTermsOptions,
   currencyOptions,
 } from "../../constants/invoice.constants";
 
@@ -205,22 +204,6 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                         >,
                       ) => actions.handleInputChange(e, "paymentInformation")}
                       options={[...paymentMethodOptions]}
-                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                    />
-                  </div>
-
-                  <div>
-                    <ModalSelect
-                      label="Payment Terms"
-                      required
-                      name="paymentTerms"
-                      value={formData.paymentInformation?.paymentTerms}
-                      onChange={(
-                        e: React.ChangeEvent<
-                          HTMLInputElement | HTMLSelectElement
-                        >,
-                      ) => actions.handleInputChange(e, "paymentInformation")}
-                      options={[...paymentTermsOptions]}
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   </div>

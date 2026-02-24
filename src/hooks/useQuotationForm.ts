@@ -43,8 +43,6 @@ export const useQuotationForm = (
   const [taxCategory, setTaxCategory] = useState<string | undefined>("");
   const [isShippingOpen, setIsShippingOpen] = useState(false);
   const [sameAsBilling, setSameAsBilling] = useState(true);
-  const [itemMaster, setItemMaster] = useState<any[]>([]);
-  const [itemMasterLoading, setItemMasterLoading] = useState(false);
   const [exchangeRateLoading, setExchangeRateLoading] = useState(false);
   const [exchangeRateError, setExchangeRateError] = useState<string | null>(null);
 
@@ -582,11 +580,6 @@ export const useQuotationForm = (
 
       if (formData.dueDate < quotationDate) {
         throw new Error("Valid until date cannot be before quotation date");
-      }
-
-
-      if (!formData.paymentInformation?.paymentTerms) {
-        throw new Error("Please select payment terms");
       }
 
       if (!formData.paymentInformation?.paymentMethod) {

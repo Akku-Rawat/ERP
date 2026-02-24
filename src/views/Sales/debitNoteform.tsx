@@ -17,7 +17,6 @@ import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
   currencySymbols,
   paymentMethodOptions,
-  paymentTermsOptions,
 } from "../../constants/invoice.constants";
 import PaymentInfoBlock from "../../components/sales/PaymentInfoBlock";
 import AddressBlock from "../../components/ui/modal/AddressBlock";
@@ -130,12 +129,6 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
 
       if (!invcAdjustReason) {
         showApiError("Adjustment reason required");
-        return;
-      }
-
-      //  Payment Terms validation 
-      if (!formData.paymentInformation?.paymentTerms) {
-        showApiError("Please select payment terms");
         return;
       }
 
@@ -315,15 +308,6 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                   options={[...paymentMethodOptions]}
                   name="paymentMethod"
                   value={formData.paymentInformation?.paymentMethod || ""}
-                  onChange={(e) => actions.handleInputChange(e, "paymentInformation")}
-                />
-
-                <ModalSelect
-                  label="Payment Terms"
-                  required
-                  options={[...paymentTermsOptions]}
-                  name="paymentTerms"
-                  value={formData.paymentInformation?.paymentTerms || ""}
                   onChange={(e) => actions.handleInputChange(e, "paymentInformation")}
                 />
 

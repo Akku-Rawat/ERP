@@ -201,12 +201,6 @@ export const useInvoiceForm = (
         throw new Error(`Item ${idx + 1}: Please select item`);
       }
 
-
-
-      if (!formData.paymentInformation?.paymentTerms) {
-        throw new Error("Please select payment terms");
-      }
-
       if (!formData.paymentInformation?.paymentMethod) {
         throw new Error("Please select payment method");
       }
