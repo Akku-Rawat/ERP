@@ -24,12 +24,12 @@ interface PurchaseInvoiceData {
   pDate: string;
   requiredBy: string;
   status:
-    | "Draft"
-    | "Submitted"
-    | "Approved"
-    | "Partially Received"
-    | "Completed"
-    | "Cancelled";
+  | "Draft"
+  | "Submitted"
+  | "Approved"
+  | "Partially Received"
+  | "Completed"
+  | "Cancelled";
   supplierName: string;
   currency: string;
   grandTotal: number;
@@ -78,13 +78,21 @@ interface PurchaseInvoiceData {
     amount: number;
   }>;
 
-  taxes?: Array<{
+  tax?: {
     type: string;
-    accountHead: string;
-    taxRate: number;
-    taxableAmount: number;
-    taxAmount: number;
-  }>;
+    taxRate: string;
+    taxableAmount: string;
+    taxAmount: string;
+  };
+
+  summary: {
+    totalQuantity: number;
+    subTotal: number;
+    taxTotal: string;
+    grandTotal: number;
+    roundingAdjustment: number;
+    roundedTotal: number;
+  };
 
   terms?: {
     terms: {
@@ -521,54 +529,54 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
               piData.taxCategory ||
               piData.incoterm ||
               piData.placeOfSupply) && (
-              <div
-                className="border-theme rounded p-3 mb-4"
-                style={{ borderWidth: "1px" }}
-              >
-                <div className="grid grid-cols-5 gap-4 text-xs">
-                  {piData.project && (
-                    <div>
-                      <p className="text-muted mb-0.5">Project</p>
-                      <p className="text-main font-semibold">
-                        {piData.project}
-                      </p>
-                    </div>
-                  )}
-                  {piData.costCenter && (
-                    <div>
-                      <p className="text-muted mb-0.5">Cost Center</p>
-                      <p className="text-main font-semibold">
-                        {piData.costCenter}
-                      </p>
-                    </div>
-                  )}
-                  {piData.taxCategory && (
-                    <div>
-                      <p className="text-muted mb-0.5">Tax Category</p>
-                      <p className="text-main font-semibold">
-                        {piData.taxCategory}
-                      </p>
-                    </div>
-                  )}
-                  {piData.incoterm && (
-                    <div>
-                      <p className="text-muted mb-0.5">Incoterm</p>
-                      <p className="text-main font-semibold">
-                        {piData.incoterm}
-                      </p>
-                    </div>
-                  )}
-                  {piData.placeOfSupply && (
-                    <div>
-                      <p className="text-muted mb-0.5">Place of Supply</p>
-                      <p className="text-main font-semibold">
-                        {piData.placeOfSupply}
-                      </p>
-                    </div>
-                  )}
+                <div
+                  className="border-theme rounded p-3 mb-4"
+                  style={{ borderWidth: "1px" }}
+                >
+                  <div className="grid grid-cols-5 gap-4 text-xs">
+                    {piData.project && (
+                      <div>
+                        <p className="text-muted mb-0.5">Project</p>
+                        <p className="text-main font-semibold">
+                          {piData.project}
+                        </p>
+                      </div>
+                    )}
+                    {piData.costCenter && (
+                      <div>
+                        <p className="text-muted mb-0.5">Cost Center</p>
+                        <p className="text-main font-semibold">
+                          {piData.costCenter}
+                        </p>
+                      </div>
+                    )}
+                    {piData.taxCategory && (
+                      <div>
+                        <p className="text-muted mb-0.5">Tax Category</p>
+                        <p className="text-main font-semibold">
+                          {piData.taxCategory}
+                        </p>
+                      </div>
+                    )}
+                    {piData.incoterm && (
+                      <div>
+                        <p className="text-muted mb-0.5">Incoterm</p>
+                        <p className="text-main font-semibold">
+                          {piData.incoterm}
+                        </p>
+                      </div>
+                    )}
+                    {piData.placeOfSupply && (
+                      <div>
+                        <p className="text-muted mb-0.5">Place of Supply</p>
+                        <p className="text-main font-semibold">
+                          {piData.placeOfSupply}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Items Table */}
             <div
@@ -652,7 +660,7 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
             {/* Summary & Taxes */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               {/* Taxes */}
-              {piData.taxes && piData.taxes.length > 0 && (
+              {piData.tax && (
                 <div
                   className="border-theme rounded p-3"
                   style={{ borderWidth: "1px" }}
@@ -660,30 +668,21 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
                   <h3 className="font-bold text-main text-xs mb-2">
                     TAX DETAILS
                   </h3>
-                  <div className="space-y-2 text-xs">
-                    {piData.taxes.map((tax, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between pb-2 border-theme"
-                        style={{
-                          borderBottomWidth:
-                            idx < piData.taxes!.length - 1 ? "1px" : "0",
-                        }}
-                      >
-                        <div>
-                          <p className="font-semibold text-main">
-                            {tax.accountHead}
-                          </p>
-                          <p className="text-muted text-[10px]">
-                            {tax.taxRate}% on{" "}
-                            {formatCurrency(tax.taxableAmount)}
-                          </p>
-                        </div>
-                        <p className="font-bold text-primary">
-                          {formatCurrency(tax.taxAmount)}
-                        </p>
-                      </div>
-                    ))}
+
+                  <div className="flex items-center justify-between text-xs">
+                    <div>
+                      <p className="font-semibold text-main">
+                        {piData.tax.type}
+                      </p>
+                      <p className="text-muted text-[10px]">
+                        {piData.tax.taxRate} on{" "}
+                        {formatCurrency(Number(piData.tax.taxableAmount))}
+                      </p>
+                    </div>
+
+                    <p className="font-bold text-primary">
+                      {formatCurrency(Number(piData.tax.taxAmount))}
+                    </p>
                   </div>
                 </div>
               )}
@@ -702,25 +701,17 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-muted">Subtotal</span>
                     <span className="font-mono text-main">
-                      {formatCurrency(
-                        piData.items.reduce(
-                          (sum, item) => sum + item.amount,
-                          0,
-                        ),
-                      )}
+                      {formatCurrency(piData.summary.subTotal)}
                     </span>
                   </div>
+
                   <div className="flex items-center justify-between">
                     <span className="text-muted">Tax Total</span>
                     <span className="font-mono text-main">
-                      {formatCurrency(
-                        piData.taxes?.reduce(
-                          (sum, tax) => sum + tax.taxAmount,
-                          0,
-                        ) || 0,
-                      )}
+                      {formatCurrency(Number(piData.summary.taxTotal))}
                     </span>
                   </div>
+
                   <div
                     className="pt-2 border-theme"
                     style={{ borderTopWidth: "2px" }}
@@ -733,7 +724,7 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
                         className="font-bold text-primary"
                         style={{ fontSize: "15px" }}
                       >
-                        {formatCurrency(piData.grandTotal)}
+                        {formatCurrency(piData.summary.grandTotal)}
                       </span>
                     </div>
                   </div>
@@ -779,7 +770,7 @@ const PurchaseInvoiceView: React.FC<PurchaseInvoiceViewProps> = ({
                             {formatCurrency(
                               (piData.grandTotal *
                                 parseFloat(phase.percentage)) /
-                                100,
+                              100,
                             )}
                           </p>
                         </div>
