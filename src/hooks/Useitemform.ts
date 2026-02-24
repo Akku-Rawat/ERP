@@ -110,12 +110,12 @@ const buildPayload = (form: Record<string, any>) => ({
   ...(Number(form.itemTypeCode) !== 3 && {
     batchInfo: {
       has_batch_no: form.has_batch_no,
-      create_new_batch: form.create_new_batch,
+      create_new_batch: false, // Defaulting to false as per original code, can be modified if needed
       batchNo: form.has_batch_no ? form.batchNumber : "",
       has_expiry_date: form.has_expiry_date,
       expiryDate: form.has_expiry_date ? form.expiryDate : "",
       manufacturingDate: form.has_expiry_date ? form.manufacturingDate : "",
-      shelfLifeInDays: Number(form.shelfLifeInDays) || 0,
+      shelfLifeInDays: Number(form.shelfLifeInDays) || 52,
       endOfLife: form.endOfLife || "",
     },
   }),
@@ -208,34 +208,77 @@ export const useItemForm = ({
 
         // taxInfo nested → flat
         // Backend GET returns these flat already if no taxInfo key exists, so fallback handles both cases
-        taxCategory:    initialData.taxInfo?.taxCategory    || initialData.taxCategory    || "",
-        taxPreference:  initialData.taxInfo?.taxPreference  || initialData.taxPreference  || "",
-        taxType:        initialData.taxInfo?.taxType        || initialData.taxType        || "",
-        taxCode:        initialData.taxInfo?.taxCode        || initialData.taxCode        || "",
-        taxName:        initialData.taxInfo?.taxName        || initialData.taxName        || "",
-        taxDescription: initialData.taxInfo?.taxDescription || initialData.taxDescription || "",
-        taxPerct:       initialData.taxInfo?.taxPerct       || initialData.taxPerct       || "",
+        taxCategory:
+          initialData.taxInfo?.taxCategory || initialData.taxCategory || "",
+        taxPreference:
+          initialData.taxInfo?.taxPreference || initialData.taxPreference || "",
+        taxType: initialData.taxInfo?.taxType || initialData.taxType || "",
+        taxCode: initialData.taxInfo?.taxCode || initialData.taxCode || "",
+        taxName: initialData.taxInfo?.taxName || initialData.taxName || "",
+        taxDescription:
+          initialData.taxInfo?.taxDescription ||
+          initialData.taxDescription ||
+          "",
+        taxPerct: initialData.taxInfo?.taxPerct || initialData.taxPerct || "",
 
         // vendorInfo nested → flat
-        preferredVendor: initialData.vendorInfo?.preferredVendor || initialData.preferredVendor || "",
-        salesAccount:    initialData.vendorInfo?.salesAccount    || initialData.salesAccount    || "",
-        purchaseAccount: initialData.vendorInfo?.purchaseAccount || initialData.purchaseAccount || "",
+        preferredVendor:
+          initialData.vendorInfo?.preferredVendor ||
+          initialData.preferredVendor ||
+          "",
+        salesAccount:
+          initialData.vendorInfo?.salesAccount ||
+          initialData.salesAccount ||
+          "",
+        purchaseAccount:
+          initialData.vendorInfo?.purchaseAccount ||
+          initialData.purchaseAccount ||
+          "",
 
         // inventoryInfo nested → flat
-        valuationMethod: initialData.inventoryInfo?.valuationMethod || initialData.valuationMethod || "",
-        trackingMethod:  initialData.inventoryInfo?.trackingMethod  || initialData.trackingMethod  || "",
-        reorderLevel:    initialData.inventoryInfo?.reorderLevel    || initialData.reorderLevel    || "",
-        minStockLevel:   initialData.inventoryInfo?.minStockLevel   || initialData.minStockLevel   || "",
-        maxStockLevel:   initialData.inventoryInfo?.maxStockLevel   || initialData.maxStockLevel   || "",
+        valuationMethod:
+          initialData.inventoryInfo?.valuationMethod ||
+          initialData.valuationMethod ||
+          "",
+        trackingMethod:
+          initialData.inventoryInfo?.trackingMethod ||
+          initialData.trackingMethod ||
+          "",
+        reorderLevel:
+          initialData.inventoryInfo?.reorderLevel ||
+          initialData.reorderLevel ||
+          "",
+        minStockLevel:
+          initialData.inventoryInfo?.minStockLevel ||
+          initialData.minStockLevel ||
+          "",
+        maxStockLevel:
+          initialData.inventoryInfo?.maxStockLevel ||
+          initialData.maxStockLevel ||
+          "",
 
         // batchInfo nested → flat
         // Using ?? instead of || to correctly preserve false boolean values
-        has_batch_no:     initialData.batchInfo?.has_batch_no     ?? initialData.has_batch_no     ?? false,
-        create_new_batch: initialData.batchInfo?.create_new_batch ?? initialData.create_new_batch ?? false,
-        has_expiry_date:  initialData.batchInfo?.has_expiry_date  ?? initialData.has_expiry_date  ?? false,
-        batchNumber:      initialData.batchInfo?.batchNo          || initialData.batchNumber      || "",
-        expiryDate:       initialData.batchInfo?.expiryDate       || initialData.expiryDate       || "",
-       manufacturingDate:  initialData.batchInfo?.manufacturingDate ?? initialData.manufacturingDate ??  "",
+        has_batch_no:
+          initialData.batchInfo?.has_batch_no ??
+          initialData.has_batch_no ??
+          false,
+        create_new_batch:
+          initialData.batchInfo?.create_new_batch ??
+          initialData.create_new_batch ??
+          false,
+        has_expiry_date:
+          initialData.batchInfo?.has_expiry_date ??
+          initialData.has_expiry_date ??
+          false,
+        batchNumber:
+          initialData.batchInfo?.batchNo || initialData.batchNumber || "",
+        expiryDate:
+          initialData.batchInfo?.expiryDate || initialData.expiryDate || "",
+        manufacturingDate:
+          initialData.batchInfo?.manufacturingDate ??
+          initialData.manufacturingDate ??
+          "",
       };
       setForm(flatData);
     } else {

@@ -63,6 +63,7 @@ const emptyForm: Record<string, any> = {
   dimensionLength: "",
   dimensionWidth: "",
   dimensionHeight: "",
+  batchNo: "",
 };
 
 const ItemModal: React.FC<{
@@ -76,7 +77,14 @@ const ItemModal: React.FC<{
   const [form, setForm] = useState<FormState>(emptyForm);
   const [loading, setLoading] = useState(false);
   const [itemOptions, setItemOptions] = useState<
-    Array<{ label: string; value: string; id: string; itemClassCode?: string }>
+    Array<{
+      label: string;
+      value: string;
+      id: string;
+      itemClassCode?: string;
+      batchNo?: string;
+      hasBatch?: boolean;
+    }>
   >([]);
   // Fetch all available items for dropdown on open
   useEffect(() => {
@@ -86,13 +94,15 @@ const ItemModal: React.FC<{
       try {
         const response = await getAllItems(1, 1000);
 
-    const items = response?.data?.data ?? [];
+        const items = response?.data?.data ?? [];
 
-      const mappedOptions = items.map((item: any) => ({
-  label: item.itemName,
-  value: item.id,
-  itemClassCode: item.id,
-}));
+        const mappedOptions = items.map((item: any) => ({
+          label: item.itemName,
+          value: item.id,
+          itemClassCode: item.id,
+          batchNo: item.batchInfo?.batchNo || "",
+          hasBatch: item.batchInfo?.has_batch_no || false,
+        }));
 
         setItemOptions(mappedOptions);
       } catch (err) {
@@ -163,6 +173,7 @@ const ItemModal: React.FC<{
       const payload = {
         items: [
           {
+            batch_no: form.batchNo,
             item_code: form.id,
             qty: qty,
             price: price,
@@ -241,21 +252,22 @@ const ItemModal: React.FC<{
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
                     <div className="flex flex-col gap-1 text-sm col-span-1">
-                       <Select
+                      <Select
                         label="Select Item"
                         name="id"
                         value={form.id}
                         onChange={(e) => {
                           const selectedId = e.target.value;
 
- const selectedItem = itemOptions.find(
-  (item) => item.value === selectedId,
-);
+                          const selectedItem = itemOptions.find(
+                            (item) => item.value === selectedId,
+                          );
                           setForm((prev) => ({
                             ...prev,
                             id: selectedId,
                             itemName: selectedItem?.label || "",
                             itemClassCode: selectedItem?.itemClassCode || "",
+                            batchNo: selectedItem?.batchNo || "",
                           }));
                         }}
                         options={[
@@ -264,6 +276,14 @@ const ItemModal: React.FC<{
                         ]}
                       />
                     </div>
+                    <Input
+                      label="Batch Number"
+                      name="batchNo"
+                      value={form.batchNo || ""}
+                      onChange={handleForm}
+                      className="w-full"
+                      readOnly
+                    />
 
                     <Input
                       label="Item Code"
