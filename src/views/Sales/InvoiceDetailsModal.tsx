@@ -326,25 +326,7 @@ const InvoiceDetailsModal: React.FC<Props> = ({
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Field label="Customer" value={data.customerName ?? "—"} />
                 <Field label="TPIN" value={data.customerTpin ?? "—"} />
-                <Field label="Currency" value={currency || "—"} />
-                <Field label="Exchange Rate" value={data.exchangeRt ?? "—"} />
-                <Field label="Invoice Date" value={data.dateOfInvoice ?? "—"} />
-                <Field label="Customer Name" value={data.customerName ?? "—"} />
-                <Field label="Customer TPIN" value={data.customerTpin ?? "—"} />
-              </div>
-              {isLpoType ? (
-                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <Field label="LPO Number" value={data.lpoNumber ?? "—"} />
-                </div>
-              ) : null}
-            </div>
-
-            <div className="lg:col-span-3">
-              <SectionTitle title="Customer" />
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Field label="Due Date" value={data.dueDate ?? "—"} />
-                <Field label="Customer Name" value={data.customerName ?? "—"} />
-                <Field label="Customer TPIN" value={data.customerTpin ?? "—"} />
               </div>
               {isLpoType ? (
                 <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
