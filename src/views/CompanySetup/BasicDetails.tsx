@@ -112,9 +112,10 @@ const InputField: React.FC<InputFieldProps> = ({
 
 interface BasicDetailsProps {
   basic?: BasicDetailsForm | null;
+  onSaveSuccess: () => void;
 }
 
-const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
+const BasicDetails: React.FC<BasicDetailsProps> = ({ basic, onSaveSuccess }) => {
 
   const [activeTab, setActiveTab] = useState("registration");
 
@@ -210,7 +211,7 @@ const BasicDetails: React.FC<BasicDetailsProps> = ({ basic }) => {
     showLoading("Saving Company Details...");
 
     await updateCompanyById(payload);
-
+    onSaveSuccess();
     closeSwal();
     showSuccess("Company basic details updated successfully.");
   } catch (err) {
