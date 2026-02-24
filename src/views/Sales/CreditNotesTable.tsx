@@ -239,6 +239,26 @@ const CreditNotesTable: React.FC = () => {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
+  const mapCreditNoteToInvoiceDetails = (raw: any) => {
+    const selling =
+      raw?.terms?.selling ??
+      raw?.terms?.terms?.selling ??
+      raw?.terms?.terms ??
+      raw?.terms ??
+      undefined;
+
+    return {
+      ...raw,
+      invoiceNumber: raw?.invoiceNumber ?? raw?.id,
+      invoiceType: raw?.invoiceType ?? raw?.invoiceTypeParent,
+      dateOfInvoice: raw?.dateOfInvoice ?? raw?.transactionDate ?? raw?.date,
+      dueDate: raw?.dueDate ?? raw?.validUntil ?? raw?.validTill,
+      TotalAmount:
+        raw?.TotalAmount ?? raw?.totalAmount ?? raw?.grandTotal ?? raw?.total,
+      terms: selling ? { selling } : raw?.terms,
+    };
+  };
+
   return (
     <div className="p-8">
       <Table
@@ -273,6 +293,7 @@ const CreditNotesTable: React.FC = () => {
         invoiceId={detailsId}
         onClose={() => { setDetailsOpen(false); setDetailsId(null); }}
         onOpenReceiptPdf={handleOpenReceipt}
+        mapDetails={mapCreditNoteToInvoiceDetails}
       />
 
       <CreateCreditNoteModal

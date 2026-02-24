@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import { Trash2, User, Mail, Phone } from "lucide-react";
 import { showApiError, showSuccess } from "../../utils/alert";
-// import TermsAndCondition from "../TermsAndCondition";
+import TermsAndCondition from "../../components/TermsAndCondition";
 import { useEffect } from "react";
 import { getSalesInvoiceById } from "../../api/salesApi";
 import { getAllSalesInvoices } from "../../api/salesApi";
@@ -158,6 +158,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
         CreditNoteReasonCode: creditMeta.creditNoteReasonCode,
         invcAdjustReason,
         transactionProgress: creditMeta.transactionProgress,
+        terms: formData.terms,
         items: formData.items
           .filter((item) => item.itemCode)
           .map((item) => ({
@@ -207,7 +208,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
       {/* Tabs */}
       <div className="bg-app border-b border-theme px-8 shrink-0">
         <div className="flex gap-8">
-          {(["details", "terms", "address"] as const).map((tab) => (
+          {(["details", "address", "terms"] as const).map((tab) => (
             <button
               key={tab}
               type="button"
@@ -218,7 +219,7 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
                 }`}
             >
               {tab === "details" && "Details"}
-              {/* {tab === "terms" && "Terms & Conditions"} */}
+              {tab === "terms" && "Terms & Conditions"}
               {tab === "address" && "Additional Details"}
             </button>
           ))}
@@ -661,15 +662,14 @@ const CreditNoteInvoiceLikeForm: React.FC<CreditNoteInvoiceLikeFormProps> = ({
           </div>
         )}
 
-        {/* TERMS
         {ui.activeTab === "terms" && (
-          <div className="h-full w-full mt-10">
+          <div className="h-full w-full">
             <TermsAndCondition
               terms={formData.terms?.selling}
               setTerms={actions.setTerms}
             />
           </div>
-        )} */}
+        )}
 
         {ui.activeTab === "address" && (
           <div className="space-y-6 overflow-hidden">
