@@ -402,19 +402,17 @@ const DebitNoteForm: React.FC<DebitNoteFormProps> = ({
                       </tr>
                     </thead>
                     <tbody >
-                      {paginatedItems.map((it, idx) => {
-                        const i = ui.page * 5 + idx;
+                      {paginatedItems.map((it, i) => {
                         const qty = Number(it.quantity) || 0;
                         const price = Number(it.price) || 0;
                         const discount = Number(it.discount) || 0;
-                        const vatRate = Number(it.vatRate) || 0;
-                        const base = qty * price - discount;
-                        const taxAmount = base * (vatRate / 100);
-                        const amount = base + taxAmount;
+                        const discountAmount = qty * price * (discount / 100);
+                        const totalInclusive = qty * price - discountAmount;
+                        const amount = totalInclusive;
                         return (
                           <tr
                             key={i}
-                            className="border-b border-theme bg-card row-hover"
+                            className={"border-b border-theme hover:bg-muted"}
                           >
                             <td className="px-3 py-2 text-center">{i + 1}</td>
                             <td className="px-2 py-2">
