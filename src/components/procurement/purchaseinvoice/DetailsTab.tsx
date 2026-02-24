@@ -291,18 +291,18 @@ export const DetailsTab = ({
                       <td className="px-0.5 py-1">
                         <input
                           type="number"
-                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-[65px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                           name="rate"
                           value={it.rate}
                           onChange={(e) => onItemChange(e, i)}
                         />
                       </td>
                       <td className="px-0.5 py-1">
-                    <input
+                     <input
                           type="number"
                           className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                          name="rate"
-                          value={it.rate}
+                          name="vatRate"
+                          value={it.vatRate}
                           onChange={(e) => onItemChange(e, i)}
                         />
                       </td>
