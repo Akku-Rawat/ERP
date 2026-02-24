@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { FileText } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
@@ -44,29 +44,51 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     ui,
     actions,
   } = useInvoiceForm(isOpen, onClose, onSubmit);
+  const [allowSubmit, setAllowSubmit] = useState(false);
+  const tabs: Array<"details" | "address" | "terms"> = [
+  "details",
+  "address",
+  "terms",
+];
+useEffect(() => {
+  if (isOpen) {
+    setAllowSubmit(false);
+  }
+}, [isOpen]);
+const handleNext = () => {
+  const currentIndex = tabs.indexOf(ui.activeTab as any);
+  if (currentIndex < tabs.length - 1) {
+    ui.setActiveTab(tabs[currentIndex + 1]);
+    setAllowSubmit(false);
+  }
+};
 
   const symbol = currencySymbols[formData.currencyCode] ?? "₹";
   const showExchangeRate =
     String(formData.currencyCode ?? "").trim().toUpperCase() !== "INR";
   const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (submitting) return;
+  if (ui.activeTab !== "terms") {
+    handleNext();
+    return;
+  }
 
-    try {
-      setSubmitting(true);
-      const payload = await actions.handleSubmit(e);
+  if (!allowSubmit || submitting) return;
 
-      if (!payload) return;
+  try {
+    setSubmitting(true);
 
-      // ❗ Wait for parent API response
-      await onSubmit?.(payload);
-    } catch (err: any) {
-      showApiError(err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    const payload = await actions.handleSubmit(e);
+    if (!payload) return;
+
+    await onSubmit?.(payload);
+  } catch (err: any) {
+    showApiError(err);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
 
@@ -77,21 +99,30 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
       </Button>
       <div className="flex gap-2">
         <Button
-          variant="ghost"
+          variant="secondary"
           onClick={actions.handleReset}
           type="button"
           disabled={submitting}
         >
           Reset
         </Button>
-        <Button
-          variant="primary"
-          type="submit"
-          onClick={handleFormSubmit}
-          disabled={submitting}
-        >
-          {submitting ? "Submitting..." : "Submit"}
-        </Button>
+<Button
+  variant="primary"
+  type={ui.activeTab !== "terms" ? "button" : "submit"}
+  form={ui.activeTab !== "terms" ? undefined : "invoiceForm"}
+  onClick={
+    ui.activeTab !== "terms"
+      ? handleNext
+      : () => setAllowSubmit(true)
+  }
+  disabled={submitting}
+>
+  {ui.activeTab === "terms"
+    ? submitting
+      ? "Submitting..."
+      : "Submit"
+    : "Next"}
+</Button>
       </div>
     </>
   );
@@ -107,7 +138,11 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
       maxWidth="6xl"
       height="79vh"
     >
-      <form onSubmit={handleFormSubmit} className="h-full flex flex-col">
+      <form
+  id="invoiceForm"
+  onSubmit={handleFormSubmit}
+  className="h-full flex flex-col"
+>
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">

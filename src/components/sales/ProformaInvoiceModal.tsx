@@ -39,30 +39,56 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
     ui,
     actions,
   } = useInvoiceForm(isOpen, onClose, undefined, "proforma");
+  const [allowSubmit, setAllowSubmit] = useState(false);
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+useEffect(() => {
+  if (isOpen) {
+    setAllowSubmit(false);
+  }
+}, [isOpen]);
+  const tabs: Array<"details" | "address" | "terms"> = [
+  "details",
+  "address",
+  "terms",
+];
+const handleNext = () => {
+  const currentIndex = tabs.indexOf(ui.activeTab as any);
+  if (currentIndex < tabs.length - 1) {
+    ui.setActiveTab(tabs[currentIndex + 1]);
+    setAllowSubmit(false);
+  }
+};
 
-    try {
-      const payload = await actions.handleSubmit(e);
-      if (!payload) return;
+ const handleFormSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-      const res = await createProformaInvoice(payload);
+  if (ui.activeTab !== "terms") {
+    handleNext();
+    return;
+  }
 
-      if (!res || ![200, 201].includes(res.status_code)) {
-        showApiError(res);
-        return;
-      }
+  if (!allowSubmit) return;
 
-      showSuccess(res.message || "Proforma invoice created successfully");
+  try {
+    const payload = await actions.handleSubmit(e);
+    if (!payload) return;
 
-      actions.handleReset();
-      onSubmit?.();
-      onClose();
-    } catch (error: any) {
-      showApiError(error);
+    const res = await createProformaInvoice(payload);
+
+    if (!res || ![200, 201].includes(res.status_code)) {
+      showApiError(res);
+      return;
     }
-  };
+
+    showSuccess(res.message || "Proforma invoice created successfully");
+
+    actions.handleReset();
+    onSubmit?.();
+    onClose();
+  } catch (error: any) {
+    showApiError(error);
+  }
+};
 
   const handleClose = () => {
     actions.handleReset();
@@ -115,12 +141,21 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
           </Button>
 
           <div className="flex gap-2">
-            <Button variant="ghost" onClick={actions.handleReset}>
+            <Button variant="secondary" onClick={actions.handleReset}>
               Reset
             </Button>
-            <Button variant="primary" type="submit" form="proforma-form">
-              Submit
-            </Button>
+            <Button
+  variant="primary"
+  type={ui.activeTab !== "terms" ? "button" : "submit"}
+  form={ui.activeTab !== "terms" ? undefined : "proforma-form"}
+  onClick={
+    ui.activeTab !== "terms"
+      ? handleNext
+      : () => setAllowSubmit(true)
+  }
+>
+  {ui.activeTab === "terms" ? "Submit" : "Next"}
+</Button>
           </div>
         </>
       }

@@ -179,7 +179,12 @@ const CompanySetup: React.FC = () => {
 
       {/* Tab content */}
       <div>
-        {tab === "basic" && <BasicDetails basic={basicDetail} />}
+       {tab === "basic" && (
+  <BasicDetails
+    basic={basicDetail}
+    onSaveSuccess={fetchCompanyDetail}
+  />
+)}
         {tab === "bank" && (
           <BankDetails
             bankAccounts={bankAccounts}
