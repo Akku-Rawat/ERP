@@ -173,10 +173,47 @@ export const useInvoiceForm = (
   }, [isOpen, formData.currencyCode, formData.exchangeRt, exchangeRateLoading, exchangeRateError]);
 
   const setInvoiceFromApi = (invoice: any) => {
+    const invoiceCurrency = String(invoice?.currencyCode ?? "").trim().toUpperCase();
+    const invoiceRate = Number(
+      String(invoice?.exchangeRt ?? invoice?.exchangeRate ?? "1").trim(),
+    );
+
+    if (invoiceCurrency) {
+      lastCurrencyRef.current = invoiceCurrency;
+      lastRateRef.current =
+        invoiceCurrency === "ZMW"
+          ? 1
+          : Number.isFinite(invoiceRate) && invoiceRate > 0
+            ? invoiceRate
+            : 1;
+    }
+
+    const mappedItems = Array.isArray(invoice?.items)
+      ? invoice.items.map((it: any) => {
+          const price = Number(it?.price);
+          const rate = lastCurrencyRef.current === "ZMW" ? 1 : Number(lastRateRef.current);
+          const baseZmw =
+            Number.isFinite(price) && Number.isFinite(rate) && rate > 0
+              ? lastCurrencyRef.current === "ZMW"
+                ? price
+                : price * rate
+              : undefined;
+
+          return {
+            ...it,
+            _priceZmw: baseZmw,
+          };
+        })
+      : invoice?.items;
+
     setFormData((prev: any) => ({
       ...prev,
       ...invoice,
-      items: invoice.items,
+      exchangeRt:
+        invoiceCurrency === "ZMW"
+          ? "1"
+          : String(invoice?.exchangeRt ?? invoice?.exchangeRate ?? prev.exchangeRt ?? ""),
+      items: mappedItems,
     }));
 
     setCustomerDetails(invoice.customer);
