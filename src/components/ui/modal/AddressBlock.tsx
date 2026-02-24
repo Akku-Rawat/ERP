@@ -37,6 +37,7 @@ interface AddressBlockProps {
 interface Country {
   name: string;
   country_name: string;
+  code: string;
 }
 
 const AddressBlock: React.FC<AddressBlockProps> = ({
@@ -67,6 +68,10 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
 
     loadCountries();
   }, []);
+
+  const selectedCountry = countriesCache.find(
+    (c) => c.code === data.country
+  );
 
   return (
     <Card title={title} subtitle={subtitle} className="relative">
@@ -133,7 +138,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
 
           <SearchSelect
             label="Country"
-            value={data.country}
+            value={selectedCountry?.country_name || ""}
             onChange={(val) =>
               onChange({
                 target: {
@@ -153,7 +158,7 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
                 )
                 .map((c) => ({
                   label: c.country_name,
-                  value: c.name,
+                  value: c.code,
                 }));
             }}
             disabled={disableAll || sameAsBilling}

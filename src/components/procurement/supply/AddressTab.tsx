@@ -24,6 +24,7 @@ interface AddressTabProps {
 interface Country {
   name: string;
   country_name: string;
+  code: string;
 }
 
 export const AddressTab: React.FC<AddressTabProps> = ({
@@ -46,6 +47,11 @@ export const AddressTab: React.FC<AddressTabProps> = ({
 
     loadCountries();
   }, []);
+
+
+ const selectedCountry = countriesCache.find(
+  (c) => c.code === form.billingCountry
+);;
 
   return (
     <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
@@ -81,7 +87,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({
 
           <SearchSelect
             label="Country"
-            value={form.billingCountry}
+            value={selectedCountry?.country_name || ""}
             onChange={(val) =>
               onChange({
                 target: {
@@ -101,7 +107,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({
                 )
                 .map((c) => ({
                   label: c.country_name,
-                  value: c.name,
+                  value: c.code,
                 }));
             }}
             error={errors.billingCountry}

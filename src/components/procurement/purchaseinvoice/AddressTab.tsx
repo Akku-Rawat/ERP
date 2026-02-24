@@ -12,11 +12,11 @@ interface AddressTabProps {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
 }
- interface Country {
+interface Country {
   name: string;
   country_name: string;
+  code: string;
 }
-
 
 type AddressKey = keyof PurchaseOrderFormData["addresses"];
 
@@ -68,6 +68,10 @@ useEffect(() => {
   loadCountries();
 }, []);
   
+
+const selectedCountry = countriesCache.find(
+  (c) => c.code === data?.country
+);
 
     return (
       <div className="bg-card border border-theme rounded-xl shadow-sm overflow-hidden">
@@ -156,7 +160,7 @@ useEffect(() => {
 
             <SearchSelect
               label="Country"
-              value={data?.country || ""}
+              value={selectedCountry?.country_name || ""}
               onChange={(val) =>
                 onFormChange({
                   target: {
@@ -176,7 +180,7 @@ useEffect(() => {
                   )
                   .map((c) => ({
                     label: c.country_name,
-                    value: c.name,
+                    value: c.code,
                   }));
               }}
             />
