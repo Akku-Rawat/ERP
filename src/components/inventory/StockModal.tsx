@@ -91,7 +91,7 @@ const ItemModal: React.FC<{
       const mappedOptions = items.map((item: any) => ({
   label: item.itemName,
   value: item.id,
-  itemClassCode: item.itemClassCode,
+  itemClassCode: item.id,
 }));
 
         setItemOptions(mappedOptions);
