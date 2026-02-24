@@ -502,7 +502,7 @@ const ItemModal: React.FC<{
                             // clear date fields when unchecked
                             ...(!checked && {
                               expiryDate: "",
-                              manufactureDate: "",
+                               manufacturingDate: "",
                             }),
                           }))
                         }
@@ -528,9 +528,9 @@ const ItemModal: React.FC<{
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <Input
                           label="Manufacture Date"
-                          name="manufactureDate"
+                          name="manufacturingDate"
                           type="date"
-                          value={form.manufactureDate || ""}
+                          value={form.manufacturingDate || ""}
                           onChange={handleForm}
                           className="w-full"
                         />

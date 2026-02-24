@@ -31,7 +31,7 @@ export const emptyForm: Record<string, any> = {
   preferredVendor: "",
   salesAccount: "",
   purchaseAccount: "",
-  taxCategory: " ",
+  taxCategory: "",
   taxType: "",
   taxCode: "",
   taxName: "",
@@ -173,7 +173,6 @@ export const useItemForm = ({
       }));
       setItemClassOptions(mapped || []);
     } catch (err) {
-      toast.error("Failed to load item class list");
       console.error(err);
       setItemClassOptions([]);
     } finally {
@@ -236,7 +235,7 @@ export const useItemForm = ({
         has_expiry_date:  initialData.batchInfo?.has_expiry_date  ?? initialData.has_expiry_date  ?? false,
         batchNumber:      initialData.batchInfo?.batchNo          || initialData.batchNumber      || "",
         expiryDate:       initialData.batchInfo?.expiryDate       || initialData.expiryDate       || "",
-        manufactureDate:  initialData.batchInfo?.manufacturingDate || initialData.manufactureDate  || "",
+       manufacturingDate:  initialData.batchInfo?.manufacturingDate ?? initialData.manufacturingDate ??  "",
       };
       setForm(flatData);
     } else {
@@ -475,11 +474,6 @@ export const useItemForm = ({
       }
 
       onSubmit?.(response);
-      toast.success(
-        isEditMode
-          ? "Item updated successfully!"
-          : "Item created successfully!",
-      );
       handleClose();
     } catch (err: any) {
       closeSwal();
