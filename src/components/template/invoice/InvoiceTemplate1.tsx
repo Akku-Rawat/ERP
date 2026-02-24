@@ -3,31 +3,25 @@ import autoTable from "jspdf-autotable";
 import { getPaymentMethodLabel } from "../../../constants/invoice.constants";
 import { ERP_BASE } from "../../../config/api";
 
-const loadImageFromUrl = async (url: string): Promise<string> => {
-  console.log("Fetching image from URL:", url);
-
+const loadImageFromUrl = async (url: string): Promise<string | null> => {
   try {
     const res = await fetch(url, {
       mode: "cors",
       credentials: "include",
     });
 
-    if (!res.ok) {
-      throw new Error(`Image fetch failed: ${res.status} ${res.statusText}`);
-    }
+    if (!res.ok) return null;
 
     const blob = await res.blob();
-    console.log("Image blob type:", blob.type);
 
     return await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error("FileReader failed"));
+      reader.onerror = () => resolve(null);
       reader.readAsDataURL(blob);
     });
-  } catch (error) {
-    console.error("Error loading image:", error);
-    throw error;
+  } catch {
+    return null;
   }
 };
 
@@ -63,35 +57,15 @@ export const generateInvoicePDF = async (
 
   /* ================= LOGO ================= */
   
-  if (company.documents?.companyLogoUrl) {
-    try {
-      const fullLogoUrl = getFullImageUrl(company.documents.companyLogoUrl);
-      console.log("Original path:", company.documents.companyLogoUrl);
-      console.log("Full URL:", fullLogoUrl);
+if (company.documents?.companyLogoUrl) {
+  const fullLogoUrl = getFullImageUrl(company.documents.companyLogoUrl);
 
-      const logoBase64 = await loadImageFromUrl(fullLogoUrl);
-
-      let format: "PNG" | "JPEG" = "PNG";
-      if (
-        logoBase64.includes("image/jpeg") ||
-        logoBase64.includes("image/jpg")
-      ) {
-        format = "JPEG";
-      }
-
-      doc.addImage(logoBase64, format, 150, 10, 30, 15);
-      console.log("Logo added successfully");
-    } catch (e) {
-      console.error("Logo load failed:", e);
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text("[Logo]", 165, 18, { align: "center" });
-
-      doc.setTextColor(0, 0, 0);
-    }
+  try {
+    doc.addImage(fullLogoUrl, "PNG", 150, 10, 30, 15);
+  } catch {
+    // ignore logo error
   }
-
- 
+}
   
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(14);

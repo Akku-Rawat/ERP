@@ -68,8 +68,7 @@ export type InvoiceDetails = {
   dateOfInvoice?: string;
   dueDate?: string;
   invoiceStatus?: string;
-  Receipt?: string;
-  ReceiptNo?: string;
+  
   TotalAmount?: number;
   discountPercentage?: number;
   discountAmount?: number;
@@ -197,15 +196,28 @@ const InvoiceDetailsModal: React.FC<Props> = ({
       total: Math.max(0, subTotal - discount),
     };
   }, [items]);
-
-  const footer = (
-    <div className="w-full flex items-center justify-end gap-2">
+const footer = (
+  <div className="w-full flex items-center justify-between gap-2">
+    <div />
+    <div className="flex gap-2">
       <Button variant="secondary" type="button" onClick={onClose}>
         Close
       </Button>
-    </div>
-  );
 
+      <Button
+        variant="primary"
+        type="button"
+        onClick={() => {
+          if (data?.invoiceNumber && onOpenReceiptPdf) {
+            onOpenReceiptPdf(data.invoiceNumber);
+          }
+        }}
+      >
+        View PDF
+      </Button>
+    </div>
+  </div>
+);
   return (
     <Modal
       isOpen={open}
@@ -301,35 +313,7 @@ const InvoiceDetailsModal: React.FC<Props> = ({
                   }
                 />
 
-                <Field label="Receipt No" value={data.ReceiptNo ?? "—"} />
-                <Field
-                  label="Receipt"
-                  value={
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (data.Receipt) {
-                          if (onOpenReceiptPdf) {
-                            onOpenReceiptPdf(data.Receipt);
-                          } else {
-                            window.open(
-                              data.Receipt,
-                              "_blank",
-                              "noopener,noreferrer",
-                            );
-                          }
-                          return;
-                        }
-
-                        window.open("about:blank", "_blank", "noopener,noreferrer");
-                      }}
-                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary"
-                    >
-                      {data.Receipt ? "Open Receipt" : "Receipt Not Available"}{" "}
-                      <ExternalLink className="w-4 h-4" />
-                    </button>
-                  }
-                />
+               
               </div>
             </div>
 

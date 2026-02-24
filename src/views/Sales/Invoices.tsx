@@ -98,7 +98,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
       const mapped: InvoiceSummary[] = res.data.map((inv: any) => ({
         invoiceNumber:    inv.invoiceNumber,
         customerName:     inv.customerName,
-        receiptNumber:    inv.receiptNumber,
+        
         currency:         inv.currency,
         exchangeRate:     inv.exchangeRate,
         dueDate:          inv.dueDate,
@@ -228,36 +228,74 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
     setInvoiceDetailsOpen(true);
   };
 
-  const handleOpenReceiptPdf = (receiptUrl: string) => {
-    try {
-      const normalizedUrl = receiptUrl.startsWith("http://")
-        ? receiptUrl.replace(/^http:\/\//i, "https://")
-        : receiptUrl;
+  // const handleOpenReceiptPdf = (receiptUrl: string) => {
+  //   try {
+  //     const normalizedUrl = receiptUrl.startsWith("http://")
+  //       ? receiptUrl.replace(/^http:\/\//i, "https://")
+  //       : receiptUrl;
 
-      const urlWithoutPort = (() => {
-        try {
-          const u = new URL(normalizedUrl);
-          u.port = "";
-          return u.toString();
-        } catch {
-          return normalizedUrl.replace(/^(https?:\/\/[^\/]+):\d+(\/.*)?$/i, "$1$2");
-        }
-      })();
+  //     const urlWithoutPort = (() => {
+  //       try {
+  //         const u = new URL(normalizedUrl);
+  //         u.port = "";
+  //         return u.toString();
+  //       } catch {
+  //         return normalizedUrl.replace(/^(https?:\/\/[^\/]+):\d+(\/.*)?$/i, "$1$2");
+  //       }
+  //     })();
 
-      const a = document.createElement("a");
-      a.href = urlWithoutPort;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+  //     const a = document.createElement("a");
+  //     a.href = urlWithoutPort;
+  //     a.target = "_blank";
+  //     a.rel = "noopener noreferrer";
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     a.remove();
 
-      setInvoiceDetailsOpen(false);
-    } catch (err: any) {
-      showApiError(err);
+  //     setInvoiceDetailsOpen(false);
+  //   } catch (err: any) {
+  //     showApiError(err);
+  //   }
+  // };
+
+
+const handlePreviewPDF = async (inv: InvoiceSummary, e?: React.MouseEvent) => {
+  e?.stopPropagation();
+
+  try {
+    showLoading("Preparing invoice preview...");
+
+    if (!company) {
+      closeSwal();
+      showApiError("Company data not loaded");
+      return;
     }
-  };
 
+    const invoiceRes = await getSalesInvoiceById(inv.invoiceNumber);
+
+    if (!invoiceRes || invoiceRes.status_code !== 200) {
+      closeSwal();
+      showApiError("Failed to load invoice");
+      return;
+    }
+
+    const blobUrl = await generateInvoicePDF(
+      invoiceRes.data,
+      company,
+      "bloburl"
+    );
+
+    closeSwal();
+
+    setPdfUrl(blobUrl);
+    setSelectedInvoice(invoiceRes.data);
+    setPdfOpen(true);
+
+  } catch (err: any) {
+    closeSwal();
+    showApiError(err);
+  }
+};
   const handleDownload = async (inv: InvoiceSummary, e?: React.MouseEvent) => {
     e?.stopPropagation();
     try {
@@ -414,13 +452,18 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
           />
           <ActionMenu
             onDelete={(e) => handleDelete(inv.invoiceNumber, e)}
-            showDownload
-            onDownload={(e) => handleDownload(inv, e)}
-            customActions={(STATUS_TRANSITIONS[inv.invoiceStatus] ?? []).map((status) => ({
-              label: `Mark as ${status}`,
-              danger: status === "Paid",
-              onClick: () => handleRowStatusChange(inv.invoiceNumber, status),
-            }))}
+           customActions={[
+  {
+    label: "View PDF",
+    onClick: (e) => handlePreviewPDF(inv, e),
+  },
+  ...((STATUS_TRANSITIONS[inv.invoiceStatus] ?? []).map((status) => ({
+    label: `Mark as ${status}`,
+    danger: status === "Paid",
+    onClick: () => handleRowStatusChange(inv.invoiceNumber, status),
+  })))
+]}
+           
           />
         </ActionGroup>
       ),
@@ -469,12 +512,18 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
         }
       />
 
-      <InvoiceDetailsModal
-        open={invoiceDetailsOpen}
-        invoiceId={invoiceDetailsId}
-        onClose={handleCloseInvoiceDetails}
-        onOpenReceiptPdf={handleOpenReceiptPdf}
-      />
+  <InvoiceDetailsModal
+  open={invoiceDetailsOpen}
+  invoiceId={invoiceDetailsId}
+  onClose={handleCloseInvoiceDetails}
+  onOpenReceiptPdf={(invoiceNumber) => {
+    const invoice = invoices.find(i => i.invoiceNumber === invoiceNumber);
+    if (invoice) {
+      handleCloseInvoiceDetails();   
+      handlePreviewPDF(invoice);     
+    }
+  }}
+/>
     </div>
   );
 };
