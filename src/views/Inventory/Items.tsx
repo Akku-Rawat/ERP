@@ -57,17 +57,39 @@ const fetchItems = async () => {
     setLoading(true);
     const res = await getAllItems(page, pageSize, filters);
 
-    // ── Backend returns res.data.data (double nested) ──
-    const safeData   = Array.isArray(res?.data?.data)  ? res.data.data  : [];
+    const rawList    = Array.isArray(res?.data?.data) ? res.data.data : [];
     const pagination = res?.data?.pagination;
 
-    setItems(safeData);
+    // ── Flatten nested fields so table columns work directly ──
+    const flatList = rawList.map((item: any) => ({
+      ...item,
+      // taxInfo → flat
+      taxCategory:    item.taxInfo?.taxCategory    ?? "",
+      taxPreference:  item.taxInfo?.taxPreference  ?? "",
+      taxType:        item.taxInfo?.taxType        ?? "",
+      taxCode:        item.taxInfo?.taxCode        ?? "",
+      taxPerct:       item.taxInfo?.taxPerct       ?? "",
+
+      // vendorInfo → flat
+      preferredVendor: item.vendorInfo?.preferredVendor ?? "",
+      salesAccount:    item.vendorInfo?.salesAccount    ?? "",
+      purchaseAccount: item.vendorInfo?.purchaseAccount ?? "",
+
+      // inventoryInfo → flat
+      minStockLevel:   item.inventoryInfo?.minStockLevel  ?? "",
+      maxStockLevel:   item.inventoryInfo?.maxStockLevel  ?? "",
+      reorderLevel:    item.inventoryInfo?.reorderLevel   ?? "",
+      valuationMethod: item.inventoryInfo?.valuationMethod ?? "",
+      trackingMethod:  item.inventoryInfo?.trackingMethod  ?? "",
+    }));
+
+    setItems(flatList);
     setTotalPages(pagination?.total_pages ?? 1);
     setTotalItems(pagination?.total       ?? 0);
 
   } catch (err) {
     console.error(err);
-    setItems([]);      
+    setItems([]);
     setTotalPages(1);
     setTotalItems(0);
   } finally {
@@ -75,7 +97,6 @@ const fetchItems = async () => {
     setInitialLoad(false);
   }
 };
-
   useEffect(() => {
     fetchItems();
   }, [page, pageSize, filters]);
