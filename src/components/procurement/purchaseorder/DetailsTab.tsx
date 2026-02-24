@@ -176,7 +176,7 @@ export const DetailsTab = ({
                     Rate
                   </th>
                   <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
-                    Tax{" "}
+                    Tax(%){" "}
                   </th>
                   <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]">
                     Tax Code

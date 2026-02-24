@@ -11,7 +11,17 @@ export interface ModalProps {
   icon?: LucideIcon;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "4xl" | "5xl" | "6xl";
+  maxWidth?:
+  | "sm"
+  | "md"
+  | "lg"
+  | "xl"
+  | "2xl"
+  | "4xl"
+  | "5xl"
+  | "6xl"
+  | "wide"
+  | "full";
   height?: string;
 }
 
@@ -37,6 +47,8 @@ const Modal: React.FC<ModalProps> = ({
     "4xl": "max-w-4xl",
     "5xl": "max-w-5xl",
     "6xl": "max-w-6xl",
+    wide: "w-[70vw] max-w-6xl",
+    full: "max-w-[92vw]",
   };
 
   return (
