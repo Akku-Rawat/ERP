@@ -1,3 +1,5 @@
+export const INDIA_TAX_AUTO_POPULATE = false;
+
 export const INDIA_TAX_CONFIGS = {
   "Non-Export": {
     taxType: "Standard Rated",
