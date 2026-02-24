@@ -1,502 +1,36 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { showApiError, showLoading, closeSwal } from "../../utils/alert";
-import { toast } from "sonner";
-import { updateItemByItemCode, createItem } from "../../api/itemApi";
-import { getItemGroupById } from "../../api/itemCategoryApi";
+import React from "react";
 import Modal from "../ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
-import { useCompanySelection } from "../../hooks/useCompanySelection";
-import { getItemFieldConfigs } from "../../config/companyConfigResolver";
 import { DynamicField } from "../DynamicField";
-import { API } from "../../config/api";
-import { getTaxConfigs } from "../../taxconfig/taxConfigResolver";
-import { getRolaPackagingUnitCodes } from "../../api/lookupApi";
-type FormState = Record<string, any>;
-
-const emptyForm: Record<string, any> = {
-  id: "",
-  itemName: "",
-  itemGroup: "",
-  itemClassCode: "",
-  itemTypeCode: "",
-  originNationCode: "",
-  packagingUnitCode: "",
-  svcCharge: "",
-  ins: "",
-  sellingPrice: "",
-  buyingPrice: "",
-  unitOfMeasureCd: "",
-  description: "",
-  sku: "",
-  taxPreference: "",
-  preferredVendor: "",
-  salesAccount: "",
-  purchaseAccount: "",
-  taxCategory: " ",
-  taxType: "",
-  taxCode: "",
-  taxName: "",
-  taxDescription: "",
-  taxPerct: "",
-  dimensionUnit: "",
-  weight: "",
-  valuationMethod: "",
-  trackingMethod: "",
-  reorderLevel: "",
-  minStockLevel: "",
-  maxStockLevel: "",
-  brand: "",
-  weightUnit: "",
-  dimensionLength: "",
-  dimensionWidth: "",
-  dimensionHeight: "",
-};
-
-const itemTypeCodeOptions = [
-  { value: "1", label: "Raw Material" },
-  { value: "2", label: "Finished Product" },
-  { value: "3", label: "Service" },
-];
-
-
+import { useItemForm } from "../../hooks/Useitemform";
 
 const ItemModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  // onSubmit?: (data: Record<string, any>) => void;
   onSubmit?: (res: any) => void;
-
   initialData?: Record<string, any> | null;
   isEditMode?: boolean;
 }> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
-  const [form, setForm] = useState<FormState>(emptyForm);
-  const [loading, setLoading] = useState(false);
-  const [fetchingItem, setFetchingItem] = useState(false);
-  const [itemCategoryDetails, setItemCategoryDetails] = useState<any>(null);
-  const isServiceItem = Number(form.itemTypeCode) === 3;
-  const { companyCode } = useCompanySelection();
-  const fieldConfigs = getItemFieldConfigs(companyCode);
-  const taxConfigs = getTaxConfigs(companyCode);
-  const [activeTab, setActiveTab] = useState<
-    "details" | "taxDetails" | "inventoryDetails"
-  >("details");
-  const [packagingOptions, setPackagingOptions] = useState<any[]>([]);
-  const [loadingPackaging, setLoadingPackaging] = useState(false);
-  // Cascading item class dropdown states
-  const [itemClassOptions, setItemClassOptions] = useState<
-    Array<{ cd: string; cdNm: string; lvl: string }>
-  >([]);
-  const [loadingItemClasses, setLoadingItemClasses] = useState(false);
-  const [selectedLevel1, setSelectedLevel1] = useState("");
-  const [selectedLevel2, setSelectedLevel2] = useState("");
-  const [selectedLevel3, setSelectedLevel3] = useState("");
-  const [selectedLevel4, setSelectedLevel4] = useState("");
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    setForm(isEditMode && initialData ? initialData : emptyForm);
-    setActiveTab("details");
-
-    // Clear level selections when opening in add mode
-    if (!isEditMode) {
-      setSelectedLevel1("");
-      setSelectedLevel2("");
-      setSelectedLevel3("");
-      setSelectedLevel4("");
-    }
-
-    // Fetch item class list when modal opens
-    void fetchItemClassList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, isEditMode, initialData]);
-
-  // Populate cascading selections from existing itemClassCode when editing
-  useEffect(() => {
-    if (
-      !isEditMode ||
-      !initialData?.itemClassCode ||
-      itemClassOptions.length === 0
-    ) {
-      return;
-    }
-
-    const code = String(initialData.itemClassCode);
-    const codeLength = code.length;
-
-    // Helper to check if a code exists in options
-    const codeExists = (checkCode: string) => {
-      return itemClassOptions.some((opt) => opt.cd === checkCode);
-    };
-
-    // Determine level based on code length (each level adds 2 characters)
-    // Level 1: 2 chars, Level 2: 4 chars, Level 3: 6 chars, Level 4: 8 chars
-    if (codeLength >= 2) {
-      const level1Code = code.substring(0, 2);
-      if (codeExists(level1Code)) {
-        setSelectedLevel1(level1Code);
-      }
-    }
-    if (codeLength >= 4) {
-      const level2Code = code.substring(0, 4);
-      if (codeExists(level2Code)) {
-        setSelectedLevel2(level2Code);
-      }
-    }
-    if (codeLength >= 6) {
-      const level3Code = code.substring(0, 6);
-      if (codeExists(level3Code)) {
-        setSelectedLevel3(level3Code);
-      }
-    }
-    if (codeLength >= 8) {
-      const level4Code = code.substring(0, 8);
-      if (codeExists(level4Code)) {
-        setSelectedLevel4(level4Code);
-      }
-    }
-  }, [isEditMode, initialData, itemClassOptions]);
-
-  // Fetch item class list from API
-  const fetchItemClassList = useCallback(async () => {
-    try {
-      setLoadingItemClasses(true);
-      const response = await fetch(API.lookup.getItemClasses);
-
-      const data = await response.json();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      const mapped = data.map((item: any) => ({
-        cd: item.itemClsCd || item.cd || "",
-        cdNm: item.itemClsNm || item.cdNm || "",
-        lvl: item.itemClsLvl || item.lvl || "1",
-      }));
-      setItemClassOptions(mapped || []);
-    } catch (err) {
-      toast.error("Failed to load item class list");
-      console.error(err);
-      setItemClassOptions([]);
-    } finally {
-      setLoadingItemClasses(false);
-    }
-  }, []);
-
-
- const fetchPackagingUnits = async () => {
-  try {
-    setLoadingPackaging(true);
-    const data = await getRolaPackagingUnitCodes();
-    setPackagingOptions(data);
-  } catch (err) {
-    console.error("Packaging API error:", err);
-    setPackagingOptions([]);
-  } finally {
-    setLoadingPackaging(false);
-  }
-};
-
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    fetchPackagingUnits();
-  }, [isOpen]);
-
-  // Helper function to get codes by level and parent
-  const getCodesByLevel = (level: string, parentCode?: string) => {
-    return itemClassOptions.filter((option) => {
-      if (option.lvl !== level) return false;
-
-      // Level 1 has no parent
-      if (level === "1") return true;
-
-      // For other levels, check if code starts with parent prefix
-      if (!parentCode) return false;
-
-      const prefixLength = parseInt(level) * 2;
-      const parentPrefix = parentCode.substring(0, prefixLength - 2);
-      const codePrefix = option.cd.substring(0, prefixLength - 2);
-
-      return codePrefix === parentPrefix;
-    });
-  };
-
-  // Handle level selection - clear child levels when parent changes
-  const handleLevelChange = (level: number, value: string) => {
-    switch (level) {
-      case 1:
-        setSelectedLevel1(value);
-        setSelectedLevel2("");
-        setSelectedLevel3("");
-        setSelectedLevel4("");
-        break;
-      case 2:
-        setSelectedLevel2(value);
-        setSelectedLevel3("");
-        setSelectedLevel4("");
-        break;
-      case 3:
-        setSelectedLevel3(value);
-        setSelectedLevel4("");
-        break;
-      case 4:
-        setSelectedLevel4(value);
-        break;
-    }
-
-    // Update form with the final selected code (Level 3 or 4 required for submission)
-    const finalCode =
-      level === 4
-        ? value || selectedLevel3 || selectedLevel2 || selectedLevel1
-        : level === 3
-          ? value || selectedLevel2 || selectedLevel1
-          : level === 2
-            ? value || selectedLevel1
-            : value;
-
-    setForm((prev) => ({ ...prev, itemClassCode: finalCode }));
-  };
-
-  // Validate Item Details section
-  const validateItemDetails = () => {
-    if (!form.itemClassCode || String(form.itemClassCode).trim() === "") {
-      toast.error("Item Class Code is required.");
-      return false;
-    }
-
-    // Then validate other required Item Details and Sales & Purchase fields
-    const requiredFields = [
-      { field: "itemTypeCode", label: "Item Type" },
-      { field: "itemGroup", label: "Item Category" },
-      { field: "itemName", label: "Items Name" },
-      { field: "description", label: "Description" },
-      { field: "packagingUnitCode", label: "Packaging Unit" },
-      { field: "originNationCode", label: "Country Code" },
-      { field: "unitOfMeasureCd", label: "Unit of Measurement" },
-      { field: "svcCharge", label: "Service Charge" },
-      { field: "ins", label: "INSURANCE" },
-      { field: "sku", label: "SKU" },
-      { field: "sellingPrice", label: "Selling Price", isNumeric: true },
-      { field: "salesAccount", label: "Sales Account" },
-      { field: "buyingPrice", label: "Buying Price", isNumeric: true },
-      { field: "purchaseAccount", label: "Purchase Account" },
-      { field: "taxPreference", label: "Tax Preference" },
-      { field: "preferredVendor", label: "Preferred Vendor" },
-    ];
-
-    for (const { field, label, isNumeric } of requiredFields) {
-      const fieldValue = form[field];
-      const isEmpty = isNumeric
-        ? fieldValue === "" || fieldValue === null || fieldValue === undefined
-        : !fieldValue || String(fieldValue).trim() === "";
-
-      if (isEmpty) {
-        toast.error(
-          `${label} is required. Please fill in all required fields.`,
-        );
-        return false;
-      }
-    }
-
-    return true;
-  };
-
-  // Validate Tax Details section
-  const validateTaxDetails = () => {
-    if (!form.taxCategory || String(form.taxCategory).trim() === "") {
-      toast.error("Please select a Tax Category.");
-      return false;
-    }
-
-    return true;
-  };
-
-  // Handle form submission based on active tab
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // If on Item Details tab, validate and move to Tax Details
-    if (activeTab === "details") {
-      if (validateItemDetails()) {
-        toast.success("Item details validated. Please complete Tax Details.");
-        setActiveTab("taxDetails");
-      }
-      return;
-    }
-
-    // If on Tax Details tab, validate tax details and submit to API
-    if (activeTab === "taxDetails") {
-      if (!validateTaxDetails()) {
-        return;
-      }
-
-      try {
-        setLoading(true);
-
-        showLoading(isEditMode ? "Updating Item..." : "Creating Item...");
-
-        const payload = {
-          ...form,
-          itemTypeCode: Number(form.itemTypeCode),
-        };
-
-        let response;
-
-        if (isEditMode && initialData?.id) {
-          response = await updateItemByItemCode(initialData.id, payload);
-        } else {
-          response = await createItem(payload);
-        }
-
-        closeSwal();
-
-        if (!response || ![200, 201].includes(response.status_code)) {
-          showApiError(response);
-          return;
-        }
-
-        onSubmit?.(response);
-
-        // Show success message and close modal
-        toast.success(
-          isEditMode
-            ? "Item updated successfully!"
-            : "Item created successfully!",
-        );
-        handleClose();
-      } catch (err: any) {
-        closeSwal();
-        console.error("Item save failed:", err);
-        showApiError(err);
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
-
-    // If on Inventory Details tab, just submit (inventory details are optional)
-    if (activeTab === "inventoryDetails") {
-      try {
-        setLoading(true);
-
-        showLoading(isEditMode ? "Updating Item..." : "Creating Item...");
-
-        const payload = {
-          ...form,
-          itemTypeCode: Number(form.itemTypeCode),
-        };
-
-        let response;
-
-        if (isEditMode && initialData?.id) {
-          response = await updateItemByItemCode(initialData.id, payload);
-        } else {
-          response = await createItem(payload);
-        }
-
-        closeSwal();
-
-        if (!response || ![200, 201].includes(response.status_code)) {
-          showApiError(response);
-          return;
-        }
-
-        onSubmit?.(response);
-
-        toast.success(
-          isEditMode
-            ? "Item updated successfully!"
-            : "Item created successfully!",
-        );
-        handleClose();
-      } catch (err: any) {
-        closeSwal();
-        console.error("Item save failed:", err);
-        showApiError(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const loadItemCategoryDetailsById = async (id: string) => {
-    try {
-      const response = await getItemGroupById(id);
-      if (!response || response.status_code !== 200) return;
-      setForm((p) => ({ ...p, item_group: response.data.name }));
-      setItemCategoryDetails(response.data);
-    } catch (err) {
-      showApiError("Error loading item category details");
-    }
-  };
-
-  const handleForm = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => {
-    const { name, value } = e.target;
-
-    // Auto-populate tax details when tax category changes
-    if (name === "taxCategory") {
-      const taxConfig = taxConfigs[value];
-
-      if (!taxConfig) {
-        // If user selects empty option → clear tax fields
-        setForm((prev) => ({
-          ...prev,
-          taxCategory: "",
-          taxType: "",
-          taxPerct: "",
-          taxCode: "",
-          taxDescription: "",
-          taxName: "",
-        }));
-        return;
-      }
-
-      // Auto populate everything
-      setForm((prev) => ({
-        ...prev,
-        taxCategory: value,
-        taxType: taxConfig.taxType,
-        taxPerct: taxConfig.taxPerct,
-        taxCode: taxConfig.taxCode,
-        taxDescription: taxConfig.taxDescription,
-        taxName: value, // or use taxConfig.taxCode if you prefer
-      }));
-
-      return;
-    }
-
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleDynamicFieldChange = (name: string, value: any) => {
-    // If itemTypeCode changes, clear the itemGroup since it needs to be refiltered
-    if (name === "itemTypeCode") {
-      setForm((prev) => ({ ...prev, [name]: value, itemGroup: "" }));
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleCategoryChange = async (data: { name: string; id: string }) => {
-    setForm((prev) => ({ ...prev, itemGroup: data.name }));
-    await loadItemCategoryDetailsById(data.id);
-  };
-
-  const reset = () => {
-    setForm(emptyForm);
-    setSelectedLevel1("");
-    setSelectedLevel2("");
-    setSelectedLevel3("");
-    setSelectedLevel4("");
-  };
-
-  const handleClose = () => {
-    reset();
-    onClose();
-  };
+  const {
+    form,
+    setForm,
+    autoPopulateTax,
+    loading,
+    activeTab,
+    setActiveTab,
+    isServiceItem,
+    showBatchExpiry,
+    fieldConfigs,
+    taxConfigs,
+    packagingOptions,
+    loadingPackaging,
+    handleForm,
+    handleDynamicFieldChange,
+    handleCategoryChange,
+    reset,
+    handleClose,
+    handleSubmit,
+  } = useItemForm({ isOpen, isEditMode, initialData, onSubmit, onClose });
 
   if (!isOpen) return null;
 
@@ -510,26 +44,27 @@ const ItemModal: React.FC<{
       height="90vh"
     >
       <form onSubmit={handleSubmit} noValidate className="h-full flex flex-col">
-        {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
             <button
               type="button"
               onClick={() => setActiveTab("details")}
-              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === "details"
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
+                activeTab === "details"
                   ? "text-primary border-b-[3px] border-primary"
                   : "text-muted border-b-[3px] border-transparent hover:text-main"
-                }`}
+              }`}
             >
               Item Details
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("taxDetails")}
-              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === "taxDetails"
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
+                activeTab === "taxDetails"
                   ? "text-primary border-b-[3px] border-primary"
                   : "text-muted border-b-[3px] border-transparent hover:text-main"
-                }`}
+              }`}
             >
               Tax Details
             </button>
@@ -537,20 +72,17 @@ const ItemModal: React.FC<{
               type="button"
               disabled={isServiceItem}
               onClick={() => !isServiceItem && setActiveTab("inventoryDetails")}
-              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2
-    ${activeTab === "inventoryDetails" && !isServiceItem
+              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
+                activeTab === "inventoryDetails" && !isServiceItem
                   ? "text-primary border-b-[3px] border-primary"
                   : "text-muted border-b-[3px] border-transparent hover:text-main"
-                }
-    ${isServiceItem ? "opacity-50 cursor-not-allowed" : ""}
-  `}
+              } ${isServiceItem ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               Inventory Details
             </button>
           </div>
         </div>
 
-        {/* Tab Content */}
         <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
           <div className="gap-6 max-h-screen overflow-auto p-4">
             {activeTab === "details" && (
@@ -561,7 +93,6 @@ const ItemModal: React.FC<{
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {fieldConfigs.map((fieldConfig) => {
-
                       if (fieldConfig.fieldName === "packagingUnitCode") {
                         return (
                           <label
@@ -569,9 +100,9 @@ const ItemModal: React.FC<{
                             className="flex flex-col gap-1 text-sm"
                           >
                             <span className="font-medium text-muted">
-                              Packaging Unit <span className="text-red-500 ml-1">*</span>
+                              Packaging Unit{" "}
+                              <span className="text-red-500 ml-1">*</span>
                             </span>
-
                             <select
                               value={form.packagingUnitCode || ""}
                               onChange={(e) =>
@@ -585,7 +116,6 @@ const ItemModal: React.FC<{
                               <option value="">
                                 {loadingPackaging ? "Loading..." : "Select..."}
                               </option>
-
                               {packagingOptions.map((item: any) => (
                                 <option key={item.code} value={item.code}>
                                   {item.code} - {item.code_name}
@@ -595,7 +125,7 @@ const ItemModal: React.FC<{
                           </label>
                         );
                       }
-                      // Special rendering for itemClassCode - use cascading dropdowns
+
                       if (fieldConfig.fieldName === "itemClassCode") {
                         return (
                           <Input
@@ -609,7 +139,7 @@ const ItemModal: React.FC<{
                           />
                         );
                       }
-                      // Regular DynamicField for other fields
+
                       return (
                         <DynamicField
                           key={fieldConfig.fieldName}
@@ -698,8 +228,7 @@ const ItemModal: React.FC<{
 
             {activeTab === "taxDetails" && (
               <>
-                {/* Tax Category Selector */}
-                <div className="mb-8 ">
+                <div className="mb-8">
                   <label className="block text-sm font-semibold text-main mb-3">
                     Tax Category
                   </label>
@@ -710,7 +239,6 @@ const ItemModal: React.FC<{
                     className="w-full md:w-96 px-4 py-3 text-base border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   >
                     <option value="">Select...</option>
-
                     {Object.keys(taxConfigs).map((key) => (
                       <option key={key} value={key}>
                         {key}
@@ -723,15 +251,13 @@ const ItemModal: React.FC<{
                   </p>
                 </div>
 
-                {/* Dynamic Tax Form based on selected category */}
                 <div className="bg-app rounded-lg p-6 border border-theme">
                   <h3 className="text-lg font-semibold text-main mb-4 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-primary rounded-full"></span>
+                    <span className="w-2 h-2 bg-primary rounded-full" />
                     {form.taxCategory
                       ? `${form.taxCategory} Tax Details`
                       : "Tax Details"}
                   </h3>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <Input
                       label="Tax Type"
@@ -740,7 +266,7 @@ const ItemModal: React.FC<{
                       onChange={handleForm}
                       placeholder="e.g. VAT"
                       className="w-full"
-                      disabled
+                      disabled={autoPopulateTax}
                     />
                     <Input
                       label="Tax Code"
@@ -749,7 +275,7 @@ const ItemModal: React.FC<{
                       onChange={handleForm}
                       placeholder="V001"
                       className="w-full"
-                      disabled
+                      disabled={autoPopulateTax}
                     />
                     <Input
                       label="Tax Name"
@@ -758,7 +284,7 @@ const ItemModal: React.FC<{
                       onChange={handleForm}
                       placeholder="Standard VAT"
                       className="w-full"
-                      readOnly
+                      readOnly={autoPopulateTax}
                     />
                     <div className="md:col-span-2">
                       <Input
@@ -768,7 +294,7 @@ const ItemModal: React.FC<{
                         onChange={handleForm}
                         placeholder="12% VAT on Non-Export"
                         className="w-full"
-                        disabled
+                        disabled={autoPopulateTax}
                       />
                     </div>
                     <div className="flex flex-col gap-1">
@@ -783,8 +309,8 @@ const ItemModal: React.FC<{
                           value={form.taxPerct || ""}
                           onChange={handleForm}
                           placeholder="12"
-                          className="w-full px-3 py-2 pr-10 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-card text-muted cursor-not-allowed"
-                          disabled
+                          className={`w-full px-3 py-2 pr-10 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-card ${autoPopulateTax ? "text-muted cursor-not-allowed" : "text-main"}`}
+                          disabled={autoPopulateTax}
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted font-medium">
                           %
@@ -794,7 +320,6 @@ const ItemModal: React.FC<{
                   </div>
                 </div>
 
-                {/* Summary Card */}
                 <div className="mt-6 bg-card border border-theme rounded-lg p-4">
                   <h4 className="text-sm font-semibold text-main mb-2">
                     Current Configuration
@@ -823,7 +348,7 @@ const ItemModal: React.FC<{
 
             {activeTab === "inventoryDetails" && (
               <>
-                <h3 className=" mb-2 text-lg font-semibold text-main underline">
+                <h3 className="mb-2 text-lg font-semibold text-main underline">
                   Inventory Details
                 </h3>
                 <div className="flex flex-col gap-4">
@@ -850,9 +375,7 @@ const ItemModal: React.FC<{
                           onChange={handleForm}
                           className="w-full text-center text-xs"
                         />
-
                         <span className="text-muted font-medium">×</span>
-
                         <Input
                           label=""
                           name="dimensionWidth"
@@ -861,9 +384,7 @@ const ItemModal: React.FC<{
                           onChange={handleForm}
                           className="w-full text-center text-xs"
                         />
-
                         <span className="text-muted font-medium">×</span>
-
                         <Input
                           label=""
                           name="dimensionHeight"
@@ -872,7 +393,6 @@ const ItemModal: React.FC<{
                           onChange={handleForm}
                           className="w-full text-center text-xs"
                         />
-
                         <select
                           name="dimensionUnit"
                           value={form.dimensionUnit || "cm"}
@@ -902,7 +422,6 @@ const ItemModal: React.FC<{
                           name="weightUnit"
                           value={form.weightUnit}
                           onChange={handleForm}
-                          // className="w-28 rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                           className="w-16 px-1 py-1.5 text-xs border border-theme bg-card text-main rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                         >
                           <option value="gm">gm</option>
@@ -913,7 +432,6 @@ const ItemModal: React.FC<{
                       </div>
                     </div>
 
-                    {/* Valuation Method */}
                     <div className="flex flex-col gap-1 text-sm">
                       <span className="font-medium text-muted">
                         Valuation Method
@@ -932,7 +450,104 @@ const ItemModal: React.FC<{
                   </div>
                 </div>
 
-                <div className=" mt-6 col-span-full lg:col-span-4 xl:col-span-3 space-y-4">
+                {/* ── Batch & Expiry Section ── */}
+                {showBatchExpiry && (
+                  <div className="mt-6 border border-theme rounded-lg p-4 bg-card space-y-4">
+                    <h4 className="text-sm font-semibold text-main">
+                      Batch & Expiry Info
+                    </h4>
+
+                    {/* Row 1: checkboxes */}
+                    <div className="flex flex-wrap gap-6">
+                      <CheckboxField
+                        id="has_batch_no"
+                        label="Has Batch No"
+                        checked={form.has_batch_no || false}
+                        onChange={(checked) =>
+                          setForm((prev) => ({
+                            ...prev,
+                            has_batch_no: checked,
+                            // clear batch fields when unchecked
+                            ...(!checked && {
+                              batchNumber: "",
+                              create_new_batch: false,
+                            }),
+                          }))
+                        }
+                      />
+
+                      {/* create_new_batch only shows when has_batch_no is true */}
+                      {form.has_batch_no && (
+                        <CheckboxField
+                          id="create_new_batch"
+                          label="Create New Batch"
+                          checked={form.create_new_batch || false}
+                          onChange={(checked) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              create_new_batch: checked,
+                            }))
+                          }
+                        />
+                      )}
+
+                      <CheckboxField
+                        id="has_expiry_date"
+                        label="Has Expiry Date"
+                        checked={form.has_expiry_date || false}
+                        onChange={(checked) =>
+                          setForm((prev) => ({
+                            ...prev,
+                            has_expiry_date: checked,
+                            // clear date fields when unchecked
+                            ...(!checked && {
+                              expiryDate: "",
+                              manufactureDate: "",
+                            }),
+                          }))
+                        }
+                      />
+                    </div>
+
+                    {/* Row 2: Batch Number — only if has_batch_no */}
+                    {form.has_batch_no && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <Input
+                          label="Batch Number"
+                          name="batchNumber"
+                          value={form.batchNumber || ""}
+                          onChange={handleForm}
+                          placeholder="e.g. BATCH-001"
+                          className="w-full"
+                        />
+                      </div>
+                    )}
+
+                    {/* Row 3: Manufacture & Expiry — only if has_expiry_date */}
+                    {form.has_expiry_date && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <Input
+                          label="Manufacture Date"
+                          name="manufactureDate"
+                          type="date"
+                          value={form.manufactureDate || ""}
+                          onChange={handleForm}
+                          className="w-full"
+                        />
+                        <Input
+                          label="Expiry Date"
+                          name="expiryDate"
+                          type="date"
+                          value={form.expiryDate || ""}
+                          onChange={handleForm}
+                          className="w-full"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="mt-6 col-span-full lg:col-span-4 xl:col-span-3 space-y-4">
                   <div className="flex items-center gap-3">
                     <input
                       type="checkbox"
@@ -976,7 +591,7 @@ const ItemModal: React.FC<{
                   )}
                 </div>
 
-                <h3 className=" mt-12 text-lg font-semibold text-main underline">
+                <h3 className="mt-12 text-lg font-semibold text-main underline">
                   Stock Level Tracking
                 </h3>
                 <div className="flex flex-col gap-4">
@@ -1008,16 +623,14 @@ const ItemModal: React.FC<{
             )}
           </div>
         </section>
-        {/*  FOOTER INSIDE FORM */}
+
         <div className="flex justify-end gap-2 border-t border-theme px-6 py-4">
           <Button variant="secondary" type="button" onClick={handleClose}>
             Cancel
           </Button>
-
           <Button variant="danger" type="button" onClick={reset}>
             Reset
           </Button>
-
           <Button variant="primary" loading={loading} type="submit">
             {activeTab === "details" ? "Next" : "Submit"}
           </Button>
@@ -1027,7 +640,28 @@ const ItemModal: React.FC<{
   );
 };
 
-// Input component with required support
+/* ── Reusable Checkbox ── */
+const CheckboxField: React.FC<{
+  id: string;
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}> = ({ id, label, checked, onChange }) => (
+  <div className="flex items-center gap-2">
+    <input
+      type="checkbox"
+      id={id}
+      checked={checked}
+      onChange={(e) => onChange(e.target.checked)}
+      className="w-4 h-4 accent-primary cursor-pointer rounded"
+    />
+    <label htmlFor={id} className="text-sm font-medium text-main cursor-pointer select-none">
+      {label}
+    </label>
+  </div>
+);
+
+/* ── Input ── */
 const Input = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement> & { label: string }
@@ -1039,9 +673,9 @@ const Input = React.forwardRef<
     </span>
     <input
       ref={ref}
-      className={`rounded border border-theme px-3 py-2 bg-card text-main 
-focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${props.disabled ? "bg-app text-muted cursor-not-allowed" : ""
-        } ${className}`}
+      className={`rounded border border-theme px-3 py-2 bg-card text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+        props.disabled ? "bg-app text-muted cursor-not-allowed" : ""
+      } ${className}`}
       {...props}
     />
   </label>

@@ -52,20 +52,29 @@ const Items: React.FC = () => {
   }, [searchTerm]);
 
 
-  const fetchItems = async () => {
-    try {
-      setLoading(true);
-      const res = await getAllItems(page, pageSize, filters);
-      setItems(res.data);
-      setTotalPages(res.pagination?.total_pages || 1);
-      setTotalItems(res.pagination?.total || 0);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-      setInitialLoad(false);
-    }
-  };
+const fetchItems = async () => {
+  try {
+    setLoading(true);
+    const res = await getAllItems(page, pageSize, filters);
+
+    // ── Backend returns res.data.data (double nested) ──
+    const safeData   = Array.isArray(res?.data?.data)  ? res.data.data  : [];
+    const pagination = res?.data?.pagination;
+
+    setItems(safeData);
+    setTotalPages(pagination?.total_pages ?? 1);
+    setTotalItems(pagination?.total       ?? 0);
+
+  } catch (err) {
+    console.error(err);
+    setItems([]);      
+    setTotalPages(1);
+    setTotalItems(0);
+  } finally {
+    setLoading(false);
+    setInitialLoad(false);
+  }
+};
 
   useEffect(() => {
     fetchItems();
@@ -207,7 +216,7 @@ const Items: React.FC = () => {
     <div className="p-8">
       <Table
         loading={loading || initialLoad}
-        serverSide
+    
         columns={columns}
         data={items}
         enableColumnSelector

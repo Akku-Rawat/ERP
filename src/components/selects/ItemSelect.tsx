@@ -53,16 +53,23 @@ export default function ItemSelect({
           taxCategory ? { taxCategory } : undefined,
         );
 
-        if (!cancelled && res?.status_code === 200) {
-          setItems(
-            res.data.map((it: any) => ({
-              id: it.id,
-              itemCode: it.id,
-              itemName: it.itemName,
-              sellingPrice: it.sellingPrice ?? 0,
-            })),
-          );
-        }
+if (!cancelled && res?.status_code === 200) {
+  
+  const rawList = Array.isArray(res?.data?.data)
+    ? res.data.data        
+    : Array.isArray(res?.data)
+      ? res.data             
+      : [];             
+
+  setItems(
+    rawList.map((it: any) => ({
+      id: it.id,
+      itemCode: it.id,
+      itemName: it.itemName,
+      sellingPrice: it.sellingPrice ?? 0,
+    })),
+  );
+}
       } catch (err) {
         if (!cancelled) {
           console.error("Failed to load items", err);

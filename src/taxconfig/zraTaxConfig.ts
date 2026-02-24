@@ -1,3 +1,5 @@
+export const ZRA_TAX_AUTO_POPULATE = true;
+
 export const ZRA_TAX_CONFIGS = {
   "Non-Export": {
     taxType: "Standard Rated",
