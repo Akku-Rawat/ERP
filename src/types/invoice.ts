@@ -27,6 +27,8 @@ export interface InvoiceSummary {
   exchangeRate: string;
   dueDate: string | null;
   dateOfInvoice: Date;
+  timeOfInvoice?: string;
+  invoiceDateTime?: Date;
   total: number;
   totalTax: string;
   invoiceTypeParent: string;

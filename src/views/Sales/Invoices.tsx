@@ -81,19 +81,32 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       const res = await getAllSalesInvoices(page, pageSize, sortBy, sortOrder, searchTerm);
       if (!res || res.status_code !== 200) return;
 
-      const mapped: InvoiceSummary[] = (res?.data ?? []).map((inv: any) => ({
-        invoiceNumber: inv.invoiceNumber,
-        customerName: inv.customerName,
-        receiptNumber: inv.receiptNumber,
-        currency: inv.currency,
-        exchangeRate: inv.exchangeRate,
-        dueDate: inv.dueDate,
-        dateOfInvoice: new Date(inv.dateOfInvoice),
-        total: Number(inv.totalAmount),
-        totalTax: inv.totalTax,
-        invoiceTypeParent: inv.invoiceTypeParent,
-        invoiceType: inv.invoiceType,
-      }));
+      const mapped: InvoiceSummary[] = (res?.data ?? []).map((inv: any) => {
+        const dateIso = String(inv.dateOfInvoice ?? "").trim();
+        const timeIso = String(inv.timeOfInvoice ?? "").trim();
+        const dt = timeIso ? new Date(`${dateIso}T${timeIso}`) : new Date(dateIso);
+
+        return {
+          invoiceNumber: inv.invoiceNumber,
+          customerName: inv.customerName,
+          receiptNumber: inv.receiptNumber,
+          currency: inv.currency,
+          exchangeRate: inv.exchangeRate,
+          dueDate: inv.dueDate,
+          dateOfInvoice: new Date(inv.dateOfInvoice),
+          timeOfInvoice: inv.timeOfInvoice,
+          invoiceDateTime: Number.isNaN(dt.getTime()) ? undefined : dt,
+          total: Number(inv.totalAmount),
+          totalTax: inv.totalTax,
+          invoiceTypeParent: inv.invoiceTypeParent,
+          invoiceType: inv.invoiceType,
+        };
+      });
+
+      mapped.sort(
+        (a, b) =>
+          (b.invoiceDateTime?.getTime() ?? 0) - (a.invoiceDateTime?.getTime() ?? 0)
+      );
 
       setInvoices(mapped);
       setTotalPages(res.pagination?.total_pages || 1);
@@ -106,8 +119,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
   useEffect(() => {
     fetchInvoices();
-  }, [page, pageSize, sortBy, sortOrder, searchTerm]); // ← searchTerm included
-
+  }, [page, pageSize, sortBy, sortOrder, searchTerm]);
 
   const handleSortChange = ({
     sortBy: colKey,
@@ -121,7 +133,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     setPage(1);
   };
 
-
   const fetchAllInvoicesForExport = async (): Promise<InvoiceSummary[]> => {
     try {
       let allData: InvoiceSummary[] = [];
@@ -132,19 +143,27 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
         const res = await getAllSalesInvoices(current, 100, sortBy, sortOrder, searchTerm);
 
         if (res?.status_code === 200) {
-          const mapped: InvoiceSummary[] = (res?.data ?? []).map((inv: any) => ({
-            invoiceNumber: inv.invoiceNumber,
-            customerName: inv.customerName,
-            receiptNumber: inv.receiptNumber,
-            currency: inv.currency,
-            exchangeRate: inv.exchangeRate,
-            dueDate: inv.dueDate,
-            dateOfInvoice: new Date(inv.dateOfInvoice),
-            total: Number(inv.totalAmount),
-            totalTax: inv.totalTax,
-            invoiceTypeParent: inv.invoiceTypeParent,
-            invoiceType: inv.invoiceType,
-          }));
+          const mapped: InvoiceSummary[] = (res?.data ?? []).map((inv: any) => {
+            const dateIso = String(inv.dateOfInvoice ?? "").trim();
+            const timeIso = String(inv.timeOfInvoice ?? "").trim();
+            const dt = timeIso ? new Date(`${dateIso}T${timeIso}`) : new Date(dateIso);
+
+            return {
+              invoiceNumber: inv.invoiceNumber,
+              customerName: inv.customerName,
+              receiptNumber: inv.receiptNumber,
+              currency: inv.currency,
+              exchangeRate: inv.exchangeRate,
+              dueDate: inv.dueDate,
+              dateOfInvoice: new Date(inv.dateOfInvoice),
+              timeOfInvoice: inv.timeOfInvoice,
+              invoiceDateTime: Number.isNaN(dt.getTime()) ? undefined : dt,
+              total: Number(inv.totalAmount),
+              totalTax: inv.totalTax,
+              invoiceTypeParent: inv.invoiceTypeParent,
+              invoiceType: inv.invoiceType,
+            };
+          });
 
           allData = [...allData, ...mapped];
           total = res.pagination?.total_pages || 1;
@@ -153,11 +172,27 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
         current++;
       } while (current <= total);
 
+      allData.sort(
+        (a, b) =>
+          (b.invoiceDateTime?.getTime() ?? 0) - (a.invoiceDateTime?.getTime() ?? 0)
+      );
+
       return allData;
     } catch (error) {
       showApiError(error);
       return [];
     }
+  };
+
+  const formatDateTime = (d?: Date, timeOfInvoice?: string) => {
+    const dt = d instanceof Date && !Number.isNaN(d.getTime()) ? d : undefined;
+    if (!dt) return "-";
+
+    const datePart = dt.toLocaleDateString();
+    const timePart = String(timeOfInvoice ?? "").trim() ||
+      dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+    return `${datePart} ${timePart}`;
   };
 
   const handleExportExcel = async () => {
@@ -177,7 +212,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
           "Invoice No": inv.invoiceNumber,
           Type: inv.invoiceType,
           Customer: inv.customerName,
-          Date: inv.dateOfInvoice.toLocaleDateString(),
+          "Date/Time": formatDateTime(inv.invoiceDateTime ?? inv.dateOfInvoice, inv.timeOfInvoice),
           "Due Date": inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "",
           Amount: inv.total,
           Currency: inv.currency,
@@ -202,8 +237,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       showApiError(error);
     }
   };
-
-
 
   const handleViewClick = (invoiceNumber: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -289,8 +322,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     console.log("Delete invoice:", invoiceNumber);
   };
 
-
-
   const columns: Column<InvoiceSummary>[] = [
     {
       key: "invoiceNumber",
@@ -300,6 +331,13 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       render: (inv) => (
         <span className="font-semibold text-main">{inv.invoiceNumber}</span>
       ),
+    },
+    {
+      key: "invoiceDateTime",
+      header: "Date/Time",
+      align: "left",
+      sortable: false,
+      render: (inv) => formatDateTime(inv.invoiceDateTime ?? inv.dateOfInvoice, inv.timeOfInvoice),
     },
     {
       key: "invoiceType",
@@ -318,16 +356,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       sortable: true,
       render: (inv) => (
         <span className="text-sm text-main">{inv.customerName}</span>
-      ),
-    },
-    {
-      key: "dateOfInvoice",
-      header: "Date",
-      align: "left",
-      render: (inv) => (
-        <span className="text-xs text-muted">
-          {inv.dateOfInvoice.toLocaleDateString()}
-        </span>
       ),
     },
     {

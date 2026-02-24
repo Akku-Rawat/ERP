@@ -19,6 +19,8 @@ type CreditNote = {
   invoiceNo: string;
   customer: string;
   date: string;
+  timeOfInvoice?: string;
+  dateTime?: Date;
   amount: number;
   currency: string;
 };
@@ -28,6 +30,23 @@ type CreditNote = {
 // ---------------------------------------------------------------------------
 
 const CreditNotesTable: React.FC = () => {
+
+  const buildDateTime = (dateIso?: string, timeOfInvoice?: string) => {
+    const d = String(dateIso ?? "").trim();
+    const t = String(timeOfInvoice ?? "").trim();
+    if (!d) return undefined;
+
+    const dt = t ? new Date(`${d}T${t}`) : new Date(d);
+    return Number.isNaN(dt.getTime()) ? undefined : dt;
+  };
+
+  const formatDateTime = (dateIso?: string, timeOfInvoice?: string) => {
+    const dt = buildDateTime(dateIso, timeOfInvoice);
+    if (!dt) return "-";
+    const timePart = String(timeOfInvoice ?? "").trim() ||
+      dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return `${dt.toLocaleDateString()} ${timePart}`;
+  };
 
   // ── Data ──────────────────────────────────────────────────────────────────
   const [data, setData] = useState<CreditNote[]>([]);
@@ -68,9 +87,15 @@ const CreditNotesTable: React.FC = () => {
         invoiceNo: item.receiptNumber,
         customer: item.customerName,
         date: item.dateOfInvoice,
+        timeOfInvoice: item.timeOfInvoice,
+        dateTime: buildDateTime(item.dateOfInvoice, item.timeOfInvoice),
         amount: Math.abs(item.totalAmount),
         currency: item.currency,
       }));
+
+      mappedData.sort(
+        (a, b) => (b.dateTime?.getTime() ?? 0) - (a.dateTime?.getTime() ?? 0)
+      );
 
       setData(mappedData);
       setTotalPages(resp.pagination.total_pages);
@@ -141,6 +166,8 @@ const CreditNotesTable: React.FC = () => {
           invoiceNo: item.receiptNumber,
           customer: item.customerName,
           date: item.dateOfInvoice,
+          timeOfInvoice: item.timeOfInvoice,
+          dateTime: buildDateTime(item.dateOfInvoice, item.timeOfInvoice),
           amount: Math.abs(item.totalAmount),
           currency: item.currency,
         }));
@@ -149,6 +176,10 @@ const CreditNotesTable: React.FC = () => {
         total = resp.pagination.total_pages;
         current++;
       } while (current <= total);
+
+      allData.sort(
+        (a, b) => (b.dateTime?.getTime() ?? 0) - (a.dateTime?.getTime() ?? 0)
+      );
 
       return allData;
     } catch (error) {
@@ -174,7 +205,7 @@ const CreditNotesTable: React.FC = () => {
           "Credit Note No": r.noteNo,
           "Receipt No": r.invoiceNo,
           Customer: r.customer,
-          Date: r.date,
+          "Date/Time": formatDateTime(r.date, r.timeOfInvoice),
           Amount: r.amount,
           Currency: r.currency,
         }))
@@ -205,6 +236,7 @@ const CreditNotesTable: React.FC = () => {
     { key: "noteNo", header: "Credit Invoice No", sortable: true },
     { key: "invoiceNo", header: "Receipt No" },
     { key: "customer", header: "Customer", sortable: true },
+
     {
       key: "amount",
       header: "Amount",
@@ -216,7 +248,13 @@ const CreditNotesTable: React.FC = () => {
         </code>
       ),
     },
-    { key: "date", header: "Date", sortable: true },
+    {
+      key: "dateTime",
+      header: "Date/Time",
+      sortable: false,
+      render: (r) => formatDateTime(r.date, r.timeOfInvoice),
+    },
+
     {
       key: "actions",
       header: "Actions",

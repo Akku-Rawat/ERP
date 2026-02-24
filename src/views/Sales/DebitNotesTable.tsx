@@ -19,6 +19,8 @@ type DebitNoteRow = {
   invoiceNo: string;
   customer:  string;
   date:      string;
+  timeOfInvoice?: string;
+  dateTime?: Date;
   amount:    number;
   currency:  string;
 };
@@ -32,6 +34,7 @@ const mapRow = (item: any): DebitNoteRow => ({
   invoiceNo: item.receiptNumber,
   customer:  item.customerName,
   date:      item.dateOfInvoice,
+  timeOfInvoice: item.timeOfInvoice,
   amount:    item.totalAmount,
   currency:  item.currency || item.currencyCode || item.currCd || "",
 });
@@ -41,6 +44,22 @@ const mapRow = (item: any): DebitNoteRow => ({
 // ---------------------------------------------------------------------------
 
 const DebitNotesTable: React.FC = () => {
+
+  const buildDateTime = (dateIso?: string, timeOfInvoice?: string) => {
+    const d = String(dateIso ?? "").trim();
+    const t = String(timeOfInvoice ?? "").trim();
+    if (!d) return undefined;
+    const dt = t ? new Date(`${d}T${t}`) : new Date(d);
+    return Number.isNaN(dt.getTime()) ? undefined : dt;
+  };
+
+  const formatDateTime = (dateIso?: string, timeOfInvoice?: string) => {
+    const dt = buildDateTime(dateIso, timeOfInvoice);
+    if (!dt) return "-";
+    const timePart = String(timeOfInvoice ?? "").trim() ||
+      dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return `${dt.toLocaleDateString()} ${timePart}`;
+  };
 
   const [data, setData]               = useState<DebitNoteRow[]>([]);
   const [loading, setLoading]         = useState(false);
@@ -74,7 +93,17 @@ const DebitNotesTable: React.FC = () => {
 
       const resp = await getAllDebitNotes(page, pageSize, sortBy, sortOrder, searchTerm);
 
-      setData(resp.data.map(mapRow));
+      const mapped = resp.data.map((raw: any) => {
+        const r = mapRow(raw);
+        return { ...r, dateTime: buildDateTime(r.date, r.timeOfInvoice) };
+      });
+
+      mapped.sort(
+        (a: DebitNoteRow, b: DebitNoteRow) =>
+          (b.dateTime?.getTime() ?? 0) - (a.dateTime?.getTime() ?? 0)
+      );
+
+      setData(mapped);
       setTotalPages(resp.pagination.total_pages);
       setTotalItems(resp.pagination.total);
     } catch (error: any) {
@@ -135,10 +164,20 @@ const DebitNotesTable: React.FC = () => {
       do {
         const resp = await getAllDebitNotes(current, 100, sortBy, sortOrder, searchTerm);
 
-        allData = [...allData, ...resp.data.map(mapRow)];
+        const mapped = resp.data.map((raw: any) => {
+          const r = mapRow(raw);
+          return { ...r, dateTime: buildDateTime(r.date, r.timeOfInvoice) };
+        });
+
+        allData = [...allData, ...mapped];
         total   = resp.pagination.total_pages;
         current++;
       } while (current <= total);
+
+      allData.sort(
+        (a: DebitNoteRow, b: DebitNoteRow) =>
+          (b.dateTime?.getTime() ?? 0) - (a.dateTime?.getTime() ?? 0)
+      );
 
       return allData;
     } catch (error) {
@@ -164,7 +203,7 @@ const DebitNotesTable: React.FC = () => {
           "Debit Note No": r.noteNo,
           "Receipt No":    r.invoiceNo,
           Customer:        r.customer,
-          Date:            r.date,
+          "Date/Time":     formatDateTime(r.date, r.timeOfInvoice),
           Amount:          r.amount,
           Currency:        r.currency,
         }))
@@ -204,7 +243,12 @@ const DebitNotesTable: React.FC = () => {
         </code>
       ),
     },
-    { key: "date",   header: "Date",   sortable: true },
+    {
+      key: "dateTime",
+      header: "Date/Time",
+      sortable: false,
+      render: (r) => formatDateTime(r.date, r.timeOfInvoice),
+    },
     {
       key: "actions",
       header: "Actions",
