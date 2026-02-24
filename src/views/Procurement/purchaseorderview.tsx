@@ -69,13 +69,21 @@ interface PurchaseOrderData {
     amount: number;
   }>;
 
-  taxes?: Array<{
+  tax?: {
     type: string;
-    accountHead: string;
-    taxRate: number;
-    taxableAmount: number;
-    taxAmount: number;
-  }>;
+    taxRate: string;
+    taxableAmount: string;
+    taxAmount: string;
+  };
+
+  summary: {
+    totalQuantity: number;
+    subTotal: number;
+    taxTotal: string;
+    grandTotal: number;
+    roundingAdjustment: number;
+    roundedTotal: number;
+  };
 
   terms?: {
     terms: {
@@ -112,7 +120,7 @@ interface PurchaseOrderData {
 }
 
 interface PurchaseOrderViewProps {
-   poData: PurchaseOrderData;
+  poData: PurchaseOrderData;
   onClose?: () => void;
   onEdit?: () => void;
 }
@@ -124,8 +132,8 @@ const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
 }) => {
   const po = poData;
   const [showActions, setShowActions] = useState(false);
- if (!po) return null;
- 
+  if (!po) return null;
+
 
   const getCurrencySymbol = (currency: string) => {
     switch (currency) {
@@ -156,11 +164,11 @@ const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
   };
 
   const formatCurrency = (amount: number) => {
-  return `${getCurrencySymbol(po.currency)} ${amount.toLocaleString(
-    "en-US",
-    { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-  )}`;
-};
+    return `${getCurrencySymbol(po.currency)} ${amount.toLocaleString(
+      "en-US",
+      { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+    )}`;
+  };
 
 
   const formatDate = (dateString: string) => {
@@ -226,7 +234,7 @@ const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
                 <StatusIcon className="w-3.5 h-3.5" />
                 {po.status}
               </div>
-            
+
               <div className="relative">
                 <button
                   onClick={() => setShowActions(!showActions)}
@@ -466,21 +474,22 @@ const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
             {/* Summary & Taxes */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               {/* Taxes */}
-              {po.taxes && po.taxes.length > 0 && (
+              {po.tax && (
                 <div className="border-theme rounded p-3" style={{ borderWidth: '1px' }}>
                   <h3 className="font-bold text-main text-xs mb-2">TAX DETAILS</h3>
-                  <div className="space-y-2 text-xs">
-                    {po.taxes.map((tax, idx) => (
-                      <div key={idx} className="flex items-center justify-between pb-2 border-theme" style={{ borderBottomWidth: idx < po.taxes!.length - 1 ? '1px' : '0' }}>
-                        <div>
-                          <p className="font-semibold text-main">{tax.accountHead}</p>
-                          <p className="text-muted text-[10px]">
-                            {tax.taxRate}% on {formatCurrency(tax.taxableAmount)}
-                          </p>
-                        </div>
-                        <p className="font-bold text-primary">{formatCurrency(tax.taxAmount)}</p>
-                      </div>
-                    ))}
+
+                  <div className="flex items-center justify-between text-xs">
+                    <div>
+                      <p className="font-semibold text-main">
+                        {po.tax.type}
+                      </p>
+                      <p className="text-muted text-[10px]">
+                        {po.tax.taxRate} on {formatCurrency(Number(po.tax.taxableAmount))}
+                      </p>
+                    </div>
+                    <p className="font-bold text-primary">
+                      {formatCurrency(Number(po.tax.taxAmount))}
+                    </p>
                   </div>
                 </div>
               )}
@@ -491,17 +500,23 @@ const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-muted">Subtotal</span>
-                    <span className="font-mono text-main">{formatCurrency(po.items.reduce((sum, item) => sum + item.amount, 0))}</span>
+                    <span className="font-mono text-main">
+                      {formatCurrency(po.summary.subTotal)}
+                    </span>
                   </div>
+
                   <div className="flex items-center justify-between">
                     <span className="text-muted">Tax Total</span>
-                    <span className="font-mono text-main">{formatCurrency(po.taxes?.reduce((sum, tax) => sum + tax.taxAmount, 0) || 0)}</span>
+                    <span className="font-mono text-main">
+                      {formatCurrency(Number(po.summary.taxTotal))}
+                    </span>
                   </div>
+
                   <div className="pt-2 border-theme" style={{ borderTopWidth: '2px' }}>
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-primary">GRAND TOTAL</span>
                       <span className="font-bold text-primary" style={{ fontSize: '15px' }}>
-                        {formatCurrency(po.grandTotal)}
+                        {formatCurrency(po.summary.grandTotal)}
                       </span>
                     </div>
                   </div>
