@@ -424,14 +424,13 @@ export const useQuotationForm = (
         }
 
         items[index] = {
-          ...items[index],
-          itemCode: resolvedId,
-          description: data.itemDescription ?? data.itemName ?? "",
-          price: Number(convertedPrice),
-          vatRate: Number(data.taxPerct ?? 0),
-          vatCode:
-            prev.invoiceType === "Export" ? "C1" : (data.taxCode ?? ""),
-        };
+  ...items[index],
+  itemCode: resolvedId,
+  description: data.itemDescription ?? data.itemName ?? "",
+  price: Number(convertedPrice),
+  vatRate: Number(data.taxInfo?.taxPerct ?? 0),
+vatCode: data.taxInfo?.taxCode ?? "",
+};
 
         return { ...prev, items };
       });

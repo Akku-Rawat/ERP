@@ -77,14 +77,11 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
     ...(form.paymentTermsTemplate && { paymentTermsTemplate: form.paymentTermsTemplate }),
     ...(form.taxesChargesTemplate && { taxesChargesTemplate: form.taxesChargesTemplate }),
 
-    addresses: form.addresses,
+   addresses: form.addresses,
 
-    // Terms - backend expects "selling" structure
-    ...(form.terms?.buying && {
-      terms: {
-        buying: form.terms.buying
-      }
-    }),
+terms: {
+  buying: form.terms?.buying || {},
+},
 
 
     items: items, // Already filtered and mapped

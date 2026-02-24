@@ -88,11 +88,9 @@ const payload: any = {
 
   addresses: form.addresses,
 
-  ...(form.terms?.buying && {
-    terms: {
-      selling: form.terms.buying,
-    },
-  }),
+ terms: {
+  buying: form.terms?.buying || {},
+},
 
   items,
 

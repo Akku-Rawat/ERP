@@ -326,32 +326,39 @@ export const usePurchaseOrderForm = ({
     }
   };
 
-  const handleItemSelect = async (itemId: string, idx: number) => {
-    try {
-      const res = await getItemByItemCode(itemId);
-      if (!res || res.status_code !== 200) return;
+const handleItemSelect = async (itemId: string, idx: number) => {
+  try {
+    const res = await getItemByItemCode(itemId);
+    if (!res || res.status_code !== 200) return;
 
-      const data = res.data;
+    const data = res.data;
 
-      setForm((prev) => {
-        const items = [...prev.items];
+    setForm((prev) => {
+      const items = [...prev.items];
 
-        items[idx] = {
-          ...items[idx],
-          itemCode: data.id,
-          itemName: data.itemName,
-          uom: data.unitOfMeasureCd || "Unit",
-          rate: Number(data.sellingPrice || 0),
+      items[idx] = {
+        ...items[idx],
+
+        itemCode: data.id,
+        itemName: data.itemName,
+
       
-        };
+        rate: Number(data.buyingPrice ?? 0),
 
-        return { ...prev, items };
-      });
-    } catch (err) {
-      console.error("Failed to fetch item details", err);
-      toast.error("Failed to load item details");
-    }
-  };
+        uom: data.unitOfMeasureCd || "Unit",
+
+    
+        vatRate: Number(data.taxInfo?.taxPerct ?? 0),
+        vatCd: data.taxInfo?.taxCode ?? "",
+      };
+
+      return { ...prev, items };
+    });
+  } catch (err) {
+    console.error("Failed to fetch item details", err);
+    toast.error("Failed to load item details");
+  }
+};
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -379,7 +386,6 @@ export const usePurchaseOrderForm = ({
 
       let res;
 
-      // ❌ EDIT NOT ALLOWED
       if (isEditMode) {
         showApiError({
           message:
@@ -388,7 +394,7 @@ export const usePurchaseOrderForm = ({
         return;
       }
 
-      // ✅ CREATE ONLY
+      
       res = await createPurchaseOrder(payload);
 
       if (!res || ![200, 201].includes(res.status_code)) {

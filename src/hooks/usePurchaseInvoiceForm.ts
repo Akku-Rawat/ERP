@@ -321,35 +321,36 @@ export const usePurchaseInvoiceForm = ({
     }
   };
 
-  const handleItemSelect = async (itemId: string, idx: number) => {
-    try {
-      const res = await getItemByItemCode(itemId);
-      if (!res || res.status_code !== 200) return;
+const handleItemSelect = async (itemId: string, idx: number) => {
+  try {
+    const res = await getItemByItemCode(itemId);
+    if (!res || res.status_code !== 200) return;
 
-      const data = res.data;
+    const data = res.data;
 
-      setForm((prev) => {
-        const items = [...prev.items];
+    setForm((prev) => {
+      const items = [...prev.items];
 
-        items[idx] = {
-          ...items[idx],
-          itemCode: data.id,
-          itemName: data.itemName,
-          uom: data.unitOfMeasureCd || "Unit",
-          rate: Number(data.sellingPrice || 0),
-    
-          
-        };
+      items[idx] = {
+        ...items[idx],
 
-        return { ...prev, items };
-      });
-    } catch (err) {
-      console.error("Failed to fetch item details", err);
-      showApiError({
-        message: "Failed to load item details",
-      });
-    }
-  };
+        itemCode: data.id,
+        itemName: data.itemName,
+        uom: data.unitOfMeasureCd || "Unit",   
+        rate: Number(data.buyingPrice ?? 0),
+        vatCd: data.taxInfo?.taxCode ?? "",
+        vatRate: Number(data.taxInfo?.taxPerct ?? 0),
+      };
+
+      return { ...prev, items };
+    });
+  } catch (err) {
+    console.error("Failed to fetch item details", err);
+    showApiError({
+      message: "Failed to load item details",
+    });
+  }
+};
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();

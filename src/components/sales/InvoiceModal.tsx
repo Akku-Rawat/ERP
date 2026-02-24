@@ -405,7 +405,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number" // Assuming input is number for entry, stored as string in Type
-                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="vatRate"
                                   value={it.vatRate}
                                   disabled

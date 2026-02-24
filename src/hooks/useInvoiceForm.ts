@@ -48,40 +48,40 @@ export const useInvoiceForm = (
   const shippingEditedRef = useRef(false);
   const lastCurrencyRef = useRef<string>("INR");
   const lastRateRef = useRef<number>(1);
-useEffect(() => {
-  if (!isOpen || initialData) return;
+  useEffect(() => {
+    if (!isOpen || initialData) return;
 
 
-  const loadCompanyData = async () => {
-    try {
-      const companyRes = await getCompanyById(COMPANY_ID);
-      const company = companyRes?.data;
-      
-      setFormData((prev) => ({
-        ...prev,
-        invoiceStatus: prev.invoiceStatus || (mode === "proforma" ? "Draft" : prev.invoiceStatus),
-        invoiceType: prev.invoiceType || (mode === "proforma" ? "Non-Export" : prev.invoiceType),
-        terms: {
-          selling: company?.terms?.selling ?? EMPTY_TERMS.selling,
-        },
-        paymentInformation: {
-          ...prev.paymentInformation,
-           paymentTerms:
-            company?.terms?.selling?.payment?.dueDates ?? "",
+    const loadCompanyData = async () => {
+      try {
+        const companyRes = await getCompanyById(COMPANY_ID);
+        const company = companyRes?.data;
 
-          bankName: company?.bankAccounts?.[0]?.bankName ?? "",
-          accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
-          routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
-          swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
-        },
-      }));
-    } catch (err) {
-      console.error("Failed to load company data", err);
-    }
-  };
+        setFormData((prev) => ({
+          ...prev,
+          invoiceStatus: prev.invoiceStatus || (mode === "proforma" ? "Draft" : prev.invoiceStatus),
+          invoiceType: prev.invoiceType || (mode === "proforma" ? "Non-Export" : prev.invoiceType),
+          terms: {
+            selling: company?.terms?.selling ?? EMPTY_TERMS.selling,
+          },
+          paymentInformation: {
+            ...prev.paymentInformation,
+            paymentTerms:
+              company?.terms?.selling?.payment?.dueDates ?? "",
 
-  loadCompanyData();
-}, [isOpen, mode]);
+            bankName: company?.bankAccounts?.[0]?.bankName ?? "",
+            accountNumber: company?.bankAccounts?.[0]?.accountNo ?? "",
+            routingNumber: company?.bankAccounts?.[0]?.sortCode ?? "",
+            swiftCode: company?.bankAccounts?.[0]?.swiftCode ?? "",
+          },
+        }));
+      } catch (err) {
+        console.error("Failed to load company data", err);
+      }
+    };
+
+    loadCompanyData();
+  }, [isOpen, mode]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -198,9 +198,9 @@ useEffect(() => {
 
 
 
-if (!formData.paymentInformation?.paymentTerms) {
-  throw new Error("Please select payment terms");
-}
+      if (!formData.paymentInformation?.paymentTerms) {
+        throw new Error("Please select payment terms");
+      }
 
       if (!it.quantity || it.quantity <= 0) {
         throw new Error(`Item ${idx + 1}: Quantity must be greater than 0`);
@@ -327,15 +327,15 @@ if (!formData.paymentInformation?.paymentTerms) {
 
       const countryLookupList = await getRolaCountryList();
 
-const formattedCountries = countryLookupList.map((c: any) => ({
-  code: c.code || c.name,
-  name: c.country_name || c.name,
-}));
+      const formattedCountries = countryLookupList.map((c: any) => ({
+        code: c.code || c.name,
+        name: c.country_name || c.name,
+      }));
 
-const countryCode = getCountryCode(
-  formattedCountries,
-  data.shippingCountry || data.billingCountry,
-);
+      const countryCode = getCountryCode(
+        formattedCountries,
+        data.shippingCountry || data.billingCountry,
+      );
 
       setCustomerDetails(data);
 
@@ -357,11 +357,11 @@ const countryCode = getCountryCode(
         country: data.shippingCountry ?? "",
       };
 
-     const paymentInformation = {
-  paymentTerms:
-    company?.terms?.selling?.payment?.dueDates ??
-    data.paymentInformation?.paymentTerms ??
-    "",
+      const paymentInformation = {
+        paymentTerms:
+          company?.terms?.selling?.payment?.dueDates ??
+          data.paymentInformation?.paymentTerms ??
+          "",
 
         paymentMethod: "01",
         bankName: company?.bankAccounts?.[0]?.bankName ?? "",
@@ -387,8 +387,8 @@ const countryCode = getCountryCode(
           shippingAddress: shipping,
           paymentInformation,
           terms: {
-  selling: company?.terms?.selling ?? prev.terms?.selling ?? EMPTY_TERMS.selling,
-},
+            selling: company?.terms?.selling ?? prev.terms?.selling ?? EMPTY_TERMS.selling,
+          },
         };
       });
     } catch (err) {
@@ -458,10 +458,13 @@ const countryCode = getCountryCode(
         items[index] = {
           ...items[index],
           itemCode: resolvedId,
-          description: data.itemDescription ?? data.itemName ?? "",
+          description: data.description ?? data.itemName ?? "",
           price: Number(convertedPrice),
-          vatRate: Number(data.taxPerct ?? 0),
-          vatCode: prev.invoiceType === "Export" ? "C1" : (data.taxCode ?? ""),
+
+
+          vatRate: Number(data.taxInfo?.taxPerct ?? 0),
+          vatCode: data.taxInfo?.taxCode ?? "",
+
           quantity: Number(items[index].quantity) || 1,
           discount: Number(items[index].discount) || 0,
         };
@@ -525,36 +528,36 @@ const countryCode = getCountryCode(
       dueDate: invoice.dueDate,
       billingAddress: invoice.billingAddress ?? prev.billingAddress,
       shippingAddress: invoice.shippingAddress ?? prev.shippingAddress,
-       paymentInformation:
-      invoice.paymentInformation ?? prev.paymentInformation,
-    terms: invoice.terms ?? prev.terms,
+      paymentInformation:
+        invoice.paymentInformation ?? prev.paymentInformation,
+      terms: invoice.terms ?? prev.terms,
       items: invoice.items.map((it: any) => {
-  const quantity = Number(it.quantity);
-  const price = Number(it.price);
-  const discount = Number(it.discount || 0);
+        const quantity = Number(it.quantity);
+        const price = Number(it.price);
+        const discount = Number(it.discount || 0);
 
-  const discountAmount = quantity * price * (discount / 100);
-const totalInclusive = quantity * price - discountAmount;
-  const exclusiveBase = Number(it.vatTaxableAmount || 0);
+        const discountAmount = quantity * price * (discount / 100);
+        const totalInclusive = quantity * price - discountAmount;
+        const exclusiveBase = Number(it.vatTaxableAmount || 0);
 
-  const taxAmount = totalInclusive - exclusiveBase;
+        const taxAmount = totalInclusive - exclusiveBase;
 
-  const taxRate =
-    exclusiveBase > 0
-      ? Number(((taxAmount / exclusiveBase) * 100).toFixed(2))
-      : 0;
+        const taxRate =
+          exclusiveBase > 0
+            ? Number(((taxAmount / exclusiveBase) * 100).toFixed(2))
+            : 0;
 
-  return {
-    itemCode: it.itemCode,
-    description: it.description ?? "",
-    quantity,
-    price,
-    discount,
-    vatRate: taxRate,
-    vatCode: it.vatCode ?? "",
-    _fromInvoice: true,
-  };
-}),
+        return {
+          itemCode: it.itemCode,
+          description: it.description ?? "",
+          quantity,
+          price,
+          discount,
+          vatRate: taxRate,
+          vatCode: it.vatCode ?? "",
+          _fromInvoice: true,
+        };
+      }),
 
     }));
 
@@ -571,79 +574,79 @@ const totalInclusive = quantity * price - discountAmount;
     if (!checked) shippingEditedRef.current = false;
   };
 
-const handleReset = async () => {
-  try {
-    const companyRes = await getCompanyById(COMPANY_ID);
-    const company = companyRes?.data;
+  const handleReset = async () => {
+    try {
+      const companyRes = await getCompanyById(COMPANY_ID);
+      const company = companyRes?.data;
 
-    setFormData({
-      ...(DEFAULT_INVOICE_FORM as Invoice),
-      terms: {
-        selling:
-          company?.terms?.selling ?? EMPTY_TERMS.selling,
-      },
-      shippingAddress: {
-        ...DEFAULT_INVOICE_FORM.billingAddress,
-      },
-    });
-  } catch (err) {
-    setFormData({
-      ...(DEFAULT_INVOICE_FORM as Invoice),
-      terms: { ...EMPTY_TERMS },
-      shippingAddress: {
-        ...DEFAULT_INVOICE_FORM.billingAddress,
-      },
-    });
-  }
+      setFormData({
+        ...(DEFAULT_INVOICE_FORM as Invoice),
+        terms: {
+          selling:
+            company?.terms?.selling ?? EMPTY_TERMS.selling,
+        },
+        shippingAddress: {
+          ...DEFAULT_INVOICE_FORM.billingAddress,
+        },
+      });
+    } catch (err) {
+      setFormData({
+        ...(DEFAULT_INVOICE_FORM as Invoice),
+        terms: { ...EMPTY_TERMS },
+        shippingAddress: {
+          ...DEFAULT_INVOICE_FORM.billingAddress,
+        },
+      });
+    }
 
-  setCustomerDetails(null);
-  setCustomerNameDisplay("");
-  setTaxCategory("");
-  setActiveTab("details");
-  setSameAsBilling(true);
-  setIsShippingOpen(false);
-  setPage(0);
-  shippingEditedRef.current = false;
-  lastCurrencyRef.current = "INR";
-  lastRateRef.current = 1;
-};
-
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  validateForm();
-
-  const payload = {
-    ...formData,
-    items: formData.items.map((item) => ({
-      ...item,
-      vatRate: String(item.vatRate), // convert to string only here
-    })),
+    setCustomerDetails(null);
+    setCustomerNameDisplay("");
+    setTaxCategory("");
+    setActiveTab("details");
+    setSameAsBilling(true);
+    setIsShippingOpen(false);
+    setPage(0);
+    shippingEditedRef.current = false;
+    lastCurrencyRef.current = "INR";
+    lastRateRef.current = 1;
   };
 
-  return payload;
-};
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
+    validateForm();
 
-const { subTotal, totalTax, grandTotal } = useMemo(() => {
-  let sub = 0;
-  let tax = 0;
+    const payload = {
+      ...formData,
+      items: formData.items.map((item) => ({
+        ...item,
+        vatRate: String(item.vatRate), // convert to string only here
+      })),
+    };
 
-  formData.items.forEach((item) => {
-const discountAmount = item.quantity * item.price * (Number(item.discount || 0) / 100);
-const totalInclusive = item.quantity * item.price - discountAmount;
-const exclusive = totalInclusive / (1 + Number(item.vatRate || 0) / 100);
-const taxAmt = totalInclusive - exclusive;
-sub += exclusive;
-tax += taxAmt;
-  });
-
-  return {
-    subTotal: sub,
-    totalTax: tax,
-    grandTotal: sub + tax,
+    return payload;
   };
-}, [formData.items]);
+
+
+  const { subTotal, totalTax, grandTotal } = useMemo(() => {
+    let sub = 0;
+    let tax = 0;
+
+    formData.items.forEach((item) => {
+      const discountAmount = item.quantity * item.price * (Number(item.discount || 0) / 100);
+      const totalInclusive = item.quantity * item.price - discountAmount;
+      const exclusive = totalInclusive / (1 + Number(item.vatRate || 0) / 100);
+      const taxAmt = totalInclusive - exclusive;
+      sub += exclusive;
+      tax += taxAmt;
+    });
+
+    return {
+      subTotal: sub,
+      totalTax: tax,
+      grandTotal: sub + tax,
+    };
+  }, [formData.items]);
 
 
   const paginatedItems = formData.items.slice(
