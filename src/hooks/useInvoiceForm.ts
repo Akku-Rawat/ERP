@@ -151,12 +151,17 @@ export const useInvoiceForm = (
         const price = Number(it.price);
         if (!Number.isFinite(price)) return it;
 
-        const priceInZmw = prevCurrency === "ZMW" ? price : price * prevRate;
-        const nextPrice = newCurrency === "ZMW" ? priceInZmw : priceInZmw / newRate;
+        const baseZmw =
+          Number.isFinite(Number((it as any)._priceZmw))
+            ? Number((it as any)._priceZmw)
+            : (prevCurrency === "ZMW" ? price : price * prevRate);
+
+        const nextPrice = newCurrency === "ZMW" ? baseZmw : baseZmw / newRate;
 
         return {
           ...it,
           price: Number(nextPrice.toFixed(2)),
+          _priceZmw: baseZmw,
         };
       });
 
@@ -260,9 +265,14 @@ export const useInvoiceForm = (
       }
     } else {
       if (name === "currencyCode") {
-        setExchangeRateLoading(true);
+        const next = String(value ?? "").trim().toUpperCase();
         setExchangeRateError(null);
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setExchangeRateLoading(!!next && next !== "ZMW");
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          exchangeRt: next === "ZMW" ? "1" : "",
+        }));
         return;
       }
 
@@ -433,12 +443,11 @@ export const useInvoiceForm = (
 
         const apiSellingPrice = Number(data.sellingPrice);
         const hasApiPrice = Number.isFinite(apiSellingPrice) && apiSellingPrice > 0;
+        const baseZmw = hasApiPrice ? apiSellingPrice : Number(items[index].price);
         const convertedPrice = (() => {
-          if (!hasApiPrice) return Number(items[index].price);
-          if (currency !== "ZMW" && Number.isFinite(rate) && rate > 0) {
-            return apiSellingPrice / rate;
-          }
-          return apiSellingPrice;
+          if (!Number.isFinite(baseZmw)) return Number(items[index].price);
+          if (currency !== "ZMW" && Number.isFinite(rate) && rate > 0) return baseZmw / rate;
+          return baseZmw;
         })();
 
         const existingIdx = items.findIndex(
@@ -461,6 +470,7 @@ export const useInvoiceForm = (
           itemCode: resolvedId,
           description: data.itemDescription ?? data.itemName ?? "",
           price: Number(Number(convertedPrice).toFixed(2)),
+          _priceZmw: Number.isFinite(baseZmw) ? baseZmw : undefined,
           vatRate: Number(data.taxPerct ?? 0),
           vatCode: prev.invoiceType === "Export" ? "C1" : (data.taxCode ?? ""),
           quantity: Number(items[index].quantity) || 1,
@@ -528,6 +538,9 @@ export const useInvoiceForm = (
     });
   };
   const setFormDataFromInvoice = async (invoice: any) => {
+    const invoiceCurrency = String(invoice?.currencyCode ?? "").trim().toUpperCase();
+    const invoiceRate = Number(String(invoice?.exchangeRt ?? invoice?.exchangeRate ?? "1").trim());
+
     setFormData((prev) => ({
       ...prev,
       invoiceNumber: invoice.invoiceNumber,
@@ -545,6 +558,11 @@ export const useInvoiceForm = (
         const price = Number(it.price);
         const discount = Number(it.discount || 0);
 
+        const baseZmw =
+          invoiceCurrency === "ZMW" || !Number.isFinite(invoiceRate) || invoiceRate <= 0
+            ? price
+            : price * invoiceRate;
+
         const discountAmount = quantity * price * (discount / 100);
         const totalInclusive = quantity * price - discountAmount;
         const exclusiveBase = Number(it.vatTaxableAmount || 0);
@@ -561,6 +579,7 @@ export const useInvoiceForm = (
           description: it.description ?? "",
           quantity,
           price,
+          _priceZmw: Number.isFinite(baseZmw) ? baseZmw : undefined,
           discount,
           vatRate: taxRate,
           vatCode: it.vatCode ?? "",

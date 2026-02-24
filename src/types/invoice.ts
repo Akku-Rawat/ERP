@@ -51,6 +51,7 @@ export interface InvoiceItem {
   price: number;
   vatCode: string ;
   _fromInvoice?: boolean;
+  _priceZmw?: number;
 }
 
 export interface PaymentInformation {

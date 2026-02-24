@@ -167,12 +167,17 @@ export const useQuotationForm = (
         const price = Number(it.price);
         if (!Number.isFinite(price)) return it;
 
-        const priceInZmw = prevCurrency === "ZMW" ? price : price * prevRate;
-        const nextPrice = newCurrency === "ZMW" ? priceInZmw : priceInZmw / newRate;
+        const baseZmw =
+          Number.isFinite(Number((it as any)._priceZmw))
+            ? Number((it as any)._priceZmw)
+            : (prevCurrency === "ZMW" ? price : price * prevRate);
+
+        const nextPrice = newCurrency === "ZMW" ? baseZmw : baseZmw / newRate;
 
         return {
           ...it,
           price: Number(nextPrice.toFixed(2)),
+          _priceZmw: baseZmw,
         };
       });
 
@@ -250,9 +255,14 @@ export const useQuotationForm = (
       }
     } else {
       if (name === "currencyCode") {
-        setExchangeRateLoading(true);
+        const next = String(value ?? "").trim().toUpperCase();
         setExchangeRateError(null);
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setExchangeRateLoading(!!next && next !== "ZMW");
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          exchangeRt: next === "ZMW" ? "1" : "",
+        }));
         return;
       }
 
@@ -400,12 +410,11 @@ export const useQuotationForm = (
         const rate = Number(String(prev.exchangeRt ?? "1").trim());
         const apiSellingPrice = Number(data.sellingPrice);
         const hasApiPrice = Number.isFinite(apiSellingPrice) && apiSellingPrice > 0;
+        const baseZmw = hasApiPrice ? apiSellingPrice : Number(items[index].price);
         const convertedPrice = (() => {
-          if (!hasApiPrice) return Number(items[index].price);
-          if (currency !== "ZMW" && Number.isFinite(rate) && rate > 0) {
-            return apiSellingPrice / rate;
-          }
-          return apiSellingPrice;
+          if (!Number.isFinite(baseZmw)) return Number(items[index].price);
+          if (currency !== "ZMW" && Number.isFinite(rate) && rate > 0) return baseZmw / rate;
+          return baseZmw;
         })();
 
         const existingIdx = items.findIndex(
@@ -428,6 +437,7 @@ export const useQuotationForm = (
           itemCode: resolvedId,
           description: data.itemDescription ?? data.itemName ?? "",
           price: Number(Number(convertedPrice).toFixed(2)),
+          _priceZmw: Number.isFinite(baseZmw) ? baseZmw : undefined,
           vatRate: Number(data.taxPerct ?? 0),
           vatCode:
             prev.invoiceType === "Export" ? "C1" : (data.taxCode ?? ""),
@@ -460,9 +470,28 @@ export const useQuotationForm = (
 
     setFormData((prev) => {
       const items = [...prev.items];
+      const nextVal = isNum ? clampItemNumber(name, value) : value;
+
+      if (name === "price") {
+        const currency = String(prev.currencyCode ?? "").trim().toUpperCase();
+        const rate = Number(String(prev.exchangeRt ?? "1").trim());
+        const baseZmw =
+          currency === "ZMW" || !Number.isFinite(rate) || rate <= 0
+            ? Number(nextVal)
+            : Number(nextVal) * rate;
+
+        items[idx] = {
+          ...items[idx],
+          price: Number(nextVal),
+          _priceZmw: Number.isFinite(baseZmw) ? baseZmw : items[idx]?._priceZmw,
+        };
+
+        return { ...prev, items };
+      }
+
       items[idx] = {
         ...items[idx],
-        [name]: isNum ? clampItemNumber(name, value) : value,
+        [name]: nextVal,
       };
       return { ...prev, items };
     });
