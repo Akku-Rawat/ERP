@@ -9,6 +9,7 @@ import { Button } from "../../components/ui/modal/formComponent";
 import { ModalInput, ModalSelect } from "../ui/modal/modalComponent";
 import ItemSelect from "../selects/ItemSelect";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
+import CountrySelect from "../selects/CountrySelect";
 import {
   currencySymbols,
   paymentMethodOptions,
@@ -216,28 +217,18 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   </div> */}
 
                   {(ui.isExport || ui.hasC1) && (
-                    // <CountrySelect
-                    //   value={formData.destnCountryCd}
-                    //   onChange={(c) =>
-                    //     actions.handleInputChange({
-                    //       target: {
-                    //         name: "destnCountryCd",
-                    //         value: c.code,
-                    //       },
-                    //     } as any)
-                    //   }
-                    // />
-
-                    <div>
-                      <ModalInput
-                        label="Export To Country"
-                        name="destnCountryCd"
-                        type="text"
-                        value={formData.destnCountryCd}
-                        onChange={actions.handleInputChange}
-                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                      />
-                    </div>
+                    <CountrySelect
+                      value={formData.destnCountryCd}
+                      required
+                      onChange={(c) =>
+                        actions.handleInputChange({
+                          target: {
+                            name: "destnCountryCd",
+                            value: c.code,
+                          },
+                        } as any)
+                      }
+                    />
                   )}
 
                   {ui.isLocal && (

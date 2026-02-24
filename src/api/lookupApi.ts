@@ -1,8 +1,8 @@
 import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
 
-import { API, ERP_BASE } from "../config/api";
-const api = createAxiosInstance(ERP_BASE);
+import { API, CODES_BASE } from "../config/api";
+const api = createAxiosInstance(CODES_BASE);
 export const LookupAPI = API.lookup;
 export const RolaLookupAPI = API.rolaLookup;
 

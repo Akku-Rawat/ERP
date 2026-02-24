@@ -12,11 +12,11 @@ import { ModalSelect, ModalInput } from "../ui/modal/modalComponent";
 import CustomerSelect from "../selects/CustomerSelect";
 import ItemSelect from "../selects/ItemSelect";
 import Modal from "../../components/ui/modal/modal";
-import { showSuccess } from "../../utils/alert";
 import { User, Mail, Phone } from "lucide-react";
 import AddressBlock from "../ui/modal/AddressBlock";
 import PaymentInfoBlock from "./PaymentInfoBlock";
 import React, { useState } from "react";
+import CountrySelect from "../selects/CountrySelect";
 import {
   currencySymbols,
   paymentMethodOptions,
@@ -60,10 +60,6 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handlePrint = () => {
-    showSuccess("Print functionality - Opens print dialog");
   };
 
   const footerContent = (
@@ -209,16 +205,18 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                   </div>
 
                   {(ui.isExport || ui.hasC1) && (
-                    <div>
-                      <ModalInput
-                        label="Export To Country"
-                        name="destnCountryCd"
-                        type="text"
-                        value={formData.destnCountryCd}
-                        onChange={actions.handleInputChange}
-                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                      />
-                    </div>
+                    <CountrySelect
+                      value={formData.destnCountryCd}
+                      required
+                      onChange={(c) =>
+                        actions.handleInputChange({
+                          target: {
+                            name: "destnCountryCd",
+                            value: c.code,
+                          },
+                        } as any)
+                      }
+                    />
                   )}
 
                   {/* LPO Number */}
@@ -290,7 +288,6 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                           const qty = Number(it.quantity) || 0;
                           const price = Number(it.price) || 0;
                           const discount = Number(it.discount) || 0;
-                          const vatRate = Number(it.vatRate) || 0;
                           const discountAmount = qty * price * (discount / 100);
                           const amount = qty * price - discountAmount;
                           return (

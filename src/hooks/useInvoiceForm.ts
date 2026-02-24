@@ -3,7 +3,6 @@ import { getCustomerByCustomerCode } from "../api/customerApi";
 import { getCompanyById } from "../api/companySetupApi";
 import type { TermSection } from "../types/termsAndCondition";
 import type { Invoice, InvoiceItem } from "../types/invoice";
-import { getCountryList } from "../api/lookupApi";
 import { getItemByItemCode } from "../api/itemApi";
 import { getExchangeRate } from "../api/exchangeRateApi";
 
@@ -263,7 +262,7 @@ export const useInvoiceForm = (
       }
     }
 
-    if (hasC1 && !formData.destnCountryCd) {
+    if ((invoiceType === "export" || hasC1) && !formData.destnCountryCd) {
       throw new Error(
         "Destination country (destnCountryCd) is required for VAT code C1 transactions",
       );
@@ -301,6 +300,16 @@ export const useInvoiceForm = (
         shippingEditedRef.current = true;
       }
     } else {
+      if (name === "invoiceType") {
+        const nextType = String(value ?? "").trim();
+        setFormData((prev) => ({
+          ...prev,
+          [name]: nextType,
+          destnCountryCd: nextType === "Export" ? "" : prev.destnCountryCd,
+        }));
+        return;
+      }
+
       if (name === "currencyCode") {
         const next = String(value ?? "").trim().toUpperCase();
         setExchangeRateError(null);
@@ -321,30 +330,6 @@ export const useInvoiceForm = (
 
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
-  };
-
-  const getCountryCode = (
-    countries: { code: string; name: string }[],
-    countryName?: string,
-  ): string => {
-    if (!countryName || !countries.length) return "";
-
-    const n = countryName.trim().toLowerCase();
-
-    const byCode = countries.find((c) => c.code.toLowerCase() === n);
-    if (byCode) return byCode.code;
-
-    const byName = countries.find((c) => c.name.toLowerCase().includes(n));
-    if (byName) return byName.code;
-
-    const reverse = countries.find((c) => n.includes(c.name.toLowerCase()));
-    if (reverse) return reverse.code;
-
-    if (n === "usa" || n === "united states of america") return "US";
-    if (n === "uk" || n === "united kingdom") return "GB";
-    if (n === "uae") return "AE";
-
-    return "";
   };
 
   const handleCustomerSelect = async ({
@@ -374,16 +359,6 @@ export const useInvoiceForm = (
         | "Lpo";
 
       setTaxCategory(invoiceType);
-
-      const countryLookupRes = await getCountryList();
-      const countryLookupList = Array.isArray(countryLookupRes)
-        ? countryLookupRes
-        : (countryLookupRes?.data ?? []);
-
-      const countryCode = getCountryCode(
-        countryLookupList,
-        data.shippingCountry || data.billingCountry,
-      );
 
       setCustomerDetails(data);
 
@@ -429,7 +404,7 @@ export const useInvoiceForm = (
 
         return {
           ...prev,
-          destnCountryCd: invoiceType === "Export" ? countryCode : prev.destnCountryCd,
+          destnCountryCd: invoiceType === "Export" ? "" : prev.destnCountryCd,
           invoiceType,
           billingAddress: billing,
           shippingAddress: shipping,

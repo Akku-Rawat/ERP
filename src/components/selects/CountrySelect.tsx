@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { getCountryList } from "../../api/lookupApi";
 
@@ -7,6 +7,7 @@ interface CountrySelectProps {
   onChange: (country: { code: string; name: string }) => void;
   className?: string;
   label?: string;
+  required?: boolean;
 }
 
 export default function CountrySelect({
@@ -14,6 +15,7 @@ export default function CountrySelect({
   onChange,
   className = "",
   label = "Export To Country",
+  required = false,
 }: CountrySelectProps) {
   const [countries, setCountries] = useState<
     { sortOrder: number; code: string; name: string }[]
@@ -43,7 +45,10 @@ export default function CountrySelect({
   }, []);
 
   useEffect(() => {
-    if (!value) return;
+    if (!value) {
+      setSearch("");
+      return;
+    }
     const match = countries.find((c) => c.code === value);
     if (match) setSearch(match.name);
   }, [value, countries]);
@@ -78,7 +83,10 @@ export default function CountrySelect({
 
   return (
     <div className={`flex flex-col gap-1 w-full ${className}`}>
-      <span className="font-medium text-muted text-sm">{label}</span>
+      <span className="font-medium text-muted text-sm">
+        {label}
+        {required && <span className="text-danger">*</span>}
+      </span>
 
       <input
   ref={inputRef}

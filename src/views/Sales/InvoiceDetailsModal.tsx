@@ -5,6 +5,7 @@ import { FileText, ExternalLink } from "lucide-react";
 import Modal from "../../components/ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
 import { getSalesInvoiceById } from "../../api/salesApi";
+import { getCountryList } from "../../api/lookupApi";
 import { getPaymentMethodLabel } from "../../constants/invoice.constants";
 
 type Address = {
@@ -128,6 +129,7 @@ const InvoiceDetailsModal: React.FC<Props> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<InvoiceDetails | null>(null);
+  const [countryNameMap, setCountryNameMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let mounted = true;
@@ -165,6 +167,37 @@ const InvoiceDetailsModal: React.FC<Props> = ({
       mounted = false;
     };
   }, [open, invoiceId, fetchDetails, mapDetails]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const run = async () => {
+      if (!open) return;
+      const code = String(data?.destnCountryCd ?? "").trim().toUpperCase();
+      if (!code) return;
+      if (countryNameMap[code]) return;
+
+      try {
+        const resp = await getCountryList();
+        const list = Array.isArray(resp) ? resp : (resp?.data ?? []);
+        const next: Record<string, string> = {};
+        (list ?? []).forEach((c: any) => {
+          const cc = String(c?.code ?? "").trim().toUpperCase();
+          const name = String(c?.name ?? "").trim();
+          if (cc) next[cc] = name || cc;
+        });
+        if (!mounted) return;
+        setCountryNameMap((prev) => ({ ...next, ...prev }));
+      } catch {
+        // ignore lookup failures; we will fall back to showing the code
+      }
+    };
+
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [open, data?.destnCountryCd, countryNameMap]);
 
   const items = data?.items ?? [];
 
@@ -328,7 +361,12 @@ const InvoiceDetailsModal: React.FC<Props> = ({
                 {isExportType ? (
                   <Field
                     label="Destination Country"
-                    value={data.destnCountryCd ?? "—"}
+                    value={
+                      data.destnCountryCd
+                        ? countryNameMap[String(data.destnCountryCd).trim().toUpperCase()] ??
+                          data.destnCountryCd
+                        : "—"
+                    }
                   />
                 ) : null}
 

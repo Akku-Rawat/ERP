@@ -16,6 +16,7 @@ import AddressBlock from "../ui/modal/AddressBlock";
 import { getAllCustomers } from "../../api/customerApi";
 import CustomerSelect from "../selects/CustomerSelect";
 import ItemSelect from "../selects/ItemSelect";
+import CountrySelect from "../selects/CountrySelect";
 import { createProformaInvoice } from "../../api/proformaInvoiceApi";
 import { useInvoiceForm } from "../../hooks/useInvoiceForm";
 import {
@@ -256,29 +257,18 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                   </div> */}
 
                   {ui.isExport && (
-                    // <CountrySelect
-                    //   value={formData.destnCountryCd}
-                    //   onChange={(c) =>
-                    //     actions.handleInputChange({
-                    //       target: {
-                    //         name: "destnCountryCd",
-                    //         value: c.code,
-                    //       },
-                    //     } as any)
-                    //   }
-                    // />
-
-                    <div>
-                      <ModalInput
-                        label="Export To Country"
-                        name="destnCountryCd"
-                        type="text"
-                        disabled
-                        value={formData.destnCountryCd}
-                        onChange={actions.handleInputChange}
-                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                      />
-                    </div>
+                    <CountrySelect
+                      value={formData.destnCountryCd}
+                      required
+                      onChange={(c) =>
+                        actions.handleInputChange({
+                          target: {
+                            name: "destnCountryCd",
+                            value: c.code,
+                          },
+                        } as any)
+                      }
+                    />
                   )}
 
                   {ui.isLocal && (
