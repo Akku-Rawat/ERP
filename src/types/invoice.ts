@@ -62,6 +62,7 @@ export interface InvoiceItem {
   price: number;
   vatCode: string ;
   _fromInvoice?: boolean;
+  batchNo?: string;
 }
 
 export interface PaymentInformation {

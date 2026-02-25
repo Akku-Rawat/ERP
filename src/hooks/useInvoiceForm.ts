@@ -467,6 +467,9 @@ export const useInvoiceForm = (
 
           quantity: Number(items[index].quantity) || 1,
           discount: Number(items[index].discount) || 0,
+          batchNo: data.batchInfo?.has_batch_no
+    ? data.batchInfo?.batchNo || ""
+    : "",
         };
 
         return { ...prev, items };

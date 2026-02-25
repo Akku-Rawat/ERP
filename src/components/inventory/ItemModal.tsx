@@ -130,7 +130,7 @@ const ItemModal: React.FC<{
                         return (
                           <Input
                             key="itemClassCode"
-                            label="Item Class Code"
+                            label="HSN CODE"
                             name="itemClassCode"
                             value={form.itemClassCode || ""}
                             onChange={handleForm}
@@ -467,17 +467,14 @@ const ItemModal: React.FC<{
                           setForm((prev) => ({
                             ...prev,
                             has_batch_no: checked,
-                            // clear batch fields when unchecked
-                            ...(!checked && {
-                              batchNumber: "",
-                              create_new_batch: false,
-                            }),
+                            batchNo: checked ? prev.batchNo : "",
+                            create_new_batch: false,
                           }))
                         }
                       />
 
                       {/* create_new_batch only shows when has_batch_no is true */}
-                      {form.has_batch_no && (
+                      {/* {form.has_batch_no && (
                         <CheckboxField
                           id="create_new_batch"
                           label="Create New Batch"
@@ -489,7 +486,7 @@ const ItemModal: React.FC<{
                             }))
                           }
                         />
-                      )}
+                      )} */}
 
                       <CheckboxField
                         id="has_expiry_date"
@@ -502,7 +499,7 @@ const ItemModal: React.FC<{
                             // clear date fields when unchecked
                             ...(!checked && {
                               expiryDate: "",
-                               manufacturingDate: "",
+                              manufacturingDate: "",
                             }),
                           }))
                         }
@@ -514,8 +511,8 @@ const ItemModal: React.FC<{
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <Input
                           label="Batch Number"
-                          name="batchNumber"
-                          value={form.batchNumber || ""}
+                          name="batchNo"
+                          value={form.batchNo || ""}
                           onChange={handleForm}
                           placeholder="e.g. BATCH-001"
                           className="w-full"
@@ -632,7 +629,10 @@ const ItemModal: React.FC<{
             Reset
           </Button>
           <Button variant="primary" loading={loading} type="submit">
-            {activeTab === "details" ? "Next" : "Submit"}
+            {activeTab === "inventoryDetails" ||
+            (activeTab === "taxDetails" && isServiceItem)
+              ? "Submit"
+              : "Next"}
           </Button>
         </div>
       </form>
@@ -655,7 +655,10 @@ const CheckboxField: React.FC<{
       onChange={(e) => onChange(e.target.checked)}
       className="w-4 h-4 accent-primary cursor-pointer rounded"
     />
-    <label htmlFor={id} className="text-sm font-medium text-main cursor-pointer select-none">
+    <label
+      htmlFor={id}
+      className="text-sm font-medium text-main cursor-pointer select-none"
+    >
       {label}
     </label>
   </div>

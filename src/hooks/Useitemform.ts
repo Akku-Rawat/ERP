@@ -12,6 +12,11 @@ import {
 } from "../taxconfig/taxConfigResolver";
 import { API } from "../config/api";
 
+// ---------------------------------------------------------------------------
+// Default empty form state — all fields initialised to safe defaults.
+// Boolean flags use `false`; strings use `""` to avoid uncontrolled-input
+// warnings in React.
+// ---------------------------------------------------------------------------
 export const emptyForm: Record<string, any> = {
   id: "",
   itemName: "",
@@ -37,12 +42,13 @@ export const emptyForm: Record<string, any> = {
   taxName: "",
   taxDescription: "",
   taxPerct: "",
+  // countryCode is sent inside taxInfo — stored flat in form state
+  countryCode: "",
   dimensionUnit: "",
   weight: "",
   valuationMethod: "",
   trackingMethod: "",
   reorderLevel: "",
-  batchNumber: "",
   expiryDate: "",
   manufacturingDate: "",
   shelfLifeInDays: "",
@@ -55,12 +61,23 @@ export const emptyForm: Record<string, any> = {
   dimensionWidth: "",
   dimensionHeight: "",
   trackInventory: false,
-  // ── Batch boolean flags ──
+  // Batch tracking flags
   has_batch_no: false,
+  batchNo: "",
   create_new_batch: false,
   has_expiry_date: false,
 };
 
+// ---------------------------------------------------------------------------
+// buildPayload — transforms flat form state into the nested API request shape.
+//
+// Structure mirrors exactly what the backend expects:
+//   - vendorInfo, taxInfo, inventoryInfo are always present
+//   - taxInfo includes countryCode
+//   - batchInfo is included for non-service items (itemTypeCode !== 3)
+//   - batchNo / expiryDate / manufacturingDate are always sent as strings;
+//     the backend treats "" as "not set" — never send null here
+// ---------------------------------------------------------------------------
 const buildPayload = (form: Record<string, any>) => ({
   itemName: form.itemName,
   itemGroup: form.itemGroup,
@@ -96,6 +113,9 @@ const buildPayload = (form: Record<string, any>) => ({
     taxName: form.taxName,
     taxDescription: form.taxDescription,
     taxPerct: form.taxPerct,
+    // Backend requires countryCode inside taxInfo.
+    // Falls back to originNationCode if countryCode is not separately stored.
+    countryCode: form.countryCode || form.originNationCode || "",
   },
 
   inventoryInfo: {
@@ -106,13 +126,18 @@ const buildPayload = (form: Record<string, any>) => ({
     maxStockLevel: form.maxStockLevel,
   },
 
-  // batchInfo only for non-service items (itemTypeCode !== 3)
+  // batchInfo is only relevant for physical/inventory items (type 1 & 2).
+  // Conditionally spread so the key is absent for service items (type 3).
   ...(Number(form.itemTypeCode) !== 3 && {
     batchInfo: {
       has_batch_no: form.has_batch_no,
-      create_new_batch: false, // Defaulting to false as per original code, can be modified if needed
-      batchNo: form.has_batch_no ? form.batchNumber : "",
+      create_new_batch: false,
+      // Always send as string — backend treats "" as "not provided".
+      // Do NOT send null; it causes backend validation errors.
+      batchNo: form.has_batch_no ? form.batchNo : "",
       has_expiry_date: form.has_expiry_date,
+      // Always send date fields as strings regardless of the flag.
+      // Backend ignores their values when has_expiry_date is false.
       expiryDate: form.has_expiry_date ? form.expiryDate : "",
       manufacturingDate: form.has_expiry_date ? form.manufacturingDate : "",
       shelfLifeInDays: Number(form.shelfLifeInDays) || 52,
@@ -157,9 +182,14 @@ export const useItemForm = ({
   const taxConfigs = getTaxConfigs(companyCode);
   const autoPopulateTax = isTaxAutoPopulated(companyCode);
 
+  // Derived flags used by the UI to conditionally show/hide sections.
   const isServiceItem = Number(form.itemTypeCode) === 3;
   const showBatchExpiry =
     Number(form.itemTypeCode) === 1 || Number(form.itemTypeCode) === 2;
+
+  // ---------------------------------------------------------------------------
+  // Data fetchers
+  // ---------------------------------------------------------------------------
 
   const fetchItemClassList = useCallback(async () => {
     try {
@@ -173,7 +203,7 @@ export const useItemForm = ({
       }));
       setItemClassOptions(mapped || []);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch item class list:", err);
       setItemClassOptions([]);
     } finally {
       setLoadingItemClasses(false);
@@ -186,79 +216,92 @@ export const useItemForm = ({
       const data = await getRolaPackagingUnitCodes();
       setPackagingOptions(data);
     } catch (err) {
-      console.error("Packaging API error:", err);
+      console.error("Failed to fetch packaging units:", err);
       setPackagingOptions([]);
     } finally {
       setLoadingPackaging(false);
     }
   }, []);
 
+  // ---------------------------------------------------------------------------
+  // Initialise / reset form whenever the modal opens.
+  //
+  // For edit mode the API response is nested (taxInfo, vendorInfo, inventoryInfo,
+  // batchInfo). We flatten all nested objects into the single flat `form` state
+  // so every input can bind directly to `form.<fieldName>`.
+  //
+  // Key rules:
+  //   - Use `??` (nullish coalescing) for booleans and values that may
+  //     legitimately be `false` or `0` — `||` would incorrectly replace them.
+  //   - Use `??` for string fields too so empty strings from the API are
+  //     preserved and not replaced by a fallback.
+  // ---------------------------------------------------------------------------
   useEffect(() => {
     if (!isOpen) return;
 
-    // ── OLD: Direct set — nested API fields (taxInfo, vendorInfo etc.) form mein nahi aate the ──
-    // setForm(isEditMode && initialData ? initialData : emptyForm);
-
-    // ── NEW: Flatten nested API response into flat form shape ──
     if (isEditMode && initialData) {
       const flatData: Record<string, any> = {
-        // All top-level flat fields from API (itemName, brand, weight, sku etc.)
+        // Spread emptyForm first to guarantee all keys exist, then override
+        // with top-level fields from the API response.
         ...emptyForm,
         ...initialData,
 
-        // taxInfo nested → flat
-        // Backend GET returns these flat already if no taxInfo key exists, so fallback handles both cases
+        // taxInfo → flat
         taxCategory:
-          initialData.taxInfo?.taxCategory || initialData.taxCategory || "",
+          initialData.taxInfo?.taxCategory ?? initialData.taxCategory ?? "",
         taxPreference:
-          initialData.taxInfo?.taxPreference || initialData.taxPreference || "",
-        taxType: initialData.taxInfo?.taxType || initialData.taxType || "",
-        taxCode: initialData.taxInfo?.taxCode || initialData.taxCode || "",
-        taxName: initialData.taxInfo?.taxName || initialData.taxName || "",
+          initialData.taxInfo?.taxPreference ?? initialData.taxPreference ?? "",
+        taxType: initialData.taxInfo?.taxType ?? initialData.taxType ?? "",
+        taxCode: initialData.taxInfo?.taxCode ?? initialData.taxCode ?? "",
+        taxName: initialData.taxInfo?.taxName ?? initialData.taxName ?? "",
         taxDescription:
-          initialData.taxInfo?.taxDescription ||
-          initialData.taxDescription ||
+          initialData.taxInfo?.taxDescription ??
+          initialData.taxDescription ??
           "",
-        taxPerct: initialData.taxInfo?.taxPerct || initialData.taxPerct || "",
+        taxPerct: initialData.taxInfo?.taxPerct ?? initialData.taxPerct ?? "",
+        // countryCode lives inside taxInfo in the API response
+        countryCode:
+          initialData.taxInfo?.countryCode ?? initialData.countryCode ?? "",
 
-        // vendorInfo nested → flat
+        // vendorInfo → flat
         preferredVendor:
-          initialData.vendorInfo?.preferredVendor ||
-          initialData.preferredVendor ||
+          initialData.vendorInfo?.preferredVendor ??
+          initialData.preferredVendor ??
           "",
         salesAccount:
-          initialData.vendorInfo?.salesAccount ||
-          initialData.salesAccount ||
+          initialData.vendorInfo?.salesAccount ??
+          initialData.salesAccount ??
           "",
         purchaseAccount:
-          initialData.vendorInfo?.purchaseAccount ||
-          initialData.purchaseAccount ||
+          initialData.vendorInfo?.purchaseAccount ??
+          initialData.purchaseAccount ??
           "",
 
-        // inventoryInfo nested → flat
+        // inventoryInfo → flat
         valuationMethod:
-          initialData.inventoryInfo?.valuationMethod ||
-          initialData.valuationMethod ||
+          initialData.inventoryInfo?.valuationMethod ??
+          initialData.valuationMethod ??
           "",
         trackingMethod:
-          initialData.inventoryInfo?.trackingMethod ||
-          initialData.trackingMethod ||
+          initialData.inventoryInfo?.trackingMethod ??
+          initialData.trackingMethod ??
           "",
         reorderLevel:
-          initialData.inventoryInfo?.reorderLevel ||
-          initialData.reorderLevel ||
+          initialData.inventoryInfo?.reorderLevel ??
+          initialData.reorderLevel ??
           "",
         minStockLevel:
-          initialData.inventoryInfo?.minStockLevel ||
-          initialData.minStockLevel ||
+          initialData.inventoryInfo?.minStockLevel ??
+          initialData.minStockLevel ??
           "",
         maxStockLevel:
-          initialData.inventoryInfo?.maxStockLevel ||
-          initialData.maxStockLevel ||
+          initialData.inventoryInfo?.maxStockLevel ??
+          initialData.maxStockLevel ??
           "",
 
-        // batchInfo nested → flat
-        // Using ?? instead of || to correctly preserve false boolean values
+        // batchInfo → flat
+        // All fields use `??` so `false` booleans and `""` strings from the
+        // API are preserved and not replaced by the fallback defaults.
         has_batch_no:
           initialData.batchInfo?.has_batch_no ??
           initialData.has_batch_no ??
@@ -271,14 +314,20 @@ export const useItemForm = ({
           initialData.batchInfo?.has_expiry_date ??
           initialData.has_expiry_date ??
           false,
-        batchNumber:
-          initialData.batchInfo?.batchNo || initialData.batchNumber || "",
+        batchNo:
+          initialData.batchInfo?.batchNo ?? initialData.batchNo ?? "",
         expiryDate:
-          initialData.batchInfo?.expiryDate || initialData.expiryDate || "",
+          initialData.batchInfo?.expiryDate ?? initialData.expiryDate ?? "",
         manufacturingDate:
           initialData.batchInfo?.manufacturingDate ??
           initialData.manufacturingDate ??
           "",
+        shelfLifeInDays:
+          initialData.batchInfo?.shelfLifeInDays ??
+          initialData.shelfLifeInDays ??
+          "",
+        endOfLife:
+          initialData.batchInfo?.endOfLife ?? initialData.endOfLife ?? "",
       };
       setForm(flatData);
     } else {
@@ -286,16 +335,24 @@ export const useItemForm = ({
     }
 
     setActiveTab("details");
+
+    // Reset HSN level selectors only when opening in create mode.
     if (!isEditMode) {
       setSelectedLevel1("");
       setSelectedLevel2("");
       setSelectedLevel3("");
       setSelectedLevel4("");
     }
+
     void fetchItemClassList();
     void fetchPackagingUnits();
   }, [isOpen, isEditMode, initialData]);
 
+  // ---------------------------------------------------------------------------
+  // Pre-select HSN code level dropdowns when editing an existing item.
+  // Runs after itemClassOptions are loaded so the options exist before we set
+  // the selected values.
+  // ---------------------------------------------------------------------------
   useEffect(() => {
     if (
       !isEditMode ||
@@ -303,9 +360,11 @@ export const useItemForm = ({
       itemClassOptions.length === 0
     )
       return;
+
     const code = String(initialData.itemClassCode);
     const codeExists = (c: string) =>
       itemClassOptions.some((opt) => opt.cd === c);
+
     if (code.length >= 2 && codeExists(code.substring(0, 2)))
       setSelectedLevel1(code.substring(0, 2));
     if (code.length >= 4 && codeExists(code.substring(0, 4)))
@@ -315,6 +374,10 @@ export const useItemForm = ({
     if (code.length >= 8 && codeExists(code.substring(0, 8)))
       setSelectedLevel4(code.substring(0, 8));
   }, [isEditMode, initialData, itemClassOptions]);
+
+  // ---------------------------------------------------------------------------
+  // HSN code hierarchical level helpers
+  // ---------------------------------------------------------------------------
 
   const getCodesByLevel = (level: string, parentCode?: string) => {
     return itemClassOptions.filter((option) => {
@@ -330,6 +393,7 @@ export const useItemForm = ({
   };
 
   const handleLevelChange = (level: number, value: string) => {
+    // Reset all child levels when a parent level changes.
     if (level === 1) {
       setSelectedLevel1(value);
       setSelectedLevel2("");
@@ -346,6 +410,7 @@ export const useItemForm = ({
       setSelectedLevel4(value);
     }
 
+    // The deepest selected level becomes the committed itemClassCode.
     const finalCode =
       level === 4
         ? value || selectedLevel3 || selectedLevel2 || selectedLevel1
@@ -357,6 +422,10 @@ export const useItemForm = ({
 
     setForm((prev) => ({ ...prev, itemClassCode: finalCode }));
   };
+
+  // ---------------------------------------------------------------------------
+  // Validation
+  // ---------------------------------------------------------------------------
 
   const validateItemDetails = (): boolean => {
     if (!form.itemClassCode || String(form.itemClassCode).trim() === "") {
@@ -373,7 +442,7 @@ export const useItemForm = ({
       { field: "originNationCode", label: "Country Code" },
       { field: "unitOfMeasureCd", label: "Unit of Measurement" },
       { field: "svcCharge", label: "Service Charge" },
-      { field: "ins", label: "INSURANCE" },
+      { field: "ins", label: "Insurance" },
       { field: "sku", label: "SKU" },
       { field: "sellingPrice", label: "Selling Price", isNumeric: true },
       { field: "salesAccount", label: "Sales Account" },
@@ -389,9 +458,7 @@ export const useItemForm = ({
         ? val === "" || val === null || val === undefined
         : !val || String(val).trim() === "";
       if (isEmpty) {
-        toast.error(
-          `${label} is required. Please fill in all required fields.`,
-        );
+        toast.error(`${label} is required. Please fill in all required fields.`);
         return false;
       }
     }
@@ -407,6 +474,10 @@ export const useItemForm = ({
     return true;
   };
 
+  // ---------------------------------------------------------------------------
+  // Event handlers
+  // ---------------------------------------------------------------------------
+
   const handleForm = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -414,6 +485,8 @@ export const useItemForm = ({
   ) => {
     const { name, value } = e.target;
 
+    // Tax category change has special handling: when auto-populate is enabled,
+    // selecting a category fills all related tax fields from the config.
     if (name === "taxCategory") {
       if (!autoPopulateTax) {
         setForm((prev) => ({ ...prev, taxCategory: value }));
@@ -422,6 +495,7 @@ export const useItemForm = ({
 
       const taxConfig = taxConfigs[value];
       if (!taxConfig) {
+        // Unknown category — clear all tax fields to avoid stale data.
         setForm((prev) => ({
           ...prev,
           taxCategory: "",
@@ -451,6 +525,7 @@ export const useItemForm = ({
 
   const handleDynamicFieldChange = (name: string, value: any) => {
     if (name === "itemTypeCode") {
+      // Changing item type invalidates the previously selected item group.
       setForm((prev) => ({ ...prev, [name]: value, itemGroup: "" }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
@@ -472,6 +547,10 @@ export const useItemForm = ({
     await loadItemCategoryDetailsById(data.id);
   };
 
+  // ---------------------------------------------------------------------------
+  // Form lifecycle
+  // ---------------------------------------------------------------------------
+
   const reset = () => {
     setForm(emptyForm);
     setSelectedLevel1("");
@@ -488,6 +567,7 @@ export const useItemForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Step 1 — validate item details and advance to tax details.
     if (activeTab === "details") {
       if (validateItemDetails()) {
         toast.success("Item details validated. Please complete Tax Details.");
@@ -496,8 +576,21 @@ export const useItemForm = ({
       return;
     }
 
-    if (activeTab === "taxDetails" && !validateTaxDetails()) return;
+    // Step 2 — validate tax details.
+    // For non-service items, advance to inventory/batch tab before submitting
+    // so the user can fill in batch, expiry, and stock level fields.
+    // Service items (type 3) have no inventory tab — submit directly.
+    if (activeTab === "taxDetails") {
+      if (!validateTaxDetails()) return;
+      if (!isServiceItem) {
+        toast.success("Tax details validated. Please complete Inventory Details.");
+        setActiveTab("inventoryDetails");
+        return;
+      }
+      // Service item — fall through to submit below.
+    }
 
+    // Step 3 — final submission (inventoryDetails for physical items, taxDetails for service items).
     try {
       setLoading(true);
       showLoading(isEditMode ? "Updating Item..." : "Creating Item...");

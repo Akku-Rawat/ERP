@@ -286,6 +286,10 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
                             Item
                           </th>
+                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[110px] whitespace-nowrap">
+                              Batch No
+                          </th>
+
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[110px] whitespace-nowrap">
                             Description
                           </th>
@@ -340,6 +344,19 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                 />
                               </td>
                               <td className="px-0.5 py-1">
+                                <input
+                                  type="text"
+                                  name="batchNo"
+                                  value={it.batchNo}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                               disabled
+                                  className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                
                                 <input
                                   type="text"
                                   name="description"
