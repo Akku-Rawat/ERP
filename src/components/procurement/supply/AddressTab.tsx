@@ -50,7 +50,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({
 
 
  const selectedCountry = countriesCache.find(
-  (c) => c.code === form.billingCountry
+  (c) => c.country_name === form.billingCountry
 );;
 
   return (
@@ -107,7 +107,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({
                 )
                 .map((c) => ({
                   label: c.country_name,
-                  value: c.code,
+                  value: c.country_name,
                 }));
             }}
             error={errors.billingCountry}
