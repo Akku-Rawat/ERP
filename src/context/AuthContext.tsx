@@ -1,28 +1,32 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import {
-  loginApi,
-  logoutApi,
-  getStoredUser,
-} from "../api/authService";
+import { loginApi, logoutApi, AuthUser } from "../api/authService";
+
+const SID_KEY = "session_id";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: any;
+  user: AuthUser | null;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  isLoading: boolean; 
 }
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = getStoredUser();
-    if (storedUser) setUser(storedUser);
-     setIsLoading(false);
+    const sid = localStorage.getItem(SID_KEY);
+    const storedUser = localStorage.getItem("auth_user");
+
+    if (sid && storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+
+    setLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -32,6 +36,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     await logoutApi();
+    localStorage.removeItem(SID_KEY);
+    localStorage.removeItem("auth_user");
     setUser(null);
   };
 
@@ -40,9 +46,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       value={{
         isAuthenticated: !!user,
         user,
+        loading,
         login,
         logout,
-       isLoading,
       }}
     >
       {children}
