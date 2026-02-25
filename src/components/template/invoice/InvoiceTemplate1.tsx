@@ -98,9 +98,10 @@ if (company.documents?.companyLogoUrl) {
   autoTable(doc, {
     startY: 80,
     head: [
-      ["#", "Name", "Qty", "Unit Price", `Total (${currency})`, "Tax Cat"],
+      ["#","Batch no", "Name", "Qty", "Unit Price", `Total (${currency})`, "Tax Cat"],
     ],
     body: invoice.items.map((i: any, idx: number) => {
+  const batchNo = i.batchNumber || "";  
   const qty = Number(i.quantity);
   const price = Number(i.price);
   const discountAmount = qty * price * (Number(i.discount || 0) / 100);
@@ -108,6 +109,7 @@ if (company.documents?.companyLogoUrl) {
   return [
     idx + 1,
     i.description,
+    batchNo,
     qty.toFixed(1),
     price.toFixed(2),
     totalInclusive.toFixed(2),

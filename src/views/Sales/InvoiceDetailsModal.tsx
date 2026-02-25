@@ -1,10 +1,23 @@
 import React, { useEffect, useMemo, useState } from "react";
-
-import { FileText, ExternalLink } from "lucide-react";
+import {
+  FileText,
+  Send,
+  Eye,
+  ChevronDown,
+  ChevronUp,
+  Hash,
+  User,
+  CreditCard,
+  Package,
+  MapPin,
+  ScrollText,
+  Banknote,
+} from "lucide-react";
 
 import Modal from "../../components/ui/modal/modal";
-import { Button } from "../../components/ui/modal/formComponent";
 import { getSalesInvoiceById } from "../../api/salesApi";
+
+/* ─────────────────────────── Types ─────────────────────────── */
 
 type Address = {
   line1?: string;
@@ -68,7 +81,6 @@ export type InvoiceDetails = {
   dateOfInvoice?: string;
   dueDate?: string;
   invoiceStatus?: string;
-  
   TotalAmount?: number;
   discountPercentage?: number;
   discountAmount?: number;
@@ -86,83 +98,139 @@ type Props = {
   invoiceId: string | null;
   onClose: () => void;
   onOpenReceiptPdf?: (receiptUrl: string) => void;
+  onSend?: (invoiceNumber: string) => void;
   fetchDetails?: (id: string) => Promise<any>;
   mapDetails?: (raw: any) => InvoiceDetails;
 };
+
+/* ─────────────────────────── Helpers ─────────────────────────── */
+
+const statusConfig = (status?: string) => {
+  const s = (status ?? "").toLowerCase();
+  if (s.includes("approve") || s.includes("paid") || s.includes("success"))
+    return { cls: "bg-success", dot: "var(--success)" };
+  if (s.includes("reject") || s.includes("cancel") || s.includes("fail"))
+    return { cls: "bg-danger", dot: "var(--danger)" };
+  if (s.includes("draft") || s.includes("pending"))
+    return { cls: "bg-warning", dot: "#f59e0b" };
+  return { cls: "bg-info", dot: "#3b82f6" };
+};
+
+const fmt = (v?: number | string | null, prefix?: string) => {
+  if (v === undefined || v === null || v === "") return "—";
+  const num = Number(v);
+  if (isNaN(num)) return String(v);
+  return prefix ? `${prefix} ${num.toFixed(2)}` : num.toFixed(2);
+};
+
+/* ─────────────────────────── Sub-components ─────────────────────────── */
+
+/** Read-only field using theme tokens */
+const Field = ({ label, value }: { label: string; value: React.ReactNode }) => {
+  const isPrimitive = typeof value === "string" || typeof value === "number";
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">
+        {label}
+      </span>
+      <div
+        className="px-3 py-2 rounded-lg text-sm text-main font-medium truncate border-theme"
+        style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+      >
+        {isPrimitive ? (String(value) || "—") : value}
+      </div>
+    </div>
+  );
+};
+
+/** Collapsible section using theme bg-card / bg-app */
+const Section = ({
+  icon: Icon,
+  title,
+  children,
+  defaultOpen = true,
+}: {
+  icon: React.ElementType;
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) => {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div
+      className="rounded-2xl overflow-hidden border-theme"
+      style={{ border: "1px solid var(--border)" }}
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className="w-full flex items-center justify-between px-5 py-3 bg-app transition-all row-hover"
+      >
+        <div className="flex items-center gap-2.5">
+          <Icon size={14} className="text-muted" />
+          <span className="text-[11px] font-bold uppercase tracking-widest text-muted">
+            {title}
+          </span>
+        </div>
+        {open
+          ? <ChevronUp size={13} className="text-muted" />
+          : <ChevronDown size={13} className="text-muted" />}
+      </button>
+
+      {open && (
+        <div className="bg-card px-5 py-4">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/** Shimmer skeleton block */
+const SkeletonRow = () => (
+  <div
+    className="h-10 rounded-lg animate-shimmer"
+    style={{
+      background:
+        "linear-gradient(90deg, var(--bg) 25%, var(--border) 50%, var(--bg) 75%)",
+      backgroundSize: "200% 100%",
+    }}
+  />
+);
+
+/* ─────────────────────────── Main Component ─────────────────────────── */
 
 const InvoiceDetailsModal: React.FC<Props> = ({
   open,
   invoiceId,
   onClose,
   onOpenReceiptPdf,
+  onSend,
   fetchDetails,
   mapDetails,
 }) => {
-  const Field = ({ label, value }: { label: string; value: React.ReactNode }) => {
-    const isPrimitive = typeof value === "string" || typeof value === "number";
-
-    return (
-      <div className="flex flex-col gap-1">
-        <div className="text-[11px] font-semibold text-muted uppercase tracking-wide">{label}</div>
-        {isPrimitive ? (
-          <input
-            readOnly
-            value={String(value)}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-main"
-          />
-        ) : (
-          <div className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-main">
-            {value}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const SectionTitle = ({ title }: { title: string }) => (
-    <div className="text-xs font-bold text-main uppercase tracking-wide">{title}</div>
-  );
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<InvoiceDetails | null>(null);
 
-  const statusBadgeClass = (status?: string) => {
-    const s = (status ?? "").toLowerCase();
-    if (s.includes("approve") || s.includes("paid") || s.includes("success")) {
-      return "bg-emerald-50 text-emerald-700";
-    }
-    if (s.includes("reject") || s.includes("cancel") || s.includes("fail")) {
-      return "bg-red-50 text-red-700";
-    }
-    if (s.includes("draft") || s.includes("pending")) {
-      return "bg-slate-100 text-slate-700";
-    }
-    return "bg-amber-50 text-amber-700";
-  };
-
   useEffect(() => {
     let mounted = true;
-
     const run = async () => {
       if (!open || !invoiceId) return;
       try {
         setLoading(true);
         setError(null);
         setData(null);
-
         const resp = fetchDetails
           ? await fetchDetails(invoiceId)
           : await getSalesInvoiceById(invoiceId);
         if (!mounted) return;
-
         if (!resp || resp.status_code !== 200) {
           setError(resp?.message ?? "Failed to load invoice details");
           return;
         }
-
-        const next = mapDetails ? mapDetails(resp.data) : (resp.data as InvoiceDetails);
-        setData(next);
+        setData(mapDetails ? mapDetails(resp.data) : (resp.data as InvoiceDetails));
       } catch (e: any) {
         if (!mounted) return;
         setError(e?.message ?? "Failed to load invoice details");
@@ -171,155 +239,213 @@ const InvoiceDetailsModal: React.FC<Props> = ({
         setLoading(false);
       }
     };
-
     run();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [open, invoiceId, fetchDetails, mapDetails]);
 
   const items = data?.items ?? [];
-
   const currency = data?.currencyCode ?? "";
 
   const computedTotals = useMemo(() => {
-    const subTotal = items.reduce((sum, it) => sum + Number(it.price ?? 0) * Number(it.quantity ?? 0), 0);
+    const subTotal = items.reduce(
+      (sum, it) => sum + Number(it.price ?? 0) * Number(it.quantity ?? 0),
+      0,
+    );
     const discount = items.reduce((sum, it) => {
       const pct = Number(it.discount ?? 0);
       const row = Number(it.price ?? 0) * Number(it.quantity ?? 0);
       return sum + row * (pct / 100);
     }, 0);
-
-    return {
-      subTotal,
-      discount,
-      total: Math.max(0, subTotal - discount),
-    };
+    return { subTotal, discount, total: Math.max(0, subTotal - discount) };
   }, [items]);
-const footer = (
-  <div className="w-full flex items-center justify-between gap-2">
-    <div />
-    <div className="flex gap-2">
-      <Button variant="secondary" type="button" onClick={onClose}>
-        Close
-      </Button>
 
-      <Button
-        variant="primary"
-        type="button"
-        onClick={() => {
-          if (data?.invoiceNumber && onOpenReceiptPdf) {
-            onOpenReceiptPdf(data.invoiceNumber);
-          }
-        }}
+  const sc = statusConfig(data?.invoiceStatus);
+
+  /* ── Composite title: invoice # + status badge + actions ── */
+ const modalTitle = (
+  <div className="flex items-center gap-3">
+    <span className="font-bold text-main whitespace-nowrap">
+      {data?.invoiceNumber
+        ? `Invoice ${data.invoiceNumber}`
+        : "Invoice Details"}
+    </span>
+
+    {data?.invoiceStatus && (
+      <span
+        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${sc.cls}`}
       >
-        View PDF
-      </Button>
-    </div>
+        <span
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ background: sc.dot }}
+        />
+        {data.invoiceStatus}
+      </span>
+    )}
   </div>
 );
   return (
     <Modal
       isOpen={open}
       onClose={onClose}
-      title={data?.invoiceNumber ? `Invoice ${data.invoiceNumber}` : "Invoice Details"}
-      subtitle={loading ? "Loading invoice details" : undefined}
+      title={modalTitle}
       icon={FileText}
       maxWidth="6xl"
       height="82vh"
-      footer={footer}
+      footer={
+  <div className="flex justify-between items-center w-full">
+    {/* Left Side Empty or Future Actions */}
+    <div />
+
+    {/* Right Side Actions */}
+    <div className="flex items-center gap-2">
+      {data && !loading && (
+        <>
+          <button
+            type="button"
+            onClick={() =>
+              data.invoiceNumber && onSend?.(data.invoiceNumber)
+            }
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-main transition-all row-hover"
+            style={{
+              background: "var(--bg)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <Send size={13} />
+            Send
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              data.invoiceNumber &&
+              onOpenReceiptPdf?.(data.invoiceNumber)
+            }
+            className="bg-primary inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
+          >
+            <Eye size={13} />
+            View PDF
+          </button>
+        </>
+      )}
+
+      <button
+        type="button"
+        onClick={onClose}
+        className="px-4 py-2 rounded-lg text-sm font-semibold text-main transition-all row-hover"
+        style={{
+          background: "var(--bg)",
+          border: "1px solid var(--border)",
+        }}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+}
     >
-      {error && (
-        <div className="mb-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm font-semibold">
-          {error}
-        </div>
-      )}
+      <div className="flex flex-col gap-4 pb-2">
 
-      {loading && (
-        <div className="animate-pulse">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <div className="h-3 w-32 bg-gray-300 rounded" />
-              <div className="h-6 w-40 bg-gray-300 rounded mt-2" />
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <div className="h-3 w-32 bg-gray-300 rounded" />
-              <div className="h-6 w-40 bg-gray-300 rounded mt-2" />
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <div className="h-3 w-32 bg-gray-300 rounded" />
-              <div className="h-6 w-40 bg-gray-300 rounded mt-2" />
-            </div>
+        {/* Error */}
+        {error && (
+          <div className="bg-danger flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold">
+            <span>⚠</span>
+            {error}
           </div>
+        )}
 
-          <div className="mt-3 bg-white border border-gray-200 rounded-xl p-4">
-            <div className="h-3 w-32 bg-gray-300 rounded" />
-            <div className="h-24 w-full bg-gray-300 rounded mt-2" />
+        {/* Skeleton */}
+        {loading && (
+          <div className="flex flex-col gap-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="rounded-2xl overflow-hidden"
+                style={{ border: "1px solid var(--border)" }}
+              >
+                <div className="h-10 bg-app animate-pulse" />
+                <div className="bg-card p-5 grid grid-cols-3 gap-4">
+                  {[1, 2, 3, 4, 5, 6].map((j) => <SkeletonRow key={j} />)}
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      )}
+        )}
 
-      {!loading && data && (
-        <div className="bg-[#fbf7f2] border border-gray-200 rounded-2xl p-5">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-3">
-              <SectionTitle title="Basic Information" />
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Content */}
+        {!loading && data && (
+          <>
+            {/* KPI bar */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: "Invoice Date", value: data.dateOfInvoice ?? "—" },
+                { label: "Due Date", value: data.dueDate ?? "—" },
+                { label: "Currency", value: currency || "—" },
+                {
+                  label: "Total Amount",
+                  value:
+                    data.TotalAmount != null
+                      ? `${currency} ${Number(data.TotalAmount).toFixed(2)}`
+                      : `${currency} ${computedTotals.total.toFixed(2)}`,
+                },
+              ].map((kpi) => (
+                <div
+                  key={kpi.label}
+                  className="bg-card rounded-xl px-4 py-3 flex flex-col gap-0.5"
+                  style={{ border: "1px solid var(--border)" }}
+                >
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">
+                    {kpi.label}
+                  </span>
+                  <span className="text-sm font-bold text-main truncate">
+                    {kpi.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Basic Information */}
+            <Section icon={Hash} title="Basic Information">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Field label="Invoice Number" value={data.invoiceNumber ?? "—"} />
                 <Field label="Invoice Type" value={data.invoiceType ?? "—"} />
-                <Field
-                  label="Invoice Status"
-                  value={
-                    <span
-                      className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold ${statusBadgeClass(
-                        data.invoiceStatus,
-                      )}`}
-                    >
-                      {data.invoiceStatus ?? "—"}
-                    </span>
-                  }
-                />
-
-                <Field label="Invoice Date" value={data.dateOfInvoice ?? "—"} />
-                <Field label="Due Date" value={data.dueDate ?? "—"} />
                 <Field label="Origin Invoice" value={data.originInvoice ?? "—"} />
               </div>
-            </div>
+            </Section>
 
-            <div className="lg:col-span-3">
-              <SectionTitle title="Customer" />
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Customer */}
+            <Section icon={User} title="Customer">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Field label="Customer Name" value={data.customerName ?? "—"} />
                 <Field label="Customer TPIN" value={data.customerTpin ?? "—"} />
                 <Field label="LPO Number" value={data.lpoNumber ?? "—"} />
               </div>
-            </div>
+            </Section>
 
-            <div className="lg:col-span-3">
-              <SectionTitle title="Currency & Discounts" />
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Currency & Discounts */}
+            <Section icon={Banknote} title="Currency & Discounts">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Field label="Currency" value={currency || "—"} />
                 <Field label="Exchange Rate" value={data.exchangeRt ?? "—"} />
                 <Field label="Destination Country" value={data.destnCountryCd ?? "—"} />
-
-                <Field label="Discount %" value={String(data.discountPercentage ?? 0)} />
-                <Field label="Discount Amount" value={String(data.discountAmount ?? 0)} />
+                <Field label="Discount %" value={fmt(data.discountPercentage)} />
+                <Field label="Discount Amount" value={fmt(data.discountAmount, currency)} />
                 <Field
                   label="Total After Discount"
                   value={
-                    data.TotalAmount !== undefined && data.TotalAmount !== null
-                      ? `${currency} ${Number(data.TotalAmount).toFixed(2)}`
-                      : "—"
+                    <span className="font-bold text-primary">
+                      {data.TotalAmount != null
+                        ? `${currency} ${Number(data.TotalAmount).toFixed(2)}`
+                        : "—"}
+                    </span>
                   }
                 />
-
-               
               </div>
-            </div>
+            </Section>
 
-            <div className="lg:col-span-3">
-              <SectionTitle title="Payment Information" />
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Payment Information */}
+            <Section icon={CreditCard} title="Payment Information">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Field label="Payment Terms" value={data.paymentInformation?.paymentTerms ?? "—"} />
                 <Field label="Payment Method" value={data.paymentInformation?.paymentMethod ?? "—"} />
                 <Field label="Bank Name" value={data.paymentInformation?.bankName ?? "—"} />
@@ -329,117 +455,194 @@ const footer = (
               </div>
 
               {!!data.terms?.selling?.payment?.phases?.length && (
-                <div className="mt-4 bg-white border border-gray-200 rounded-xl p-4">
-                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wide">Payment Phases</div>
-                  <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="mt-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted mb-3">
+                    Payment Phases
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {data.terms.selling.payment.phases.map((p, idx) => (
-                      <div key={idx} className="border border-gray-200 rounded-xl p-4 bg-[#fbf7f2]">
-                        {p.name && p.name.trim() !== "-" ? (
-                          <div className="text-sm font-bold text-main">{p.name}</div>
-                        ) : null}
-                        {p.percentage ? (
-                          <div className="text-xs text-muted font-semibold">{p.percentage}</div>
-                        ) : null}
-                        <div className="text-sm text-main mt-2 whitespace-pre-wrap">{p.condition ?? "—"}</div>
+                      <div
+                        key={idx}
+                        className="rounded-xl p-4"
+                        style={{
+                          background: "var(--bg)",
+                          border: "1px solid var(--border)",
+                        }}
+                      >
+                        {p.name && p.name.trim() !== "-" && (
+                          <p className="text-sm font-bold text-main">{p.name}</p>
+                        )}
+                        {p.percentage && (
+                          <p className="text-xs text-primary font-semibold mt-0.5">
+                            {p.percentage}
+                          </p>
+                        )}
+                        <p className="text-sm text-muted mt-2 whitespace-pre-wrap leading-relaxed">
+                          {p.condition ?? "—"}
+                        </p>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-            </div>
+            </Section>
 
-            <div className="lg:col-span-3">
-              <SectionTitle title="Items" />
-              <div className="mt-3 bg-white border border-gray-200 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wide">
-                    Items Count: {items.length}
-                  </div>
-                  <div className="text-[11px] font-bold text-main uppercase tracking-wide">
-                    Total: {currency} {computedTotals.total.toFixed(2)}
-                  </div>
-                </div>
+            {/* Items */}
+            <Section icon={Package} title={`Items (${items.length})`}>
+              {/* Totals strip */}
+              <div
+                className="flex items-center justify-between mb-4 px-4 py-2.5 rounded-xl text-sm bg-card"
+                style={{ border: "1px solid var(--border)" }}
+              >
+                <span className="text-muted font-medium">
+                  Subtotal{" "}
+                  <span className="text-main font-bold">
+                    {currency} {computedTotals.subTotal.toFixed(2)}
+                  </span>
+                </span>
+                <span className="text-muted font-medium">
+                  Discount{" "}
+                  <span className="text-danger font-bold">
+                    − {currency} {computedTotals.discount.toFixed(2)}
+                  </span>
+                </span>
+                <span className="text-muted font-medium">
+                  Total{" "}
+                  <span className="text-primary font-bold text-base">
+                    {currency} {computedTotals.total.toFixed(2)}
+                  </span>
+                </span>
+              </div>
 
-                <div className="space-y-3">
-                  {items.length ? (
-                    items.map((it, idx) => (
-                      <div key={idx} className="border border-gray-200 rounded-xl p-4 bg-[#fbf7f2]">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <Field label="Item Code" value={it.itemCode ?? "—"} />
-                          <Field label="Quantity" value={String(Number(it.quantity ?? 0))} />
-                          <Field label="Unit Price" value={Number(it.price ?? 0).toFixed(2)} />
-                          <Field label="Discount %" value={String(Number(it.discount ?? 0))} />
-                          <Field label="VAT Code" value={it.vatCode ?? "—"} />
-                          <Field label="VAT Taxable Amount" value={it.vatTaxableAmount ?? "—"} />
-                          <div className="md:col-span-3">
-                            <Field label="Description" value={it.description ?? "—"} />
-                          </div>
-                        </div>
+              {items.length ? (
+                <div className="flex flex-col gap-3">
+                  {items.map((it, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-card rounded-xl p-4"
+                      style={{ border: "1px solid var(--border)" }}
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="bg-primary w-6 h-6 flex items-center justify-center rounded-full text-[11px] font-bold">
+                          {idx + 1}
+                        </span>
+                        <span className="text-xs font-semibold text-muted">
+                          {it.itemCode ?? `Item ${idx + 1}`}
+                        </span>
+                        {it.description && (
+                          <span className="text-xs text-muted truncate max-w-xs opacity-60">
+                            {it.description}
+                          </span>
+                        )}
+                        <span className="ml-auto text-sm font-bold text-primary">
+                          {currency}{" "}
+                          {(
+                            Number(it.price ?? 0) *
+                            Number(it.quantity ?? 0) *
+                            (1 - Number(it.discount ?? 0) / 100)
+                          ).toFixed(2)}
+                        </span>
                       </div>
-                    ))
-                  ) : (
-                    <div className="text-sm text-muted">No items</div>
-                  )}
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <Field label="Quantity" value={String(Number(it.quantity ?? 0))} />
+                        <Field label="Unit Price" value={fmt(it.price, currency)} />
+                        <Field label="Discount %" value={fmt(it.discount)} />
+                        <Field label="VAT Code" value={it.vatCode ?? "—"} />
+                        {it.vatTaxableAmount && (
+                          <div className="md:col-span-2">
+                            <Field label="VAT Taxable Amount" value={it.vatTaxableAmount} />
+                          </div>
+                        )}
+                        {it.description && (
+                          <div className="md:col-span-4">
+                            <Field label="Description" value={it.description} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              ) : (
+                <div className="text-center text-sm text-muted py-6">No items found</div>
+              )}
+            </Section>
+
+            {/* Addresses */}
+            <Section icon={MapPin} title="Addresses">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(["Billing", "Shipping"] as const).map((type) => {
+                  const addr =
+                    type === "Billing" ? data.billingAddress : data.shippingAddress;
+                  return (
+                    <div
+                      key={type}
+                      className="bg-card rounded-xl p-4"
+                      style={{ border: "1px solid var(--border)" }}
+                    >
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted mb-3">
+                        {type} Address
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Field label="Line 1" value={addr?.line1 ?? "—"} />
+                        <Field label="Line 2" value={addr?.line2 ?? "—"} />
+                        <Field label="Postal Code" value={addr?.postalCode ?? "—"} />
+                        <Field label="City" value={addr?.city ?? "—"} />
+                        <Field label="State" value={addr?.state ?? "—"} />
+                        <Field label="Country" value={addr?.country ?? "—"} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+            </Section>
 
-            <div className="lg:col-span-3">
-              <SectionTitle title="Addresses" />
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wide">Billing Address</div>
-                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Field label="Line 1" value={data.billingAddress?.line1 ?? "—"} />
-                    <Field label="Line 2" value={data.billingAddress?.line2 ?? "—"} />
-                    <Field label="Postal Code" value={data.billingAddress?.postalCode ?? "—"} />
-                    <Field label="City" value={data.billingAddress?.city ?? "—"} />
-                    <Field label="State" value={data.billingAddress?.state ?? "—"} />
-                    <Field label="Country" value={data.billingAddress?.country ?? "—"} />
-                  </div>
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wide">Shipping Address</div>
-                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Field label="Line 1" value={data.shippingAddress?.line1 ?? "—"} />
-                    <Field label="Line 2" value={data.shippingAddress?.line2 ?? "—"} />
-                    <Field label="Postal Code" value={data.shippingAddress?.postalCode ?? "—"} />
-                    <Field label="City" value={data.shippingAddress?.city ?? "—"} />
-                    <Field label="State" value={data.shippingAddress?.state ?? "—"} />
-                    <Field label="Country" value={data.shippingAddress?.country ?? "—"} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
+            {/* Terms & Conditions */}
             {data.terms?.selling && (
-              <div className="lg:col-span-3">
-                <SectionTitle title="Terms & Conditions" />
-                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Section icon={ScrollText} title="Terms & Conditions" defaultOpen={false}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Field label="General" value={data.terms.selling.general ?? "—"} />
                   <Field label="Delivery" value={data.terms.selling.delivery ?? "—"} />
                   <Field label="Cancellation" value={data.terms.selling.cancellation ?? "—"} />
                   <Field label="Warranty" value={data.terms.selling.warranty ?? "—"} />
                   <Field label="Liability" value={data.terms.selling.liability ?? "—"} />
                   <Field
-                    label="Payment"
+                    label="Payment Notes"
                     value={
-                      <div className="text-sm text-main whitespace-pre-wrap">
-                        {data.terms.selling.payment?.dueDates ? `Due Dates: ${data.terms.selling.payment.dueDates}\n` : ""}
-                        {data.terms.selling.payment?.lateCharges ? `Late Charges: ${data.terms.selling.payment.lateCharges}\n` : ""}
-                        {data.terms.selling.payment?.taxes ? `Taxes: ${data.terms.selling.payment.taxes}\n` : ""}
-                        {data.terms.selling.payment?.notes ? `Notes: ${data.terms.selling.payment.notes}` : ""}
+                      <div className="text-sm text-main whitespace-pre-wrap leading-relaxed space-y-1">
+                        {data.terms.selling.payment?.dueDates && (
+                          <p>
+                            <span className="font-semibold text-muted">Due Dates: </span>
+                            {data.terms.selling.payment.dueDates}
+                          </p>
+                        )}
+                        {data.terms.selling.payment?.lateCharges && (
+                          <p>
+                            <span className="font-semibold text-muted">Late Charges: </span>
+                            {data.terms.selling.payment.lateCharges}
+                          </p>
+                        )}
+                        {data.terms.selling.payment?.taxes && (
+                          <p>
+                            <span className="font-semibold text-muted">Taxes: </span>
+                            {data.terms.selling.payment.taxes}
+                          </p>
+                        )}
+                        {data.terms.selling.payment?.notes && (
+                          <p>
+                            <span className="font-semibold text-muted">Notes: </span>
+                            {data.terms.selling.payment.notes}
+                          </p>
+                        )}
                       </div>
                     }
                   />
                 </div>
-
-              </div>
+              </Section>
             )}
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </Modal>
   );
 };
