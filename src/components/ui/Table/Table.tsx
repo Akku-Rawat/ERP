@@ -85,11 +85,9 @@ const SkeletonRow: React.FC<{ columnsCount: number }> = ({ columnsCount }) => (
 // ---------------------------------------------------------------------------
 // Table
 // ---------------------------------------------------------------------------
-
 function Table<T extends Record<string, any>>({
-  // Core
-  columns,
-  data,
+  columns = [],
+  data = [],
   rowKey,
   loading = false,
   emptyMessage = "No records found.",
