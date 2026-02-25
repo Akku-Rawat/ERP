@@ -354,6 +354,7 @@ const handleNext = () => {
                         <tr className="border-b border-theme">
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px] whitespace-nowrap">#</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">Item</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[100px] whitespace-nowrap">Batch no</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[110px] whitespace-nowrap">Description</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">Quantity</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">Unit Price</th>
@@ -399,6 +400,17 @@ const handleNext = () => {
                                   onChange={(item) => {
                                     actions.handleItemSelect(i, item.id);
                                   }}
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="batchNo"
+                                  value={it.batchNo}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  disabled
                                 />
                               </td>
 

@@ -327,8 +327,11 @@ const handleNext = () => {
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px] whitespace-nowrap">
                             #
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
+                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
                             Item
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
+                            Batch No
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px] whitespace-nowrap">
                             Description
@@ -390,6 +393,18 @@ const handleNext = () => {
                                   onChange={(item) => {
                                     actions.handleItemSelect(i, item.id);
                                   }}
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="string"
+                                   className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="batchNo"
+                                  value={it.batchNo}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  disabled
                                 />
                               </td>
 
