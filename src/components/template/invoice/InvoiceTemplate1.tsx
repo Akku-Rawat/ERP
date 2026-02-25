@@ -98,20 +98,40 @@ if (company.documents?.companyLogoUrl) {
   autoTable(doc, {
     startY: 80,
     head: [
-      ["#", "Name", "Qty", "Unit Price", `Total (${currency})`, "Tax Cat"],
-    ],
-    body: invoice.items.map((i: any, idx: number) => {
-  const qty = Number(i.quantity);
-  const price = Number(i.price);
-  const discountAmount = qty * price * (Number(i.discount || 0) / 100);
-  const totalInclusive = qty * price - discountAmount;
+  [
+    "SN",
+    "Item",
+    "HSN",
+    "Batch No",
+    "Qty",
+    "Unit",
+    "MFG",
+    "EXP",
+    "Rate",
+    "Tax",
+    "Total",
+  ],
+],
+ body: invoice.items.map((i: any, idx: number) => {
+  const qty = Number(i.quantity || 0);
+  const rate = Number(i.price || 0);
+
+  const discount = Number(i.discount || 0);
+  const discountAmount = qty * rate * (discount / 100);
+  const total = qty * rate - discountAmount;
+
   return [
-    idx + 1,
-    i.description,
-    qty.toFixed(1),
-    price.toFixed(2),
-    totalInclusive.toFixed(2),
-    i.vatCode || "",
+    idx + 1,                              // SN
+    i.description || "",                   // Item
+    i.hsnCode || "",                       // HSN
+    i.batchNumber || "",                   // Batch No
+    qty.toFixed(2),                        // Qty
+    i.unit || "",                          // Unit
+    i.mfgDate || "",                       // MFG
+    i.expDate || "",                       // EXP
+    rate.toFixed(2),                       // Rate
+    i.vatCode || "",                       // Tax
+    total.toFixed(2),                      // Total
   ];
 }),
     styles: {
@@ -124,11 +144,15 @@ if (company.documents?.companyLogoUrl) {
       textColor: [255, 255, 255],
       fontStyle: "bold",
     },
-    columnStyles: {
-      1: { halign: "left" },
-      3: { halign: "right" },
-      4: { halign: "right" },
-    },
+  columnStyles: {
+  1: { halign: "left" },   // Item
+  2: { halign: "center" }, // HSN
+  3: { halign: "center" }, // Batch
+  4: { halign: "right" },  // Qty
+  8: { halign: "right" },  // Rate
+  9: { halign: "center" }, // Tax
+  10: { halign: "right" }, // Total
+},
     margin: { left: 15, right: 15 },
   });
 
