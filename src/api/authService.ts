@@ -1,41 +1,95 @@
-const fakeUser = {
-  email: "admin",
-  password: "admin",
-};
+import type { AxiosResponse } from "axios";
+import { createAxiosInstance } from "./axiosInstance";
+import { ERP_BASE, API } from "../config/api";
 
-const AUTH_KEY = "auth_user";
+const api = createAxiosInstance(ERP_BASE);
 
-const delay = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+interface LoginApiResponse {
+  message?: {
+    status?: string;
+    data?: {
+      sid?: string;          
+      username?: string;
+      email?: string;
+      full_name?: string;
+    };
+  };
+}
 
-export const loginApi = async (email: string, password: string) => {
-  await delay(500);
+export interface AuthUser {
+  username?: string;
+  email?: string;
+  fullName?: string;
+}
 
-  if (email === fakeUser.email && password === fakeUser.password) {
-    const user = { email };
-    localStorage.setItem(AUTH_KEY, JSON.stringify(user));
-    return user;
+
+const SID_KEY = "session_id";
+
+export const loginApi = async (
+  email: string,
+  password: string
+): Promise<AuthUser> => {
+  const resp: AxiosResponse<LoginApiResponse> = await api.post(
+    API.loginApi.login,
+    {
+      usr: email,
+      pwd: password,
+    }
+  );
+
+  const data = resp.data;
+
+  if (!data?.message || data.message.status !== "success") {
+    throw new Error("LOGIN_FAILED");
   }
 
-  throw new Error("Invalid credentials");
+  const sid = data.message.data?.sid;
+
+ if (sid) {
+  localStorage.setItem(SID_KEY, sid);
+  localStorage.setItem("auth_user", JSON.stringify({
+    username: data.message.data?.username,
+    email: data.message.data?.email,
+    fullName: data.message.data?.full_name,
+  }));
+}
+  return {
+    username: data.message.data?.username,
+    email: data.message.data?.email,
+    fullName: data.message.data?.full_name,
+  };
 };
 
-export const logoutApi = async () => {
-  await delay(200);
-  localStorage.removeItem(AUTH_KEY);
+export const logoutApi = async (): Promise<void> => {
+  localStorage.removeItem(SID_KEY);
 };
 
-export const resetPasswordApi = async (email: string) => {
-  await delay(500);
+export const getCurrentUserApi = async (): Promise<AuthUser | null> => {
+  try {
+    const resp = await api.get("/api/method/frappe.auth.get_logged_user");
+    return resp.data?.message || null;
+  } catch {
+    return null;
+  }
+};
 
-  if (email !== fakeUser.email) {
-    throw new Error("User not found");
+
+
+export const resetPasswordApi = async (
+  username: string
+): Promise<{ message: string }> => {
+
+  await new Promise((resolve) => setTimeout(resolve, 800));
+
+  if (!username || username.trim() === "") {
+    throw new Error("Username is required");
   }
 
-  return { message: "Reset link sent (simulated)" };
-};
+  if (username.length < 3) {
+    throw new Error("Invalid username");
+  }
 
-export const getStoredUser = () => {
-  const user = localStorage.getItem(AUTH_KEY);
-  return user ? JSON.parse(user) : null;
+  return {
+    message: "Reset link sent successfully (demo mode)",
+  };
 };
