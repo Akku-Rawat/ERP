@@ -213,7 +213,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
   };
 
   return (
-    <div className="space-y-4 animate-[fadeIn_0.2s_ease]">
+    <div className="flex flex-col gap-4 min-h-0 animate-[fadeIn_0.2s_ease]">
       {/* Select-all bar */}
       <div className="flex items-center justify-between py-2.5 px-4 bg-app border border-theme rounded-xl">
         <div className="flex items-center gap-6">
@@ -252,52 +252,52 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
       </div>
 
       {/* Employee list */}
-      <div className="border border-theme rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <div className="flex items-center justify-between gap-3 px-4 py-3 bg-card border-b border-theme">
-            <div className="flex items-center gap-3 overflow-x-auto flex-nowrap min-w-0">
-              <div className="text-xs text-muted whitespace-nowrap shrink-0">{filtered.length} employees</div>
+      <div className="border border-theme rounded-xl overflow-hidden flex flex-col min-h-0 flex-1">
+        <div className="shrink-0 flex items-center justify-between gap-3 px-4 py-3 bg-card border-b border-theme">
+          <div className="flex items-center gap-3 overflow-x-auto flex-nowrap min-w-0">
+            <div className="text-xs text-muted whitespace-nowrap shrink-0">{filtered.length} employees</div>
 
-              <input
-                type="text"
-                value={(data as any).nameSearch ?? ""}
-                onChange={e => updateFilter("nameSearch", e.target.value)}
-                placeholder="Search name"
-                className={miniInputCls}
-              />
+            <input
+              type="text"
+              value={(data as any).nameSearch ?? ""}
+              onChange={e => updateFilter("nameSearch", e.target.value)}
+              placeholder="Search name"
+              className={miniInputCls}
+            />
 
-              <select
-                value={(data as any).jobTitleFilter ?? ""}
-                onChange={e => updateFilter("jobTitleFilter", e.target.value)}
-                className={miniSelectCls}
-              >
-                <option value="">Job title (All)</option>
-                {jobTitleOptions.map(j => (
-                  <option key={j} value={j}>{j}</option>
-                ))}
-              </select>
-
-              <select
-                value={(data as any).departmentFilter ?? ""}
-                onChange={e => updateFilter("departmentFilter", e.target.value)}
-                className={miniSelectCls}
-              >
-                <option value="">Department (All)</option>
-                {departmentOptions.map(d => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
-            </div>
-            <button
-              type="button"
-              onClick={() => onCreatePayroll?.(data.selectedEmployees)}
-              disabled={!data.selectedEmployees.length}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-success text-white text-xs font-extrabold disabled:opacity-40 disabled:cursor-not-allowed"
+            <select
+              value={(data as any).jobTitleFilter ?? ""}
+              onChange={e => updateFilter("jobTitleFilter", e.target.value)}
+              className={miniSelectCls}
             >
-              Create Payroll ({data.selectedEmployees.length})
-            </button>
-          </div>
+              <option value="">Job title (All)</option>
+              {jobTitleOptions.map(j => (
+                <option key={j} value={j}>{j}</option>
+              ))}
+            </select>
 
+            <select
+              value={(data as any).departmentFilter ?? ""}
+              onChange={e => updateFilter("departmentFilter", e.target.value)}
+              className={miniSelectCls}
+            >
+              <option value="">Department (All)</option>
+              {departmentOptions.map(d => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={() => onCreatePayroll?.(data.selectedEmployees)}
+            disabled={!data.selectedEmployees.length}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-success text-white text-xs font-extrabold disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Create Payroll ({data.selectedEmployees.length})
+          </button>
+        </div>
+
+        <div className="flex-1 min-h-0 overflow-auto">
           <table className="w-full">
             <thead className="bg-app border-b border-theme">
               <tr>
@@ -381,31 +381,31 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
               )}
             </tbody>
           </table>
-
-          {filtered.length > 0 && (
-            <div className="flex items-center justify-between gap-3 px-4 py-3 bg-app border-t border-theme">
-              <div className="text-xs text-muted">Page {pageSafe} of {totalPages}</div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={pageSafe <= 1}
-                  className="px-3 py-2 text-xs font-bold rounded-lg border border-theme bg-card text-main disabled:opacity-40"
-                >
-                  Previous
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  disabled={pageSafe >= totalPages}
-                  className="px-3 py-2 text-xs font-bold rounded-lg border border-theme bg-card text-main disabled:opacity-40"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
         </div>
+
+        {filtered.length > 0 && (
+          <div className="shrink-0 flex items-center justify-between gap-3 px-4 py-3 bg-app border-t border-theme">
+            <div className="text-xs text-muted">Page {pageSafe} of {totalPages}</div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={pageSafe <= 1}
+                className="px-3 py-2 text-xs font-bold rounded-lg border border-theme bg-card text-main disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={pageSafe >= totalPages}
+                className="px-3 py-2 text-xs font-bold rounded-lg border border-theme bg-card text-main disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

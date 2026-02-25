@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Plus, Save, ChevronLeft,
   FileText, Users, CheckCircle,
-  BarChart3, Layers, Zap,
+  BarChart3, Layers, Zap, X,
 } from "lucide-react";
 
 import type { PayrollEntry, Employee } from "../../../types/payrolltypes";
@@ -260,6 +260,35 @@ export default function PayrollManagement() {
     setTimeout(() => setToast(null), 3500);
   };
 
+  const [dashboardEntry, setDashboardEntry] = useState<PayrollEntry>({
+    payrollName: "",
+    postingDate: new Date().toISOString().slice(0, 10),
+    currency: "ZMW",
+    company: "Izyane InovSolutions Pvt. Ltd.",
+    payrollPayableAccount: "Payroll Payable - I",
+    status: "Draft",
+    salarySlipTimesheet: false,
+    deductTaxForProof: false,
+    payrollFrequency: "Monthly",
+    startDate: "",
+    endDate: "",
+    paymentAccount: "",
+    costCenter: "",
+    project: "",
+    letterHead: "",
+    employeeSelectionMode: "multiple",
+    selectedEmployees: [],
+  });
+
+  const handleDashboardChange = (field: string, value: any) => {
+    setDashboardEntry(p => ({ ...p, [field]: value }));
+  };
+
+  const [lastCreatedPayroll, setLastCreatedPayroll] = useState<{
+    createdAtIso: string;
+    employees: { id: string; name: string; employeeId?: string }[];
+  } | null>(null);
+
   useEffect(() => {
     if (!employeesError) return;
     showToast(employeesError, "error");
@@ -322,6 +351,17 @@ export default function PayrollManagement() {
 
   const handleCreatePayroll = (empIds: string[]) => {
     if (!empIds.length) return;
+
+    const createdEmployees = employees
+      .filter(e => empIds.includes(e.id))
+      .map(e => ({ id: e.id, name: e.name, employeeId: e.employeeId }))
+      .slice(0, 30);
+
+    setLastCreatedPayroll({
+      createdAtIso: new Date().toISOString(),
+      employees: createdEmployees,
+    });
+
     showToast(`Payroll created for ${empIds.length} employee${empIds.length > 1 ? "s" : ""}`);
   };
 
@@ -353,7 +393,10 @@ export default function PayrollManagement() {
         <NewPayrollEntry
           employees={employees}
           onBack={() => setView("dashboard")}
-          onCreatePayroll={(ids) => { handleCreatePayroll(ids); setView("dashboard"); }}
+          onCreatePayroll={(ids) => {
+            handleCreatePayroll(ids);
+            setView("dashboard");
+          }}
           onViewEmployee={(id) => setDetailEmployeeId(id)}
         />
       );
@@ -387,8 +430,41 @@ export default function PayrollManagement() {
 
       <div className="flex-1 min-h-0 px-5 pb-4 flex flex-col">
         <div className="flex-1 min-h-0 bg-card border border-theme rounded-2xl overflow-hidden shadow-sm flex flex-col">
-          <div className="flex-1 min-h-0 flex items-center justify-center">
-            <div />
+          {lastCreatedPayroll && (
+            <div className="shrink-0 border-b border-theme bg-app px-5 py-3 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-xs font-extrabold text-main">
+                  Payroll created for {lastCreatedPayroll.employees.length} employee{lastCreatedPayroll.employees.length === 1 ? "" : "s"}
+                </div>
+                <div className="mt-1 text-[11px] text-muted leading-relaxed break-words">
+                  {lastCreatedPayroll.employees.map((e, idx) => (
+                    <React.Fragment key={e.id}>
+                      <span className="font-semibold text-main">{e.name || e.employeeId || e.id}</span>
+                      {idx < lastCreatedPayroll.employees.length - 1 ? ", " : ""}
+                    </React.Fragment>
+                  ))}
+                  {lastCreatedPayroll.employees.length >= 30 ? "…" : ""}
+                </div>
+              </div>
+              <Btn
+                variant="outline"
+                size="sm"
+                icon={<X className="w-3.5 h-3.5" />}
+                onClick={() => setLastCreatedPayroll(null)}
+              >
+                Clear
+              </Btn>
+            </div>
+          )}
+
+          <div className="flex-1 min-h-0 overflow-y-auto p-4">
+            <EmployeesTab
+              data={dashboardEntry}
+              onChange={handleDashboardChange}
+              employees={employees}
+              onViewEmployee={(id) => setDetailEmployeeId(id)}
+              onCreatePayroll={() => handleCreatePayroll(dashboardEntry.selectedEmployees)}
+            />
           </div>
         </div>
       </div>

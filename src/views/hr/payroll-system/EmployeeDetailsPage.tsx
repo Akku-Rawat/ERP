@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, X } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { getEmployeeById } from "../../../api/employeeapi";
+import { calculateZmPayrollFromGross } from "./util";
 
 interface EmployeeDetailsPageProps {
   employeeId: string;
@@ -57,7 +58,7 @@ const Card: React.FC<{ title: string; children: React.ReactNode; right?: React.R
   </div>
 );
 
-const KeyValueGrid: React.FC<{ data: AnyRecord }> = ({ data }) => {
+const KeyValueGrid: React.FC<{ data: AnyRecord; columns?: 2 | 3 | 4 }> = ({ data, columns = 2 }) => {
   const entries = useMemo(
     () =>
       Object.entries(data)
@@ -69,7 +70,15 @@ const KeyValueGrid: React.FC<{ data: AnyRecord }> = ({ data }) => {
   if (!entries.length) return <div className="text-sm text-muted">No information available</div>;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div
+      className={`grid grid-cols-1 gap-4 ${
+        columns === 4
+          ? "md:grid-cols-4"
+          : columns === 3
+            ? "md:grid-cols-3"
+            : "md:grid-cols-2"
+      }`}
+    >
       {entries.map(([k, v]) => (
         <div key={k} className="min-w-0">
           <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-1">
@@ -141,7 +150,155 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
   const employmentInfo = (data?.employmentInfo || {}) as AnyRecord;
   const payrollInfo = (data?.payrollInfo || {}) as AnyRecord;
   const bankInfo = (payrollInfo?.bankAccount || {}) as AnyRecord;
+  const statutory = (payrollInfo?.statutoryDeductions || {}) as AnyRecord;
   const documents = (data?.documents || []) as any[];
+
+  const grossSalaryForCalc = useMemo(() => {
+    const v =
+      data?.grossSalary ??
+      payrollInfo?.grossSalary ??
+      payrollInfo?.GrossSalary ??
+      payrollInfo?.basicSalary ??
+      payrollInfo?.BasicSalary ??
+      data?.basicSalary ??
+      0;
+    return Number(v ?? 0);
+  }, [data, payrollInfo]);
+
+  const statutoryCalc = useMemo(() => {
+    const rates = {
+      napsaEmployeeRate: statutory?.napsaEmployeeRate,
+      napsaEmployerRate: statutory?.napsaEmployerRate,
+      nhimaRate: statutory?.nhimaRate,
+    };
+
+    return calculateZmPayrollFromGross(grossSalaryForCalc, {
+      rates,
+    });
+  }, [grossSalaryForCalc, statutory]);
+
+  const profileInfo = useMemo(
+    () => ({ ...identityInfo, ...personalInfo, ...contactInfo }),
+    [identityInfo, personalInfo, contactInfo],
+  );
+
+  const payrollMain = useMemo(() => {
+    const copy = { ...(payrollInfo || {}) } as AnyRecord;
+    delete copy.bankAccount;
+    delete copy.statutoryDeductions;
+    return copy;
+  }, [payrollInfo]);
+
+  const employmentCompact = useMemo(() => {
+    const omit = new Set(
+      [
+        "department",
+        "jobtitle",
+        "worklocation",
+        "branch",
+        "status",
+        "email",
+        "salarybreakdown",
+        "weeklyschedule",
+      ].map((s) => s.toLowerCase()),
+    );
+    const out: AnyRecord = {};
+    Object.entries(employmentInfo || {}).forEach(([k, v]) => {
+      if (omit.has(String(k).toLowerCase())) return;
+      out[k] = v;
+    });
+    return out;
+  }, [employmentInfo]);
+
+  const weeklyScheduleRows = useMemo(() => {
+    const raw =
+      (employmentInfo as any)?.weeklySchedule ??
+      (employmentInfo as any)?.WeeklySchedule ??
+      (employmentInfo as any)?.weekly_schedule ??
+      null;
+
+    const normalize = (day: any) => {
+      const d = String(day ?? "").trim();
+      if (!d) return "";
+      return d.charAt(0).toUpperCase() + d.slice(1).toLowerCase();
+    };
+
+    if (!raw) return [] as { day: string; time: string }[];
+
+    if (Array.isArray(raw)) {
+      return raw
+        .map((x: any) => ({
+          day: normalize(x?.day ?? x?.Day ?? x?.name ?? x?.label),
+          time: String(x?.time ?? x?.Time ?? x?.hours ?? x?.value ?? "").trim(),
+        }))
+        .filter((r: any) => r.day && r.time);
+    }
+
+    if (typeof raw === "object") {
+      return Object.entries(raw)
+        .map(([k, v]) => ({ day: normalize(k), time: String(v ?? "").trim() }))
+        .filter((r) => r.day && r.time);
+    }
+
+    const s = String(raw).trim();
+    if (!s) return [] as { day: string; time: string }[];
+
+    return s
+      .split(/\s*[·,]\s*/g)
+      .map((part) => {
+        const p = String(part ?? "").trim();
+        if (!p) return null;
+        const idx = p.indexOf(":");
+        if (idx === -1) return null;
+        const day = normalize(p.slice(0, idx));
+        const time = p.slice(idx + 1).trim();
+        if (!day || !time) return null;
+        return { day, time };
+      })
+      .filter(Boolean) as { day: string; time: string }[];
+  }, [employmentInfo]);
+
+  const payrollCompact = useMemo(() => {
+    const omit = new Set(
+      [
+        "grosssalary",
+        "basicsalary",
+        "salarybreakdown",
+        "department",
+        "jobtitle",
+        "worklocation",
+      ].map((s) => s.toLowerCase()),
+    );
+    const out: AnyRecord = {};
+    Object.entries(payrollMain || {}).forEach(([k, v]) => {
+      if (omit.has(String(k).toLowerCase())) return;
+      out[k] = v;
+    });
+    return out;
+  }, [payrollMain]);
+
+  const salaryBreakdown = useMemo(() => {
+    const basic = payrollInfo?.basicSalary ?? payrollInfo?.BasicSalary ?? data?.basicSalary;
+    const totalAllowances = payrollInfo?.allowances ?? payrollInfo?.Allowances ?? data?.allowances;
+    const breakdown = payrollInfo?.salaryBreakdown ?? payrollInfo?.SalaryBreakdown ?? null;
+
+    if (Array.isArray(breakdown)) {
+      return breakdown
+        .map((x: any) => ({ label: String(x?.label ?? x?.name ?? ""), amount: x?.amount }))
+        .filter((x: any) => x.label && x.amount !== undefined && x.amount !== null);
+    }
+
+    if (breakdown && typeof breakdown === "object") {
+      return Object.entries(breakdown)
+        .map(([k, v]) => ({ label: toTitle(String(k)), amount: v }))
+        .filter((x) => x.label && x.amount !== undefined && x.amount !== null);
+    }
+
+    const rows: { label: string; amount: any }[] = [];
+    if (basic !== undefined && basic !== null && basic !== "") rows.push({ label: "Basic Salary", amount: basic });
+    if (totalAllowances !== undefined && totalAllowances !== null && totalAllowances !== "") rows.push({ label: "Allowances", amount: totalAllowances });
+    return rows;
+  }, [data?.allowances, data?.basicSalary, payrollInfo]);
 
   return (
     <div className="h-screen flex flex-col bg-app overflow-hidden">
@@ -162,110 +319,183 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
         {loading ? (
           <div className="rounded-xl border border-theme bg-app p-6 text-sm text-muted">Loading employee details…</div>
         ) : error ? (
-          <div className="rounded-xl border border-danger/30 bg-danger/5 p-6">
-            <div className="text-sm font-bold text-danger">Failed to load</div>
-            <div className="text-xs text-danger/80 mt-1">{error}</div>
-          </div>
+          <div className="rounded-xl border border-danger/30 bg-danger/5 p-6 text-sm font-semibold text-danger">{error}</div>
         ) : (
-          <div className="space-y-5">
+          <div className="max-w-[1280px] mx-auto">
             <div className="bg-card border border-theme rounded-2xl overflow-hidden shadow-sm">
-              <div className="p-6 flex flex-col md:flex-row md:items-center gap-5">
-                <div className="shrink-0">
-                  {profilePictureUrl ? (
-                    <img
-                      src={String(profilePictureUrl)}
-                      alt={employeeName}
-                      className="w-20 h-20 rounded-2xl object-cover border border-theme bg-app"
-                    />
-                  ) : (
-                    <div className="w-20 h-20 rounded-2xl bg-app border border-theme flex items-center justify-center text-sm font-extrabold text-muted">
-                      {employeeName.split(" ").map((p: string) => p[0]).join("").slice(0, 2).toUpperCase()}
+              <div className="p-6">
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex items-start gap-4 min-w-0">
+                    <div className="w-12 h-12 rounded-xl bg-app border border-theme flex items-center justify-center overflow-hidden shrink-0">
+                      {profilePictureUrl ? (
+                        <img src={profilePictureUrl} alt={employeeName} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-6 h-6 rounded-lg bg-primary/10" />
+                      )}
                     </div>
-                  )}
-                </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
                       <div className="text-lg font-extrabold text-main truncate">{employeeName}</div>
                       <div className="text-xs text-muted mt-0.5 truncate">{employeeCode ? `Employee ID: ${employeeCode}` : `ID: ${employeeId}`}</div>
                     </div>
-                    <span className={`shrink-0 inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold border ${headerStatus.toLowerCase() === "active"
-                      ? "bg-success/10 text-success border-success/20"
-                      : "bg-warning/10 text-warning border-warning/20"}`}>
-                      {headerStatus}
-                    </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-                    <div className="bg-app border border-theme rounded-xl px-4 py-3">
-                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Job Title</div>
-                      <div className="text-sm font-bold text-main mt-1 truncate">{headerJobTitle || "—"}</div>
-                    </div>
-                    <div className="bg-app border border-theme rounded-xl px-4 py-3">
-                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Department</div>
-                      <div className="text-sm font-bold text-main mt-1 truncate">{headerDepartment || "—"}</div>
-                    </div>
-                    <div className="bg-app border border-theme rounded-xl px-4 py-3">
-                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Email</div>
-                      <div className="text-sm font-bold text-main mt-1 truncate">{headerEmail || "—"}</div>
-                    </div>
+                  <span className={`shrink-0 inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold border ${headerStatus.toLowerCase() === "active"
+                    ? "bg-success/10 text-success border-success/20"
+                    : "bg-warning/10 text-warning border-warning/20"}`}>
+                    {headerStatus}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+                  <div className="bg-app border border-theme rounded-xl px-4 py-3">
+                    <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Job Title</div>
+                    <div className="text-sm font-bold text-main mt-1 truncate">{headerJobTitle || "—"}</div>
+                  </div>
+                  <div className="bg-app border border-theme rounded-xl px-4 py-3">
+                    <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Department</div>
+                    <div className="text-sm font-bold text-main mt-1 truncate">{headerDepartment || "—"}</div>
+                  </div>
+                  <div className="bg-app border border-theme rounded-xl px-4 py-3">
+                    <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Email</div>
+                    <div className="text-sm font-bold text-main mt-1 truncate">{headerEmail || "—"}</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              <div className="lg:col-span-2 space-y-5">
-                <Card title="Identity">
-                  <KeyValueGrid data={identityInfo} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5">
+              <div className="lg:col-span-2">
+                <Card title="Employee Information">
+                  <div className="space-y-5">
+                    <div>
+                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-2">Profile</div>
+                      <KeyValueGrid data={profileInfo} columns={4} />
+                    </div>
+                  </div>
                 </Card>
 
-                <Card title="Personal">
-                  <KeyValueGrid data={personalInfo} />
-                </Card>
+                <div className="mt-5">
+                  <Card title="Salary, Bank & Deductions">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="min-w-0">
+                          <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-3">Salary Breakdown</div>
+                          <div className="space-y-2">
+                            {salaryBreakdown.length ? (
+                              salaryBreakdown.map((r: any) => (
+                                <div key={r.label} className="flex items-center justify-between gap-3">
+                                  <div className="text-xs font-semibold text-main">{r.label}</div>
+                                  <div className="text-xs font-mono font-extrabold text-main tabular-nums">{r.amount ?? "—"}</div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-sm text-muted">No salary data</div>
+                            )}
+                          </div>
+                        </div>
 
-                <Card title="Contact">
-                  <KeyValueGrid data={contactInfo} />
-                </Card>
+                        <div className="min-w-0">
+                          <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-3">Bank</div>
+                          <KeyValueGrid data={bankInfo} />
+                        </div>
+
+                        <div className="min-w-0">
+                          <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-3">Statutory Deductions</div>
+                          <div className="space-y-2">
+                            {[
+                              {
+                                label: "Napsa Employee",
+                                rate: statutoryCalc?.rates?.napsaEmployeeRate,
+                                amount: statutoryCalc?.statutory?.napsaEmployee,
+                              },
+                              {
+                                label: "Napsa Employer",
+                                rate: statutoryCalc?.rates?.napsaEmployerRate,
+                                amount: statutoryCalc?.statutory?.napsaEmployer,
+                              },
+                              {
+                                label: "Nhima",
+                                rate: statutoryCalc?.rates?.nhimaRate,
+                                amount: statutoryCalc?.statutory?.nhima,
+                              },
+                              {
+                                label: "Paye",
+                                rate: null,
+                                amount: statutoryCalc?.statutory?.paye,
+                              },
+                            ].map((r) => (
+                              <div key={r.label} className="flex items-center justify-between gap-3 bg-app border border-theme rounded-xl px-4 py-2">
+                                <div className="text-xs font-semibold text-main">{r.label}</div>
+                                <div className="text-xs font-mono font-extrabold text-main tabular-nums">
+                                  {r.rate === null || r.rate === undefined ? "" : `${Number(r.rate)}% • `}
+                                  ZMW {Number(r.amount ?? 0).toLocaleString("en-ZM")}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                  </Card>
+                </div>
               </div>
 
               <div className="space-y-5">
-                <Card title="Employment">
-                  <KeyValueGrid data={employmentInfo} />
+                <Card title="Employment & Payroll">
+                  <KeyValueGrid
+                    columns={4}
+                    data={{
+                      ...(employmentCompact || {}),
+                      ...(payrollCompact || {}),
+                    }}
+                  />
+
+                  {weeklyScheduleRows.length > 0 && (
+                    <div className="mt-6">
+                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-2">Weekly Schedule</div>
+                      <div className="overflow-x-auto border border-theme rounded-xl">
+                        <table className="w-full">
+                          <thead className="bg-app border-b border-theme">
+                            <tr>
+                              <th className="px-4 py-2 text-[10px] font-extrabold text-muted uppercase tracking-wider text-left whitespace-nowrap">Day</th>
+                              <th className="px-4 py-2 text-[10px] font-extrabold text-muted uppercase tracking-wider text-left whitespace-nowrap">Time</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {weeklyScheduleRows.map((r) => (
+                              <tr key={r.day} className="border-b border-theme last:border-0">
+                                <td className="px-4 py-2 text-xs font-bold text-main whitespace-nowrap">{r.day}</td>
+                                <td className="px-4 py-2 text-xs text-muted whitespace-nowrap">{r.time}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                 </Card>
 
-                <Card title="Payroll">
-                  <KeyValueGrid data={payrollInfo} />
-                </Card>
-
-                <Card title="Bank">
-                  <KeyValueGrid data={bankInfo} />
+                <Card
+                  title="Documents"
+                  right={
+                    <div className="text-xs font-extrabold text-muted tabular-nums">
+                      {Array.isArray(documents) ? documents.length : 0}
+                    </div>
+                  }
+                >
+                  {Array.isArray(documents) && documents.length > 0 ? (
+                    <div className="space-y-3">
+                      {documents.map((doc, idx) => (
+                        <div key={idx} className="py-2">
+                          <KeyValueGrid data={(doc || {}) as AnyRecord} columns={4} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted">No documents</div>
+                  )}
                 </Card>
               </div>
             </div>
-
-            <Card
-              title="Documents"
-              right={
-                <button className="text-xs font-bold text-muted hover:text-main transition inline-flex items-center gap-1" type="button">
-                  <X className="w-3.5 h-3.5" />
-                  {Array.isArray(documents) ? documents.length : 0}
-                </button>
-              }
-            >
-              {Array.isArray(documents) && documents.length > 0 ? (
-                <div className="space-y-3">
-                  {documents.map((doc, idx) => (
-                    <div key={idx} className="rounded-xl border border-theme bg-app p-4">
-                      <KeyValueGrid data={(doc || {}) as AnyRecord} />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-sm text-muted">No documents</div>
-              )}
-            </Card>
           </div>
         )}
       </div>
