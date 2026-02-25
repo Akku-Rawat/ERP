@@ -5,26 +5,38 @@ import { API, ERP_BASE } from "../config/api";
 const api = createAxiosInstance(ERP_BASE);
 export const EmployeeAPI = API.employee;
 
+type GetAllEmployeesParams = {
+  page?: number;
+  page_size?: number;
+  status?: string;
+  department?: string;
+  jobTitle?: string;
+  workLocation?: string;
+  id?: string;
+};
+
 export async function getAllEmployees(
-  page: number = 1,
+  pageOrParams: number | GetAllEmployeesParams = 1,
   page_size: number = 200,
   status: string = "Active",
 ): Promise<any> {
-  const resp: AxiosResponse = await api.get(EmployeeAPI.getAll, {
-    params: {
-      page,
-      page_size,
-      status,
-    },
-  });
+  const params: GetAllEmployeesParams =
+    typeof pageOrParams === "object"
+      ? pageOrParams
+      : {
+          page: pageOrParams,
+          page_size,
+          status,
+        };
 
-  return resp.data;
+  const resp: AxiosResponse = await api.get(EmployeeAPI.getAll, { params });
+  return resp.data?.data ?? resp.data;
 }
 
 export async function getEmployeeById(id: string): Promise<any> {
   const url = `${EmployeeAPI.getById}?id=${id}`;
   const resp: AxiosResponse = await api.get(url);
-  return resp.data || null;
+  return (resp.data?.data ?? resp.data) || null;
 }
 
 export async function createEmployee(payload: any): Promise<any> {

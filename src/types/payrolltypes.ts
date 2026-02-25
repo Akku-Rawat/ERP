@@ -1,23 +1,27 @@
-// types.ts — All TypeScript interfaces and types
-
 export interface Employee {
   id: string;
+  employeeId?: string;
   name: string;
-  email: string;
+  email?: string;
+  status?: string;
   department: string;
-  designation: string;
-  grade: string;
-  joiningDate: string;
-  bankAccount: string;
-  ifscCode: string;
-  pfNumber: string;
+  jobTitle?: string;
+  workLocation?: string;
+  grossSalary?: number;
+
+  designation?: string;
+  grade?: string;
+  joiningDate?: string;
+  bankAccount?: string;
+  ifscCode?: string;
+  pfNumber?: string;
   esiNumber?: string;
-  panNumber: string;
-  taxStatus: string;
+  panNumber?: string;
+  taxStatus?: string;
   isActive: boolean;
-  basicSalary: number;
-  hra: number;
-  allowances: number;
+  basicSalary?: number;
+  hra?: number;
+  allowances?: number;
   managerId?: string;
   branch?: string;
 }
@@ -144,13 +148,12 @@ export interface PayrollEntry {
   project: string;
   letterHead: string;
   selectedEmployees: string[];
+  employeeSelectionMode?: "single" | "multiple";
   branch?: string;
   department?: string;
   designation?: string;
   grade?: string;
 }
-
-// ── Validation types (ERP-grade pre-payroll validation) ──────────────────────
 
 export type ValidationSeverity = "error" | "warning" | "info";
 
@@ -166,12 +169,12 @@ export interface ValidationIssue {
   description: string;
   field?: string;
   suggestedAction?: string;
-  canProceed: boolean; // if false, blocks payroll run
+  canProceed: boolean; 
 }
 
 export interface ValidationResult {
   isValid: boolean;
-  canProceed: boolean; // true even if warnings exist, false only on blocking errors
+  canProceed: boolean; 
   errors: ValidationIssue[];
   warnings: ValidationIssue[];
   infos: ValidationIssue[];

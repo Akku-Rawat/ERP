@@ -2,8 +2,8 @@
 import React, { useState } from "react";
 import { Download, BarChart3, Check, X, Clock } from "lucide-react";
 import type { PayrollRecord } from "../../../types/payrolltypes";
-import { generateNEFTFile, fmtINR } from "./utils";
-import { ESI_EMPLOYER_RATE, ESI_RATE, PROFESSIONAL_TAX } from "./constants";
+
+const fmtZMW = (n: number) => Number(n || 0).toLocaleString("en-ZM");
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PAYROLL REPORTS
@@ -25,13 +25,13 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
   const paid = records.filter(r => r.status === "Paid");
 
   const summary = {
-    employees:   paid.length,
-    gross:       paid.reduce((s, r) => s + r.grossPay, 0),
-    deductions:  paid.reduce((s, r) => s + r.totalDeductions, 0),
-    net:         paid.reduce((s, r) => s + r.netPay, 0),
-    tax:         paid.reduce((s, r) => s + r.taxDeduction, 0),
-    pf:          paid.reduce((s, r) => s + r.pfDeduction, 0),
-    esi:         paid.reduce((s, r) => s + r.esiDeduction, 0),
+    employees: paid.length,
+    gross: paid.reduce((s, r) => s + r.grossPay, 0),
+    deductions: paid.reduce((s, r) => s + r.totalDeductions, 0),
+    net: paid.reduce((s, r) => s + r.netPay, 0),
+    tax: paid.reduce((s, r) => s + r.taxDeduction, 0),
+    pf: paid.reduce((s, r) => s + r.pfDeduction, 0),
+    esi: paid.reduce((s, r) => s + r.esiDeduction, 0),
   };
 
   const deptData = Object.values(
@@ -39,17 +39,17 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
       if (!acc[r.department]) acc[r.department] = { dept: r.department, count: 0, gross: 0, net: 0 };
       acc[r.department].count++;
       acc[r.department].gross += r.grossPay;
-      acc[r.department].net   += r.netPay;
+      acc[r.department].net += r.netPay;
       return acc;
     }, {}),
   );
   const maxGross = Math.max(...deptData.map(d => d.gross), 1);
 
   const handleDownloadNEFT = () => {
-    const content = generateNEFTFile(paid);
+    const content = "NEFT export is disabled until real payroll APIs are connected.";
     const blob = new Blob([content], { type: "text/plain" });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
     a.href = url;
     a.download = `NEFT_Payroll_${new Date().toISOString().slice(0, 10)}.txt`;
     a.click();
@@ -75,9 +75,8 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
       <div className="flex gap-0 border-b-2 border-theme">
         {(["summary", "department", "tax", "compliance"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-5 py-2.5 text-xs font-bold capitalize border-b-2 -mb-0.5 transition-all ${
-              tab === t ? "text-primary border-primary" : "text-muted border-transparent hover:text-main"
-            }`}>
+            className={`px-5 py-2.5 text-xs font-bold capitalize border-b-2 -mb-0.5 transition-all ${tab === t ? "text-primary border-primary" : "text-muted border-transparent hover:text-main"
+              }`}>
             {t}
           </button>
         ))}
@@ -88,22 +87,22 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-4">
             <StatCard label="Total Employees" value={String(summary.employees)} color="bg-info" />
-            <StatCard label="Gross Payout"    value={`₹${fmtINR(summary.gross)}`} color="bg-success" />
-            <StatCard label="Total Deductions" value={`₹${fmtINR(summary.deductions)}`} color="bg-danger" />
-            <StatCard label="Net Payout"      value={`₹${fmtINR(summary.net)}`}   color="bg-primary" />
+            <StatCard label="Gross Payout" value={`ZMW ${fmtZMW(summary.gross)}`} color="bg-success" />
+            <StatCard label="Total Deductions" value={`ZMW ${fmtZMW(summary.deductions)}`} color="bg-danger" />
+            <StatCard label="Net Payout" value={`ZMW ${fmtZMW(summary.net)}`} color="bg-primary" />
           </div>
 
           <div className="bg-card border border-theme rounded-xl p-5">
             <h4 className="text-xs font-extrabold text-muted uppercase tracking-wider mb-4">Statutory Deductions Breakdown</h4>
             <div className="grid grid-cols-3 gap-4">
               {[
-                { label: "Income Tax (TDS)", val: summary.tax,  color: "border-danger" },
-                { label: "Provident Fund",   val: summary.pf,   color: "border-info" },
-                { label: "ESI",              val: summary.esi,  color: "border-warning" },
+                { label: "Income Tax (TDS)", val: summary.tax, color: "border-danger" },
+                { label: "Provident Fund", val: summary.pf, color: "border-info" },
+                { label: "ESI", val: summary.esi, color: "border-warning" },
               ].map(({ label, val, color }) => (
                 <div key={label} className={`rounded-xl border-l-4 ${color} bg-app px-4 py-3`}>
                   <p className="text-xs text-muted mb-1">{label}</p>
-                  <p className="text-lg font-extrabold text-main tabular-nums">₹{fmtINR(val)}</p>
+                  <p className="text-lg font-extrabold text-main tabular-nums">ZMW {fmtZMW(val)}</p>
                 </div>
               ))}
             </div>
@@ -130,10 +129,10 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
                 return (
                   <div key={d.dept} className="flex flex-col items-center gap-2 flex-1">
                     <div className="flex items-end gap-1 w-full justify-center" style={{ height: 128 }}>
-                      <div title={`Gross: ₹${fmtINR(d.gross)}`}
+                      <div title={`Gross: ZMW ${fmtZMW(d.gross)}`}
                         className="bg-primary/80 rounded-t-md flex-1 transition-all hover:bg-primary cursor-pointer max-w-[24px]"
                         style={{ height: h }} />
-                      <div title={`Net: ₹${fmtINR(d.net)}`}
+                      <div title={`Net: ZMW ${fmtZMW(d.net)}`}
                         className="bg-success/80 rounded-t-md flex-1 transition-all hover:bg-success cursor-pointer max-w-[24px]"
                         style={{ height: Math.round((d.net / maxGross) * 120) }} />
                     </div>
@@ -153,19 +152,19 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
             <table className="w-full">
               <thead className="bg-app border-b border-theme">
                 <tr>
-                  {["Department","Employees","Gross Pay","Net Pay","Avg Net Pay"].map(h => (
+                  {["Department", "Employees", "Gross Pay", "Net Pay", "Avg Net Pay"].map(h => (
                     <th key={h} className="px-5 py-3 text-left text-[10px] font-extrabold text-muted uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {deptData.map((d, i) => (
-                  <tr key={d.dept} className={`border-b border-theme last:border-0 ${i%2===1?"bg-app":"bg-card"}`}>
+                  <tr key={d.dept} className={`border-b border-theme last:border-0 ${i % 2 === 1 ? "bg-app" : "bg-card"}`}>
                     <td className="px-5 py-3 text-sm font-bold text-main">{d.dept}</td>
                     <td className="px-5 py-3 text-sm text-muted">{d.count}</td>
-                    <td className="px-5 py-3 text-sm font-bold text-main tabular-nums">₹{fmtINR(d.gross)}</td>
-                    <td className="px-5 py-3 text-sm font-bold text-success tabular-nums">₹{fmtINR(d.net)}</td>
-                    <td className="px-5 py-3 text-sm text-muted tabular-nums">₹{fmtINR(Math.round(d.net / d.count))}</td>
+                    <td className="px-5 py-3 text-sm font-bold text-main tabular-nums">ZMW {fmtZMW(d.gross)}</td>
+                    <td className="px-5 py-3 text-sm font-bold text-success tabular-nums">ZMW {fmtZMW(d.net)}</td>
+                    <td className="px-5 py-3 text-sm text-muted tabular-nums">ZMW {fmtZMW(Math.round(d.net / d.count))}</td>
                   </tr>
                 ))}
               </tbody>
@@ -182,8 +181,8 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
               title: "Income Tax (TDS)",
               color: "border-danger/30 bg-danger/5",
               items: [
-                ["Total TDS Collected", `₹${fmtINR(summary.tax)}`],
-                ["Avg TDS / Employee",  `₹${fmtINR(paid.length ? Math.round(summary.tax / paid.length) : 0)}`],
+                ["Total TDS Collected", `ZMW ${fmtZMW(summary.tax)}`],
+                ["Avg TDS / Employee", `ZMW ${fmtZMW(paid.length ? Math.round(summary.tax / paid.length) : 0)}`],
                 ["New Regime Employees", `${paid.filter(r => r.taxRegime === "New").length}`],
                 ["Old Regime Employees", `${paid.filter(r => r.taxRegime === "Old").length}`],
               ],
@@ -192,18 +191,16 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
               title: "Provident Fund (PF)",
               color: "border-info/30 bg-info/5",
               items: [
-                ["Employee Contribution (12%)", `₹${fmtINR(summary.pf)}`],
-                ["Employer Contribution (12%)", `₹${fmtINR(summary.pf)}`],
-                ["Total PF Remittance",          `₹${fmtINR(summary.pf * 2)}`],
+                ["Employee Contribution (12%)", `ZMW ${fmtZMW(summary.pf)}`],
+                ["Employer Contribution (12%)", `ZMW ${fmtZMW(summary.pf)}`],
+                ["Total PF Remittance", `ZMW ${fmtZMW(summary.pf * 2)}`],
               ],
             },
             {
               title: "ESI",
               color: "border-warning/30 bg-warning/5",
               items: [
-                ["Employee Contribution (0.75%)", `₹${fmtINR(summary.esi)}`],
-                ["Employer Contribution (3.25%)", `₹${fmtINR(Math.round(summary.esi * (ESI_EMPLOYER_RATE / ESI_RATE)))}`],
-                ["Total ESI Remittance",           `₹${fmtINR(Math.round(summary.esi * (1 + ESI_EMPLOYER_RATE / ESI_RATE)))}`],
+                // ["Total ESI Collected", `ZMW ${fmtZMW(summary.esi)}`],
               ],
             },
           ].map(({ title, color, items }) => (
@@ -232,10 +229,10 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             {[
-              { title: "PF Compliance",          val: `${records.filter(r=>r.pfNumber).length}/${records.length}`, ok: true },
-              { title: "PAN Verified",            val: `${records.filter(r=>r.panNumber).length}/${records.length}`, ok: true },
-              { title: "Bank Account Configured", val: `${records.filter(r=>r.bankAccount).length}/${records.length}`, ok: records.filter(r=>r.bankAccount).length === records.length },
-              { title: "Tax Regime Declared",     val: `${records.filter(r=>r.taxRegime).length}/${records.length}`, ok: true },
+              { title: "PF Compliance", val: `${records.filter(r => r.pfNumber).length}/${records.length}`, ok: true },
+              { title: "PAN Verified", val: `${records.filter(r => r.panNumber).length}/${records.length}`, ok: true },
+              { title: "Bank Account Configured", val: `${records.filter(r => r.bankAccount).length}/${records.length}`, ok: records.filter(r => r.bankAccount).length === records.length },
+              { title: "Tax Regime Declared", val: `${records.filter(r => r.taxRegime).length}/${records.length}`, ok: true },
             ].map(({ title, val, ok }) => (
               <div key={title} className={`rounded-xl border p-4 flex items-center gap-3 ${ok ? "border-success/30 bg-success/5" : "border-danger/30 bg-danger/5"}`}>
                 <div className={`p-2 rounded-full ${ok ? "bg-success/15" : "bg-danger/15"}`}>
@@ -305,13 +302,13 @@ export const ApprovalWorkflowManager: React.FC<ApprovalWorkflowManagerProps> = (
 
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: "Gross Pay",    val: r.grossPay,       color: "text-main"    },
-                { label: "Deductions",   val: r.totalDeductions, color: "text-danger"  },
-                { label: "Net Pay",      val: r.netPay,          color: "text-success" },
+                { label: "Gross Pay", val: r.grossPay, color: "text-main" },
+                { label: "Deductions", val: r.totalDeductions, color: "text-danger" },
+                { label: "Net Pay", val: r.netPay, color: "text-success" },
               ].map(({ label, val, color }) => (
                 <div key={label} className="bg-app rounded-lg p-3">
                   <p className="text-[10px] text-muted mb-1">{label}</p>
-                  <p className={`text-sm font-extrabold ${color} tabular-nums`}>₹{fmtINR(val)}</p>
+                  <p className={`text-sm font-extrabold ${color} tabular-nums`}>ZMW {fmtZMW(val)}</p>
                 </div>
               ))}
             </div>

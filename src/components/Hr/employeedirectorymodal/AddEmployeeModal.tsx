@@ -415,7 +415,7 @@ const [step, setStep] = useState<"verification" | "form">(
     const fetchEmployees = async () => {
       try {
         const res = await getAllEmployees(1, 200, "Active");
-        const employees = res?.data?.employees ?? [];
+        const employees = res?.employees ?? [];
 
         setReportingManagers(
           filterEmployeesByRole(

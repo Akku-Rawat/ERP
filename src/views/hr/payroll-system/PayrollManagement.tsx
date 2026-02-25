@@ -1,33 +1,19 @@
-// PayrollManagement.tsx — Root orchestrator for the Payroll module
-// Component-wise, clean separation. No inline logic in JSX.
-
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Plus, Save, ChevronLeft, ChevronRight,
-  FileText, Users, Settings, CheckCircle,
+  Plus, Save, ChevronLeft,
+  FileText, Users, CheckCircle,
   BarChart3, Layers, Zap,
 } from "lucide-react";
 
-import type { PayrollRecord, PayrollEntry, Employee } from "../../../types/payrolltypes";
-import { demoEmployees } from "./constants";
-import { generatePayrollRecord, recalculatePayroll, runPayrollValidation } from "./utils";
+import type { PayrollEntry, Employee } from "../../../types/payrolltypes";
+import { getAllEmployees } from "../../../api/employeeapi";
 
 // ── Components ────────────────────────────────────────────────────────────────
-import { KPICards }      from "./KPICards";
-import { FilterBar }     from "./FilterBar";
-import { PayrollTable }  from "./PayrollTable";
-import TaxDeduction      from "./TaxDeduction";
-import { OverviewTab, EmployeesTab, AccountingTab } from "./EntryFormTabs";
-
-// ── Modals ────────────────────────────────────────────────────────────────────
-import { PayslipModal }            from "../../../components/Hr/payrollmodal/PayslipModal";
-import { EditModal }               from "../../../components/Hr/payrollmodal/EditModal";
-import { QuickCreateModal }        from "../../../components/Hr/payrollmodal/QuickCreatePayrollModal";
-import { PayrollValidationModal }  from "../../../components/Hr/payrollmodal/payrollvalidationmodal";
+import { KPICards } from "./KPICards";
+import { OverviewTab, EmployeesTab } from "./EntryFormTabs";
 
 // ── Views ─────────────────────────────────────────────────────────────────────
-import { PayrollReports }     from "./ReportsApprovals";
-import { EmployeeDetailPage } from "./Employeedetailpage";
+import EmployeeDetailsPage from "./EmployeeDetailsPage";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TOAST NOTIFICATION (inline, lightweight)
@@ -38,8 +24,8 @@ const Toast: React.FC<{ toast: ToastState | null }> = ({ toast }) => {
   if (!toast) return null;
   const colors = {
     success: "bg-success text-white",
-    error:   "bg-danger  text-white",
-    info:    "bg-primary text-white",
+    error: "bg-danger  text-white",
+    info: "bg-primary text-white",
   };
   return (
     <div className={`fixed bottom-5 right-5 z-[100] flex items-center gap-2 px-4 py-3 rounded-xl shadow-xl text-sm font-semibold ${colors[toast.type]} animate-[slideUp_0.2s_ease]`}>
@@ -65,7 +51,7 @@ const Btn: React.FC<{
     primary: "bg-primary text-white hover:opacity-90 shadow-sm",
     outline: "bg-card text-main border border-theme hover:bg-app",
     success: "bg-success text-white hover:opacity-90 shadow-sm",
-    ghost:   "text-muted hover:text-main hover:bg-app",
+    ghost: "text-muted hover:text-main hover:bg-app",
   };
   const s = size === "sm" ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm";
   return (
@@ -90,10 +76,11 @@ const TopBar: React.FC<{
   setView: (v: View) => void;
   onQuickCreate: () => void;
   onNewPayroll: () => void;
-}> = ({ view, setView, onQuickCreate, onNewPayroll }) => {
+  totalEmployees?: number;
+}> = ({ view, setView, onQuickCreate, onNewPayroll, totalEmployees }) => {
   const navItems: { id: View; label: string; icon: React.ReactNode }[] = [
-    { id: "dashboard", label: "Dashboard", icon: <BarChart3 className="w-3.5 h-3.5" /> },
-    { id: "reports",   label: "Reports",   icon: <FileText  className="w-3.5 h-3.5" /> },
+    { id: "dashboard", label: "Home", icon: <BarChart3 className="w-3.5 h-3.5" /> },
+    { id: "reports", label: "Reports", icon: <FileText className="w-3.5 h-3.5" /> },
   ];
 
   return (
@@ -114,11 +101,10 @@ const TopBar: React.FC<{
             <button
               key={item.id}
               onClick={() => setView(item.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                view === item.id
-                  ? "bg-app text-primary border border-theme"
-                  : "text-muted hover:text-main hover:bg-app"
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${view === item.id
+                ? "bg-app text-primary border border-theme"
+                : "text-muted hover:text-main hover:bg-app"
+                }`}
             >
               {item.icon}{item.label}
             </button>
@@ -127,6 +113,12 @@ const TopBar: React.FC<{
       </div>
 
       <div className="flex items-center gap-2">
+        {typeof totalEmployees === "number" && (
+          <div className="hidden md:flex items-center gap-2 mr-2 px-3 py-1.5 rounded-lg bg-app border border-theme">
+            <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Total Employees</span>
+            <span className="text-xs font-extrabold text-main tabular-nums">{totalEmployees}</span>
+          </div>
+        )}
         <Btn variant="outline" size="sm" icon={<Zap className="w-3.5 h-3.5" />} onClick={onQuickCreate}>
           Quick Create
         </Btn>
@@ -139,22 +131,24 @@ const TopBar: React.FC<{
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NEW PAYROLL ENTRY — 3-step wizard
+// NEW PAYROLL ENTRY — 2-step wizard
 // ─────────────────────────────────────────────────────────────────────────────
 const NewPayrollEntry: React.FC<{
   employees: Employee[];
   onBack: () => void;
   onCreatePayroll: (empIds: string[]) => void;
-}> = ({ employees, onBack, onCreatePayroll }) => {
-  const [step, setStep]   = useState(0);
+  onViewEmployee: (employeeId: string) => void;
+}> = ({ employees, onBack, onCreatePayroll, onViewEmployee }) => {
+  const [step, setStep] = useState(0);
   const [saved, setSaved] = useState(false);
   const [formData, setFormData] = useState<PayrollEntry>({
     payrollName: "", postingDate: new Date().toISOString().slice(0, 10),
-    currency: "INR", company: "Izyane InovSolutions Pvt. Ltd.",
+    currency: "ZMW", company: "Izyane InovSolutions Pvt. Ltd.",
     payrollPayableAccount: "Payroll Payable - I",
     status: "Draft", salarySlipTimesheet: false, deductTaxForProof: false,
     payrollFrequency: "Monthly", startDate: "", endDate: "",
     paymentAccount: "", costCenter: "", project: "", letterHead: "",
+    employeeSelectionMode: "multiple",
     selectedEmployees: [],
   });
 
@@ -166,9 +160,8 @@ const NewPayrollEntry: React.FC<{
   const handleSave = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
 
   const tabs = [
-    { label: "Overview",   icon: <FileText  className="w-3.5 h-3.5" /> },
-    { label: "Employees",  icon: <Users     className="w-3.5 h-3.5" /> },
-    { label: "Accounting", icon: <Settings  className="w-3.5 h-3.5" /> },
+    { label: "Overview", icon: <FileText className="w-3.5 h-3.5" /> },
+    { label: "Employees", icon: <Users className="w-3.5 h-3.5" /> },
   ];
 
   return (
@@ -203,18 +196,16 @@ const NewPayrollEntry: React.FC<{
               <React.Fragment key={i}>
                 <button
                   onClick={() => setStep(i)}
-                  className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold border-b-2 -mb-px transition-all ${
-                    i === step
-                      ? "text-primary border-primary"
-                      : i < step
+                  className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold border-b-2 -mb-px transition-all ${i === step
+                    ? "text-primary border-primary"
+                    : i < step
                       ? "text-success border-transparent hover:border-theme"
                       : "text-muted border-transparent hover:text-main"
-                  }`}
+                    }`}
                 >
                   {i < step
                     ? <CheckCircle className="w-3.5 h-3.5 text-success" />
-                    : <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold shrink-0 ${
-                        i === step ? "bg-primary text-white" : "bg-app border border-theme text-muted"
+                    : <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold shrink-0 ${i === step ? "bg-primary text-white" : "bg-app border border-theme text-muted"
                       }`}>{i + 1}</span>
                   }
                   {t.label}
@@ -228,318 +219,179 @@ const NewPayrollEntry: React.FC<{
 
           {/* Tab content */}
           <div className="flex-1 min-h-0 overflow-y-auto p-6">
-            {step === 0 && <OverviewTab   data={formData} onChange={handleFormChange} />}
-            {step === 1 && <EmployeesTab  data={formData} onChange={handleFormChange} employees={employees} />}
-            {step === 2 && <AccountingTab data={formData} onChange={handleFormChange} employees={employees} />}
+            {step === 0 && <OverviewTab data={formData} onChange={handleFormChange} />}
+            {step === 1 && (
+              <EmployeesTab
+                data={formData}
+                onChange={handleFormChange}
+                employees={employees}
+                onViewEmployee={onViewEmployee}
+                onCreatePayroll={() => onCreatePayroll(formData.selectedEmployees)}
+              />
+            )}
           </div>
 
-          {/* Footer navigation */}
-          <div className="shrink-0 border-t border-theme px-6 py-3 bg-app flex items-center justify-between">
-            <Btn variant="outline" size="sm" icon={<ChevronLeft className="w-3.5 h-3.5" />}
-              onClick={() => setStep(p => Math.max(0, p - 1))} disabled={step === 0}>
-              Previous
-            </Btn>
-
-            {/* Step dots */}
-            <div className="flex items-center gap-1.5">
-              {tabs.map((_, i) => (
-                <div key={i} className={`rounded-full transition-all ${
-                  i === step ? "w-5 h-2 bg-primary" : i < step ? "w-2 h-2 bg-success" : "w-2 h-2 bg-theme"
-                }`} />
-              ))}
-            </div>
-
-            {step === tabs.length - 1
-              ? <Btn variant="success" size="sm" icon={<CheckCircle className="w-3.5 h-3.5" />}
-                  onClick={() => onCreatePayroll(formData.selectedEmployees)}
-                  disabled={!formData.selectedEmployees.length}>
-                  Create Payroll ({formData.selectedEmployees.length})
-                </Btn>
-              : <Btn size="sm" onClick={() => setStep(p => Math.min(tabs.length - 1, p + 1))}>
-                  Next <ChevronRight className="w-3.5 h-3.5" />
-                </Btn>
-            }
-          </div>
+          <div className="shrink-0" />
         </div>
       </div>
     </div>
   );
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ROOT — PayrollManagement
-// ─────────────────────────────────────────────────────────────────────────────
 export default function PayrollManagement() {
-  // ── State ──────────────────────────────────────────────────────────────────
   const [view, setView] = useState<View>("dashboard");
-  const [payrollRecords, setPayrollRecords] = useState<PayrollRecord[]>([
-    generatePayrollRecord(demoEmployees[0], "Paid"),
-    generatePayrollRecord(demoEmployees[1], "Pending"),
-    generatePayrollRecord(demoEmployees[2], "Paid"),
-    generatePayrollRecord(demoEmployees[3], "Pending"),
-  ]);
 
-  const [expandedRows,      setExpandedRows]      = useState<Set<string>>(new Set());
-  const [searchQuery,       setSearchQuery]        = useState("");
-  const [selectedDept,      setSelectedDept]       = useState("All");
-  const [filterStatus,      setFilterStatus]       = useState("All");
-  const [tableTab,          setTableTab]           = useState<"summary" | "tax">("summary");
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employeesLoading, setEmployeesLoading] = useState(false);
+  const [employeesError, setEmployeesError] = useState<string | null>(null);
 
-  // Modals
-  const [showCreateModal,   setShowCreateModal]    = useState(false);
-  const [showValidation,    setShowValidation]     = useState(false);
-  const [selectedEmployees, setSelectedEmployees]  = useState<string[]>([]);
-  const [selectedRecord,    setSelectedRecord]     = useState<PayrollRecord | null>(null);
-  const [editingRecord,     setEditingRecord]      = useState<PayrollRecord | null>(null);
-  const [detailRecord,      setDetailRecord]       = useState<PayrollRecord | null>(null);
+  const [employeesSummary, setEmployeesSummary] = useState<{
+    totalEmployees: number;
+    active: number;
+    onLeave: number;
+    inactive: number;
+  } | null>(null);
 
-  // Validation
-  const [validationResult,  setValidationResult]   = useState<ReturnType<typeof runPayrollValidation> | null>(null);
-  const [isProcessing,      setIsProcessing]       = useState(false);
+  const [detailEmployeeId, setDetailEmployeeId] = useState<string | null>(null);
 
-  // Toast
   const [toast, setToast] = useState<ToastState | null>(null);
   const showToast = (msg: string, type: ToastState["type"] = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
   };
 
-  // ── Derived data ───────────────────────────────────────────────────────────
-  const departments = useMemo(() => {
-    const depts = new Set(payrollRecords.map(r => r.department));
-    return ["All", ...Array.from(depts)];
-  }, [payrollRecords]);
+  useEffect(() => {
+    if (!employeesError) return;
+    showToast(employeesError, "error");
+  }, [employeesError]);
 
-  const filteredRecords = useMemo(() =>
-    payrollRecords.filter(r => {
-      const deptOk   = selectedDept   === "All" || r.department === selectedDept;
-      const statusOk = filterStatus   === "All" || r.status     === filterStatus;
-      const searchOk = !searchQuery   ||
-        r.employeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.employeeId.toLowerCase().includes(searchQuery.toLowerCase());
-      return deptOk && statusOk && searchOk;
-    }),
-  [payrollRecords, selectedDept, filterStatus, searchQuery]);
+  useEffect(() => {
+    let mounted = true;
 
-  const pendingRecords = payrollRecords.filter(r => r.status === "Pending");
-  const paidRecords    = payrollRecords.filter(r => r.status === "Paid");
-  const totalNet       = payrollRecords.reduce((s, r) => s + r.netPay, 0);
+    const loadEmployees = async () => {
+      setEmployeesLoading(true);
+      setEmployeesError(null);
+      try {
+        const resp = await getAllEmployees({ page: 1, page_size: 200 });
+        const list = Array.isArray(resp?.employees) ? resp.employees : [];
+        const summary = resp?.summary || null;
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
-  const toggleRow = (id: string) =>
-    setExpandedRows(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+        const mapped: Employee[] = list.map((e: any) => {
+          const status = String(e?.status ?? "");
+          return {
+            id: String(e?.id ?? e?.employeeId ?? e?.employee_id ?? ""),
+            employeeId: String(e?.employeeId ?? ""),
+            name: String(e?.name ?? ""),
+            email: String(e?.email ?? ""),
+            status: status || undefined,
+            department: String(e?.department ?? ""),
+            jobTitle: String(e?.jobTitle ?? ""),
+            workLocation: String(e?.workLocation ?? ""),
+            grossSalary: Number(e?.grossSalary ?? 0),
+            isActive: status.toLowerCase() === "active",
+          };
+        });
 
-  const toggleEmployee = (id: string) =>
-    setSelectedEmployees(p => p.includes(id) ? p.filter(i => i !== id) : [...p, id]);
+        if (!mounted) return;
+        setEmployees(mapped.filter(e => !!e.id));
+        setEmployeesSummary(
+          summary
+            ? {
+                totalEmployees: Number(summary?.totalEmployees ?? 0),
+                active: Number(summary?.active ?? 0),
+                onLeave: Number(summary?.onLeave ?? 0),
+                inactive: Number(summary?.inactive ?? 0),
+              }
+            : null,
+        );
+      } catch (err: any) {
+        if (!mounted) return;
+        setEmployeesError(err?.message || "Failed to load employees");
+      } finally {
+        if (!mounted) return;
+        setEmployeesLoading(false);
+      }
+    };
 
-  const selectAllEmployees = () => {
-    const all = demoEmployees.filter(e => e.isActive).map(e => e.id);
-    setSelectedEmployees(selectedEmployees.length === all.length ? [] : all);
-  };
+    loadEmployees();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleCreatePayroll = (empIds: string[]) => {
     if (!empIds.length) return;
-    const newRecs = empIds
-      .map(id => { const e = demoEmployees.find(x => x.id === id); return e ? generatePayrollRecord(e, "Pending") : null; })
-      .filter((r): r is PayrollRecord => r !== null);
-    setPayrollRecords(p => [...p, ...newRecs]);
-    setSelectedEmployees([]);
-    setShowCreateModal(false);
-    showToast(`Payroll created for ${newRecs.length} employee${newRecs.length > 1 ? "s" : ""}`);
+    showToast(`Payroll created for ${empIds.length} employee${empIds.length > 1 ? "s" : ""}`);
   };
 
-  /**
-   * "Run Payroll" button flow:
-   *  1. Run validation engine against all pending records
-   *  2. Show PayrollValidationModal with results
-   *  3. If canProceed → user clicks "Confirm & Process"
-   *  4. Update status Pending → Processing → Paid
-   */
-  const handleRunPayroll = () => {
-    if (!pendingRecords.length) return;
-    const result = runPayrollValidation(pendingRecords);
-    setValidationResult(result);
-    setShowValidation(true);
-  };
-
-  const handleRevalidate = () => {
-    const result = runPayrollValidation(pendingRecords);
-    setValidationResult(result);
-  };
-
-  const handleConfirmPayroll = () => {
-    setIsProcessing(true);
-    const ids = pendingRecords.map(r => r.id);
-
-    // Step 1: set Processing
-    setPayrollRecords(p => p.map(r => ids.includes(r.id) ? { ...r, status: "Processing" as const } : r));
-
-    setTimeout(() => {
-      // Step 2: set Paid
-      setPayrollRecords(p => p.map(r =>
-        ids.includes(r.id)
-          ? { ...r, status: "Paid" as const, paymentDate: new Date().toLocaleDateString("en-IN") }
-          : r,
-      ));
-      setIsProcessing(false);
-      setShowValidation(false);
-      setValidationResult(null);
-      showToast(`Payroll processed for ${ids.length} employee${ids.length > 1 ? "s" : ""}. Salary slips generated.`);
-    }, 2500);
-  };
-
-  const saveEdit = () => {
-    if (!editingRecord) return;
-    const updated = recalculatePayroll(editingRecord);
-    setPayrollRecords(p => p.map(r => r.id === updated.id ? updated : r));
-    setEditingRecord(null);
-    showToast("Salary updated and recalculated");
-  };
-
-  // ── SUB-VIEWS ──────────────────────────────────────────────────────────────
   const topBarProps = {
-    view, setView,
-    onQuickCreate: () => setShowCreateModal(true),
-    onNewPayroll:  () => setView("newEntry"),
+    view,
+    setView,
+    onQuickCreate: () => showToast("Quick Create is disabled until payroll APIs are connected", "info"),
+    onNewPayroll: () => setView("newEntry"),
+    totalEmployees: employeesSummary?.totalEmployees ?? employees.length,
   };
 
-  if (view === "newEntry") return (
-    <NewPayrollEntry
-      employees={demoEmployees}
-      onBack={() => setView("dashboard")}
-      onCreatePayroll={(ids) => { handleCreatePayroll(ids); setView("dashboard"); }}
-    />
-  );
+  if (detailEmployeeId) {
+    return (
+      <EmployeeDetailsPage
+        employeeId={detailEmployeeId}
+        onBack={() => setDetailEmployeeId(null)}
+      />
+    );
+  }
 
-  if (view === "reports") return (
-    <div className="h-screen flex flex-col bg-app overflow-hidden">
-      <TopBar {...topBarProps} />
-      <div className="flex-1 overflow-y-auto px-5 py-5">
-        <PayrollReports records={payrollRecords} />
+  if (view === "newEntry") {
+    return employeesLoading
+      ? (
+        <div className="h-screen flex items-center justify-center bg-app">
+          <div className="text-sm text-muted">Loading employees…</div>
+        </div>
+      )
+      : (
+        <NewPayrollEntry
+          employees={employees}
+          onBack={() => setView("dashboard")}
+          onCreatePayroll={(ids) => { handleCreatePayroll(ids); setView("dashboard"); }}
+          onViewEmployee={(id) => setDetailEmployeeId(id)}
+        />
+      );
+  }
+
+  if (view === "reports") {
+    return (
+      <div className="h-screen flex flex-col bg-app overflow-hidden">
+        <TopBar {...topBarProps} />
+        <div className="flex-1 overflow-y-auto px-5 py-5">
+          <div className="bg-card border border-theme rounded-2xl p-6" />
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (detailRecord) return (
-    <EmployeeDetailPage
-      records={payrollRecords}
-      initialRecord={detailRecord}
-      onBack={() => setDetailRecord(null)}
-      onViewPayslip={r => setSelectedRecord(r)}
-    />
-  );
-
-  // ── DASHBOARD ──────────────────────────────────────────────────────────────
   return (
     <div className="h-screen flex flex-col bg-app overflow-hidden">
       <Toast toast={toast} />
 
-      {/* 1. Top bar */}
       <TopBar {...topBarProps} />
 
-      {/* 2. KPI cards */}
       <div className="shrink-0 px-5 pt-4 pb-3">
         <KPICards
-          totalRecords={payrollRecords.length}
-          paidCount={paidRecords.length}
-          pendingCount={pendingRecords.length}
-          totalPayout={totalNet}
+          totalEmployees={employeesSummary?.totalEmployees ?? employees.length}
+          activeEmployees={employeesSummary?.active ?? employees.filter(e => e.isActive).length}
+          inactiveEmployees={employeesSummary?.inactive ?? employees.filter(e => !e.isActive).length}
+          onLeaveEmployees={employeesSummary?.onLeave ?? 0}
         />
       </div>
 
-      {/* 3. Filter bar */}
-      <div className="shrink-0 px-5 pb-3">
-        <FilterBar
-          searchQuery={searchQuery}   onSearchChange={setSearchQuery}
-          selectedDept={selectedDept} onDeptChange={setSelectedDept}
-          departments={departments}
-          filterStatus={filterStatus} onStatusChange={setFilterStatus}
-          pendingCount={pendingRecords.length}
-          onRunPayroll={handleRunPayroll}
-          totalShown={filteredRecords.length}
-        />
-      </div>
-
-      {/* 4. Main table card — fills remaining space, scrolls internally */}
       <div className="flex-1 min-h-0 px-5 pb-4 flex flex-col">
         <div className="flex-1 min-h-0 bg-card border border-theme rounded-2xl overflow-hidden shadow-sm flex flex-col">
-
-          {/* Tab switcher */}
-          <div className="shrink-0 flex items-center border-b border-theme px-4">
-            {(["summary", "tax"] as const).map(t => (
-              <button
-                key={t}
-                onClick={() => setTableTab(t)}
-                className={`px-5 py-3 text-xs font-bold border-b-2 -mb-px transition-all ${
-                  tableTab === t
-                    ? "text-primary border-primary"
-                    : "text-muted border-transparent hover:text-main"
-                }`}
-              >
-                {t === "summary" ? "Employee Summary" : "Tax Deductions"}
-              </button>
-            ))}
-          </div>
-
-          {/* Scrollable content */}
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            {tableTab === "summary" && (
-              <PayrollTable
-                records={filteredRecords}
-                expandedRows={expandedRows}
-                onToggleRow={toggleRow}
-                onViewPayslip={r => setSelectedRecord(r)}
-                onEditRecord={r => setEditingRecord({ ...r })}
-                onViewDetails={r => setDetailRecord(r)}
-              />
-            )}
-            {tableTab === "tax" && (
-              <div className="p-5">
-                <TaxDeduction records={payrollRecords} />
-              </div>
-            )}
+          <div className="flex-1 min-h-0 flex items-center justify-center">
+            <div />
           </div>
         </div>
       </div>
-
-      {/* ── MODALS ── */}
-
-      {/* Quick create */}
-      <QuickCreateModal
-        show={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        employees={demoEmployees}
-        selectedEmployees={selectedEmployees}
-        onToggleEmployee={toggleEmployee}
-        onSelectAll={selectAllEmployees}
-        onCreate={() => handleCreatePayroll(selectedEmployees)}
-      />
-
-      {/* Edit salary */}
-      <EditModal
-        record={editingRecord}
-        onClose={() => setEditingRecord(null)}
-        onSave={saveEdit}
-        onChange={(field, val) => setEditingRecord(p => p ? { ...p, [field]: val } : null)}
-      />
-
-      {/* PRE-PAYROLL VALIDATION — the ERP validation screen */}
-      <PayrollValidationModal
-        show={showValidation}
-        result={validationResult}
-        isRunning={isProcessing}
-        onClose={() => { setShowValidation(false); setValidationResult(null); }}
-        onProceed={handleConfirmPayroll}
-        onRevalidate={handleRevalidate}
-      />
-
-      {/* Payslip viewer */}
-      <PayslipModal
-        record={selectedRecord}
-        onClose={() => setSelectedRecord(null)}
-        onDownload={() => { showToast(`Payslip downloaded for ${selectedRecord?.employeeName}`); }}
-        onEmail={() => { showToast(`Payslip emailed to ${selectedRecord?.email}`); }}
-      />
     </div>
   );
 }

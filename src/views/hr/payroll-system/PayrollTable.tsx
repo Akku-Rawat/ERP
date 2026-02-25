@@ -2,8 +2,13 @@
 import React from "react";
 import { ChevronDown, CheckCircle, Clock, FileText, Edit2, Users, RefreshCw } from "lucide-react";
 import type { PayrollRecord } from "../../../types/payrolltypes";
-import { calculateDeductions, fmtINR } from "./utils";
 import { ExpandedRowDetail } from "./ExpandedRowDetail";
+
+const fmtZMW = (n: number) => Number(n || 0).toLocaleString("en-ZM");
+
+const calculateDeductions = (record: PayrollRecord): number =>
+  record.taxDeduction + record.pfDeduction + record.esiDeduction +
+  record.professionalTax + record.loanDeduction + record.advanceDeduction + record.otherDeductions;
 
 interface PayrollTableProps {
   records: PayrollRecord[];
@@ -16,19 +21,19 @@ interface PayrollTableProps {
 
 const StatusPill: React.FC<{ status: string }> = ({ status }) => {
   const map: Record<string, string> = {
-    Paid:       "bg-success/10 text-success",
-    Pending:    "bg-warning/10 text-warning",
+    Paid: "bg-success/10 text-success",
+    Pending: "bg-warning/10 text-warning",
     Processing: "bg-primary/10 text-primary",
-    Approved:   "bg-success/10 text-success",
-    Rejected:   "bg-danger/10 text-danger",
-    Draft:      "bg-app text-muted",
-    Failed:     "bg-danger/10 text-danger",
+    Approved: "bg-success/10 text-success",
+    Rejected: "bg-danger/10 text-danger",
+    Draft: "bg-app text-muted",
+    Failed: "bg-danger/10 text-danger",
   };
   return (
     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${map[status] ?? "bg-app text-muted"}`}>
-      {status === "Paid"       && <CheckCircle className="w-3 h-3" />}
-      {status === "Pending"    && <Clock       className="w-3 h-3" />}
-      {status === "Processing" && <RefreshCw   className="w-3 h-3 animate-spin" />}
+      {status === "Paid" && <CheckCircle className="w-3 h-3" />}
+      {status === "Pending" && <Clock className="w-3 h-3" />}
+      {status === "Processing" && <RefreshCw className="w-3 h-3 animate-spin" />}
       {status}
     </span>
   );
@@ -70,9 +75,9 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
       </thead>
       <tbody>
         {records.map(record => {
-          const expanded     = expandedRows.has(record.id);
-          const totalDed     = calculateDeductions(record);
-          const initials     = record.employeeName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+          const expanded = expandedRows.has(record.id);
+          const totalDed = calculateDeductions(record);
+          const initials = record.employeeName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
           const attendancePct = record.workingDays > 0 ? (record.paidDays / record.workingDays) * 100 : 0;
 
           return (
@@ -80,9 +85,8 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
               {/* Main row */}
               <tr
                 onClick={() => onToggleRow(record.id)}
-                className={`border-b border-theme cursor-pointer transition-colors ${
-                  expanded ? "bg-primary/[0.03]" : "hover:bg-app"
-                }`}
+                className={`border-b border-theme cursor-pointer transition-colors ${expanded ? "bg-primary/[0.03]" : "hover:bg-app"
+                  }`}
               >
                 {/* Employee */}
                 <td className="px-4 py-3">
@@ -120,17 +124,17 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
 
                 {/* Gross */}
                 <td className="px-4 py-3 text-right">
-                  <span className="text-xs font-bold text-main tabular-nums font-mono">₹{fmtINR(record.grossPay)}</span>
+                  <span className="text-xs font-bold text-main tabular-nums font-mono">ZMW {fmtZMW(record.grossPay)}</span>
                 </td>
 
                 {/* Deductions */}
                 <td className="px-4 py-3 text-right">
-                  <span className="text-xs font-bold text-danger tabular-nums font-mono">−₹{fmtINR(totalDed)}</span>
+                  <span className="text-xs font-bold text-danger tabular-nums font-mono">−ZMW {fmtZMW(totalDed)}</span>
                 </td>
 
                 {/* Net Pay */}
                 <td className="px-4 py-3 text-right">
-                  <span className="text-sm font-extrabold text-success tabular-nums font-mono">₹{fmtINR(record.netPay)}</span>
+                  <span className="text-xs font-extrabold text-success tabular-nums font-mono">ZMW {fmtZMW(record.netPay)}</span>
                 </td>
 
                 {/* Status */}

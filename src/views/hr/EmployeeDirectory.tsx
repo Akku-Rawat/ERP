@@ -58,8 +58,8 @@ const EmployeeDirectory: React.FC = () => {
         workLocation: location,
       });
 
-      setEmployees(res.data.employees || []);
-      setTotalItems(res.data.pagination?.total || 0);
+      setEmployees(res.employees || []);
+      setTotalItems(res.pagination?.total || 0);
     } catch (err) {
       console.error("Failed to fetch employees", err);
     } finally {

@@ -50,7 +50,7 @@ const EmployeeDirectory: React.FC = () => {
   try {
     showLoading("Loading Employee...");
     const res = await getEmployeeById(id);
-    setSelectedEmployee(res.data ?? res);
+    setSelectedEmployee(res);
     setViewMode("detail");
     closeSwal();
   } catch (error) {
@@ -64,7 +64,7 @@ const EmployeeDirectory: React.FC = () => {
     if (!selectedEmployee?.id) return;
 
     const res = await getEmployeeById(selectedEmployee.id);
-    setSelectedEmployee(res.data ?? res);
+    setSelectedEmployee(res);
   };
 
 const fetchEmployees = async () => {
@@ -72,9 +72,9 @@ const fetchEmployees = async () => {
     setLoading(true);
     const res = await getAllEmployees(page, pageSize, searchTerm);
 
-    setEmployees(res.data.employees);
-    setTotalPages(res.data.pagination?.total_pages || 1);
-    setTotalItems(res.data.pagination?.total || 0);
+    setEmployees(res.employees);
+    setTotalPages(res.pagination?.total_pages || 1);
+    setTotalItems(res.pagination?.total || 0);
   } catch (error) {
     showApiError(error);
   } finally {
@@ -100,7 +100,7 @@ const handleEdit = async (id: string, e: React.MouseEvent) => {
   try {
     showLoading("Fetching Employee...");
     const res = await getEmployeeById(id);
-    setEditEmployee(res.data ?? res);
+    setEditEmployee(res);
     setShowModal(true);
     closeSwal();
   } catch (error) {

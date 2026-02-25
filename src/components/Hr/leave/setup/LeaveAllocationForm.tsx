@@ -41,7 +41,7 @@ const LeaveAllocationForm: React.FC<Props> = ({ onClose, onSuccess }) => {
     const fetchEmployees = async () => {
       try {
         const res = await getAllEmployees(1, 200);
-        setEmployees(res.data.employees || []);
+        setEmployees(res.employees || []);
       } catch {
         toast.error("Failed to load employees");
       }

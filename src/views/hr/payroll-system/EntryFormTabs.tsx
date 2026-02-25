@@ -1,8 +1,9 @@
 // EntryFormTabs.tsx — New Payroll Entry: Overview, Employees, Accounting tabs
-import React from "react";
-import { Edit2 } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { Edit2, Eye } from "lucide-react";
 import type { PayrollEntry, Employee } from "../../../types/payrolltypes";
 import HrDateInput from "../../../components/Hr/HrDateInput";
+
 
 // ── Primitives ────────────────────────────────────────────────────────────────
 const Label: React.FC<{ children: React.ReactNode; required?: boolean }> = ({ children, required }) => (
@@ -54,7 +55,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
       <div>
         <Label required>Currency</Label>
         <select value={data.currency} onChange={e => onChange("currency", e.target.value)} className={selectCls}>
-          <option value="INR">INR — Indian Rupee</option>
+          <option value="ZMW">ZMW — Zambian Kwacha</option>
           <option value="USD">USD — US Dollar</option>
           <option value="EUR">EUR — Euro</option>
         </select>
@@ -96,8 +97,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
     {/* Toggles */}
     <div className="grid grid-cols-2 gap-4">
       {[
-        { field: "deductTaxForProof",   label: "Deduct Tax for Proof Submission", desc: "Apply TDS based on submitted investment proofs" },
-        { field: "salarySlipTimesheet", label: "Salary Slip Based on Timesheet",  desc: "Calculate pay using logged timesheet hours" },
+        { field: "deductTaxForProof", label: "Deduct Tax for Proof Submission", desc: "Apply TDS based on submitted investment proofs" },
+        { field: "salarySlipTimesheet", label: "Salary Slip Based on Timesheet", desc: "Calculate pay using logged timesheet hours" },
       ].map(({ field, label, desc }) => (
         <label key={field} className="flex items-start gap-3 p-4 bg-app border border-theme rounded-xl cursor-pointer hover:border-primary/40 transition">
           <input
@@ -124,117 +125,292 @@ interface EmployeesTabProps {
   onChange: (field: string, value: any) => void;
   employees: Employee[];
   onEditEmployee?: (emp: Employee) => void;
+  onViewEmployee?: (employeeId: string) => void;
+  onCreatePayroll?: (empIds: string[]) => void;
 }
 
 export const EmployeesTab: React.FC<EmployeesTabProps> = ({
-  data, onChange, employees, onEditEmployee,
+  data, onChange, employees, onEditEmployee, onViewEmployee, onCreatePayroll,
 }) => {
   const active = employees.filter(e => e.isActive);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  const miniInputCls = "w-56 px-2.5 py-2 bg-app border border-theme rounded-lg text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary transition";
+  const miniSelectCls = "w-56 px-2.5 py-2 bg-app border border-theme rounded-lg text-xs text-main focus:outline-none focus:border-primary transition cursor-pointer";
+
+  const selectionMode: "single" | "multiple" = (data.employeeSelectionMode || "multiple");
+
   const toggleEmp = (id: string) => {
+    if (selectionMode === "single") {
+      onChange("selectedEmployees", data.selectedEmployees[0] === id ? [] : [id]);
+      return;
+    }
+
     const next = data.selectedEmployees.includes(id)
       ? data.selectedEmployees.filter(i => i !== id)
       : [...data.selectedEmployees, id];
     onChange("selectedEmployees", next);
   };
   const selectAll = () => {
-    const all = active.map(e => e.id);
+    const all = filtered.map(e => e.id);
     onChange("selectedEmployees", data.selectedEmployees.length === all.length ? [] : all);
+  };
+
+  const filtered = useMemo(() => {
+    const q = String((data as any).nameSearch ?? "").trim().toLowerCase();
+    const job = String((data as any).jobTitleFilter ?? "").trim().toLowerCase();
+    const dept = String((data as any).departmentFilter ?? "").trim().toLowerCase();
+
+    return active.filter(e => {
+      const name = String(e.name ?? "").toLowerCase();
+      const jobTitle = String(e.jobTitle ?? e.designation ?? "").toLowerCase();
+      const department = String(e.department ?? "").toLowerCase();
+
+      if (q && !name.includes(q)) return false;
+      if (job && !jobTitle.includes(job)) return false;
+      if (dept && !department.includes(dept)) return false;
+
+      return true;
+    });
+  }, [active, data]);
+
+  const jobTitleOptions = useMemo(() => {
+    const set = new Set<string>();
+    active.forEach(e => {
+      const v = String(e.jobTitle ?? e.designation ?? "").trim();
+      if (v) set.add(v);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [active]);
+
+  const departmentOptions = useMemo(() => {
+    const set = new Set<string>();
+    active.forEach(e => {
+      const v = String(e.department ?? "").trim();
+      if (v) set.add(v);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [active]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const pageSafe = Math.min(page, totalPages);
+  const pageEmployees = useMemo(
+    () => filtered.slice((pageSafe - 1) * pageSize, pageSafe * pageSize),
+    [filtered, pageSafe],
+  );
+
+  const updateFilter = (field: string, value: any) => {
+    onChange(field, value);
+    setPage(1);
+  };
+
+  const setSelectionMode = (mode: "single" | "multiple") => {
+    onChange("employeeSelectionMode", mode);
+    if (mode === "single" && data.selectedEmployees.length > 1) {
+      onChange("selectedEmployees", data.selectedEmployees.slice(0, 1));
+    }
   };
 
   return (
     <div className="space-y-4 animate-[fadeIn_0.2s_ease]">
-      {/* Filter row */}
-      <div className="grid grid-cols-4 gap-4">
-        {[
-          { field: "branch",      label: "Branch",      ph: "All branches" },
-          { field: "department",  label: "Department",  ph: "All departments" },
-          { field: "designation", label: "Designation", ph: "All designations" },
-          { field: "grade",       label: "Grade",       ph: "All grades" },
-        ].map(({ field, label, ph }) => (
-          <div key={field}>
-            <Label>{label}</Label>
-            <input
-              type="text"
-              value={(data as any)[field] ?? ""}
-              onChange={e => onChange(field, e.target.value)}
-              placeholder={ph}
-              className={inputCls}
-            />
-          </div>
-        ))}
-      </div>
-
       {/* Select-all bar */}
       <div className="flex items-center justify-between py-2.5 px-4 bg-app border border-theme rounded-xl">
-        <label className="flex items-center gap-2.5 cursor-pointer text-sm font-semibold text-main">
-          <input
-            type="checkbox"
-            checked={data.selectedEmployees.length === active.length && active.length > 0}
-            onChange={selectAll}
-            className="w-4 h-4 accent-primary cursor-pointer"
-          />
-          Select All Employees
-        </label>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectionMode("single")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-extrabold border transition ${selectionMode === "single" ? "bg-primary text-white border-primary" : "bg-card text-muted border-theme hover:bg-app"}`}
+            >
+              Single
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectionMode("multiple")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-extrabold border transition ${selectionMode === "multiple" ? "bg-primary text-white border-primary" : "bg-card text-muted border-theme hover:bg-app"}`}
+            >
+              Multiple
+            </button>
+          </div>
+
+          {selectionMode === "multiple" && (
+            <label className="flex items-center gap-2.5 cursor-pointer text-sm font-semibold text-main">
+              <input
+                type="checkbox"
+                checked={data.selectedEmployees.length === filtered.length && filtered.length > 0}
+                onChange={selectAll}
+                className="w-4 h-4 accent-primary cursor-pointer"
+              />
+              Select All Employees
+            </label>
+          )}
+        </div>
         <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
-          {data.selectedEmployees.length}/{active.length} selected
+          {data.selectedEmployees.length}/{filtered.length} selected
         </span>
       </div>
 
       {/* Employee list */}
       <div className="border border-theme rounded-xl overflow-hidden">
-        {active.length === 0 ? (
-          <div className="py-12 text-center text-muted text-sm">No active employees found</div>
-        ) : (
-          active.map((emp, i) => {
-            const isSel  = data.selectedEmployees.includes(emp.id);
-            const gross  = emp.basicSalary + emp.hra + emp.allowances;
-            const initials = emp.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+        <div className="overflow-x-auto">
+          <div className="flex items-center justify-between gap-3 px-4 py-3 bg-card border-b border-theme">
+            <div className="flex items-center gap-3 overflow-x-auto flex-nowrap min-w-0">
+              <div className="text-xs text-muted whitespace-nowrap shrink-0">{filtered.length} employees</div>
 
-            return (
-              <div
-                key={emp.id}
-                onClick={() => toggleEmp(emp.id)}
-                className={`flex items-center gap-4 p-4 border-b border-theme last:border-0 cursor-pointer transition-colors ${
-                  isSel ? "bg-primary/5" : i % 2 === 1 ? "bg-app hover:bg-primary/3" : "bg-card hover:bg-app"
-                }`}
+              <input
+                type="text"
+                value={(data as any).nameSearch ?? ""}
+                onChange={e => updateFilter("nameSearch", e.target.value)}
+                placeholder="Search name"
+                className={miniInputCls}
+              />
+
+              <select
+                value={(data as any).jobTitleFilter ?? ""}
+                onChange={e => updateFilter("jobTitleFilter", e.target.value)}
+                className={miniSelectCls}
               >
-                <input type="checkbox" checked={isSel} onChange={() => {}} className="w-4 h-4 accent-primary cursor-pointer shrink-0" />
+                <option value="">Job title (All)</option>
+                {jobTitleOptions.map(j => (
+                  <option key={j} value={j}>{j}</option>
+                ))}
+              </select>
 
-                <div className={`w-9 h-9 rounded-full text-xs font-extrabold flex items-center justify-center shrink-0 transition-colors ${
-                  isSel ? "bg-primary text-white" : "bg-app text-muted"
-                }`}>
-                  {initials}
-                </div>
+              <select
+                value={(data as any).departmentFilter ?? ""}
+                onChange={e => updateFilter("departmentFilter", e.target.value)}
+                className={miniSelectCls}
+              >
+                <option value="">Department (All)</option>
+                {departmentOptions.map(d => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={() => onCreatePayroll?.(data.selectedEmployees)}
+              disabled={!data.selectedEmployees.length}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-success text-white text-xs font-extrabold disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Create Payroll ({data.selectedEmployees.length})
+            </button>
+          </div>
 
-                <div className="flex-1 min-w-0 grid grid-cols-5 gap-2 items-center">
-                  <div className="col-span-2">
-                    <p className="text-sm font-bold text-main leading-tight">{emp.name}</p>
-                    <p className="text-[11px] text-muted">{emp.id}</p>
-                  </div>
-                  <p className="text-xs text-muted">{emp.department}</p>
-                  <p className="text-xs text-muted">{emp.designation}</p>
-                  <div className="text-right">
-                    <p className="text-sm font-extrabold text-main tabular-nums">₹{gross.toLocaleString("en-IN")}</p>
-                    <p className="text-[10px] text-muted">Gross</p>
-                  </div>
-                </div>
-
-                {onEditEmployee && (
-                  <button
-                    onClick={e => { e.stopPropagation(); onEditEmployee(emp); }}
-                    className="p-1.5 text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition shrink-0"
+          <table className="w-full">
+            <thead className="bg-app border-b border-theme">
+              <tr>
+                {["", "ID", "Employee ID", "Name", "Job Title", "Department", "Work Location", "Gross Salary", "Status", ""].map((h, i) => (
+                  <th
+                    key={String(i)}
+                    className={`px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider whitespace-nowrap ${i >= 7 ? "text-right" : "text-left"}`}
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {pageEmployees.length === 0 ? (
+                <tr>
+                  <td colSpan={10} className="px-4 py-10 text-center text-sm text-muted">
+                    Doesn't exist
+                  </td>
+                </tr>
+              ) : (
+                pageEmployees.map((emp, i) => {
+                  const isSel = data.selectedEmployees.includes(emp.id);
+                  const gross = Number(emp.grossSalary ?? 0);
+                  const statusLabel = String(emp.status ?? (emp.isActive ? "Active" : "Inactive"));
+
+                  return (
+                    <tr
+                      key={emp.id}
+                      onClick={() => toggleEmp(emp.id)}
+                      className={`border-b border-theme last:border-0 cursor-pointer transition-colors ${isSel ? "bg-primary/5" : i % 2 === 1 ? "bg-app hover:bg-primary/3" : "bg-card hover:bg-app"}`}
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={isSel}
+                          onChange={() => toggleEmp(emp.id)}
+                          className="w-4 h-4 accent-primary cursor-pointer"
+                        />
+                      </td>
+                      <td className="px-4 py-3 text-xs font-semibold text-main whitespace-nowrap">{emp.id}</td>
+                      <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{emp.employeeId || "—"}</td>
+                      <td className="px-4 py-3 text-xs font-bold text-main whitespace-nowrap">{emp.name || "—"}</td>
+                      <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{emp.jobTitle || emp.designation || "—"}</td>
+                      <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{emp.department || "—"}</td>
+                      <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{emp.workLocation || emp.branch || "—"}</td>
+                      <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums whitespace-nowrap">ZMW {gross.toLocaleString("en-ZM")}</td>
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${statusLabel.toLowerCase() === "active"
+                          ? "bg-success/10 text-success border-success/20"
+                          : "bg-warning/10 text-warning border-warning/20"}`}
+                        >
+                          {statusLabel}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => onViewEmployee?.(emp.id)}
+                            className="p-1.5 text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition shrink-0"
+                            aria-label="View employee details"
+                            title="View"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                          {onEditEmployee && (
+                            <button
+                              onClick={() => onEditEmployee(emp)}
+                              className="p-1.5 text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition shrink-0"
+                              aria-label="Edit employee"
+                              title="Edit"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+
+          {filtered.length > 0 && (
+            <div className="flex items-center justify-between gap-3 px-4 py-3 bg-app border-t border-theme">
+              <div className="text-xs text-muted">Page {pageSafe} of {totalPages}</div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={pageSafe <= 1}
+                  className="px-3 py-2 text-xs font-bold rounded-lg border border-theme bg-card text-main disabled:opacity-40"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={pageSafe >= totalPages}
+                  className="px-3 py-2 text-xs font-bold rounded-lg border border-theme bg-card text-main disabled:opacity-40"
+                >
+                  Next
+                </button>
               </div>
-            );
-          })
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ACCOUNTING TAB
@@ -247,47 +423,45 @@ interface AccountingTabProps {
 
 export const AccountingTab: React.FC<AccountingTabProps> = ({ data, onChange, employees }) => {
   const selectedEmps = employees.filter(e => data.selectedEmployees.includes(e.id));
-  const totalGross   = selectedEmps.reduce((s, e) => s + e.basicSalary + e.hra + e.allowances, 0);
+  const totalGross = selectedEmps.reduce((s, e) => s + Number(e.grossSalary ?? 0), 0);
 
   return (
     <div className="space-y-5 animate-[fadeIn_0.2s_ease]">
       <div className="grid grid-cols-2 gap-5">
         <div>
           <Label>Payment Account</Label>
-          <select value={data.paymentAccount} onChange={e => onChange("paymentAccount", e.target.value)} className={selectCls}>
+          <select value={(data as any).paymentAccount ?? ""} onChange={e => onChange("paymentAccount", e.target.value)} className={selectCls}>
             <option value="">Select account</option>
-            <option value="current-hdfc">Current A/C — HDFC Bank</option>
-            <option value="current-icici">Current A/C — ICICI Bank</option>
-            <option value="current-sbi">Current A/C — SBI</option>
+            <option value="current">Current Account</option>
+            <option value="salary">Salary Account</option>
           </select>
         </div>
         <div>
           <Label>Cost Center</Label>
-          <input type="text" value={data.costCenter} onChange={e => onChange("costCenter", e.target.value)}
+          <input type="text" value={(data as any).costCenter ?? ""} onChange={e => onChange("costCenter", e.target.value)}
             placeholder="e.g. HQ-Operations" className={inputCls} />
         </div>
         <div>
           <Label>Project</Label>
-          <input type="text" value={data.project} onChange={e => onChange("project", e.target.value)}
-            placeholder="e.g. Internal Payroll Q1" className={inputCls} />
+          <input type="text" value={(data as any).project ?? ""} onChange={e => onChange("project", e.target.value)}
+            placeholder="e.g. Internal Payroll" className={inputCls} />
         </div>
         <div>
           <Label>Letter Head</Label>
-          <input type="text" value={data.letterHead} onChange={e => onChange("letterHead", e.target.value)}
-            placeholder="e.g. Izyane Official" className={inputCls} />
+          <input type="text" value={(data as any).letterHead ?? ""} onChange={e => onChange("letterHead", e.target.value)}
+            placeholder="e.g. Company Letterhead" className={inputCls} />
         </div>
       </div>
 
-      {/* Summary card */}
       {data.selectedEmployees.length > 0 && (
         <div className="rounded-xl border border-success/30 bg-success/5 p-5">
           <p className="text-xs font-extrabold text-success uppercase tracking-wider mb-4">Payroll Summary</p>
           <div className="grid grid-cols-4 gap-4">
             {[
-              { label: "Employees",   value: data.selectedEmployees.length },
-              { label: "Est. Gross",  value: `₹${totalGross.toLocaleString("en-IN")}` },
-              { label: "Currency",    value: data.currency },
-              { label: "Frequency",   value: data.payrollFrequency || "—" },
+              { label: "Employees", value: data.selectedEmployees.length },
+              { label: "Est. Gross", value: `ZMW ${totalGross.toLocaleString("en-ZM")}` },
+              { label: "Currency", value: (data as any).currency || "—" },
+              { label: "Frequency", value: (data as any).payrollFrequency || "—" },
             ].map(({ label, value }) => (
               <div key={label}>
                 <p className="text-[10px] text-success/70 uppercase tracking-wider">{label}</p>
@@ -297,19 +471,6 @@ export const AccountingTab: React.FC<AccountingTabProps> = ({ data, onChange, em
           </div>
         </div>
       )}
-
-      {/* Statutory note */}
-      <div className="rounded-xl bg-info/5 border border-info/20 p-4">
-        <p className="text-xs font-extrabold text-info mb-2">Statutory Deductions (Auto-calculated)</p>
-        <div className="grid grid-cols-3 gap-3 text-xs text-info/70">
-          <div>• Provident Fund (PF) — 12% of Basic</div>
-          <div>• ESI — 0.75% (if gross ≤ ₹21,000)</div>
-          <div>• Professional Tax — ₹200/month</div>
-          <div>• Income Tax — As per IT Declaration</div>
-          <div>• Employer PF — 12% (additional)</div>
-          <div>• Employer ESI — 3.25%</div>
-        </div>
-      </div>
     </div>
   );
 };

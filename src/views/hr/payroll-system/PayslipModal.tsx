@@ -12,16 +12,16 @@ interface PayslipModalProps {
 // ── Amount to words (Indian system) ──────────────────────────────────────────
 function toWords(n: number): string {
   if (n === 0) return "Zero Rupees Only";
-  const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
-    "Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
-  const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+    "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+  const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
   const convert = (num: number): string => {
     if (num < 20) return ones[num];
-    if (num < 100) return tens[Math.floor(num/10)] + (num%10 ? " " + ones[num%10] : "");
-    if (num < 1000) return ones[Math.floor(num/100)] + " Hundred" + (num%100 ? " " + convert(num%100) : "");
-    if (num < 100000) return convert(Math.floor(num/1000)) + " Thousand" + (num%1000 ? " " + convert(num%1000) : "");
-    if (num < 10000000) return convert(Math.floor(num/100000)) + " Lakh" + (num%100000 ? " " + convert(num%100000) : "");
-    return convert(Math.floor(num/10000000)) + " Crore" + (num%10000000 ? " " + convert(num%10000000) : "");
+    if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? " " + ones[num % 10] : "");
+    if (num < 1000) return ones[Math.floor(num / 100)] + " Hundred" + (num % 100 ? " " + convert(num % 100) : "");
+    if (num < 100000) return convert(Math.floor(num / 1000)) + " Thousand" + (num % 1000 ? " " + convert(num % 1000) : "");
+    if (num < 10000000) return convert(Math.floor(num / 100000)) + " Lakh" + (num % 100000 ? " " + convert(num % 100000) : "");
+    return convert(Math.floor(num / 10000000)) + " Crore" + (num % 10000000 ? " " + convert(num % 10000000) : "");
   };
   return convert(n) + " Rupees Only";
 }
@@ -39,21 +39,21 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
   const period = new Date().toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 
   const earningsRows = [
-    { label: "Basic Salary",              amount: record.basicSalary },
-    { label: "House Rent Allowance (HRA)",amount: record.hra },
-    { label: "Allowances",                amount: record.allowances },
+    { label: "Basic Salary", amount: record.basicSalary },
+    { label: "House Rent Allowance (HRA)", amount: record.hra },
+    { label: "Allowances", amount: record.allowances },
     ...(record.arrears > 0 ? [{ label: "Arrears", amount: record.arrears }] : []),
   ];
 
   const deductionRows = [
     { label: `Income Tax (${record.taxRegime})`, amount: record.taxDeduction },
-    { label: "Provident Fund",                    amount: record.pfDeduction },
-    { label: "Other Deductions",                  amount: record.otherDeductions },
+    { label: "Provident Fund", amount: record.pfDeduction },
+    { label: "Other Deductions", amount: record.otherDeductions },
   ];
 
   const maxRows = Math.max(earningsRows.length, deductionRows.length);
   // Pad arrays
-  const ePadded = [...earningsRows,  ...Array(maxRows - earningsRows.length).fill(null)];
+  const ePadded = [...earningsRows, ...Array(maxRows - earningsRows.length).fill(null)];
   const dPadded = [...deductionRows, ...Array(maxRows - deductionRows.length).fill(null)];
 
   const fmt = (n: number) => n.toLocaleString("en-IN") + ".00";
@@ -110,11 +110,11 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                   <tbody>
                     {[
                       ["Employee Name", record.employeeName],
-                      ["Designation",   record.designation],
-                      ["Employee ID",   record.employeeId],
-                      ["PF Number",     record.pfNumber],
+                      ["Designation", record.designation],
+                      ["Employee ID", record.employeeId],
+                      ["PF Number", record.pfNumber],
                       ["Date of Joining", record.joiningDate],
-                      ["Pay Period",    period],
+                      ["Pay Period", period],
                     ].map(([l, v]) => (
                       <tr key={l}>
                         <td className="text-[11px] text-slate-500 py-0.5 pr-2 w-36 whitespace-nowrap">{l}</td>
@@ -135,8 +135,8 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                   </div>
                   <div className="px-4 py-2.5 space-y-1.5">
                     {[
-                      ["Paid Days",    `${record.paidDays}`],
-                      ["LOP Days",     `${lop}`],
+                      ["Paid Days", `${record.paidDays}`],
+                      ["LOP Days", `${lop}`],
                     ].map(([l, v]) => (
                       <div key={l} className="flex justify-between text-[11px]">
                         <span className="text-slate-500">{l}</span>

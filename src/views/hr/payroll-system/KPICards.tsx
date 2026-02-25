@@ -1,12 +1,11 @@
-// KPICards.tsx
 import React from "react";
-import { Users, CheckCircle, Clock, DollarSign, ArrowUpRight } from "lucide-react";
+import { Users, CheckCircle, Clock, ArrowUpRight } from "lucide-react";
 
 interface KPICardsProps {
-  totalRecords: number;
-  paidCount: number;
-  pendingCount: number;
-  totalPayout: number;
+  totalEmployees: number;
+  activeEmployees: number;
+  inactiveEmployees: number;
+  onLeaveEmployees: number;
 }
 
 const Card: React.FC<{
@@ -18,65 +17,69 @@ const Card: React.FC<{
   trend?: string;
 }> = ({ label, value, sub, icon, accent, trend }) => {
   const accentMap = {
-    primary: { ring: "ring-primary/20", iconBg: "bg-primary/10", iconColor: "text-primary",  val: "text-primary"  },
-    success: { ring: "ring-success/20", iconBg: "bg-success/10", iconColor: "text-success",  val: "text-success"  },
-    warning: { ring: "ring-warning/20", iconBg: "bg-warning/10", iconColor: "text-warning",  val: "text-warning"  },
-    info:    { ring: "ring-info/20",    iconBg: "bg-info/10",    iconColor: "text-info",      val: "text-info"     },
+    primary: { chip: "from-purple-500 to-purple-600" },
+    success: { chip: "from-emerald-500 to-emerald-600" },
+    warning: { chip: "from-amber-500 to-amber-600" },
+    info: { chip: "from-blue-500 to-blue-600" },
   };
   const a = accentMap[accent];
 
   return (
-    <div className={`bg-card border border-theme rounded-2xl p-5 ring-1 ${a.ring} flex flex-col gap-4 transition-shadow hover:shadow-md`}>
-      <div className="flex items-start justify-between">
-        <div className={`p-2.5 rounded-xl ${a.iconBg} ${a.iconColor}`}>{icon}</div>
-        {trend && (
-          <span className="flex items-center gap-0.5 text-[11px] font-bold text-success bg-success/10 px-2 py-0.5 rounded-full">
-            <ArrowUpRight className="w-3 h-3" />{trend}
-          </span>
-        )}
-      </div>
-      <div>
-        <p className={`text-2xl font-extrabold ${a.val} tabular-nums`}>{value}</p>
-        <p className="text-sm text-muted mt-0.5">{label}</p>
-        {sub && <p className={`text-[11px] font-semibold ${a.iconColor} mt-1`}>{sub}</p>}
+    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm min-h-[124px]">
+      <div className="flex items-center justify-between h-full">
+        <div>
+          <p className="text-sm font-semibold text-gray-600">{label}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1 tabular-nums">{value}</p>
+          {sub ? <p className="text-xs font-semibold text-gray-500 mt-1">{sub}</p> : null}
+          {trend ? (
+            <span className="mt-2 inline-flex items-center gap-0.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <ArrowUpRight className="w-3 h-3" />
+              {trend}
+            </span>
+          ) : null}
+        </div>
+
+        <div className={`p-3 bg-gradient-to-br ${a.chip} rounded-xl shadow-sm`}>
+          <div className="text-white">{icon}</div>
+        </div>
       </div>
     </div>
   );
 };
 
 export const KPICards: React.FC<KPICardsProps> = ({
-  totalRecords, paidCount, pendingCount, totalPayout,
+  totalEmployees, activeEmployees, inactiveEmployees, onLeaveEmployees,
 }) => {
-  const completion = totalRecords > 0 ? Math.round((paidCount / totalRecords) * 100) : 0;
+  const activeRate = totalEmployees > 0 ? Math.round((activeEmployees / totalEmployees) * 100) : 0;
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <Card
         label="Total Employees"
-        value={totalRecords}
+        value={totalEmployees}
         icon={<Users className="w-5 h-5" />}
         accent="info"
-        trend="+2 this month"
       />
       <Card
-        label="Net Payout"
-        value={`₹${(totalPayout / 1000).toFixed(0)}K`}
-        sub={`₹${totalPayout.toLocaleString("en-IN")} total`}
-        icon={<DollarSign className="w-5 h-5" />}
-        accent="primary"
-      />
-      <Card
-        label="Processed"
-        value={`${paidCount}/${totalRecords}`}
-        sub={`${completion}% completion rate`}
+        label="Active"
+        value={activeEmployees}
+        sub={`${activeRate}% of total`}
         icon={<CheckCircle className="w-5 h-5" />}
         accent="success"
+        trend={activeRate >= 75 ? "Healthy workforce" : undefined}
       />
       <Card
-        label="Pending"
-        value={pendingCount}
-        sub={pendingCount > 0 ? "Action required" : "All up to date"}
+        label="On Leave"
+        value={onLeaveEmployees}
+        sub={onLeaveEmployees > 0 ? "Currently on leave" : "No one on leave"}
         icon={<Clock className="w-5 h-5" />}
-        accent={pendingCount > 0 ? "warning" : "info"}
+        accent={onLeaveEmployees > 0 ? "warning" : "info"}
+      />
+      <Card
+        label="Inactive"
+        value={inactiveEmployees}
+        sub={inactiveEmployees > 0 ? "Requires follow-up" : "All employees active"}
+        icon={<Users className="w-5 h-5" />}
+        accent={inactiveEmployees > 0 ? "warning" : "info"}
       />
     </div>
   );

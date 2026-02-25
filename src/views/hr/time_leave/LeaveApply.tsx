@@ -80,7 +80,7 @@ const LeaveApply: React.FC<LeaveApplyProps> = ({ editLeaveId }) => {
   useEffect(() => {
     const fetchEmployees = async () => {
       const res = await getAllEmployees(1, 100);
-      setEmployees(res.data.employees || []);
+      setEmployees(res.employees || []);
     };
     fetchEmployees();
   }, []);
