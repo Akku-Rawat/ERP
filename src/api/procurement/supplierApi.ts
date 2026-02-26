@@ -49,3 +49,9 @@ export async function updateSupplier(payload: any): Promise<any> {
   return resp.data;
 }
 
+export async function deleteSupplier(id: string | number): Promise<any> {
+  const resp: AxiosResponse = await api.delete(SupplierAPI.delete, {
+    data: { supplierId: id },   // IMPORTANT
+  });
+  return resp.data;
+}
