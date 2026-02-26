@@ -5,10 +5,14 @@ import { API, ERP_BASE } from "../config/api";
 const api = createAxiosInstance(ERP_BASE);
 
 export type SingleEmployeePayrollPayload = {
-  employeeId: string;
-  payrollDate: string;
-  salaryBreakdown: Record<string, number>;
-  statutoryDeductions: Record<string, number>;
+  employee: string;
+  company: string;
+  start_date: string;
+  end_date: string;
+  payroll_type: string;
+  currency: string;
+  exchange_rate: number;
+  payroll_payable_account: string;
 };
 
 export async function runSingleEmployeePayroll(payload: SingleEmployeePayrollPayload): Promise<any> {

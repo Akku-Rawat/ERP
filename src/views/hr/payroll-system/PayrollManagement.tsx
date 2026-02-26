@@ -145,8 +145,8 @@ const NewPayrollEntry: React.FC<{
   const [saved, setSaved] = useState(false);
   const [formData, setFormData] = useState<PayrollEntry>({
     payrollName: "", postingDate: new Date().toISOString().slice(0, 10),
-    currency: "ZMW", company: "Izyane InovSolutions Pvt. Ltd.",
-    payrollPayableAccount: "Payroll Payable - I",
+    currency: "ZMW", company: "Izyane",
+    payrollPayableAccount: "Payroll Payable - Izyane - I",
     status: "Draft", salarySlipTimesheet: false, deductTaxForProof: false,
     payrollFrequency: "Monthly", startDate: "", endDate: "",
     paymentAccount: "", costCenter: "", project: "", letterHead: "",

@@ -8,6 +8,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { calculateZmPayrollFromGross } from "../payroll-system/util";
 import {
   createSalaryStructure,
   createSalaryComponent,
@@ -196,21 +197,47 @@ export default function SalaryStructureTab() {
     }
   };
 
-  const handleCreateNew = () => {
+  const handleCreateNew = async () => {
     setModalMode("edit");
+
+    let allComponents: SalaryComponentListItem[] = [];
+    try {
+      const data = await getSalaryComponents();
+      allComponents = Array.isArray(data) ? data : [];
+      setSalaryComponents(allComponents);
+    } catch {
+      allComponents = [];
+      setSalaryComponents([]);
+    }
+
+    const requiredComponents: SalaryStructureComponentCreate[] = allComponents
+      .filter((c) => Boolean(c?.component || c?.id))
+      .map((c) => {
+        const rawType = String(c?.type ?? "earning").toLowerCase();
+        const type = rawType.includes("deduct") ? "deduction" : "earning";
+        return {
+          component: String(c.component || c.id),
+          type,
+          amount: 0,
+          enabled: 1,
+        };
+      });
+
     setEditingStructure({
       name: "",
       company: "",
-      components: [
-        {
-          component: "Basic",
-          type: "earning",
-          amount: 0,
-          enabled: 1,
-        },
-      ],
+      components: requiredComponents.length
+        ? requiredComponents
+        : [
+          {
+            component: "Basic",
+            type: "earning",
+            amount: 0,
+            enabled: 1,
+          },
+        ],
     });
-    refreshComponents();
+
     setShowModal(true);
   };
 
@@ -281,6 +308,35 @@ export default function SalaryStructureTab() {
       return;
     }
 
+    let mergedComponents = (editingStructure.components || []).filter((c) => Boolean(c?.component));
+
+    try {
+      const all = await getSalaryComponents();
+      const allArr: SalaryComponentListItem[] = Array.isArray(all) ? all : [];
+
+      const byComponent = new Map<string, SalaryStructureComponentCreate>();
+      mergedComponents.forEach((c) => byComponent.set(String(c.component), c));
+
+      allArr
+        .filter((c) => Boolean(c?.component || c?.id))
+        .forEach((c) => {
+          const name = String(c.component || c.id);
+          if (byComponent.has(name)) return;
+          const rawType = String(c?.type ?? "earning").toLowerCase();
+          const type = rawType.includes("deduct") ? "deduction" : "earning";
+          byComponent.set(name, {
+            component: name,
+            type,
+            amount: 0,
+            enabled: 1,
+          });
+        });
+
+      mergedComponents = Array.from(byComponent.values());
+    } catch {
+      // keep mergedComponents as-is
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -289,14 +345,14 @@ export default function SalaryStructureTab() {
           id: editingStructure.id,
           name: editingStructure.name,
           company: editingStructure.company,
-          components: editingStructure.components,
+          components: mergedComponents,
         };
         await updateSalaryStructure(payload);
       } else {
         const payload: SalaryStructureCreatePayload = {
           name: editingStructure.name,
           company: editingStructure.company,
-          components: editingStructure.components,
+          components: mergedComponents,
         };
         await createSalaryStructure(payload);
       }
@@ -1030,13 +1086,6 @@ function StructureModal({
 }) {
   const [formData, setFormData] = useState(structure);
 
-  const totalAmount = useMemo(() => {
-    return (formData.components || []).reduce(
-      (sum, c) => sum + (Number(c.amount || 0) || 0),
-      0,
-    );
-  }, [formData.components]);
-
   const enabledComponents = useMemo(() => {
     return (formData.components || []).filter((c) => Boolean(c?.enabled));
   }, [formData.components]);
@@ -1057,9 +1106,60 @@ function StructureModal({
     return earnings.reduce((sum, c) => sum + (Number(c.amount || 0) || 0), 0);
   }, [earnings]);
 
+  const basicSalaryForStatutory = useMemo(() => {
+    const basic = earnings.find((c) => String(c?.component || "").toLowerCase() === "basic");
+    return Number(basic?.amount || 0) || 0;
+  }, [earnings]);
+
+  const statutoryCalc = useMemo(() => {
+    return calculateZmPayrollFromGross(totalEarnings, {
+      basicSalaryBase: basicSalaryForStatutory,
+    });
+  }, [basicSalaryForStatutory, totalEarnings]);
+
+  const deductionsWithEffectiveAmounts = useMemo(() => {
+    return deductions.map((c) => {
+      const rawAmt = Number(c.amount || 0) || 0;
+      const key = String(c.component || "").toLowerCase();
+
+      if (rawAmt !== 0) {
+        return { ...c, effectiveAmount: rawAmt, label: String(c.component || "") };
+      }
+
+      if (key.includes("napsa")) {
+        return {
+          ...c,
+          effectiveAmount: statutoryCalc.statutory.napsaEmployee,
+          label: `NAPSA (${statutoryCalc.rates.napsaEmployeeRate}%)`,
+        };
+      }
+
+      if (key.includes("nhima")) {
+        return {
+          ...c,
+          effectiveAmount: statutoryCalc.statutory.nhima,
+          label: `NHIMA (${statutoryCalc.rates.nhimaRate}%)`,
+        };
+      }
+
+      if (key.includes("income tax") || key.includes("paye") || key.includes("payee")) {
+        return {
+          ...c,
+          effectiveAmount: statutoryCalc.statutory.paye,
+          label: "Income Tax (PAYE)",
+        };
+      }
+
+      return { ...c, effectiveAmount: 0, label: String(c.component || "") };
+    });
+  }, [deductions, statutoryCalc]);
+
   const totalDeductions = useMemo(() => {
-    return deductions.reduce((sum, c) => sum + (Number(c.amount || 0) || 0), 0);
-  }, [deductions]);
+    return deductionsWithEffectiveAmounts.reduce(
+      (sum, c: any) => sum + (Number(c.effectiveAmount || 0) || 0),
+      0,
+    );
+  }, [deductionsWithEffectiveAmounts]);
 
   const netPay = useMemo(() => {
     return totalEarnings - totalDeductions;
@@ -1068,53 +1168,6 @@ function StructureModal({
   useEffect(() => {
     onChange(formData);
   }, [formData, onChange]);
-
-  const handleAddComponent = () => {
-    setFormData({
-      ...formData,
-      components: [
-        ...(formData.components || []),
-        { component: "", type: "earning", amount: 0, enabled: 1 },
-      ],
-    });
-  };
-
-  const handleRemoveComponent = (idx: number) => {
-    toast.dismiss();
-    toast(
-      (t) => (
-        <div className="bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-[340px]">
-          <div className="text-sm font-semibold text-gray-900">Remove Component</div>
-          <div className="text-xs text-gray-500 mt-1">
-            Remove this component row from the structure?
-          </div>
-          <div className="flex items-center justify-end gap-2 mt-4">
-            <button
-              type="button"
-              onClick={() => toast.dismiss(t.id)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                toast.dismiss(t.id);
-                const next = [...(formData.components || [])];
-                next.splice(idx, 1);
-                setFormData({ ...formData, components: next });
-                toast.success("Component removed");
-              }}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700"
-            >
-              Remove
-            </button>
-          </div>
-        </div>
-      ),
-      { duration: Infinity },
-    );
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -1181,15 +1234,6 @@ function StructureModal({
                   <h4 className="text-sm font-semibold text-gray-900">
                     Salary Components
                   </h4>
-                  {!readOnly && (
-                    <button
-                      onClick={handleAddComponent}
-                      className="text-xs text-primary hover:opacity-90 font-medium flex items-center gap-1"
-                    >
-                      <Plus className="w-3 h-3" />
-                      Add Component
-                    </button>
-                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -1210,7 +1254,7 @@ function StructureModal({
                               next[idx] = { ...next[idx], component: e.target.value };
                               setFormData({ ...formData, components: next });
                             }}
-                            disabled={Boolean(readOnly)}
+                            disabled
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-700"
                           >
                             <option value="">Select component</option>
@@ -1229,7 +1273,7 @@ function StructureModal({
                               next[idx] = { ...next[idx], component: e.target.value };
                               setFormData({ ...formData, components: next });
                             }}
-                            disabled={Boolean(readOnly)}
+                            disabled
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-700"
                             placeholder="e.g., Basic"
                           />
@@ -1262,32 +1306,48 @@ function StructureModal({
                         <label className="block text-[10px] font-bold text-gray-600 mb-1">
                           Amount
                         </label>
-                        <input
-                          type="number"
-                          value={component.amount}
-                          onChange={(e) => {
-                            const next = [...(formData.components || [])];
-                            next[idx] = {
-                              ...next[idx],
-                              amount: Number(e.target.value || 0),
-                            };
-                            setFormData({ ...formData, components: next });
-                          }}
-                          disabled={Boolean(readOnly)}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-700"
-                        />
+                        {(() => {
+                          const key = String(component.component || "").toLowerCase();
+                          const isDeduction =
+                            String(component.type || "").toLowerCase() === "deduction";
+                          const isNapsa = isDeduction && key.includes("napsa");
+                          const isNhima = isDeduction && key.includes("nhima");
+                          const isPaye =
+                            isDeduction &&
+                            (key.includes("income tax") || key.includes("paye") || key.includes("payee"));
+                          const isStatutory = isNapsa || isNhima || isPaye;
+
+                          const computedAmount = isNapsa
+                            ? statutoryCalc.statutory.napsaEmployee
+                            : isNhima
+                              ? statutoryCalc.statutory.nhima
+                              : isPaye
+                                ? statutoryCalc.statutory.paye
+                                : Number(component.amount || 0) || 0;
+
+                          const disabled = Boolean(readOnly) || isStatutory;
+
+                          return (
+                            <input
+                              type="number"
+                              value={computedAmount}
+                              onChange={(e) => {
+                                if (disabled) return;
+                                const next = [...(formData.components || [])];
+                                next[idx] = {
+                                  ...next[idx],
+                                  amount: Number(e.target.value || 0),
+                                };
+                                setFormData({ ...formData, components: next });
+                              }}
+                              disabled={disabled}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-700"
+                            />
+                          );
+                        })()}
                       </div>
 
                       <div className="col-span-1 flex items-end justify-end">
-                        {!readOnly && (
-                          <button
-                            onClick={() => handleRemoveComponent(idx)}
-                            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                            title="Remove"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
                       </div>
 
                       <div className="col-span-12 flex items-center gap-2">
@@ -1327,8 +1387,8 @@ function StructureModal({
 
                 <div className="bg-white rounded-lg p-4 text-sm">
                   <div className="text-center pb-3 border-b">
-                    <p className="text-xs text-gray-600">Preview Calculation</p>
-                    <p className="text-xl font-bold text-gray-900">ZMW {netPay.toLocaleString()}</p>
+                    <p className="text-xs text-gray-600">Gross Pay</p>
+                    <p className="text-xl font-bold text-gray-900">ZMW {totalEarnings.toLocaleString()}</p>
                   </div>
 
                   <div className="pt-3 border-b pb-3">
@@ -1351,18 +1411,14 @@ function StructureModal({
                   <div className="pt-3">
                     <div className="text-[11px] font-bold text-gray-700">DEDUCTIONS:</div>
                     <div className="mt-2 space-y-1">
-                      {deductions.map((c, idx) => {
-                        const amt = Number(c.amount || 0) || 0;
+                      {deductionsWithEffectiveAmounts.map((c: any, idx) => {
+                        const amt = Number(c.effectiveAmount || 0) || 0;
                         return (
                           <div key={`${c.component}-${idx}`} className="flex items-center justify-between gap-3">
-                            <div className="text-xs text-gray-700 truncate">{c.component}</div>
-                            {amt === 0 ? (
-                              <div className="text-xs font-bold text-red-600">Auto-calc</div>
-                            ) : (
-                              <div className="text-xs font-semibold text-gray-900 tabular-nums">
-                                {amt.toLocaleString()}
-                              </div>
-                            )}
+                            <div className="text-xs text-gray-700 truncate">{c.label}</div>
+                            <div className="text-xs font-semibold text-gray-900 tabular-nums">
+                              {amt.toLocaleString()}
+                            </div>
                           </div>
                         );
                       })}
@@ -1391,8 +1447,9 @@ function StructureModal({
                         {netPay.toLocaleString()}
                       </div>
                     </div>
-                    <div className="text-[10px] text-gray-500 pt-2">
-                      Components total: {totalAmount.toLocaleString()}
+                    <div className="flex items-center justify-between pt-2 text-[10px] text-gray-500">
+                      <div>Gross Pay</div>
+                      <div className="tabular-nums">{totalEarnings.toLocaleString()}</div>
                     </div>
                   </div>
                 </div>

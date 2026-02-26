@@ -44,7 +44,7 @@ export const API = {
   },
 
   payrolls: {
-    singleEmployeePayroll: `${ERP_BASE}/api/method/payroll_rola_izyane.api.payrolls.single.main.single_employee_payroll`,
+    singleEmployeePayroll: `${ERP_BASE}/api/method/payroll_rola_izyane.api.payroll_entry.api.create_single_employee_payroll`,
   },
 
   
