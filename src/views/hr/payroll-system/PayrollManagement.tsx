@@ -13,6 +13,7 @@ import { getSalarySlipById, getSalarySlips, type SalarySlipDetail, type SalarySl
 import { KPICards } from "./KPICards";
 import { OverviewTab, EmployeesTab } from "./EntryFormTabs";
 import SalaryStructureTab from "../tabs/SalaryStructureTab";
+import SalaryStructureAssignmentsDashboardTab from "./SalaryStructureAssignmentsDashboardTab";
 
 // ── Views ─────────────────────────────────────────────────────────────────────
 import EmployeeDetailsPage from "./EmployeeDetailsPage";
@@ -71,7 +72,7 @@ const Btn: React.FC<{
 // ─────────────────────────────────────────────────────────────────────────────
 // TOP NAVIGATION BAR (shared across views)
 // ─────────────────────────────────────────────────────────────────────────────
-type View = "dashboard" | "newEntry" | "salaryStructure" | "reports";
+type View = "dashboard" | "newEntry" | "salaryStructure" | "assignments" | "reports";
 
 const TopBar: React.FC<{
   view: View;
@@ -81,6 +82,7 @@ const TopBar: React.FC<{
 }> = ({ view, setView, onNewPayroll, totalEmployees }) => {
   const navItems: { id: View; label: string; icon: React.ReactNode }[] = [
     { id: "salaryStructure", label: "Salary Structure", icon: <Users className="w-3.5 h-3.5" /> },
+    { id: "assignments", label: "Employee Assignment", icon: <Users className="w-3.5 h-3.5" /> },
     { id: "reports", label: "Reports", icon: <FileText className="w-3.5 h-3.5" /> },
   ];
 
@@ -581,6 +583,17 @@ export default function PayrollManagement() {
         <TopBar {...topBarProps} />
         <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5">
           <SalaryStructureTab />
+        </div>
+      </div>
+    );
+  }
+
+  if (view === "assignments") {
+    return (
+      <div className="h-screen flex flex-col bg-app overflow-hidden">
+        <TopBar {...topBarProps} />
+        <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5">
+          <SalaryStructureAssignmentsDashboardTab />
         </div>
       </div>
     );
