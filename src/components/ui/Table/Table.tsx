@@ -172,7 +172,7 @@ function Table<T extends Record<string, any>>({
   // ---------------------------------------------------------------------------
 
   return (
-    <div className="bg-card rounded-2xl border border-[var(--border)] flex flex-col shadow-sm transition-all relative z-10 w-full overflow-hidden">
+    <div className="bg-card rounded-2xl border border-[var(--border)] flex flex-col shadow-sm transition-all relative z-10 w-full">
 
       {/* ── Toolbar ── */}
       {showToolbar && (
@@ -232,92 +232,107 @@ function Table<T extends Record<string, any>>({
       )}
 
       {/* ── Table ── */}
-      <div className="w-full overflow-x-auto custom-scrollbar">
-        <div className="max-h-[420px] overflow-y-auto min-w-full md:min-w-[800px] relative">
-          <table className="w-full min-w-full border-separate border-spacing-0">
+      {/*
+        FIX: Removed the inner div with max-h-[420px] that was clipping the last
+        row behind the sticky footer. Scrolling is now handled on the outer wrapper
+        using a dynamic max-height that accounts for the toolbar (~73px) and
+        footer (~57px), so every row — including action buttons on the last row —
+        is always fully visible before the footer begins.
+      */}
+      <div
+        className="w-full overflow-x-auto custom-scrollbar"
+        style={{ 
+          minHeight: "200px",
+          overflowY: "auto",
+          maxHeight: "60vh",
+        }}
+      >
+        {/* pb-4 ensures the last row's action buttons/dropdowns are never clipped by the sticky footer */}
+        <div className="pb-4">
+        <table className="w-full min-w-full md:min-w-[800px] border-separate border-spacing-0">
 
-            {/* Header */}
-            <thead className="sticky top-0 z-30 shadow-sm">
-              <tr>
-                {visibleColumns.map((column) => {
-                  const isSortable = !!column.sortable && !!onSortChange;
-                  const isActive   = sortBy === column.key;
-                  const isAsc      = isActive && sortOrderProp === "asc";
-                  const isDesc     = isActive && sortOrderProp === "desc";
+          {/* Header */}
+          <thead className="sticky top-0 z-30 shadow-sm">
+            <tr>
+              {visibleColumns.map((column) => {
+                const isSortable = !!column.sortable && !!onSortChange;
+                const isActive   = sortBy === column.key;
+                const isAsc      = isActive && sortOrderProp === "asc";
+                const isDesc     = isActive && sortOrderProp === "desc";
 
-                  return (
-                    <th
-                      key={column.key}
-                      onClick={isSortable ? () => handleColumnSort(column.key) : undefined}
-                      className={[
-                        "px-3 sm:px-5 py-3.5 sm:py-4",
-                        "text-[10px] font-black uppercase tracking-[0.08em] sm:tracking-[0.12em]",
-                        "text-muted border-b border-[var(--border)] bg-card whitespace-nowrap",
-                        getAlignment(column.align),
-                        isSortable ? "cursor-pointer select-none hover:text-primary transition-colors" : "",
-                        isActive   ? "text-primary" : "",
-                      ].join(" ")}
-                    >
-                      <span className="inline-flex items-center gap-1.5">
-                        {column.header}
-                        {isSortable && (
-                          <span className="inline-flex opacity-60">
-                            {isAsc  ? <FaSortUp   size={10} className="text-primary opacity-100" /> :
-                             isDesc ? <FaSortDown size={10} className="text-primary opacity-100" /> :
-                                      <FaSort     size={10} />}
-                          </span>
-                        )}
-                      </span>
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-
-            {/* Body */}
-            <tbody className="relative z-10">
-              {loading ? (
-                Array.from({ length: pageSize }).map((_, idx) => (
-                  <SkeletonRow key={idx} columnsCount={visibleColumns.length} />
-                ))
-              ) : data.length === 0 ? (
-                <tr>
-                  <td colSpan={visibleColumns.length} className="px-6 py-24 text-center">
-                    <p className="text-xs font-bold text-muted uppercase tracking-widest opacity-40">
-                      {emptyMessage}
-                    </p>
-                  </td>
-                </tr>
-              ) : (
-                data.map((item, idx) => (
-                  <tr
-                    key={rowKey ? rowKey(item) : JSON.stringify(item)}
-                    onClick={() => onRowClick?.(item)}
+                return (
+                  <th
+                    key={column.key}
+                    onClick={isSortable ? () => handleColumnSort(column.key) : undefined}
                     className={[
-                      "group transition-none",
-                      onRowClick ? "cursor-pointer" : "",
-                      idx % 2 === 0 ? "bg-transparent" : "bg-row-hover/10",
-                      "hover:bg-row-hover",
+                      "px-3 sm:px-5 py-3.5 sm:py-4",
+                      "text-[10px] font-black uppercase tracking-[0.08em] sm:tracking-[0.12em]",
+                      "text-muted border-b border-[var(--border)] bg-card whitespace-nowrap",
+                      getAlignment(column.align),
+                      isSortable ? "cursor-pointer select-none hover:text-primary transition-colors" : "",
+                      isActive   ? "text-primary" : "",
                     ].join(" ")}
                   >
-                    {visibleColumns.map((column) => (
-                      <td
-                        key={column.key}
-                        className={`px-3 sm:px-5 py-3.5 text-xs font-medium text-main border-b border-[var(--border)]/20 ${getAlignment(column.align)}`}
-                      >
-                        {column.render
-                          ? column.render(item)
-                          : <span className="opacity-90">{item[column.key]}</span>
-                        }
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              )}
-            </tbody>
+                    <span className="inline-flex items-center gap-1.5">
+                      {column.header}
+                      {isSortable && (
+                        <span className="inline-flex opacity-60">
+                          {isAsc  ? <FaSortUp   size={10} className="text-primary opacity-100" /> :
+                           isDesc ? <FaSortDown size={10} className="text-primary opacity-100" /> :
+                                    <FaSort     size={10} />}
+                        </span>
+                      )}
+                    </span>
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
 
-          </table>
-        </div>
+          {/* Body */}
+          <tbody className="relative z-10">
+            {loading ? (
+              Array.from({ length: pageSize }).map((_, idx) => (
+                <SkeletonRow key={idx} columnsCount={visibleColumns.length} />
+              ))
+            ) : data.length === 0 ? (
+              <tr>
+                <td colSpan={visibleColumns.length} className="px-6 py-24 text-center">
+                  <p className="text-xs font-bold text-muted uppercase tracking-widest opacity-40">
+                    {emptyMessage}
+                  </p>
+                </td>
+              </tr>
+            ) : (
+              data.map((item, idx) => (
+                <tr
+                  key={rowKey ? rowKey(item) : JSON.stringify(item)}
+                  onClick={() => onRowClick?.(item)}
+                  className={[
+                    "group transition-none",
+                    onRowClick ? "cursor-pointer" : "",
+                    idx % 2 === 0 ? "bg-transparent" : "bg-row-hover/10",
+                    "hover:bg-row-hover",
+                  ].join(" ")}
+                >
+                  {visibleColumns.map((column) => (
+                    <td
+                      key={column.key}
+                      className={`px-3 sm:px-5 py-3.5 text-xs font-medium text-main border-b border-[var(--border)]/20 ${getAlignment(column.align)}`}
+                    >
+                      {column.render
+                        ? column.render(item)
+                        : <span className="opacity-90">{item[column.key]}</span>
+                      }
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+
+        </table>
+        </div>{/* end pb-4 wrapper */}
       </div>
 
       {/* ── Footer / Pagination ── */}

@@ -83,8 +83,12 @@ const Detail: React.FC<DetailProps> = ({
 const normalizeBankAccounts = (accounts: any[]): BankAccount[] =>
   accounts.map((acc) => ({
     ...acc,
-    // API returns default as "0"/"1" string — normalize to boolean
-    isdefault: acc.default === "1" || acc.default === 1 || acc.isdefault === true,
+    isdefault:
+      acc.default === "1" ||
+      acc.default === 1 ||
+      acc.dafault === "1" ||  
+      acc.dafault === 1 ||
+      acc.isdefault === true,
   }));
 
 interface Props {
@@ -134,7 +138,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
           currency: acc.currency,
           dateAdded: acc.dateAdded,
           openingBalance: acc.openingBalance,
-          default: acc.isdefault ? 1 : 0,
+          default: acc.isdefault ? "1" : 0,
         })),
       };
 
@@ -184,7 +188,7 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
           currency: acc.currency,
           dateAdded: acc.dateAdded,
           openingBalance: acc.openingBalance,
-          default: acc.isdefault ? 1 : 0,
+          default: acc.isdefault ? "1" : "0",
         })),
       };
 
@@ -243,7 +247,7 @@ const handleDelete = async () => {
         currency: acc.currency,
         dateAdded: acc.dateAdded,
         openingBalance: acc.openingBalance,
-        default: acc.isdefault ? 1 : 0,
+        default: acc.isdefault ? "1" : 0,
       })),
     };
 
