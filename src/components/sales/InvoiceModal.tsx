@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { FileText } from "lucide-react";
 import TermsAndCondition from "../TermsAndCondition";
@@ -46,49 +46,49 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   } = useInvoiceForm(isOpen, onClose, onSubmit);
   const [allowSubmit, setAllowSubmit] = useState(false);
   const tabs: Array<"details" | "address" | "terms"> = [
-  "details",
-  "address",
-  "terms",
-];
-useEffect(() => {
-  if (isOpen) {
-    setAllowSubmit(false);
-  }
-}, [isOpen]);
-const handleNext = () => {
-  const currentIndex = tabs.indexOf(ui.activeTab as any);
-  if (currentIndex < tabs.length - 1) {
-    ui.setActiveTab(tabs[currentIndex + 1]);
-    setAllowSubmit(false);
-  }
-};
+    "details",
+    "address",
+    "terms",
+  ];
+  useEffect(() => {
+    if (isOpen) {
+      setAllowSubmit(false);
+    }
+  }, [isOpen]);
+  const handleNext = () => {
+    const currentIndex = tabs.indexOf(ui.activeTab as any);
+    if (currentIndex < tabs.length - 1) {
+      ui.setActiveTab(tabs[currentIndex + 1]);
+      setAllowSubmit(false);
+    }
+  };
 
   const symbol = currencySymbols[formData.currencyCode] ?? "₹";
   const showExchangeRate =
     String(formData.currencyCode ?? "").trim().toUpperCase() !== "INR";
   const handleFormSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (ui.activeTab !== "terms") {
-    handleNext();
-    return;
-  }
+    if (ui.activeTab !== "terms") {
+      handleNext();
+      return;
+    }
 
-  if (!allowSubmit || submitting) return;
+    if (submitting) return;
 
-  try {
-    setSubmitting(true);
+    try {
+      setSubmitting(true);
 
-    const payload = await actions.handleSubmit(e);
-    if (!payload) return;
+      const payload = await actions.handleSubmit(e);
+      if (!payload) return;
 
-    await onSubmit?.(payload);
-  } catch (err: any) {
-    showApiError(err);
-  } finally {
-    setSubmitting(false);
-  }
-};
+      await onSubmit?.(payload);
+    } catch (err: any) {
+      showApiError(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
 
@@ -106,23 +106,23 @@ const handleNext = () => {
         >
           Reset
         </Button>
-<Button
-  variant="primary"
-  type={ui.activeTab !== "terms" ? "button" : "submit"}
-  form={ui.activeTab !== "terms" ? undefined : "invoiceForm"}
-  onClick={
-    ui.activeTab !== "terms"
-      ? handleNext
-      : () => setAllowSubmit(true)
-  }
-  disabled={submitting}
->
-  {ui.activeTab === "terms"
-    ? submitting
-      ? "Submitting..."
-      : "Submit"
-    : "Next"}
-</Button>
+        <Button
+          variant="primary"
+          type={ui.activeTab !== "terms" ? "button" : "submit"}
+          form={ui.activeTab !== "terms" ? undefined : "invoiceForm"}
+          onClick={
+  ui.activeTab !== "terms"
+    ? handleNext
+    : undefined
+}
+          disabled={submitting}
+        >
+          {ui.activeTab === "terms"
+            ? submitting
+              ? "Submitting..."
+              : "Submit"
+            : "Next"}
+        </Button>
       </div>
     </>
   );
@@ -139,28 +139,27 @@ const handleNext = () => {
       height="79vh"
     >
       <form
-  id="invoiceForm"
-  onSubmit={handleFormSubmit}
-  className="h-full flex flex-col"
->
+        id="invoiceForm"
+        onSubmit={handleFormSubmit}
+        className="h-full flex flex-col"
+      >
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
-            {(["details", "address","terms" ] as const).map((tab) => (
+            {(["details", "address", "terms"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => ui.setActiveTab(tab)}
                 className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all 
-              ${
-                ui.activeTab === tab
-                  ? "text-primary border-b-[3px] border-primary"
-                  : "text-muted border-b-[3px] border-transparent hover:text-main"
-              }`}
+              ${ui.activeTab === tab
+                    ? "text-primary border-b-[3px] border-primary"
+                    : "text-muted border-b-[3px] border-transparent hover:text-main"
+                  }`}
               >
                 {tab === "details" && "Details"}
                 {tab === "address" && "Additional Details"}
-                  {tab === "terms" && "Terms & Conditions"}
+                {tab === "terms" && "Terms & Conditions"}
               </button>
             ))}
           </div>
@@ -321,23 +320,35 @@ const handleNext = () => {
                   </div>
 
                   <div className="mt-2 overflow-x-auto">
-                     <table className="w-full min-w-[760px] border-collapse text-[10px]">
+                    <table className="w-full min-w-[760px] border-collapse text-[10px]">
                       <thead>
                         <tr className="border-b border-theme">
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px] whitespace-nowrap">
                             #
                           </th>
-                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
-                            Item
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
+                            Box
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
-                            Batch No
+                            Item
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px] whitespace-nowrap">
                             Description
                           </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
+                            Packing
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
+                            Batch No
+                          </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
                             Quantity
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
+                            Manufacturing Date
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
+                            Expiry Date
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">
                             Unit Price
@@ -373,7 +384,6 @@ const handleNext = () => {
                               className="border-b border-theme bg-card row-hover"
                             >
                               <td className="px-3 py-2 text-center">{i + 1}</td>
-                              <td className="px-0.5 py-1">
                                 {/* <ItemSelect
                                     taxCategory={ui.taxCategory}
                                     value={it.itemCode}
@@ -384,114 +394,173 @@ const handleNext = () => {
                                       });
                                     }}
                                   /> */}
-                                <ItemSelect
-                                  taxCategory={ui.taxCategory}
-                                  value={it.itemCode}
-                                  excludeItemCodes={formData.items
-                                    .map((x, j) => (j === i ? "" : x?.itemCode))
-                                    .filter(Boolean) as string[]}
-                                  onChange={(item) => {
-                                    actions.handleItemSelect(i, item.id);
-                                  }}
-                                />
-                              </td>
-                              <td className="px-0.5 py-1">
-                                <input
-                                  type="string"
-                                   className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                  name="batchNo"
-                                  value={it.batchNo}
-                                  onChange={(e) =>
-                                    actions.handleItemChange(i, e)
-                                  }
-                                  disabled
-                                />
-                              </td>
 
-                              <td className="px-0.5 py-1">
-                                <input
-                                  className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                  name="description"
-                                  value={it.description}
-                                  onChange={(e) =>
-                                    actions.handleItemChange(i, e)
-                                  }
-                                />
-                              </td>
-                              <td className="px-0.5 py-1">
-                                <input
-                                  type="number"
-                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                  name="quantity"
-                                  value={it.quantity}
-                                  onChange={(e) =>
-                                    actions.handleItemChange(i, e)
-                                  }
-                                />
-                              </td>
-                              <td className="px-0.5 py-1">
-                                <input
-                                  type="number"
-                                  className="w-[90px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                  name="price"
-                                  value={it.price}
-                                  disabled
-                                  onChange={(e) =>
-                                    actions.handleItemChange(i, e)
-                                  }
-                                />
-                              </td>
-                              <td className="px-0.5 py-1">
-                                <input
-                                  type="number"
-                                  className="w-[80px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                  name="discount"
-                                  value={it.discount}
-                                  onChange={(e) =>
-                                    actions.handleItemChange(i, e)
-                                  }
-                                />
-                              </td>
-                              <td className="px-0.5 py-1">
-                                <input
-                                  type="number" // Assuming input is number for entry, stored as string in Type
-                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                  name="vatRate"
-                                  value={it.vatRate}
-                                  disabled
-                                  onChange={(e) =>
-                                    actions.handleItemChange(i, e)
-                                  }
-                                />
-                              </td>
-                              <td className="px-0.5 py-1">
-                                <input
-                                  type="string"
-                                  className="w-[80px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                  name="vatCode"
-                                  value={it.vatCode}
-                                  disabled
-                                  onChange={(e) =>
-                                    actions.handleItemChange(i, e)
-                                  }
-                                />
-                              </td>
-                              <td className="px-0.5 py-1">
-                                <span className="text-[10px] font-medium text-main">
-                                  {symbol} {amount.toFixed(2)}
-                                </span>
-                              </td>
+                                {/* BOX COLUMN */}
+                                <td className="px-0.5 py-1">
+                                  <div className="flex items-center gap-1">
+                                    <input
+                                      name="boxStart"
+                                      value={it.boxStart || ""}
+                                      onChange={(e) => actions.handleItemChange(i, e)}
+                                      placeholder="Start"
+                                      className="w-[45px] py-1 px-1 border border-theme rounded text-[10px] bg-card text-main"
+                                    />
+                                    <span className="text-[10px] text-muted">-</span>
+                                    <input
+                                      name="boxEnd"
+                                      value={it.boxEnd || ""}
+                                      onChange={(e) => actions.handleItemChange(i, e)}
+                                      placeholder="End"
+                                      className="w-[45px] py-1 px-1 border border-theme rounded text-[10px] bg-card text-main"
+                                    />
+                                  </div>
+                                </td>
 
-                              <td className="px-0.5 py-1">
-                                <button
-                                  type="button"
-                                  onClick={() => actions.removeItem(i)}
-                                  className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
-                                  title="Remove item"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </td>
+                                {/* ITEM COLUMN */}
+                                <td className="px-0.5 py-1">
+                                  <ItemSelect
+                                    taxCategory={ui.taxCategory}
+                                    value={it.itemCode}
+                                    excludeItemCodes={formData.items
+                                      .map((x, j) => (j === i ? "" : x?.itemCode))
+                                      .filter(Boolean) as string[]}
+                                    onChange={(item) => {
+                                      actions.handleItemSelect(i, item.id);
+                                    }}
+                                  />
+                                </td>
+
+
+                                <td className="px-0.5 py-1">
+                                  <input
+                                    className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                    name="description"
+                                    value={it.description}
+                                    onChange={(e) =>
+                                      actions.handleItemChange(i, e)
+                                    }
+                                  />
+                                </td>
+
+                                <td className="px-0.5 py-1">
+                                  <input
+                                    name="packing"
+                                    value={it.packing || ""}
+                                    onChange={(e) => actions.handleItemChange(i, e)}
+                                    placeholder="e.g. 10x10"
+                                    className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  />
+                                </td>
+
+                                <td className="px-0.5 py-1">
+                                  <input
+                                    type="string"
+                                    className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                    name="batchNo"
+                                    value={it.batchNo}
+                                    onChange={(e) =>
+                                      actions.handleItemChange(i, e)
+                                    }
+                                    disabled
+                                  />
+                                </td>
+
+                                <td className="px-0.5 py-1">
+                                  <input
+                                    type="number"
+                                    className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                    name="quantity"
+                                    value={it.quantity}
+                                    onChange={(e) =>
+                                      actions.handleItemChange(i, e)
+                                    }
+                                  />
+                                </td>
+
+                                <td className="px-0.5 py-1">
+                                  <input
+                                    type="date"
+                                    name="mfgDate"
+                                    value={it.mfgDate || ""}
+                                    onChange={(e) => actions.handleItemChange(i, e)}
+                                    className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  />
+                                </td>
+
+                                <td className="px-0.5 py-1">
+                                  <input
+                                    type="date"
+                                    name="expDate"
+                                    value={it.expDate || ""}
+                                    onChange={(e) => actions.handleItemChange(i, e)}
+                                    className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  />
+                                </td>
+
+
+                                <td className="px-0.5 py-1">
+                                  <input
+                                    type="number"
+                                    className="w-[90px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                    name="price"
+                                    value={it.price}
+                                    disabled
+                                    onChange={(e) =>
+                                      actions.handleItemChange(i, e)
+                                    }
+                                  />
+                                </td>
+                                <td className="px-0.5 py-1">
+                                  <input
+                                    type="number"
+                                    className="w-[80px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                    name="discount"
+                                    value={it.discount}
+                                    onChange={(e) =>
+                                      actions.handleItemChange(i, e)
+                                    }
+                                  />
+                                </td>
+                                <td className="px-0.5 py-1">
+                                  <input
+                                    type="number" // Assuming input is number for entry, stored as string in Type
+                                    className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                    name="vatRate"
+                                    value={it.vatRate}
+                                    disabled
+                                    onChange={(e) =>
+                                      actions.handleItemChange(i, e)
+                                    }
+                                  />
+                                </td>
+                                <td className="px-0.5 py-1">
+                                  <input
+                                    type="string"
+                                    className="w-[80px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                    name="vatCode"
+                                    value={it.vatCode}
+                                    disabled
+                                    onChange={(e) =>
+                                      actions.handleItemChange(i, e)
+                                    }
+                                  />
+                                </td>
+                                <td className="px-0.5 py-1">
+                                  <span className="text-[10px] font-medium text-main">
+                                    {symbol} {amount.toFixed(2)}
+                                  </span>
+                                </td>
+
+                                <td className="px-0.5 py-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => actions.removeItem(i)}
+                                    className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
+                                    title="Remove item"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
                             </tr>
                           );
                         })}

@@ -43,10 +43,8 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               name="tpin"
               value={form.tpin}
               onChange={onChange}
-              placeholder="maximum 10 digit"
-              maxLength={10}
+              placeholder="Enter TPIN"
               required
-              error={errors.tpin}
             />
             <ModalInput
               label="Supplier Name"
@@ -94,9 +92,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               value={form.phoneNo}
               onChange={onChange}
               type="tel"
-              maxLength={10}
               required
-              error={errors.phoneNo}
             />
 
             <ModalInput
@@ -105,8 +101,6 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               value={form.alternateNo}
               onChange={onChange}
               type="tel"
-              maxLength={10}
-              error={errors.alternateNo}
             />
 
             <ModalInput

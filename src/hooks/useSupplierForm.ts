@@ -60,11 +60,6 @@ export const useSupplierForm = ({
   const validateSupplierTab = (): boolean => {
     const newErrors: SupplierErrors = {};
 
-    if (!form.tpin) {
-      newErrors.tpin = "TPIN is required";
-    } else if (form.tpin.length !== 10) {
-      newErrors.tpin = "TPIN must be exactly 10 characters";
-    }
 
     if (!form.supplierName || form.supplierName.trim() === "") {
       newErrors.supplierName = "Supplier Name is required";
@@ -78,11 +73,6 @@ export const useSupplierForm = ({
       newErrors.contactPerson = "Contact Person is required";
     }
 
-    if (!form.phoneNo) {
-      newErrors.phoneNo = "Phone Number is required";
-    } else if (form.phoneNo.length !== 10) {
-      newErrors.phoneNo = "Phone Number must be exactly 10 digits";
-    }
 
     if (!form.emailId) {
       newErrors.emailId = "Email is required";
@@ -130,9 +120,6 @@ export const useSupplierForm = ({
       newErrors.sortCode = "Sort Code is required";
     }
 
-    if (!form.swiftCode || form.swiftCode.trim() === "") {
-      newErrors.swiftCode = "SWIFT Code is required";
-    }
 
     if (!form.branchAddress || form.branchAddress.trim() === "") {
       newErrors.branchAddress = "Branch Address is required";
@@ -204,35 +191,23 @@ useEffect(() => {
     if (errors[name as keyof SupplierErrors]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
+if (type === "checkbox") {
+  const checked = (e.target as HTMLInputElement).checked;
+  setForm((p) => ({ ...p, [name]: checked as any }));
+} else {
 
-    if (type === "checkbox") {
-      const checked = (e.target as HTMLInputElement).checked;
-      setForm((p) => ({ ...p, [name]: checked as any }));
-    } else {
-      // Real-time validation for phone and email
-      if (name === "phoneNo") {
-        // Only allow digits
-        if (!/^\d*$/.test(value)) return;
-        // Check length
-        if (value && value.length !== 10) {
-          setErrors((prev) => ({ ...prev, phoneNo: "Phone Number must be exactly 10 digits" }));
-        }
-      } else if (name === "alternateNo") {
-        // Only allow digits
-        if (!/^\d*$/.test(value)) return;
-        // Check length if not empty
-        if (value && value.length !== 10) {
-          setErrors((prev) => ({ ...prev, alternateNo: "Alternate Number must be exactly 10 digits" }));
-        }
-      } else if (name === "emailId") {
-        // Check email format
-        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          setErrors((prev) => ({ ...prev, emailId: "Invalid email format" }));
-        }
-      }
-      
-      setForm((p) => ({ ...p, [name]: value }));
+  // Only email validation remains
+  if (name === "emailId") {
+    if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      setErrors((prev) => ({ 
+        ...prev, 
+        emailId: "Invalid email format" 
+      }));
     }
+  }
+
+  setForm((p) => ({ ...p, [name]: value }));
+}
   };
 
 
@@ -277,8 +252,6 @@ const handleSubmit = async (e?: React.FormEvent) => {
     if (!form.bankAccount) emptyFields.push("Bank");
     if (!form.accountNumber) emptyFields.push("Account Number");
     if (!form.accountHolder) emptyFields.push("Account Holder Name");
-    if (!form.sortCode) emptyFields.push("Sort Code");
-    if (!form.swiftCode) emptyFields.push("SWIFT Code");
     if (!form.branchAddress) emptyFields.push("Branch Address");
     
     const message = emptyFields.length > 0 

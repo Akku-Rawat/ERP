@@ -70,7 +70,7 @@ useEffect(() => {
   
 
 const selectedCountry = countriesCache.find(
-  (c) => c.code === data?.country
+  (c) => c.country_name === data?.country
 );
 
     return (
@@ -180,7 +180,7 @@ const selectedCountry = countriesCache.find(
                   )
                   .map((c) => ({
                     label: c.country_name,
-                    value: c.code,
+                    value: c.country_name,
                   }));
               }}
             />

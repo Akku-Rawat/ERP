@@ -24,7 +24,7 @@ import { getCompanyById } from "../api/companySetupApi";
 import { mapSupplierToAddress } from "../types/Supply/purchaseInvoiceMapper";
 import type { AddressBlock } from "../types/Supply/purchaseInvoice";
 import { getItemByItemCode } from "../api/itemApi";
-
+import { getPurchaseOrderById,getPurchaseOrders } from "../api/procurement/PurchaseOrderApi";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 interface UsePurchaseInvoiceFormProps {
@@ -43,7 +43,7 @@ export const usePurchaseInvoiceForm = ({
   const [form, setForm] = useState<PurchaseInvoiceFormData>(emptyPOForm);
   const [activeTab, setActiveTab] = useState<POTab>("details");
   const [saving, setSaving] = useState(false);
-
+   const [poList, setPoList] = useState<any[]>([]);
   useEffect(() => {
     if (!isOpen) {
       setForm(emptyPOForm);
@@ -151,6 +151,48 @@ export const usePurchaseInvoiceForm = ({
     }));
   };
 
+  const handlePOSelect = async (po: any) => {
+  if (!po) return;
+
+  try {
+    const res = await getPurchaseOrderById(po.poId);
+    const data = res?.data;
+    if (!data) return;
+
+    setForm(prev => ({
+  ...prev,
+
+  poNumber: data.pId,
+  currency: data.currency,
+  project: data.project,
+  costCenter: data.costCenter,
+  incoterm: data.incoterm,
+  shippingRule: data.shippingRule,
+
+  addresses: {
+    ...prev.addresses,
+    supplierAddress: data.addresses?.supplierAddress || prev.addresses.supplierAddress,
+    dispatchAddress: data.addresses?.dispatchAddress || prev.addresses.dispatchAddress,
+    shippingAddress: data.addresses?.shippingAddress || prev.addresses.shippingAddress,
+  },
+
+  items: (data.items || []).map((item:any) => ({
+    itemCode: item.item_code,
+    itemName: item.item_name,
+    quantity: item.qty,
+    rate: item.rate,
+    uom: item.uom,
+    vatCd: item.VatCd || "",
+    vatRate: 0,
+    requiredBy: prev.requiredBy
+  }))
+}));
+
+  } catch (e) {
+    showApiError({ message: "Failed to load PO details" });
+  }
+};
+
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -173,48 +215,47 @@ export const usePurchaseInvoiceForm = ({
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSupplierChange = async (sup: any) => {
-    if (!sup) return;
+ const handleSupplierChange = async (sup: any) => {
+  if (!sup) return;
 
-    try {
-      const res = await getSupplierById(sup.id);
-      const supplier = res?.data;
-      if (!supplier) return;
+  try {
+    const res = await getSupplierById(sup.id);
+    const supplier = res?.data;
+    if (!supplier) return;
 
-      const destCode = "";
+    // 1. Set supplier details
+    setForm((p) => ({
+      ...p,
+      supplier: supplier.supplierName,
+      supplierId: supplier.supplierId,
+      supplierCode: supplier.supplierCode,
+      supplierEmail: supplier.emailId,
+      supplierPhone: supplier.phoneNo,
+      taxCategory: supplier.taxCategory || "",
+      currency: supplier.currency || p.currency,
+      supplierContact: supplier.contactPerson || "",
+      destnCountryCd: "",
+      placeOfSupply: "",
+      addresses: {
+        ...p.addresses,
+        supplierAddress: mapSupplierToAddress(
+          supplier,
+          p.addresses.supplierAddress
+        ),
+      },
+    }));
 
-      setForm((p) => ({
-        ...p,
+    // 2. Fetch PO list for that supplier
+    const poRes = await getPurchaseOrders(1, 100, {
+  supplier: supplier.supplierName
+});
 
-        /*  BASIC SUPPLIER INFO  */
-        supplier: supplier.supplierName,
-        supplierId: supplier.supplierId,
-        supplierCode: supplier.supplierCode,
-        supplierEmail: supplier.emailId,
-        supplierPhone: supplier.phoneNo,
-        taxCategory: supplier.taxCategory || "",
+    setPoList(poRes?.data?.data || []);
 
-        /*   AUTO FETCHED FIELDS  */
-        currency: supplier.currency || p.currency,
-        supplierContact: supplier.contactPerson || "",
-
-        /*  EXPORT HANDLING  */
-        destnCountryCd: "",
-        placeOfSupply: "",
-
-        /*  ADDRESS AUTO FILL  */
-        addresses: {
-          ...p.addresses,
-          supplierAddress: mapSupplierToAddress(
-            supplier,
-            p.addresses.supplierAddress,
-          ),
-        },
-      }));
-    } catch (e) {
-      console.error("Supplier detail fetch failed", e);
-    }
-  };
+  } catch (e) {
+    console.error("Supplier detail fetch failed", e);
+  }
+};
 
   const handleItemChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -435,6 +476,8 @@ const handleItemSelect = async (itemId: string, idx: number) => {
     handleSubmit,
     reset,
     setForm,
+    poList,          
+  handlePOSelect
   };
 };
 

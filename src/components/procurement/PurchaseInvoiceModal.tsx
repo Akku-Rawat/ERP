@@ -45,6 +45,8 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
     getCurrencySymbol,
     handleSubmit,
     reset,
+     poList,
+  handlePOSelect
   } = usePurchaseInvoiceForm({ isOpen, onSuccess: onSubmit, onClose, pId });
 
   const footer = (
@@ -110,6 +112,8 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
               onRemoveItem={removeItem}
               getCurrencySymbol={getCurrencySymbol}
               onItemSelect={handleItemSelect}
+              poList={poList}
+onPOSelect={handlePOSelect}
             />
           )}
 

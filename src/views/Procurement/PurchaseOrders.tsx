@@ -107,7 +107,10 @@ const fetchOrders = async () => {
       id: po.poId,
       supplier: po.supplierName,
       date: po.poDate,
-      deliveryDate: po.deliveryDate,
+     deliveryDate:
+  po.deliveryDate ||
+  po.items?.[0]?.requiredBy ||
+  "",
       amount: po.grandTotal,
       status: po.status,
     }));

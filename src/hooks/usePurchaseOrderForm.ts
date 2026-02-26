@@ -99,11 +99,11 @@ export const usePurchaseOrderForm = ({
   }, [isOpen, poId]);
 
   // Set default date on create mode
-  useEffect(() => {
-    if (!isOpen || poId) return;
-    const today = new Date().toISOString().split("T")[0];
-    setForm((prev) => ({ ...prev, date: today, requiredBy: today }));
-  }, [isOpen, poId]);
+useEffect(() => {
+  if (!isOpen || poId) return;
+  const today = new Date().toISOString().split("T")[0];
+  setForm((prev) => ({ ...prev, date: today }));
+}, [isOpen, poId]);
 
   // Calculate totals (Items + Taxes + Rounding)
   useEffect(() => {
@@ -236,9 +236,18 @@ export const usePurchaseOrderForm = ({
   };
 
   const addItem = () => {
-    setForm((p) => ({ ...p, items: [...p.items, { ...emptyItem }] }));
-    toast.success("New item row added");
-  };
+  setForm((p) => ({
+    ...p,
+    items: [
+      ...p.items,
+      {
+        ...emptyItem,
+        requiredBy: p.date, 
+      },
+    ],
+  }));
+  toast.success("New item row added");
+};
 
   const removeItem = (idx: number) => {
     if (form.items.length === 1) {
@@ -338,18 +347,13 @@ const handleItemSelect = async (itemId: string, idx: number) => {
 
       items[idx] = {
         ...items[idx],
-
         itemCode: data.id,
-        itemName: data.itemName,
-
-      
+        itemName: data.itemName,   
         rate: Number(data.buyingPrice ?? 0),
-
         uom: data.unitOfMeasureCd || "Unit",
-
-    
         vatRate: Number(data.taxInfo?.taxPerct ?? 0),
         vatCd: data.taxInfo?.taxCode ?? "",
+        requiredBy: items[idx].requiredBy || prev.date, 
       };
 
       return { ...prev, items };

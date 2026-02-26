@@ -5,6 +5,8 @@
 //   rate: number;
 //   amount: number;
 // }
+
+
 export interface QuotationItem {
   productName: string;
   description: string;
@@ -60,7 +62,6 @@ export interface QuotationData {
   quotationDate: string;
   validUntil: string;
   currency: string;
-
   billingAddressLine1?: string;
   billingAddressLine2?: string;
   billingCity?: string;
@@ -99,3 +100,15 @@ export interface QuotationData {
   iban?: string;
   swiftCode?: string;
 }
+
+
+export type QuotationStatus =
+  | "Draft"
+  | "Sent"
+  | "Overdue";
+
+export const quotationStatusOptions = [
+  { value: "Draft", label: "Draft" },
+  { value: "Sent", label: "Sent" },
+  { value: "Overdue", label: "Overdue" },
+] as const;
