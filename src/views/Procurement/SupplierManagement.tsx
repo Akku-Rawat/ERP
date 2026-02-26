@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SupplierDetailView from "./SupplierDetailView";
 import SupplierModal from "../../components/procurement/supply/SupplierModal";
-import { getSupplierById, getSuppliers } from "../../api/procurement/supplierApi";
+import { deleteSupplier, getSupplierById, getSuppliers } from "../../api/procurement/supplierApi";
 import { mapSupplierApi } from "../../types/Supply/supplierMapper";
 
 import Table from "../../components/ui/Table/Table";
@@ -182,7 +182,28 @@ const SupplierManagement: React.FC<Props> = () => {
     handleEditSupplier(supplier);
   };
 
+const handleDeleteSupplier = async (supplier: Supplier) => {
+  if (!supplier.supplierId) return;
 
+  const confirm = window.confirm(
+    `Are you sure you want to delete ${supplier.supplierName}?`
+  );
+
+  if (!confirm) return;
+
+  try {
+    setLoading(true);
+
+    await deleteSupplier(supplier.supplierId);
+
+    await fetchSuppliers(); // refresh table
+
+  } catch (err) {
+    console.error("Delete failed", err);
+  } finally {
+    setLoading(false);
+  }
+};
   //  TABLE COLUMNS (ENTERPRISE STYLE) 
   const columns: Column<Supplier>[] = [
     { key: "supplierCode", header: "Code", align: "left" },
@@ -235,6 +256,7 @@ const SupplierManagement: React.FC<Props> = () => {
 
           <ActionMenu
             onEdit={(e) => handleEditSupplier(s)}
+            onDelete={(e) => handleDeleteSupplier(s)}
           />
         </ActionGroup>
       ),
