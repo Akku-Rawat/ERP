@@ -242,7 +242,7 @@ export default function SalaryStructureTab() {
             <div className="bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-[420px]">
               <div className="text-sm font-semibold text-gray-900">Unable to delete</div>
               <div
-                className="text-xs text-gray-600 mt-1 [&_a]:text-purple-700 [&_a]:underline"
+                className="text-xs text-gray-600 mt-1 [&_a]:text-primary [&_a]:underline"
                 dangerouslySetInnerHTML={{ __html: html }}
               />
               <div className="flex items-center justify-end mt-4">
@@ -333,7 +333,7 @@ export default function SalaryStructureTab() {
           </button>
           <button
             onClick={handleCreateNew}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Create Structure
@@ -393,7 +393,7 @@ export default function SalaryStructureTab() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleEdit(structure)}
-                      className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition"
+                      className="p-2 text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg transition"
                       title="Edit"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -749,26 +749,24 @@ function SalaryComponentsModal({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="p-6 flex-1 overflow-y-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
             <div className="text-sm text-gray-600">{filtered.length} components</div>
-            <button
-              onClick={startCreate}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              New Component
-            </button>
-          </div>
-
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search components"
-              className="w-full md:w-96 px-3 py-2 text-sm border border-gray-300 rounded-lg"
-            />
-            <div className="text-xs text-gray-500">Page {page} of {pageCount}</div>
+            <div className="flex items-center gap-2">
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search components"
+                className="w-full md:w-96 px-3 py-2 text-sm border border-gray-300 rounded-lg"
+              />
+              <button
+                onClick={startCreate}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                New Component
+              </button>
+            </div>
           </div>
 
           {error && (
@@ -802,7 +800,7 @@ function SalaryComponentsModal({
                         <td className="px-4 py-3 text-gray-700">{c.abbr}</td>
                         <td className="px-4 py-3 text-gray-700">{String(c.type || "")}</td>
                         <td className="px-4 py-3">
-                          <span className={`text-xs font-medium ${c.tax_applicable ? "text-purple-700" : "text-gray-500"}`}>
+                          <span className={`text-xs font-medium ${c.tax_applicable ? "text-primary" : "text-gray-500"}`}>
                             {c.tax_applicable ? "Taxable" : "No"}
                           </span>
                         </td>
@@ -815,7 +813,7 @@ function SalaryComponentsModal({
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => startEdit(c)}
-                              className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg"
+                              className="p-2 text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg"
                               title="Edit"
                             >
                               <Edit2 className="w-4 h-4" />
@@ -984,7 +982,7 @@ function SalaryComponentsModal({
                 <button
                   onClick={save}
                   disabled={loading}
-                  className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:opacity-90 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4" />
                   Save
@@ -1156,7 +1154,7 @@ function StructureModal({
                       }
                       placeholder="e.g., Executive Level, Mid-Level Staff"
                       disabled={Boolean(readOnly)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100 disabled:text-gray-700"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary disabled:bg-gray-100 disabled:text-gray-700"
                     />
                   </div>
                   <div className="col-span-2">
@@ -1171,7 +1169,7 @@ function StructureModal({
                       }
                       placeholder="e.g., Izyane"
                       disabled={Boolean(readOnly)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100 disabled:text-gray-700"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary disabled:bg-gray-100 disabled:text-gray-700"
                     />
                   </div>
                 </div>
@@ -1186,7 +1184,7 @@ function StructureModal({
                   {!readOnly && (
                     <button
                       onClick={handleAddComponent}
-                      className="text-xs text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1"
+                      className="text-xs text-primary hover:opacity-90 font-medium flex items-center gap-1"
                     >
                       <Plus className="w-3 h-3" />
                       Add Component
@@ -1322,7 +1320,7 @@ function StructureModal({
 
             {/* Right - Preview */}
             <div className="col-span-1">
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border border-purple-200 p-4 sticky top-4">
+              <div className="bg-white rounded-lg border border-gray-200 p-4 sticky top-4">
                 <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   Summary
                 </h4>
@@ -1415,7 +1413,7 @@ function StructureModal({
             <button
               onClick={onSave}
               disabled={busy}
-              className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:opacity-90 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="w-4 h-4" />
               Save Structure

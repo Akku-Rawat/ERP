@@ -478,7 +478,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
                 </button>
               </div>
             </div>
-          </div>
+          </div> 
         </div>
       )}
 
