@@ -367,7 +367,7 @@ export default function SalaryStructureTab() {
   };
 
   return (
-    <div className="max-w-7xl space-y-6">
+    <div className="w-full space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-gray-900">
@@ -404,7 +404,7 @@ export default function SalaryStructureTab() {
       )}
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <div className={`p-4 ${pagedStructures.length > 0 ? "border-b" : ""} flex flex-col md:flex-row md:items-center md:justify-between gap-3`}>
+        <div className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div className="text-sm text-gray-600">
             {filteredStructures.length} structures
           </div>
@@ -418,125 +418,170 @@ export default function SalaryStructureTab() {
           </div>
         </div>
 
-        <div className="p-4 space-y-4">
-          {pagedStructures.map((structure) => {
-            const key = String(structure.name || structure.id);
-            const preview = structurePreviewMap[key];
-            const isPreviewLoading = Boolean(structurePreviewLoading[key]);
-            return (
-              <div
-                key={key}
-                onMouseEnter={() => fetchStructurePreview(key)}
-                className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="text-lg font-semibold text-gray-900 truncate">{structure.name}</div>
-                      <span
-                        className={`px-2 py-0.5 text-xs font-medium rounded ${
-                          structure.is_active
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-600"
+        <div className="p-4">
+          <div className="overflow-auto border border-gray-200 rounded-xl">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  {[
+                    "Structure",
+                    "Company",
+                    "Status",
+                    "Earnings",
+                    "Deductions",
+                    "",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className={`px-4 py-3 text-[10px] font-extrabold text-gray-500 uppercase tracking-wider whitespace-nowrap ${
+                        h === "" ? "text-right" : "text-left"
+                      }`}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  Array.from({ length: 6 }).map((_, skIdx) => (
+                    <tr key={`sk-${skIdx}`} className={skIdx % 2 === 1 ? "bg-gray-50/40" : "bg-white"}>
+                      <td className="px-4 py-3"><div className="h-3 w-40 bg-gray-200 rounded animate-pulse" /></td>
+                      <td className="px-4 py-3"><div className="h-3 w-24 bg-gray-200 rounded animate-pulse" /></td>
+                      <td className="px-4 py-3"><div className="h-5 w-16 bg-gray-200 rounded-full animate-pulse" /></td>
+                      <td className="px-4 py-3"><div className="h-10 w-full bg-gray-200 rounded animate-pulse" /></td>
+                      <td className="px-4 py-3"><div className="h-10 w-full bg-gray-200 rounded animate-pulse" /></td>
+                      <td className="px-4 py-3 text-right"><div className="h-7 w-40 bg-gray-200 rounded-lg animate-pulse ml-auto" /></td>
+                    </tr>
+                  ))
+                ) : pagedStructures.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-10 text-center text-sm text-gray-600">
+                      No salary structures found
+                    </td>
+                  </tr>
+                ) : (
+                  pagedStructures.map((structure, idx) => {
+                    const key = String(structure.name || structure.id);
+                    const preview = structurePreviewMap[key];
+                    const isPreviewLoading = Boolean(structurePreviewLoading[key]);
+
+                    const earnings = Array.isArray(preview?.earnings) ? preview?.earnings : [];
+                    const deductions = Array.isArray(preview?.deductions) ? preview?.deductions : [];
+
+                    return (
+                      <tr
+                        key={key}
+                        onMouseEnter={() => fetchStructurePreview(key)}
+                        className={`border-b border-gray-200 last:border-0 ${
+                          idx % 2 === 1 ? "bg-gray-50/40" : "bg-white"
                         }`}
                       >
-                        {structure.is_active ? "Active" : "Inactive"}
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-500">{structure.company}</div>
-                  </div>
+                        <td className="px-4 py-3">
+                          <div className="text-xs font-extrabold text-gray-900 break-words">
+                            {structure.name}
+                          </div>
+                        </td>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleEdit(structure)}
-                      className="p-2 text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg transition"
-                      title="Edit"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setShowDeleteConfirm(structure.name || structure.id)}
-                      className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
+                        <td className="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">
+                          {structure.company || "—"}
+                        </td>
 
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <div className="text-[11px] font-semibold text-gray-700">Earnings</div>
-                      <div className="mt-2 space-y-1 text-xs text-gray-700">
-                        {isPreviewLoading && !preview ? (
-                          <div className="text-xs text-gray-500">Loading…</div>
-                        ) : (
-                          (preview?.earnings || []).slice(0, 3).map((r: any, idx: number) => (
-                            <div key={`${r?.component}-${idx}`} className="flex items-center justify-between gap-3">
-                              <div className="truncate">{String(r?.component ?? "")}</div>
-                              <div className="font-semibold text-gray-900 tabular-nums">
-                                {Number(r?.amount ?? 0).toLocaleString()}
-                              </div>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 text-[11px] font-bold rounded-full border ${
+                              structure.is_active
+                                ? "bg-green-50 text-green-700 border-green-200"
+                                : "bg-gray-50 text-gray-600 border-gray-200"
+                            }`}
+                          >
+                            {structure.is_active ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3 align-top">
+                          {isPreviewLoading && !preview ? (
+                            <div className="text-xs text-gray-500">Loading…</div>
+                          ) : earnings.length === 0 ? (
+                            <div className="text-xs text-gray-500">—</div>
+                          ) : (
+                            <div className="space-y-1">
+                              {earnings.slice(0, 2).map((r: any, i: number) => (
+                                <div key={`${r?.component}-${i}`} className="flex items-center justify-between gap-3">
+                                  <div className="text-xs text-gray-700 truncate max-w-[220px]">
+                                    {String(r?.component ?? "")}
+                                  </div>
+                                  <div className="text-xs font-extrabold text-gray-900 tabular-nums whitespace-nowrap">
+                                    {Number(r?.amount ?? 0).toLocaleString()}
+                                  </div>
+                                </div>
+                              ))}
+                              {earnings.length > 2 && (
+                                <div className="text-[11px] text-gray-500">+ {(earnings.length - 2).toString()} more…</div>
+                              )}
                             </div>
-                          ))
-                        )}
-                        {!isPreviewLoading && (preview?.earnings || []).length === 0 && (
-                          <div className="text-xs text-gray-500">—</div>
-                        )}
-                        {(preview?.earnings || []).length > 3 && (
-                          <div className="text-xs text-gray-500">+ {(preview.earnings.length - 3).toString()} more…</div>
-                        )}
-                      </div>
-                    </div>
+                          )}
+                        </td>
 
-                    <div>
-                      <div className="text-[11px] font-semibold text-gray-700">Deductions</div>
-                      <div className="mt-2 space-y-1 text-xs text-gray-700">
-                        {isPreviewLoading && !preview ? (
-                          <div className="text-xs text-gray-500">Loading…</div>
-                        ) : (
-                          (preview?.deductions || []).slice(0, 3).map((r: any, idx: number) => (
-                            <div key={`${r?.component}-${idx}`} className="flex items-center justify-between gap-3">
-                              <div className="truncate">{String(r?.component ?? "")}</div>
-                              <div className="font-semibold text-gray-900 tabular-nums">
-                                {Number(r?.amount ?? 0).toLocaleString()}
-                              </div>
+                        <td className="px-4 py-3 align-top">
+                          {isPreviewLoading && !preview ? (
+                            <div className="text-xs text-gray-500">Loading…</div>
+                          ) : deductions.length === 0 ? (
+                            <div className="text-xs text-gray-500">—</div>
+                          ) : (
+                            <div className="space-y-1">
+                              {deductions.slice(0, 2).map((r: any, i: number) => (
+                                <div key={`${r?.component}-${i}`} className="flex items-center justify-between gap-3">
+                                  <div className="text-xs text-gray-700 truncate max-w-[220px]">
+                                    {String(r?.component ?? "")}
+                                  </div>
+                                  <div className="text-xs font-extrabold text-gray-900 tabular-nums whitespace-nowrap">
+                                    {Number(r?.amount ?? 0).toLocaleString()}
+                                  </div>
+                                </div>
+                              ))}
+                              {deductions.length > 2 && (
+                                <div className="text-[11px] text-gray-500">+ {(deductions.length - 2).toString()} more…</div>
+                              )}
                             </div>
-                          ))
-                        )}
-                        {!isPreviewLoading && (preview?.deductions || []).length === 0 && (
-                          <div className="text-xs text-gray-500">—</div>
-                        )}
-                        {(preview?.deductions || []).length > 3 && (
-                          <div className="text-xs text-gray-500">+ {(preview.deductions.length - 3).toString()} more…</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                          )}
+                        </td>
 
-                  <div className="mt-4 flex items-center justify-end">
-                    <button
-                      onClick={() => handleView(structure)}
-                      className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                    >
-                      View
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-
-          {!loading && pagedStructures.length === 0 && (
-            <div className="px-4 py-10 text-center text-gray-600">
-              No salary structures found
-            </div>
-          )}
+                        <td className="px-4 py-3 whitespace-nowrap text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleView(structure)}
+                              className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                            >
+                              View
+                            </button>
+                            <button
+                              onClick={() => handleEdit(structure)}
+                              className="p-2 text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg transition"
+                              title="Edit"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setShowDeleteConfirm(structure.name || structure.id)}
+                              className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {pagedStructures.length > 0 && (
-          <div className="p-4 border-t flex items-center justify-between">
+          <div className="p-4 flex items-center justify-between">
             <div className="text-xs text-gray-500">
               Page {page} of {pageCount}
             </div>

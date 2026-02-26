@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
-  Plus, Save, ChevronLeft,
+  Plus, ChevronLeft,
   FileText, Users, CheckCircle,
-  BarChart3, Layers, Zap, X,
+  Layers, X,
 } from "lucide-react";
 
 import type { PayrollEntry, Employee } from "../../../types/payrolltypes";
@@ -12,7 +12,7 @@ import { getSalarySlipById, getSalarySlips, type SalarySlipDetail, type SalarySl
 // ── Components ────────────────────────────────────────────────────────────────
 import { KPICards } from "./KPICards";
 import { OverviewTab, EmployeesTab } from "./EntryFormTabs";
-import SalaryStructureAssignmentsDashboardTab from "./SalaryStructureAssignmentsDashboardTab";
+import SalaryStructureTab from "../tabs/SalaryStructureTab";
 
 // ── Views ─────────────────────────────────────────────────────────────────────
 import EmployeeDetailsPage from "./EmployeeDetailsPage";
@@ -71,17 +71,16 @@ const Btn: React.FC<{
 // ─────────────────────────────────────────────────────────────────────────────
 // TOP NAVIGATION BAR (shared across views)
 // ─────────────────────────────────────────────────────────────────────────────
-type View = "dashboard" | "newEntry" | "reports";
+type View = "dashboard" | "newEntry" | "salaryStructure" | "reports";
 
 const TopBar: React.FC<{
   view: View;
   setView: (v: View) => void;
-  onQuickCreate: () => void;
   onNewPayroll: () => void;
   totalEmployees?: number;
-}> = ({ view, setView, onQuickCreate, onNewPayroll, totalEmployees }) => {
+}> = ({ view, setView, onNewPayroll, totalEmployees }) => {
   const navItems: { id: View; label: string; icon: React.ReactNode }[] = [
-    { id: "dashboard", label: "Home", icon: <BarChart3 className="w-3.5 h-3.5" /> },
+    { id: "salaryStructure", label: "Salary Structure", icon: <Users className="w-3.5 h-3.5" /> },
     { id: "reports", label: "Reports", icon: <FileText className="w-3.5 h-3.5" /> },
   ];
 
@@ -89,12 +88,18 @@ const TopBar: React.FC<{
     <header className="h-12 shrink-0 bg-card border-b border-theme px-5 flex items-center justify-between z-30 shadow-sm">
       <div className="flex items-center gap-4">
         {/* Brand */}
-        <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setView("dashboard")}
+          className={`flex items-center gap-2 rounded-md px-1.5 py-1 transition ${
+            view === "dashboard" ? "text-primary" : "text-main hover:text-primary"
+          }`}
+        >
           <div className="w-6 h-6 rounded-md bg-primary text-white flex items-center justify-center">
             <Layers className="w-3.5 h-3.5" />
           </div>
-          <span className="text-sm font-extrabold text-main">Payroll</span>
-        </div>
+          <span className="text-sm font-extrabold">Payroll</span>
+        </button>
         <span className="text-muted opacity-30 select-none">|</span>
 
         {/* Nav */}
@@ -115,18 +120,17 @@ const TopBar: React.FC<{
       </div>
 
       <div className="flex items-center gap-2">
-        {typeof totalEmployees === "number" && (
+        {view === "dashboard" && typeof totalEmployees === "number" && (
           <div className="hidden md:flex items-center gap-2 mr-2 px-3 py-1.5 rounded-lg bg-app border border-theme">
             <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Total Employees</span>
             <span className="text-xs font-extrabold text-main tabular-nums">{totalEmployees}</span>
           </div>
         )}
-        <Btn variant="outline" size="sm" icon={<Zap className="w-3.5 h-3.5" />} onClick={onQuickCreate}>
-          Quick Create
-        </Btn>
-        <Btn size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={onNewPayroll}>
-          New Payroll
-        </Btn>
+        {view === "dashboard" && (
+          <Btn size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={onNewPayroll}>
+            New Payroll
+          </Btn>
+        )}
       </div>
     </header>
   );
@@ -142,12 +146,12 @@ const NewPayrollEntry: React.FC<{
   onViewEmployee: (employeeId: string) => void;
 }> = ({ employees, onBack, onCreatePayroll, onViewEmployee }) => {
   const [step, setStep] = useState(0);
-  const [saved, setSaved] = useState(false);
   const [formData, setFormData] = useState<PayrollEntry>({
     payrollName: "", postingDate: new Date().toISOString().slice(0, 10),
     currency: "ZMW", company: "Izyane",
     payrollPayableAccount: "Payroll Payable - Izyane - I",
     status: "Draft", salarySlipTimesheet: false, deductTaxForProof: false,
+
     payrollFrequency: "Monthly", startDate: "", endDate: "",
     paymentAccount: "", costCenter: "", project: "", letterHead: "",
     employeeSelectionMode: "multiple",
@@ -156,10 +160,7 @@ const NewPayrollEntry: React.FC<{
 
   const handleFormChange = (field: string, value: any) => {
     setFormData(p => ({ ...p, [field]: value }));
-    setSaved(false);
   };
-
-  const handleSave = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
 
   const tabs = [
     { label: "Overview", icon: <FileText className="w-3.5 h-3.5" /> },
@@ -177,15 +178,6 @@ const NewPayrollEntry: React.FC<{
           <div className="h-4 w-px bg-theme opacity-40" />
           <span className="text-sm font-extrabold text-main">New Payroll Entry</span>
           <span className="text-xs text-muted opacity-60">· Fill all details to create a payroll run</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {saved
-            ? <span className="flex items-center gap-1 text-xs font-bold text-success bg-success/10 px-2.5 py-1 rounded-full"><CheckCircle className="w-3 h-3" /> Saved</span>
-            : <span className="text-xs text-muted bg-app border border-theme px-2.5 py-1 rounded-full">Unsaved</span>
-          }
-          <Btn variant="outline" size="sm" icon={<Save className="w-3.5 h-3.5" />} onClick={handleSave}>
-            Save Draft
-          </Btn>
         </div>
       </header>
 
@@ -405,8 +397,6 @@ const SalarySlipDetailsModal: React.FC<{
 export default function PayrollManagement() {
   const [view, setView] = useState<View>("dashboard");
 
-  const [dashboardTab, setDashboardTab] = useState<"salarySlips" | "assignments">("salarySlips");
-
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [employeesLoading, setEmployeesLoading] = useState(false);
   const [employeesError, setEmployeesError] = useState<string | null>(null);
@@ -552,7 +542,6 @@ export default function PayrollManagement() {
   const topBarProps = {
     view,
     setView,
-    onQuickCreate: () => showToast("Quick Create is disabled until payroll APIs are connected", "info"),
     onNewPayroll: () => setView("newEntry"),
     totalEmployees: employeesSummary?.totalEmployees ?? employees.length,
   };
@@ -584,6 +573,17 @@ export default function PayrollManagement() {
           onViewEmployee={(id) => setDetailEmployeeId(id)}
         />
       );
+  }
+
+  if (view === "salaryStructure") {
+    return (
+      <div className="h-screen flex flex-col bg-app overflow-hidden">
+        <TopBar {...topBarProps} />
+        <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5">
+          <SalaryStructureTab />
+        </div>
+      </div>
+    );
   }
 
   if (view === "reports") {
@@ -641,142 +641,124 @@ export default function PayrollManagement() {
             </div>
           )}
 
-          <div className="shrink-0 border-b border-theme bg-app px-4 py-3 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setDashboardTab("salarySlips")}
-              className={`px-4 py-2 rounded-lg text-xs font-extrabold border transition ${dashboardTab === "salarySlips"
-                ? "bg-primary text-white border-primary"
-                : "bg-card text-muted border-theme hover:bg-app"
-                }`}
-            >
-              Salary Slips
-            </button>
-            <button
-              type="button"
-              onClick={() => setDashboardTab("assignments")}
-              className={`px-4 py-2 rounded-lg text-xs font-extrabold border transition ${dashboardTab === "assignments"
-                ? "bg-primary text-white border-primary"
-                : "bg-card text-muted border-theme hover:bg-app"
-                }`}
-            >
-              Assignments
-            </button>
-          </div>
-
           <div className="flex-1 min-h-0 overflow-y-auto p-4">
-            {dashboardTab === "assignments" ? (
-              <SalaryStructureAssignmentsDashboardTab />
-            ) : (
-              <div className="mt-4 border border-theme rounded-xl overflow-hidden bg-card">
-                <div className="px-4 py-3 bg-app border-b border-theme flex items-center justify-between">
-                  <div>
-                    <div className="text-xs font-extrabold text-main uppercase tracking-wide">Salary Slips</div>
-                    <div className="text-[11px] text-muted mt-0.5">Latest payroll runs</div>
-                  </div>
-                  <div className="text-xs text-muted">Page {slipsPage} of {slipsTotalPages}</div>
+            <div className="mt-4 border border-theme rounded-xl overflow-hidden bg-card">
+              <div className="px-4 py-3 bg-app border-b border-theme flex items-center justify-between">
+                <div>
+                  <div className="text-xs font-extrabold text-main uppercase tracking-wide">Salary Slips</div>
+                  <div className="text-[11px] text-muted mt-0.5">Latest payroll runs</div>
                 </div>
+                <div className="text-xs text-muted">Page {slipsPage} of {slipsTotalPages}</div>
+              </div>
 
-                {slipsError && (
-                  <div className="px-4 py-3 bg-danger/10 text-danger text-sm border-b border-theme">{slipsError}</div>
-                )}
+              {slipsError && (
+                <div className="px-4 py-3 bg-danger/10 text-danger text-sm border-b border-theme">{slipsError}</div>
+              )}
 
-                <div className="overflow-auto">
-                  <table className="w-full">
-                    <thead className="bg-app border-b border-theme">
+              <div className="overflow-auto">
+                <table className="w-full">
+                  <thead className="bg-app border-b border-theme">
+                    <tr>
+                      {[
+                        "Slip ID",
+                        "Employee",
+                        "Structure",
+                        "Start",
+                        "End",
+                        "Status",
+                        "Earnings",
+                        "Deductions",
+                        "Net",
+                        "",
+                      ].map((h, i) => (
+                        <th
+                          key={String(i)}
+                          className={`px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider whitespace-nowrap ${
+                            i >= 6 && i <= 8 ? "text-right" : "text-left"
+                          }`}
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {slipsLoading ? (
+                      Array.from({ length: 6 }).map((_, skIdx) => (
+                        <tr key={`sk-${skIdx}`} className={skIdx % 2 === 1 ? "bg-app" : "bg-card"}>
+                          <td className="px-4 py-3"><div className="h-3 w-28 bg-theme/60 rounded animate-pulse" /></td>
+                          <td className="px-4 py-3"><div className="h-3 w-20 bg-theme/60 rounded animate-pulse" /></td>
+                          <td className="px-4 py-3"><div className="h-3 w-24 bg-theme/60 rounded animate-pulse" /></td>
+                          <td className="px-4 py-3"><div className="h-3 w-16 bg-theme/60 rounded animate-pulse" /></td>
+                          <td className="px-4 py-3"><div className="h-3 w-16 bg-theme/60 rounded animate-pulse" /></td>
+                          <td className="px-4 py-3"><div className="h-5 w-16 bg-theme/60 rounded-full animate-pulse" /></td>
+                          <td className="px-4 py-3 text-right"><div className="h-3 w-16 bg-theme/60 rounded animate-pulse ml-auto" /></td>
+                          <td className="px-4 py-3 text-right"><div className="h-3 w-16 bg-theme/60 rounded animate-pulse ml-auto" /></td>
+                          <td className="px-4 py-3 text-right"><div className="h-3 w-16 bg-theme/60 rounded animate-pulse ml-auto" /></td>
+                          <td className="px-4 py-3 text-right"><div className="h-7 w-16 bg-theme/60 rounded-lg animate-pulse ml-auto" /></td>
+                        </tr>
+                      ))
+                    ) : salarySlips.length === 0 ? (
                       <tr>
-                        {[
-                          "Slip ID",
-                          "Employee",
-                          "Structure",
-                          "Start",
-                          "End",
-                          "Status",
-                          "Earnings",
-                          "Deductions",
-                          "Net",
-                          "",
-                        ].map((h, i) => (
-                          <th
-                            key={String(i)}
-                            className={`px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider whitespace-nowrap ${
-                              i >= 6 && i <= 8 ? "text-right" : "text-left"
-                            }`}
-                          >
-                            {h}
-                          </th>
-                        ))}
+                        <td colSpan={10} className="px-4 py-10 text-center text-sm text-muted">
+                          No salary slips found
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {slipsLoading ? (
-                        <tr>
-                          <td colSpan={10} className="px-4 py-10 text-center text-sm text-muted">
-                            Loading salary slips...
+                    ) : (
+                      salarySlips.map((s, idx) => (
+                        <tr
+                          key={s.name}
+                          className={`border-b border-theme last:border-0 ${idx % 2 === 1 ? "bg-app" : "bg-card"}`}
+                        >
+                          <td className="px-4 py-3 text-xs font-semibold text-main break-words">{s.name}</td>
+                          <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{s.employee}</td>
+                          <td className="px-4 py-3 text-xs text-muted break-words">{s.salary_structure}</td>
+                          <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{s.start_date}</td>
+                          <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{s.end_date}</td>
+                          <td className="px-4 py-3"><StatusChip status={s.status} /></td>
+                          <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(s.total_earnings ?? 0).toLocaleString("en-ZM")}</td>
+                          <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(s.total_deduction ?? 0).toLocaleString("en-ZM")}</td>
+                          <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(s.net_pay ?? 0).toLocaleString("en-ZM")}</td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              onClick={() => {
+                                setSlipDetailsId(s.name);
+                                setSlipDetailsOpen(true);
+                              }}
+                              className="px-3 py-1.5 rounded-lg text-xs font-extrabold border border-theme bg-card text-main hover:bg-app"
+                            >
+                              View
+                            </button>
                           </td>
                         </tr>
-                      ) : salarySlips.length === 0 ? (
-                        <tr>
-                          <td colSpan={10} className="px-4 py-10 text-center text-sm text-muted">
-                            No salary slips found
-                          </td>
-                        </tr>
-                      ) : (
-                        salarySlips.map((s, idx) => (
-                          <tr
-                            key={s.name}
-                            className={`border-b border-theme last:border-0 ${idx % 2 === 1 ? "bg-app" : "bg-card"}`}
-                          >
-                            <td className="px-4 py-3 text-xs font-semibold text-main break-words">{s.name}</td>
-                            <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{s.employee}</td>
-                            <td className="px-4 py-3 text-xs text-muted break-words">{s.salary_structure}</td>
-                            <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{s.start_date}</td>
-                            <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{s.end_date}</td>
-                            <td className="px-4 py-3"><StatusChip status={s.status} /></td>
-                            <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(s.total_earnings ?? 0).toLocaleString("en-ZM")}</td>
-                            <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(s.total_deduction ?? 0).toLocaleString("en-ZM")}</td>
-                            <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(s.net_pay ?? 0).toLocaleString("en-ZM")}</td>
-                            <td className="px-4 py-3 text-right">
-                              <button
-                                onClick={() => {
-                                  setSlipDetailsId(s.name);
-                                  setSlipDetailsOpen(true);
-                                }}
-                                className="px-3 py-1.5 rounded-lg text-xs font-extrabold border border-theme bg-card text-main hover:bg-app"
-                              >
-                                View
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
-                <div className="px-4 py-3 bg-app border-t border-theme flex items-center justify-between">
-                  <div className="text-xs text-muted">Showing {salarySlips.length} slips</div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setSlipsPage((p) => Math.max(1, p - 1))}
-                      disabled={slipsPage <= 1}
-                      className="px-3 py-2 text-xs font-bold rounded-lg border border-theme bg-card text-main disabled:opacity-40"
-                    >
-                      Previous
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSlipsPage((p) => Math.min(slipsTotalPages, p + 1))}
-                      disabled={slipsPage >= slipsTotalPages}
-                      className="px-3 py-2 text-xs font-bold rounded-lg border border-theme bg-card text-main disabled:opacity-40"
-                    >
-                      Next
-                    </button>
-                  </div>
+              <div className="px-4 py-3 bg-app border-t border-theme flex items-center justify-between">
+                <div className="text-xs text-muted">Showing {salarySlips.length} slips</div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSlipsPage((p) => Math.max(1, p - 1))}
+                    disabled={slipsPage <= 1}
+                    className="px-3 py-2 text-xs font-bold rounded-lg border border-theme bg-card text-main disabled:opacity-40"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSlipsPage((p) => Math.min(slipsTotalPages, p + 1))}
+                    disabled={slipsPage >= slipsTotalPages}
+                    className="px-3 py-2 text-xs font-bold rounded-lg border border-theme bg-card text-main disabled:opacity-40"
+                  >
+                    Next
+                  </button>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

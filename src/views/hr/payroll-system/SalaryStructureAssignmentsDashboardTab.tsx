@@ -104,7 +104,7 @@ export default function SalaryStructureAssignmentsDashboardTab() {
               <table className="w-full">
                 <thead className="bg-card border-b border-theme">
                   <tr>
-                    {["Name", "Employee", "Full Name", "Structure", "From", "Company", "Department", "Currency"].map(
+                    {["Employee ID", "Full Name", "Structure", "Date", "Department", "Currency"].map(
                       (h) => (
                         <th
                           key={h}
@@ -119,13 +119,13 @@ export default function SalaryStructureAssignmentsDashboardTab() {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={8} className="px-4 py-10 text-center text-sm text-muted">
+                      <td colSpan={6} className="px-4 py-10 text-center text-sm text-muted">
                         Loading assignments...
                       </td>
                     </tr>
                   ) : rows.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-4 py-10 text-center text-sm text-muted">
+                      <td colSpan={6} className="px-4 py-10 text-center text-sm text-muted">
                         No assignments found
                       </td>
                     </tr>
@@ -135,12 +135,10 @@ export default function SalaryStructureAssignmentsDashboardTab() {
                         key={r.name}
                         className={`border-b border-theme last:border-0 ${idx % 2 === 1 ? "bg-app" : "bg-card"}`}
                       >
-                        <td className="px-4 py-3 text-xs font-semibold text-main break-words">{r.name}</td>
                         <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{r.employee}</td>
                         <td className="px-4 py-3 text-xs text-muted break-words">{r.full_name || "—"}</td>
                         <td className="px-4 py-3 text-xs text-muted break-words">{r.salary_structure}</td>
                         <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{r.from_date}</td>
-                        <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{r.company || "—"}</td>
                         <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{r.department || "—"}</td>
                         <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{r.currency || "—"}</td>
                       </tr>

@@ -2,6 +2,12 @@
 import React, { useState, useEffect } from "react";
 import { Calculator, RefreshCw, Lock } from "lucide-react";
 import { getCurrentCeiling } from "../../../api/employeeapi";
+import {
+  getSalaryStructureById,
+  getSalaryStructures,
+  type SalaryStructureDetail,
+  type SalaryStructureListItem,
+} from "../../../api/salaryStructureApi";
 
 type CompensationTabProps = {
   formData: any;
@@ -29,75 +35,7 @@ const ZAMBIAN_BANKS = [
 // ─────────────────────────────────────────────────────────
 // AllowanceRow is defined outside to prevent remount on parent re-render
 // ─────────────────────────────────────────────────────────
-type AllowanceRowProps = {
-  label: string;
-  field: string;
-  value: string;
-  type: "percentage" | "amount";
-  basicSalary: string;
-  onValueChange: (field: string, val: string) => void;
-  onTypeChange: (v: "percentage" | "amount") => void;
-  onBlur: () => void;
-  placeholder: string;
-};
-
-const AllowanceRow: React.FC<AllowanceRowProps> = ({
-  label,
-  field,
-  value,
-  type,
-  basicSalary,
-  onValueChange,
-  onTypeChange,
-  onBlur,
-  placeholder,
-}) => {
-  const basic = parseFloat(basicSalary || "0");
-  const numVal = parseFloat(value || "0");
-  const resolvedAmount =
-    type === "percentage" ? (basic * numVal) / 100 : numVal;
-  const resolvedPercent =
-    basic > 0 && numVal > 0 ? ((numVal / basic) * 100).toFixed(1) : null;
-
-  return (
-    <div>
-      <label className="block text-xs text-main mb-1.5 font-medium">
-        {label}
-      </label>
-      <div className="flex gap-2">
-        <input
-          type="number"
-          value={value}
-          onChange={(e) => onValueChange(field, e.target.value)}
-          onBlur={onBlur}
-          placeholder={type === "percentage" ? "e.g., 20" : placeholder}
-          className="flex-1 px-4 py-2 text-sm border border-theme bg-card rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
-        />
-        <select
-          value={type}
-          onChange={(e) =>
-            onTypeChange(e.target.value as "percentage" | "amount")
-          }
-          className="w-24 px-2 py-2 text-sm border border-theme bg-card rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
-        >
-          <option value="amount">ZMW</option>
-          <option value="percentage">%</option>
-        </select>
-      </div>
-
-      {/* Helper text — shows resolved amount or percent depending on mode */}
-      {basicSalary && value && (
-        <p className="text-[11px] text-muted mt-1">
-          {type === "percentage"
-            ? `≈ ZMW ${resolvedAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-            : resolvedPercent
-              ? `≈ ${resolvedPercent}% of basic`
-              : null}
-        </p>
-      )}
-    </div>
-  );
-};
+ 
 
 // ─────────────────────────────────────────────────────────
 // BankNameField — custom dropdown with 5-item scroll + manual entry fallback
@@ -263,14 +201,17 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
   const [ceilingLoading, setCeilingLoading] = useState(false);
   const [ceilingError, setCeilingError] = useState(false);
 
-  const [housingType, setHousingType] = useState<"percentage" | "amount">(
-    "amount",
+  const [salaryStructures, setSalaryStructures] = useState<SalaryStructureListItem[]>(
+    [],
   );
-  const [mealType, setMealType] = useState<"percentage" | "amount">("amount");
-  const [transportType, setTransportType] = useState<"percentage" | "amount">(
-    "amount",
+  const [salaryStructureLoading, setSalaryStructureLoading] = useState(false);
+  const [salaryStructureError, setSalaryStructureError] = useState<string | null>(
+    null,
   );
-  const [otherType, setOtherType] = useState<"percentage" | "amount">("amount");
+
+  const [salaryStructureDetailLoading, setSalaryStructureDetailLoading] = useState(false);
+  const [salaryStructureDetailError, setSalaryStructureDetailError] = useState<string | null>(null);
+  const [salaryStructureDetail, setSalaryStructureDetail] = useState<SalaryStructureDetail | null>(null);
 
   // Fetch the current NAPSA ceiling on mount (skipped if already populated, e.g. edit mode)
   const fetchCeiling = async () => {
@@ -305,43 +246,144 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
     }
   }, []);
 
-  // Resolves an allowance value to its ZMW amount based on input type
-  const resolve = (
-    val: string,
-    type: "percentage" | "amount",
-    basic: number,
-  ) => {
-    const n = parseFloat(val || "0");
-    return type === "percentage" ? (basic * n) / 100 : n;
-  };
-
-  const calculateGross = () => {
-    const basic = parseFloat(formData.basicSalary || "0");
-    return (
-      basic +
-      resolve(formData.housingAllowance, housingType, basic) +
-      resolve(formData.mealAllowance, mealType, basic) +
-      resolve(formData.transportAllowance, transportType, basic) +
-      resolve(formData.otherAllowances, otherType, basic)
-    );
-  };
-
-  // Recalculates and saves gross whenever user leaves any salary field
-  const handleFieldBlur = () => {
-    const gross = calculateGross();
-    if (gross > 0) handleInputChange("grossSalary", gross.toString());
-  };
-
-  const grossSalary = calculateGross();
-  const monthlySalary = grossSalary / 12;
-
   // Once fetched successfully, ceiling fields go read-only
   const ceilingLocked = !ceilingError && !!formData.ceilingAmount;
   const lockedClass = "bg-app text-main cursor-default";
   const editableClass = "bg-card text-main";
 
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      setSalaryStructureLoading(true);
+      setSalaryStructureError(null);
+      try {
+        const rows = await getSalaryStructures();
+        if (!mounted) return;
+        setSalaryStructures(Array.isArray(rows) ? rows : []);
+      } catch (e: any) {
+        if (!mounted) return;
+        setSalaryStructures([]);
+        setSalaryStructureError(e?.message || "Failed to load salary structures");
+      } finally {
+        if (!mounted) return;
+        setSalaryStructureLoading(false);
+      }
+    };
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const extractAmount = (
+    detail: SalaryStructureDetail | any,
+    opts: { componentNames?: string[]; abbrs?: string[] },
+  ): number => {
+    const earnings = Array.isArray(detail?.earnings) ? detail.earnings : [];
+    const names = (opts.componentNames ?? []).map((s) => String(s).trim().toLowerCase());
+    const abbrs = (opts.abbrs ?? []).map((s) => String(s).trim().toLowerCase());
+    const row = earnings.find((r: any) => {
+      const cn = String(r?.component ?? "").trim().toLowerCase();
+      const ab = String(r?.abbr ?? "").trim().toLowerCase();
+      return (cn && names.includes(cn)) || (ab && abbrs.includes(ab));
+    });
+    const amount = Number(row?.amount ?? 0);
+    return Number.isFinite(amount) ? amount : 0;
+  };
+
+  const applySalaryStructure = async (structureName: string) => {
+    const name = String(structureName ?? "").trim();
+    if (!name) {
+      setSalaryStructureDetail(null);
+      setSalaryStructureDetailError(null);
+      setSalaryStructureDetailLoading(false);
+      return;
+    }
+
+    setSalaryStructureDetailLoading(true);
+    setSalaryStructureDetailError(null);
+    try {
+      const detail = await getSalaryStructureById(name);
+
+      setSalaryStructureDetail(detail);
+
+      const basic = extractAmount(detail, {
+        componentNames: ["basic", "basic salary"],
+        abbrs: ["basic"],
+      });
+      const housing = extractAmount(detail, {
+        componentNames: ["housing allowance"],
+        abbrs: ["ha"],
+      });
+      const meal = extractAmount(detail, {
+        componentNames: ["meal allowance"],
+        abbrs: ["ma", "meal"],
+      });
+      const transport = extractAmount(detail, {
+        componentNames: ["transport allowance"],
+        abbrs: ["ta", "transport"],
+      });
+
+      handleInputChange("basicSalary", basic ? String(basic) : "");
+      handleInputChange("housingAllowance", housing ? String(housing) : "");
+      handleInputChange("mealAllowance", meal ? String(meal) : "");
+      handleInputChange("transportAllowance", transport ? String(transport) : "");
+      handleInputChange("otherAllowances", "");
+
+      const gross = basic + housing + meal + transport;
+      handleInputChange("grossSalary", gross > 0 ? String(gross) : "");
+    } catch (e: any) {
+      setSalaryStructureDetail(null);
+      const serverMessage =
+        e?.response?.data?.message ??
+        e?.response?.data?.exc ??
+        e?.response?.data?._server_messages ??
+        e?.response?.data?.error?.message ??
+        e?.message;
+
+      const safeMessage = String(serverMessage ?? "").trim();
+      setSalaryStructureDetailError(safeMessage || "Failed to load salary structure details");
+    } finally {
+      setSalaryStructureDetailLoading(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-5xl mx-auto space-y-5">
+      <div className="bg-card p-5 rounded-lg border border-theme space-y-3">
+        <h4 className="text-xs font-semibold text-main uppercase tracking-wide">
+          Salary Structure
+        </h4>
+        <div>
+          <label className="block text-xs text-main mb-1 font-medium">
+            Select salary structure
+          </label>
+          <select
+            value={String(formData.salaryStructure ?? "")}
+            onChange={(e) => {
+              const v = e.target.value;
+              handleInputChange("salaryStructure", v);
+              applySalaryStructure(v);
+            }}
+            disabled={salaryStructureLoading || salaryStructureDetailLoading}
+            className="w-full px-3 py-2 text-sm border border-theme bg-card rounded-lg focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
+          >
+            <option value="">Select a salary structure</option>
+            {salaryStructures.map((s) => (
+              <option key={String(s.id ?? s.name)} value={String(s.name)}>
+                {String(s.name)}
+              </option>
+            ))}
+          </select>
+          {salaryStructureDetailError ? (
+            <div className="text-[11px] text-danger mt-1">{salaryStructureDetailError}</div>
+          ) : null}
+          {salaryStructureError ? (
+            <div className="text-[11px] text-danger mt-1">{salaryStructureError}</div>
+          ) : null}
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-6">
         {/* ═══════════════ LEFT — Salary & Payroll ═══════════════ */}
         <div className="space-y-5">
@@ -349,92 +391,101 @@ const CompensationTab: React.FC<CompensationTabProps> = ({
           <div className="bg-card p-5 rounded-lg border border-theme space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-semibold text-main uppercase tracking-wide">
-                Salary Components (Annual)
+                Salary Components
               </h4>
               <Calculator className="w-4 h-4 text-muted" />
             </div>
 
-            <div>
-              <label className="block text-xs text-main mb-1.5 font-medium">
-                Basic Salary (ZMW) <span className="text-danger">*</span>
-              </label>
-              <input
-                type="number"
-                value={formData.basicSalary || ""}
-                onChange={(e) =>
-                  handleInputChange("basicSalary", e.target.value)
-                }
-                onBlur={handleFieldBlur}
-                placeholder="e.g., 14500"
-                className="w-full px-4 py-2 text-sm border border-theme bg-card rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
+            {salaryStructureDetailLoading ? (
+              <div className="text-xs text-muted">Loading salary structure…</div>
+            ) : !formData.salaryStructure ? (
+              <div className="text-xs text-muted">Select a salary structure to preview its components.</div>
+            ) : !salaryStructureDetail ? (
+              <div className="text-xs text-muted">—</div>
+            ) : (
+              (() => {
+                const currency = String(formData.currency ?? "ZMW").trim() || "ZMW";
+                const earnings = Array.isArray((salaryStructureDetail as any)?.earnings)
+                  ? (salaryStructureDetail as any).earnings
+                  : [];
+                const deductions = Array.isArray((salaryStructureDetail as any)?.deductions)
+                  ? (salaryStructureDetail as any).deductions
+                  : [];
+                const totalEarnings = earnings.reduce((s: number, r: any) => s + Number(r?.amount ?? 0), 0);
+                const totalDeductions = deductions.reduce((s: number, r: any) => s + Number(r?.amount ?? 0), 0);
+                const net = totalEarnings - totalDeductions;
+                const monthly = totalEarnings / 12;
 
-            <AllowanceRow
-              label="Housing Allowance"
-              field="housingAllowance"
-              value={formData.housingAllowance || ""}
-              type={housingType}
-              basicSalary={formData.basicSalary}
-              onValueChange={handleInputChange}
-              onTypeChange={setHousingType}
-              onBlur={handleFieldBlur}
-              placeholder="e.g., 3000"
-            />
-            <AllowanceRow
-              label="Meal Allowance"
-              field="mealAllowance"
-              value={formData.mealAllowance || ""}
-              type={mealType}
-              basicSalary={formData.basicSalary}
-              onValueChange={handleInputChange}
-              onTypeChange={setMealType}
-              onBlur={handleFieldBlur}
-              placeholder="e.g., 1300"
-            />
-            <AllowanceRow
-              label="Transport Allowance"
-              field="transportAllowance"
-              value={formData.transportAllowance || ""}
-              type={transportType}
-              basicSalary={formData.basicSalary}
-              onValueChange={handleInputChange}
-              onTypeChange={setTransportType}
-              onBlur={handleFieldBlur}
-              placeholder="e.g., 1000"
-            />
-            <AllowanceRow
-              label="Other Allowances"
-              field="otherAllowances"
-              value={formData.otherAllowances || ""}
-              type={otherType}
-              basicSalary={formData.basicSalary}
-              onValueChange={handleInputChange}
-              onTypeChange={setOtherType}
-              onBlur={handleFieldBlur}
-              placeholder="e.g., 700"
-            />
+                return (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="bg-app border border-theme rounded-lg p-3">
+                        <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Salary Structure</div>
+                        <div className="text-xs font-bold text-main mt-1 break-words">{String((salaryStructureDetail as any)?.name ?? formData.salaryStructure)}</div>
+                      </div>
+                      <div className="bg-app border border-theme rounded-lg p-3">
+                        <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Gross Pay</div>
+                        <div className="text-xs font-extrabold text-main mt-1 tabular-nums">{currency} {Number(totalEarnings || 0).toLocaleString()}</div>
+                        <div className="text-[11px] text-muted mt-0.5">Monthly: {currency} {Number(monthly || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+                      </div>
+                      <div className="bg-app border border-theme rounded-lg p-3">
+                        <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Net</div>
+                        <div className="text-xs font-extrabold text-main mt-1 tabular-nums">{currency} {Number(net || 0).toLocaleString()}</div>
+                        <div className="text-[11px] text-muted mt-0.5">Deductions: {currency} {Number(totalDeductions || 0).toLocaleString()}</div>
+                      </div>
+                    </div>
 
-            {/* Live gross salary summary */}
-            <div className="pt-3 border-t border-theme">
-              <div className="bg-primary/10 border border-primary/30 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-semibold text-primary uppercase">
-                    Gross Salary (Annual)
-                  </span>
-                </div>
-                <div className="text-2xl font-bold text-primary">
-                  ZMW{" "}
-                  {Number(formData.grossSalary || 0).toLocaleString()}
-                </div>
-                <div className="text-xs text-primary/70 mt-0.5">
-                  Monthly: ZMW{" "}
-                  {monthlySalary.toLocaleString(undefined, {
-                    maximumFractionDigits: 2,
-                  })}
-                </div>
-              </div>
-            </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div className="border border-theme rounded-xl bg-card p-4">
+                        <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Earnings</div>
+                        <div className="mt-3 space-y-2">
+                          {earnings.length === 0 ? (
+                            <div className="text-xs text-muted">—</div>
+                          ) : (
+                            earnings.map((row: any, idx: number) => (
+                              <div key={`${row?.component ?? idx}`} className="border-b border-theme/60 last:border-0 py-2">
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="text-xs font-bold text-main truncate">{String(row?.component ?? "—")}</div>
+                                    <div className="text-[11px] text-muted mt-0.5">abbr: {String(row?.abbr ?? "—")}</div>
+                                  </div>
+                                  <div className="text-xs font-extrabold text-main tabular-nums whitespace-nowrap">
+                                    {currency} {Number(row?.amount ?? 0).toLocaleString()}
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="border border-theme rounded-xl bg-card p-4">
+                        <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Deductions</div>
+                        <div className="mt-3 space-y-2">
+                          {deductions.length === 0 ? (
+                            <div className="text-xs text-muted">—</div>
+                          ) : (
+                            deductions.map((row: any, idx: number) => (
+                              <div key={`${row?.component ?? idx}`} className="border-b border-theme/60 last:border-0 py-2">
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="text-xs font-bold text-main truncate">{String(row?.component ?? "—")}</div>
+                                    <div className="text-[11px] text-muted mt-0.5">abbr: {String(row?.abbr ?? "—")}</div>
+                                  </div>
+                                  <div className="text-xs font-extrabold text-main tabular-nums whitespace-nowrap">
+                                    {currency} {Number(row?.amount ?? 0).toLocaleString()}
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()
+            )}
           </div>
 
           {/* Payroll config — currency, frequency, method */}

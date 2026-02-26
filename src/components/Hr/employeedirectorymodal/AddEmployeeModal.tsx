@@ -75,6 +75,7 @@ const DEFAULT_FORM_DATA = {
   currency: "ZMW",
   paymentFrequency: "Monthly",
   paymentMethod: "Bank Transfer",
+  salaryStructure: "",
 
   // Bank
   accountName: "",
@@ -513,6 +514,7 @@ const [step, setStep] = useState<"verification" | "form">(
       currency: formData.currency,
       PaymentFrequency: formData.paymentFrequency,
       PaymentMethod: formData.paymentMethod,
+      SalaryStructure: formData.salaryStructure,
 
       // Bank
       AccountType: formData.accountType,
