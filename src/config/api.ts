@@ -14,6 +14,39 @@ export const API = {
     summary: `${ERP_BASE}/api/method/erpnext.dashboards.main.api.summary`,
   },
 
+  /* =========================
+   * PAYROLL SETUP
+   * ========================= */
+  payrollSetup: {
+    salaryStructure: {
+      create: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_structure.api.create_salary_structure`,
+      getAll: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_structure.api.get_salary_structures`,
+      getById: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_structure.api.get_salary_structure_by_id`,
+      update: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_structure.api.update_salary_structure`,
+      delete: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_structure.api.delete_salary_structure`,
+    },
+    salaryStructureAssignment: {
+      create: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_structure_assignment.api.create_salary_structure_assignment`,
+      getAll: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_structure_assignment.api.get_salary_structure_assignment`,
+    },
+    salaryComponent: {
+      create: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_component.api.create_salary_component`,
+      getAll: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_component.api.get_salary_components`,
+      getById: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_component.api.get_salary_component_by_id`,
+      getOne: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_component.api.get_salary_component`,
+      update: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_component.api.update_salary_component`,
+      delete: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_component.api.delete_salary_component`,
+    },
+    salarySlip: {
+      getAll: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_slip.api.get_salary_slips`,
+      getById: `${ERP_BASE}/api/method/payroll_rola_izyane.api.salary_slip.api.get_salary_slip_by_id`,
+    },
+  },
+
+  payrolls: {
+    singleEmployeePayroll: `${ERP_BASE}/api/method/payroll_rola_izyane.api.payrolls.single.main.single_employee_payroll`,
+  },
+
   
    /* =========================
    * SALES DASHBOARD

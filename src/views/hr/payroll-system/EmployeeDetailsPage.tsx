@@ -323,61 +323,59 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
         ) : (
           <div className="max-w-[1280px] mx-auto">
             <div className="bg-card border border-theme rounded-2xl overflow-hidden shadow-sm">
-              <div className="p-6">
-                <div className="flex items-start justify-between gap-6">
-                  <div className="flex items-start gap-4 min-w-0">
-                    <div className="w-12 h-12 rounded-xl bg-app border border-theme flex items-center justify-center overflow-hidden shrink-0">
-                      {profilePictureUrl ? (
-                        <img src={profilePictureUrl} alt={employeeName} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-6 h-6 rounded-lg bg-primary/10" />
-                      )}
+                <div className="p-6">
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="flex items-start gap-4 min-w-0">
+                      <div className="w-12 h-12 rounded-xl bg-app border border-theme flex items-center justify-center overflow-hidden shrink-0">
+                        {profilePictureUrl ? (
+                          <img src={profilePictureUrl} alt={employeeName} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-6 h-6 rounded-lg bg-primary/10" />
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="text-lg font-extrabold text-main truncate">{employeeName}</div>
+                        <div className="text-xs text-muted mt-0.5 truncate">{employeeCode ? `Employee ID: ${employeeCode}` : `ID: ${employeeId}`}</div>
+                      </div>
                     </div>
 
-                    <div className="min-w-0">
-                      <div className="text-lg font-extrabold text-main truncate">{employeeName}</div>
-                      <div className="text-xs text-muted mt-0.5 truncate">{employeeCode ? `Employee ID: ${employeeCode}` : `ID: ${employeeId}`}</div>
+                    <span className={`shrink-0 inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold border ${headerStatus.toLowerCase() === "active" ? "bg-success/10 text-success border-success/20" : "bg-warning/10 text-warning border-warning/20"}`}>
+                      {headerStatus}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+                    <div className="bg-app border border-theme rounded-xl px-4 py-3">
+                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Job Title</div>
+                      <div className="text-sm font-bold text-main mt-1 truncate">{headerJobTitle || "—"}</div>
                     </div>
-                  </div>
-
-                  <span className={`shrink-0 inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold border ${headerStatus.toLowerCase() === "active"
-                    ? "bg-success/10 text-success border-success/20"
-                    : "bg-warning/10 text-warning border-warning/20"}`}>
-                    {headerStatus}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-                  <div className="bg-app border border-theme rounded-xl px-4 py-3">
-                    <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Job Title</div>
-                    <div className="text-sm font-bold text-main mt-1 truncate">{headerJobTitle || "—"}</div>
-                  </div>
-                  <div className="bg-app border border-theme rounded-xl px-4 py-3">
-                    <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Department</div>
-                    <div className="text-sm font-bold text-main mt-1 truncate">{headerDepartment || "—"}</div>
-                  </div>
-                  <div className="bg-app border border-theme rounded-xl px-4 py-3">
-                    <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Email</div>
-                    <div className="text-sm font-bold text-main mt-1 truncate">{headerEmail || "—"}</div>
+                    <div className="bg-app border border-theme rounded-xl px-4 py-3">
+                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Department</div>
+                      <div className="text-sm font-bold text-main mt-1 truncate">{headerDepartment || "—"}</div>
+                    </div>
+                    <div className="bg-app border border-theme rounded-xl px-4 py-3">
+                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Email</div>
+                      <div className="text-sm font-bold text-main mt-1 truncate">{headerEmail || "—"}</div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5">
-              <div className="lg:col-span-2">
-                <Card title="Employee Information">
-                  <div className="space-y-5">
-                    <div>
-                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-2">Profile</div>
-                      <KeyValueGrid data={profileInfo} columns={4} />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5">
+                <div className="lg:col-span-2">
+                  <Card title="Employee Information">
+                    <div className="space-y-5">
+                      <div>
+                        <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-2">Profile</div>
+                        <KeyValueGrid data={profileInfo} columns={4} />
+                      </div>
                     </div>
-                  </div>
-                </Card>
+                  </Card>
 
-                <div className="mt-5">
-                  <Card title="Salary, Bank & Deductions">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="mt-5">
+                    <Card title="Salary, Bank & Deductions">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="min-w-0">
                           <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-3">Salary Breakdown</div>
                           <div className="space-y-2">
@@ -435,70 +433,64 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
                           </div>
                         </div>
                       </div>
+                    </Card>
+                  </div>
+                </div>
+
+                <div className="space-y-5">
+                  <Card title="Employment & Payroll">
+                    <KeyValueGrid columns={4} data={{ ...(employmentCompact || {}), ...(payrollCompact || {}) }} />
+
+                    {weeklyScheduleRows.length > 0 && (
+                      <div className="mt-6">
+                        <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-2">Weekly Schedule</div>
+                        <div className="overflow-x-auto border border-theme rounded-xl">
+                          <table className="w-full">
+                            <thead className="bg-app border-b border-theme">
+                              <tr>
+                                <th className="px-4 py-2 text-[10px] font-extrabold text-muted uppercase tracking-wider text-left whitespace-nowrap">Day</th>
+                                <th className="px-4 py-2 text-[10px] font-extrabold text-muted uppercase tracking-wider text-left whitespace-nowrap">Time</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {weeklyScheduleRows.map((r) => (
+                                <tr key={r.day} className="border-b border-theme last:border-0">
+                                  <td className="px-4 py-2 text-xs font-bold text-main whitespace-nowrap">{r.day}</td>
+                                  <td className="px-4 py-2 text-xs text-muted whitespace-nowrap">{r.time}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+
+                  <Card
+                    title="Documents"
+                    right={
+                      <div className="text-xs font-extrabold text-muted tabular-nums">
+                        {Array.isArray(documents) ? documents.length : 0}
+                      </div>
+                    }
+                  >
+                    {Array.isArray(documents) && documents.length > 0 ? (
+                      <div className="space-y-3">
+                        {documents.map((doc, idx) => (
+                          <div key={idx} className="py-2">
+                            <KeyValueGrid data={(doc || {}) as AnyRecord} columns={4} />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-muted">No documents</div>
+                    )}
                   </Card>
                 </div>
               </div>
-
-              <div className="space-y-5">
-                <Card title="Employment & Payroll">
-                  <KeyValueGrid
-                    columns={4}
-                    data={{
-                      ...(employmentCompact || {}),
-                      ...(payrollCompact || {}),
-                    }}
-                  />
-
-                  {weeklyScheduleRows.length > 0 && (
-                    <div className="mt-6">
-                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-2">Weekly Schedule</div>
-                      <div className="overflow-x-auto border border-theme rounded-xl">
-                        <table className="w-full">
-                          <thead className="bg-app border-b border-theme">
-                            <tr>
-                              <th className="px-4 py-2 text-[10px] font-extrabold text-muted uppercase tracking-wider text-left whitespace-nowrap">Day</th>
-                              <th className="px-4 py-2 text-[10px] font-extrabold text-muted uppercase tracking-wider text-left whitespace-nowrap">Time</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {weeklyScheduleRows.map((r) => (
-                              <tr key={r.day} className="border-b border-theme last:border-0">
-                                <td className="px-4 py-2 text-xs font-bold text-main whitespace-nowrap">{r.day}</td>
-                                <td className="px-4 py-2 text-xs text-muted whitespace-nowrap">{r.time}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
-                </Card>
-
-                <Card
-                  title="Documents"
-                  right={
-                    <div className="text-xs font-extrabold text-muted tabular-nums">
-                      {Array.isArray(documents) ? documents.length : 0}
-                    </div>
-                  }
-                >
-                  {Array.isArray(documents) && documents.length > 0 ? (
-                    <div className="space-y-3">
-                      {documents.map((doc, idx) => (
-                        <div key={idx} className="py-2">
-                          <KeyValueGrid data={(doc || {}) as AnyRecord} columns={4} />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-sm text-muted">No documents</div>
-                  )}
-                </Card>
-              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
     </div>
   );
 };

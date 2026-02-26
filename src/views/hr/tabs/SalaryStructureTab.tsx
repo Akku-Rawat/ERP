@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Plus,
   Edit2,
@@ -6,86 +6,309 @@ import {
   Save,
   X,
   DollarSign,
-  Check,
   AlertTriangle,
 } from "lucide-react";
+import toast from "react-hot-toast";
 import {
-  getSalaryStructures,
   createSalaryStructure,
-  updateSalaryStructure,
+  createSalaryComponent,
+  deleteSalaryComponent,
   deleteSalaryStructure,
-} from "../../../views/hr/tabs/salarystructure";
-import type { SalaryStructure } from "../../../views/hr/tabs/salarystructure";
-import type { SalaryComponent } from "../../../views/hr/tabs/salarystructure";
-import HrDateInput from "../../../components/Hr/HrDateInput";
+  getSalaryComponents,
+  getSalaryStructures,
+  getSalaryStructureById,
+  updateSalaryComponent,
+  updateSalaryStructure,
+  type SalaryStructureComponentCreate,
+  type SalaryStructureCreatePayload,
+  type SalaryStructureUpdatePayload,
+  type SalaryStructureListItem,
+  type SalaryComponentCreatePayload,
+  type SalaryComponentListItem,
+  type SalaryComponentUpdatePayload,
+} from "../../../api/salaryStructureApi";
 
 export default function SalaryStructureTab() {
-  const [structures, setStructures] = useState<SalaryStructure[]>(
-    getSalaryStructures(),
-  );
+  const [structures, setStructures] = useState<SalaryStructureListItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [editingStructure, setEditingStructure] =
-    useState<SalaryStructure | null>(null);
+  const [showComponentsModal, setShowComponentsModal] = useState(false);
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const [modalMode, setModalMode] = useState<"edit" | "view">("edit");
+  const [editingStructure, setEditingStructure] = useState<{
+    id?: string;
+    name: string;
+    company: string;
+    components: SalaryStructureComponentCreate[];
+  } | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(
     null,
   );
+  const [salaryComponents, setSalaryComponents] = useState<SalaryComponentListItem[]>([]);
+  const [structurePreviewMap, setStructurePreviewMap] = useState<
+    Record<string, { earnings: any[]; deductions: any[] }>
+  >({});
+  const [structurePreviewLoading, setStructurePreviewLoading] = useState<Record<string, boolean>>({});
 
-  const refreshStructures = () => {
-    setStructures(getSalaryStructures());
+  const extractFrappeMessageHtml = (e: any): string | null => {
+    const data = e?.response?.data;
+    if (!data) return null;
+    if (typeof data?.message === "string" && data.message.trim()) return data.message;
+
+    const raw = data?._server_messages;
+    if (typeof raw !== "string" || !raw.trim()) return null;
+    try {
+      const arr = JSON.parse(raw);
+      const first = Array.isArray(arr) ? arr[0] : null;
+      if (!first) return null;
+      const obj = typeof first === "string" ? JSON.parse(first) : first;
+      const msg = obj?.message;
+      return typeof msg === "string" && msg.trim() ? msg : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const refreshStructures = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getSalaryStructures();
+      setStructures(Array.isArray(data) ? data : []);
+    } catch (e: any) {
+      setError(e?.message || "Failed to load salary structures");
+    } finally {
+      setLoading(false);
+    }
+
+  };
+
+  const fetchStructurePreview = async (structureNameOrId: string) => {
+    if (!structureNameOrId) return;
+    if (structurePreviewMap[structureNameOrId]) return;
+    if (structurePreviewLoading[structureNameOrId]) return;
+
+    setStructurePreviewLoading((p) => ({ ...p, [structureNameOrId]: true }));
+    try {
+      const detail = await getSalaryStructureById(structureNameOrId);
+      const earnings = Array.isArray((detail as any)?.earnings) ? (detail as any).earnings : [];
+      const deductions = Array.isArray((detail as any)?.deductions) ? (detail as any).deductions : [];
+      setStructurePreviewMap((p) => ({
+        ...p,
+        [structureNameOrId]: { earnings, deductions },
+      }));
+    } catch {
+      setStructurePreviewMap((p) => ({
+        ...p,
+        [structureNameOrId]: { earnings: [], deductions: [] },
+      }));
+    } finally {
+      setStructurePreviewLoading((p) => ({ ...p, [structureNameOrId]: false }));
+    }
+  };
+
+  const openStructureModalFromDetail = async (
+    structure: SalaryStructureListItem,
+    mode: "edit" | "view",
+  ) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const detail = await getSalaryStructureById(structure.name || structure.id);
+      const earnings = Array.isArray((detail as any)?.earnings)
+        ? ((detail as any).earnings as any[])
+        : [];
+      const deductions = Array.isArray((detail as any)?.deductions)
+        ? ((detail as any).deductions as any[])
+        : [];
+
+      const components: SalaryStructureComponentCreate[] = [...earnings, ...deductions]
+        .map((row: any) => {
+          const isDeductionSource = deductions.includes(row);
+          return {
+            component: String(row?.component ?? ""),
+            type: (isDeductionSource ? "deduction" : "earning") as
+              | "deduction"
+              | "earning",
+            amount: Number(row?.amount ?? 0) || 0,
+            enabled: 1 as 1,
+          };
+        })
+        .filter((c) => Boolean(c.component));
+
+      setModalMode(mode);
+      setEditingStructure({
+        id: structure.id,
+        name: (detail as any)?.name ?? structure.name,
+        company: (detail as any)?.company ?? structure.company,
+        components: components.length
+          ? components
+          : [{ component: "Basic", type: "earning", amount: 0, enabled: 1 }],
+      });
+      await refreshComponents();
+      setShowModal(true);
+    } catch (e: any) {
+      setError(e?.message || "Failed to load salary structure");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredStructures = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const items = Array.isArray(structures) ? structures : [];
+    if (!q) return items;
+    return items.filter((s) => {
+      return (
+        String(s.name || "").toLowerCase().includes(q) ||
+        String(s.company || "").toLowerCase().includes(q)
+      );
+    });
+  }, [structures, query]);
+
+  const pageCount = useMemo(() => {
+    return Math.max(1, Math.ceil(filteredStructures.length / pageSize));
+  }, [filteredStructures.length]);
+
+  const pagedStructures = useMemo(() => {
+    const p = Math.min(Math.max(1, page), pageCount);
+    const start = (p - 1) * pageSize;
+    return filteredStructures.slice(start, start + pageSize);
+  }, [filteredStructures, page, pageCount]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query]);
+
+  useEffect(() => {
+    refreshStructures();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const refreshComponents = async () => {
+    try {
+      const data = await getSalaryComponents();
+      setSalaryComponents(Array.isArray(data) ? data : []);
+    } catch {
+      setSalaryComponents([]);
+    }
   };
 
   const handleCreateNew = () => {
+    setModalMode("edit");
     setEditingStructure({
-      id: `struct_${Date.now()}`,
       name: "",
-      description: "",
-      effectiveFrom: new Date().toISOString().split("T")[0],
-      status: "Draft",
-      usedBy: 0,
-      level: "",
+      company: "",
       components: [
         {
-          id: `c_${Date.now()}`,
-          name: "Basic Salary",
-          category: "Earning",
-          valueType: "percentage",
-          value: 60,
-          taxable: true,
-          statutory: "NAPSA Base",
+          component: "Basic",
+          type: "earning",
+          amount: 0,
+          enabled: 1,
         },
       ],
     });
+    refreshComponents();
     setShowModal(true);
   };
 
-  const handleEdit = (structure: SalaryStructure) => {
-    setEditingStructure(JSON.parse(JSON.stringify(structure)));
-    setShowModal(true);
+  const handleEdit = async (structure: SalaryStructureListItem) => {
+    await openStructureModalFromDetail(structure, "edit");
   };
 
-  const handleDelete = (id: string) => {
-    const structure = structures.find((s) => s.id === id);
-    if (structure && structure.usedBy > 0) {
-      alert(
-        `Cannot delete! This structure is used by ${structure.usedBy} employees.`,
-      );
+  const handleView = async (structure: SalaryStructureListItem) => {
+    await openStructureModalFromDetail(structure, "view");
+  };
+
+  const handleDelete = async (name: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await deleteSalaryStructure(name);
+      await refreshStructures();
+      setShowDeleteConfirm(null);
+      toast.success("Salary structure deleted");
+    } catch (e: any) {
+      const html = extractFrappeMessageHtml(e);
+      const msg = html ? html.replace(/<[^>]*>/g, "").trim() : e?.message;
+      setError(msg || "Failed to delete salary structure");
+
+      if (html) {
+        toast.dismiss();
+        toast(
+          (t) => (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-[420px]">
+              <div className="text-sm font-semibold text-gray-900">Unable to delete</div>
+              <div
+                className="text-xs text-gray-600 mt-1 [&_a]:text-purple-700 [&_a]:underline"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+              <div className="flex items-center justify-end mt-4">
+                <button
+                  type="button"
+                  onClick={() => toast.dismiss(t.id)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          ),
+          { duration: 8000 },
+        );
+      } else {
+        toast.error(msg || "Failed to delete salary structure");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const canSubmit = useMemo(() => {
+    return Boolean(
+      editingStructure?.name?.trim() &&
+        editingStructure?.company?.trim() &&
+        (editingStructure?.components?.length || 0) > 0,
+    );
+  }, [editingStructure]);
+
+  const handleSave = async () => {
+    if (!editingStructure) return;
+    if (!canSubmit) {
+      toast.error("Please provide structure name, company, and at least one component");
       return;
     }
-    deleteSalaryStructure(id);
-    refreshStructures();
-    setShowDeleteConfirm(null);
-  };
 
-  const handleSave = (structure: SalaryStructure) => {
-    const existingIndex = structures.findIndex((s) => s.id === structure.id);
-    if (existingIndex >= 0) {
-      updateSalaryStructure(structure.id, structure);
-    } else {
-      createSalaryStructure(structure);
+    setLoading(true);
+    setError(null);
+    try {
+      if (editingStructure.id) {
+        const payload: SalaryStructureUpdatePayload = {
+          id: editingStructure.id,
+          name: editingStructure.name,
+          company: editingStructure.company,
+          components: editingStructure.components,
+        };
+        await updateSalaryStructure(payload);
+      } else {
+        const payload: SalaryStructureCreatePayload = {
+          name: editingStructure.name,
+          company: editingStructure.company,
+          components: editingStructure.components,
+        };
+        await createSalaryStructure(payload);
+      }
+      await refreshStructures();
+      setShowModal(false);
+      setEditingStructure(null);
+    } catch (e: any) {
+      setError(e?.message || "Failed to save salary structure");
+    } finally {
+      setLoading(false);
     }
-    refreshStructures();
-    setShowModal(false);
-    setEditingStructure(null);
   };
 
   return (
@@ -99,28 +322,188 @@ export default function SalaryStructureTab() {
             Manage reusable salary templates
           </p>
         </div>
-        <button
-          onClick={handleCreateNew}
-          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Create Structure
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              refreshComponents();
+              setShowComponentsModal(true);
+            }}
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+          >
+            Components
+          </button>
+          <button
+            onClick={handleCreateNew}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Create Structure
+          </button>
+        </div>
       </div>
 
-      {/* Structures List */}
-      <div className="grid grid-cols-1 gap-4">
-        {structures.map((structure) => (
-          <StructureCard
-            key={structure.id}
-            structure={structure}
-            onEdit={handleEdit}
-            onDelete={() => setShowDeleteConfirm(structure.id)}
-          />
-        ))}
+      {error && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="p-4 border-b flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="text-sm text-gray-600">
+            {filteredStructures.length} structures
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by name or company"
+              className="w-full md:w-80 px-3 py-2 text-sm border border-gray-300 rounded-lg"
+            />
+          </div>
+        </div>
+
+        <div className="p-4 space-y-4">
+          {pagedStructures.map((structure) => {
+            const key = String(structure.name || structure.id);
+            const preview = structurePreviewMap[key];
+            const isPreviewLoading = Boolean(structurePreviewLoading[key]);
+            return (
+              <div
+                key={key}
+                onMouseEnter={() => fetchStructurePreview(key)}
+                className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="text-lg font-semibold text-gray-900 truncate">{structure.name}</div>
+                      <span
+                        className={`px-2 py-0.5 text-xs font-medium rounded ${
+                          structure.is_active
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {structure.is_active ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500">{structure.company}</div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleEdit(structure)}
+                      className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition"
+                      title="Edit"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteConfirm(structure.name || structure.id)}
+                      className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <div className="text-[11px] font-semibold text-gray-700">Earnings</div>
+                      <div className="mt-2 space-y-1 text-xs text-gray-700">
+                        {isPreviewLoading && !preview ? (
+                          <div className="text-xs text-gray-500">Loading…</div>
+                        ) : (
+                          (preview?.earnings || []).slice(0, 3).map((r: any, idx: number) => (
+                            <div key={`${r?.component}-${idx}`} className="flex items-center justify-between gap-3">
+                              <div className="truncate">{String(r?.component ?? "")}</div>
+                              <div className="font-semibold text-gray-900 tabular-nums">
+                                {Number(r?.amount ?? 0).toLocaleString()}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                        {!isPreviewLoading && (preview?.earnings || []).length === 0 && (
+                          <div className="text-xs text-gray-500">—</div>
+                        )}
+                        {(preview?.earnings || []).length > 3 && (
+                          <div className="text-xs text-gray-500">+ {(preview.earnings.length - 3).toString()} more…</div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-[11px] font-semibold text-gray-700">Deductions</div>
+                      <div className="mt-2 space-y-1 text-xs text-gray-700">
+                        {isPreviewLoading && !preview ? (
+                          <div className="text-xs text-gray-500">Loading…</div>
+                        ) : (
+                          (preview?.deductions || []).slice(0, 3).map((r: any, idx: number) => (
+                            <div key={`${r?.component}-${idx}`} className="flex items-center justify-between gap-3">
+                              <div className="truncate">{String(r?.component ?? "")}</div>
+                              <div className="font-semibold text-gray-900 tabular-nums">
+                                {Number(r?.amount ?? 0).toLocaleString()}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                        {!isPreviewLoading && (preview?.deductions || []).length === 0 && (
+                          <div className="text-xs text-gray-500">—</div>
+                        )}
+                        {(preview?.deductions || []).length > 3 && (
+                          <div className="text-xs text-gray-500">+ {(preview.deductions.length - 3).toString()} more…</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-end">
+                    <button
+                      onClick={() => handleView(structure)}
+                      className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    >
+                      View
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {!loading && pagedStructures.length === 0 && (
+            <div className="px-4 py-10 text-center text-gray-600">
+              No salary structures found
+            </div>
+          )}
+        </div>
+
+        <div className="p-4 border-t flex items-center justify-between">
+          <div className="text-xs text-gray-500">
+            Page {page} of {pageCount}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <button
+              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+              disabled={page >= pageCount}
+              className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
 
-      {structures.length === 0 && (
+      {!loading && structures.length === 0 && (
         <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
           <DollarSign className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600 mb-4">No salary structures created yet</p>
@@ -142,13 +525,24 @@ export default function SalaryStructureTab() {
             setShowModal(false);
             setEditingStructure(null);
           }}
+          onChange={setEditingStructure}
+          busy={loading}
+          salaryComponents={salaryComponents}
+          readOnly={modalMode === "view"}
+        />
+      )}
+
+      {showComponentsModal && (
+        <SalaryComponentsModal
+          onClose={() => setShowComponentsModal(false)}
+          onChanged={refreshComponents}
         />
       )}
 
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
         <DeleteConfirmModal
-          structure={structures.find((s) => s.id === showDeleteConfirm)!}
+          structure={structures.find((s) => (s.name || s.id) === showDeleteConfirm)!}
           onConfirm={() => handleDelete(showDeleteConfirm)}
           onCancel={() => setShowDeleteConfirm(null)}
         />
@@ -157,120 +551,468 @@ export default function SalaryStructureTab() {
   );
 }
 
-// Structure Card Component
-function StructureCard({
-  structure,
-  onEdit,
-  onDelete,
+function SalaryComponentsModal({
+  onClose,
+  onChanged,
 }: {
-  structure: SalaryStructure;
-  onEdit: (s: SalaryStructure) => void;
-  onDelete: () => void;
+  onClose: () => void;
+  onChanged: () => void;
 }) {
-  const totalPercentage = structure.components
-    .filter((c) => c.category === "Earning" && c.valueType === "percentage")
-    .reduce((sum, c) => sum + (typeof c.value === "number" ? c.value : 0), 0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [items, setItems] = useState<SalaryComponentListItem[]>([]);
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const [editing, setEditing] = useState<{
+    id?: string;
+    name: string;
+    type: "Earning" | "Deduction";
+    abbr: string;
+    description: string;
+    enabled: boolean;
+    amount_based_on_formula: boolean;
+    condition: string;
+    formula: string;
+    tax_applicable: boolean;
+  } | null>(null);
+
+  const refresh = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getSalaryComponents();
+      setItems(Array.isArray(data) ? data : []);
+    } catch (e: any) {
+      setError(e?.message || "Failed to load salary components");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const arr = Array.isArray(items) ? items : [];
+    if (!q) return arr;
+    return arr.filter((c) => {
+      return (
+        String(c.component || "").toLowerCase().includes(q) ||
+        String(c.abbr || "").toLowerCase().includes(q) ||
+        String(c.type || "").toLowerCase().includes(q)
+      );
+    });
+  }, [items, query]);
+
+  const pageCount = useMemo(() => {
+    return Math.max(1, Math.ceil(filtered.length / pageSize));
+  }, [filtered.length]);
+
+  const paged = useMemo(() => {
+    const p = Math.min(Math.max(1, page), pageCount);
+    const start = (p - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, page, pageCount]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query]);
+
+  const startCreate = () => {
+    setEditing({
+      name: "",
+      type: "Earning",
+      abbr: "",
+      description: "",
+      enabled: true,
+      amount_based_on_formula: false,
+      condition: "",
+      formula: "",
+      tax_applicable: false,
+    });
+  };
+
+  const startEdit = (c: SalaryComponentListItem) => {
+    setEditing({
+      id: c.id,
+      name: c.component || c.id,
+      type: String(c.type || "Earning") as any,
+      abbr: c.abbr || "",
+      description: c.description || "",
+      enabled: Boolean(c.enabled),
+      amount_based_on_formula: false,
+      condition: "",
+      formula: "",
+      tax_applicable: Boolean(c.tax_applicable),
+    });
+  };
+
+  const save = async () => {
+    if (!editing) return;
+    if (!editing.name.trim() || !editing.abbr.trim()) {
+      toast.error("Please provide component name and abbreviation");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      if (editing.id) {
+        const payload: SalaryComponentUpdatePayload = {
+          id: editing.id,
+          name: editing.name,
+          type: editing.type,
+          abbr: editing.abbr,
+          description: editing.description,
+          enabled: editing.enabled ? 1 : 0,
+          amount_based_on_formula: editing.amount_based_on_formula ? 1 : 0,
+          condition: editing.condition,
+          formula: editing.formula,
+          tax_applicable: editing.tax_applicable ? 1 : 0,
+        };
+        await updateSalaryComponent(payload);
+      } else {
+        const payload: SalaryComponentCreatePayload = {
+          name: editing.name,
+          type: editing.type,
+          abbr: editing.abbr,
+          description: editing.description,
+          enabled: editing.enabled ? 1 : 0,
+          amount_based_on_formula: editing.amount_based_on_formula ? 1 : 0,
+          condition: editing.condition,
+          formula: editing.formula,
+          tax_applicable: editing.tax_applicable ? 1 : 0,
+        };
+        await createSalaryComponent(payload);
+      }
+      await refresh();
+      onChanged();
+      setEditing(null);
+      toast.success("Salary component saved");
+    } catch (e: any) {
+      setError(e?.message || "Failed to save salary component");
+      toast.error(e?.message || "Failed to save salary component");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const remove = async (name: string) => {
+    toast.dismiss();
+    toast(
+      (t) => (
+        <div className="bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-[340px]">
+          <div className="text-sm font-semibold text-gray-900">Delete Salary Component</div>
+          <div className="text-xs text-gray-500 mt-1">Are you sure you want to delete "{name}"?</div>
+          <div className="flex items-center justify-end gap-2 mt-4">
+            <button
+              type="button"
+              onClick={() => toast.dismiss(t.id)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                (async () => {
+                  try {
+                    toast.dismiss(t.id);
+                    setLoading(true);
+                    setError(null);
+                    await deleteSalaryComponent(name);
+                    await refresh();
+                    onChanged();
+                    if (editing?.name === name || editing?.id === name) setEditing(null);
+                    toast.success("Salary component deleted");
+                  } catch (e: any) {
+                    const msg = e?.message || "Failed to delete salary component";
+                    setError(msg);
+                    toast.error(msg);
+                  } finally {
+                    setLoading(false);
+                  }
+                })();
+              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity },
+    );
+  };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h3 className="text-lg font-semibold text-gray-900">
-              {structure.name}
-            </h3>
-            <span
-              className={`px-2 py-0.5 text-xs font-medium rounded ${
-                structure.status === "Active"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-600"
-              }`}
-            >
-              {structure.status}
-            </span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+          <div className="min-w-0">
+            <div className="text-lg font-semibold">Salary Components</div>
+            <div className="text-xs text-white/80 mt-0.5">Manage earnings and deductions</div>
           </div>
-          <p className="text-sm text-gray-600 mb-3">{structure.description}</p>
-          <div className="flex items-center gap-4 text-xs text-gray-500">
-            <span>📊 {structure.components.length} components</span>
-            <span>👥 Used by {structure.usedBy} employees</span>
-            <span>
-              📅 Effective:{" "}
-              {new Date(structure.effectiveFrom).toLocaleDateString()}
-            </span>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => onEdit(structure)}
-            className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition"
-          >
-            <Edit2 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={onDelete}
-            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-            disabled={structure.usedBy > 0}
-          >
-            <Trash2 className="w-4 h-4" />
+          <button onClick={onClose} className="text-white/80 hover:text-white">
+            <X className="w-5 h-5" />
           </button>
         </div>
-      </div>
 
-      {/* Component Preview */}
-      <div className="border-t pt-4">
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <p className="text-xs font-semibold text-gray-700 mb-2">
-              Earnings ({totalPercentage}%)
-            </p>
-            <div className="space-y-1">
-              {structure.components
-                .filter((c) => c.category === "Earning")
-                .slice(0, 3)
-                .map((c) => (
-                  <div key={c.id} className="flex justify-between text-xs">
-                    <span className="text-gray-600">{c.name}</span>
-                    <span className="font-medium">
-                      {typeof c.value === "number"
-                        ? c.valueType === "percentage"
-                          ? `${c.value}%`
-                          : `ZMW ${c.value}`
-                        : c.value}
-                    </span>
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+            <div className="text-sm text-gray-600">{filtered.length} components</div>
+            <button
+              onClick={startCreate}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              New Component
+            </button>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search components"
+              className="w-full md:w-96 px-3 py-2 text-sm border border-gray-300 rounded-lg"
+            />
+            <div className="text-xs text-gray-500">Page {page} of {pageCount}</div>
+          </div>
+
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 mb-4">
+              {error}
+            </div>
+          )}
+
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-gray-50 text-gray-700">
+                    <tr>
+                      <th className="text-left font-semibold px-4 py-3">Component</th>
+                      <th className="text-left font-semibold px-4 py-3">Abbr</th>
+                      <th className="text-left font-semibold px-4 py-3">Type</th>
+                      <th className="text-left font-semibold px-4 py-3">Tax</th>
+                      <th className="text-left font-semibold px-4 py-3">Enabled</th>
+                      <th className="text-right font-semibold px-4 py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-gray-800">
+                    {paged.map((c) => (
+                      <tr key={c.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          <div className="font-semibold text-gray-900">{c.component || c.id}</div>
+                          {c.description && (
+                            <div className="text-xs text-gray-500 line-clamp-1">{c.description}</div>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-gray-700">{c.abbr}</td>
+                        <td className="px-4 py-3 text-gray-700">{String(c.type || "")}</td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs font-medium ${c.tax_applicable ? "text-purple-700" : "text-gray-500"}`}>
+                            {c.tax_applicable ? "Taxable" : "No"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs font-medium ${c.enabled ? "text-green-700" : "text-gray-500"}`}>
+                            {c.enabled ? "Yes" : "No"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => startEdit(c)}
+                              className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg"
+                              title="Edit"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => remove(c.id)}
+                              className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {!loading && paged.length === 0 && (
+                      <tr>
+                        <td className="px-4 py-10 text-center text-gray-600" colSpan={6}>
+                          No salary components found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="p-4 border-t flex items-center justify-end gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Prev
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                  disabled={page >= pageCount}
+                  className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+          </div>
+        </div>
+
+        {editing && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+              <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+                <div className="min-w-0">
+                  <div className="text-lg font-semibold">{editing?.id ? "Edit" : "Create"} Component</div>
+                  <div className="text-xs text-white/80 mt-0.5">Fill in the component details</div>
+                </div>
+                <button onClick={() => setEditing(null)} className="text-white/80 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Name *</label>
+                    <input
+                      value={editing.name}
+                      onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                    />
                   </div>
-                ))}
-              {structure.components.filter((c) => c.category === "Earning")
-                .length > 3 && (
-                <p className="text-xs text-gray-500">
-                  +
-                  {structure.components.filter((c) => c.category === "Earning")
-                    .length - 3}{" "}
-                  more...
-                </p>
-              )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Type *</label>
+                      <select
+                        value={editing.type}
+                        onChange={(e) => setEditing({ ...editing, type: e.target.value as any })}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                      >
+                        <option value="Earning">Earning</option>
+                        <option value="Deduction">Deduction</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Abbr *</label>
+                      <input
+                        value={editing.abbr}
+                        onChange={(e) => setEditing({ ...editing, abbr: e.target.value })}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                    <input
+                      value={editing.description}
+                      onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={editing.enabled}
+                        onChange={(e) => setEditing({ ...editing, enabled: e.target.checked })}
+                      />
+                      Enabled
+                    </label>
+
+                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={editing.tax_applicable}
+                        onChange={(e) => setEditing({ ...editing, tax_applicable: e.target.checked })}
+                      />
+                      Tax applicable
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={editing.amount_based_on_formula}
+                        onChange={(e) =>
+                          setEditing({
+                            ...editing,
+                            amount_based_on_formula: e.target.checked,
+                          })
+                        }
+                      />
+                      Amount based on formula
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Condition</label>
+                      <input
+                        value={editing.condition}
+                        onChange={(e) => setEditing({ ...editing, condition: e.target.value })}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Formula</label>
+                      <input
+                        value={editing.formula}
+                        onChange={(e) => setEditing({ ...editing, formula: e.target.value })}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
+                <button
+                  onClick={() => setEditing(null)}
+                  className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={save}
+                  disabled={loading}
+                  className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save className="w-4 h-4" />
+                  Save
+                </button>
+              </div>
             </div>
           </div>
-          <div>
-            <p className="text-xs font-semibold text-gray-700 mb-2">
-              Deductions
-            </p>
-            <div className="space-y-1">
-              {structure.components
-                .filter((c) => c.category === "Deduction")
-                .map((c) => (
-                  <div key={c.id} className="flex justify-between text-xs">
-                    <span className="text-gray-600">{c.name}</span>
-                    <span className="font-medium text-red-600">
-                      {typeof c.value === "number"
-                        ? c.valueType === "percentage"
-                          ? `${c.value}%`
-                          : `ZMW ${c.value}`
-                        : c.value}
-                    </span>
-                  </div>
-                ))}
-            </div>
-          </div>
+        )}
+
+        <div className="px-6 py-4 border-t flex justify-end gap-3 bg-gray-50">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
@@ -282,95 +1024,123 @@ function StructureModal({
   structure,
   onSave,
   onClose,
+  onChange,
+  busy,
+  salaryComponents,
+  readOnly,
 }: {
-  structure: SalaryStructure;
-  onSave: (s: SalaryStructure) => void;
+  structure: {
+    id?: string;
+    name: string;
+    company: string;
+    components: SalaryStructureComponentCreate[];
+  };
+  onSave: () => void;
   onClose: () => void;
+  onChange: (v: any) => void;
+  busy: boolean;
+  salaryComponents: SalaryComponentListItem[];
+  readOnly?: boolean;
 }) {
-  const [formData, setFormData] = useState<SalaryStructure>(structure);
-  const [showComponentModal, setShowComponentModal] = useState(false);
-  const [editingComponent, setEditingComponent] =
-    useState<SalaryComponent | null>(null);
+  const [formData, setFormData] = useState(structure);
+
+  const totalAmount = useMemo(() => {
+    return (formData.components || []).reduce(
+      (sum, c) => sum + (Number(c.amount || 0) || 0),
+      0,
+    );
+  }, [formData.components]);
+
+  const enabledComponents = useMemo(() => {
+    return (formData.components || []).filter((c) => Boolean(c?.enabled));
+  }, [formData.components]);
+
+  const earnings = useMemo(() => {
+    return enabledComponents.filter(
+      (c) => String(c?.type || "").toLowerCase() === "earning",
+    );
+  }, [enabledComponents]);
+
+  const deductions = useMemo(() => {
+    return enabledComponents.filter(
+      (c) => String(c?.type || "").toLowerCase() === "deduction",
+    );
+  }, [enabledComponents]);
+
+  const totalEarnings = useMemo(() => {
+    return earnings.reduce((sum, c) => sum + (Number(c.amount || 0) || 0), 0);
+  }, [earnings]);
+
+  const totalDeductions = useMemo(() => {
+    return deductions.reduce((sum, c) => sum + (Number(c.amount || 0) || 0), 0);
+  }, [deductions]);
+
+  const netPay = useMemo(() => {
+    return totalEarnings - totalDeductions;
+  }, [totalEarnings, totalDeductions]);
+
+  useEffect(() => {
+    onChange(formData);
+  }, [formData, onChange]);
 
   const handleAddComponent = () => {
-    setEditingComponent({
-      id: `c_${Date.now()}`,
-      name: "",
-      category: "Earning",
-      valueType: "percentage",
-      value: 0,
-      taxable: true,
+    setFormData({
+      ...formData,
+      components: [
+        ...(formData.components || []),
+        { component: "", type: "earning", amount: 0, enabled: 1 },
+      ],
     });
-    setShowComponentModal(true);
   };
 
-  const handleEditComponent = (component: SalaryComponent) => {
-    setEditingComponent(JSON.parse(JSON.stringify(component)));
-    setShowComponentModal(true);
-  };
-
-  const handleSaveComponent = (component: SalaryComponent) => {
-    const existingIndex = formData.components.findIndex(
-      (c) => c.id === component.id,
+  const handleRemoveComponent = (idx: number) => {
+    toast.dismiss();
+    toast(
+      (t) => (
+        <div className="bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-[340px]">
+          <div className="text-sm font-semibold text-gray-900">Remove Component</div>
+          <div className="text-xs text-gray-500 mt-1">
+            Remove this component row from the structure?
+          </div>
+          <div className="flex items-center justify-end gap-2 mt-4">
+            <button
+              type="button"
+              onClick={() => toast.dismiss(t.id)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                toast.dismiss(t.id);
+                const next = [...(formData.components || [])];
+                next.splice(idx, 1);
+                setFormData({ ...formData, components: next });
+                toast.success("Component removed");
+              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity },
     );
-    if (existingIndex >= 0) {
-      const updated = [...formData.components];
-      updated[existingIndex] = component;
-      setFormData({ ...formData, components: updated });
-    } else {
-      setFormData({
-        ...formData,
-        components: [...formData.components, component],
-      });
-    }
-    setShowComponentModal(false);
-    setEditingComponent(null);
   };
-
-  const handleDeleteComponent = (id: string) => {
-    if (confirm("Delete this component?")) {
-      setFormData({
-        ...formData,
-        components: formData.components.filter((c) => c.id !== id),
-      });
-    }
-  };
-
-  const handleSubmit = () => {
-    if (!formData.name.trim()) {
-      alert("Please enter structure name");
-      return;
-    }
-    if (formData.components.length === 0) {
-      alert("Please add at least one component");
-      return;
-    }
-    onSave(formData);
-  };
-
-  const grossExample = 10000;
-  const totalPercentage = formData.components
-    .filter((c) => c.category === "Earning" && c.valueType === "percentage")
-    .reduce((sum, c) => sum + (typeof c.value === "number" ? c.value : 0), 0);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="px-6 py-4 border-b flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              {structure.id.startsWith("struct_") ? "Create" : "Edit"} Salary
-              Structure
-            </h3>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Define components and calculations
-            </p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+          <div className="min-w-0">
+            <div className="text-lg font-semibold">
+              {readOnly ? "View" : formData.id ? "Edit" : "Create"} Salary Structure
+            </div>
+            <div className="text-xs text-white/80 mt-0.5">Define components and calculations</div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
+          <button onClick={onClose} className="text-white/80 hover:text-white">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -397,71 +1167,26 @@ function StructureModal({
                         setFormData({ ...formData, name: e.target.value })
                       }
                       placeholder="e.g., Executive Level, Mid-Level Staff"
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                      disabled={Boolean(readOnly)}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100 disabled:text-gray-700"
                     />
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Description
+                      Company *
                     </label>
-                    <textarea
-                      value={formData.description}
+                    <input
+                      type="text"
+                      value={formData.company}
                       onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
+                        setFormData({ ...formData, company: e.target.value })
                       }
-                      placeholder="Brief description"
-                      rows={2}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                      placeholder="e.g., Izyane"
+                      disabled={Boolean(readOnly)}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100 disabled:text-gray-700"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Effective From *
-                    </label>
-                    <HrDateInput
-                      value={formData.effectiveFrom}
-                      onChange={(v: string) =>
-                        setFormData({
-                          ...formData,
-                          effectiveFrom: v,
-                        })
-                      }
-                      placeholder="DD/MM/YYYY"
-                      inputClassName="px-3 py-2 text-sm border border-gray-300 rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Status
-                    </label>
-                    <select
-                      value={formData.status}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          status: e.target.value as "Active" | "Draft",
-                        })
-                      }
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                    >
-                      <option value="Draft">Draft</option>
-                      <option value="Active">Active</option>
-                    </select>
                   </div>
                 </div>
-
-                {totalPercentage > 100 && (
-                  <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-red-700">
-                      Warning: Total percentage earnings ({totalPercentage}%)
-                      exceeds 100%
-                    </p>
-                  </div>
-                )}
               </div>
 
               {/* Components */}
@@ -470,72 +1195,136 @@ function StructureModal({
                   <h4 className="text-sm font-semibold text-gray-900">
                     Salary Components
                   </h4>
-                  <button
-                    onClick={handleAddComponent}
-                    className="text-xs text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1"
-                  >
-                    <Plus className="w-3 h-3" />
-                    Add Component
-                  </button>
+                  {!readOnly && (
+                    <button
+                      onClick={handleAddComponent}
+                      className="text-xs text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1"
+                    >
+                      <Plus className="w-3 h-3" />
+                      Add Component
+                    </button>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  {formData.components.map((component) => (
+                  {(formData.components || []).map((component, idx) => (
                     <div
-                      key={component.id}
-                      className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 transition"
+                      key={`${component.component}-${idx}`}
+                      className="grid grid-cols-12 gap-3 p-3 bg-white border border-gray-200 rounded-lg"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-medium text-gray-900">
-                            {component.name}
-                          </span>
-                          <span
-                            className={`px-2 py-0.5 text-xs font-medium rounded ${
-                              component.category === "Earning"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
-                            }`}
+                      <div className="col-span-5">
+                        <label className="block text-[10px] font-bold text-gray-600 mb-1">
+                          Component
+                        </label>
+                        {salaryComponents.length > 0 ? (
+                          <select
+                            value={component.component}
+                            onChange={(e) => {
+                              const next = [...(formData.components || [])];
+                              next[idx] = { ...next[idx], component: e.target.value };
+                              setFormData({ ...formData, components: next });
+                            }}
+                            disabled={Boolean(readOnly)}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-700"
                           >
-                            {component.category}
-                          </span>
-                          {component.statutory && (
-                            <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded">
-                              {component.statutory}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-gray-600">
-                          <span className="capitalize">
-                            {component.valueType}
-                          </span>
-                          <span>•</span>
-                          <span className="font-medium">
-                            {typeof component.value === "number"
-                              ? component.valueType === "percentage"
-                                ? `${component.value}%`
-                                : `ZMW ${component.value}`
-                              : component.value}
-                          </span>
-                          <span>•</span>
-                          <span>
-                            {component.taxable ? "Taxable" : "Non-taxable"}
-                          </span>
-                        </div>
+                            <option value="">Select component</option>
+                            {salaryComponents.map((c) => (
+                              <option key={c.id} value={c.component || c.id}>
+                                {c.component || c.id}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            value={component.component}
+                            onChange={(e) => {
+                              const next = [...(formData.components || [])];
+                              next[idx] = { ...next[idx], component: e.target.value };
+                              setFormData({ ...formData, components: next });
+                            }}
+                            disabled={Boolean(readOnly)}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-700"
+                            placeholder="e.g., Basic"
+                          />
+                        )}
                       </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEditComponent(component)}
-                          className="p-1.5 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded"
+
+                      <div className="col-span-3">
+                        <label className="block text-[10px] font-bold text-gray-600 mb-1">
+                          Type
+                        </label>
+                        <select
+                          value={String(component.type || "earning").toLowerCase()}
+                          onChange={(e) => {
+                            const next = [...(formData.components || [])];
+                            next[idx] = {
+                              ...next[idx],
+                              type: e.target.value as any,
+                            };
+                            setFormData({ ...formData, components: next });
+                          }}
+                          disabled={Boolean(readOnly)}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-700"
                         >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteComponent(component.id)}
-                          className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded"
+                          <option value="earning">earning</option>
+                          <option value="deduction">deduction</option>
+                        </select>
+                      </div>
+
+                      <div className="col-span-3">
+                        <label className="block text-[10px] font-bold text-gray-600 mb-1">
+                          Amount
+                        </label>
+                        <input
+                          type="number"
+                          value={component.amount}
+                          onChange={(e) => {
+                            const next = [...(formData.components || [])];
+                            next[idx] = {
+                              ...next[idx],
+                              amount: Number(e.target.value || 0),
+                            };
+                            setFormData({ ...formData, components: next });
+                          }}
+                          disabled={Boolean(readOnly)}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-700"
+                        />
+                      </div>
+
+                      <div className="col-span-1 flex items-end justify-end">
+                        {!readOnly && (
+                          <button
+                            onClick={() => handleRemoveComponent(idx)}
+                            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                            title="Remove"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="col-span-12 flex items-center gap-2">
+                        <input
+                          id={`enabled_${idx}`}
+                          type="checkbox"
+                          checked={Boolean(component.enabled)}
+                          onChange={(e) => {
+                            const next = [...(formData.components || [])];
+                            next[idx] = {
+                              ...next[idx],
+                              enabled: e.target.checked ? 1 : 0,
+                            };
+                            setFormData({ ...formData, components: next });
+                          }}
+                          disabled={Boolean(readOnly)}
+                        />
+                        <label
+                          htmlFor={`enabled_${idx}`}
+                          className="text-xs text-gray-700"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                          Enabled
+                        </label>
                       </div>
                     </div>
                   ))}
@@ -548,71 +1337,79 @@ function StructureModal({
               <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border border-purple-200 p-4 sticky top-4">
                 <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <DollarSign className="w-4 h-4" />
-                  Preview Calculation
+                  Summary
                 </h4>
 
-                <div className="bg-white rounded-lg p-4 text-sm space-y-3">
+                <div className="bg-white rounded-lg p-4 text-sm">
                   <div className="text-center pb-3 border-b">
-                    <p className="text-xs text-gray-600">Example for</p>
-                    <p className="text-xl font-bold text-gray-900">
-                      ZMW {grossExample.toLocaleString()}
-                    </p>
+                    <p className="text-xs text-gray-600">Preview Calculation</p>
+                    <p className="text-xl font-bold text-gray-900">ZMW {netPay.toLocaleString()}</p>
                   </div>
 
-                  {/* Earnings */}
-                  <div>
-                    <p className="text-xs font-semibold text-gray-700 mb-2">
-                      EARNINGS:
-                    </p>
-                    <div className="space-y-1 pl-2">
-                      {formData.components
-                        .filter((c) => c.category === "Earning")
-                        .map((c) => {
-                          const amount =
-                            typeof c.value === "number"
-                              ? c.valueType === "percentage"
-                                ? (grossExample * c.value) / 100
-                                : c.value
-                              : 0;
-                          return (
-                            <div
-                              key={c.id}
-                              className="flex justify-between text-xs"
-                            >
-                              <span className="text-gray-600">{c.name}</span>
-                              <span className="font-medium">
-                                {amount.toLocaleString()}
-                              </span>
-                            </div>
-                          );
-                        })}
+                  <div className="pt-3 border-b pb-3">
+                    <div className="text-[11px] font-bold text-gray-700">EARNINGS:</div>
+                    <div className="mt-2 space-y-1">
+                      {earnings.map((c, idx) => (
+                        <div key={`${c.component}-${idx}`} className="flex items-center justify-between gap-3">
+                          <div className="text-xs text-gray-700 truncate">{c.component}</div>
+                          <div className="text-xs font-semibold text-gray-900 tabular-nums">
+                            {(Number(c.amount || 0) || 0).toLocaleString()}
+                          </div>
+                        </div>
+                      ))}
+                      {earnings.length === 0 && (
+                        <div className="text-xs text-gray-500">—</div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Deductions */}
-                  {formData.components.filter((c) => c.category === "Deduction")
-                    .length > 0 && (
-                    <div className="border-t pt-2">
-                      <p className="text-xs font-semibold text-gray-700 mb-2">
-                        DEDUCTIONS:
-                      </p>
-                      <div className="space-y-1 pl-2">
-                        {formData.components
-                          .filter((c) => c.category === "Deduction")
-                          .map((c) => (
-                            <div
-                              key={c.id}
-                              className="flex justify-between text-xs"
-                            >
-                              <span className="text-gray-600">{c.name}</span>
-                              <span className="font-medium text-red-600">
-                                Auto-calc
-                              </span>
-                            </div>
-                          ))}
+                  <div className="pt-3">
+                    <div className="text-[11px] font-bold text-gray-700">DEDUCTIONS:</div>
+                    <div className="mt-2 space-y-1">
+                      {deductions.map((c, idx) => {
+                        const amt = Number(c.amount || 0) || 0;
+                        return (
+                          <div key={`${c.component}-${idx}`} className="flex items-center justify-between gap-3">
+                            <div className="text-xs text-gray-700 truncate">{c.component}</div>
+                            {amt === 0 ? (
+                              <div className="text-xs font-bold text-red-600">Auto-calc</div>
+                            ) : (
+                              <div className="text-xs font-semibold text-gray-900 tabular-nums">
+                                {amt.toLocaleString()}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                      {deductions.length === 0 && (
+                        <div className="text-xs text-gray-500">—</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t space-y-1 text-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="text-gray-600">Total earnings</div>
+                      <div className="font-semibold text-gray-900 tabular-nums">
+                        {totalEarnings.toLocaleString()}
                       </div>
                     </div>
-                  )}
+                    <div className="flex items-center justify-between">
+                      <div className="text-gray-600">Total deductions</div>
+                      <div className="font-semibold text-gray-900 tabular-nums">
+                        {totalDeductions.toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="text-gray-700 font-semibold">Net</div>
+                      <div className="font-bold text-gray-900 tabular-nums">
+                        {netPay.toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-gray-500 pt-2">
+                      Components total: {totalAmount.toLocaleString()}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -620,222 +1417,23 @@ function StructureModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t flex justify-end gap-3">
+        <div className="px-6 py-4 border-t flex justify-end gap-3 bg-gray-50">
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
           >
-            Cancel
+            {readOnly ? "Close" : "Cancel"}
           </button>
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
-          >
-            <Save className="w-4 h-4" />
-            Save Structure
-          </button>
-        </div>
-
-        {/* Component Modal */}
-        {showComponentModal && editingComponent && (
-          <ComponentModal
-            component={editingComponent}
-            onSave={handleSaveComponent}
-            onClose={() => {
-              setShowComponentModal(false);
-              setEditingComponent(null);
-            }}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-// Component Modal
-function ComponentModal({
-  component,
-  onSave,
-  onClose,
-}: {
-  component: SalaryComponent;
-  onSave: (c: SalaryComponent) => void;
-  onClose: () => void;
-}) {
-  const [formData, setFormData] = useState<SalaryComponent>(component);
-
-  const handleSubmit = () => {
-    if (!formData.name.trim()) {
-      alert("Please enter component name");
-      return;
-    }
-    if (formData.valueType !== "auto" && !formData.value) {
-      alert("Please enter value");
-      return;
-    }
-    onSave(formData);
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="text-lg font-semibold text-gray-900">
-            {component.id.startsWith("c_") ? "Add" : "Edit"} Component
-          </h4>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Component Name *
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              placeholder="e.g., Basic Salary, Transport Allowance"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Category *
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    category: e.target.value as "Earning" | "Deduction",
-                  })
-                }
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-              >
-                <option value="Earning">Earning</option>
-                <option value="Deduction">Deduction</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Value Type *
-              </label>
-              <select
-                value={formData.valueType}
-                onChange={(e) =>
-                  setFormData({ ...formData, valueType: e.target.value as any })
-                }
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-              >
-                <option value="percentage">Percentage</option>
-                <option value="fixed">Fixed Amount</option>
-                <option value="auto">Auto-calculated</option>
-              </select>
-            </div>
-          </div>
-
-          {formData.valueType !== "auto" && (
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Value * {formData.valueType === "percentage" ? "(%)" : "(ZMW)"}
-              </label>
-              <input
-                type="number"
-                value={formData.value}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    value: parseFloat(e.target.value) || 0,
-                  })
-                }
-                placeholder={
-                  formData.valueType === "percentage" ? "0-100" : "Amount"
-                }
-                step={formData.valueType === "percentage" ? "0.1" : "1"}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-          )}
-
-          {formData.valueType === "auto" && (
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Formula/Description
-              </label>
-              <input
-                type="text"
-                value={formData.value as string}
-                onChange={(e) =>
-                  setFormData({ ...formData, value: e.target.value })
-                }
-                placeholder="e.g., 5% of Basic, Tax Slab"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Statutory (Optional)
-            </label>
-            <select
-              value={formData.statutory || ""}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  statutory: e.target.value || undefined,
-                })
-              }
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+          {!readOnly && (
+            <button
+              onClick={onSave}
+              disabled={busy}
+              className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <option value="">None</option>
-              <option value="NAPSA Base">NAPSA Base</option>
-              <option value="NAPSA">NAPSA</option>
-              <option value="NHIMA">NHIMA</option>
-              <option value="PAYE">PAYE</option>
-            </select>
-          </div>
-
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="taxable"
-              checked={formData.taxable}
-              onChange={(e) =>
-                setFormData({ ...formData, taxable: e.target.checked })
-              }
-              className="mr-2"
-            />
-            <label htmlFor="taxable" className="text-sm text-gray-700">
-              Taxable
-            </label>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3 mt-6">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
-          >
-            <Check className="w-4 h-4" />
-            Save Component
-          </button>
+              <Save className="w-4 h-4" />
+              Save Structure
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -848,62 +1446,54 @@ function DeleteConfirmModal({
   onConfirm,
   onCancel,
 }: {
-  structure: SalaryStructure;
+  structure: SalaryStructureListItem;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30
-"
-    >
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <div className="flex items-start gap-3 mb-4">
-          <div className="p-2 bg-red-100 rounded-lg">
-            <AlertTriangle className="w-5 h-5 text-red-600" />
-          </div>
-          <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-1">
-              Delete Salary Structure?
-            </h4>
-            <p className="text-sm text-gray-600">
-              Are you sure you want to delete{" "}
-              <strong>"{structure.name}"</strong>?
-            </p>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl">
+        <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+          <div className="text-base font-semibold">Delete Salary Structure</div>
+          <button onClick={onCancel} className="text-white/80 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {structure.usedBy > 0 ? (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
-            <p className="text-sm text-red-700">
-              ⚠️ Cannot delete! This structure is used by{" "}
-              <strong>{structure.usedBy} employees</strong>. Please reassign
-              them first.
-            </p>
+        <div className="p-6">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="p-2 bg-red-100 rounded-lg">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">
+                Are you sure you want to delete{" "}
+                <strong>"{structure.name}"</strong>?
+              </p>
+            </div>
           </div>
-        ) : (
+
           <div className="p-3 bg-gray-50 rounded-lg mb-4">
             <p className="text-sm text-gray-700">
               This action cannot be undone. The structure will be permanently
               deleted.
             </p>
           </div>
-        )}
 
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={structure.usedBy > 0}
-            className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Delete Structure
-          </button>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={onCancel}
+              className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Delete Structure
+            </button>
+          </div>
         </div>
       </div>
     </div>

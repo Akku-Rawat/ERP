@@ -1,0 +1,50 @@
+import type { AxiosResponse } from "axios";
+import { createAxiosInstance } from "./axiosInstance";
+import { API, ERP_BASE } from "../config/api";
+
+const api = createAxiosInstance(ERP_BASE);
+
+export type SalaryStructureAssignmentCreatePayload = {
+  employee: string;
+  salary_structure: string;
+  from_date: string;
+  company: string;
+};
+
+export type SalaryStructureAssignmentListItem = {
+  name: string;
+  employee: string;
+  full_name?: string;
+  salary_structure: string;
+  from_date: string;
+  company?: string;
+  department?: string;
+  currency?: string;
+};
+
+export type GetSalaryStructureAssignmentsParams = {
+  employee?: string;
+  name?: string;
+};
+
+export async function createSalaryStructureAssignment(
+  payload: SalaryStructureAssignmentCreatePayload,
+): Promise<any> {
+  const url = API.payrollSetup.salaryStructureAssignment.create;
+  const resp: AxiosResponse = await api.post(url, payload);
+  return resp.data?.data ?? resp.data;
+}
+
+export async function getSalaryStructureAssignments(
+  params: GetSalaryStructureAssignmentsParams = {},
+): Promise<SalaryStructureAssignmentListItem[]> {
+  const url = API.payrollSetup.salaryStructureAssignment.getAll;
+  const resp: AxiosResponse = await api.get(url, {
+    params: {
+      ...(params.employee ? { employee: params.employee } : {}),
+      ...(params.name ? { name: params.name } : {}),
+    },
+  });
+  const data = resp.data?.data ?? resp.data;
+  return Array.isArray(data) ? (data as SalaryStructureAssignmentListItem[]) : [];
+}

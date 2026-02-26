@@ -7,10 +7,12 @@ import {
 
 import type { PayrollEntry, Employee } from "../../../types/payrolltypes";
 import { getAllEmployees } from "../../../api/employeeapi";
+import { getSalarySlipById, getSalarySlips, type SalarySlipDetail, type SalarySlipListItem } from "../../../api/salarySlipApi";
 
 // ── Components ────────────────────────────────────────────────────────────────
 import { KPICards } from "./KPICards";
 import { OverviewTab, EmployeesTab } from "./EntryFormTabs";
+import SalaryStructureAssignmentsDashboardTab from "./SalaryStructureAssignmentsDashboardTab";
 
 // ── Views ─────────────────────────────────────────────────────────────────────
 import EmployeeDetailsPage from "./EmployeeDetailsPage";
@@ -238,8 +240,172 @@ const NewPayrollEntry: React.FC<{
   );
 };
 
+const StatusChip: React.FC<{ status?: string }> = ({ status }) => {
+  const s = String(status ?? "").toLowerCase();
+  const cls =
+    s === "submitted" || s === "paid"
+      ? "bg-success/10 text-success border-success/20"
+      : s === "draft"
+        ? "bg-warning/10 text-warning border-warning/20"
+        : "bg-app text-muted border-theme";
+  return (
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${cls}`}>
+      {status || "—"}
+    </span>
+  );
+};
+
+const SalarySlipDetailsModal: React.FC<{
+  open: boolean;
+  slipId: string | null;
+  onClose: () => void;
+}> = ({ open, slipId, onClose }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<SalarySlipDetail | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      if (!open || !slipId) return;
+      setLoading(true);
+      setError(null);
+      setData(null);
+      try {
+        const resp = await getSalarySlipById(slipId);
+        if (!mounted) return;
+        setData(resp);
+      } catch (e: any) {
+        if (!mounted) return;
+        setError(e?.message || "Failed to load salary slip");
+      } finally {
+        if (!mounted) return;
+        setLoading(false);
+      }
+    };
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [open, slipId]);
+
+  if (!open) return null;
+
+  const earnings = Array.isArray(data?.earnings) ? data?.earnings : [];
+  const deductions = Array.isArray(data?.deductions) ? data?.deductions : [];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+        <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+          <div className="min-w-0">
+            <div className="text-lg font-semibold">Salary Slip</div>
+            <div className="text-xs text-white/80 mt-0.5 break-words">{slipId}</div>
+          </div>
+          <button onClick={onClose} className="text-white/80 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              {error}
+            </div>
+          )}
+          {loading && <div className="text-sm text-muted">Loading...</div>}
+
+          {!loading && data && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-app border border-theme rounded-xl p-4">
+                  <div className="text-[11px] font-extrabold text-muted uppercase tracking-wider">Employee</div>
+                  <div className="text-sm font-bold text-main mt-1">{data.employee_name || data.employee}</div>
+                  <div className="text-xs text-muted mt-0.5">{data.employee}</div>
+                </div>
+                <div className="bg-app border border-theme rounded-xl p-4">
+                  <div className="text-[11px] font-extrabold text-muted uppercase tracking-wider">Period</div>
+                  <div className="text-sm font-bold text-main mt-1">{data.start_date} → {data.end_date}</div>
+                  <div className="text-xs text-muted mt-0.5">{data.salary_structure}</div>
+                </div>
+                <div className="bg-app border border-theme rounded-xl p-4">
+                  <div className="text-[11px] font-extrabold text-muted uppercase tracking-wider">Net Pay</div>
+                  <div className="text-xl font-extrabold text-main mt-1 tabular-nums">ZMW {Number(data.net_pay ?? 0).toLocaleString("en-ZM")}</div>
+                  <div className="mt-2"><StatusChip status={data.status} /></div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border border-theme rounded-xl overflow-hidden">
+                  <div className="px-4 py-3 bg-app border-b border-theme flex items-center justify-between">
+                    <div className="text-xs font-extrabold text-main uppercase tracking-wide">Earnings</div>
+                    <div className="text-xs font-extrabold text-main">ZMW {Number(data.total_earnings ?? 0).toLocaleString("en-ZM")}</div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-card border-b border-theme">
+                        <tr>
+                          <th className="px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider text-left">Component</th>
+                          <th className="px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider text-right">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {earnings.length === 0 ? (
+                          <tr><td colSpan={2} className="px-4 py-8 text-center text-sm text-muted">No earnings</td></tr>
+                        ) : earnings.map((r: any, idx: number) => (
+                          <tr key={`${r?.component}-${idx}`} className="border-b border-theme last:border-0">
+                            <td className="px-4 py-3 text-xs font-semibold text-main">{String(r?.component ?? "")}</td>
+                            <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(r?.amount ?? 0).toLocaleString("en-ZM")}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="border border-theme rounded-xl overflow-hidden">
+                  <div className="px-4 py-3 bg-app border-b border-theme flex items-center justify-between">
+                    <div className="text-xs font-extrabold text-main uppercase tracking-wide">Deductions</div>
+                    <div className="text-xs font-extrabold text-main">ZMW {Number(data.total_deduction ?? 0).toLocaleString("en-ZM")}</div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-card border-b border-theme">
+                        <tr>
+                          <th className="px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider text-left">Component</th>
+                          <th className="px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider text-right">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {deductions.length === 0 ? (
+                          <tr><td colSpan={2} className="px-4 py-8 text-center text-sm text-muted">No deductions</td></tr>
+                        ) : deductions.map((r: any, idx: number) => (
+                          <tr key={`${r?.component}-${idx}`} className="border-b border-theme last:border-0">
+                            <td className="px-4 py-3 text-xs font-semibold text-main">{String(r?.component ?? "")}</td>
+                            <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(r?.amount ?? 0).toLocaleString("en-ZM")}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="px-6 py-4 border-t border-theme bg-app flex justify-end">
+          <Btn variant="outline" onClick={onClose}>Close</Btn>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function PayrollManagement() {
   const [view, setView] = useState<View>("dashboard");
+
+  const [dashboardTab, setDashboardTab] = useState<"salarySlips" | "assignments">("salarySlips");
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [employeesLoading, setEmployeesLoading] = useState(false);
@@ -260,39 +426,57 @@ export default function PayrollManagement() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  const [dashboardEntry, setDashboardEntry] = useState<PayrollEntry>({
-    payrollName: "",
-    postingDate: new Date().toISOString().slice(0, 10),
-    currency: "ZMW",
-    company: "Izyane InovSolutions Pvt. Ltd.",
-    payrollPayableAccount: "Payroll Payable - I",
-    status: "Draft",
-    salarySlipTimesheet: false,
-    deductTaxForProof: false,
-    payrollFrequency: "Monthly",
-    startDate: "",
-    endDate: "",
-    paymentAccount: "",
-    costCenter: "",
-    project: "",
-    letterHead: "",
-    employeeSelectionMode: "multiple",
-    selectedEmployees: [],
-  });
-
-  const handleDashboardChange = (field: string, value: any) => {
-    setDashboardEntry(p => ({ ...p, [field]: value }));
-  };
-
   const [lastCreatedPayroll, setLastCreatedPayroll] = useState<{
     createdAtIso: string;
     employees: { id: string; name: string; employeeId?: string }[];
   } | null>(null);
 
+  const [salarySlips, setSalarySlips] = useState<SalarySlipListItem[]>([]);
+  const [slipsLoading, setSlipsLoading] = useState(false);
+  const [slipsError, setSlipsError] = useState<string | null>(null);
+  const [slipsPage, setSlipsPage] = useState(1);
+  const [slipsPageSize] = useState(20);
+  const [slipsTotalPages, setSlipsTotalPages] = useState(1);
+  const [slipDetailsOpen, setSlipDetailsOpen] = useState(false);
+  const [slipDetailsId, setSlipDetailsId] = useState<string | null>(null);
+
   useEffect(() => {
     if (!employeesError) return;
     showToast(employeesError, "error");
   }, [employeesError]);
+
+  useEffect(() => {
+    if (!slipsError) return;
+    showToast(slipsError, "error");
+  }, [slipsError]);
+
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      try {
+        setSlipsLoading(true);
+        setSlipsError(null);
+        const resp = await getSalarySlips({ page: slipsPage, page_size: slipsPageSize });
+        if (!mounted) return;
+        const list = Array.isArray(resp?.salary_slips) ? resp.salary_slips : [];
+        setSalarySlips(list);
+        setSlipsTotalPages(Number(resp?.pagination?.total_pages ?? 1) || 1);
+      } catch (e: any) {
+        if (!mounted) return;
+        setSalarySlips([]);
+        setSlipsTotalPages(1);
+        setSlipsError(e?.message || "Failed to load salary slips");
+      } finally {
+        if (!mounted) return;
+        setSlipsLoading(false);
+      }
+    };
+
+    if (view === "dashboard") run();
+    return () => {
+      mounted = false;
+    };
+  }, [view, slipsPage, slipsPageSize]);
 
   useEffect(() => {
     let mounted = true;
@@ -457,17 +641,154 @@ export default function PayrollManagement() {
             </div>
           )}
 
+          <div className="shrink-0 border-b border-theme bg-app px-4 py-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setDashboardTab("salarySlips")}
+              className={`px-4 py-2 rounded-lg text-xs font-extrabold border transition ${dashboardTab === "salarySlips"
+                ? "bg-primary text-white border-primary"
+                : "bg-card text-muted border-theme hover:bg-app"
+                }`}
+            >
+              Salary Slips
+            </button>
+            <button
+              type="button"
+              onClick={() => setDashboardTab("assignments")}
+              className={`px-4 py-2 rounded-lg text-xs font-extrabold border transition ${dashboardTab === "assignments"
+                ? "bg-primary text-white border-primary"
+                : "bg-card text-muted border-theme hover:bg-app"
+                }`}
+            >
+              Assignments
+            </button>
+          </div>
+
           <div className="flex-1 min-h-0 overflow-y-auto p-4">
-            <EmployeesTab
-              data={dashboardEntry}
-              onChange={handleDashboardChange}
-              employees={employees}
-              onViewEmployee={(id) => setDetailEmployeeId(id)}
-              onCreatePayroll={() => handleCreatePayroll(dashboardEntry.selectedEmployees)}
-            />
+            {dashboardTab === "assignments" ? (
+              <SalaryStructureAssignmentsDashboardTab />
+            ) : (
+              <div className="mt-4 border border-theme rounded-xl overflow-hidden bg-card">
+                <div className="px-4 py-3 bg-app border-b border-theme flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-extrabold text-main uppercase tracking-wide">Salary Slips</div>
+                    <div className="text-[11px] text-muted mt-0.5">Latest payroll runs</div>
+                  </div>
+                  <div className="text-xs text-muted">Page {slipsPage} of {slipsTotalPages}</div>
+                </div>
+
+                {slipsError && (
+                  <div className="px-4 py-3 bg-danger/10 text-danger text-sm border-b border-theme">{slipsError}</div>
+                )}
+
+                <div className="overflow-auto">
+                  <table className="w-full">
+                    <thead className="bg-app border-b border-theme">
+                      <tr>
+                        {[
+                          "Slip ID",
+                          "Employee",
+                          "Structure",
+                          "Start",
+                          "End",
+                          "Status",
+                          "Earnings",
+                          "Deductions",
+                          "Net",
+                          "",
+                        ].map((h, i) => (
+                          <th
+                            key={String(i)}
+                            className={`px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider whitespace-nowrap ${
+                              i >= 6 && i <= 8 ? "text-right" : "text-left"
+                            }`}
+                          >
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {slipsLoading ? (
+                        <tr>
+                          <td colSpan={10} className="px-4 py-10 text-center text-sm text-muted">
+                            Loading salary slips...
+                          </td>
+                        </tr>
+                      ) : salarySlips.length === 0 ? (
+                        <tr>
+                          <td colSpan={10} className="px-4 py-10 text-center text-sm text-muted">
+                            No salary slips found
+                          </td>
+                        </tr>
+                      ) : (
+                        salarySlips.map((s, idx) => (
+                          <tr
+                            key={s.name}
+                            className={`border-b border-theme last:border-0 ${idx % 2 === 1 ? "bg-app" : "bg-card"}`}
+                          >
+                            <td className="px-4 py-3 text-xs font-semibold text-main break-words">{s.name}</td>
+                            <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{s.employee}</td>
+                            <td className="px-4 py-3 text-xs text-muted break-words">{s.salary_structure}</td>
+                            <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{s.start_date}</td>
+                            <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{s.end_date}</td>
+                            <td className="px-4 py-3"><StatusChip status={s.status} /></td>
+                            <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(s.total_earnings ?? 0).toLocaleString("en-ZM")}</td>
+                            <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(s.total_deduction ?? 0).toLocaleString("en-ZM")}</td>
+                            <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(s.net_pay ?? 0).toLocaleString("en-ZM")}</td>
+                            <td className="px-4 py-3 text-right">
+                              <button
+                                onClick={() => {
+                                  setSlipDetailsId(s.name);
+                                  setSlipDetailsOpen(true);
+                                }}
+                                className="px-3 py-1.5 rounded-lg text-xs font-extrabold border border-theme bg-card text-main hover:bg-app"
+                              >
+                                View
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="px-4 py-3 bg-app border-t border-theme flex items-center justify-between">
+                  <div className="text-xs text-muted">Showing {salarySlips.length} slips</div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSlipsPage((p) => Math.max(1, p - 1))}
+                      disabled={slipsPage <= 1}
+                      className="px-3 py-2 text-xs font-bold rounded-lg border border-theme bg-card text-main disabled:opacity-40"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSlipsPage((p) => Math.min(slipsTotalPages, p + 1))}
+                      disabled={slipsPage >= slipsTotalPages}
+                      className="px-3 py-2 text-xs font-bold rounded-lg border border-theme bg-card text-main disabled:opacity-40"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      <SalarySlipDetailsModal
+        open={slipDetailsOpen}
+        slipId={slipDetailsId}
+        onClose={() => {
+          setSlipDetailsOpen(false);
+          setSlipDetailsId(null);
+        }}
+      />
     </div>
   );
 }

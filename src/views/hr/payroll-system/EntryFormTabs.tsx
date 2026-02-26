@@ -1,9 +1,11 @@
 // EntryFormTabs.tsx — New Payroll Entry: Overview, Employees, Accounting tabs
 import React, { useMemo, useState } from "react";
-import { Edit2, Eye } from "lucide-react";
+import { Edit2, Eye, X } from "lucide-react";
+import toast from "react-hot-toast";
 import type { PayrollEntry, Employee } from "../../../types/payrolltypes";
-import HrDateInput from "../../../components/Hr/HrDateInput";
-
+import type { PayrollInfo } from "../../../types/employee";
+import { runSingleEmployeePayroll } from "../../../api/singleEmployeePayrollApi";
+import { getEmployeeById } from "../../../api/employeeapi";
 
 // ── Primitives ────────────────────────────────────────────────────────────────
 const Label: React.FC<{ children: React.ReactNode; required?: boolean }> = ({ children, required }) => (
@@ -33,11 +35,11 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
       </div>
       <div>
         <Label required>Posting Date</Label>
-        <HrDateInput
+        <input
+          type="date"
           value={data.postingDate}
-          onChange={(v: string) => onChange("postingDate", v)}
-          placeholder="DD/MM/YYYY"
-          inputClassName={inputCls}
+          onChange={(e) => onChange("postingDate", e.target.value)}
+          className={inputCls}
         />
       </div>
       <div>
@@ -76,20 +78,20 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ data, onChange }) => (
     <div className="grid grid-cols-2 gap-5">
       <div>
         <Label required>Pay Period Start</Label>
-        <HrDateInput
+        <input
+          type="date"
           value={data.startDate}
-          onChange={(v: string) => onChange("startDate", v)}
-          placeholder="DD/MM/YYYY"
-          inputClassName={inputCls}
+          onChange={(e) => onChange("startDate", e.target.value)}
+          className={inputCls}
         />
       </div>
       <div>
         <Label required>Pay Period End</Label>
-        <HrDateInput
+        <input
+          type="date"
           value={data.endDate}
-          onChange={(v: string) => onChange("endDate", v)}
-          placeholder="DD/MM/YYYY"
-          inputClassName={inputCls}
+          onChange={(e) => onChange("endDate", e.target.value)}
+          className={inputCls}
         />
       </div>
     </div>
@@ -135,11 +137,100 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
   const active = employees.filter(e => e.isActive);
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  const [singleSubmitting, setSingleSubmitting] = useState(false);
+  const [singleModalOpen, setSingleModalOpen] = useState(false);
 
   const miniInputCls = "w-56 px-2.5 py-2 bg-app border border-theme rounded-lg text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary transition";
   const miniSelectCls = "w-56 px-2.5 py-2 bg-app border border-theme rounded-lg text-xs text-main focus:outline-none focus:border-primary transition cursor-pointer";
 
   const selectionMode: "single" | "multiple" = (data.employeeSelectionMode || "multiple");
+
+  const selectedSingleEmployeeId = selectionMode === "single" ? String(data.selectedEmployees?.[0] ?? "") : "";
+
+  const [singleEmployeeLoading, setSingleEmployeeLoading] = useState(false);
+  const [singleEmployeeError, setSingleEmployeeError] = useState<string | null>(null);
+  const [singleEmployeePayrollInfo, setSingleEmployeePayrollInfo] = useState<PayrollInfo | null>(null);
+
+  React.useEffect(() => {
+    if (selectionMode !== "single") {
+      setSingleModalOpen(false);
+
+      setSingleEmployeeLoading(false);
+      setSingleEmployeeError(null);
+      setSingleEmployeePayrollInfo(null);
+
+      return;
+    }
+
+    if (selectedSingleEmployeeId) {
+      setSingleModalOpen(true);
+    }
+  }, [selectedSingleEmployeeId, selectionMode]);
+
+  React.useEffect(() => {
+    if (!singleModalOpen) return;
+    if (!selectedSingleEmployeeId) return;
+
+    let mounted = true;
+
+    const run = async () => {
+      setSingleEmployeeLoading(true);
+      setSingleEmployeeError(null);
+      setSingleEmployeePayrollInfo(null);
+      try {
+        const resp = await getEmployeeById(selectedSingleEmployeeId);
+        if (!mounted) return;
+        setSingleEmployeePayrollInfo((resp?.payrollInfo ?? null) as PayrollInfo | null);
+      } catch (e: any) {
+        if (!mounted) return;
+        setSingleEmployeeError(e?.message || "Failed to load employee payroll info");
+      } finally {
+        if (!mounted) return;
+        setSingleEmployeeLoading(false);
+      }
+    };
+
+    run();
+
+    return () => {
+      mounted = false;
+    };
+  }, [selectedSingleEmployeeId, singleModalOpen]);
+
+  const canRunSinglePayroll = useMemo(() => {
+    if (selectionMode !== "single") return false;
+    if (!selectedSingleEmployeeId) return false;
+
+    if (!String(data.postingDate ?? "").trim()) return false;
+
+    if (singleEmployeeLoading) return false;
+    if (singleEmployeeError) return false;
+    if (!singleEmployeePayrollInfo) return false;
+
+    return true;
+  }, [singleEmployeeError, selectedSingleEmployeeId, selectionMode, singleEmployeeLoading, singleEmployeePayrollInfo, data.postingDate]);
+
+  const runSinglePayroll = async () => {
+    if (!canRunSinglePayroll) {
+      toast.error("Please select an employee and fill amounts");
+      return;
+    }
+
+    setSingleSubmitting(true);
+    try {
+      await runSingleEmployeePayroll({
+        employeeId: selectedSingleEmployeeId,
+        payrollDate: String(data.postingDate),
+        salaryBreakdown: (singleEmployeePayrollInfo as any)?.salaryBreakdown ?? {},
+        statutoryDeductions: (singleEmployeePayrollInfo as any)?.statutoryDeductions ?? {},
+      });
+      toast.success("Single payroll run created");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to run single payroll");
+    } finally {
+      setSingleSubmitting(false);
+    }
+  };
 
   const toggleEmp = (id: string) => {
     if (selectionMode === "single") {
@@ -207,6 +298,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
   const setSelectionMode = (mode: "single" | "multiple") => {
     onChange("employeeSelectionMode", mode);
+
     if (mode === "single" && data.selectedEmployees.length > 1) {
       onChange("selectedEmployees", data.selectedEmployees.slice(0, 1));
     }
@@ -251,6 +343,145 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
         </span>
       </div>
 
+      {singleModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-card border border-theme rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+            <div className="px-6 py-4 bg-app border-b border-theme flex items-center justify-between">
+              <div>
+                <div className="text-sm font-extrabold text-main">Single Payroll</div>
+                <div className="text-xs text-muted mt-0.5">Posting date: {String(data.postingDate || "—")}</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSingleModalOpen(false)}
+                className="p-2 rounded-lg hover:bg-card text-muted hover:text-main transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+              <div className="border border-theme rounded-xl overflow-hidden bg-app">
+                <div className="px-4 py-3 bg-card border-b border-theme flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-extrabold text-main uppercase tracking-wide">Payroll Info Summary</div>
+                    <div className="text-[11px] text-muted mt-0.5">This is the data that will be sent when you run payroll</div>
+                  </div>
+                </div>
+                <div className="p-4">
+                  {singleEmployeeLoading ? (
+                    <div className="text-xs text-muted">Loading payroll info…</div>
+                  ) : singleEmployeeError ? (
+                    <div className="text-xs text-danger">{singleEmployeeError}</div>
+                  ) : !singleEmployeePayrollInfo ? (
+                    <div className="text-xs text-muted">—</div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="border border-theme rounded-xl bg-card p-4">
+                          <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Payroll</div>
+                          <div className="mt-3 space-y-2">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="text-xs text-muted">Gross Salary</div>
+                              <div className="text-xs font-extrabold text-main tabular-nums">
+                                {String((singleEmployeePayrollInfo as any)?.currency ?? "")}{" "}
+                                {Number((singleEmployeePayrollInfo as any)?.grossSalary ?? 0).toLocaleString()}
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="text-xs text-muted">Payment Frequency</div>
+                              <div className="text-xs font-bold text-main">{String((singleEmployeePayrollInfo as any)?.paymentFrequency ?? "—")}</div>
+                            </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="text-xs text-muted">Payment Method</div>
+                              <div className="text-xs font-bold text-main">{String((singleEmployeePayrollInfo as any)?.paymentMethod ?? "—")}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border border-theme rounded-xl bg-card p-4">
+                          <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Bank Account</div>
+                          <div className="mt-3 space-y-2">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="text-xs text-muted">Account Name</div>
+                              <div className="text-xs font-bold text-main text-right">{String((singleEmployeePayrollInfo as any)?.bankAccount?.AccountName ?? "—")}</div>
+                            </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="text-xs text-muted">Account Number</div>
+                              <div className="text-xs font-bold text-main text-right">{String((singleEmployeePayrollInfo as any)?.bankAccount?.AccountNumber ?? "—")}</div>
+                            </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="text-xs text-muted">Bank</div>
+                              <div className="text-xs font-bold text-main text-right">{String((singleEmployeePayrollInfo as any)?.bankAccount?.BankName ?? "—")}</div>
+                            </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="text-xs text-muted">Branch Code</div>
+                              <div className="text-xs font-bold text-main text-right">{String((singleEmployeePayrollInfo as any)?.bankAccount?.branchCode ?? "—")}</div>
+                            </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="text-xs text-muted">Account Type</div>
+                              <div className="text-xs font-bold text-main text-right">{String((singleEmployeePayrollInfo as any)?.bankAccount?.AccountType ?? "—")}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="border border-theme rounded-xl bg-card p-4">
+                          <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Salary Breakdown</div>
+                          <div className="mt-3 space-y-2">
+                            {Object.entries((singleEmployeePayrollInfo as any)?.salaryBreakdown ?? {}).length === 0 ? (
+                              <div className="text-xs text-muted">—</div>
+                            ) : (
+                              Object.entries((singleEmployeePayrollInfo as any)?.salaryBreakdown ?? {}).map(([k, v]) => (
+                                <div key={k} className="flex items-center justify-between gap-3 border-b border-theme/60 last:border-0 py-2">
+                                  <div className="text-xs text-muted">{String(k)}</div>
+                                  <div className="text-xs font-bold text-main tabular-nums">
+                                    {String((singleEmployeePayrollInfo as any)?.currency ?? "")}{" "}
+                                    {Number(v ?? 0).toLocaleString()}
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="border border-theme rounded-xl bg-card p-4">
+                          <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Statutory Deductions</div>
+                          <div className="mt-3 space-y-2">
+                            {Object.entries((singleEmployeePayrollInfo as any)?.statutoryDeductions ?? {}).length === 0 ? (
+                              <div className="text-xs text-muted">—</div>
+                            ) : (
+                              Object.entries((singleEmployeePayrollInfo as any)?.statutoryDeductions ?? {}).map(([k, v]) => (
+                                <div key={k} className="flex items-center justify-between gap-3 border-b border-theme/60 last:border-0 py-2">
+                                  <div className="text-xs text-muted">{String(k)}</div>
+                                  <div className="text-xs font-bold text-main tabular-nums">{String(v ?? "—")}</div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={runSinglePayroll}
+                  disabled={!canRunSinglePayroll || singleSubmitting}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-success text-white text-xs font-extrabold disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {singleSubmitting ? "Running..." : "Run Payroll"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Employee list */}
       <div className="border border-theme rounded-xl overflow-hidden flex flex-col min-h-0 flex-1">
         <div className="shrink-0 flex items-center justify-between gap-3 px-4 py-3 bg-card border-b border-theme">
@@ -260,36 +491,47 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
             <input
               type="text"
               value={(data as any).nameSearch ?? ""}
-              onChange={e => updateFilter("nameSearch", e.target.value)}
+              onChange={(e) => updateFilter("nameSearch", e.target.value)}
               placeholder="Search name"
               className={miniInputCls}
             />
 
             <select
               value={(data as any).jobTitleFilter ?? ""}
-              onChange={e => updateFilter("jobTitleFilter", e.target.value)}
+              onChange={(e) => updateFilter("jobTitleFilter", e.target.value)}
               className={miniSelectCls}
             >
               <option value="">Job title (All)</option>
-              {jobTitleOptions.map(j => (
-                <option key={j} value={j}>{j}</option>
+              {jobTitleOptions.map((j) => (
+                <option key={j} value={j}>
+                  {j}
+                </option>
               ))}
             </select>
 
             <select
               value={(data as any).departmentFilter ?? ""}
-              onChange={e => updateFilter("departmentFilter", e.target.value)}
+              onChange={(e) => updateFilter("departmentFilter", e.target.value)}
               className={miniSelectCls}
             >
               <option value="">Department (All)</option>
-              {departmentOptions.map(d => (
-                <option key={d} value={d}>{d}</option>
+              {departmentOptions.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
               ))}
             </select>
           </div>
+
           <button
             type="button"
-            onClick={() => onCreatePayroll?.(data.selectedEmployees)}
+            onClick={() => {
+              if (selectionMode === "single") {
+                runSinglePayroll();
+                return;
+              }
+              onCreatePayroll?.(data.selectedEmployees);
+            }}
             disabled={!data.selectedEmployees.length}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-success text-white text-xs font-extrabold disabled:opacity-40 disabled:cursor-not-allowed"
           >
@@ -301,7 +543,18 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
           <table className="w-full">
             <thead className="bg-app border-b border-theme">
               <tr>
-                {["", "ID", "Employee ID", "Name", "Job Title", "Department", "Work Location", "Gross Salary", "Status", ""].map((h, i) => (
+                {[
+                  "",
+                  "ID",
+                  "Employee ID",
+                  "Name",
+                  "Job Title",
+                  "Department",
+                  "Work Location",
+                  "Gross Salary",
+                  "Status",
+                  "",
+                ].map((h, i) => (
                   <th
                     key={String(i)}
                     className={`px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider whitespace-nowrap ${i >= 7 ? "text-right" : "text-left"}`}
