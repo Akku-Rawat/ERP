@@ -111,11 +111,11 @@ export default function PayrollPreviewModal({
                 <div className="mt-3">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div className="bg-app border border-theme rounded-lg p-3">
-                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">ID</div>
+                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">DATE</div>
                       <div className="text-xs font-bold text-main mt-1 break-words">{String((detail as any)?.id ?? "—")}</div>
                     </div>
                     <div className="bg-app border border-theme rounded-lg p-3">
-                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Name</div>
+                      <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Salary Structure</div>
                       <div className="text-xs font-bold text-main mt-1 break-words">{String((detail as any)?.name ?? "—")}</div>
                     </div>
                     <div className="bg-app border border-theme rounded-lg p-3">

@@ -328,8 +328,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
   onViewEmployee,
 
-  onCreatePayroll,
-
   onOpenPayrollPreview,
 
 }) => {
@@ -582,9 +580,22 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
       toast.success("Single payroll run created");
 
+      setSingleModalOpen(false);
+
+      onChange("selectedEmployees", []);
+
     } catch (e: any) {
 
-      toast.error(e?.message || "Failed to run single payroll");
+      const serverMessage =
+        e?.response?.data?.message ??
+        e?.response?.data?.exc ??
+        e?.response?.data?._server_messages ??
+        e?.response?.data?.error?.message ??
+        e?.message;
+
+      const safeMessage = String(serverMessage ?? "").trim();
+
+      toast.error(safeMessage || "Failed to run single payroll");
 
     } finally {
 
@@ -824,8 +835,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
             <div className="text-xs text-muted whitespace-nowrap shrink-0">{filtered.length} employees</div>
 
-
-
             <input
 
               type="text"
@@ -839,8 +848,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
               className={miniInputCls}
 
             />
-
-
 
             <select
 
@@ -865,8 +872,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
               ))}
 
             </select>
-
-
 
             <select
 
@@ -894,39 +899,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
           </div>
 
-
-
-          <button
-
-            type="button"
-
-            onClick={() => {
-
-              if (selectionMode === "single") {
-
-                runSinglePayroll();
-
-                return;
-
-              }
-
-              onCreatePayroll?.(data.selectedEmployees);
-
-            }}
-
-            disabled={!data.selectedEmployees.length}
-
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-success text-white text-xs font-extrabold disabled:opacity-40 disabled:cursor-not-allowed"
-
-          >
-
-            Create Payroll ({data.selectedEmployees.length})
-
-          </button>
-
         </div>
-
-
 
         <div className="flex-1 min-h-0 overflow-auto">
 
