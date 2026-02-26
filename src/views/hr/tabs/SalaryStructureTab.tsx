@@ -5,7 +5,6 @@ import {
   Trash2,
   Save,
   X,
-  DollarSign,
   AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -349,7 +348,7 @@ export default function SalaryStructureTab() {
       )}
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <div className="p-4 border-b flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div className={`p-4 ${pagedStructures.length > 0 ? "border-b" : ""} flex flex-col md:flex-row md:items-center md:justify-between gap-3`}>
           <div className="text-sm text-gray-600">
             {filteredStructures.length} structures
           </div>
@@ -480,41 +479,30 @@ export default function SalaryStructureTab() {
           )}
         </div>
 
-        <div className="p-4 border-t flex items-center justify-between">
-          <div className="text-xs text-gray-500">
-            Page {page} of {pageCount}
+        {pagedStructures.length > 0 && (
+          <div className="p-4 border-t flex items-center justify-between">
+            <div className="text-xs text-gray-500">
+              Page {page} of {pageCount}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                disabled={page >= pageCount}
+                className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-            >
-              Prev
-            </button>
-            <button
-              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-              disabled={page >= pageCount}
-              className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        </div>
+        )}
       </div>
-
-      {!loading && structures.length === 0 && (
-        <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
-          <DollarSign className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 mb-4">No salary structures created yet</p>
-          <button
-            onClick={handleCreateNew}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-          >
-            Create Your First Structure
-          </button>
-        </div>
-      )}
 
       {/* Edit Modal */}
       {showModal && editingStructure && (
@@ -1336,7 +1324,6 @@ function StructureModal({
             <div className="col-span-1">
               <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border border-purple-200 p-4 sticky top-4">
                 <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" />
                   Summary
                 </h4>
 
