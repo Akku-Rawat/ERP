@@ -12,10 +12,6 @@ export const validatePO = (form: PurchaseOrderFormData) => {
     errors.push("PO Date is required");
   }
   
-  if (!form.requiredBy) {
-    errors.push("Required By date is required");
-  }
-
 
 
 

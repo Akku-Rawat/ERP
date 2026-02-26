@@ -90,17 +90,7 @@ export const DetailsTab = ({
             />
           </div>
 
-          {/* Required By */}
-          <div>
-            <ModalInput
-              label="Required By"
-              type="date"
-              name="requiredBy"
-              value={form.requiredBy}
-              onChange={onFormChange}
-              required
-            />
-          </div>
+      
 
           {/* Status */}
           <div>
