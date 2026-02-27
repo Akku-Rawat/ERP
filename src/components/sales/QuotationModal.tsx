@@ -11,11 +11,12 @@ import { showSuccess } from "../../utils/alert";
 import { User, Mail, Phone } from "lucide-react";
 import AddressBlock from "../ui/modal/AddressBlock";
 import PaymentInfoBlock from "./PaymentInfoBlock";
+import { quotationStatusOptions } from "../../types/quotation";
 import {
-  invoiceStatusOptions,
   currencySymbols,
   paymentMethodOptions,
   currencyOptions,
+  industryBaseOptions
 } from "../../constants/invoice.constants";
 
 interface QuotationModalProps {
@@ -41,35 +42,35 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
   } = useQuotationForm(isOpen, onClose, onSubmit);
   const [allowSubmit, setAllowSubmit] = React.useState(false);
 
-const tabs: Array<"details" | "address" | "terms"> = [
-  "details",
-  "address",
-  "terms",
-];
+  const tabs: Array<"details" | "address" | "terms"> = [
+    "details",
+    "address",
+    "terms",
+  ];
   const handleNext = () => {
-  const currentIndex = tabs.indexOf(ui.activeTab as any);
-  if (currentIndex < tabs.length - 1) {
-    ui.setActiveTab(tabs[currentIndex + 1]);
-    setAllowSubmit(false);
-  }
-};
+    const currentIndex = tabs.indexOf(ui.activeTab as any);
+    if (currentIndex < tabs.length - 1) {
+      ui.setActiveTab(tabs[currentIndex + 1]);
+      setAllowSubmit(false);
+    }
+  };
 
- const symbol = currencySymbols[formData.currencyCode] ?? "₹";
+  const symbol = currencySymbols[formData.currencyCode] ?? "₹";
   const showExchangeRate =
-  formData.currencyCode?.toUpperCase() !== "INR";
-const handleFormSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    formData.currencyCode?.toUpperCase() !== "INR";
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  if (ui.activeTab !== "terms") {
-    handleNext();
-    return;
-  }
-  if (!allowSubmit) {
-    return;
-  }
+    if (ui.activeTab !== "terms") {
+      handleNext();
+      return;
+    }
+    if (!allowSubmit) {
+      return;
+    }
 
-  await actions.handleSubmit(e);
-};
+    await actions.handleSubmit(e);
+  };
 
   const handlePrint = () => {
     showSuccess("Print functionality - Opens print dialog");
@@ -84,18 +85,18 @@ const handleFormSubmit = async (e: React.FormEvent) => {
         <Button variant="secondary" onClick={actions.handleReset} type="button">
           Reset
         </Button>
-       <Button
-  variant="primary"
-  type={ui.activeTab !== "terms" ? "button" : "submit"}
-  form={ui.activeTab !== "terms" ? undefined : "quotationForm"}
-  onClick={
-    ui.activeTab !== "terms"
-      ? handleNext
-      : () => setAllowSubmit(true)
-  }
->
-  {ui.activeTab === "terms" ? "Submit" : "Next"}
-</Button>
+        <Button
+          variant="primary"
+          type={ui.activeTab !== "terms" ? "button" : "submit"}
+          form={ui.activeTab !== "terms" ? undefined : "quotationForm"}
+          onClick={
+            ui.activeTab !== "terms"
+              ? handleNext
+              : () => setAllowSubmit(true)
+          }
+        >
+          {ui.activeTab === "terms" ? "Submit" : "Next"}
+        </Button>
       </div>
     </>
   );
@@ -111,7 +112,7 @@ const handleFormSubmit = async (e: React.FormEvent) => {
       maxWidth="6xl"
       height="79vh"
     >
-      <form  id="quotationForm" onSubmit={handleFormSubmit} className="h-full flex flex-col">
+      <form id="quotationForm" onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
@@ -125,8 +126,8 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                 type="button"
                 onClick={() => ui.setActiveTab(tab.key as any)}
                 className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab.key
-                    ? "text-primary border-b-[3px] border-primary"
-                    : "text-muted border-b-[3px] border-transparent hover:text-main"
+                  ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
                   }`}
               >
                 {tab.label}
@@ -142,7 +143,7 @@ const handleFormSubmit = async (e: React.FormEvent) => {
             <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
               <div className="">
                 <div
-                  className={`grid ${showExchangeRate ? "grid-cols-7" : "grid-cols-6"} gap-3 items-end`}
+                  className="grid grid-cols-6 gap-3 items-end"
                 >
                   {/* Customer */}
 
@@ -151,6 +152,18 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                     onChange={actions.handleCustomerSelect}
                     className="w-full"
                   />
+
+                  {/* Industry Base */}
+                  <div>
+                    <ModalSelect
+                      label="Industry Base"
+                      name="industryBases"
+                      value={formData.industryBases}
+                      onChange={actions.handleInputChange}
+                      options={industryBaseOptions}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    />
+                  </div>
 
                   {/* Date of Quotation */}
                   <div>
@@ -184,39 +197,19 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                       value={formData.currencyCode}
                       onChange={actions.handleInputChange}
                       options={[...currencyOptions]}
+                      disabled
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     ></ModalSelect>
                   </div>
-
-                  {showExchangeRate && (
-                    <div>
-                      <ModalInput
-                        label={
-                          ui.exchangeRateLoading
-                            ? "Exchange Rate (Loading...)"
-                            : "Exchange Rate"
-                        }
-                        name="exchangeRt"
-                        value={formData.exchangeRt}
-                        onChange={actions.handleInputChange}
-                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                      />
-                      {!!ui.exchangeRateError && (
-                        <div className="mt-1 text-[10px] text-danger">
-                          {ui.exchangeRateError}
-                        </div>
-                      )}
-                    </div>
-                  )}
 
                   {/* Status */}
                   <div>
                     <ModalSelect
                       label="Status"
-                      name="invoiceStatus"
-                      value={formData.invoiceStatus}
+                      name="quotationStatus"
+                      value={formData.quotationStatus}
+                      options={[...quotationStatusOptions]}
                       onChange={actions.handleInputChange}
-                      options={[...invoiceStatusOptions]}
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     ></ModalSelect>
                   </div>
@@ -277,7 +270,7 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                     </h3>
                   </div>
                   <div className="mt-2 overflow-x-auto">
-                   <table className="w-full min-w-[760px] border-collapse text-[10px]">
+                    <table className="w-full min-w-[760px] border-collapse text-[10px]">
                       <thead>
                         <tr className="border-b border-theme">
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px] whitespace-nowrap">
@@ -286,12 +279,11 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
                             Item
                           </th>
-                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[110px] whitespace-nowrap">
-                              Batch No
-                          </th>
-
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[110px] whitespace-nowrap">
                             Description
+                          </th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[110px] whitespace-nowrap">
+                            Packing
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
                             Qty
@@ -344,19 +336,7 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                 />
                               </td>
                               <td className="px-0.5 py-1">
-                                <input
-                                  type="text"
-                                  name="batchNo"
-                                  value={it.batchNo}
-                                  onChange={(e) =>
-                                    actions.handleItemChange(i, e)
-                                  }
-                               disabled
-                                  className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                />
-                              </td>
-                              <td className="px-0.5 py-1">
-                                
+
                                 <input
                                   type="text"
                                   name="description"
@@ -368,6 +348,19 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                   className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="text"
+                                  name="batchNo"
+                                  value={it.batchNo}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  disabled
+                                  className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
@@ -390,7 +383,6 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                   }
                                   min="0"
                                   step="0.01"
-                                  disabled
                                   className="w-[90px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
@@ -417,7 +409,6 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                   }
                                   min="0"
                                   placeholder="0"
-                                  disabled
                                   className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
@@ -429,7 +420,6 @@ const handleFormSubmit = async (e: React.FormEvent) => {
                                   onChange={(e) =>
                                     actions.handleItemChange(i, e)
                                   }
-                                  disabled
                                   className="w-[80px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>

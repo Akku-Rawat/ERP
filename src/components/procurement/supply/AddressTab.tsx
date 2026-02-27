@@ -49,9 +49,9 @@ export const AddressTab: React.FC<AddressTabProps> = ({
   }, []);
 
 
- const selectedCountry = countriesCache.find(
-  (c) => c.country_name === form.billingCountry
-);;
+  const selectedCountry = countriesCache.find(
+    (c) => c.country_name === form.billingCountry
+  );;
 
   return (
     <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
@@ -85,6 +85,24 @@ export const AddressTab: React.FC<AddressTabProps> = ({
             error={errors.billingCity}
           />
 
+
+          <ModalInput
+            label="District"
+            name="district"
+            value={form.district}
+            onChange={onChange}
+            required
+            error={errors.district}
+          />
+
+          <ModalInput
+            label="State/Province"
+            name="province"
+            value={form.province}
+            onChange={onChange}
+            error={errors.province}
+          />
+
           <SearchSelect
             label="Country"
             value={selectedCountry?.country_name || ""}
@@ -112,23 +130,6 @@ export const AddressTab: React.FC<AddressTabProps> = ({
             }}
             error={errors.billingCountry}
             required
-          />
-
-          <ModalInput
-            label="District"
-            name="district"
-            value={form.district}
-            onChange={onChange}
-            required
-            error={errors.district}
-          />
-
-          <ModalInput
-            label="Province"
-            name="province"
-            value={form.province}
-            onChange={onChange}
-            error={errors.province}
           />
 
           <ModalInput

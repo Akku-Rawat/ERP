@@ -114,7 +114,7 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
             onChange("");
           }}
           onFocus={() => search && setOpen(true)}
-          className={`w-full py-2 px-3 border rounded text-[13px] text-main bg-card ${
+          className={`py-1 px-2 border rounded text-[11px] text-main bg-card transition-all w-auto min-w-0, ${
             error ? "border-danger" : "border-theme"
           }`}
         />

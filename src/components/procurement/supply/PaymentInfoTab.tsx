@@ -118,12 +118,11 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
           />
 
           <ModalInput
-            label="Sort Code"
+            label="Sort/IFSC Code"
             name="sortCode"
             value={form.sortCode}
+             required
             onChange={onChange}
-            required
-            error={errors.sortCode}
           />
 
           <ModalInput
@@ -131,8 +130,6 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             name="swiftCode"
             value={form.swiftCode}
             onChange={onChange}
-            required
-            error={errors.swiftCode}
           />
 
           <ModalInput
@@ -140,7 +137,6 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             name="branchAddress"
             value={form.branchAddress}
             onChange={onChange}
-            required
             error={errors.branchAddress}
           />
         </div>

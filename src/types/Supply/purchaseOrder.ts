@@ -63,7 +63,6 @@ destnCountryCd: string; // New field for Export country
   shippingRule: string;
   incoterm: string;
   taxesChargesTemplate: string;
-  requiredBy: string;
   currency: string;
   status: string;
   costCenter: string;
@@ -145,7 +144,6 @@ export const emptyPOForm: PurchaseOrderFormData = {
   poNumber: "",
   date: "",
   supplier: "",
-  requiredBy: "",
   supplierContact: "",
   taxCategory: "",
   currency: "INR",
@@ -154,8 +152,8 @@ export const emptyPOForm: PurchaseOrderFormData = {
   shippingRule: "",
   incoterm: "",
   taxesChargesTemplate: "",
-  costCenter: "",
-  project: "",
+  costCenter: "UD-001 - Udvil - RI",
+  project: "Project-0001",
 
   addresses: {
     supplierAddress: {

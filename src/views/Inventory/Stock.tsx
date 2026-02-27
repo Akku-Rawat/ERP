@@ -33,7 +33,7 @@ import type { Column } from "../../components/ui/Table/type";
 import type { ItemSummary, Item } from "../../types/item";
 
 const Items: React.FC = () => {
-  const [items, setItems] = useState<any[]>([]);
+const [items, setItems] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -59,17 +59,21 @@ const Items: React.FC = () => {
       // Map API data to ItemSummary[]
       const list = Array.isArray(apiData) ? apiData : apiData?.data || [];
 
-      const mapped = list.flatMap((entry: any) =>
-        (entry.items || []).map((item: any) => ({
-          id: entry.name || "",
-          date: entry.posting_date || "",
-          itemCode: item.item_code || "",
-          qty: item.qty || 0,
-          totalAmount: Number(item.custom_total_amount || 0),
-        })),
-      );
+      
+const mapped = list.flatMap((entry: any) =>
+  (entry.items || []).map((item: any) => ({
+    id: entry.name || "",
+    date: entry.posting_date || "",
+    itemCode: item.item_code || "",
+    qty: item.qty || 0,
+    totalAmount: Number(item.custom_total_amount || 0),
+  }))
+);
 
-      setItems(mapped as any);
+setItems(mapped as any);
+
+
+ 
 
       setTotalItems(apiData?.totalItems ?? 0);
       setTotalPages(apiData?.totalPages ?? 1);
@@ -94,34 +98,32 @@ const Items: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleEdit = async (stockId: string, e?: React.MouseEvent<Element>) => {
-    e?.stopPropagation();
+const handleEdit = async (stockId: string, e?: React.MouseEvent<Element>) => {
+  e?.stopPropagation();
 
-    try {
-      const res = await getStockById(stockId);
-      console.log("FULL RESPONSE:", res);
+  try {
+    const res = await getStockById(stockId);
+    console.log("FULL RESPONSE:", res);
 
-      const stockData = Array.isArray(res?.data?.data)
+    const stockData =
+      Array.isArray(res?.data?.data)
         ? res.data.data[0]
         : null;
 
-      if (!stockData) {
-        showApiError("Invalid stock data");
-        return;
-      }
-
-      setViewStockData(stockData);
-      setShowViewModal(true);
-    } catch (err) {
-      console.error(err);
-      showApiError("Unable to fetch stock entry details");
+    if (!stockData) {
+      showApiError("Invalid stock data");
+      return;
     }
-  };
 
-  const handleDeleteClick = (
-    item: ItemSummary,
-    e?: React.MouseEvent<Element>,
-  ) => {
+    setViewStockData(stockData);
+    setShowViewModal(true);
+  } catch (err) {
+    console.error(err);
+    showApiError("Unable to fetch stock entry details");
+  }
+};
+
+  const handleDeleteClick = (item: ItemSummary, e?: React.MouseEvent<Element>) => {
     e?.stopPropagation();
     setItemToDelete(item);
     setDeleteModalOpen(true);
@@ -134,22 +136,24 @@ const Items: React.FC = () => {
       setDeleting(true);
       showLoading("Deleting Stock Entry...");
 
-      const res = await deleteStockEntry({
-        stock_entry_id: itemToDelete.id,
-      });
+const res = await deleteStockEntry({
+  stock_entry_id: itemToDelete.id,
+});
 
-      if (res?.status_code !== 200 || res?.status !== "success") {
-        closeSwal();
-        showApiError(res?.message || "Delete failed");
-        return;
-      }
+if (res?.status_code !== 200 || res?.status !== "success") {
+  closeSwal();
+  showApiError(res?.message || "Delete failed");
+  return;
+}
 
-      closeSwal();
-      showSuccess("Stock entry deleted successfully");
+closeSwal();
+showSuccess("Stock entry deleted successfully");
 
-      setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
+setItems((prev) =>
+  prev.filter((i) => i.id !== itemToDelete.id)
+);
 
-      setDeleteModalOpen(false);
+setDeleteModalOpen(false);
 
       setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
       setDeleteModalOpen(false);
@@ -179,66 +183,68 @@ const Items: React.FC = () => {
     }
   };
 
+
   /*      COLUMNS
    */
 
-  const columns: Column<any>[] = [
-    {
-      key: "id",
-      header: "Stock ID",
-      align: "left",
-    },
-    {
-      key: "date",
-      header: "Posting Date",
-      align: "left",
-      render: (i) => (i.date ? new Date(i.date).toLocaleDateString() : "—"),
-    },
-    {
-      key: "itemCode",
-      header: "Item Code",
-      align: "left",
-    },
-    {
-      key: "qty",
-      header: "Qty",
-      align: "right",
-    },
-    {
-      key: "totalAmount",
-      header: "Total Amount",
-      align: "right",
-      render: (i) => (
-        <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
-          INR {i.totalAmount.toLocaleString()}
-        </code>
-      ),
-    },
-    {
-      key: "actions",
-      header: "Actions",
-      align: "center",
-      render: (i) => (
-        <ActionGroup>
-          {/* View Button Direct */}
-          <ActionButton
-            type="view"
-            onClick={(e) => handleEdit(i.id, e)}
-            iconOnly
-          />
+const columns: Column<any>[] = [
+  {
+    key: "id",
+    header: "Stock ID",
+    align: "left",
+  },
+  {
+    key: "date",
+    header: "Posting Date",
+    align: "left",
+    render: (i) =>
+      i.date ? new Date(i.date).toLocaleDateString() : "—",
+  },
+  {
+    key: "itemCode",
+    header: "Item Code",
+    align: "left",
+  },
+  {
+    key: "qty",
+    header: "Qty",
+    align: "right",
+  },
+{
+  key: "totalAmount",
+  header: "Total Amount",
+  align: "right",
+  render: (i) => (
+    <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
+      INR {i.totalAmount.toLocaleString()}
+    </code>
+  ),
+},
+  {
+  key: "actions",
+  header: "Actions",
+  align: "center",
+  render: (i) => (
+    <ActionGroup>
+      {/* View Button Direct */}
+      <ActionButton
+        type="view"
+        onClick={(e) => handleEdit(i.id, e)}
+        iconOnly
+      />
 
-          {/* Dropdown Menu */}
-          <ActionMenu
-            onEdit={() => {
-              setEditItem(i);
-              setShowModal(true);
-            }}
-            onDelete={(e) => handleDeleteClick(i, e)}
-          />
-        </ActionGroup>
-      ),
-    },
-  ];
+      {/* Dropdown Menu */}
+      <ActionMenu
+        onEdit={() => {
+          setEditItem(i);
+          setShowModal(true);
+        }}
+        onDelete={(e) => handleDeleteClick(i, e)}
+      />
+    </ActionGroup>
+  ),
+}
+];
   /*      RENDER
    */
 
@@ -246,6 +252,7 @@ const Items: React.FC = () => {
     <div className="p-8">
       <Table
         loading={loading || initialLoad}
+      
         columns={columns}
         data={items}
         enableColumnSelector

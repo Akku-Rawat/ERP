@@ -9,6 +9,8 @@ import SupplierSelect from "../../selects/procurement/SupplierSelect";
 import POItemSelect from "../../selects/procurement/POItemSelect";
 import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
 
+
+
 interface DetailsTabProps {
   form: PurchaseInvoiceFormData;
   items: ItemRow[];
@@ -21,6 +23,8 @@ interface DetailsTabProps {
   onAddItem: () => void;
   onRemoveItem: (idx: number) => void;
   getCurrencySymbol: () => string;
+  poList: any[];
+  onPOSelect: (po:any) => void;
 }
 
 export const DetailsTab = ({
@@ -33,6 +37,8 @@ export const DetailsTab = ({
   onAddItem,
   onRemoveItem,
   getCurrencySymbol,
+   poList,
+  onPOSelect
 }: DetailsTabProps) => {
   const symbol = getCurrencySymbol();
 
@@ -77,6 +83,22 @@ export const DetailsTab = ({
               onChange={onSupplierChange}
             />
           </div>
+
+          
+          <ModalSelect
+            label="PO Number"
+            name="poNumber"
+            value={form.poNumber}
+            placeholder="Select PO"
+            options={(poList || []).map(po => ({
+             label: po.poId,
+value: po.poId
+            }))}
+            onChange={(e) => {
+              const selected = poList.find(p => p.pId === e.target.value);
+              onPOSelect(selected);
+            }}
+          />
 
           {/* Date */}
           <div>

@@ -8,6 +8,14 @@ export const EMPTY_ITEM: InvoiceItem = {
   discount: 0,
  vatRate: 0,
   vatCode: "",
+   packing: "",
+  mfgDate: "",
+  expDate: "",
+  boxStart: "",
+  boxEnd: "",
+
+    batchNo: "",        
+
 };
 
 export const EMPTY_TERMS: InvoiceTerms = {
@@ -115,7 +123,7 @@ export const currencyOptions = [
   { value: "GBP", label: "GBP (£)" },
   { value: "CNY", label: "CNY (¥)" },
   { value: "EUR", label: "EUR (€)" },
-  { value: "INR",label:"INR"},
+  { value: "INR",label:"INR ()"},
 ] as const;
 
 export const currencySymbols: Record<string, string> = {
@@ -129,3 +137,10 @@ export const currencySymbols: Record<string, string> = {
 };
 
 export const ITEMS_PER_PAGE = 5;
+
+
+
+export const industryBaseOptions = [
+  { label: "Product", value: "Product" },
+  { label: "Service", value: "Service" }
+];

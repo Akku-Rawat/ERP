@@ -15,7 +15,9 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 
 export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, icon, options = [], children, className = "", error, ...props }, ref) => (
-    <label className="flex flex-col  text-sm w-full group">
+    <label className="flex flex-col text-sm group min-w-0">
+
+      {/* LABEL */}
       <span className="block text-[10px] font-medium text-main mb-1">
         {icon && (
           <span className="text-muted group-focus-within:text-primary transition-colors">
@@ -26,17 +28,20 @@ export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
         {props.required && <span className="text-red-500">*</span>}
       </span>
 
+      {/* SELECT */}
       <select
         ref={ref}
         {...props}
         value={props.value ?? ""}
         className={[
-          "w-full py-2 px-3 border rounded text-[13px] text-main bg-card",
+          "py-1 px-2 border rounded text-[11px] text-main bg-card transition-all w-auto min-w-0",
+
           error
             ? "border-danger"
             : props.disabled
               ? "bg-app cursor-not-allowed opacity-60 border-theme"
               : "border-[var(--border)] hover:border-primary/40",
+
           className,
         ].join(" ")}
       >
@@ -51,6 +56,7 @@ export const ModalSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
       </select>
+
       {error && <span className="text-danger text-[10px] mt-1">{error}</span>}
     </label>
   ),
@@ -64,9 +70,16 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  icon?: React.ReactNode;
+  error?: string;
+}
+
 export const ModalInput = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, icon, className = "", error, ...props }, ref) => (
-    <label className="flex flex-col text-sm w-full group">
+    <label className="flex flex-col text-sm group min-w-0">
+
       {/* LABEL */}
       <span className="block text-[10px] font-medium text-main mb-1">
         {icon && (
@@ -84,7 +97,7 @@ export const ModalInput = React.forwardRef<HTMLInputElement, InputProps>(
         {...props}
         value={props.value ?? ""}
         className={[
-          "w-full py-2 px-3 border rounded text-[13px] text-main bg-card transition-all",
+          "py-1 px-2 border rounded text-[11px] text-main bg-card transition-all w-auto min-w-0",
 
           error
             ? "border-danger focus:border-danger"
@@ -97,8 +110,8 @@ export const ModalInput = React.forwardRef<HTMLInputElement, InputProps>(
         onFocus={(e) => {
           if (!props.disabled) {
             e.currentTarget.style.boxShadow = error
-              ? "0 0 0 3px rgba(239, 68, 68, 0.18)" // red glow
-              : "0 0 0 3px rgba(37, 99, 235, 0.16)"; // blue glow
+              ? "0 0 0 3px rgba(239, 68, 68, 0.18)"
+              : "0 0 0 3px rgba(37, 99, 235, 0.16)";
           }
           props.onFocus?.(e);
         }}

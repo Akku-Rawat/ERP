@@ -28,6 +28,8 @@ const ItemModal: React.FC<{
     reset,
     handleClose,
     handleSubmit,
+      itemGroups,
+    loadingItemGroups,
   } = useItemForm({ isOpen, isEditMode, initialData, onSubmit, onClose });
 
   if (!isOpen) return null;
@@ -138,21 +140,47 @@ const ItemModal: React.FC<{
                       }
 
                       // ── Default: delegate to DynamicField ─────────────
-                      return (
-                        <DynamicField
-                          key={fieldConfig.fieldName}
-                          config={fieldConfig}
-                          value={form[fieldConfig.fieldName]}
-                          onChange={handleDynamicFieldChange}
-                          onApiChange={
-                            fieldConfig.fieldName === "itemGroup"
-                              ? handleCategoryChange
-                              : undefined
-                          }
-                          filterValue={form.itemTypeCode}
-                        />
-                      );
-                    })}
+                    if (fieldConfig.fieldName === "itemGroup") {
+  return (
+    <label key="itemGroup" className="flex flex-col gap-1 text-sm">
+      <FieldLabel label="Item Category" required />
+      <select
+        value={form.itemGroup || ""}
+        onChange={(e) => handleDynamicFieldChange("itemGroup", e.target.value)}
+        disabled={loadingItemGroups || !form.itemTypeCode}
+        className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed"
+      >
+        {loadingItemGroups ? (
+          <option>Searching...</option>
+        ) : !form.itemTypeCode ? (
+          <option value="">Select Item Type first</option>
+        ) : (
+          <>
+            <option value="">Select Category</option>
+            {itemGroups.map((group) => (
+              <option key={group.id} value={group.groupName}>
+                {group.groupName}
+              </option>
+            ))}
+          </>
+        )}
+      </select>
+    </label>
+  );
+}
+ return (
+    <DynamicField
+      key={fieldConfig.fieldName}
+      config={fieldConfig}
+      value={form[fieldConfig.fieldName]}
+      onChange={handleDynamicFieldChange}
+      filterValue={form.itemTypeCode}
+    />
+  );
+
+})}
+               
+                    
                   </div>
                 </div>
 
@@ -217,8 +245,8 @@ const ItemModal: React.FC<{
                       name="preferredVendor"
                       value={form.preferredVendor || ""}
                       onChange={handleForm}
-                      className="w-full col-span-3"
-                      required
+                      className="w-full col-span-1"
+                    
                     />
                   </div>
                 </div>
@@ -618,7 +646,7 @@ const Input = React.forwardRef<
     <input
       ref={ref}
       className={[
-        "rounded border border-theme px-3 py-2 bg-card text-main",
+        "rounded border border-theme px-1 py-2 bg-card text-main",
         "focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary",
         props.disabled ? "bg-app text-muted cursor-not-allowed" : "",
         className,
