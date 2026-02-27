@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { getSalaryStructureById, type SalaryStructureDetail } from "../../../api/salaryStructureApi";
+import {
+  getSalaryStructureById,
+  getSalaryStructures,
+  type SalaryStructureDetail,
+  type SalaryStructureListItem,
+} from "../../../api/salaryStructureApi";
 import { getSalaryStructureAssignments } from "../../../api/salaryStructureAssignmentApi";
 import type { Employee } from "../../../types/payrolltypes";
 
@@ -9,6 +14,8 @@ type Props = {
   employees: Employee[];
   selectedEmployeeIds: string[];
   structureName: string;
+  selectedSalaryStructure?: string;
+  onSelectedSalaryStructureChange?: (v: string) => void;
   currency: string;
   payPeriodStart: string;
   payPeriodEnd: string;
@@ -30,6 +37,8 @@ export default function MultiPayrollPreviewModal({
   employees,
   selectedEmployeeIds,
   structureName,
+  selectedSalaryStructure,
+  onSelectedSalaryStructureChange,
   currency,
   payPeriodStart,
   payPeriodEnd,
@@ -131,6 +140,39 @@ export default function MultiPayrollPreviewModal({
     return String(assignedStructureName ?? "").trim() || fromEmp || fallback;
   }, [activeIndex, assignedStructureName, selected, structureName]);
 
+  const [structuresLoading, setStructuresLoading] = useState(false);
+  const [structuresError, setStructuresError] = useState<string | null>(null);
+  const [structures, setStructures] = useState<SalaryStructureListItem[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    let mounted = true;
+
+    const run = async () => {
+      try {
+        setStructuresLoading(true);
+        setStructuresError(null);
+        const list = await getSalaryStructures();
+        if (!mounted) return;
+        setStructures(Array.isArray(list) ? list : []);
+      } catch (e: any) {
+        if (!mounted) return;
+        setStructures([]);
+        setStructuresError(e?.message || "Failed to load salary structures");
+      } finally {
+        if (!mounted) return;
+        setStructuresLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [open]);
+
+  const salaryStructureForRun = String(selectedSalaryStructure ?? "").trim() || activeStructureName;
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<SalaryStructureDetail | null>(null);
@@ -172,7 +214,7 @@ export default function MultiPayrollPreviewModal({
 
   useEffect(() => {
     if (!open) return;
-    const name = String(activeStructureName ?? "").trim();
+    const name = String(salaryStructureForRun ?? "").trim();
     if (!name) {
       setDetail(null);
       setError(null);
@@ -202,7 +244,7 @@ export default function MultiPayrollPreviewModal({
     return () => {
       mounted = false;
     };
-  }, [open, activeStructureName]);
+  }, [open, salaryStructureForRun]);
 
   if (!open) return null;
 
@@ -258,7 +300,7 @@ export default function MultiPayrollPreviewModal({
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
               <div>
                 <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">Month</div>
                 <input
@@ -268,13 +310,40 @@ export default function MultiPayrollPreviewModal({
                   className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none"
                 />
               </div>
+
+              <div>
+                <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">Salary Structure</div>
+                <select
+                  value={salaryStructureForRun}
+                  onChange={(e) => onSelectedSalaryStructureChange?.(e.target.value)}
+                  className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none"
+                  disabled={structuresLoading || !onSelectedSalaryStructureChange}
+                >
+                  {!salaryStructureForRun && <option value="">Select structure</option>}
+                  {salaryStructureForRun && !structures.some((s) => String(s.name) === salaryStructureForRun) && (
+                    <option value={salaryStructureForRun}>{salaryStructureForRun}</option>
+                  )}
+                  {structures
+                    .filter((s) => Boolean((s as any)?.is_active ?? true))
+                    .map((s) => (
+                      <option key={String(s.name)} value={String(s.name)}>
+                        {String(s.name)}
+                      </option>
+                    ))}
+                </select>
+                {structuresError && (
+                  <div className="text-[11px] text-red-600 mt-1 break-words">{structuresError}</div>
+                )}
+              </div>
+
               <div>
                 <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">Start</div>
                 <input
                   type="date"
                   value={payPeriodStart}
                   onChange={(e) => onPayPeriodStartChange(e.target.value)}
-                  className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none"
+                  disabled={Boolean(month)}
+                  className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
                 />
               </div>
               <div>
@@ -283,10 +352,17 @@ export default function MultiPayrollPreviewModal({
                   type="date"
                   value={payPeriodEnd}
                   onChange={(e) => onPayPeriodEndChange(e.target.value)}
-                  className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none"
+                  disabled={Boolean(month)}
+                  className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
                 />
               </div>
             </div>
+
+            {Boolean(month) && (
+              <div className="mt-2 text-[11px] text-gray-500">
+                Start/End are auto-filled from the selected month. Clear the month to edit dates manually.
+              </div>
+            )}
 
             <div className="mt-3 text-xs text-gray-600">
               {selected.length === 0 ? "" : `Employee ${activeIndex + 1} of ${selected.length}`}

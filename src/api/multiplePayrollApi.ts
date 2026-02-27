@@ -5,7 +5,7 @@ import { ERP_BASE } from "../config/api";
 const api = createAxiosInstance(ERP_BASE);
 
 export interface MultiplePayrollRequest {
-  employees: string[];
+  salary_structure?: string;
   start_date: string;
   end_date: string;
 }

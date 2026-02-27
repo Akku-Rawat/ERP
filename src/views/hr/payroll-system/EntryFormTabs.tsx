@@ -1,6 +1,4 @@
-// EntryFormTabs.tsx — New Payroll Entry: Overview, Employees, Accounting tabs
-
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 
 import { Download, Edit2, Eye } from "lucide-react";
 
@@ -15,6 +13,8 @@ import { createMultipleEmployeesPayroll } from "../../../api/multiplePayrollApi"
 import { getSalarySlips } from "../../../api/salarySlipApi";
 
 import { getSalaryStructureAssignments } from "../../../api/salaryStructureAssignmentApi";
+
+import { getSalaryStructures, type SalaryStructureListItem } from "../../../api/salaryStructureApi";
 
 import PayrollPreviewModal from "./payrollPreview";
 
@@ -219,7 +219,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
   onEditEmployee,
   onViewEmployee,
 }) => {
-  const active = employees.filter((e) => e.isActive);
+  const active = useMemo(() => employees.filter((e) => e.isActive), [employees]);
 
   const isLoading = Boolean(loading);
 
@@ -234,6 +234,15 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
   const [singleModalOpen, setSingleModalOpen] = useState(false);
 
   const [multiModalOpen, setMultiModalOpen] = useState(false);
+
+  const [multiSalaryStructureName, setMultiSalaryStructureName] = useState<string>("");
+  const [salaryStructures, setSalaryStructures] = useState<SalaryStructureListItem[]>([]);
+  const [salaryStructuresLoading, setSalaryStructuresLoading] = useState(false);
+
+  const [multiStructureAssignments, setMultiStructureAssignments] = useState<any[]>([]);
+  const [multiAssignmentsLoading, setMultiAssignmentsLoading] = useState(false);
+
+  const lastAutoSelectedStructureRef = useRef<string>("");
 
   const miniInputCls =
     "w-56 px-2.5 py-2 bg-app border border-theme rounded-lg text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary transition";
@@ -313,10 +322,10 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
         const payEnd = String(data.endDate ?? "").trim();
         const effective = /^\d{4}-\d{2}-\d{2}$/.test(payEnd)
           ? list.filter((r: any) => {
-              const fd = String(r?.from_date ?? "");
-              if (!/^\d{4}-\d{2}-\d{2}$/.test(fd)) return false;
-              return fd <= payEnd;
-            })
+            const fd = String(r?.from_date ?? "");
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(fd)) return false;
+            return fd <= payEnd;
+          })
           : list;
 
         const best = (effective.length > 0 ? effective : list)
@@ -352,6 +361,143 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
     }
   }, [selectionMode]);
 
+  React.useEffect(() => {
+    if (selectionMode !== "multiple") return;
+    let mounted = true;
+
+    const run = async () => {
+      try {
+        setSalaryStructuresLoading(true);
+        const list = await getSalaryStructures();
+        if (!mounted) return;
+        setSalaryStructures(Array.isArray(list) ? list : []);
+      } catch {
+        if (!mounted) return;
+        setSalaryStructures([]);
+      } finally {
+        if (!mounted) return;
+        setSalaryStructuresLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [selectionMode]);
+
+  React.useEffect(() => {
+    if (selectionMode !== "multiple") return;
+    let mounted = true;
+    const run = async () => {
+      try {
+        setMultiAssignmentsLoading(true);
+        const rows = await getSalaryStructureAssignments();
+        if (!mounted) return;
+        setMultiStructureAssignments(Array.isArray(rows) ? rows : []);
+      } catch {
+        if (!mounted) return;
+        setMultiStructureAssignments([]);
+      } finally {
+        if (!mounted) return;
+        setMultiAssignmentsLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [selectionMode]);
+
+  const effectiveStructureIndex = useMemo(() => {
+    const byEmployee = new Map<string, string>();
+    const byFullNameLower = new Map<string, string>();
+    const list = Array.isArray(multiStructureAssignments) ? multiStructureAssignments : [];
+
+    const effectiveStart = String(data.startDate ?? "").trim();
+    const useDate = /^\d{4}-\d{2}-\d{2}$/.test(effectiveStart) ? effectiveStart : "";
+
+    const byEmp = new Map<string, any[]>();
+    list.forEach((r: any) => {
+      const emp = String(r?.employee ?? "").trim();
+      if (!emp) return;
+      if (!byEmp.has(emp)) byEmp.set(emp, []);
+      byEmp.get(emp)!.push(r);
+    });
+
+    byEmp.forEach((rows, emp) => {
+      let eligible = rows;
+      if (useDate) {
+        eligible = rows.filter((r: any) => {
+          const fd = String(r?.from_date ?? "");
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(fd)) return false;
+          return fd <= useDate;
+        });
+      }
+
+      const best = (eligible.length > 0 ? eligible : rows)
+        .filter((r: any) => String(r?.salary_structure ?? "").trim())
+        .sort((a: any, b: any) => String(b?.from_date ?? "").localeCompare(String(a?.from_date ?? "")))[0];
+
+      const structure = String(best?.salary_structure ?? "").trim();
+      if (!structure) return;
+
+      byEmployee.set(emp, structure);
+      const fullName = String(best?.full_name ?? "").trim().toLowerCase();
+      if (fullName) byFullNameLower.set(fullName, structure);
+    });
+
+    return { byEmployee, byFullNameLower };
+  }, [data.startDate, multiStructureAssignments]);
+
+  const getEffectiveStructureForEmployee = (emp: any): string => {
+    const code = String(emp?.employeeId ?? "").trim();
+    const id = String(emp?.id ?? "").trim();
+    const nameLower = String(emp?.name ?? "").trim().toLowerCase();
+
+    return (
+      (code && effectiveStructureIndex.byEmployee.get(code)) ||
+      (id && effectiveStructureIndex.byEmployee.get(id)) ||
+      (nameLower && effectiveStructureIndex.byFullNameLower.get(nameLower)) ||
+      ""
+    );
+  };
+
+  const employeesMatchingSelectedStructure = useMemo(() => {
+    if (selectionMode !== "multiple") return [] as Employee[];
+    const selectedStructure = String(multiSalaryStructureName ?? "").trim();
+    if (!selectedStructure) return [] as Employee[];
+
+    return active.filter((emp: any) => {
+      const eff = getEffectiveStructureForEmployee(emp);
+      return Boolean(eff) && eff === selectedStructure;
+    });
+  }, [active, effectiveStructureIndex, multiSalaryStructureName, selectionMode]);
+
+  React.useEffect(() => {
+    if (selectionMode !== "multiple") return;
+    const selectedStructure = String(multiSalaryStructureName ?? "").trim();
+    if (!selectedStructure) return;
+    if (multiAssignmentsLoading) return;
+
+    if (lastAutoSelectedStructureRef.current === selectedStructure) return;
+
+    const ids = employeesMatchingSelectedStructure.map((e) => String((e as any).id)).filter(Boolean);
+
+    onChange("selectedEmployees", ids);
+    lastAutoSelectedStructureRef.current = selectedStructure;
+    setPage((p) => (p === 1 ? p : 1));
+  }, [employeesMatchingSelectedStructure, multiAssignmentsLoading, multiSalaryStructureName, onChange, selectionMode]);
+
+  React.useEffect(() => {
+    if (selectionMode !== "multiple") return;
+    const selectedStructure = String(multiSalaryStructureName ?? "").trim();
+    if (!selectedStructure) {
+      lastAutoSelectedStructureRef.current = "";
+    }
+  }, [multiSalaryStructureName, selectionMode]);
+
   const canRunSinglePayroll = useMemo(() => {
     if (selectionMode !== "single") return false;
     if (!selectedSingleEmployeeCode) return false;
@@ -378,6 +524,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
   const canRunMultiplePayroll = useMemo(() => {
     if (selectionMode !== "multiple") return false;
     if (!Array.isArray(data.selectedEmployees) || data.selectedEmployees.length === 0) return false;
+    if (!String(multiSalaryStructureName ?? "").trim()) return false;
     if (!String(data.company ?? "").trim()) return false;
     if (!String(data.currency ?? "").trim()) return false;
     if (!String(data.payrollFrequency ?? "").trim()) return false;
@@ -386,6 +533,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
     if (!String(data.endDate ?? "").trim()) return false;
     return true;
   }, [
+    multiSalaryStructureName,
     data.company,
     data.currency,
     data.endDate,
@@ -447,6 +595,10 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
   const runMultiplePayroll = async () => {
     if (!canRunMultiplePayroll) {
+      if (!String(multiSalaryStructureName ?? "").trim()) {
+        toast.error("Please select a salary structure");
+        return;
+      }
       toast.error("Please select employees and fill required fields");
       return;
     }
@@ -559,7 +711,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
       }
 
       const resp = await createMultipleEmployeesPayroll({
-        employees: toRun,
+        salary_structure: String(multiSalaryStructureName).trim(),
         start_date: startDate,
         end_date: endDate,
       });
@@ -598,15 +750,30 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
     const q = String((data as any).nameSearch ?? "").trim().toLowerCase();
     const job = String((data as any).jobTitleFilter ?? "").trim().toLowerCase();
 
+    const selectedStructure =
+      selectionMode === "multiple" ? String(multiSalaryStructureName ?? "").trim() : "";
+
+    const canFilterByStructure =
+      Boolean(selectedStructure) &&
+      !multiAssignmentsLoading &&
+      Array.isArray(multiStructureAssignments) &&
+      multiStructureAssignments.length > 0;
+
     return active.filter((e) => {
       const name = String(e.name ?? "").toLowerCase();
       const jobTitle = String(e.jobTitle ?? (e as any).designation ?? "").toLowerCase();
+
+      if (canFilterByStructure) {
+        const eff = getEffectiveStructureForEmployee(e);
+        if (!eff) return false;
+        if (eff !== selectedStructure) return false;
+      }
 
       if (q && !name.includes(q)) return false;
       if (job && !jobTitle.includes(job)) return false;
       return true;
     });
-  }, [active, data]);
+  }, [active, data, effectiveStructureIndex, multiAssignmentsLoading, multiSalaryStructureName, multiStructureAssignments, selectionMode]);
 
   const toggleEmp = (id: string) => {
     if (selectionMode === "single") {
@@ -666,6 +833,8 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
         employees={active}
         selectedEmployeeIds={data.selectedEmployees}
         structureName={String((fallbackSalaryStructureName || "").trim())}
+        selectedSalaryStructure={multiSalaryStructureName}
+        onSelectedSalaryStructureChange={(v: string) => setMultiSalaryStructureName(v)}
         currency={String(data.currency ?? "")}
         payPeriodStart={String(data.startDate ?? "")}
         payPeriodEnd={String(data.endDate ?? "")}
@@ -729,6 +898,24 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
                 <div className="text-xs text-muted whitespace-nowrap">{filtered.length} employees</div>
               )}
 
+              {selectionMode === "multiple" && !isLoading && (
+                <select
+                  value={multiSalaryStructureName}
+                  onChange={(e) => setMultiSalaryStructureName(e.target.value)}
+                  className={miniSelectCls}
+                  disabled={salaryStructuresLoading}
+                >
+                  <option value="">Salary structure</option>
+                  {salaryStructures
+                    .filter((s) => Boolean((s as any)?.is_active ?? true))
+                    .map((s) => (
+                      <option key={String(s.name)} value={String(s.name)}>
+                        {String(s.name)}
+                      </option>
+                    ))}
+                </select>
+              )}
+
               {isLoading ? (
                 <div className="h-9 w-56 bg-theme/60 rounded-lg animate-pulse" />
               ) : (
@@ -773,6 +960,11 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
                           return;
                         }
 
+                        if (!String(multiSalaryStructureName ?? "").trim()) {
+                          toast.error("Please select a salary structure");
+                          return;
+                        }
+
                         if (!String(data.startDate ?? "").trim() || !String(data.endDate ?? "").trim()) {
                           const now = new Date();
                           const start = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -782,7 +974,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
                         }
                         setMultiModalOpen(true);
                       }}
-                      disabled={data.selectedEmployees.length === 0}
+                      disabled={data.selectedEmployees.length === 0 || !String(multiSalaryStructureName ?? "").trim()}
                       className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg bg-primary text-white hover:opacity-90 disabled:opacity-40"
                     >
                       Preview Payroll
@@ -839,9 +1031,8 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
                 ].map((h, i) => (
                   <th
                     key={String(i)}
-                    className={`px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider whitespace-nowrap ${
-                      i >= 7 ? "text-right" : "text-left"
-                    }`}
+                    className={`px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider whitespace-nowrap ${i >= 7 ? "text-right" : "text-left"
+                      }`}
                   >
                     {h}
                   </th>
@@ -856,9 +1047,8 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
                     {Array.from({ length: 10 }).map((__, cIdx) => (
                       <td key={String(cIdx)} className="px-4 py-3">
                         <div
-                          className={`h-3 bg-theme/60 rounded animate-pulse ${
-                            cIdx === 0 ? "w-4" : cIdx === 3 ? "w-32" : "w-20"
-                          }`}
+                          className={`h-3 bg-theme/60 rounded animate-pulse ${cIdx === 0 ? "w-4" : cIdx === 3 ? "w-32" : "w-20"
+                            }`}
                         />
                       </td>
                     ))}
@@ -882,9 +1072,8 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
                     <tr
                       key={emp.id}
                       onClick={() => toggleEmp(emp.id)}
-                      className={`border-b border-theme last:border-0 cursor-pointer transition-colors ${
-                        isSel ? "bg-primary/5" : i % 2 === 1 ? "bg-app hover:bg-primary/3" : "bg-card hover:bg-app"
-                      }`}
+                      className={`border-b border-theme last:border-0 cursor-pointer transition-colors ${isSel ? "bg-primary/5" : i % 2 === 1 ? "bg-app hover:bg-primary/3" : "bg-card hover:bg-app"
+                        }`}
                     >
                       <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <input
@@ -909,11 +1098,10 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
-                            statusLabel.toLowerCase() === "active"
+                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${statusLabel.toLowerCase() === "active"
                               ? "bg-success/10 text-success border-success/20"
                               : "bg-warning/10 text-warning border-warning/20"
-                          }`}
+                            }`}
                         >
                           {statusLabel}
                         </span>
