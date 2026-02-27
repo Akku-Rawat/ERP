@@ -94,7 +94,7 @@ export const ExpandedRowDetail: React.FC<ExpandedRowDetailProps> = ({
             </Block>
 
             <Block title="Deductions">
-              <MoneyRow label="Income Tax" value={record.taxDeduction} danger />
+              <MoneyRow label="PAYE" value={record.taxDeduction} danger />
               <MoneyRow label="Provident Fund" value={record.pfDeduction} danger />
               <MoneyRow label="ESI" value={record.esiDeduction} danger />
               <MoneyRow label="Professional Tax" value={record.professionalTax} danger />

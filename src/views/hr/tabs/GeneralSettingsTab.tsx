@@ -134,7 +134,7 @@ export default function GeneralSettingsTab() {
             </label>
             <label className="flex items-center">
               <input type="checkbox" defaultChecked className="mr-3" />
-              <span className="text-sm text-gray-700">PAYE (Income Tax)</span>
+              <span className="text-sm text-gray-700">PAYE</span>
             </label>
           </div>
         </div>

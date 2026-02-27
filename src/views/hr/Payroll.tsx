@@ -38,15 +38,6 @@ interface Employee {
   allowances: number;
 }
 
-interface TaxConfig {
-  employeeId: string;
-  regime: "Old" | "New";
-  section80C: number;
-  section80D: number;
-  hra: number;
-  otherDeductions: number;
-}
-
 interface Bonus {
   id: string;
   label: string;
@@ -970,7 +961,7 @@ export default function EnhancedPayroll() {
                                 <div className="space-y-3">
                                   <div className="flex justify-between items-center">
                                     <span className="text-sm text-red-800">
-                                      Income Tax ({record.taxRegime}):
+                                      PAYE ({record.taxRegime}):
                                     </span>
                                     <span className="text-sm font-bold text-red-900">
                                       ₹{record.taxDeduction.toLocaleString()}
@@ -1470,7 +1461,7 @@ export default function EnhancedPayroll() {
                     <h3 className="font-bold text-red-800 mb-4">Deductions</h3>
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
-                        <span>Income Tax ({selectedRecord.taxRegime})</span>
+                        <span>PAYE ({selectedRecord.taxRegime})</span>
                         <span className="font-semibold">
                           ₹{selectedRecord.taxDeduction.toLocaleString()}
                         </span>

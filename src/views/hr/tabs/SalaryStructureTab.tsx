@@ -572,7 +572,6 @@ export default function SalaryStructureTab() {
                             <button
                               onClick={() => setShowDeleteConfirm(structure.name || structure.id)}
                               className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                              title="Delete"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -1221,7 +1220,7 @@ function StructureModal({
         return {
           ...c,
           effectiveAmount: statutoryCalc.statutory.paye,
-          label: "PAYEE",
+          label: "PAYE",
         };
       }
 

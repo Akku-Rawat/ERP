@@ -96,7 +96,7 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
             <h4 className="text-xs font-extrabold text-muted uppercase tracking-wider mb-4">Statutory Deductions Breakdown</h4>
             <div className="grid grid-cols-3 gap-4">
               {[
-                { label: "Income Tax (TDS)", val: summary.tax, color: "border-danger" },
+                { label: "PAYE", val: summary.tax, color: "border-danger" },
                 { label: "Provident Fund", val: summary.pf, color: "border-info" },
                 { label: "ESI", val: summary.esi, color: "border-warning" },
               ].map(({ label, val, color }) => (
@@ -178,7 +178,7 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
         <div className="space-y-4">
           {[
             {
-              title: "Income Tax (TDS)",
+              title: "PAYE",
               color: "border-danger/30 bg-danger/5",
               items: [
                 ["Total TDS Collected", `ZMW ${fmtZMW(summary.tax)}`],
@@ -216,7 +216,6 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
               </div>
             </div>
           ))}
-
           <button onClick={() => alert("Downloading tax report…")}
             className="flex items-center gap-2 px-4 py-2 border border-theme text-primary text-xs font-bold rounded-lg hover:bg-app transition">
             <Download className="w-3.5 h-3.5" /> Download Tax Report

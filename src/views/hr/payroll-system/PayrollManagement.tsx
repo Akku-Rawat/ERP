@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   Plus, ChevronLeft,
   FileText, Users, CheckCircle,
-  Layers, X,
+  Layers, X, Download,
 } from "lucide-react";
 
 import type { PayrollEntry, Employee } from "../../../types/payrolltypes";
@@ -14,6 +14,7 @@ import { KPICards } from "./KPICards";
 import { EmployeesTab } from "./EntryFormTabs";
 import SalaryStructureTab from "../tabs/SalaryStructureTab";
 import SalaryStructureAssignmentsDashboardTab from "./SalaryStructureAssignmentsDashboardTab";
+import PayrollReportsDashboard from "./PayrollReportsDashboard";
 
 // ── Views ─────────────────────────────────────────────────────────────────────
 import EmployeeDetailsPage from "./EmployeeDetailsPage";
@@ -73,6 +74,35 @@ const Btn: React.FC<{
 // TOP NAVIGATION BAR (shared across views)
 // ─────────────────────────────────────────────────────────────────────────────
 type View = "dashboard" | "newEntry" | "salaryStructure" | "assignments" | "reports";
+
+const toCsv = (rows: Array<Record<string, any>>): string => {
+  const colSet = new Set<string>();
+  rows.forEach((r) => {
+    Object.keys(r || {}).forEach((k) => colSet.add(k));
+  });
+  const cols = Array.from(colSet);
+
+  const esc = (v: any) => {
+    const s = v === null || v === undefined ? "" : String(v);
+    const needs = /[\n\r,\"]/g.test(s);
+    const out = s.replace(/\"/g, '""');
+    return needs ? `"${out}"` : out;
+  };
+
+  const header = cols.map(esc).join(",");
+  const lines = rows.map((r) => cols.map((c) => esc((r as any)?.[c])).join(","));
+  return [header, ...lines].join("\n");
+};
+
+const downloadCsv = (filename: string, csvContent: string) => {
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+};
 
 const TopBar: React.FC<{
   view: View;
@@ -411,7 +441,7 @@ export default function PayrollManagement() {
     if (!q) return salarySlips;
     return salarySlips.filter((s) => {
       const status = String(s.status ?? "").trim();
-      const normalizedStatus = status.toLowerCase() === "submitted" ? "paid" : status.toLowerCase();
+      const normalizedStatus = status.toLowerCase() === "submitted" ? "Paid" : status || "Unknown";
       const hay = [
         String(s.name ?? ""),
         String(s.employee ?? ""),
@@ -456,7 +486,7 @@ export default function PayrollManagement() {
       }
     };
 
-    if (view === "dashboard") run();
+    if (view === "dashboard" || view === "reports") run();
     return () => {
       mounted = false;
     };
@@ -591,7 +621,11 @@ export default function PayrollManagement() {
       <div className="h-screen flex flex-col bg-app overflow-hidden">
         <TopBar {...topBarProps} />
         <div className="flex-1 overflow-y-auto px-5 py-5">
-          <div className="bg-card border border-theme rounded-2xl p-6" />
+          <PayrollReportsDashboard
+            slips={filteredSalarySlips}
+            loading={slipsLoading}
+            error={slipsError}
+          />
         </div>
       </div>
     );
@@ -649,6 +683,31 @@ export default function PayrollManagement() {
                   <div className="text-[11px] text-muted mt-0.5">Latest payroll runs</div>
                 </div>
                 <div className="flex items-center gap-3">
+                  <Btn
+                    variant="outline"
+                    size="sm"
+                    icon={<Download className="w-3.5 h-3.5" />}
+                    onClick={() => {
+                      const rows = filteredSalarySlips.map((s) => ({
+                        slip_id: s.name,
+                        employee: s.employee,
+                        salary_structure: s.salary_structure,
+                        start_date: s.start_date,
+                        end_date: s.end_date,
+                        status: s.status,
+                        total_earnings: s.total_earnings,
+                        total_deduction: s.total_deduction,
+                        net_pay: s.net_pay,
+                      }));
+                      downloadCsv(
+                        `salary_slips_${new Date().toISOString().slice(0, 10)}.csv`,
+                        toCsv(rows),
+                      );
+                    }}
+                    disabled={filteredSalarySlips.length === 0 || slipsLoading}
+                  >
+                    Export CSV
+                  </Btn>
                   <input
                     type="text"
                     value={slipsSearch}

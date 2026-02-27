@@ -19,7 +19,6 @@ export const EmployeeSelfService: React.FC<EmployeeSelfServiceProps> = ({
   employee,
   payrollRecords,
 }) => {
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("current");
   const [selectedPayslip, setSelectedPayslip] = useState<PayrollRecord | null>(
     null,
   );
@@ -225,7 +224,7 @@ export const EmployeeSelfService: React.FC<EmployeeSelfServiceProps> = ({
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-700">
-                      Income Tax ({currentRecord.taxRegime})
+                      PAYE ({currentRecord.taxRegime})
                     </span>
                     <span className="font-semibold">
                       ₹{currentRecord.taxDeduction.toLocaleString()}

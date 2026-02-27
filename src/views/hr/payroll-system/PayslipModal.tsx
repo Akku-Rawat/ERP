@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Download, Mail, Printer } from "lucide-react";
+import { X, Download, Mail } from "lucide-react";
 import type { PayrollRecord } from "../../../types/payrolltypes";
 
 interface PayslipModalProps {
@@ -46,7 +46,7 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
   ];
 
   const deductionRows = [
-    { label: `Income Tax (${record.taxRegime})`, amount: record.taxDeduction },
+    { label: `PAYE (${record.taxRegime})`, amount: record.taxDeduction },
     { label: "Provident Fund", amount: record.pfDeduction },
     { label: "Other Deductions", amount: record.otherDeductions },
   ];
