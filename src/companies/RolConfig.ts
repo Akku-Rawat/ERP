@@ -1,119 +1,118 @@
-import type { FieldConfig } from '../types/fieldConfig.types';
+import type { FieldConfig } from "../types/fieldConfig.types";
 
-
+/**
+ * ROLA (COMP-00004) item field configuration.
+ *
+ * Packaging unit is intentionally omitted — the packing information
+ * (pakingunit / packingsize) is handled separately in buildPayload and
+ * does not require a UI dropdown for this company.
+ */
 export const COMP_00004_ITEM_FIELDS: FieldConfig[] = [
-  // Item Type - Static dropdown
+  // ── Core classification ────────────────────────────────────────────────────
+
   {
-    fieldName: 'itemTypeCode',
-    fieldType: 'static-select',
-    label: 'Item Type',
+    fieldName: "itemTypeCode",
+    fieldType: "static-select",
+    label: "Item Type",
     required: true,
     colSpan: 1,
     options: [
-      
-      { value: '1', label: 'Raw Material' },
-      { value: '2', label: 'Finished Product' },
-      { value: '3', label: 'Service' },
+      { value: "1", label: "Raw Material" },
+      { value: "2", label: "Finished Product" },
+      { value: "3", label: "Service" },
     ],
   },
 
-  // Item Group - TEXT INPUT (no API)
-   {
-    fieldName: 'itemGroup',
-    fieldType: 'api-select',
-    label: 'Item Category',
+  {
+    fieldName: "itemGroup",
+    fieldType: "api-select",
+    label: "Item Category",
     required: true,
     colSpan: 1,
-    apiFunctionName: 'ItemCategorySelect', 
-    customComponent: 'ItemCategorySelect',
+    apiFunctionName: "ItemCategorySelect",
+    customComponent: "ItemCategorySelect",
   },
 
-  // Item Name
   {
-    fieldName: 'itemName',
-    fieldType: 'text-input',
-    label: 'Items Name',
+    fieldName: "itemName",
+    fieldType: "text-input",
+    label: "Item Name",
     required: true,
     colSpan: 1,
   },
 
-  // Description
   {
-    fieldName: 'description',
-    fieldType: 'textarea',
-    label: 'Description',
+    fieldName: "description",
+    fieldType: "textarea",
+    label: "Description",
+    required: false,
     colSpan: 1,
   },
 
-  // Item Class - TEXT INPUT (no API)
+  // ── Classification codes ───────────────────────────────────────────────────
+
   {
-    fieldName: 'itemClassCode',
-    fieldType: 'text-input',
-    label: 'Item Class',
+    fieldName: "itemClassCode",
+    fieldType: "text-input",
+    label: "HSN Code",
+    required: true,
     colSpan: 1,
-    placeholder: 'Enter item class',
+    placeholder: "Enter HSN / item class code",
   },
 
-  // Packaging Unit - TEXT INPUT (no API)
+  // ── Origin & measurement ───────────────────────────────────────────────────
+
   {
-    fieldName: 'packagingUnitCode',
-    fieldType: 'text-input',
-    label: 'Packaging Unit',
+    fieldName: "originNationCode",
+    fieldType: "api-select",
+    label: "Country of Origin",
+    required: true,
     colSpan: 1,
-    placeholder: 'e.g., Box, Carton',
+    apiFunctionName: "getRolaCountries",
+    customComponent: "ItemGenericSelect",
   },
 
-  // Country Code - TEXT INPUT (no API)
-{
-  fieldName: 'originNationCode',
-  fieldType: 'api-select',
-  label: 'Country Code',
-  required: true,
-  colSpan: 1,
-  apiFunctionName: 'getRolaCountries',  
-  customComponent: 'ItemGenericSelect',
-},
-
-  // Unit of Measure - TEXT INPUT (no API)
-    {
-    fieldName: 'unitOfMeasureCd',
-    fieldType: 'api-select',
-    label: 'Unit of Measurement',
-    colSpan: 1,
-    apiFunctionName: 'getRolaUOMs',
-    customComponent: 'ItemGenericSelect',
-  },
-  // Service Charge
   {
-    fieldName: 'svcCharge',
-    fieldType: 'static-select',
-    label: 'Service Charge',
+    fieldName: "unitOfMeasureCd",
+    fieldType: "api-select",
+    label: "Unit of Measurement",
+    required: true,
+    colSpan: 1,
+    apiFunctionName: "getRolaUOMs",
+    customComponent: "ItemGenericSelect",
+  },
+
+  // ── Charges & identifiers ──────────────────────────────────────────────────
+
+  {
+    fieldName: "svcCharge",
+    fieldType: "static-select",
+    label: "Service Charge",
     required: true,
     colSpan: 1,
     options: [
-      { value: 'Y', label: 'Y' },
-      { value: 'N', label: 'N' },
+      { value: "Y", label: "Yes" },
+      { value: "N", label: "No" },
     ],
   },
 
-  // Insurance
   {
-    fieldName: 'ins',
-    fieldType: 'static-select',
-    label: 'INSURANCE',
+    fieldName: "ins",
+    fieldType: "static-select",
+    label: "Insurance",
     required: true,
     colSpan: 1,
     options: [
-      { value: 'Y', label: 'Y' },
-      { value: 'N', label: 'N' },
+      { value: "Y", label: "Yes" },
+      { value: "N", label: "No" },
     ],
   },
 
-  // SKU
   {
-    fieldName: 'sku',
-    fieldType: 'text-input',
-    label: 'SKU',
-    colSpan:1,
+    fieldName: "sku",
+    fieldType: "text-input",
+    label: "SKU",
+    required: true,
+    colSpan: 1,
   },
 ];

@@ -93,7 +93,11 @@ const ItemsCategory: React.FC = () => {
     e.stopPropagation();
     try {
       const res = await getItemGroupById(id);
-      setEditGroup(res.data);
+
+setEditGroup({
+  ...res.data,
+itemType: res.data.itemType,
+});
       setShowModal(true);
     } catch {
       console.error("Unable to fetch item category");

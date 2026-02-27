@@ -1,52 +1,66 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Field type discriminant — add new variants here when needed.
+// ─────────────────────────────────────────────────────────────────────────────
 
-export type FieldType = 
-  | 'text-input'
-  | 'api-select'
-  | 'static-select'
-  | 'textarea'
-  | 'number-input';
+export type FieldType =
+  | "text-input"
+  | "number-input"
+  | "textarea"
+  | "static-select"
+  | "api-select";
 
-// Base shared properties
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared base — every field config has these.
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface BaseFieldConfig {
   fieldName: string;
   label: string;
   required?: boolean;
   placeholder?: string;
+  /** How many grid columns this field should span (default: 1). */
   colSpan?: 1 | 2 | 3 | 4;
 }
 
-// Text input
+// ─────────────────────────────────────────────────────────────────────────────
+// Concrete variants
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface TextFieldConfig extends BaseFieldConfig {
-  fieldType: 'text-input';
+  fieldType: "text-input";
 }
 
-// Textarea
-export interface TextareaFieldConfig extends BaseFieldConfig {
-  fieldType: 'textarea';
-}
-
-// Number input
 export interface NumberFieldConfig extends BaseFieldConfig {
-  fieldType: 'number-input';
+  fieldType: "number-input";
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
-// API-driven select
-export interface ApiFieldConfig extends BaseFieldConfig {
-  fieldType: 'api-select';
-  apiFunctionName: string;
-  customComponent?: 'ItemTreeSelect' | 'ItemGenericSelect' | 'ItemCategorySelect'|'';
+export interface TextareaFieldConfig extends BaseFieldConfig {
+  fieldType: "textarea";
+  rows?: number;
 }
 
-// Static select
 export interface StaticSelectConfig extends BaseFieldConfig {
-  fieldType: 'static-select';
+  fieldType: "static-select";
   options: Array<{ value: string; label: string }>;
 }
 
-// Union type - TypeScript will discriminate based on fieldType
-export type FieldConfig = 
-  | TextFieldConfig 
-  | TextareaFieldConfig
+export interface ApiSelectConfig extends BaseFieldConfig {
+  fieldType: "api-select";
+  apiFunctionName: string;
+  /** Which custom component DynamicField should render for this field. */
+  customComponent: "ItemTreeSelect" | "ItemGenericSelect" | "ItemCategorySelect";
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Union — TypeScript discriminates on `fieldType`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type FieldConfig =
+  | TextFieldConfig
   | NumberFieldConfig
-  | ApiFieldConfig 
-  | StaticSelectConfig;
+  | TextareaFieldConfig
+  | StaticSelectConfig
+  | ApiSelectConfig;

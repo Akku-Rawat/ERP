@@ -281,7 +281,7 @@ export const API = {
     get: `${CODES_BASE}/exchange/`,
   },
   rolaLookup: {
-    getUnitOfMeasure: `${ERP_BASE}/api/resource/UOM`,
+    getUnitOfMeasure: `${ERP_BASE}/api/resource/UOM?limit_start=0&limit_page_length=500`,
     getItemClasses: `${ERP_BASE}/api/item-class-list/`,
     getCountries: `${ERP_BASE}/api/resource/Country?fields=["name","country_name","code"]&limit_page_length=300`,
     getPackagingUnits : `${ERP_BASE}/api/method/erpnext.packaging_unit.get_all_packaging_units`
