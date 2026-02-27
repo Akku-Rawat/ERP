@@ -152,8 +152,8 @@ export const emptyPOForm: PurchaseOrderFormData = {
   shippingRule: "",
   incoterm: "",
   taxesChargesTemplate: "",
-  costCenter: "",
-  project: "",
+  costCenter: "UD-001 - Udvil - RI",
+  project: "Project-0001",
 
   addresses: {
     supplierAddress: {

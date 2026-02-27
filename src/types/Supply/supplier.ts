@@ -3,11 +3,13 @@ export interface SupplierFormData {
   supplierName?: string;
   supplierCode?: string;
   taxCategory: string;
-  paymentTerms: string ;
+  paymentTerms: string;
   currency?: string;
   bankAccount?: string;
   contactPerson?: string;
+  phoneCode?: string;
   phoneNo?: string;
+  alternateCode?: string;
   alternateNo?: string;
   emailId?: string;
   dateOfAddition?: string;
@@ -24,6 +26,7 @@ export interface SupplierFormData {
   province?: string;
   billingCountry?: string;
   billingPostalCode?: string;
+
 }
 
 
@@ -31,12 +34,14 @@ export const emptySupplierForm: SupplierFormData = {
   tpin: "",
   supplierName: "",
   supplierCode: "",
-   taxCategory: "",
+  taxCategory: "",
   paymentTerms: "",
   currency: "",
   bankAccount: "",
   contactPerson: "",
+  phoneCode: "",
   phoneNo: "",
+  alternateCode: "",
   alternateNo: "",
   emailId: "",
   dateOfAddition: "",
@@ -97,6 +102,6 @@ export const taxCategorySelectOptions = taxCategoryOptions.map(t => ({
     t === "Non-Export"
       ? "Non-Export"
       : t === "Export"
-      ? "Export"
-      : "LPO",
+        ? "Export"
+        : "LPO",
 }));

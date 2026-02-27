@@ -40,6 +40,7 @@ export const useQuotationForm = (
     invoiceStatus: "Draft",
     invoiceType: "Non-Export",
     quotationStatus: "Draft",
+    industryBases: "",
   });
   const companyLoadedRef = useRef(false);
   const [companyData, setCompanyData] = useState<any>(null);
@@ -72,6 +73,7 @@ export const useQuotationForm = (
       validUntil: "",
       invoiceStatus: "Draft",
       invoiceType: "Non-Export",
+      industryBases: prev.industryBases || "",
     }));
 
     setPage(0);
@@ -127,10 +129,11 @@ export const useQuotationForm = (
     shippingEditedRef.current = true;
 
     setFormData({
-      ...DEFAULT_INVOICE_FORM,
-      ...initialData,
-      dateOfInvoice: initialData.dateOfQuotation,
-      dueDate: initialData.validUntil,
+  ...DEFAULT_INVOICE_FORM,
+  ...initialData,
+  industryBases: initialData.industryBases || "",
+  dateOfInvoice: initialData.dateOfQuotation,
+  dueDate: initialData.validUntil,
       items: (initialData.items || []).map((it: any) => ({
         itemCode: it.itemCode,
         description: it.description ?? "",
@@ -155,33 +158,33 @@ export const useQuotationForm = (
     }));
   }, [formData.billingAddress, sameAsBilling]);
 
-const handleInputChange = (
-  e: React.ChangeEvent<
-    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-  >,
-  section?: NestedSection,
-) => {
-  const { name, value } = e.target;
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+    section?: NestedSection,
+  ) => {
+    const { name, value } = e.target;
 
-  if (section) {
-    setFormData((prev) => ({
-      ...prev,
-      [section]: {
-        ...(prev[section] as object),
+    if (section) {
+      setFormData((prev) => ({
+        ...prev,
+        [section]: {
+          ...(prev[section] as object),
+          [name]: value,
+        },
+      }));
+
+      if (section === "shippingAddress" && !sameAsBilling) {
+        shippingEditedRef.current = true;
+      }
+    } else {
+      setFormData((prev) => ({
+        ...prev,
         [name]: value,
-      },
-    }));
-
-    if (section === "shippingAddress" && !sameAsBilling) {
-      shippingEditedRef.current = true;
+      }));
     }
-  } else {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-};
+  };
 
   const getCountryCode = (
     countries: { code: string; name: string }[],
@@ -284,7 +287,7 @@ const handleInputChange = (
 
         return {
           ...prev,
-          currencyCode: data.currency || prev.currencyCode, 
+          currencyCode: data.currency || prev.currencyCode,
           destnCountryCd:
             invoiceType === "Export" ? countryCode : prev.destnCountryCd,
           invoiceType,
@@ -334,10 +337,10 @@ const handleInputChange = (
         }
 
         items[index] = {
-  ...items[index],
-  itemCode: resolvedId,
-  description: data.itemDescription ?? data.itemName ?? "",
-  price: Number(data.sellingPrice) || 0,
+          ...items[index],
+          itemCode: resolvedId,
+          description: data.itemDescription ?? data.itemName ?? "",
+          price: Number(data.sellingPrice) || 0,
           vatRate: Number(data.taxInfo?.taxPerct ?? 0),
           vatCode: data.taxInfo?.taxCode ?? "",
           batchNo: data.batchInfo?.has_batch_no
@@ -416,6 +419,7 @@ const handleInputChange = (
       invoiceStatus: "Draft",
       invoiceType: "Non-Export",
       quotationStatus: "Draft",
+      industryBases: "",
       shippingAddress: { ...DEFAULT_INVOICE_FORM.billingAddress },
 
       paymentInformation: {
@@ -466,9 +470,14 @@ const handleInputChange = (
         (it) => String(it?.vatCode ?? "").toUpperCase() === "C1",
       );
 
+
       //  VALIDATION
       if (!formData.customerId) {
         throw new Error("Please select a customer");
+      }
+
+      if (!formData.industryBases) {
+        throw new Error("Please select Industry Base (Product / Service)");
       }
 
       if (!formData.dateOfInvoice) {
@@ -506,7 +515,7 @@ const handleInputChange = (
         currencyCode: formData.currencyCode,
         dateOfQuotation: formData.dateOfInvoice,
         validUntil: formData.dueDate,
-        industryBases: formData.industryBases || "Service",
+        industryBases: formData.industryBases,
         invoiceType: formData.invoiceType,
         quotationStatus: formData.quotationStatus,
 

@@ -90,7 +90,7 @@ export const DetailsTab = ({
             />
           </div>
 
-      
+
 
           {/* Status */}
           <div>
@@ -112,14 +112,11 @@ export const DetailsTab = ({
             />
           </div>
           <div>
-            <ModalSelect
+            <ModalInput
               label="Cost Center"
               name="costCenter"
               value={form.costCenter}
-              onChange={onFormChange}
-              options={[
-                { value: "UD-001 - Udvil - RI", label: "UD-001 - Udvil - RI" },
-              ]}
+              disabled
             />
           </div>
 
@@ -128,7 +125,7 @@ export const DetailsTab = ({
               label="Project"
               name="project"
               value={form.project}
-              onChange={onFormChange}
+              disabled
             />
           </div>
         </div>

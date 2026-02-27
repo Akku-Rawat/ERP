@@ -558,16 +558,6 @@ const CustomerModal: React.FC<{
                   ]}
                 />
 
-                  <ModalInput
-                  label="Bank Account"
-                  name="accountNumber"
-                  value={form.accountNumber}
-                  onChange={handleChange}
-                  required
-                  placeholder="Account number"
-                  error={errors.accountNumber}
-                />
-
 
                 <ModalInput
                   label="Onboard Balance"

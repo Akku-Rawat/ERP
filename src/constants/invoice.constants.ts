@@ -137,3 +137,10 @@ export const currencySymbols: Record<string, string> = {
 };
 
 export const ITEMS_PER_PAGE = 5;
+
+
+
+export const industryBaseOptions = [
+  { label: "Product", value: "Product" },
+  { label: "Service", value: "Service" }
+];

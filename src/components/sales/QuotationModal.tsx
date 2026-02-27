@@ -16,6 +16,7 @@ import {
   currencySymbols,
   paymentMethodOptions,
   currencyOptions,
+  industryBaseOptions
 } from "../../constants/invoice.constants";
 
 interface QuotationModalProps {
@@ -152,6 +153,18 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     className="w-full"
                   />
 
+                  {/* Industry Base */}
+                  <div>
+                    <ModalSelect
+                      label="Industry Base"
+                      name="industryBases"
+                      value={formData.industryBases}
+                      onChange={actions.handleInputChange}
+                      options={industryBaseOptions}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    />
+                  </div>
+
                   {/* Date of Quotation */}
                   <div>
                     <ModalInput
@@ -188,8 +201,6 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     ></ModalSelect>
                   </div>
-
-                
 
                   {/* Status */}
                   <div>
@@ -324,7 +335,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   }}
                                 />
                               </td>
-                               <td className="px-0.5 py-1">
+                              <td className="px-0.5 py-1">
 
                                 <input
                                   type="text"
@@ -349,7 +360,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
-                             
+
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
@@ -372,7 +383,6 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   }
                                   min="0"
                                   step="0.01"
-                                  disabled
                                   className="w-[90px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
@@ -399,7 +409,6 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   }
                                   min="0"
                                   placeholder="0"
-                                  disabled
                                   className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
@@ -411,7 +420,6 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   onChange={(e) =>
                                     actions.handleItemChange(i, e)
                                   }
-                                  disabled
                                   className="w-[80px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
