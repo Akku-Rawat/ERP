@@ -741,14 +741,12 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
       const safeMessage = String(serverMessage ?? "").trim();
       toast.error(safeMessage || "Failed to run multiple payroll");
-    } finally {
       setMultiSubmitting(false);
     }
   };
 
   const filtered = useMemo(() => {
     const q = String((data as any).nameSearch ?? "").trim().toLowerCase();
-    const job = String((data as any).jobTitleFilter ?? "").trim().toLowerCase();
 
     const selectedStructure =
       selectionMode === "multiple" ? String(multiSalaryStructureName ?? "").trim() : "";
@@ -761,7 +759,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
     return active.filter((e) => {
       const name = String(e.name ?? "").toLowerCase();
-      const jobTitle = String(e.jobTitle ?? (e as any).designation ?? "").toLowerCase();
 
       if (canFilterByStructure) {
         const eff = getEffectiveStructureForEmployee(e);
@@ -770,7 +767,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
       }
 
       if (q && !name.includes(q)) return false;
-      if (job && !jobTitle.includes(job)) return false;
       return true;
     });
   }, [active, data, effectiveStructureIndex, multiAssignmentsLoading, multiSalaryStructureName, multiStructureAssignments, selectionMode]);
@@ -807,15 +803,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
       onChange("selectedEmployees", data.selectedEmployees.slice(0, 1));
     }
   };
-
-  const jobTitleOptions = useMemo(() => {
-    const set = new Set<string>();
-    active.forEach((e) => {
-      const v = String(e.jobTitle ?? (e as any).designation ?? "").trim();
-      if (v) set.add(v);
-    });
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [active]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
 
@@ -926,23 +913,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
                   placeholder="Search name"
                   className={miniInputCls}
                 />
-              )}
-
-              {isLoading ? (
-                <div className="h-9 w-56 bg-theme/60 rounded-lg animate-pulse" />
-              ) : (
-                <select
-                  value={(data as any).jobTitleFilter ?? ""}
-                  onChange={(e) => updateFilter("jobTitleFilter", e.target.value)}
-                  className={miniSelectCls}
-                >
-                  <option value="">Job title (All)</option>
-                  {jobTitleOptions.map((j) => (
-                    <option key={j} value={j}>
-                      {j}
-                    </option>
-                  ))}
-                </select>
               )}
             </div>
 
