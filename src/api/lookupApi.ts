@@ -2,6 +2,7 @@ import type { AxiosResponse } from "axios";
 import { createAxiosInstance } from "./axiosInstance";
 
 import { API, ERP_BASE } from "../config/api";
+import { useParams } from "react-router-dom";
 const api = createAxiosInstance(ERP_BASE);
 export const LookupAPI = API.lookup;
 export const RolaLookupAPI = API.rolaLookup;
@@ -27,10 +28,21 @@ export async function getCountryList(): Promise<any> {
 }
 
 // ROLAFACE LOOKUPS
-export async function getRolaUnitOfMeasureList(): Promise<any> {
-  const resp: AxiosResponse = await api.get(RolaLookupAPI.getUnitOfMeasure);
-  return resp.data || [];
+export async function getRolaUnitOfMeasureList(
+  limitStart: number = 0,
+  limitLength: number = 500
+): Promise<any[]> {
+
+  const resp = await api.get(API.rolaLookup.getUnitOfMeasure, {
+    params: {
+      limit_start: limitStart,
+      limit_page_length: limitLength,
+    },
+  });
+
+  return resp.data?.data || [];
 }
+
 
 export async function getRolaItemClassList(): Promise<any> {
   const resp: AxiosResponse = await api.get(RolaLookupAPI.getItemClasses);

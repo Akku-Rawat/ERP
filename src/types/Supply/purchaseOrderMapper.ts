@@ -231,7 +231,6 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
 
     currency: api.currency || "INR",
     status: api.status || "Draft",
-
     costCenter: api.costCenter || "",
     project: api.project || "",
     

@@ -1,4 +1,5 @@
 export interface ItemGroupSummary {
+  itemType: string;
   id: string;
   groupName: string;
   description: string;
@@ -8,6 +9,7 @@ export interface ItemGroupSummary {
 }
 
 export interface ItemGroup {
+  itemType: string;
   id: string;
   groupName: string;
   description: string;

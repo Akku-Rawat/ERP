@@ -53,7 +53,6 @@ const AddressBlock: React.FC<{
 
  
 const [countriesCache, setCountriesCache] = useState<Country[]>([]);
-
 useEffect(() => {
   const loadCountries = async () => {
     try {
@@ -73,7 +72,6 @@ useEffect(() => {
 
   loadCountries();
 }, []);
-  
 
 const selectedCountry = countriesCache.find(
   (c) => c.country_name === data?.country
