@@ -304,6 +304,8 @@ interface EmployeesTabProps {
 
   employees: Employee[];
 
+  loading?: boolean;
+
   onEditEmployee?: (emp: Employee) => void;
 
   onViewEmployee?: (employeeId: string) => void;
@@ -324,6 +326,8 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
   employees,
 
+  loading,
+
   onEditEmployee,
 
   onViewEmployee,
@@ -333,6 +337,8 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 }) => {
 
   const active = employees.filter((e) => e.isActive);
+
+  const isLoading = Boolean(loading);
 
   const [page, setPage] = useState(1);
 
@@ -393,6 +399,13 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
     if (selectedSingleEmployeeId) {
 
       setSingleModalOpen(true);
+
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const toIso = (d: Date) => d.toISOString().slice(0, 10);
+      onChange("startDate", toIso(start));
+      onChange("endDate", toIso(end));
 
     }
 
@@ -735,74 +748,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
     <div className="flex flex-col gap-4 min-h-0 animate-[fadeIn_0.2s_ease]">
 
-      <div className="flex items-center justify-between py-2.5 px-4 bg-app border border-theme rounded-xl">
-
-        <div className="flex items-center gap-6">
-
-          <div className="flex items-center gap-2">
-
-            <button
-
-              type="button"
-
-              onClick={() => setSelectionMode("single")}
-
-              className={`px-3 py-1.5 rounded-lg text-xs font-extrabold border transition ${selectionMode === "single" ? "bg-primary text-white border-primary" : "bg-card text-muted border-theme hover:bg-app"}`}
-
-            >
-
-              Single
-
-            </button>
-
-            <button
-
-              type="button"
-
-              onClick={() => setSelectionMode("multiple")}
-
-              className={`px-3 py-1.5 rounded-lg text-xs font-extrabold border transition ${selectionMode === "multiple" ? "bg-primary text-white border-primary" : "bg-card text-muted border-theme hover:bg-app"}`}
-
-            >
-
-              Multiple
-
-            </button>
-
-          </div>
-
-          {selectionMode === "multiple" && (
-
-            <label className="flex items-center gap-2.5 cursor-pointer text-sm font-semibold text-main">
-
-              <input
-
-                type="checkbox"
-
-                checked={data.selectedEmployees.length === filtered.length && filtered.length > 0}
-
-                onChange={selectAll}
-
-                className="w-4 h-4 accent-primary cursor-pointer"
-
-              />
-
-              Select All Employees
-
-            </label>
-
-          )}
-
-        </div>
-
-        <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
-
-          {data.selectedEmployees.length}/{filtered.length} selected
-
-        </span>
-
-      </div>
-
       <PayrollPreviewModal
 
         open={singleModalOpen}
@@ -810,6 +755,14 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
         structureName={String((singleSalaryStructureName || fallbackSalaryStructureName || "").trim())}
 
         currency={String(data.currency ?? "")}
+
+        payPeriodStart={String(data.startDate ?? "")}
+
+        payPeriodEnd={String(data.endDate ?? "")}
+
+        onPayPeriodStartChange={(v) => onChange("startDate", v)}
+
+        onPayPeriodEndChange={(v) => onChange("endDate", v)}
 
         onClose={() => {
 
@@ -829,76 +782,100 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
       <div className="border border-theme rounded-xl overflow-hidden flex flex-col min-h-0 flex-1">
 
-        <div className="shrink-0 flex items-center justify-between gap-3 px-4 py-3 bg-card border-b border-theme">
+        <div className="shrink-0 px-4 py-3 bg-card border-b border-theme">
 
-          <div className="flex items-center gap-3 overflow-x-auto flex-nowrap min-w-0">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
 
-            <div className="text-xs text-muted whitespace-nowrap shrink-0">{filtered.length} employees</div>
+            <div className="flex items-center gap-2 flex-wrap">
 
-            <input
+              {isLoading ? (
+                <div className="h-9 w-44 bg-theme/60 rounded-lg animate-pulse" />
+              ) : (
+                <select
+                  value={selectionMode}
+                  onChange={(e) => setSelectionMode(e.target.value as any)}
+                  className={miniSelectCls}
+                >
+                  <option value="multiple">Multiple Payroll</option>
+                  <option value="single">Single Payroll</option>
+                </select>
+              )}
 
-              type="text"
+              {!isLoading && selectionMode === "multiple" && (
+                <label className="flex items-center gap-2.5 cursor-pointer text-sm font-semibold text-main">
+                  <input
+                    type="checkbox"
+                    checked={data.selectedEmployees.length === filtered.length && filtered.length > 0}
+                    onChange={selectAll}
+                    className="w-4 h-4 accent-primary cursor-pointer"
+                  />
+                  Select All Employees
+                </label>
+              )}
 
-              value={(data as any).nameSearch ?? ""}
+              {isLoading ? (
+                <div className="h-4 w-24 bg-theme/60 rounded animate-pulse" />
+              ) : (
+                <div className="text-xs text-muted whitespace-nowrap">{filtered.length} employees</div>
+              )}
 
-              onChange={(e) => updateFilter("nameSearch", e.target.value)}
+              {isLoading ? (
+                <div className="h-9 w-56 bg-theme/60 rounded-lg animate-pulse" />
+              ) : (
+                <input
+                  type="text"
+                  value={(data as any).nameSearch ?? ""}
+                  onChange={(e) => updateFilter("nameSearch", e.target.value)}
+                  placeholder="Search name"
+                  className={miniInputCls}
+                />
+              )}
 
-              placeholder="Search name"
+              {isLoading ? (
+                <div className="h-9 w-56 bg-theme/60 rounded-lg animate-pulse" />
+              ) : (
+                <select
+                  value={(data as any).jobTitleFilter ?? ""}
+                  onChange={(e) => updateFilter("jobTitleFilter", e.target.value)}
+                  className={miniSelectCls}
+                >
+                  <option value="">Job title (All)</option>
+                  {jobTitleOptions.map((j) => (
+                    <option key={j} value={j}>
+                      {j}
+                    </option>
+                  ))}
+                </select>
+              )}
 
-              className={miniInputCls}
+              {isLoading ? (
+                <div className="h-9 w-56 bg-theme/60 rounded-lg animate-pulse" />
+              ) : (
+                <select
+                  value={(data as any).departmentFilter ?? ""}
+                  onChange={(e) => updateFilter("departmentFilter", e.target.value)}
+                  className={miniSelectCls}
+                >
+                  <option value="">Department (All)</option>
+                  {departmentOptions.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
 
-            />
-
-            <select
-
-              value={(data as any).jobTitleFilter ?? ""}
-
-              onChange={(e) => updateFilter("jobTitleFilter", e.target.value)}
-
-              className={miniSelectCls}
-
-            >
-
-              <option value="">Job title (All)</option>
-
-              {jobTitleOptions.map((j) => (
-
-                <option key={j} value={j}>
-
-                  {j}
-
-                </option>
-
-              ))}
-
-            </select>
-
-            <select
-
-              value={(data as any).departmentFilter ?? ""}
-
-              onChange={(e) => updateFilter("departmentFilter", e.target.value)}
-
-              className={miniSelectCls}
-
-            >
-
-              <option value="">Department (All)</option>
-
-              {departmentOptions.map((d) => (
-
-                <option key={d} value={d}>
-
-                  {d}
-
-                </option>
-
-              ))}
-
-            </select>
-
+            <div className="flex items-center justify-end">
+              {isLoading ? (
+                <div className="h-6 w-24 bg-theme/60 rounded-full animate-pulse" />
+              ) : (
+                <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full whitespace-nowrap">
+                  {data.selectedEmployees.length}/{filtered.length} selected
+                </span>
+              )}
+            </div>
           </div>
-
         </div>
 
         <div className="flex-1 min-h-0 overflow-auto">
@@ -953,7 +930,17 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
             <tbody>
 
-              {pageEmployees.length === 0 ? (
+              {isLoading ? (
+                Array.from({ length: 8 }).map((_, skIdx) => (
+                  <tr key={`sk-${skIdx}`} className={skIdx % 2 === 1 ? "bg-app" : "bg-card"}>
+                    {Array.from({ length: 10 }).map((__, cIdx) => (
+                      <td key={String(cIdx)} className="px-4 py-3">
+                        <div className={`h-3 bg-theme/60 rounded animate-pulse ${cIdx === 0 ? "w-4" : cIdx === 3 ? "w-32" : "w-20"}`} />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : pageEmployees.length === 0 ? (
 
                 <tr>
 

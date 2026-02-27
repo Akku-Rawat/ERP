@@ -11,7 +11,7 @@ import { getSalarySlipById, getSalarySlips, type SalarySlipDetail, type SalarySl
 
 // ── Components ────────────────────────────────────────────────────────────────
 import { KPICards } from "./KPICards";
-import { OverviewTab, EmployeesTab } from "./EntryFormTabs";
+import { EmployeesTab } from "./EntryFormTabs";
 import SalaryStructureTab from "../tabs/SalaryStructureTab";
 import SalaryStructureAssignmentsDashboardTab from "./SalaryStructureAssignmentsDashboardTab";
 
@@ -143,11 +143,12 @@ const TopBar: React.FC<{
 // ─────────────────────────────────────────────────────────────────────────────
 const NewPayrollEntry: React.FC<{
   employees: Employee[];
+  loading?: boolean;
   onBack: () => void;
   onCreatePayroll: (empIds: string[]) => void;
   onViewEmployee: (employeeId: string) => void;
-}> = ({ employees, onBack, onCreatePayroll, onViewEmployee }) => {
-  const [step, setStep] = useState(0);
+}> = ({ employees, loading, onBack, onCreatePayroll, onViewEmployee }) => {
+
   const [formData, setFormData] = useState<PayrollEntry>({
     payrollName: "", postingDate: new Date().toISOString().slice(0, 10),
     currency: "ZMW", company: "Izyane",
@@ -163,11 +164,6 @@ const NewPayrollEntry: React.FC<{
   const handleFormChange = (field: string, value: any) => {
     setFormData(p => ({ ...p, [field]: value }));
   };
-
-  const tabs = [
-    { label: "Overview", icon: <FileText className="w-3.5 h-3.5" /> },
-    { label: "Employees", icon: <Users className="w-3.5 h-3.5" /> },
-  ];
 
   return (
     <div className="h-screen flex flex-col bg-app overflow-hidden">
@@ -186,45 +182,16 @@ const NewPayrollEntry: React.FC<{
       <div className="flex-1 min-h-0 px-6 py-4 flex flex-col">
         <div className="flex-1 min-h-0 bg-card border border-theme rounded-xl overflow-hidden shadow-sm flex flex-col">
 
-          {/* Step tabs */}
-          <div className="shrink-0 flex items-center border-b border-theme px-6">
-            {tabs.map((t, i) => (
-              <React.Fragment key={i}>
-                <button
-                  onClick={() => setStep(i)}
-                  className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold border-b-2 -mb-px transition-all ${i === step
-                    ? "text-primary border-primary"
-                    : i < step
-                      ? "text-success border-transparent hover:border-theme"
-                      : "text-muted border-transparent hover:text-main"
-                    }`}
-                >
-                  {i < step
-                    ? <CheckCircle className="w-3.5 h-3.5 text-success" />
-                    : <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold shrink-0 ${i === step ? "bg-primary text-white" : "bg-app border border-theme text-muted"
-                      }`}>{i + 1}</span>
-                  }
-                  {t.label}
-                </button>
-                {i < tabs.length - 1 && (
-                  <div className={`flex-1 h-px mx-3 opacity-30 max-w-[60px] ${i < step ? "bg-success" : "bg-theme"}`} />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-
           {/* Tab content */}
           <div className="flex-1 min-h-0 overflow-y-auto p-6">
-            {step === 0 && <OverviewTab data={formData} onChange={handleFormChange} />}
-            {step === 1 && (
-              <EmployeesTab
-                data={formData}
-                onChange={handleFormChange}
-                employees={employees}
-                onViewEmployee={onViewEmployee}
-                onCreatePayroll={() => onCreatePayroll(formData.selectedEmployees)}
-              />
-            )}
+            <EmployeesTab
+              data={formData}
+              onChange={handleFormChange}
+              employees={employees}
+              loading={loading}
+              onViewEmployee={onViewEmployee}
+              onCreatePayroll={() => onCreatePayroll(formData.selectedEmployees)}
+            />
           </div>
 
           <div className="shrink-0" />
@@ -558,23 +525,18 @@ export default function PayrollManagement() {
   }
 
   if (view === "newEntry") {
-    return employeesLoading
-      ? (
-        <div className="h-screen flex items-center justify-center bg-app">
-          <div className="text-sm text-muted">Loading employees…</div>
-        </div>
-      )
-      : (
-        <NewPayrollEntry
-          employees={employees}
-          onBack={() => setView("dashboard")}
-          onCreatePayroll={(ids) => {
-            handleCreatePayroll(ids);
-            setView("dashboard");
-          }}
-          onViewEmployee={(id) => setDetailEmployeeId(id)}
-        />
-      );
+    return (
+      <NewPayrollEntry
+        employees={employees}
+        loading={employeesLoading}
+        onBack={() => setView("dashboard")}
+        onCreatePayroll={(ids) => {
+          handleCreatePayroll(ids);
+          setView("dashboard");
+        }}
+        onViewEmployee={(id) => setDetailEmployeeId(id)}
+      />
+    );
   }
 
   if (view === "salaryStructure") {
