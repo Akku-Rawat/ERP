@@ -1180,16 +1180,9 @@ function StructureModal({
     return arr;
   }, [earnings]);
 
-  const basicSalaryForStatutory = useMemo(() => {
-    const basic = earnings.find((c) => String(c?.component || "").toLowerCase() === "basic");
-    return Number(basic?.amount || 0) || 0;
-  }, [earnings]);
-
   const statutoryCalc = useMemo(() => {
-    return calculateZmPayrollFromGross(totalEarnings, {
-      basicSalaryBase: basicSalaryForStatutory,
-    });
-  }, [basicSalaryForStatutory, totalEarnings]);
+    return calculateZmPayrollFromGross(totalEarnings);
+  }, [totalEarnings]);
 
   const deductionsWithEffectiveAmounts = useMemo(() => {
     return deductions.map((c) => {
