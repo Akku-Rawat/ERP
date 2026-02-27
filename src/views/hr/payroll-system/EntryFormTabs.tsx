@@ -382,7 +382,22 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
     setMultiSubmitting(true);
     try {
       const selectedEmployeeData = active.filter((e) => data.selectedEmployees.includes(e.id));
-      const employeeIds = selectedEmployeeData.map((e) => e.employeeId || e.id).filter(Boolean);
+      let employeeIds = selectedEmployeeData.map((e: any) => e.employeeId || e.id).filter(Boolean);
+
+      const employeeNameByCode = new Map<string, string>();
+      selectedEmployeeData.forEach((e: any) => {
+        const code = String(e?.employeeId || e?.id || "").trim();
+        const name = String(e?.name || e?.employee_name || code).trim();
+        if (code) employeeNameByCode.set(code, name || code);
+      });
+
+      const fmtNames = (ids: string[], limit = 5) => {
+        const uniq = Array.from(new Set(ids.map((x) => String(x).trim()).filter(Boolean)));
+        const names = uniq.map((id) => employeeNameByCode.get(id) || id);
+        const head = names.slice(0, limit);
+        const rest = Math.max(0, names.length - head.length);
+        return head.join(", ") + (rest > 0 ? ` +${rest} more` : "");
+      };
 
       if (employeeIds.length === 0) {
         toast.error("No valid employee IDs found");
@@ -392,6 +407,12 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
       const startDate = String(data.startDate);
       const endDate = String(data.endDate);
 
+      let skippedNoStructureCount = 0;
+      let skippedDuplicateCount = 0;
+      let skippedNoStructureIds: string[] = [];
+      let skippedDuplicateIds: string[] = [];
+
+      // Skip employees with no effective salary structure assignment
       const effectiveStart = String(startDate ?? "").trim();
       if (/^\d{4}-\d{2}-\d{2}$/.test(effectiveStart)) {
         const assignments = await getSalaryStructureAssignments();
@@ -407,24 +428,20 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
           });
         };
 
-        const withStructure = employeeIds.filter((id) => hasEffective(id));
-        const noStructure = employeeIds.filter((id) => !hasEffective(id));
+        const withStructure = employeeIds.filter((id: any) => hasEffective(String(id)));
+        skippedNoStructureIds = employeeIds.filter((id: any) => !hasEffective(String(id))).map(String);
+        skippedNoStructureCount = skippedNoStructureIds.length;
+        employeeIds = withStructure;
 
-        if (noStructure.length > 0) {
-          toast(
-            `Skipping ${noStructure.length} employee${noStructure.length > 1 ? "s" : ""} (no salary structure applicable on/before ${effectiveStart})`,
+        if (employeeIds.length === 0) {
+          toast.error(
+            `No payroll created. Skipped ${skippedNoStructureCount} employee${skippedNoStructureCount === 1 ? "" : "s"} (no salary structure applicable on/before ${effectiveStart})${skippedNoStructureCount > 0 ? `: ${fmtNames(skippedNoStructureIds)}` : ""}`,
           );
-        }
-
-        if (withStructure.length === 0) {
-          toast.error("No selected employees have an applicable salary structure for this period");
           return;
         }
-
-        // Continue with only employees that have an effective assignment
-        employeeIds.splice(0, employeeIds.length, ...withStructure);
       }
 
+      // Skip duplicates (month-normalized)
       const toIso = (d: Date) => d.toISOString().slice(0, 10);
       const normalizeMonthRange = (iso: string): { start: string; end: string } | null => {
         const s = String(iso ?? "").trim();
@@ -453,17 +470,19 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
           .filter(Boolean),
       );
 
-      const toRun = employeeIds.filter((id) => !existingEmployees.has(String(id).trim()));
-      const skipped = employeeIds.filter((id) => existingEmployees.has(String(id).trim()));
-
-      if (skipped.length > 0) {
-        toast(
-          `Skipping ${skipped.length} employee${skipped.length > 1 ? "s" : ""} (already has payroll for this period)`,
-        );
-      }
+      const toRun = employeeIds.filter((id: any) => !existingEmployees.has(String(id).trim())).map(String);
+      skippedDuplicateIds = employeeIds.filter((id: any) => existingEmployees.has(String(id).trim())).map(String);
+      skippedDuplicateCount = skippedDuplicateIds.length;
 
       if (toRun.length === 0) {
-        toast.error("All selected employees already have payroll for this period");
+        const parts: string[] = [];
+        if (skippedNoStructureCount > 0) {
+          parts.push(`Skipped ${skippedNoStructureCount} (no salary structure): ${fmtNames(skippedNoStructureIds)}`);
+        }
+        if (skippedDuplicateCount > 0) {
+          parts.push(`Skipped ${skippedDuplicateCount} (already has payroll): ${fmtNames(skippedDuplicateIds)}`);
+        }
+        toast.error(`No payroll created. ${parts.join(" | ") || "All selected employees were skipped."}`);
         return;
       }
 
@@ -474,7 +493,18 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
       });
 
       const msg = String((resp as any)?.message ?? "").trim();
-      toast.success(msg || `Multiple payroll created for ${toRun.length} employee${toRun.length > 1 ? "s" : ""}`);
+      const summaryParts: string[] = [];
+      if (skippedNoStructureCount > 0) {
+        summaryParts.push(`Skipped ${skippedNoStructureCount} (no salary structure): ${fmtNames(skippedNoStructureIds)}`);
+      }
+      if (skippedDuplicateCount > 0) {
+        summaryParts.push(`Skipped ${skippedDuplicateCount} (already has payroll): ${fmtNames(skippedDuplicateIds)}`);
+      }
+      const summary = summaryParts.length ? ` | ${summaryParts.join(" | ")}` : "";
+
+      toast.success(
+        (msg || `Multiple payroll created for ${toRun.length} employee${toRun.length > 1 ? "s" : ""}`) + summary,
+      );
       setMultiModalOpen(false);
       onChange("selectedEmployees", []);
     } catch (e: any) {
