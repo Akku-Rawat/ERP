@@ -1221,7 +1221,7 @@ function StructureModal({
         return {
           ...c,
           effectiveAmount: statutoryCalc.statutory.paye,
-          label: "Income Tax (PAYE)",
+          label: "PAYEE",
         };
       }
 

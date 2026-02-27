@@ -396,11 +396,15 @@ export default function PayrollManagement() {
   const [slipsLoading, setSlipsLoading] = useState(false);
   const [slipsError, setSlipsError] = useState<string | null>(null);
   const [slipsPage, setSlipsPage] = useState(1);
-  const [slipsPageSize] = useState(20);
+  const [slipsPageSize] = useState(10);
   const [slipsTotalPages, setSlipsTotalPages] = useState(1);
   const [slipDetailsOpen, setSlipDetailsOpen] = useState(false);
   const [slipDetailsId, setSlipDetailsId] = useState<string | null>(null);
   const [slipsSearch, setSlipsSearch] = useState("");
+
+  useEffect(() => {
+    setSlipsPage(1);
+  }, [slipsSearch]);
 
   const filteredSalarySlips = useMemo(() => {
     const q = String(slipsSearch ?? "").trim().toLowerCase();
