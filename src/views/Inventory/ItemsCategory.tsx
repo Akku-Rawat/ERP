@@ -61,20 +61,27 @@ const ItemsCategory: React.FC = () => {
      FETCH
    */
 
-  const fetchGroups = async () => {
-    try {
-      setLoading(true);
-      const res = await getAllItemGroups(page, pageSize,filters);
-      setGroups(res.data);
-      setTotalPages(res.pagination?.total_pages || 1);
-      setTotalItems(res.pagination?.total || 0);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-      setInitialLoad(false);
-    }
-  };
+const fetchGroups = async () => {
+  try {
+    setLoading(true);
+
+    const res = await getAllItemGroups(page, pageSize, filters);
+
+    const list = res?.data?.data || [];
+    const pagination = res?.data?.pagination || {};
+
+    setGroups(list);
+    setTotalPages(pagination.total_pages || 1);
+    setTotalItems(pagination.total || 0);
+
+  } catch (err) {
+    console.error(err);
+    showApiError("Failed to fetch item groups");
+  } finally {
+    setLoading(false);
+    setInitialLoad(false);
+  }
+};
 
   useEffect(() => {
     fetchGroups();
