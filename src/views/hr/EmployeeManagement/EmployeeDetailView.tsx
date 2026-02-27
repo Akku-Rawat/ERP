@@ -22,6 +22,7 @@ import { updateEmployeeDocuments } from "../../../api/employeeapi";
 import { ERP_BASE } from "../../../config/api";
 import { calculateZmPayrollFromGross } from "../payroll-system/util";
 import { useAssignedSalaryStructure } from "../../../hooks/useAssignedSalaryStructure";
+import { toSalaryStructureMoneyRows } from "../../../utils/salaryStructureDisplay";
 
 
 type Props = {
@@ -679,18 +680,7 @@ const handleUploadDocument = async ({
                     {Array.isArray((salaryStructureDetail as any)?.deductions) && (salaryStructureDetail as any).deductions.length > 0 && (
                       <Section title="Salary Structure Deductions">
                         <div className="space-y-2">
-                          {(salaryStructureDetail as any).deductions
-                            .map((d: any) => ({
-                              label: (() => {
-                                const component = String(d?.component ?? "").trim();
-                                const abbr = String(d?.abbr ?? "").trim();
-                                if (component.toLowerCase() === "income tax" || abbr.toUpperCase() === "IT") return "PAYE";
-                                return component;
-                              })(),
-                              amount: d?.amount,
-                            }))
-                            .filter((d: any) => d.label)
-                            .map((d: any) => (
+                          {toSalaryStructureMoneyRows((salaryStructureDetail as any).deductions).map((d: any) => (
                               <div
                                 key={d.label}
                                 className="flex justify-between items-center py-1.5 border-b border-border"

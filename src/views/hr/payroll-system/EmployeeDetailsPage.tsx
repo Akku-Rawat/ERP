@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { getEmployeeById } from "../../../api/employeeapi";
 import { calculateZmPayrollFromGross } from "./util";
 import { useAssignedSalaryStructure } from "../../../hooks/useAssignedSalaryStructure";
+import { toSalaryStructureMoneyRows } from "../../../utils/salaryStructureDisplay";
 
 interface EmployeeDetailsPageProps {
   employeeId: string;
@@ -434,18 +435,7 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
                           <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-3">Statutory Deductions</div>
                           <div className="space-y-2">
                             {Array.isArray(salaryStructureDetail?.deductions) && salaryStructureDetail.deductions.length > 0 ? (
-                              salaryStructureDetail.deductions
-                                .map((d: any) => ({
-                                  label: (() => {
-                                    const component = String(d?.component ?? "").trim();
-                                    const abbr = String(d?.abbr ?? "").trim();
-                                    if (component.toLowerCase() === "income tax" || abbr.toUpperCase() === "IT") return "PAYE";
-                                    return component;
-                                  })(),
-                                  amount: d?.amount,
-                                }))
-                                .filter((d: any) => d.label)
-                                .map((d: any) => (
+                              toSalaryStructureMoneyRows(salaryStructureDetail.deductions).map((d: any) => (
                                   <div key={d.label} className="flex items-center justify-between gap-3 bg-app border border-theme rounded-xl px-4 py-2">
                                     <div className="text-xs font-semibold text-main">{d.label}</div>
                                     <div className="text-xs font-mono font-extrabold text-main tabular-nums">
