@@ -14,6 +14,8 @@ import { createMultipleEmployeesPayroll } from "../../../api/multiplePayrollApi"
 
 import { getSalarySlips } from "../../../api/salarySlipApi";
 
+import { getSalaryStructureAssignments } from "../../../api/salaryStructureAssignmentApi";
+
 import PayrollPreviewModal from "./payrollPreview";
 
 import MultiPayrollPreviewModal from "./multiPayrollPreview";
@@ -390,6 +392,39 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
       const startDate = String(data.startDate);
       const endDate = String(data.endDate);
 
+      const effectiveStart = String(startDate ?? "").trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(effectiveStart)) {
+        const assignments = await getSalaryStructureAssignments();
+        const list = Array.isArray(assignments) ? assignments : [];
+        const hasEffective = (empCode: string) => {
+          const code = String(empCode ?? "").trim();
+          if (!code) return false;
+          return list.some((r: any) => {
+            if (String(r?.employee ?? "").trim() !== code) return false;
+            const fd = String(r?.from_date ?? "");
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(fd)) return false;
+            return fd <= effectiveStart;
+          });
+        };
+
+        const withStructure = employeeIds.filter((id) => hasEffective(id));
+        const noStructure = employeeIds.filter((id) => !hasEffective(id));
+
+        if (noStructure.length > 0) {
+          toast(
+            `Skipping ${noStructure.length} employee${noStructure.length > 1 ? "s" : ""} (no salary structure applicable on/before ${effectiveStart})`,
+          );
+        }
+
+        if (withStructure.length === 0) {
+          toast.error("No selected employees have an applicable salary structure for this period");
+          return;
+        }
+
+        // Continue with only employees that have an effective assignment
+        employeeIds.splice(0, employeeIds.length, ...withStructure);
+      }
+
       const toIso = (d: Date) => d.toISOString().slice(0, 10);
       const normalizeMonthRange = (iso: string): { start: string; end: string } | null => {
         const s = String(iso ?? "").trim();
@@ -424,7 +459,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
       if (skipped.length > 0) {
         toast(
           `Skipping ${skipped.length} employee${skipped.length > 1 ? "s" : ""} (already has payroll for this period)`,
-          { icon: "⚠️" },
         );
       }
 

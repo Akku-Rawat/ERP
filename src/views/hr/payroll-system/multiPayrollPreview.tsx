@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { getSalaryStructureById, type SalaryStructureDetail } from "../../../api/salaryStructureApi";
+import { getSalaryStructureAssignments } from "../../../api/salaryStructureAssignmentApi";
 import type { Employee } from "../../../types/payrolltypes";
 
 type Props = {
@@ -45,8 +46,90 @@ export default function MultiPayrollPreviewModal({
   }, [employees, selectedEmployeeIds]);
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const activeEmployee = selected[activeIndex] ?? null;
   const isLastEmployee = selected.length > 0 && activeIndex >= selected.length - 1;
+
+  const activeEmployeeCode = useMemo(() => {
+    const emp: any = selected[activeIndex] as any;
+    return String(emp?.employeeId ?? emp?.employee_id ?? emp?.id ?? "").trim();
+  }, [activeIndex, selected]);
+
+  const [assignedStructureName, setAssignedStructureName] = useState<string>("");
+  const [assignmentLoading, setAssignmentLoading] = useState(false);
+  const [assignmentError, setAssignmentError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    if (!activeEmployeeCode) {
+      setAssignedStructureName("");
+      setAssignmentLoading(false);
+      setAssignmentError(null);
+      return;
+    }
+
+    let mounted = true;
+    const run = async () => {
+      try {
+        setAssignmentLoading(true);
+        setAssignmentError(null);
+        const rows = await getSalaryStructureAssignments({ employee: activeEmployeeCode });
+        if (!mounted) return;
+        let list = Array.isArray(rows) ? rows : [];
+
+        if (list.length === 0) {
+          const all = await getSalaryStructureAssignments();
+          if (!mounted) return;
+          const allList = Array.isArray(all) ? all : [];
+          const code = String(activeEmployeeCode).trim();
+          list = allList.filter((r: any) => String(r?.employee ?? "").trim() === code);
+        }
+
+        const payEnd = String(payPeriodEnd ?? "").trim();
+        const effective = /^\d{4}-\d{2}-\d{2}$/.test(payEnd)
+          ? list.filter((r: any) => {
+              const fd = String(r?.from_date ?? "");
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(fd)) return false;
+              return fd <= payEnd;
+            })
+          : list;
+
+        const best = (effective.length > 0 ? effective : list)
+          .filter((r: any) => String(r?.salary_structure ?? "").trim())
+          .sort((a: any, b: any) => {
+            const ad = String(a?.from_date ?? "");
+            const bd = String(b?.from_date ?? "");
+            return bd.localeCompare(ad);
+          })[0];
+
+        setAssignedStructureName(String(best?.salary_structure ?? "").trim());
+      } catch (e: any) {
+        if (!mounted) return;
+        setAssignedStructureName("");
+        setAssignmentError(e?.message || "Failed to load assignment");
+      } finally {
+        if (!mounted) return;
+        setAssignmentLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [activeEmployeeCode, open, payPeriodEnd]);
+
+  const activeStructureName = useMemo(() => {
+    const emp: any = selected[activeIndex] as any;
+    const fromEmp = String(
+      emp?.salary_structure ??
+        emp?.salaryStructure ??
+        emp?.salaryStructureName ??
+        emp?.structureName ??
+        "",
+    ).trim();
+
+    const fallback = String(structureName ?? "").trim();
+    return String(assignedStructureName ?? "").trim() || fromEmp || fallback;
+  }, [activeIndex, assignedStructureName, selected, structureName]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +147,9 @@ export default function MultiPayrollPreviewModal({
     if (!open) return;
     setActiveIndex(0);
     setMonth(initialMonth);
+    setAssignedStructureName("");
+    setAssignmentLoading(false);
+    setAssignmentError(null);
   }, [open]);
 
   useEffect(() => {
@@ -86,7 +172,7 @@ export default function MultiPayrollPreviewModal({
 
   useEffect(() => {
     if (!open) return;
-    const name = String(structureName ?? "").trim();
+    const name = String(activeStructureName ?? "").trim();
     if (!name) {
       setDetail(null);
       setError(null);
@@ -116,7 +202,7 @@ export default function MultiPayrollPreviewModal({
     return () => {
       mounted = false;
     };
-  }, [open, structureName]);
+  }, [open, activeStructureName]);
 
   if (!open) return null;
 
@@ -134,123 +220,77 @@ export default function MultiPayrollPreviewModal({
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-              <div className="text-sm font-semibold text-gray-600">Report Period</div>
-              <div className="mt-3 grid grid-cols-1 gap-3">
-                <div>
-                  <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">Month</div>
-                  <input
-                    type="month"
-                    value={month}
-                    onChange={(e) => setMonth(e.target.value)}
-                    className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">Start</div>
-                    <input
-                      type="date"
-                      value={payPeriodStart}
-                      onChange={(e) => onPayPeriodStartChange(e.target.value)}
-                      className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">End</div>
-                    <input
-                      type="date"
-                      value={payPeriodEnd}
-                      onChange={(e) => onPayPeriodEndChange(e.target.value)}
-                      className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-200 pt-3">
-                  <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">Summary</div>
-                  <div className="mt-2 space-y-1.5">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Employees</span>
-                      <span className="font-bold text-gray-900 tabular-nums">{selected.length}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Salary Structure</span>
-                      <span className="font-bold text-gray-900 tabular-nums">{String(structureName || (detail as any)?.name || "—")}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-gray-600">Employee Preview</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Use previous/next to review selected employees</div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setActiveIndex((i) => Math.max(0, i - 1))}
-                    disabled={activeIndex <= 0}
-                    className="h-10 w-10 inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveIndex((i) => Math.min(selected.length - 1, i + 1))}
-                    disabled={activeIndex >= selected.length - 1}
-                    className="h-10 w-10 inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {!activeEmployee ? (
-                <div className="text-sm text-gray-500 mt-6">No employee selected</div>
-              ) : (
-                <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
-                    <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">Employee</div>
-                    <div className="text-base font-extrabold text-gray-900 mt-1 break-words">
-                      {String(activeEmployee.name || activeEmployee.id || "Employee")}
-                    </div>
-                    <div className="text-xs text-gray-600 mt-1">{String((activeEmployee as any).employeeId || activeEmployee.id)}</div>
-                    <div className="text-xs text-gray-500 mt-1">{String(activeEmployee.department || "")}</div>
-                    <div className="text-xs text-gray-500">{String(activeEmployee.jobTitle || (activeEmployee as any).designation || "")}</div>
-                  </div>
-
-                  <div className="md:col-span-2 bg-gray-50 border border-gray-200 rounded-2xl p-4">
-                    <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">Salary Structure</div>
-                    <div className="text-sm font-bold text-gray-900 mt-1 break-words">
-                      {String(structureName || (detail as any)?.name || "—")}
-                    </div>
-                    <div className="text-xs text-gray-600 mt-1">Company: {String((detail as any)?.company || "—")}</div>
-                    <div className="text-xs text-gray-600">Status: {Boolean((detail as any)?.is_active) ? "Active" : "Inactive"}</div>
-                  </div>
-                </div>
-              )}
-
-              <div className="mt-5 border-t border-gray-200 pt-3 flex items-center justify-between">
-                <div className="text-xs text-gray-600">
-                  {selected.length === 0
-                    ? ""
-                    : `Employee ${activeIndex + 1} of ${selected.length}`}
-                </div>
-                <div className="text-xs text-gray-500">Ready to run payroll</div>
-              </div>
-            </div>
-          </div>
-
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <div className="text-sm font-semibold text-gray-600">Salary Structure Components</div>
-            <div className="text-xs text-gray-500 mt-0.5">Earnings and deductions for this run</div>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-sm font-semibold text-gray-600">Salary Structure Components</div>
+                <div className="text-xs text-gray-500 mt-0.5">Earnings and deductions for this run</div>
+                <div className="text-xs text-gray-600 mt-1 font-semibold break-words">
+                  Employee: {activeEmployeeCode || "—"}
+                </div>
+                <div className="text-xs text-gray-600 mt-0.5 font-semibold break-words">
+                  Structure: {activeStructureName || "—"}
+                  {assignmentLoading ? " (loading...)" : ""}
+                </div>
+                {assignmentError && (
+                  <div className="text-xs text-red-600 mt-0.5 break-words">{assignmentError}</div>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveIndex((i) => Math.max(0, i - 1))}
+                  disabled={activeIndex <= 0}
+                  className="h-10 w-10 inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+                  title="Previous"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveIndex((i) => Math.min(selected.length - 1, i + 1))}
+                  disabled={activeIndex >= selected.length - 1}
+                  className="h-10 w-10 inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+                  title="Next"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">Month</div>
+                <input
+                  type="month"
+                  value={month}
+                  onChange={(e) => setMonth(e.target.value)}
+                  className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none"
+                />
+              </div>
+              <div>
+                <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">Start</div>
+                <input
+                  type="date"
+                  value={payPeriodStart}
+                  onChange={(e) => onPayPeriodStartChange(e.target.value)}
+                  className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none"
+                />
+              </div>
+              <div>
+                <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">End</div>
+                <input
+                  type="date"
+                  value={payPeriodEnd}
+                  onChange={(e) => onPayPeriodEndChange(e.target.value)}
+                  className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="mt-3 text-xs text-gray-600">
+              {selected.length === 0 ? "" : `Employee ${activeIndex + 1} of ${selected.length}`}
+            </div>
 
             {loading ? (
               <div className="text-sm text-gray-500 mt-4">Loading salary structure…</div>

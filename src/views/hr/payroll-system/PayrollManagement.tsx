@@ -443,8 +443,25 @@ export default function PayrollManagement() {
 
   const filteredSalarySlips = useMemo(() => {
     const q = String(slipsSearch ?? "").trim().toLowerCase();
-    if (!q) return salarySlips;
+    const month = String(slipsMonth ?? "").trim();
+
+    let monthStart: Date | null = null;
+    let monthEnd: Date | null = null;
+    if (/^\d{4}-\d{2}$/.test(month)) {
+      const [y, m] = month.split("-").map((v) => Number(v));
+      if (y && m) {
+        monthStart = new Date(y, m - 1, 1);
+        monthEnd = new Date(y, m, 0);
+      }
+    }
+
     return salarySlips.filter((s) => {
+      if (monthStart && monthEnd) {
+        const sStart = new Date(String(s.start_date));
+        const sEnd = new Date(String(s.end_date));
+        if (!(sStart <= monthEnd && sEnd >= monthStart)) return false;
+      }
+
       const status = String(s.status ?? "").trim();
       const normalizedStatus = status.toLowerCase() === "submitted" ? "Paid" : status || "Unknown";
       const hay = [
@@ -455,9 +472,11 @@ export default function PayrollManagement() {
       ]
         .join(" ")
         .toLowerCase();
+
+      if (!q) return true;
       return hay.includes(q);
     });
-  }, [salarySlips, slipsSearch]);
+  }, [salarySlips, slipsMonth, slipsSearch]);
 
   useEffect(() => {
     if (!employeesError) return;
@@ -475,28 +494,25 @@ export default function PayrollManagement() {
       try {
         setSlipsLoading(true);
         setSlipsError(null);
-        const month = String(slipsMonth ?? "").trim();
-        let start_date: string | undefined;
-        let end_date: string | undefined;
-        if (/^\d{4}-\d{2}$/.test(month)) {
-          const [y, m] = month.split("-").map((v) => Number(v));
-          if (y && m) {
-            const toIso = (d: Date) => d.toISOString().slice(0, 10);
-            start_date = toIso(new Date(y, m - 1, 1));
-            end_date = toIso(new Date(y, m, 0));
-          }
-        }
 
-        const resp = await getSalarySlips({
-          page: slipsPage,
-          page_size: slipsPageSize,
-          ...(start_date ? { start_date } : {}),
-          ...(end_date ? { end_date } : {}),
-        });
+        const month = String(slipsMonth ?? "").trim();
+        const monthMode = /^\d{4}-\d{2}$/.test(month);
+        const resp = await getSalarySlips(
+          monthMode
+            ? {
+                page: 1,
+                page_size: 2000,
+              }
+            : {
+                page: slipsPage,
+                page_size: slipsPageSize,
+              },
+        );
         if (!mounted) return;
         const list = Array.isArray(resp?.salary_slips) ? resp.salary_slips : [];
         setSalarySlips(list);
-        setSlipsTotalPages(Number(resp?.pagination?.total_pages ?? 1) || 1);
+        setSlipsTotalPages(monthMode ? 1 : Number(resp?.pagination?.total_pages ?? 1) || 1);
+        if (monthMode) setSlipsPage(1);
       } catch (e: any) {
         if (!mounted) return;
         setSalarySlips([]);
@@ -542,7 +558,7 @@ export default function PayrollManagement() {
         });
 
         if (!mounted) return;
-        setEmployees(mapped.filter(e => !!e.id));
+        setEmployees(mapped.filter((e) => !!e.id));
         setEmployeesSummary(
           summary
             ? {
@@ -563,7 +579,6 @@ export default function PayrollManagement() {
     };
 
     loadEmployees();
-
     return () => {
       mounted = false;
     };
@@ -573,6 +588,8 @@ export default function PayrollManagement() {
     if (!empIds.length) return;
 
     const createdEmployees = employees
+      .filter((e) => empIds.includes(e.id))
+      .map((e) => ({ id: e.id, name: e.name, employeeId: e.employeeId }))
       .filter(e => empIds.includes(e.id))
       .map(e => ({ id: e.id, name: e.name, employeeId: e.employeeId }))
       .slice(0, 30);
