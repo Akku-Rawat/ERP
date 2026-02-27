@@ -431,10 +431,15 @@ export default function PayrollManagement() {
   const [slipDetailsOpen, setSlipDetailsOpen] = useState(false);
   const [slipDetailsId, setSlipDetailsId] = useState<string | null>(null);
   const [slipsSearch, setSlipsSearch] = useState("");
+  const [slipsMonth, setSlipsMonth] = useState("");
 
   useEffect(() => {
     setSlipsPage(1);
   }, [slipsSearch]);
+
+  useEffect(() => {
+    setSlipsPage(1);
+  }, [slipsMonth]);
 
   const filteredSalarySlips = useMemo(() => {
     const q = String(slipsSearch ?? "").trim().toLowerCase();
@@ -470,7 +475,24 @@ export default function PayrollManagement() {
       try {
         setSlipsLoading(true);
         setSlipsError(null);
-        const resp = await getSalarySlips({ page: slipsPage, page_size: slipsPageSize });
+        const month = String(slipsMonth ?? "").trim();
+        let start_date: string | undefined;
+        let end_date: string | undefined;
+        if (/^\d{4}-\d{2}$/.test(month)) {
+          const [y, m] = month.split("-").map((v) => Number(v));
+          if (y && m) {
+            const toIso = (d: Date) => d.toISOString().slice(0, 10);
+            start_date = toIso(new Date(y, m - 1, 1));
+            end_date = toIso(new Date(y, m, 0));
+          }
+        }
+
+        const resp = await getSalarySlips({
+          page: slipsPage,
+          page_size: slipsPageSize,
+          ...(start_date ? { start_date } : {}),
+          ...(end_date ? { end_date } : {}),
+        });
         if (!mounted) return;
         const list = Array.isArray(resp?.salary_slips) ? resp.salary_slips : [];
         setSalarySlips(list);
@@ -490,7 +512,7 @@ export default function PayrollManagement() {
     return () => {
       mounted = false;
     };
-  }, [view, slipsPage, slipsPageSize]);
+  }, [view, slipsMonth, slipsPage, slipsPageSize]);
 
   useEffect(() => {
     let mounted = true;
@@ -683,6 +705,12 @@ export default function PayrollManagement() {
                   <div className="text-[11px] text-muted mt-0.5">Latest payroll runs</div>
                 </div>
                 <div className="flex items-center gap-3">
+                  <input
+                    type="month"
+                    value={slipsMonth}
+                    onChange={(e) => setSlipsMonth(e.target.value)}
+                    className="w-40 px-2.5 py-2 bg-card border border-theme rounded-lg text-xs text-main focus:outline-none focus:border-primary transition"
+                  />
                   <Btn
                     variant="outline"
                     size="sm"

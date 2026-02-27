@@ -10,9 +10,13 @@ import type { PayrollEntry, Employee } from "../../../types/payrolltypes";
 
 import { runSingleEmployeePayroll } from "../../../api/singleEmployeePayrollApi";
 
-import { getSalaryStructureAssignments } from "../../../api/salaryStructureAssignmentApi";
+import { createMultipleEmployeesPayroll } from "../../../api/multiplePayrollApi";
+
+import { getSalarySlips } from "../../../api/salarySlipApi";
 
 import PayrollPreviewModal from "./payrollPreview";
+
+import MultiPayrollPreviewModal from "./multiPayrollPreview";
 
 const toCsv = (rows: Array<Record<string, any>>): string => {
   const colSet = new Set<string>();
@@ -225,7 +229,11 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
   const [singleSubmitting, setSingleSubmitting] = useState(false);
 
+  const [multiSubmitting, setMultiSubmitting] = useState(false);
+
   const [singleModalOpen, setSingleModalOpen] = useState(false);
+
+  const [multiModalOpen, setMultiModalOpen] = useState(false);
 
   const miniInputCls =
     "w-56 px-2.5 py-2 bg-app border border-theme rounded-lg text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary transition";
@@ -275,75 +283,12 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
   }, [selectedSingleEmployeeId, selectionMode]);
 
   React.useEffect(() => {
-    if (!singleModalOpen) return;
-    if (!selectedSingleEmployeeCode) return;
-
-    let mounted = true;
-
-    const run = async () => {
-      setSingleSalaryStructureName("");
-
-      try {
-        let structureName = "";
-
-        try {
-          const candidateEmployeeKeys = Array.from(
-            new Set(
-              [
-                selectedSingleEmployeeCode,
-                String(selectedSingleEmployeeRow?.employeeId ?? "").trim(),
-                String((selectedSingleEmployeeRow as any)?.employee_id ?? "").trim(),
-                String(selectedSingleEmployeeRow?.id ?? "").trim(),
-              ].filter(Boolean),
-            ),
-          );
-
-          let rows: any[] = [];
-
-          for (const key of candidateEmployeeKeys) {
-            const r = await getSalaryStructureAssignments({ employee: key });
-
-            if (Array.isArray(r) && r.length > 0) {
-              rows = r as any[];
-              break;
-            }
-          }
-
-          const company = String(data.company ?? "").trim();
-
-          const list = Array.isArray(rows) ? rows : [];
-
-          const filteredRows = company
-            ? list.filter((r: any) => String(r?.company ?? "").trim() === company)
-            : list;
-
-          const pool = filteredRows.length > 0 ? filteredRows : list;
-
-          const best = [...pool].sort((a: any, b: any) => {
-            const ad = String(a?.from_date ?? "");
-            const bd = String(b?.from_date ?? "");
-            return bd.localeCompare(ad);
-          })[0];
-
-          structureName = String(best?.salary_structure ?? "").trim();
-        } catch {
-          // ignore
-        }
-
-        if (!mounted) return;
-
-        setSingleSalaryStructureName(structureName);
-      } finally {
-        if (!mounted) return;
-      }
-    };
-
-    run();
-
-    return () => {
-      mounted = false;
-    };
-  }, [data.company, selectedSingleEmployeeCode, selectedSingleEmployeeRow, singleModalOpen]);
+    if (selectionMode !== "multiple") {
+      setMultiModalOpen(false);
+      setMultiSubmitting(false);
+      return;
+    }
+  }, [selectionMode]);
 
   const canRunSinglePayroll = useMemo(() => {
     if (selectionMode !== "single") return false;
@@ -363,6 +308,27 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
     data.payrollPayableAccount,
     data.startDate,
     selectedSingleEmployeeCode,
+    selectionMode,
+  ]);
+
+  const canRunMultiplePayroll = useMemo(() => {
+    if (selectionMode !== "multiple") return false;
+    if (!Array.isArray(data.selectedEmployees) || data.selectedEmployees.length === 0) return false;
+    if (!String(data.company ?? "").trim()) return false;
+    if (!String(data.currency ?? "").trim()) return false;
+    if (!String(data.payrollFrequency ?? "").trim()) return false;
+    if (!String(data.payrollPayableAccount ?? "").trim()) return false;
+    if (!String(data.startDate ?? "").trim()) return false;
+    if (!String(data.endDate ?? "").trim()) return false;
+    return true;
+  }, [
+    data.company,
+    data.currency,
+    data.endDate,
+    data.payrollFrequency,
+    data.payrollPayableAccount,
+    data.selectedEmployees,
+    data.startDate,
     selectionMode,
   ]);
 
@@ -405,19 +371,103 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
     }
   };
 
+  const runMultiplePayroll = async () => {
+    if (!canRunMultiplePayroll) {
+      toast.error("Please select employees and fill required fields");
+      return;
+    }
+
+    setMultiSubmitting(true);
+    try {
+      const selectedEmployeeData = active.filter((e) => data.selectedEmployees.includes(e.id));
+      const employeeIds = selectedEmployeeData.map((e) => e.employeeId || e.id).filter(Boolean);
+
+      if (employeeIds.length === 0) {
+        toast.error("No valid employee IDs found");
+        return;
+      }
+
+      const startDate = String(data.startDate);
+      const endDate = String(data.endDate);
+
+      const toIso = (d: Date) => d.toISOString().slice(0, 10);
+      const normalizeMonthRange = (iso: string): { start: string; end: string } | null => {
+        const s = String(iso ?? "").trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+        const [y, m] = s.split("-").map((v) => Number(v));
+        if (!y || !m) return null;
+        const start = new Date(y, m - 1, 1);
+        const end = new Date(y, m, 0);
+        return { start: toIso(start), end: toIso(end) };
+      };
+
+      const monthRange = normalizeMonthRange(startDate) ?? normalizeMonthRange(endDate);
+      const checkStart = monthRange?.start ?? startDate;
+      const checkEnd = monthRange?.end ?? endDate;
+
+      const existing = await getSalarySlips({
+        start_date: checkStart,
+        end_date: checkEnd,
+        page: 1,
+        page_size: 2000,
+      });
+
+      const existingEmployees = new Set(
+        (Array.isArray(existing?.salary_slips) ? existing.salary_slips : [])
+          .map((s) => String(s.employee ?? "").trim())
+          .filter(Boolean),
+      );
+
+      const toRun = employeeIds.filter((id) => !existingEmployees.has(String(id).trim()));
+      const skipped = employeeIds.filter((id) => existingEmployees.has(String(id).trim()));
+
+      if (skipped.length > 0) {
+        toast(
+          `Skipping ${skipped.length} employee${skipped.length > 1 ? "s" : ""} (already has payroll for this period)`,
+          { icon: "⚠️" },
+        );
+      }
+
+      if (toRun.length === 0) {
+        toast.error("All selected employees already have payroll for this period");
+        return;
+      }
+
+      const resp = await createMultipleEmployeesPayroll({
+        employees: toRun,
+        start_date: startDate,
+        end_date: endDate,
+      });
+
+      const msg = String((resp as any)?.message ?? "").trim();
+      toast.success(msg || `Multiple payroll created for ${toRun.length} employee${toRun.length > 1 ? "s" : ""}`);
+      setMultiModalOpen(false);
+      onChange("selectedEmployees", []);
+    } catch (e: any) {
+      const serverMessage =
+        e?.response?.data?.message ??
+        e?.response?.data?.exc ??
+        e?.response?.data?._server_messages ??
+        e?.response?.data?.error?.message ??
+        e?.message;
+
+      const safeMessage = String(serverMessage ?? "").trim();
+      toast.error(safeMessage || "Failed to run multiple payroll");
+    } finally {
+      setMultiSubmitting(false);
+    }
+  };
+
   const filtered = useMemo(() => {
     const q = String((data as any).nameSearch ?? "").trim().toLowerCase();
     const job = String((data as any).jobTitleFilter ?? "").trim().toLowerCase();
-    const dept = String((data as any).departmentFilter ?? "").trim().toLowerCase();
 
     return active.filter((e) => {
       const name = String(e.name ?? "").toLowerCase();
       const jobTitle = String(e.jobTitle ?? (e as any).designation ?? "").toLowerCase();
-      const department = String(e.department ?? "").toLowerCase();
 
       if (q && !name.includes(q)) return false;
       if (job && !jobTitle.includes(job)) return false;
-      if (dept && !department.includes(dept)) return false;
       return true;
     });
   }, [active, data]);
@@ -464,15 +514,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [active]);
 
-  const departmentOptions = useMemo(() => {
-    const set = new Set<string>();
-    active.forEach((e) => {
-      const v = String(e.department ?? "").trim();
-      if (v) set.add(v);
-    });
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [active]);
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
 
   const pageSafe = Math.min(page, totalPages);
@@ -484,6 +525,22 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
   return (
     <div className="flex flex-col gap-4 min-h-0 animate-[fadeIn_0.2s_ease]">
+      <MultiPayrollPreviewModal
+        open={multiModalOpen}
+        employees={active}
+        selectedEmployeeIds={data.selectedEmployees}
+        structureName={String((fallbackSalaryStructureName || "").trim())}
+        currency={String(data.currency ?? "")}
+        payPeriodStart={String(data.startDate ?? "")}
+        payPeriodEnd={String(data.endDate ?? "")}
+        onPayPeriodStartChange={(v: string) => onChange("startDate", v)}
+        onPayPeriodEndChange={(v: string) => onChange("endDate", v)}
+        onClose={() => setMultiModalOpen(false)}
+        onRunPayroll={runMultiplePayroll}
+        runPayrollDisabled={!canRunMultiplePayroll || multiSubmitting}
+        runPayrollLoading={multiSubmitting}
+      />
+
       <PayrollPreviewModal
         open={singleModalOpen}
         structureName={String((singleSalaryStructureName || fallbackSalaryStructureName || "").trim())}
@@ -518,7 +575,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
                 </select>
               )}
 
-              {!isLoading && selectionMode === "multiple" && (
+              {selectionMode === "multiple" && !isLoading && (
                 <label className="flex items-center gap-2.5 cursor-pointer text-sm font-semibold text-main">
                   <input
                     type="checkbox"
@@ -564,23 +621,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
                   ))}
                 </select>
               )}
-
-              {isLoading ? (
-                <div className="h-9 w-56 bg-theme/60 rounded-lg animate-pulse" />
-              ) : (
-                <select
-                  value={(data as any).departmentFilter ?? ""}
-                  onChange={(e) => updateFilter("departmentFilter", e.target.value)}
-                  className={miniSelectCls}
-                >
-                  <option value="">Department (All)</option>
-                  {departmentOptions.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              )}
             </div>
 
             <div className="flex items-center justify-end">
@@ -588,6 +628,31 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
                 <div className="h-6 w-24 bg-theme/60 rounded-full animate-pulse" />
               ) : (
                 <div className="flex items-center gap-2">
+                  {selectionMode === "multiple" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!data.selectedEmployees.length) {
+                          toast.error("Please select employees");
+                          return;
+                        }
+
+                        if (!String(data.startDate ?? "").trim() || !String(data.endDate ?? "").trim()) {
+                          const now = new Date();
+                          const start = new Date(now.getFullYear(), now.getMonth(), 1);
+                          const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                          onChange("startDate", start.toISOString().slice(0, 10));
+                          onChange("endDate", end.toISOString().slice(0, 10));
+                        }
+                        setMultiModalOpen(true);
+                      }}
+                      disabled={data.selectedEmployees.length === 0}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg bg-primary text-white hover:opacity-90 disabled:opacity-40"
+                    >
+                      Preview Payroll
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={() => {
@@ -623,209 +688,131 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
         <div className="flex-1 min-h-0 overflow-auto">
           <table className="w-full">
             <thead className="bg-app border-b border-theme">
-
               <tr>
-
                 {[
-
                   "",
-
                   "ID",
-
                   "Employee ID",
-
                   "Name",
-
                   "Job Title",
-
                   "Department",
-
                   "Work Location",
-
                   "Gross Salary",
-
                   "Status",
-
                   "",
-
                 ].map((h, i) => (
-
                   <th
-
                     key={String(i)}
-
-                    className={`px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider whitespace-nowrap ${i >= 7 ? "text-right" : "text-left"}`}
-
+                    className={`px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider whitespace-nowrap ${
+                      i >= 7 ? "text-right" : "text-left"
+                    }`}
                   >
-
                     {h}
-
                   </th>
-
                 ))}
-
               </tr>
-
             </thead>
 
             <tbody>
-
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, skIdx) => (
                   <tr key={`sk-${skIdx}`} className={skIdx % 2 === 1 ? "bg-app" : "bg-card"}>
                     {Array.from({ length: 10 }).map((__, cIdx) => (
                       <td key={String(cIdx)} className="px-4 py-3">
-                        <div className={`h-3 bg-theme/60 rounded animate-pulse ${cIdx === 0 ? "w-4" : cIdx === 3 ? "w-32" : "w-20"}`} />
+                        <div
+                          className={`h-3 bg-theme/60 rounded animate-pulse ${
+                            cIdx === 0 ? "w-4" : cIdx === 3 ? "w-32" : "w-20"
+                          }`}
+                        />
                       </td>
                     ))}
                   </tr>
                 ))
               ) : pageEmployees.length === 0 ? (
-
                 <tr>
-
                   <td colSpan={10} className="px-4 py-10 text-center text-sm text-muted">
-
                     Doesn't exist
-
                   </td>
-
                 </tr>
-
               ) : (
-
                 pageEmployees.map((emp, i) => {
-
                   const isSel = data.selectedEmployees.includes(emp.id);
 
                   const gross = Number(emp.grossSalary ?? 0);
 
                   const statusLabel = String(emp.status ?? (emp.isActive ? "Active" : "Inactive"));
 
-
-
                   return (
-
                     <tr
-
                       key={emp.id}
-
                       onClick={() => toggleEmp(emp.id)}
-
-                      className={`border-b border-theme last:border-0 cursor-pointer transition-colors ${isSel ? "bg-primary/5" : i % 2 === 1 ? "bg-app hover:bg-primary/3" : "bg-card hover:bg-app"}`}
-
+                      className={`border-b border-theme last:border-0 cursor-pointer transition-colors ${
+                        isSel ? "bg-primary/5" : i % 2 === 1 ? "bg-app hover:bg-primary/3" : "bg-card hover:bg-app"
+                      }`}
                     >
-
                       <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-
                         <input
-
                           type="checkbox"
-
                           checked={isSel}
-
                           onChange={() => toggleEmp(emp.id)}
-
                           className="w-4 h-4 accent-primary cursor-pointer"
-
                         />
-
                       </td>
-
                       <td className="px-4 py-3 text-xs font-semibold text-main whitespace-nowrap">{emp.id}</td>
-
                       <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{emp.employeeId || "—"}</td>
-
                       <td className="px-4 py-3 text-xs font-bold text-main whitespace-nowrap">{emp.name || "—"}</td>
-
-                      <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{emp.jobTitle || emp.designation || "—"}</td>
-
+                      <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">
+                        {emp.jobTitle || emp.designation || "—"}
+                      </td>
                       <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{emp.department || "—"}</td>
-
-                      <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{emp.workLocation || emp.branch || "—"}</td>
-
-                      <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums whitespace-nowrap">ZMW {gross.toLocaleString("en-ZM")}</td>
-
+                      <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">
+                        {emp.workLocation || emp.branch || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums whitespace-nowrap">
+                        ZMW {gross.toLocaleString("en-ZM")}
+                      </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
-
                         <span
-
-                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${statusLabel.toLowerCase() === "active"
-
-                            ? "bg-success/10 text-success border-success/20"
-
-                            : "bg-warning/10 text-warning border-warning/20"}`}
-
+                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
+                            statusLabel.toLowerCase() === "active"
+                              ? "bg-success/10 text-success border-success/20"
+                              : "bg-warning/10 text-warning border-warning/20"
+                          }`}
                         >
-
                           {statusLabel}
-
                         </span>
-
                       </td>
-
                       <td className="px-4 py-3 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-
                         <div className="flex items-center justify-end gap-1">
-
                           <button
-
                             onClick={() => onViewEmployee?.(emp.id)}
-
                             className="p-1.5 text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition shrink-0"
-
                             aria-label="View employee details"
-
                             title="View"
-
                           >
-
                             <Eye className="w-3.5 h-3.5" />
-
                           </button>
-
                           {onEditEmployee && (
-
                             <button
-
                               onClick={() => onEditEmployee(emp)}
-
                               className="p-1.5 text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition shrink-0"
-
                               aria-label="Edit employee"
-
                               title="Edit"
-
                             >
-
                               <Edit2 className="w-3.5 h-3.5" />
-
                             </button>
-
                           )}
-
                         </div>
-
                       </td>
-
                     </tr>
-
                   );
-
                 })
-
               )}
-
             </tbody>
-
           </table>
-
         </div>
 
-
-
         {filtered.length > 0 && (
-
           <div className="shrink-0 flex items-center justify-between gap-3 px-4 py-3 bg-app border-t border-theme">
 
             <div className="text-xs text-muted">Page {pageSafe} of {totalPages}</div>
