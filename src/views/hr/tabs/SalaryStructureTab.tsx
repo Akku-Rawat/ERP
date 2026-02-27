@@ -28,6 +28,13 @@ import {
   type SalaryComponentUpdatePayload,
 } from "../../../api/salaryStructureApi";
 
+const toTitleCase = (value: string) => {
+  return value
+    .split(" ")
+    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : ""))
+    .join(" ");
+};
+
 export default function SalaryStructureTab() {
   const [structures, setStructures] = useState<SalaryStructureListItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -1151,6 +1158,20 @@ function StructureModal({
     return earnings.reduce((sum, c) => sum + (Number(c.amount || 0) || 0), 0);
   }, [earnings]);
 
+  const earningsForSummary = useMemo(() => {
+    const arr = [...earnings];
+    arr.sort((a: any, b: any) => {
+      const an = String(a?.component || "").toLowerCase();
+      const bn = String(b?.component || "").toLowerCase();
+      const aIsBasic = an === "basic" || an === "basic salary";
+      const bIsBasic = bn === "basic" || bn === "basic salary";
+      if (aIsBasic && !bIsBasic) return -1;
+      if (!aIsBasic && bIsBasic) return 1;
+      return 0;
+    });
+    return arr;
+  }, [earnings]);
+
   const basicSalaryForStatutory = useMemo(() => {
     const basic = earnings.find((c) => String(c?.component || "").toLowerCase() === "basic");
     return Number(basic?.amount || 0) || 0;
@@ -1239,8 +1260,8 @@ function StructureModal({
                 <h4 className="text-sm font-semibold text-gray-900">
                   Basic Information
                 </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Structure Name *
                     </label>
@@ -1248,14 +1269,14 @@ function StructureModal({
                       type="text"
                       value={formData.name}
                       onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
+                        setFormData({ ...formData, name: toTitleCase(e.target.value) })
                       }
                       placeholder="e.g., Executive Level, Mid-Level Staff"
                       disabled={Boolean(readOnly)}
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary disabled:bg-gray-100 disabled:text-gray-700"
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Company *
                     </label>
@@ -1263,7 +1284,7 @@ function StructureModal({
                       type="text"
                       value={formData.company}
                       onChange={(e) =>
-                        setFormData({ ...formData, company: e.target.value })
+                        setFormData({ ...formData, company: toTitleCase(e.target.value) })
                       }
                       placeholder="e.g., Izyane"
                       disabled={Boolean(readOnly)}
@@ -1370,23 +1391,25 @@ function StructureModal({
                                 ? statutoryCalc.statutory.paye
                                 : Number(component.amount || 0) || 0;
 
+                          const displayAmount = computedAmount === 0 ? "" : computedAmount;
+
                           const disabled = Boolean(readOnly) || isStatutory;
 
                           return (
                             <input
                               type="number"
-                              value={computedAmount}
+                              value={displayAmount}
                               onChange={(e) => {
                                 if (disabled) return;
                                 const next = [...(formData.components || [])];
                                 next[idx] = {
                                   ...next[idx],
-                                  amount: Number(e.target.value || 0),
+                                  amount: e.target.value === "" ? 0 : Number(e.target.value || 0),
                                 };
                                 setFormData({ ...formData, components: next });
                               }}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:bg-gray-50"
                               disabled={disabled}
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:text-gray-700"
                             />
                           );
                         })()}
@@ -1439,7 +1462,7 @@ function StructureModal({
                   <div className="pt-3 border-b pb-3">
                     <div className="text-[11px] font-bold text-gray-700">EARNINGS:</div>
                     <div className="mt-2 space-y-1">
-                      {earnings.map((c, idx) => (
+                      {earningsForSummary.map((c, idx) => (
                         <div key={`${c.component}-${idx}`} className="flex items-center justify-between gap-3">
                           <div className="text-xs text-gray-700 truncate">{c.component}</div>
                           <div className="text-xs font-semibold text-gray-900 tabular-nums">
@@ -1447,7 +1470,7 @@ function StructureModal({
                           </div>
                         </div>
                       ))}
-                      {earnings.length === 0 && (
+                      {earningsForSummary.length === 0 && (
                         <div className="text-xs text-gray-500">—</div>
                       )}
                     </div>
@@ -1491,10 +1514,6 @@ function StructureModal({
                       <div className="font-bold text-gray-900 tabular-nums">
                         {netPay.toLocaleString()}
                       </div>
-                    </div>
-                    <div className="flex items-center justify-between pt-2 text-[10px] text-gray-500">
-                      <div>Gross Pay</div>
-                      <div className="tabular-nums">{totalEarnings.toLocaleString()}</div>
                     </div>
                   </div>
                 </div>

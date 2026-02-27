@@ -11,7 +11,6 @@ const TABS = [
   "Leave Policy",
   "Work Schedule",
   "salaryslip setup",
-
   "Company Mapping",
   "",
 ];
