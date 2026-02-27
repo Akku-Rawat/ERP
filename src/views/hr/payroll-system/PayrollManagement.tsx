@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Plus, ChevronLeft,
   FileText, Users, CheckCircle,
@@ -400,6 +400,25 @@ export default function PayrollManagement() {
   const [slipsTotalPages, setSlipsTotalPages] = useState(1);
   const [slipDetailsOpen, setSlipDetailsOpen] = useState(false);
   const [slipDetailsId, setSlipDetailsId] = useState<string | null>(null);
+  const [slipsSearch, setSlipsSearch] = useState("");
+
+  const filteredSalarySlips = useMemo(() => {
+    const q = String(slipsSearch ?? "").trim().toLowerCase();
+    if (!q) return salarySlips;
+    return salarySlips.filter((s) => {
+      const status = String(s.status ?? "").trim();
+      const normalizedStatus = status.toLowerCase() === "submitted" ? "paid" : status.toLowerCase();
+      const hay = [
+        String(s.name ?? ""),
+        String(s.employee ?? ""),
+        String(s.salary_structure ?? ""),
+        normalizedStatus,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    });
+  }, [salarySlips, slipsSearch]);
 
   useEffect(() => {
     if (!employeesError) return;
@@ -625,7 +644,16 @@ export default function PayrollManagement() {
                   <div className="text-xs font-extrabold text-main uppercase tracking-wide">Salary Slips</div>
                   <div className="text-[11px] text-muted mt-0.5">Latest payroll runs</div>
                 </div>
-                <div className="text-xs text-muted">Page {slipsPage} of {slipsTotalPages}</div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={slipsSearch}
+                    onChange={(e) => setSlipsSearch(e.target.value)}
+                    placeholder="Search slips…"
+                    className="w-64 px-2.5 py-2 bg-card border border-theme rounded-lg text-xs text-main placeholder:text-muted focus:outline-none focus:border-primary transition"
+                  />
+                  <div className="text-xs text-muted whitespace-nowrap">Page {slipsPage} of {slipsTotalPages}</div>
+                </div>
               </div>
 
               {slipsError && (
@@ -675,14 +703,14 @@ export default function PayrollManagement() {
                           <td className="px-4 py-3 text-right"><div className="h-7 w-16 bg-theme/60 rounded-lg animate-pulse ml-auto" /></td>
                         </tr>
                       ))
-                    ) : salarySlips.length === 0 ? (
+                    ) : filteredSalarySlips.length === 0 ? (
                       <tr>
                         <td colSpan={10} className="px-4 py-10 text-center text-sm text-muted">
-                          No salary slips found
+                          {String(slipsSearch ?? "").trim() ? "No matching salary slips" : "No salary slips found"}
                         </td>
                       </tr>
                     ) : (
-                      salarySlips.map((s, idx) => (
+                      filteredSalarySlips.map((s, idx) => (
                         <tr
                           key={s.name}
                           className={`border-b border-theme last:border-0 ${idx % 2 === 1 ? "bg-app" : "bg-card"}`}
@@ -715,7 +743,7 @@ export default function PayrollManagement() {
               </div>
 
               <div className="px-4 py-3 bg-app border-t border-theme flex items-center justify-between">
-                <div className="text-xs text-muted">Showing {salarySlips.length} slips</div>
+                <div className="text-xs text-muted">Showing {filteredSalarySlips.length} slips</div>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
