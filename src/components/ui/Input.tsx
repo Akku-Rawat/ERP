@@ -6,14 +6,20 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, className = "", ...props }, ref) => (
-    <label className="flex flex-col gap-1 text-sm w-full">
-      <span className="font-medium text-muted">{label}</span>
+    <label className="flex flex-col gap-0.5 text-sm w-full">
+      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+        {label}
+      </span>
       <input
         ref={ref}
         {...props}
-        className={`rounded border border-theme bg-app px-3 py-2 text-main focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${
-          props.disabled ? "bg-row-hover text-muted cursor-not-allowed" : ""
-        } ${className}`}
+        className={`
+          h-8 rounded-md border border-theme bg-card text-main text-sm px-2.5
+          placeholder:text-muted/40
+          focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary
+          ${props.disabled ? "bg-app text-muted cursor-not-allowed opacity-60" : ""}
+          ${className}
+        `}
       />
     </label>
   ),

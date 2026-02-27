@@ -364,7 +364,7 @@ const handleStatusChange = async (
       <Table
         columns={columns}
         data={orders}
-        serverSide
+
         showToolbar
         loading={loading}
         searchValue={searchTerm}

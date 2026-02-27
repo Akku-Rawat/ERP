@@ -88,11 +88,11 @@ const Dashboard = () => {
     };
   }, []);
 
-  const currencyZMW = useMemo(
+  const currencyINR= useMemo(
     () =>
-      new Intl.NumberFormat('en-ZM', {
+      new Intl.NumberFormat('en-IN', {
         style: 'currency',
-        currency: 'ZMW',
+        currency: 'INR',
         maximumFractionDigits: 2,
       }),
     [],
@@ -136,7 +136,7 @@ const Dashboard = () => {
     },
     {
       label: 'Total Sales Amount',
-      value: currencyZMW.format(summaryData?.totalSalesAmount ?? 0),
+      value: currencyINR.format(summaryData?.totalSalesAmount ?? 0),
       icon: DollarSign,
       gradient: 'from-purple-500 to-purple-600',
     },
@@ -261,7 +261,7 @@ const Dashboard = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} width={52} />
-                  <Tooltip formatter={(v: any) => currencyZMW.format(Number(v ?? 0))} />
+                  <Tooltip formatter={(v: any) => currencyINR.format(Number(v ?? 0))} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Line type="monotone" dataKey="revenue" stroke="#8b5cf6" strokeWidth={2} dot={false} name="Sales" />
                 </LineChart>
@@ -284,7 +284,7 @@ const Dashboard = () => {
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={48} />
                   <YAxis tick={{ fontSize: 12 }} width={52} />
                   <Tooltip
-                    formatter={(v: any) => currencyZMW.format(Number(v ?? 0))}
+                    formatter={(v: any) => currencyINR.format(Number(v ?? 0))}
                     labelFormatter={(
                       _label: any,
                       payload: readonly { payload?: { name?: string; customer?: string; posting_date?: string } }[],
@@ -323,7 +323,7 @@ const Dashboard = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-15} textAnchor="end" height={52} />
                   <YAxis tick={{ fontSize: 12 }} width={52} />
-                  <Tooltip formatter={(v: any) => currencyZMW.format(Number(v ?? 0))} />
+                  <Tooltip formatter={(v: any) => currencyINR.format(Number(v ?? 0))} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Bar dataKey="total" fill="#f59e0b" radius={[6, 6, 0, 0]} name="Total" />
                 </BarChart>

@@ -183,9 +183,14 @@ const ItemModal: React.FC<{
 
       showLoading("Creating Stock Entry...");
 
-      await createItemStock(payload);
+     const response= await createItemStock(payload);
 
       closeSwal();
+      if (!response || response.status_code !== 200) {
+        showApiError(response?.message||"failed to create stock entry");
+        return;
+      }
+
       showSuccess("Stock entry created successfully");
 
       onSubmit?.();

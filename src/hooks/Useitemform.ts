@@ -8,7 +8,7 @@ import { getAllItemGroups } from "../api/itemCategoryApi";
 import { getItemFieldConfigs } from "../config/companyConfigResolver";
 import { getTaxConfigs, isTaxAutoPopulated } from "../taxconfig/taxConfigResolver";
 import { API } from "../config/api";
-
+import { getSuppliers } from "../api/procurement/supplierApi";
 // ─────────────────────────────────────────────────────────────────────────────
 // Empty form
 //
@@ -192,7 +192,10 @@ const [loadingItemGroups, setLoadingItemGroups] = useState(false);
   const isServiceItem   = Number(form.itemTypeCode) === 3;
   const showBatchExpiry = Number(form.itemTypeCode) === 1 || Number(form.itemTypeCode) === 2;
 
-
+const [suppliers, setSuppliers] = useState<
+  Array<{ label: string; value: string }>
+>([]);
+const [loadingSuppliers, setLoadingSuppliers] = useState(false);
 
 const fetchItemGroups = useCallback(async (itemType?: string) => {
   try {
@@ -215,27 +218,53 @@ const fetchItemGroups = useCallback(async (itemType?: string) => {
     setLoadingItemGroups(false);
   }
 }, []);
+
+const fetchSuppliers = useCallback(async () => {
+  try {
+    setLoadingSuppliers(true);
+
+    const res = await getSuppliers(1, 1000);
+
+    if (!res || res.status_code !== 200) {
+      showApiError(res?.message || "Failed to load suppliers");
+      return;
+    }
+
+const list = res?.data?.suppliers || [];
+
+const mapped = list.map((supplier: any) => ({
+  label: supplier.supplierName,
+  value: supplier.supplierId,
+}));
+
+    setSuppliers(mapped);
+  } catch (err) {
+    showApiError("Error fetching suppliers");
+  } finally {
+    setLoadingSuppliers(false);
+  }
+}, []);
   // ── Data fetchers ──────────────────────────────────────────────────────────
 
-  const fetchItemClassList = useCallback(async () => {
-    try {
-      setLoadingItemClasses(true);
-      const response = await fetch(API.lookup.getItemClasses);
-      const data: any[] = await response.json();
-      setItemClassOptions(
-        data.map((item) => ({
-          cd:  item.itemClsCd  ?? item.cd  ?? "",
-          cdNm: item.itemClsNm ?? item.cdNm ?? "",
-          lvl: item.itemClsLvl ?? item.lvl ?? "1",
-        }))
-      );
-    } catch (err) {
-      console.error("[useItemForm] Failed to fetch item classes:", err);
-      setItemClassOptions([]);
-    } finally {
-      setLoadingItemClasses(false);
-    }
-  }, []);
+  // const fetchItemClassList = useCallback(async () => {
+  //   try {
+  //     setLoadingItemClasses(true);
+  //     const response = await fetch(API.lookup.getItemClasses);
+  //     const data: any[] = await response.json();
+  //     setItemClassOptions(
+  //       data.map((item) => ({
+  //         cd:  item.itemClsCd  ?? item.cd  ?? "",
+  //         cdNm: item.itemClsNm ?? item.cdNm ?? "",
+  //         lvl: item.itemClsLvl ?? item.lvl ?? "1",
+  //       }))
+  //     );
+  //   } catch (err) {
+  //     console.error("[useItemForm] Failed to fetch item classes:", err);
+  //     setItemClassOptions([]);
+  //   } finally {
+  //     setLoadingItemClasses(false);
+  //   }
+  // }, []);
 
   // ── Form initialisation ────────────────────────────────────────────────────
   //
@@ -304,9 +333,9 @@ const fetchItemGroups = useCallback(async (itemType?: string) => {
       setSelectedLevel3("");
       setSelectedLevel4("");
     }
-
-    void fetchItemClassList();
-   void fetchItemClassList();
+ void fetchSuppliers();
+  //   void fetchItemClassList();
+  //  void fetchItemClassList();
   }, [isOpen, isEditMode, initialData]);
 
   // Pre-populate HSN level selectors when editing an existing item.
@@ -572,5 +601,7 @@ const handleCategoryChange = async (data: { name: string; id: string }) => {
     handleSubmit,
     itemGroups,
     loadingItemGroups,
+    suppliers,
+loadingSuppliers,
   };
 };
