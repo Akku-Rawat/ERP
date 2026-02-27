@@ -53,12 +53,17 @@ const AddressBlock: React.FC<{
 
  
 const [countriesCache, setCountriesCache] = useState<Country[]>([]);
-
 useEffect(() => {
   const loadCountries = async () => {
     try {
       const result = await getRolaCountryList();
-      setCountriesCache(result || []);
+
+      const formatted = (result || []).map((c: Country) => ({
+        ...c,
+        code: c.code?.toUpperCase() || "",
+      }));
+
+      setCountriesCache(formatted);
     } catch (error) {
       console.error("Failed to load countries:", error);
       setCountriesCache([]);
@@ -67,7 +72,6 @@ useEffect(() => {
 
   loadCountries();
 }, []);
-  
 
 const selectedCountry = countriesCache.find(
   (c) => c.code === data?.country
