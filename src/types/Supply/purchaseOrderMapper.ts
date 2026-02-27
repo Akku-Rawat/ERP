@@ -229,7 +229,7 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
     supplierPhone: api.phone || "",
     supplierContact: api.contactPerson || "",
 
-    currency: api.currency || "ZMW",
+    currency: api.currency || "INR",
     status: api.status || "Draft",
 
     costCenter: api.costCenter || "",
