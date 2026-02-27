@@ -34,6 +34,33 @@ export default function PayrollPreviewModal({
   const [error, setError] = React.useState<string | null>(null);
   const [detail, setDetail] = React.useState<SalaryStructureDetail | null>(null);
 
+  const monthValue = React.useMemo(() => {
+    const s = String(payPeriodStart ?? "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s.slice(0, 7);
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  }, [payPeriodStart]);
+
+  const fillDatesForMonth = (yyyyMm: string) => {
+    if (!/^\d{4}-\d{2}$/.test(yyyyMm)) return;
+    const [yRaw, mRaw] = yyyyMm.split("-");
+    const y = Number(yRaw);
+    const m = Number(mRaw);
+    if (!Number.isFinite(y) || !Number.isFinite(m)) return;
+
+    const start = new Date(y, m - 1, 1);
+    const end = new Date(y, m, 0);
+    const toIso = (d: Date) => {
+      const yy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yy}-${mm}-${dd}`;
+    };
+
+    onPayPeriodStartChange?.(toIso(start));
+    onPayPeriodEndChange?.(toIso(end));
+  };
+
   React.useEffect(() => {
     if (!open) return;
     const name = String(structureName ?? "").trim();
@@ -113,7 +140,18 @@ export default function PayrollPreviewModal({
 
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {(typeof onPayPeriodStartChange === "function" || typeof onPayPeriodEndChange === "function") && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-1">
+                  Month
+                </div>
+                <input
+                  type="month"
+                  value={monthValue}
+                  onChange={(e) => fillDatesForMonth(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-app border border-theme rounded-lg text-sm text-main placeholder:text-muted focus:outline-none focus:border-primary transition"
+                />
+              </div>
               <div>
                 <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-1">
                   Pay Period Start
