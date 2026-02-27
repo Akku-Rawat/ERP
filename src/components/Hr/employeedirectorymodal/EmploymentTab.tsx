@@ -277,13 +277,14 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-main mb-1 font-medium">
-              Reporting Manager
+              Reporting Manager <span className="text-danger">*</span>
             </label>
             <select
               value={formData.reportingManager}
               onChange={(e) =>
                 handleInputChange("reportingManager", e.target.value)
               }
+              required
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg
   focus:outline-none focus:border-primary  focus:ring-primary/20"
             >
@@ -297,11 +298,12 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-main mb-1 font-medium">
-              HR Manager
+              HR Manager <span className="text-danger">*</span>
             </label>
             <select
               value={formData.hrManager}
               onChange={(e) => handleInputChange("hrManager", e.target.value)}
+              required
               className="w-full px-3 py-2 text-sm border border-theme bg-card text-main  rounded-lg
       focus:outline-none focus:border-primary  focus:ring-primary/20"
             >

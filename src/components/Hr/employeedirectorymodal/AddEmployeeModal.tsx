@@ -401,6 +401,14 @@ const [step, setStep] = useState<"verification" | "form">(
           !formData.engagementDate
         )
           return "Department, job title and engagement date are required";
+
+        if (!String(formData.reportingManager ?? "").trim()) {
+          return "Reporting manager is required";
+        }
+
+        if (!String(formData.hrManager ?? "").trim()) {
+          return "HR manager is required";
+        }
         return null;
 
       case "Compensation & Payroll":
