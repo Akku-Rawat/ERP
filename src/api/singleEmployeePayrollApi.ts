@@ -7,6 +7,8 @@ const api = createAxiosInstance(ERP_BASE);
 export type SingleEmployeePayrollPayload = {
   employee: string;
   company: string;
+  payroll_name?: string;
+  posting_date?: string;
   start_date: string;
   end_date: string;
   payroll_type: string;

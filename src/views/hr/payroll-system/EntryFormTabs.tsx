@@ -209,7 +209,6 @@ interface EmployeesTabProps {
   onEditEmployee?: (emp: Employee) => void;
   onViewEmployee?: (employeeId: string) => void;
   onCreatePayroll?: (empIds: string[]) => void;
-  onOpenPayrollPreview?: (employeeId: string) => void;
 }
 
 export const EmployeesTab: React.FC<EmployeesTabProps> = ({
@@ -219,7 +218,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
   loading,
   onEditEmployee,
   onViewEmployee,
-  onOpenPayrollPreview,
 }) => {
   const active = employees.filter((e) => e.isActive);
 
@@ -265,11 +263,13 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
   const fallbackSalaryStructureName = "";
 
   const [singleSalaryStructureName, setSingleSalaryStructureName] = useState<string>("");
+  const [singleAssignmentLoading, setSingleAssignmentLoading] = useState(false);
 
   React.useEffect(() => {
     if (selectionMode !== "single") {
       setSingleModalOpen(false);
       setSingleSalaryStructureName("");
+      setSingleAssignmentLoading(false);
       return;
     }
 
@@ -285,6 +285,66 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
   }, [selectedSingleEmployeeId, selectionMode]);
 
   React.useEffect(() => {
+    if (selectionMode !== "single") return;
+    if (!singleModalOpen) return;
+    if (!selectedSingleEmployeeCode) {
+      setSingleSalaryStructureName("");
+      setSingleAssignmentLoading(false);
+      return;
+    }
+
+    let mounted = true;
+    const run = async () => {
+      try {
+        setSingleAssignmentLoading(true);
+
+        const rows = await getSalaryStructureAssignments({ employee: selectedSingleEmployeeCode });
+        if (!mounted) return;
+        let list = Array.isArray(rows) ? rows : [];
+
+        if (list.length === 0) {
+          const all = await getSalaryStructureAssignments();
+          if (!mounted) return;
+          const allList = Array.isArray(all) ? all : [];
+          const code = String(selectedSingleEmployeeCode).trim();
+          list = allList.filter((r: any) => String(r?.employee ?? "").trim() === code);
+        }
+
+        const payEnd = String(data.endDate ?? "").trim();
+        const effective = /^\d{4}-\d{2}-\d{2}$/.test(payEnd)
+          ? list.filter((r: any) => {
+              const fd = String(r?.from_date ?? "");
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(fd)) return false;
+              return fd <= payEnd;
+            })
+          : list;
+
+        const best = (effective.length > 0 ? effective : list)
+          .filter((r: any) => String(r?.salary_structure ?? "").trim())
+          .sort((a: any, b: any) => {
+            const ad = String(a?.from_date ?? "");
+            const bd = String(b?.from_date ?? "");
+            return bd.localeCompare(ad);
+          })[0];
+
+        setSingleSalaryStructureName(String(best?.salary_structure ?? "").trim());
+      } catch (e: any) {
+        if (!mounted) return;
+        setSingleSalaryStructureName("");
+        toast.error(e?.message || "Failed to load salary structure assignment");
+      } finally {
+        if (!mounted) return;
+        setSingleAssignmentLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [data.endDate, selectedSingleEmployeeCode, selectionMode, singleModalOpen]);
+
+  React.useEffect(() => {
     if (selectionMode !== "multiple") {
       setMultiModalOpen(false);
       setMultiSubmitting(false);
@@ -295,6 +355,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
   const canRunSinglePayroll = useMemo(() => {
     if (selectionMode !== "single") return false;
     if (!selectedSingleEmployeeCode) return false;
+    if (!String(singleSalaryStructureName ?? "").trim()) return false;
     if (!String(data.company ?? "").trim()) return false;
     if (!String(data.currency ?? "").trim()) return false;
     if (!String(data.payrollFrequency ?? "").trim()) return false;
@@ -310,6 +371,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
     data.payrollPayableAccount,
     data.startDate,
     selectedSingleEmployeeCode,
+    singleSalaryStructureName,
     selectionMode,
   ]);
 
@@ -336,6 +398,11 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
   const runSinglePayroll = async () => {
     if (!canRunSinglePayroll) {
+      if (!String(singleSalaryStructureName ?? "").trim()) {
+        toast.error("No salary structure assigned for this employee in the selected period");
+        return;
+      }
+
       toast.error("Please fill required fields");
       return;
     }
@@ -343,9 +410,14 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
     setSingleSubmitting(true);
 
     try {
+      const postingDate = String(data.postingDate ?? "").trim();
+      const payrollName = String(data.payrollName ?? "").trim();
+
       await runSingleEmployeePayroll({
         employee: selectedSingleEmployeeCode,
         company: String(data.company),
+        ...(payrollName ? { payroll_name: payrollName } : {}),
+        ...(postingDate ? { posting_date: postingDate } : {}),
         start_date: String(data.startDate),
         end_date: String(data.endDate),
         payroll_type: String(data.payrollFrequency),
@@ -618,7 +690,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
           onChange("selectedEmployees", []);
         }}
         onRunPayroll={runSinglePayroll}
-        runPayrollDisabled={!canRunSinglePayroll || singleSubmitting}
+        runPayrollDisabled={!canRunSinglePayroll || singleSubmitting || singleAssignmentLoading}
         runPayrollLoading={singleSubmitting}
       />
 
