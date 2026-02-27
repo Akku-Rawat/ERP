@@ -300,22 +300,22 @@ export default function SalaryStructureTab() {
     }
   };
 
-  const canSubmit = useMemo(() => {
-    return Boolean(
-      editingStructure?.name?.trim() &&
-        editingStructure?.company?.trim() &&
-        (editingStructure?.components?.length || 0) > 0,
-    );
-  }, [editingStructure]);
-
-  const handleSave = async () => {
-    if (!editingStructure) return;
-    if (!canSubmit) {
+  const handleSave = async (
+    draft?: {
+      id?: string;
+      name: string;
+      company: string;
+      components: SalaryStructureComponentCreate[];
+    } | null,
+  ) => {
+    const source = draft ?? editingStructure;
+    if (!source) return;
+    if (!source?.name?.trim() || !source?.company?.trim() || (source?.components?.length || 0) <= 0) {
       toast.error("Please provide structure name, company, and at least one component");
       return;
     }
 
-    let mergedComponents = (editingStructure.components || []).filter((c) => Boolean(c?.component));
+    let mergedComponents = (source.components || []).filter((c) => Boolean(c?.component));
 
     try {
       const all = await getSalaryComponents();
@@ -347,18 +347,18 @@ export default function SalaryStructureTab() {
     setLoading(true);
     setError(null);
     try {
-      if (editingStructure.id) {
+      if (source.id) {
         const payload: SalaryStructureUpdatePayload = {
-          id: editingStructure.id,
-          name: editingStructure.name,
-          company: editingStructure.company,
+          id: source.id,
+          name: source.name,
+          company: source.company,
           components: mergedComponents,
         };
         await updateSalaryStructure(payload);
       } else {
         const payload: SalaryStructureCreatePayload = {
-          name: editingStructure.name,
-          company: editingStructure.company,
+          name: source.name,
+          company: source.company,
           components: mergedComponents,
         };
         await createSalaryStructure(payload);
@@ -616,7 +616,7 @@ export default function SalaryStructureTab() {
       {showModal && editingStructure && (
         <StructureModal
           structure={editingStructure}
-          onSave={handleSave}
+          onSave={(v) => handleSave(v)}
           onClose={() => {
             setShowModal(false);
             setEditingStructure(null);
@@ -1129,7 +1129,12 @@ function StructureModal({
     company: string;
     components: SalaryStructureComponentCreate[];
   };
-  onSave: () => void;
+  onSave: (v: {
+    id?: string;
+    name: string;
+    company: string;
+    components: SalaryStructureComponentCreate[];
+  }) => void;
   onClose: () => void;
   onChange: (v: any) => void;
   busy: boolean;
@@ -1137,6 +1142,10 @@ function StructureModal({
   readOnly?: boolean;
 }) {
   const [formData, setFormData] = useState(structure);
+
+  useEffect(() => {
+    setFormData(structure);
+  }, [structure]);
 
   const enabledComponents = useMemo(() => {
     return (formData.components || []).filter((c) => Boolean(c?.enabled));
@@ -1532,7 +1541,32 @@ function StructureModal({
           </button>
           {!readOnly && (
             <button
-              onClick={onSave}
+              onClick={() => {
+                const finalComponents = (formData.components || []).map((c) => {
+                  const type = String(c?.type ?? "").toLowerCase();
+                  const key = String(c?.component ?? "").toLowerCase();
+                  const isDeduction = type === "deduction";
+                  const isNapsa = isDeduction && key.includes("napsa");
+                  const isNhima = isDeduction && key.includes("nhima");
+                  const isPaye =
+                    isDeduction &&
+                    (key.includes("income tax") || key.includes("paye") || key.includes("payee"));
+
+                  if (isNapsa) {
+                    return { ...c, amount: statutoryCalc.statutory.napsaEmployee };
+                  }
+                  if (isNhima) {
+                    return { ...c, amount: statutoryCalc.statutory.nhima };
+                  }
+                  if (isPaye) {
+                    return { ...c, amount: statutoryCalc.statutory.paye };
+                  }
+
+                  return c;
+                });
+
+                onSave({ ...formData, components: finalComponents });
+              }}
               disabled={busy}
               className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:opacity-90 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
