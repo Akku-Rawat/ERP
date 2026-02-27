@@ -27,7 +27,7 @@ interface InvoiceModalProps {
   onClose: () => void;
   onSubmit?: (data: any) => void;
 }
-
+const ITEMS_PER_PAGE = 5;
 const InvoiceModal: React.FC<InvoiceModalProps> = ({
   isOpen,
   onClose,
@@ -66,6 +66,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   const symbol = currencySymbols[formData.currencyCode] ?? "₹";
   const showExchangeRate =
     String(formData.currencyCode ?? "").trim().toUpperCase() !== "INR";
+  const showExportField = ui.isExport || ui.hasC1;
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -111,10 +112,10 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
           type={ui.activeTab !== "terms" ? "button" : "submit"}
           form={ui.activeTab !== "terms" ? undefined : "invoiceForm"}
           onClick={
-  ui.activeTab !== "terms"
-    ? handleNext
-    : undefined
-}
+            ui.activeTab !== "terms"
+              ? handleNext
+              : undefined
+          }
           disabled={submitting}
         >
           {ui.activeTab === "terms"
@@ -135,8 +136,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
       subtitle="Create and manage invoice details"
       icon={FileText}
       footer={footerContent}
-      maxWidth="6xl"
-      height="79vh"
+      maxWidth="7xl"
+      height="78vh"
     >
       <form
         id="invoiceForm"
@@ -171,8 +172,16 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
           {ui.activeTab === "details" && (
             <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
               <div className="">
+
                 <div
-                  className={`grid ${showExchangeRate ? "grid-cols-7" : "grid-cols-6"} gap-3 items-end`}
+                  className={`grid ${showExchangeRate
+                      ? showExportField
+                        ? "grid-cols-[220px_150px_150px_100px_100px_120px_120px_140px]"
+                        : "grid-cols-[220px_150px_150px_100px_100px_120px_120px]"
+                      : showExportField
+                        ? "grid-cols-[220px_150px_150px_100px_120px_120px_140px]"
+                        : "grid-cols-[220px_150px_150px_100px_120px_120px]"
+                    } gap-3 items-end`}
                 >
                   <CustomerSelect
                     value={customerNameDisplay}
@@ -189,27 +198,27 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                   />
 
-                  <div>
-                    <ModalInput
-                      label="Due Date"
-                      name="dueDate"
-                      type="date"
-                      value={formData.dueDate}
-                      onChange={actions.handleInputChange}
-                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                    />
-                  </div>
 
-                  <div>
-                    <ModalSelect
-                      label="Currency"
-                      name="currencyCode"
-                      value={formData.currencyCode}
-                      onChange={actions.handleInputChange}
-                      options={[...currencyOptions]}
-                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                    />
-                  </div>
+                  <ModalInput
+                    label="Due Date"
+                    name="dueDate"
+                    type="date"
+                    value={formData.dueDate}
+                    onChange={actions.handleInputChange}
+                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                  />
+
+
+
+                  <ModalSelect
+                    label="Currency"
+                    name="currencyCode"
+                    value={formData.currencyCode}
+                    onChange={actions.handleInputChange}
+                    options={[...currencyOptions]}
+                    className="w-full  border border-theme rounded text-[11px] text-main bg-card"
+                  />
+
 
                   {showExchangeRate && (
                     <div>
@@ -232,31 +241,31 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     </div>
                   )}
 
-                  <div>
-                    <ModalSelect
-                      label="Invoice Status"
-                      name="invoiceStatus"
-                      value={formData.invoiceStatus}
-                      onChange={actions.handleInputChange}
-                      options={[...invoiceStatusOptions]}
-                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                    />
-                  </div>
 
-                  <div>
-                    <ModalSelect
-                      label="Payment Method"
-                      name="paymentMethod"
-                      value={formData.paymentInformation?.paymentMethod}
-                      onChange={(
-                        e: React.ChangeEvent<
-                          HTMLInputElement | HTMLSelectElement
-                        >,
-                      ) => actions.handleInputChange(e, "paymentInformation")}
-                      options={[...paymentMethodOptions]}
-                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                    />
-                  </div>
+                  <ModalSelect
+                    label="Invoice Status"
+                    name="invoiceStatus"
+                    value={formData.invoiceStatus}
+                    onChange={actions.handleInputChange}
+                    options={[...invoiceStatusOptions]}
+                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                  />
+
+
+
+                  <ModalSelect
+                    label="Payment Method"
+                    name="paymentMethod"
+                    value={formData.paymentInformation?.paymentMethod}
+                    onChange={(
+                      e: React.ChangeEvent<
+                        HTMLInputElement | HTMLSelectElement
+                      >,
+                    ) => actions.handleInputChange(e, "paymentInformation")}
+                    options={[...paymentMethodOptions]}
+                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                  />
+
 
                   {/* <div>
                     <ModalInput
@@ -283,16 +292,16 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     //   }
                     // />
 
-                    <div>
-                      <ModalInput
-                        label="Export To Country"
-                        name="destnCountryCd"
-                        type="text"
-                        value={formData.destnCountryCd}
-                        onChange={actions.handleInputChange}
-                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                      />
-                    </div>
+
+                    <ModalInput
+                      label="Export To Country"
+                      name="destnCountryCd"
+                      type="text"
+                      value={formData.destnCountryCd}
+                      onChange={actions.handleInputChange}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    />
+
                   )}
 
                   {ui.isLocal && (
@@ -311,8 +320,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               </div>
 
               {/* ITEMS */}
-              <div className="grid grid-cols-[4fr_1fr] gap-4">
-                <div className="bg-card rounded-lg p-2 shadow-sm flex-1">
+              <div className="grid grid-cols-[4fr_1fr] gap-4 items-start">
+                <div className="bg-card rounded-lg p-1 shadow-sm ">
                   <div className="flex items-center gap-1 ">
                     <h3 className="text-sm font-semibold text-main">
                       Invoiced Items
@@ -320,49 +329,49 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   </div>
 
                   <div className="mt-2 overflow-x-auto">
-                    <table className="w-full min-w-[760px] border-collapse text-[10px]">
+                    <table className="w-full min-w-[760px] border-collapse text-[10px] leading-tight">
                       <thead>
                         <tr className="border-b border-theme">
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px] whitespace-nowrap">
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[25px] whitespace-nowrap">
                             #
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
-                            Box
-                          </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
                             Item
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px] whitespace-nowrap">
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[140px] whitespace-nowrap">
                             Description
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
                             Packing
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
+                            Box
+                          </th>
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">
                             Batch No
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
-                            Quantity
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
+                            Qty
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
-                            Manufacturing Date
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
+                            Mfg Date
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
                             Expiry Date
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">
                             Unit Price
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px] whitespace-nowrap">
-                            Discount (%)
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[60px] whitespace-nowrap">
+                            Dis (%)
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
                             Tax
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">
                             Tax Code
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">
+                          <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">
                             Amount
                           </th>
                           <th></th>
@@ -370,7 +379,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       </thead>
                       <tbody>
                         {paginatedItems.map((it, idx) => {
-                          const i = ui.page * 5 + idx;
+                          const i = ui.page * ITEMS_PER_PAGE + idx;
                           const discountAmount =
                             it.quantity *
                             it.price *
@@ -383,8 +392,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                               key={i}
                               className="border-b border-theme bg-card row-hover"
                             >
-                              <td className="px-3 py-2 text-center">{i + 1}</td>
-                                {/* <ItemSelect
+                              <td className="px-2 py-1 text-center">{i + 1}</td>
+                              {/* <ItemSelect
                                     taxCategory={ui.taxCategory}
                                     value={it.itemCode}
                                     onChange={(item) => {
@@ -395,172 +404,174 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                                     }}
                                   /> */}
 
-                                {/* BOX COLUMN */}
-                                <td className="px-0.5 py-1">
-                                  <div className="flex items-center gap-1">
-                                    <input
-                                      name="boxStart"
-                                      value={it.boxStart || ""}
-                                      onChange={(e) => actions.handleItemChange(i, e)}
-                                      placeholder="Start"
-                                      className="w-[45px] py-1 px-1 border border-theme rounded text-[10px] bg-card text-main"
-                                    />
-                                    <span className="text-[10px] text-muted">-</span>
-                                    <input
-                                      name="boxEnd"
-                                      value={it.boxEnd || ""}
-                                      onChange={(e) => actions.handleItemChange(i, e)}
-                                      placeholder="End"
-                                      className="w-[45px] py-1 px-1 border border-theme rounded text-[10px] bg-card text-main"
-                                    />
-                                  </div>
-                                </td>
 
-                                {/* ITEM COLUMN */}
-                                <td className="px-0.5 py-1">
-                                  <ItemSelect
-                                    taxCategory={ui.taxCategory}
-                                    value={it.itemCode}
-                                    excludeItemCodes={formData.items
-                                      .map((x, j) => (j === i ? "" : x?.itemCode))
-                                      .filter(Boolean) as string[]}
-                                    onChange={(item) => {
-                                      actions.handleItemSelect(i, item.id);
-                                    }}
-                                  />
-                                </td>
+                              {/* ITEM COLUMN */}
+                              <td className="px-0.5 py-1 min-w-[135px]">
+                                <ItemSelect
+                                  taxCategory={ui.taxCategory}
+                                  value={it.itemCode}
+                                  excludeItemCodes={formData.items
+                                    .map((x, j) => (j === i ? "" : x?.itemCode))
+                                    .filter(Boolean) as string[]}
+                                  onChange={(item) => {
+                                    actions.handleItemSelect(i, item.id);
+                                  }}
+                                />
+                              </td>
 
 
-                                <td className="px-0.5 py-1">
+                              <td className="px-0.5 py-1">
+                                <input
+                                  className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="description"
+                                  value={it.description}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                />
+                              </td>
+
+                              <td className="px-0.5 py-1">
+                                <input
+                                  name="packing"
+                                  value={it.packing || ""}
+                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                  placeholder="e.g. 10x10"
+                                  className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+
+
+                              {/* BOX COLUMN */}
+                              <td className="px-0.5 py-1">
+                                <div className="flex items-center gap-1">
                                   <input
-                                    className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                    name="description"
-                                    value={it.description}
-                                    onChange={(e) =>
-                                      actions.handleItemChange(i, e)
-                                    }
-                                  />
-                                </td>
-
-                                <td className="px-0.5 py-1">
-                                  <input
-                                    name="packing"
-                                    value={it.packing || ""}
+                                    name="boxStart"
+                                    value={it.boxStart || ""}
                                     onChange={(e) => actions.handleItemChange(i, e)}
-                                    placeholder="e.g. 10x10"
-                                    className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                    placeholder="Start"
+                                    className="w-[38px] py-1 px-1 border border-theme rounded text-[10px] bg-card text-main"
                                   />
-                                </td>
-
-                                <td className="px-0.5 py-1">
+                                  <span className="text-[10px] text-muted">-</span>
                                   <input
-                                    type="string"
-                                    className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                    name="batchNo"
-                                    value={it.batchNo}
-                                    onChange={(e) =>
-                                      actions.handleItemChange(i, e)
-                                    }
-                                    disabled
-                                  />
-                                </td>
-
-                                <td className="px-0.5 py-1">
-                                  <input
-                                    type="number"
-                                    className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                    name="quantity"
-                                    value={it.quantity}
-                                    onChange={(e) =>
-                                      actions.handleItemChange(i, e)
-                                    }
-                                  />
-                                </td>
-
-                                <td className="px-0.5 py-1">
-                                  <input
-                                    type="date"
-                                    name="mfgDate"
-                                    value={it.mfgDate || ""}
+                                    name="boxEnd"
+                                    value={it.boxEnd || ""}
                                     onChange={(e) => actions.handleItemChange(i, e)}
-                                    className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                    placeholder="End"
+                                    className="w-[38px] py-1 px-1 border border-theme rounded text-[10px] bg-card text-main"
                                   />
-                                </td>
+                                </div>
+                              </td>
 
-                                <td className="px-0.5 py-1">
-                                  <input
-                                    type="date"
-                                    name="expDate"
-                                    value={it.expDate || ""}
-                                    onChange={(e) => actions.handleItemChange(i, e)}
-                                    className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                  />
-                                </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="string"
+                                  className="w-full py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="batchNo"
+                                  value={it.batchNo}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                  disabled
+                                />
+                              </td>
+
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  className="w-[70px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="quantity"
+                                  value={it.quantity}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                />
+                              </td>
+
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="date"
+                                  name="mfgDate"
+                                  value={it.mfgDate || ""}
+                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                  className="w-[95px] py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="date"
+                                  name="expDate"
+                                  value={it.expDate || ""}
+                                  onChange={(e) => actions.handleItemChange(i, e)}
+                                  className="w-[95px] py-1 px-2 border border-theme rounded text-[10px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
 
 
-                                <td className="px-0.5 py-1">
-                                  <input
-                                    type="number"
-                                    className="w-[90px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                    name="price"
-                                    value={it.price}
-                                    disabled
-                                    onChange={(e) =>
-                                      actions.handleItemChange(i, e)
-                                    }
-                                  />
-                                </td>
-                                <td className="px-0.5 py-1">
-                                  <input
-                                    type="number"
-                                    className="w-[80px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                    name="discount"
-                                    value={it.discount}
-                                    onChange={(e) =>
-                                      actions.handleItemChange(i, e)
-                                    }
-                                  />
-                                </td>
-                                <td className="px-0.5 py-1">
-                                  <input
-                                    type="number" // Assuming input is number for entry, stored as string in Type
-                                    className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                    name="vatRate"
-                                    value={it.vatRate}
-                                    disabled
-                                    onChange={(e) =>
-                                      actions.handleItemChange(i, e)
-                                    }
-                                  />
-                                </td>
-                                <td className="px-0.5 py-1">
-                                  <input
-                                    type="string"
-                                    className="w-[80px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
-                                    name="vatCode"
-                                    value={it.vatCode}
-                                    disabled
-                                    onChange={(e) =>
-                                      actions.handleItemChange(i, e)
-                                    }
-                                  />
-                                </td>
-                                <td className="px-0.5 py-1">
-                                  <span className="text-[10px] font-medium text-main">
-                                    {symbol} {amount.toFixed(2)}
-                                  </span>
-                                </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  className="w-[60px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="price"
+                                  value={it.price}
+                                  disabled
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number"
+                                  className="w-[60px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="discount"
+                                  value={it.discount}
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="number" // Assuming input is number for entry, stored as string in Type
+                                  className="w-[55px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="vatRate"
+                                  value={it.vatRate}
+                                  disabled
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <input
+                                  type="string"
+                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  name="vatCode"
+                                  value={it.vatCode}
+                                  disabled
+                                  onChange={(e) =>
+                                    actions.handleItemChange(i, e)
+                                  }
+                                />
+                              </td>
+                              <td className="px-0.5 py-1">
+                                <span className="w-[110px] text-[10px] font-medium text-main">
+                                  {symbol} {amount.toFixed(2)}
+                                </span>
+                              </td>
 
-                                <td className="px-0.5 py-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => actions.removeItem(i)}
-                                    className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
-                                    title="Remove item"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                </td>
+                              <td className="px-0.5 py-1">
+                                <button
+                                  type="button"
+                                  onClick={() => actions.removeItem(i)}
+                                  className="p-0.5 rounded bg-danger/10 text-danger hover:bg-danger/20 transition text-[10px]"
+                                  title="Remove item"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
                             </tr>
                           );
                         })}
@@ -577,11 +588,11 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                       <Plus className="w-4 h-4" /> Add Item
                     </button>
 
-                    {(ui.itemCount > 5 || ui.page > 0) && (
+                    {(ui.itemCount > ITEMS_PER_PAGE || ui.page > 0) && (
                       <div className="flex items-center gap-3 py-1 px-2 bg-app rounded">
                         <div className="text-[11px] text-muted whitespace-nowrap">
-                          Showing {ui.page * 5 + 1} to{" "}
-                          {Math.min((ui.page + 1) * 5, ui.itemCount)} of{" "}
+                          Showing {ui.page * ITEMS_PER_PAGE + 1} to{" "}
+                          {Math.min((ui.page + 1) * ITEMS_PER_PAGE, ui.itemCount)} of{" "}
                           {ui.itemCount} items
                         </div>
 
@@ -598,7 +609,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                           <button
                             type="button"
                             onClick={() => ui.setPage(ui.page + 1)}
-                            disabled={(ui.page + 1) * 5 >= ui.itemCount}
+                            disabled={(ui.page + 1) * ITEMS_PER_PAGE >= ui.itemCount}
                             className="px-2.5 py-1 bg-card text-main border border-theme rounded text-[11px]"
                           >
                             Next
@@ -610,7 +621,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                 </div>
 
                 {/* RIGHT SIDE */}
-                <div className="col-span-1 sticky top-0 flex flex-col items-center gap-6 px-4 lg:px-6 h-fit">
+                <div className="col-span-1 sticky top-0 flex flex-col items-center gap-4 px-3 lg:px-4 h-fit">
                   <div className="bg-card rounded-lg p-2 w-[220px]">
                     <h3 className="text-[12px] font-semibold text-main mb-2">
                       Customer Details
