@@ -2,7 +2,19 @@ import React from "react";
 import Modal from "../ui/modal/modal";
 import { Button } from "../../components/ui/modal/formComponent";
 import { DynamicField } from "../DynamicField";
-import { useItemForm } from "../../hooks/Useitemform";
+import { useItemForm } from "../../hooks/UseItemForm";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ItemModal
+//
+// Three-tab form: Item Details → Tax Details → Inventory Details.
+// Service items (itemTypeCode === 3) skip the Inventory tab and submit
+// directly from Tax Details.
+//
+// The "packagingUnitCode" field receives special rendering: the modal
+// displays the packaging unit dropdown and the pakingunit × packingsize
+// inline inputs as a grouped pair, using the static options from fieldConfig.
+// ─────────────────────────────────────────────────────────────────────────────
 
 const ItemModal: React.FC<{
   isOpen: boolean;
