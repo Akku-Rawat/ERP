@@ -2,9 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import {
   getSalaryStructureById,
-  getSalaryStructures,
   type SalaryStructureDetail,
-  type SalaryStructureListItem,
 } from "../../../api/salaryStructureApi";
 import { getSalaryStructureAssignments } from "../../../api/salaryStructureAssignmentApi";
 import type { Employee } from "../../../types/payrolltypes";
@@ -14,8 +12,6 @@ type Props = {
   employees: Employee[];
   selectedEmployeeIds: string[];
   structureName: string;
-  selectedSalaryStructure?: string;
-  onSelectedSalaryStructureChange?: (v: string) => void;
   currency: string;
   payPeriodStart: string;
   payPeriodEnd: string;
@@ -37,8 +33,6 @@ export default function MultiPayrollPreviewModal({
   employees,
   selectedEmployeeIds,
   structureName,
-  selectedSalaryStructure,
-  onSelectedSalaryStructureChange,
   currency,
   payPeriodStart,
   payPeriodEnd,
@@ -128,50 +122,12 @@ export default function MultiPayrollPreviewModal({
 
   const activeStructureName = useMemo(() => {
     const emp: any = selected[activeIndex] as any;
-    const fromEmp = String(
-      emp?.salary_structure ??
-        emp?.salaryStructure ??
-        emp?.salaryStructureName ??
-        emp?.structureName ??
-        "",
-    ).trim();
-
+    const fromEmp = String(emp?.salaryStructure ?? emp?.SalaryStructure ?? "").trim();
     const fallback = String(structureName ?? "").trim();
     return String(assignedStructureName ?? "").trim() || fromEmp || fallback;
   }, [activeIndex, assignedStructureName, selected, structureName]);
 
-  const [structuresLoading, setStructuresLoading] = useState(false);
-  const [structuresError, setStructuresError] = useState<string | null>(null);
-  const [structures, setStructures] = useState<SalaryStructureListItem[]>([]);
-
-  useEffect(() => {
-    if (!open) return;
-    let mounted = true;
-
-    const run = async () => {
-      try {
-        setStructuresLoading(true);
-        setStructuresError(null);
-        const list = await getSalaryStructures();
-        if (!mounted) return;
-        setStructures(Array.isArray(list) ? list : []);
-      } catch (e: any) {
-        if (!mounted) return;
-        setStructures([]);
-        setStructuresError(e?.message || "Failed to load salary structures");
-      } finally {
-        if (!mounted) return;
-        setStructuresLoading(false);
-      }
-    };
-
-    run();
-    return () => {
-      mounted = false;
-    };
-  }, [open]);
-
-  const salaryStructureForRun = String(selectedSalaryStructure ?? "").trim() || activeStructureName;
+  const salaryStructureForRun = activeStructureName;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -253,7 +209,7 @@ export default function MultiPayrollPreviewModal({
       <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
         <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
           <div className="min-w-0">
-            <div className="text-lg font-semibold">Payroll Preview</div>
+            <div className="text-lg font-semibold">Preview</div>
             <div className="text-xs text-white/80 mt-0.5">Multiple Employees</div>
           </div>
           <button onClick={onClose} className="text-white/80 hover:text-white">
@@ -309,31 +265,6 @@ export default function MultiPayrollPreviewModal({
                   onChange={(e) => setMonth(e.target.value)}
                   className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none"
                 />
-              </div>
-
-              <div>
-                <div className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">Salary Structure</div>
-                <select
-                  value={salaryStructureForRun}
-                  onChange={(e) => onSelectedSalaryStructureChange?.(e.target.value)}
-                  className="mt-1 h-10 w-full px-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 shadow-sm focus:outline-none"
-                  disabled={structuresLoading || !onSelectedSalaryStructureChange}
-                >
-                  {!salaryStructureForRun && <option value="">Select structure</option>}
-                  {salaryStructureForRun && !structures.some((s) => String(s.name) === salaryStructureForRun) && (
-                    <option value={salaryStructureForRun}>{salaryStructureForRun}</option>
-                  )}
-                  {structures
-                    .filter((s) => Boolean((s as any)?.is_active ?? true))
-                    .map((s) => (
-                      <option key={String(s.name)} value={String(s.name)}>
-                        {String(s.name)}
-                      </option>
-                    ))}
-                </select>
-                {structuresError && (
-                  <div className="text-[11px] text-red-600 mt-1 break-words">{structuresError}</div>
-                )}
               </div>
 
               <div>

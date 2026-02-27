@@ -820,8 +820,6 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
         employees={active}
         selectedEmployeeIds={data.selectedEmployees}
         structureName={String((fallbackSalaryStructureName || "").trim())}
-        selectedSalaryStructure={multiSalaryStructureName}
-        onSelectedSalaryStructureChange={(v: string) => setMultiSalaryStructureName(v)}
         currency={String(data.currency ?? "")}
         payPeriodStart={String(data.startDate ?? "")}
         payPeriodEnd={String(data.endDate ?? "")}
