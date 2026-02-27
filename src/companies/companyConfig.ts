@@ -1,7 +1,14 @@
 import type { FieldConfig } from "../types/fieldConfig.types";
 
+/**
+ * ZRA item field configuration.
+ *
+ * All lookup data (item classes, packaging units, countries, UOMs) is
+ * fetched from the ZRA API via the customComponent resolver.
+ */
 export const ZRA_ITEM_FIELDS: FieldConfig[] = [
-  // Item Type - Static dropdown (same for all companies)
+  // ── Core classification ────────────────────────────────────────────────────
+
   {
     fieldName: "itemTypeCode",
     fieldType: "static-select",
@@ -15,27 +22,24 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     ],
   },
 
-  // Item Group - API driven with custom component
   {
     fieldName: "itemGroup",
     fieldType: "api-select",
     label: "Item Category",
     required: true,
     colSpan: 1,
-    apiFunctionName: "ItemCategorySelect", // Special component
+    apiFunctionName: "ItemCategorySelect",
     customComponent: "ItemCategorySelect",
   },
 
-  // Item Name
   {
     fieldName: "itemName",
     fieldType: "text-input",
-    label: "Items Name",
+    label: "Item Name",
     required: true,
     colSpan: 1,
   },
 
-  // Description
   {
     fieldName: "description",
     fieldType: "textarea",
@@ -44,7 +48,8 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     colSpan: 1,
   },
 
-  // Item Class - API driven
+  // ── Classification codes ───────────────────────────────────────────────────
+
   {
     fieldName: "itemClassCode",
     fieldType: "api-select",
@@ -55,7 +60,6 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     customComponent: "ItemTreeSelect",
   },
 
-  // Packaging Unit - API driven
   {
     fieldName: "packagingUnitCode",
     fieldType: "api-select",
@@ -66,18 +70,18 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     customComponent: "ItemGenericSelect",
   },
 
-  // Country Code - API driven
+  // ── Origin & measurement ───────────────────────────────────────────────────
+
   {
     fieldName: "originNationCode",
     fieldType: "api-select",
-    label: "Country Code",
+    label: "Country of Origin",
     required: true,
     colSpan: 1,
     apiFunctionName: "getCountries",
     customComponent: "ItemGenericSelect",
   },
 
-  // Unit of Measure - API driven
   {
     fieldName: "unitOfMeasureCd",
     fieldType: "api-select",
@@ -88,7 +92,8 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     customComponent: "ItemGenericSelect",
   },
 
-  // Service Charge
+  // ── Charges & identifiers ──────────────────────────────────────────────────
+
   {
     fieldName: "svcCharge",
     fieldType: "static-select",
@@ -101,7 +106,6 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     ],
   },
 
-  // Insurance
   {
     fieldName: "ins",
     fieldType: "static-select",
@@ -114,7 +118,6 @@ export const ZRA_ITEM_FIELDS: FieldConfig[] = [
     ],
   },
 
-  // SKU
   {
     fieldName: "sku",
     fieldType: "text-input",

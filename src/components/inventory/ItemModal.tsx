@@ -22,8 +22,6 @@ const ItemModal: React.FC<{
     showBatchExpiry,
     fieldConfigs,
     taxConfigs,
-    packagingOptions,
-    loadingPackaging,
     handleForm,
     handleDynamicFieldChange,
     handleCategoryChange,
@@ -44,93 +42,50 @@ const ItemModal: React.FC<{
       height="90vh"
     >
       <form onSubmit={handleSubmit} noValidate className="h-full flex flex-col">
+
+        {/* ── Tab bar ─────────────────────────────────────────────────────── */}
         <div className="bg-app border-b border-theme px-8 shrink-0">
           <div className="flex gap-8">
-            <button
-              type="button"
+            <TabButton
+              label="Item Details"
+              active={activeTab === "details"}
               onClick={() => setActiveTab("details")}
-              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
-                activeTab === "details"
-                  ? "text-primary border-b-[3px] border-primary"
-                  : "text-muted border-b-[3px] border-transparent hover:text-main"
-              }`}
-            >
-              Item Details
-            </button>
-            <button
-              type="button"
+            />
+            <TabButton
+              label="Tax Details"
+              active={activeTab === "taxDetails"}
               onClick={() => setActiveTab("taxDetails")}
-              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
-                activeTab === "taxDetails"
-                  ? "text-primary border-b-[3px] border-primary"
-                  : "text-muted border-b-[3px] border-transparent hover:text-main"
-              }`}
-            >
-              Tax Details
-            </button>
-            <button
-              type="button"
+            />
+            <TabButton
+              label="Inventory Details"
+              active={activeTab === "inventoryDetails"}
               disabled={isServiceItem}
               onClick={() => !isServiceItem && setActiveTab("inventoryDetails")}
-              className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
-                activeTab === "inventoryDetails" && !isServiceItem
-                  ? "text-primary border-b-[3px] border-primary"
-                  : "text-muted border-b-[3px] border-transparent hover:text-main"
-              } ${isServiceItem ? "opacity-50 cursor-not-allowed" : ""}`}
-            >
-              Inventory Details
-            </button>
+            />
           </div>
         </div>
 
+        {/* ── Tab content ─────────────────────────────────────────────────── */}
         <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
           <div className="gap-6 max-h-screen overflow-auto p-4">
+
+            {/* ── Item Details tab ──────────────────────────────────────── */}
             {activeTab === "details" && (
               <>
                 <h3 className="mb-4 text-lg font-semibold text-main underline">
                   Items Information
                 </h3>
+
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {fieldConfigs.map((fieldConfig) => {
-                      if (fieldConfig.fieldName === "packagingUnitCode") {
-                        return (
-                          <label
-                            key="packagingUnitCode"
-                            className="flex flex-col gap-1 text-sm"
-                          >
-                            <span className="font-medium text-muted">
-                              Packaging Unit{" "}
-                              <span className="text-red-500 ml-1">*</span>
-                            </span>
-                            <select
-                              value={form.packagingUnitCode || ""}
-                              onChange={(e) =>
-                                setForm((prev) => ({
-                                  ...prev,
-                                  packagingUnitCode: e.target.value,
-                                }))
-                              }
-                              className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                            >
-                              <option value="">
-                                {loadingPackaging ? "Loading..." : "Select..."}
-                              </option>
-                              {packagingOptions.map((item: any) => (
-                                <option key={item.code} value={item.code}>
-                                  {item.code} - {item.code_name}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                        );
-                      }
 
+                      // ── Special render: HSN Code ───────────────────────
                       if (fieldConfig.fieldName === "itemClassCode") {
                         return (
                           <Input
                             key="itemClassCode"
-                            label="HSN CODE"
+                            label="HSN Code"
                             name="itemClassCode"
                             value={form.itemClassCode || ""}
                             onChange={handleForm}
@@ -140,6 +95,49 @@ const ItemModal: React.FC<{
                         );
                       }
 
+                      if (fieldConfig.fieldName === "unitOfMeasureCd") {
+                        return (
+                          <React.Fragment key="packing-then-uom">
+                            {/* Packing: pakingunit × packingsize */}
+                            <label className="flex flex-col gap-1 text-sm">
+                              <FieldLabel label="Packing Unit" />
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  type="number"
+                                  name="pakingunit"
+                                  value={form.pakingunit || ""}
+                                  onChange={handleForm}
+                                  placeholder="1"
+                                  min={1}
+                                  className="w-14 rounded border border-theme bg-card text-main text-center px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                                <span className="text-muted font-bold select-none">×</span>
+                                <input
+                                  type="number"
+                                  name="packingsize"
+                                  value={form.packingsize || ""}
+                                  onChange={handleForm}
+                                  placeholder="1"
+                                  min={1}
+                                  className="w-14 rounded border border-theme bg-card text-main text-center px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                                
+                              </div>
+                            </label>
+
+                            {/* Unit of Measurement — rendered immediately after */}
+                            <DynamicField
+                              key={fieldConfig.fieldName}
+                              config={fieldConfig}
+                              value={form[fieldConfig.fieldName]}
+                              onChange={handleDynamicFieldChange}
+                              filterValue={form.itemTypeCode}
+                            />
+                          </React.Fragment>
+                        );
+                      }
+
+                      // ── Default: delegate to DynamicField ─────────────
                       return (
                         <DynamicField
                           key={fieldConfig.fieldName}
@@ -158,6 +156,7 @@ const ItemModal: React.FC<{
                   </div>
                 </div>
 
+                {/* Sales & Purchase */}
                 <h3 className="py-6 text-lg font-semibold text-main underline">
                   Sales & Purchase
                 </h3>
@@ -197,10 +196,9 @@ const ItemModal: React.FC<{
                       className="w-full"
                       required
                     />
+
                     <label className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-muted">
-                        Tax Preference <span className="text-red-500">*</span>
-                      </span>
+                      <FieldLabel label="Tax Preference" required />
                       <select
                         name="taxPreference"
                         value={form.taxPreference || ""}
@@ -208,11 +206,12 @@ const ItemModal: React.FC<{
                         className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                         required
                       >
-                        <option value="">Select...</option>
+                        <option value="">Select…</option>
                         <option value="Taxable">Taxable</option>
                         <option value="Non-Taxable">Non-Taxable</option>
                       </select>
                     </label>
+
                     <Input
                       label="Preferred Vendor"
                       name="preferredVendor"
@@ -226,6 +225,7 @@ const ItemModal: React.FC<{
               </>
             )}
 
+            {/* ── Tax Details tab ───────────────────────────────────────── */}
             {activeTab === "taxDetails" && (
               <>
                 <div className="mb-8">
@@ -238,25 +238,22 @@ const ItemModal: React.FC<{
                     onChange={handleForm}
                     className="w-full md:w-96 px-4 py-3 text-base border border-theme bg-card text-main rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   >
-                    <option value="">Select...</option>
+                    <option value="">Select…</option>
                     {Object.keys(taxConfigs).map((key) => (
-                      <option key={key} value={key}>
-                        {key}
-                      </option>
+                      <option key={key} value={key}>{key}</option>
                     ))}
                   </select>
-                  <p className="mt-2 text-sm text-muted">
-                    {form.taxCategory &&
-                      taxConfigs[form.taxCategory]?.taxDescription}
-                  </p>
+                  {form.taxCategory && (
+                    <p className="mt-2 text-sm text-muted">
+                      {taxConfigs[form.taxCategory]?.taxDescription}
+                    </p>
+                  )}
                 </div>
 
                 <div className="bg-app rounded-lg p-6 border border-theme">
                   <h3 className="text-lg font-semibold text-main mb-4 flex items-center gap-2">
                     <span className="w-2 h-2 bg-primary rounded-full" />
-                    {form.taxCategory
-                      ? `${form.taxCategory} Tax Details`
-                      : "Tax Details"}
+                    {form.taxCategory ? `${form.taxCategory} Tax Details` : "Tax Details"}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <Input
@@ -309,7 +306,9 @@ const ItemModal: React.FC<{
                           value={form.taxPerct || ""}
                           onChange={handleForm}
                           placeholder="12"
-                          className={`w-full px-3 py-2 pr-10 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-card ${autoPopulateTax ? "text-muted cursor-not-allowed" : "text-main"}`}
+                          className={`w-full px-3 py-2 pr-10 rounded border border-theme focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-card ${
+                            autoPopulateTax ? "text-muted cursor-not-allowed" : "text-main"
+                          }`}
                           disabled={autoPopulateTax}
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted font-medium">
@@ -320,37 +319,33 @@ const ItemModal: React.FC<{
                   </div>
                 </div>
 
+                {/* Current config summary */}
                 <div className="mt-6 bg-card border border-theme rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-main mb-2">
-                    Current Configuration
-                  </h4>
+                  <h4 className="text-sm font-semibold text-main mb-2">Current Configuration</h4>
                   <div className="text-sm text-muted space-y-1">
-                    <p>
-                      <span className="font-medium">Category:</span>{" "}
-                      {form.taxCategory || "N/A"}
-                    </p>
-                    <p>
-                      <span className="font-medium">Tax Type:</span>{" "}
-                      {form.taxType || "N/A"}
-                    </p>
-                    <p>
-                      <span className="font-medium">Tax Code:</span>{" "}
-                      {form.taxCode || "N/A"}
-                    </p>
-                    <p>
-                      <span className="font-medium">Tax Rate:</span>{" "}
-                      {form.taxPerct ? `${form.taxPerct}%` : "N/A"}
-                    </p>
+                    {[
+                      { label: "Category", value: form.taxCategory },
+                      { label: "Tax Type", value: form.taxType },
+                      { label: "Tax Code", value: form.taxCode },
+                      { label: "Tax Rate", value: form.taxPerct ? `${form.taxPerct}%` : null },
+                    ].map(({ label, value }) => (
+                      <p key={label}>
+                        <span className="font-medium">{label}:</span>{" "}
+                        {value || "N/A"}
+                      </p>
+                    ))}
                   </div>
                 </div>
               </>
             )}
 
+            {/* ── Inventory Details tab ─────────────────────────────────── */}
             {activeTab === "inventoryDetails" && (
               <>
                 <h3 className="mb-2 text-lg font-semibold text-main underline">
                   Inventory Details
                 </h3>
+
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <Input
@@ -362,42 +357,20 @@ const ItemModal: React.FC<{
                       disabled={isServiceItem}
                     />
 
+                    {/* Dimensions */}
                     <div className="flex flex-col gap-1">
-                      <span className="font-medium text-muted text-sm">
-                        Dimensions (L × W × H)
-                      </span>
+                      <span className="font-medium text-muted text-sm">Dimensions (L × W × H)</span>
                       <div className="flex items-center gap-1">
-                        <Input
-                          label=""
-                          name="dimensionLength"
-                          placeholder="L"
-                          value={form.dimensionLength || ""}
-                          onChange={handleForm}
-                          className="w-full text-center text-xs"
-                        />
+                        <Input label="" name="dimensionLength" placeholder="L" value={form.dimensionLength || ""} onChange={handleForm} className="w-full text-center text-xs" />
                         <span className="text-muted font-medium">×</span>
-                        <Input
-                          label=""
-                          name="dimensionWidth"
-                          placeholder="W"
-                          value={form.dimensionWidth || ""}
-                          onChange={handleForm}
-                          className="w-full text-center text-xs"
-                        />
+                        <Input label="" name="dimensionWidth"  placeholder="W" value={form.dimensionWidth  || ""} onChange={handleForm} className="w-full text-center text-xs" />
                         <span className="text-muted font-medium">×</span>
-                        <Input
-                          label=""
-                          name="dimensionHeight"
-                          placeholder="H"
-                          value={form.dimensionHeight || ""}
-                          onChange={handleForm}
-                          className="w-full text-center text-xs"
-                        />
+                        <Input label="" name="dimensionHeight" placeholder="H" value={form.dimensionHeight || ""} onChange={handleForm} className="w-full text-center text-xs" />
                         <select
                           name="dimensionUnit"
                           value={form.dimensionUnit || "cm"}
                           onChange={handleForm}
-                          className="w-16 px-1 py-1.5 text-xs border border-theme bg-card text-main rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                          className="w-16 px-1 py-1.5 text-xs border border-theme bg-card text-main rounded focus:outline-none focus:ring-2 focus:ring-primary"
                         >
                           <option value="cm">cm</option>
                           <option value="in">in</option>
@@ -405,24 +378,16 @@ const ItemModal: React.FC<{
                       </div>
                     </div>
 
+                    {/* Weight */}
                     <div className="flex flex-col gap-1">
-                      <span className="font-medium text-muted text-sm">
-                        Weight
-                      </span>
+                      <span className="font-medium text-muted text-sm">Weight</span>
                       <div className="flex gap-2">
-                        <Input
-                          label=""
-                          name="weight"
-                          placeholder="0"
-                          value={form.weight}
-                          onChange={handleForm}
-                          className="flex-1"
-                        />
+                        <Input label="" name="weight" placeholder="0" value={form.weight} onChange={handleForm} className="flex-1" />
                         <select
                           name="weightUnit"
                           value={form.weightUnit}
                           onChange={handleForm}
-                          className="w-16 px-1 py-1.5 text-xs border border-theme bg-card text-main rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                          className="w-16 px-1 py-1.5 text-xs border border-theme bg-card text-main rounded focus:outline-none focus:ring-2 focus:ring-primary"
                         >
                           <option value="gm">gm</option>
                           <option value="kg">kg</option>
@@ -432,17 +397,16 @@ const ItemModal: React.FC<{
                       </div>
                     </div>
 
+                    {/* Valuation Method */}
                     <div className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium text-muted">
-                        Valuation Method
-                      </span>
+                      <span className="font-medium text-muted">Valuation Method</span>
                       <select
                         name="valuationMethod"
                         value={form.valuationMethod}
                         onChange={handleForm}
                         className="rounded border border-theme bg-card text-main px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary w-full"
                       >
-                        <option value="">Select...</option>
+                        <option value="">Select…</option>
                         <option value="FIFO">FIFO</option>
                         <option value="WAC">WAC</option>
                       </select>
@@ -450,14 +414,11 @@ const ItemModal: React.FC<{
                   </div>
                 </div>
 
-                {/* ── Batch & Expiry Section ── */}
+                {/* Batch & Expiry — physical items only */}
                 {showBatchExpiry && (
                   <div className="mt-6 border border-theme rounded-lg p-4 bg-card space-y-4">
-                    <h4 className="text-sm font-semibold text-main">
-                      Batch & Expiry Info
-                    </h4>
+                    <h4 className="text-sm font-semibold text-main">Batch & Expiry Info</h4>
 
-                    {/* Row 1: checkboxes */}
                     <div className="flex flex-wrap gap-6">
                       <CheckboxField
                         id="has_batch_no"
@@ -467,27 +428,10 @@ const ItemModal: React.FC<{
                           setForm((prev) => ({
                             ...prev,
                             has_batch_no: checked,
-                            batchNo: checked ? prev.batchNo : "",
-                            create_new_batch: false,
+                          
                           }))
                         }
                       />
-
-                      {/* create_new_batch only shows when has_batch_no is true */}
-                      {/* {form.has_batch_no && (
-                        <CheckboxField
-                          id="create_new_batch"
-                          label="Create New Batch"
-                          checked={form.create_new_batch || false}
-                          onChange={(checked) =>
-                            setForm((prev) => ({
-                              ...prev,
-                              create_new_batch: checked,
-                            }))
-                          }
-                        />
-                      )} */}
-
                       <CheckboxField
                         id="has_expiry_date"
                         label="Has Expiry Date"
@@ -496,18 +440,13 @@ const ItemModal: React.FC<{
                           setForm((prev) => ({
                             ...prev,
                             has_expiry_date: checked,
-                            // clear date fields when unchecked
-                            ...(!checked && {
-                              expiryDate: "",
-                              manufacturingDate: "",
-                            }),
+                           
                           }))
                         }
                       />
                     </div>
 
-                    {/* Row 2: Batch Number — only if has_batch_no */}
-                    {form.has_batch_no && (
+                    {/* {form.has_batch_no && (
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <Input
                           label="Batch Number"
@@ -518,10 +457,9 @@ const ItemModal: React.FC<{
                           className="w-full"
                         />
                       </div>
-                    )}
+                    )} */}
 
-                    {/* Row 3: Manufacture & Expiry — only if has_expiry_date */}
-                    {form.has_expiry_date && (
+                    {/* {form.has_expiry_date && (
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <Input
                           label="Manufacture Date"
@@ -540,29 +478,23 @@ const ItemModal: React.FC<{
                           className="w-full"
                         />
                       </div>
-                    )}
+                    )} */}
                   </div>
                 )}
 
-                <div className="mt-6 col-span-full lg:col-span-4 xl:col-span-3 space-y-4">
+                {/* Track Inventory */}
+                <div className="mt-6 space-y-4">
                   <div className="flex items-center gap-3">
                     <input
                       type="checkbox"
                       id="trackInventory"
-                      name="trackInventory"
                       checked={form.trackInventory || false}
                       onChange={(e) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          trackInventory: e.target.checked,
-                        }))
+                        setForm((prev) => ({ ...prev, trackInventory: e.target.checked }))
                       }
                       className="w-5 h-5 accent-primary border-theme rounded cursor-pointer"
                     />
-                    <label
-                      htmlFor="trackInventory"
-                      className="text-sm font-medium text-main cursor-pointer select-none"
-                    >
+                    <label htmlFor="trackInventory" className="text-sm font-medium text-main cursor-pointer select-none">
                       Track Inventory
                     </label>
                   </div>
@@ -578,7 +510,7 @@ const ItemModal: React.FC<{
                         onChange={handleForm}
                         className="w-full rounded-md border border-theme bg-card text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                       >
-                        <option value="">Select tracking method...</option>
+                        <option value="">Select tracking method…</option>
                         <option value="none">Normal (No tracking)</option>
                         <option value="batch">Batch</option>
                         <option value="serial">Serial Number (SR No)</option>
@@ -588,49 +520,29 @@ const ItemModal: React.FC<{
                   )}
                 </div>
 
+                {/* Stock Level Tracking */}
                 <h3 className="mt-12 text-lg font-semibold text-main underline">
                   Stock Level Tracking
                 </h3>
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <Input
-                      label="Min Stock Level"
-                      name="minStockLevel"
-                      value={form.minStockLevel}
-                      onChange={handleForm}
-                      className="w-full col-span-3"
-                    />
-                    <Input
-                      label="Max Stock Level"
-                      name="maxStockLevel"
-                      value={form.maxStockLevel}
-                      onChange={handleForm}
-                      className="w-full col-span-3"
-                    />
-                    <Input
-                      label="Re-order Level"
-                      name="reorderLevel"
-                      value={form.reorderLevel}
-                      onChange={handleForm}
-                      className="w-full"
-                    />
+                    <Input label="Min Stock Level" name="minStockLevel" value={form.minStockLevel} onChange={handleForm} className="w-full col-span-3" />
+                    <Input label="Max Stock Level" name="maxStockLevel" value={form.maxStockLevel} onChange={handleForm} className="w-full col-span-3" />
+                    <Input label="Re-order Level"  name="reorderLevel"  value={form.reorderLevel}  onChange={handleForm} className="w-full" />
                   </div>
                 </div>
               </>
             )}
+
           </div>
         </section>
 
+        {/* ── Footer actions ───────────────────────────────────────────────── */}
         <div className="flex justify-end gap-2 border-t border-theme px-6 py-4">
-          <Button variant="secondary" type="button" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button variant="danger" type="button" onClick={reset}>
-            Reset
-          </Button>
-          <Button variant="primary" loading={loading} type="submit">
-            {activeTab === "inventoryDetails" ||
-            (activeTab === "taxDetails" && isServiceItem)
+          <Button variant="secondary" type="button" onClick={handleClose}>Cancel</Button>
+          <Button variant="danger"    type="button" onClick={reset}>Reset</Button>
+          <Button variant="primary"   type="submit"  loading={loading}>
+            {activeTab === "inventoryDetails" || (activeTab === "taxDetails" && isServiceItem)
               ? "Submit"
               : "Next"}
           </Button>
@@ -640,7 +552,42 @@ const ItemModal: React.FC<{
   );
 };
 
-/* ── Reusable Checkbox ── */
+// ─────────────────────────────────────────────────────────────────────────────
+// Local sub-components
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Tab button with active / disabled states. */
+const TabButton: React.FC<{
+  label: string;
+  active: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}> = ({ label, active, disabled = false, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className={[
+      "py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all",
+      active
+        ? "text-primary border-b-[3px] border-primary"
+        : "text-muted border-b-[3px] border-transparent hover:text-main",
+      disabled ? "opacity-50 cursor-not-allowed" : "",
+    ].join(" ")}
+  >
+    {label}
+  </button>
+);
+
+/** Inline label text with optional required asterisk. */
+const FieldLabel: React.FC<{ label: string; required?: boolean }> = ({ label, required }) => (
+  <span className="font-medium text-muted">
+    {label}
+    {required && <span className="text-red-500 ml-1">*</span>}
+  </span>
+);
+
+/** Reusable checkbox + label pair. */
 const CheckboxField: React.FC<{
   id: string;
   label: string;
@@ -655,30 +602,27 @@ const CheckboxField: React.FC<{
       onChange={(e) => onChange(e.target.checked)}
       className="w-4 h-4 accent-primary cursor-pointer rounded"
     />
-    <label
-      htmlFor={id}
-      className="text-sm font-medium text-main cursor-pointer select-none"
-    >
+    <label htmlFor={id} className="text-sm font-medium text-main cursor-pointer select-none">
       {label}
     </label>
   </div>
 );
 
-/* ── Input ── */
+/** Text input with floating label. Forwards ref for external focus management. */
 const Input = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement> & { label: string }
 >(({ label, className = "", ...props }, ref) => (
   <label className="flex flex-col gap-1 text-sm w-full">
-    <span className="font-medium text-muted">
-      {label}
-      {props.required && <span className="text-red-500 ml-1">*</span>}
-    </span>
+    <FieldLabel label={label} required={props.required} />
     <input
       ref={ref}
-      className={`rounded border border-theme px-3 py-2 bg-card text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
-        props.disabled ? "bg-app text-muted cursor-not-allowed" : ""
-      } ${className}`}
+      className={[
+        "rounded border border-theme px-3 py-2 bg-card text-main",
+        "focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary",
+        props.disabled ? "bg-app text-muted cursor-not-allowed" : "",
+        className,
+      ].join(" ")}
       {...props}
     />
   </label>

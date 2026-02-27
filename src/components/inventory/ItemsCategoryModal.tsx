@@ -51,9 +51,11 @@ const ItemsCategoryModal: React.FC<{
     setLoading(true);
 
     try {
-      const payload = { ...form };
-      delete payload.id;
+      const payload: any = { ...form };
 
+if (!isEditMode) {
+  delete payload.id; 
+}
       let response;
 
       if (isEditMode && initialData?.id) {
