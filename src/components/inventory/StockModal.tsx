@@ -282,7 +282,7 @@ const ItemModal: React.FC<{
                       value={form.batchNo || ""}
                       onChange={handleForm}
                       className="w-full"
-                      readOnly
+         
                     />
 
                     <Input

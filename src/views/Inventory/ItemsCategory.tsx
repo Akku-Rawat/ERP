@@ -60,12 +60,16 @@ const ItemsCategory: React.FC = () => {
   /* 
      FETCH
    */
-
 const fetchGroups = async () => {
   try {
     setLoading(true);
 
     const res = await getAllItemGroups(page, pageSize, filters);
+
+    if (res?.status_code !== 200) {
+      showApiError(res?.message || "Failed to fetch item groups");
+      return;
+    }
 
     const list = res?.data?.data || [];
     const pagination = res?.data?.pagination || {};
@@ -76,13 +80,12 @@ const fetchGroups = async () => {
 
   } catch (err) {
     console.error(err);
-    showApiError("Failed to fetch item groups");
+    showApiError("Something went wrong");
   } finally {
     setLoading(false);
     setInitialLoad(false);
   }
 };
-
   useEffect(() => {
     fetchGroups();
   }, [page, pageSize,filters]);
