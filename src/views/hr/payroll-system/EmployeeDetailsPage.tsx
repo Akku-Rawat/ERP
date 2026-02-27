@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { getEmployeeById } from "../../../api/employeeapi";
 import { calculateZmPayrollFromGross } from "./util";
-import { getSalaryStructureById } from "../../../api/salaryStructureApi";
+import { useAssignedSalaryStructure } from "../../../hooks/useAssignedSalaryStructure";
 
 interface EmployeeDetailsPageProps {
   employeeId: string;
@@ -96,7 +96,6 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
-  const [salaryStructureDetail, setSalaryStructureDetail] = useState<any>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -146,6 +145,12 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
   const headerEmail = String(data?.email ?? data?.contactInfo?.Email ?? "");
   const employeeCode = String(data?.employeeId ?? data?.identityInfo?.EmployeeId ?? "");
 
+  const {
+    assignedSalaryStructureName,
+    assignedSalaryStructureFromDate,
+    salaryStructureDetail,
+  } = useAssignedSalaryStructure(employeeCode);
+
   const identityInfo = (data?.identityInfo || {}) as AnyRecord;
   const personalInfo = (data?.personalInfo || {}) as AnyRecord;
   const contactInfo = (data?.contactInfo || {}) as AnyRecord;
@@ -155,40 +160,12 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
   const statutory = (payrollInfo?.statutoryDeductions || {}) as AnyRecord;
   const documents = (data?.documents || []) as any[];
 
-  const salaryStructureName = useMemo(() => {
-    return String(
-      payrollInfo?.salaryStructure ??
-        payrollInfo?.SalaryStructure ??
-        data?.salaryStructure ??
-        data?.SalaryStructure ??
-        employmentInfo?.salaryStructure ??
-        employmentInfo?.SalaryStructure ??
-        "",
-    ).trim();
-  }, [employmentInfo, payrollInfo, data]);
-
-  useEffect(() => {
-    let mounted = true;
-    const run = async () => {
-      if (!salaryStructureName) {
-        setSalaryStructureDetail(null);
-        return;
-      }
-      try {
-        const detail = await getSalaryStructureById(salaryStructureName);
-        if (!mounted) return;
-        setSalaryStructureDetail(detail);
-      } catch {
-        if (!mounted) return;
-        setSalaryStructureDetail(null);
-      }
-    };
-
-    run();
-    return () => {
-      mounted = false;
-    };
-  }, [salaryStructureName]);
+  const assignedStructureLabel = useMemo(() => {
+    const name = String(assignedSalaryStructureName ?? "").trim();
+    if (!name) return "—";
+    const fd = String(assignedSalaryStructureFromDate ?? "").trim();
+    return fd ? `${name} (from ${fd})` : name;
+  }, [assignedSalaryStructureFromDate, assignedSalaryStructureName]);
 
   const grossSalaryForCalc = useMemo(() => {
     const v =
@@ -324,6 +301,13 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
     const totalAllowances = payrollInfo?.allowances ?? payrollInfo?.Allowances ?? data?.allowances;
     const breakdown = payrollInfo?.salaryBreakdown ?? payrollInfo?.SalaryBreakdown ?? null;
 
+    const earnings = Array.isArray(salaryStructureDetail?.earnings) ? salaryStructureDetail.earnings : [];
+    if (earnings.length > 0) {
+      return earnings
+        .map((e: any) => ({ label: String(e?.component ?? "").trim(), amount: e?.amount }))
+        .filter((r: any) => r.label && r.amount !== undefined && r.amount !== null);
+    }
+
     if (Array.isArray(breakdown)) {
       return breakdown
         .map((x: any) => ({ label: String(x?.label ?? x?.name ?? ""), amount: x?.amount }))
@@ -339,14 +323,6 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
     const rows: { label: string; amount: any }[] = [];
     if (basic !== undefined && basic !== null && basic !== "") rows.push({ label: "Basic Salary", amount: basic });
     if (totalAllowances !== undefined && totalAllowances !== null && totalAllowances !== "") rows.push({ label: "Allowances", amount: totalAllowances });
-
-    if (rows.length === 0) {
-      const earnings = Array.isArray(salaryStructureDetail?.earnings) ? salaryStructureDetail.earnings : [];
-      const structureRows = earnings
-        .map((e: any) => ({ label: String(e?.component ?? "").trim(), amount: e?.amount }))
-        .filter((r: any) => r.label && r.amount !== undefined && r.amount !== null);
-      return structureRows;
-    }
     return rows;
   }, [data?.allowances, data?.basicSalary, payrollInfo, salaryStructureDetail]);
 
@@ -424,7 +400,14 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
                   </Card>
 
                   <div className="mt-5">
-                    <Card title="Salary, Bank & Deductions">
+                    <Card
+                      title="Salary, Bank & Deductions"
+                      right={
+                        <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">
+                          {assignedStructureLabel}
+                        </div>
+                      }
+                    >
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="min-w-0">
                           <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-3">Salary Breakdown</div>
@@ -450,36 +433,58 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
                         <div className="min-w-0">
                           <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-3">Statutory Deductions</div>
                           <div className="space-y-2">
-                            {[
-                              {
-                                label: "Napsa Employee",
-                                rate: statutoryCalc?.rates?.napsaEmployeeRate,
-                                amount: statutoryCalc?.statutory?.napsaEmployee,
-                              },
-                              {
-                                label: "Napsa Employer",
-                                rate: statutoryCalc?.rates?.napsaEmployerRate,
-                                amount: statutoryCalc?.statutory?.napsaEmployer,
-                              },
-                              {
-                                label: "Nhima",
-                                rate: statutoryCalc?.rates?.nhimaRate,
-                                amount: statutoryCalc?.statutory?.nhima,
-                              },
-                              {
-                                label: "Paye",
-                                rate: null,
-                                amount: statutoryCalc?.statutory?.paye,
-                              },
-                            ].map((r) => (
-                              <div key={r.label} className="flex items-center justify-between gap-3 bg-app border border-theme rounded-xl px-4 py-2">
-                                <div className="text-xs font-semibold text-main">{r.label}</div>
-                                <div className="text-xs font-mono font-extrabold text-main tabular-nums">
-                                  {r.rate === null || r.rate === undefined ? "" : `${Number(r.rate)}% • `}
-                                  ZMW {Number(r.amount ?? 0).toLocaleString("en-ZM")}
+                            {Array.isArray(salaryStructureDetail?.deductions) && salaryStructureDetail.deductions.length > 0 ? (
+                              salaryStructureDetail.deductions
+                                .map((d: any) => ({
+                                  label: (() => {
+                                    const component = String(d?.component ?? "").trim();
+                                    const abbr = String(d?.abbr ?? "").trim();
+                                    if (component.toLowerCase() === "income tax" || abbr.toUpperCase() === "IT") return "PAYE";
+                                    return component;
+                                  })(),
+                                  amount: d?.amount,
+                                }))
+                                .filter((d: any) => d.label)
+                                .map((d: any) => (
+                                  <div key={d.label} className="flex items-center justify-between gap-3 bg-app border border-theme rounded-xl px-4 py-2">
+                                    <div className="text-xs font-semibold text-main">{d.label}</div>
+                                    <div className="text-xs font-mono font-extrabold text-main tabular-nums">
+                                      ZMW {Number(d.amount ?? 0).toLocaleString("en-ZM")}
+                                    </div>
+                                  </div>
+                                ))
+                            ) : (
+                              [
+                                {
+                                  label: "Napsa Employee",
+                                  rate: statutoryCalc?.rates?.napsaEmployeeRate,
+                                  amount: statutoryCalc?.statutory?.napsaEmployee,
+                                },
+                                {
+                                  label: "Napsa Employer",
+                                  rate: statutoryCalc?.rates?.napsaEmployerRate,
+                                  amount: statutoryCalc?.statutory?.napsaEmployer,
+                                },
+                                {
+                                  label: "Nhima",
+                                  rate: statutoryCalc?.rates?.nhimaRate,
+                                  amount: statutoryCalc?.statutory?.nhima,
+                                },
+                                {
+                                  label: "Paye",
+                                  rate: null,
+                                  amount: statutoryCalc?.statutory?.paye,
+                                },
+                              ].map((r) => (
+                                <div key={r.label} className="flex items-center justify-between gap-3 bg-app border border-theme rounded-xl px-4 py-2">
+                                  <div className="text-xs font-semibold text-main">{r.label}</div>
+                                  <div className="text-xs font-mono font-extrabold text-main tabular-nums">
+                                    {r.rate === null || r.rate === undefined ? "" : `${Number(r.rate)}% • `}
+                                    ZMW {Number(r.amount ?? 0).toLocaleString("en-ZM")}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              ))
+                            )}
                           </div>
                         </div>
                       </div>

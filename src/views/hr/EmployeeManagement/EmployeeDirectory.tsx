@@ -24,7 +24,7 @@ import ActionButton, {
 
 import type { Column } from "../../../components/ui/Table/type";
 import type { EmployeeSummary, Employee } from "../../../types/employee";
-import EmployeeDetailView from "../EmployeeManagement/mployeeDetailView";
+import EmployeeDetailView from "./EmployeeDetailView";
 
 const EmployeeDirectory: React.FC = () => {
   const [employees, setEmployees] = useState<EmployeeSummary[]>([]);

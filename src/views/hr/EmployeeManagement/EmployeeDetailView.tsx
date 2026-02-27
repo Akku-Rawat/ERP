@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   showApiError,
   showSuccess,
@@ -20,8 +20,10 @@ import {
 } from "lucide-react";
 import { updateEmployeeDocuments } from "../../../api/employeeapi";
 import { ERP_BASE } from "../../../config/api";
+import { calculateZmPayrollFromGross } from "../payroll-system/util";
+import { useAssignedSalaryStructure } from "../../../hooks/useAssignedSalaryStructure";
 
-// Props matching your original structure
+
 type Props = {
   employee: any;
   onBack: () => void;
@@ -147,6 +149,78 @@ const EmployeeDetailView: React.FC<Props> = ({
     leaveInfo,
   } = employee;
 
+  const employeeCode = String(employee?.employeeId ?? employmentInfo?.employeeId ?? "").trim();
+
+  const {
+    assignedSalaryStructureName,
+    assignedSalaryStructureFromDate,
+    salaryStructureDetail,
+  } = useAssignedSalaryStructure(employeeCode);
+
+  const salaryBreakdownRows = useMemo(() => {
+    const currency = String(payrollInfo?.currency ?? "ZMW").trim() || "ZMW";
+
+    const earnings = Array.isArray(salaryStructureDetail?.earnings) ? salaryStructureDetail.earnings : [];
+    if (earnings.length > 0) {
+      return earnings
+        .map((e: any) => ({
+          label: String(e?.component ?? "").trim(),
+          amount: e?.amount,
+          currency,
+        }))
+        .filter((r: any) => r.label && r.amount !== undefined && r.amount !== null);
+    }
+
+    const breakdown = payrollInfo?.salaryBreakdown || {};
+    return Object.entries(breakdown).map(([k, v]) => ({
+      label: String(k),
+      amount: v,
+      currency,
+    }));
+  }, [payrollInfo?.currency, payrollInfo?.salaryBreakdown, salaryStructureDetail]);
+
+  const compensationHeader = useMemo(() => {
+    const currency = String(payrollInfo?.currency ?? "ZMW").trim() || "ZMW";
+    const structureName = String(assignedSalaryStructureName ?? "").trim();
+    const fromDate = String(assignedSalaryStructureFromDate ?? "").trim();
+
+    const earnings = Array.isArray((salaryStructureDetail as any)?.earnings)
+      ? (salaryStructureDetail as any).earnings
+      : [];
+    const deductions = Array.isArray((salaryStructureDetail as any)?.deductions)
+      ? (salaryStructureDetail as any).deductions
+      : [];
+    const totalEarnings = earnings.reduce((s: number, r: any) => s + Number(r?.amount ?? 0), 0);
+    const totalDeductions = deductions.reduce((s: number, r: any) => s + Number(r?.amount ?? 0), 0);
+    const net = totalEarnings - totalDeductions;
+
+    return {
+      currency,
+      structureName,
+      fromDate,
+      totalEarnings,
+      totalDeductions,
+      net,
+    };
+  }, [assignedSalaryStructureFromDate, assignedSalaryStructureName, payrollInfo?.currency, salaryStructureDetail]);
+
+  const statutoryCalc = useMemo(() => {
+    const grossFromEmployee = Number(payrollInfo?.grossSalary ?? 0) || 0;
+    const earnings = Array.isArray((salaryStructureDetail as any)?.earnings)
+      ? (salaryStructureDetail as any).earnings
+      : [];
+    const grossFromStructure = earnings.reduce((s: number, r: any) => s + Number(r?.amount ?? 0), 0);
+
+    const gross = grossFromStructure > 0 ? grossFromStructure : grossFromEmployee;
+    const rates = {
+      napsaEmployeeRate: payrollInfo?.statutoryDeductions?.napsaEmployeeRate,
+      napsaEmployerRate: payrollInfo?.statutoryDeductions?.napsaEmployerRate,
+      nhimaRate: payrollInfo?.statutoryDeductions?.nhimaRate,
+    };
+
+    return calculateZmPayrollFromGross(gross, { rates });
+  }, [payrollInfo?.grossSalary, payrollInfo?.statutoryDeductions, salaryStructureDetail]);
+
   const getStatusBadge = () => {
     const statusLower = status?.toLowerCase() || "";
     if (statusLower === "active")
@@ -253,10 +327,10 @@ const handleUploadDocument = async ({
               {/* Employee ID */}
               <div className="px-4 py-2 border-b border-border text-center">
                 <p className="text-[10px] text-black font-bold uppercase mb-0.5">
-                  ID
+                  Employee ID
                 </p>
                 <p className="text-sm font-mono font-bold text-black">
-                  {employmentInfo?.employeeId}
+                  {employeeCode || employmentInfo?.employeeId || employee?.employeeId || employee?.id || "—"}
                 </p>
               </div>
 
@@ -544,24 +618,50 @@ const handleUploadDocument = async ({
                 {/* COMPENSATION TAB */}
                 {activeTab === "compensation" && (
                   <div className="space-y-5">
+                    <div className="bg-background border border-border rounded-xl px-4 py-3">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">
+                            Assigned Salary Structure
+                          </div>
+                          <div className="text-sm font-extrabold text-main mt-1 break-words">
+                            {compensationHeader.structureName || "—"}
+                          </div>
+                          {compensationHeader.fromDate ? (
+                            <div className="text-[11px] text-muted mt-0.5">
+                              Effective from: {compensationHeader.fromDate}
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          <div className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Gross</div>
+                          <div className="text-sm font-extrabold text-main tabular-nums">
+                            {compensationHeader.currency} {Number(compensationHeader.totalEarnings || 0).toLocaleString()}
+                          </div>
+                          <div className="text-[11px] text-muted mt-0.5">
+                            Net: {compensationHeader.currency} {Number(compensationHeader.net || 0).toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     <Section title="Salary Breakdown">
                       <div className="space-y-2">
-                        {Object.entries(payrollInfo?.salaryBreakdown || {}).map(
-                          ([key, value]) => (
+                        {salaryBreakdownRows.map((row: any) => (
                             <div
-                              key={key}
+                              key={row.label}
                               className="flex justify-between items-center py-1.5 border-b border-border"
                             >
                               <span className="text-xs text-muted font-medium">
-                                {key}
+                                {row.label}
                               </span>
                               <span className="text-xs font-bold text-main">
-                                {payrollInfo?.currency}{" "}
-                                {Number(value).toLocaleString()}
+                                {row.currency}{" "}
+                                {Number(row.amount ?? 0).toLocaleString()}
                               </span>
                             </div>
-                          ),
-                        )}
+                          ))}
                         <div className="flex justify-between items-center py-2 bg-background rounded-lg px-3 mt-2">
                           <span className="text-sm text-main font-bold">
                             Gross Salary
@@ -576,26 +676,58 @@ const handleUploadDocument = async ({
                       </div>
                     </Section>
 
-                    <Section title="Statutory Deductions">
-                      <div className="space-y-2">
-                        <DeductionRow
-                          label="NAPSA (Employee)"
-                          value={`${payrollInfo?.statutoryDeductions?.napsaEmployeeRate}%`}
-                        />
-                        <DeductionRow
-                          label="NAPSA (Employer)"
-                          value={`${payrollInfo?.statutoryDeductions?.napsaEmployerRate}%`}
-                        />
-                        <DeductionRow
-                          label="NHIMA"
-                          value={`${payrollInfo?.statutoryDeductions?.nhimaRate}%`}
-                        />
-                        <DeductionRow
-                          label="PAYE"
-                          value={`${payrollInfo?.currency} ${Number(payrollInfo?.statutoryDeductions?.payeAmount || 0).toLocaleString()}`}
-                        />
-                      </div>
-                    </Section>
+                    {Array.isArray((salaryStructureDetail as any)?.deductions) && (salaryStructureDetail as any).deductions.length > 0 && (
+                      <Section title="Salary Structure Deductions">
+                        <div className="space-y-2">
+                          {(salaryStructureDetail as any).deductions
+                            .map((d: any) => ({
+                              label: (() => {
+                                const component = String(d?.component ?? "").trim();
+                                const abbr = String(d?.abbr ?? "").trim();
+                                if (component.toLowerCase() === "income tax" || abbr.toUpperCase() === "IT") return "PAYE";
+                                return component;
+                              })(),
+                              amount: d?.amount,
+                            }))
+                            .filter((d: any) => d.label)
+                            .map((d: any) => (
+                              <div
+                                key={d.label}
+                                className="flex justify-between items-center py-1.5 border-b border-border"
+                              >
+                                <span className="text-xs text-muted font-medium">{d.label}</span>
+                                <span className="text-xs font-bold text-main">
+                                  {payrollInfo?.currency || "ZMW"}{" "}
+                                  {Number(d.amount ?? 0).toLocaleString()}
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+                      </Section>
+                    )}
+
+                    {Array.isArray((salaryStructureDetail as any)?.deductions) && (salaryStructureDetail as any).deductions.length > 0 ? null : (
+                      <Section title="Statutory Deductions">
+                        <div className="space-y-2">
+                          <DeductionRow
+                            label="NAPSA (Employee)"
+                            value={`${Number(statutoryCalc?.rates?.napsaEmployeeRate ?? 0)}% • ${payrollInfo?.currency || "ZMW"} ${Number(statutoryCalc?.statutory?.napsaEmployee ?? 0).toLocaleString()}`}
+                          />
+                          <DeductionRow
+                            label="NAPSA (Employer)"
+                            value={`${Number(statutoryCalc?.rates?.napsaEmployerRate ?? 0)}% • ${payrollInfo?.currency || "ZMW"} ${Number(statutoryCalc?.statutory?.napsaEmployer ?? 0).toLocaleString()}`}
+                          />
+                          <DeductionRow
+                            label="NHIMA"
+                            value={`${Number(statutoryCalc?.rates?.nhimaRate ?? 0)}% • ${payrollInfo?.currency || "ZMW"} ${Number(statutoryCalc?.statutory?.nhima ?? 0).toLocaleString()}`}
+                          />
+                          <DeductionRow
+                            label="PAYE"
+                            value={`${payrollInfo?.currency || "ZMW"} ${Number(statutoryCalc?.statutory?.paye ?? 0).toLocaleString()}`}
+                          />
+                        </div>
+                      </Section>
+                    )}
 
                     <Section title="Bank Account">
                       <div className="grid grid-cols-2 gap-x-4 gap-y-3">
@@ -665,19 +797,18 @@ const handleUploadDocument = async ({
                               {doc.file ? (
                                 <>
                                   <button
-                                    onClick={() =>
-                                      window.open(
-                                        getFileUrl(doc.file),
-                                        "_blank",
-                                      )
-                                    }
+                                    onClick={() => {
+                                      const url = getFileUrl(doc.file) || undefined;
+                                      if (!url) return;
+                                      window.open(url, "_blank");
+                                    }}
                                     className="p-2 text-primary hover:bg-primary/10 rounded-lg transition"
                                     title="View"
                                   >
                                     <Eye className="w-4 h-4" />
                                   </button>
                                   <a
-                                    href={getFileUrl(doc.file)}
+                                    href={getFileUrl(doc.file) || undefined}
                                     download
                                     className="p-2 text-muted hover:text-main hover:bg-row-hover rounded-lg transition"
                                     title="Download"

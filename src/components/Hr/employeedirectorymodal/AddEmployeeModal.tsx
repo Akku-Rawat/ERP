@@ -12,12 +12,13 @@ import { getLevelsFromHrSettings } from "../../../views/hr/tabs/salarystructure"
 import { EMPLOYEE_ROLE_CONFIG } from "../../../api/config/employeeRoleConfig";
 import { filterEmployeesByRole } from "../../../api/config/employeeRoleFilter";
 import { getAllEmployees } from "../../../api/employeeapi";
-
-import { createEmployee, updateEmployeeById } from "../../../api/employeeapi";
+ 
+import { createEmployee, getEmployeeById, updateEmployeeById } from "../../../api/employeeapi";
+import { createSalaryStructureAssignment } from "../../../api/salaryStructureAssignmentApi";
+import { getSalaryStructureById } from "../../../api/salaryStructureApi";
 
 import { useCompanySelection } from "../../../hooks/useCompanySelection";
 import { getEmployeeFeatures } from "../../../config/employeeFeatures";
-
 
 const DEFAULT_FORM_DATA = {
   // Personal
@@ -573,6 +574,49 @@ const [step, setStep] = useState<"verification" | "form">(
   try {
     showLoading(editData ? "Updating Employee..." : "Creating Employee...");
 
+    const selectedSalaryStructure = String(formData.salaryStructure ?? "").trim();
+
+    const resolveEmployeeCode = async (input: any): Promise<string> => {
+      const raw = String(input ?? "").trim();
+      if (!raw) return "";
+      if (/^HR-EMP-/i.test(raw)) return raw;
+
+      try {
+        const emp = await getEmployeeById(raw);
+        const code = String(emp?.employeeId ?? emp?.employee_id ?? "").trim();
+        return code;
+      } catch {
+        return "";
+      }
+    };
+
+    const createOrUpdateAssignment = async (employeeCode: string) => {
+      const emp = String(employeeCode ?? "").trim();
+      if (!emp || !selectedSalaryStructure) return;
+
+      let company = "";
+      try {
+        const detail = await getSalaryStructureById(selectedSalaryStructure);
+        company = String((detail as any)?.company ?? "").trim();
+      } catch {
+        company = "";
+      }
+
+      const from_date =
+        String(formData.engagementDate ?? "").trim() || new Date().toISOString().slice(0, 10);
+
+      try {
+        await createSalaryStructureAssignment({
+          employee: emp,
+          salary_structure: selectedSalaryStructure,
+          from_date,
+          company: company || String(companyCode ?? "").trim(),
+        });
+      } catch {
+        // Do not block employee create/update if assignment fails
+      }
+    };
+
     if (editData?.id) {
       const payload = {
         id: String(editData.id),
@@ -580,10 +624,27 @@ const [step, setStep] = useState<"verification" | "form">(
       };
 
       await updateEmployeeById(payload);
+
+      const empCode = await resolveEmployeeCode(
+        formData.employeeId ?? editData?.employeeId ?? editData?.employmentInfo?.employeeId ?? editData?.id,
+      );
+      await createOrUpdateAssignment(empCode);
       closeSwal();
       showSuccess("Employee updated successfully");
     } else {
-      await createEmployee(buildPayload());
+      const resp: any = await createEmployee(buildPayload());
+
+      const data = resp?.data ?? resp;
+      const candidate = String(
+        data?.employeeId ??
+          data?.employee_id ??
+          data?.name ??
+          data?.id ??
+          formData.employeeId ??
+          "",
+      ).trim();
+      const empCode = await resolveEmployeeCode(candidate);
+      await createOrUpdateAssignment(empCode);
       closeSwal();
       showSuccess("Employee created successfully");
     }
