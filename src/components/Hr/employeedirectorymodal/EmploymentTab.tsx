@@ -277,7 +277,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-main mb-1 font-medium">
-              Reporting Manager <span className="text-danger">*</span>
+              Reporting Manager
             </label>
             <select
               value={formData.reportingManager}
@@ -297,7 +297,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
           </div>
           <div>
             <label className="block text-xs text-main mb-1 font-medium">
-              HR Manager <span className="text-danger">*</span>
+              HR Manager
             </label>
             <select
               value={formData.hrManager}

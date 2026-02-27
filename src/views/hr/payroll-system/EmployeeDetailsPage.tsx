@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { getEmployeeById } from "../../../api/employeeapi";
 import { calculateZmPayrollFromGross } from "./util";
+import { getSalaryStructureById } from "../../../api/salaryStructureApi";
 
 interface EmployeeDetailsPageProps {
   employeeId: string;
@@ -95,6 +96,7 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
+  const [salaryStructureDetail, setSalaryStructureDetail] = useState<any>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -153,6 +155,41 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
   const statutory = (payrollInfo?.statutoryDeductions || {}) as AnyRecord;
   const documents = (data?.documents || []) as any[];
 
+  const salaryStructureName = useMemo(() => {
+    return String(
+      payrollInfo?.salaryStructure ??
+        payrollInfo?.SalaryStructure ??
+        data?.salaryStructure ??
+        data?.SalaryStructure ??
+        employmentInfo?.salaryStructure ??
+        employmentInfo?.SalaryStructure ??
+        "",
+    ).trim();
+  }, [employmentInfo, payrollInfo, data]);
+
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      if (!salaryStructureName) {
+        setSalaryStructureDetail(null);
+        return;
+      }
+      try {
+        const detail = await getSalaryStructureById(salaryStructureName);
+        if (!mounted) return;
+        setSalaryStructureDetail(detail);
+      } catch {
+        if (!mounted) return;
+        setSalaryStructureDetail(null);
+      }
+    };
+
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [salaryStructureName]);
+
   const grossSalaryForCalc = useMemo(() => {
     const v =
       data?.grossSalary ??
@@ -162,8 +199,13 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
       payrollInfo?.BasicSalary ??
       data?.basicSalary ??
       0;
-    return Number(v ?? 0);
-  }, [data, payrollInfo]);
+    const direct = Number(v ?? 0);
+    if (Number.isFinite(direct) && direct > 0) return direct;
+
+    const earnings = Array.isArray(salaryStructureDetail?.earnings) ? salaryStructureDetail.earnings : [];
+    const fromStructure = earnings.reduce((sum: number, e: any) => sum + (Number(e?.amount ?? 0) || 0), 0);
+    return Number(fromStructure ?? 0) || 0;
+  }, [data, payrollInfo, salaryStructureDetail]);
 
   const statutoryCalc = useMemo(() => {
     const rates = {
@@ -297,8 +339,16 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({ employeeId, o
     const rows: { label: string; amount: any }[] = [];
     if (basic !== undefined && basic !== null && basic !== "") rows.push({ label: "Basic Salary", amount: basic });
     if (totalAllowances !== undefined && totalAllowances !== null && totalAllowances !== "") rows.push({ label: "Allowances", amount: totalAllowances });
+
+    if (rows.length === 0) {
+      const earnings = Array.isArray(salaryStructureDetail?.earnings) ? salaryStructureDetail.earnings : [];
+      const structureRows = earnings
+        .map((e: any) => ({ label: String(e?.component ?? "").trim(), amount: e?.amount }))
+        .filter((r: any) => r.label && r.amount !== undefined && r.amount !== null);
+      return structureRows;
+    }
     return rows;
-  }, [data?.allowances, data?.basicSalary, payrollInfo]);
+  }, [data?.allowances, data?.basicSalary, payrollInfo, salaryStructureDetail]);
 
   return (
     <div className="h-screen flex flex-col bg-app overflow-hidden">

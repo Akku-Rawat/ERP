@@ -245,6 +245,7 @@ const [step, setStep] = useState<"verification" | "form">(
       workAddress: editData.employmentInfo?.workAddress || "",
       shift: editData.employmentInfo?.shift || "Day",
       reportingManager: editData.employmentInfo?.reportingManager || "",
+      hrManager: editData.employmentInfo?.hrManager || "",
 
       // ===== IDs =====
       NrcId: editData.identityInfo?.nrc || "",
@@ -496,7 +497,12 @@ const [step, setStep] = useState<"verification" | "form">(
       JobTitle: formData.jobTitle,
       EmployeeType: formData.employeeType,
       status: formData.employmentStatus,
-      ReportingManager: formData.reportingManager,
+      ...(String(formData.reportingManager ?? "").trim()
+        ? { ReportingManager: String(formData.reportingManager).trim() }
+        : {}),
+      ...(String(formData.hrManager ?? "").trim()
+        ? { HrManager: String(formData.hrManager).trim() }
+        : {}),
       probationPeriod: formData.probationPeriod,
       workLocation: formData.workLocation,
       workAddress: formData.workAddress,

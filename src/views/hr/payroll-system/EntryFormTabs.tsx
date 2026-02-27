@@ -262,7 +262,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
     return String((row as any)?.employeeId ?? row?.id ?? "").trim();
   }, [selectedSingleEmployeeId, selectedSingleEmployeeRow]);
 
-  const fallbackSalaryStructureName = "Interns Feb 2026";
+  const fallbackSalaryStructureName = "";
 
   const [singleSalaryStructureName, setSingleSalaryStructureName] = useState<string>("");
 
@@ -607,7 +607,7 @@ export const EmployeesTab: React.FC<EmployeesTabProps> = ({
 
       <PayrollPreviewModal
         open={singleModalOpen}
-        structureName={String((singleSalaryStructureName || fallbackSalaryStructureName || "").trim())}
+        structureName={String((singleSalaryStructureName || "").trim())}
         currency={String(data.currency ?? "")}
         payPeriodStart={String(data.startDate ?? "")}
         payPeriodEnd={String(data.endDate ?? "")}

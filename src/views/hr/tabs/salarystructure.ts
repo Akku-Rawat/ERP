@@ -275,7 +275,7 @@ export const deleteSalaryStructure = (id: string): void => {
   salaryStructures = salaryStructures.filter((s) => s.id !== id);
 };
 
-// ✅ Calculate salary breakdown with proper handling
+
 export const calculateSalaryBreakdown = (
   structureId: string,
   grossSalary: number,
@@ -284,7 +284,6 @@ export const calculateSalaryBreakdown = (
   const structure = getSalaryStructureById(structureId);
   if (!structure) return [];
 
-  // Use custom components if provided, otherwise use structure's default
   const components = customComponents || structure.components;
 
   return components.map((comp) => {
@@ -323,7 +322,7 @@ export const getLevelsFromHrSettings = () => {
   return Array.from(new Set(active.map((s) => s.level)));
 };
 
-// ✅ Get default gross salary for a structure
+
 export const getDefaultGrossSalary = (structureId: string): number => {
   const structure = getSalaryStructureById(structureId);
   return structure?.defaultGrossSalary || 0;
