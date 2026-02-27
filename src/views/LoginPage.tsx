@@ -31,6 +31,7 @@ const Login = () => {
     setShowPassword,
     error,
     handleSubmit,
+    isSubmitting
   } = useLogin();
 
   const [rememberMe, setRememberMe] = useState(false);
@@ -84,11 +85,10 @@ const Login = () => {
               {/* Username */}
               <div className="relative mb-4 animate-fade-in delay-350 fill-both opacity-0-start">
                 <User
-                  className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-300 ${
-                    focusedField === "user"
-                      ? "text-[hsl(270,70%,55%)]"
-                      : "text-[hsl(240,5%,50%)]"
-                  }`}
+                  className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-300 ${focusedField === "user"
+                    ? "text-[hsl(270,70%,55%)]"
+                    : "text-[hsl(240,5%,50%)]"
+                    }`}
                 />
                 <input
                   type="text"
@@ -105,11 +105,10 @@ const Login = () => {
               {/* Password */}
               <div className="relative mb-5 animate-fade-in delay-450 fill-both opacity-0-start">
                 <Lock
-                  className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-300 ${
-                    focusedField === "pass"
-                      ? "text-[hsl(270,70%,55%)]"
-                      : "text-[hsl(240,5%,50%)]"
-                  }`}
+                  className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-300 ${focusedField === "pass"
+                    ? "text-[hsl(270,70%,55%)]"
+                    : "text-[hsl(240,5%,50%)]"
+                    }`}
                 />
                 <input
                   type={showPassword ? "text" : "password"}
@@ -138,11 +137,10 @@ const Login = () => {
               <div className="mb-6 flex items-center justify-between animate-fade-in delay-550 fill-both opacity-0-start">
                 <label className="flex cursor-pointer items-center gap-2 text-sm text-[hsl(240,5%,50%)] group">
                   <div
-                    className={`flex h-4 w-4 items-center justify-center rounded border transition-all duration-200 ${
-                      rememberMe
-                        ? "border-[hsl(270,70%,55%)] bg-[hsl(270,70%,55%)]"
-                        : "border-[hsl(270,20%,88%)] group-hover:border-[hsl(270,70%,55%)]/50"
-                    }`}
+                    className={`flex h-4 w-4 items-center justify-center rounded border transition-all duration-200 ${rememberMe
+                      ? "border-[hsl(270,70%,55%)] bg-[hsl(270,70%,55%)]"
+                      : "border-[hsl(270,20%,88%)] group-hover:border-[hsl(270,70%,55%)]/50"
+                      }`}
                     onClick={() => setRememberMe(!rememberMe)}
                   >
                     {rememberMe && (
@@ -172,32 +170,45 @@ const Login = () => {
               </div>
 
               {/* Login button */}
-              <div className="animate-fade-in delay-650 fill-both opacity-0-start">
+              <div className="mt-2">
                 <button
                   type="submit"
-                  className="group relative flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[hsl(268,80%,58%)] to-[hsl(268,80%,48%)] px-6 py-3.5 text-sm font-semibold text-white 
-shadow-[0_8px_25px_rgba(124,58,237,0.35)] 
-hover:shadow-[0_12px_35px_rgba(124,58,237,0.45)] 
-hover:-translate-y-1 active:translate-y-0 
-transition-all duration-300 ease-out"
-
+                  disabled={isSubmitting}
+                  className="
+                       group relative w-full
+                       rounded-2xl
+                      bg-gradient-to-r from-purple-600 to-purple-700
+                      py-4
+                     text-white
+                      text-lg
+                      font-semibold
+                      shadow-[0_15px_40px_rgba(124,58,237,0.35)]
+                      transition-all duration-300 ease-out
+                      hover:shadow-[0_20px_50px_rgba(124,58,237,0.45)]
+                     hover:-translate-y-1
+                     active:translate-y-0
+                     disabled:opacity-60
+                    disabled:cursor-not-allowed
+                   flex items-center justify-center gap-3
+                     "
                 >
-                  Sign In
-                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                  {isSubmitting ? "Signing In..." : "Sign In"}
+
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                 </button>
               </div>
             </form>
           </div>
 
           {/* Right - Illustration */}
-<div className="relative hidden md:block overflow-hidden bg-white">
+          <div className="relative hidden md:block overflow-hidden bg-white">
 
 
             {/* Animated gradient background */}
             <div className="absolute inset-0">
-             <div className="absolute -left-16 -top-16 h-[130%] w-[130%] rounded-blob-1 bg-[hsl(255,80%,58%)] opacity-90 animate-spin-slow origin-55-50" />
+              <div className="absolute -left-16 -top-16 h-[130%] w-[130%] rounded-blob-1 bg-[hsl(255,80%,58%)] opacity-90 animate-spin-slow origin-55-50" />
 
-<div className="absolute -bottom-20 -right-20 h-[70%] w-[70%] rounded-blob-2 bg-[hsl(248,75%,50%)]/40 animate-spin-slower origin-45-50" />
+              <div className="absolute -bottom-20 -right-20 h-[70%] w-[70%] rounded-blob-2 bg-[hsl(248,75%,50%)]/40 animate-spin-slower origin-45-50" />
 
               <div className="absolute top-10 right-10 h-[40%] w-[40%] rounded-full bg-white/5 animate-spin-slowest origin-50-60" />
             </div>
@@ -205,23 +216,22 @@ transition-all duration-300 ease-out"
             {/* Content */}
             <div className="relative flex h-full flex-col items-center justify-center p-10">
               {/* Laptop */}
-   <div className="flex w-full justify-center animate-float">
-  <div className="w-full max-w-[380px] 
-      rounded-2xl 
-      bg-white/10 
-      backdrop-blur-md 
-      border border-white/20 
-      p-3 
-      shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
+              <div className="flex w-full justify-center animate-float">
+                <div className="w-full max-w-[380px] 
+                 rounded-2xl 
+                 bg-white/10 
+                   backdrop-blur-md 
+                 border border-white/20 
+                 p-3 
+                 shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
+                  <img
+                    src={erp2}
+                    alt="ERP Dashboard Preview"
+                    className="w-full rounded-xl animate-fade-in delay-500 fill-both duration-800"
+                  />
 
-    <img
-      src={erp2}
-      alt="ERP Dashboard Preview"
-      className="w-full rounded-xl animate-fade-in delay-500 fill-both duration-800"
-    />
-    
-  </div>
-</div>
+                </div>
+              </div>
               {/* Feature pills */}
               <div className="mt-8 flex flex-wrap items-center justify-center gap-2 animate-fade-in delay-800 fill-both opacity-0-start">
                 {features.map((f, i) => (

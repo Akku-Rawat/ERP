@@ -67,6 +67,7 @@ export const mapUIToCreatePI = (form: PurchaseInvoiceFormData) => {
 
 const payload: any = {
   rcptTyCd: "Local",
+    ...(form.poNumber && { lpoNumber: form.poNumber }),
   requiredBy: form.requiredBy,
   supplierId: form.supplierId,
   currency: form.currency,
@@ -243,7 +244,7 @@ else if (api.tax) {
   const mappedForm: PurchaseInvoiceFormData = {
     ...emptyPOForm,
 
-    poNumber: api.poId || "",
+    poNumber: api.lpoNumber || "",
     date: api.poDate || "",
     requiredBy: api.requiredBy || api.deliveryDate || "",
     taxCategory: api.taxCategory || "",

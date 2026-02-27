@@ -97,8 +97,6 @@ const handleNext = () => {
 
   const [custLoading, setCustLoading] = useState(true);
   const symbol = currencySymbols[formData.currencyCode] ?? "₹";
-  const showExchangeRate =
-    String(formData.currencyCode ?? "").trim().toUpperCase() !== "INR";
   useEffect(() => {
     if (!isOpen) return;
 
@@ -191,7 +189,7 @@ const handleNext = () => {
             <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
               <div className="">
                 <div
-                  className={`grid ${showExchangeRate ? "grid-cols-7" : "grid-cols-6"} gap-3 items-end`}
+                  className="grid grid-cols-6 gap-3 items-end"
                 >
                   <CustomerSelect
                     value={customerNameDisplay}
@@ -224,32 +222,11 @@ const handleNext = () => {
                       label="Currency"
                       name="currencyCode"
                       value={formData.currencyCode}
-                      onChange={actions.handleInputChange}
                       options={[...currencyOptions]}
+                      disabled
                       className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
                     />
                   </div>
-
-                  {showExchangeRate && (
-                    <div>
-                      <ModalInput
-                        label={
-                          ui.exchangeRateLoading
-                            ? "Exchange Rate (Loading...)"
-                            : "Exchange Rate"
-                        }
-                        name="exchangeRt"
-                        value={formData.exchangeRt}
-                        onChange={actions.handleInputChange}
-                        className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                      />
-                      {!!ui.exchangeRateError && (
-                        <div className="mt-1 text-[10px] text-danger">
-                          {ui.exchangeRateError}
-                        </div>
-                      )}
-                    </div>
-                  )}
 
                   <div>
                     <ModalSelect
@@ -354,8 +331,8 @@ const handleNext = () => {
                         <tr className="border-b border-theme">
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px] whitespace-nowrap">#</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px] whitespace-nowrap">Item</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[100px] whitespace-nowrap">Batch no</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[110px] whitespace-nowrap">Description</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[100px] whitespace-nowrap">Packing</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">Quantity</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">Unit Price</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">Discount (%)</th>
@@ -441,7 +418,6 @@ const handleNext = () => {
                                   className="w-[90px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="price"
                                   value={it.price}
-                                  disabled
                                   onChange={(e) =>
                                     actions.handleItemChange(i, e)
                                   }
@@ -464,7 +440,6 @@ const handleNext = () => {
                                   className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="vatRate"
                                   value={it.vatRate}
-                                  disabled
                                   onChange={(e) =>
                                     actions.handleItemChange(i, e)
                                   }
@@ -476,7 +451,6 @@ const handleNext = () => {
                                   className="w-[80px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="vatCode"
                                   value={it.vatCode}
-                                  disabled
                                   onChange={(e) =>
                                     actions.handleItemChange(i, e)
                                   }

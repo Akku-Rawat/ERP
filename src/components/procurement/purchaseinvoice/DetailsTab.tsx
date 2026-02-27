@@ -9,6 +9,8 @@ import SupplierSelect from "../../selects/procurement/SupplierSelect";
 import POItemSelect from "../../selects/procurement/POItemSelect";
 import { ModalInput, ModalSelect } from "../../ui/modal/modalComponent";
 
+
+
 interface DetailsTabProps {
   form: PurchaseInvoiceFormData;
   items: ItemRow[];
@@ -21,6 +23,8 @@ interface DetailsTabProps {
   onAddItem: () => void;
   onRemoveItem: (idx: number) => void;
   getCurrencySymbol: () => string;
+  poList: any[];
+  onPOSelect: (po:any) => void;
 }
 
 export const DetailsTab = ({
@@ -33,6 +37,8 @@ export const DetailsTab = ({
   onAddItem,
   onRemoveItem,
   getCurrencySymbol,
+   poList,
+  onPOSelect
 }: DetailsTabProps) => {
   const symbol = getCurrencySymbol();
 
@@ -77,6 +83,22 @@ export const DetailsTab = ({
               onChange={onSupplierChange}
             />
           </div>
+
+          
+          <ModalSelect
+            label="PO Number"
+            name="poNumber"
+            value={form.poNumber}
+            placeholder="Select PO"
+            options={(poList || []).map(po => ({
+             label: po.poId,
+value: po.poId
+            }))}
+            onChange={(e) => {
+              const selected = poList.find(p => p.pId === e.target.value);
+              onPOSelect(selected);
+            }}
+          />
 
           {/* Date */}
           <div>
@@ -300,7 +322,7 @@ export const DetailsTab = ({
                       <td className="px-0.5 py-1">
                      <input
                           type="number"
-                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-[70px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                           name="vatRate"
                           value={it.vatRate}
                           onChange={(e) => onItemChange(e, i)}
@@ -310,7 +332,7 @@ export const DetailsTab = ({
                       <td className="px-0.5 py-1">
                         <div className="relative">
                            <input
-                            className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                             name="vatCd"
                             value={it.vatCd || ""}
                             onChange={(e) => onItemChange(e, i)}

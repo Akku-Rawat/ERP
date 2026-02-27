@@ -195,18 +195,7 @@ const CustomerModal: React.FC<{
       newErrors.contactPerson = "Contact person is required";
     }
 
-    // Validate Display Name
-    if (!form.displayName || form.displayName === "") {
-      newErrors.displayName = "Display name is required";
-    }
-
-    // Validate TPIN
-    if (!form.tpin || form.tpin.trim() === "") {
-      newErrors.tpin = "TPIN is required";
-    } else if (form.tpin.length !== 10) {
-      newErrors.tpin = "TPIN must be 10 characters";
-    }
-
+   
     // Validate Tax Category
     if (!form.customerTaxCategory || form.customerTaxCategory === "") {
       newErrors.customerTaxCategory = "Tax category is required";
@@ -215,11 +204,6 @@ const CustomerModal: React.FC<{
     // Validate Currency
     if (!form.currency || form.currency === "") {
       newErrors.currency = "Currency is required";
-    }
-
-    // Validate Bank Account
-    if (!form.accountNumber || form.accountNumber.trim() === "") {
-      newErrors.accountNumber = "Bank account is required";
     }
 
     // Validate Email
@@ -232,13 +216,7 @@ const CustomerModal: React.FC<{
       }
     }
 
-    // Validate Mobile
-    if (!form.mobile || form.mobile.trim() === "") {
-      newErrors.mobile = "Mobile number is required";
-    } else if (form.mobile.length !== 10) {
-      newErrors.mobile = "Mobile number must be exactly 10 digits";
-    }
-
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -312,20 +290,6 @@ const CustomerModal: React.FC<{
       }));
     }
 
-    // 🔹 Mobile validation
-    if (name === "mobile") {
-      if (value && !/^\d*$/.test(value)) {
-        setErrors((prev) => ({
-          ...prev,
-          mobile: "Only numbers allowed",
-        }));
-      } else if (value.length > 0 && value.length !== 10) {
-        setErrors((prev) => ({
-          ...prev,
-          mobile: "Mobile number must be exactly 10 digits",
-        }));
-      }
-    }
 
     // 🔹 Email validation
     if (name === "email" && value) {
@@ -564,8 +528,6 @@ const CustomerModal: React.FC<{
                   onChange={handleChange}
                   required
                   placeholder="Tax identification"
-                  maxLength={10}
-                  error={errors.tpin}
                 />
 
                 <ModalSelect
@@ -596,15 +558,6 @@ const CustomerModal: React.FC<{
                   ]}
                 />
 
-                <ModalInput
-                  label="Bank Account"
-                  name="accountNumber"
-                  value={form.accountNumber}
-                  onChange={handleChange}
-                  required
-                  placeholder="Account number"
-                  error={errors.accountNumber}
-                />
 
                 <ModalInput
                   label="Onboard Balance"
@@ -634,8 +587,6 @@ const CustomerModal: React.FC<{
                   onChange={handleChange}
                   required
                   placeholder="+1234567890"
-                  maxLength={10}
-                  error={errors.mobile}
                 />
               </div>
             </Card>

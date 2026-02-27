@@ -107,16 +107,6 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
 
         <div className="grid grid-cols-2 gap-4">
           <ModalInput
-            label="Postal Code"
-            name="postalCode"
-            value={data.postalCode}
-            onChange={onChange}
-            disabled={disableAll || sameAsBilling}
-            required
-            error={errors?.postalCode}
-          />
-
-          <ModalInput
             label="City / Town"
             name="city"
             value={data.city}
@@ -124,10 +114,8 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             disabled={disableAll || sameAsBilling}
             error={errors?.city}
           />
-        </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <ModalInput
+           <ModalInput
             label="State / Province"
             name="state"
             value={data.state}
@@ -135,6 +123,9 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             disabled={disableAll || sameAsBilling}
             error={errors?.state}
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
 
           <SearchSelect
             label="Country"
@@ -164,6 +155,16 @@ const AddressBlock: React.FC<AddressBlockProps> = ({
             disabled={disableAll || sameAsBilling}
             error={errors?.country}
             required
+          />
+
+          <ModalInput
+            label="Postal Code"
+            name="postalCode"
+            value={data.postalCode}
+            onChange={onChange}
+            disabled={disableAll || sameAsBilling}
+            required
+            error={errors?.postalCode}
           />
         </div>
       </div>

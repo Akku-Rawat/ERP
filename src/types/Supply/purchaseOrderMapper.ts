@@ -35,6 +35,7 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
       uom: it.uom || "Unit",
       vatCd: it.vatCd || "A",
       vatRate: vatRate,
+      requiredBy: it.requiredBy || form.date,
     };
   });
 
@@ -63,7 +64,6 @@ export const mapUIToCreatePO = (form: PurchaseOrderFormData) => {
 
   // Build base payload
   const payload: any = {
-    requiredBy: form.requiredBy,
     supplierId: form.supplierId,
     currency: form.currency,
     status: form.status,
@@ -122,7 +122,8 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
       uom: item.uom || "Unit",
       vatCd: item.vatCd || item.VatCd || "A",
       vatRate: vatRate,
-      requiredBy: item.requiredBy || "",
+      requiredBy: item.requiredBy || api.deliveryDate || "",
+      
     };
   });
 
@@ -219,7 +220,6 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
 
     poNumber: api.poId || "",
     date: api.poDate || "",
-    requiredBy: api.requiredBy || api.deliveryDate || "",
     taxCategory: api.taxCategory || "",
 
     supplier: api.supplierName || "",
@@ -229,9 +229,8 @@ export const mapApiToUI = (apiResponse: any): PurchaseOrderFormData => {
     supplierPhone: api.phone || "",
     supplierContact: api.contactPerson || "",
 
-    currency: api.currency || "ZMW",
+    currency: api.currency || "INR",
     status: api.status || "Draft",
-
     costCenter: api.costCenter || "",
     project: api.project || "",
     

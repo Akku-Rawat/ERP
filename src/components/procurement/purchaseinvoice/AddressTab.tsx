@@ -53,12 +53,17 @@ const AddressBlock: React.FC<{
 
  
 const [countriesCache, setCountriesCache] = useState<Country[]>([]);
-
 useEffect(() => {
   const loadCountries = async () => {
     try {
       const result = await getRolaCountryList();
-      setCountriesCache(result || []);
+
+      const formatted = (result || []).map((c: Country) => ({
+        ...c,
+        code: c.code?.toUpperCase() || "",
+      }));
+
+      setCountriesCache(formatted);
     } catch (error) {
       console.error("Failed to load countries:", error);
       setCountriesCache([]);
@@ -67,7 +72,6 @@ useEffect(() => {
 
   loadCountries();
 }, []);
-  
 
 const selectedCountry = countriesCache.find(
   (c) => c.country_name === data?.country
@@ -136,22 +140,16 @@ const selectedCountry = countriesCache.find(
               onChange={onFormChange}
             />
 
-            <ModalInput
-              label="Postal Code"
-              name={`addresses.${keyName}.postalCode`}
-              value={data?.postalCode || ""}
-              onChange={onFormChange}
-            />
 
             <ModalInput
-              label="City / Town"
+              label="City/Town"
               name={`addresses.${keyName}.city`}
               value={data?.city || ""}
               onChange={onFormChange}
             />
 
             <ModalInput
-              label="State / Province"
+              label="State/Province"
               name={`addresses.${keyName}.state`}
               value={data?.state || ""}
               onChange={onFormChange}
@@ -183,6 +181,13 @@ const selectedCountry = countriesCache.find(
                     value: c.country_name,
                   }));
               }}
+            />
+
+             <ModalInput
+              label="Postal Code"
+              name={`addresses.${keyName}.postalCode`}
+              value={data?.postalCode || ""}
+              onChange={onFormChange}
             />
 
 

@@ -90,17 +90,7 @@ export const DetailsTab = ({
             />
           </div>
 
-          {/* Required By */}
-          <div>
-            <ModalInput
-              label="Required By"
-              type="date"
-              name="requiredBy"
-              value={form.requiredBy}
-              onChange={onFormChange}
-              required
-            />
-          </div>
+
 
           {/* Status */}
           <div>
@@ -122,14 +112,11 @@ export const DetailsTab = ({
             />
           </div>
           <div>
-            <ModalSelect
+            <ModalInput
               label="Cost Center"
               name="costCenter"
               value={form.costCenter}
-              onChange={onFormChange}
-              options={[
-                { value: "UD-001 - Udvil - RI", label: "UD-001 - Udvil - RI" },
-              ]}
+              disabled
             />
           </div>
 
@@ -138,7 +125,7 @@ export const DetailsTab = ({
               label="Project"
               name="project"
               value={form.project}
-              onChange={onFormChange}
+              disabled
             />
           </div>
         </div>
@@ -253,7 +240,7 @@ export const DetailsTab = ({
                       <td className="px-0.5 py-1">
                         <input
                           type="number"
-                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                           name="vatRate"
                           value={it.vatRate}
                           onChange={(e) => onItemChange(e, i)}
@@ -263,7 +250,7 @@ export const DetailsTab = ({
                       <td className="px-0.5 py-1">
                         <div className="relative">
                           <input
-                            className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                             name="vatCd"
                             value={it.vatCd || ""}
                             onChange={(e) => onItemChange(e, i)}

@@ -1,20 +1,27 @@
 import axios from "axios";
 import type { AxiosInstance } from "axios";
+
 export const createAxiosInstance = (
-  baseURL: string,
-  withAuth: boolean = true,
+  baseURL: string
 ): AxiosInstance => {
   const instance = axios.create({
     baseURL,
+    withCredentials: true,
     headers: {
       "Content-Type": "application/json",
     },
   });
 
-  if (withAuth) {
-    instance.defaults.headers.common["Authorization"] =
-      import.meta.env.VITE_API_AUTH_TOKEN;
-  }
+  // Global 401 handler
+  instance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        window.location.href = "/login";
+      }
+      return Promise.reject(error);
+    }
+  );
 
   return instance;
 };

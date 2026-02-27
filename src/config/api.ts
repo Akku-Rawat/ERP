@@ -1,4 +1,3 @@
-
 import { ENV } from "./env";
 
 export const ERP_BASE = ENV.apiBaseUrl;
@@ -7,6 +6,10 @@ export const NAPSA_BASE = ENV.napsaBaseUrl;
 
 export const API = {
 
+
+  loginApi:{
+    login : `${ERP_BASE}/api/method/auth_api.user_management.api.auth.login`
+  },
 
    /* =========================
    * DASHBOARD

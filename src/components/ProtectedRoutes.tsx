@@ -4,10 +4,9 @@ import { useAuth } from "../context/AuthContext";
 import { ROUTES } from "../routes/RoutesPath";
 
 const ProtectedRoute: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -17,7 +16,6 @@ const ProtectedRoute: React.FC = () => {
       </div>
     );
   }
-
 
   return isAuthenticated ? <Outlet /> : <Navigate to={ROUTES.LOGIN} replace />;
 };

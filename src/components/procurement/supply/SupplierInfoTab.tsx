@@ -23,11 +23,16 @@ interface SupplierInfoTabProps {
   };
 }
 
+
+
 export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
   form,
   onChange,
   errors = {},
 }) => {
+
+
+
 
   return (
     <section className="flex-1 overflow-y-auto p-4 space-y-6 bg-app">
@@ -43,10 +48,8 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               name="tpin"
               value={form.tpin}
               onChange={onChange}
-              placeholder="maximum 10 digit"
-              maxLength={10}
+              placeholder="Enter TPIN"
               required
-              error={errors.tpin}
             />
             <ModalInput
               label="Supplier Name"
@@ -88,26 +91,53 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               required
               error={errors.contactPerson}
             />
-            <ModalInput
-              label="Phone No"
-              name="phoneNo"
-              value={form.phoneNo}
-              onChange={onChange}
-              type="tel"
-              maxLength={10}
-              required
-              error={errors.phoneNo}
-            />
+      <div className="flex gap-2 items-end">
+  <div className="w-[70px]">
+    <ModalInput
+      label=" "
+      name="phoneCode"
+      value={form.phoneCode}
+      onChange={onChange}
+      placeholder="+91"
+    />
+  </div>
 
-            <ModalInput
-              label="Alternate No"
-              name="alternateNo"
-              value={form.alternateNo}
-              onChange={onChange}
-              type="tel"
-              maxLength={10}
-              error={errors.alternateNo}
-            />
+  <div className="flex-1">
+    <ModalInput
+      label="Phone No"
+      name="phoneNo"
+      value={form.phoneNo}
+      onChange={onChange}
+      placeholder="Enter mobile number"
+      type="tel"
+      required
+    />
+  </div>
+</div>
+
+
+            <div className="flex gap-2 items-end">
+  <div className="w-[70px]">
+    <ModalInput
+      label=" "
+      name="alternateCode"
+      value={form.alternateCode}
+      onChange={onChange}
+      placeholder="+91"
+    />
+  </div>
+
+  <div className="flex-1">
+    <ModalInput
+      label="Alternate No"
+      name="alternateNo"
+      value={form.alternateNo}
+      onChange={onChange}
+      placeholder="Enter mobile number"
+      type="tel"
+    />
+  </div>
+</div>
 
             <ModalInput
               label="Email Id"

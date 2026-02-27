@@ -67,6 +67,7 @@ interface PurchaseOrderData {
     uom: string;
     rate: number;
     amount: number;
+    requiredBy?: string;
   }>;
 
   tax?: {
@@ -295,10 +296,6 @@ const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
                   <p className="text-main font-semibold">{formatDate(po.poDate)}</p>
                 </div>
                 <div>
-                  <p className="text-muted mb-0.5">Required By</p>
-                  <p className="text-main font-semibold">{formatDate(po.requiredBy)}</p>
-                </div>
-                <div>
                   <p className="text-muted mb-0.5">Currency</p>
                   <p className="text-main font-semibold">{po.currency}</p>
                 </div>
@@ -451,6 +448,7 @@ const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
                     <th className="text-left px-3 py-2 font-bold">Description</th>
                     <th className="text-right px-3 py-2 font-bold" style={{ width: '60px' }}>Qty</th>
                     <th className="text-center px-3 py-2 font-bold" style={{ width: '50px' }}>UOM</th>
+                    <th className="text-center px-3 py-2 font-bold" style={{ width: '100px' }}>Required By</th>
                     <th className="text-right px-3 py-2 font-bold" style={{ width: '90px' }}>Rate</th>
                     <th className="text-right px-3 py-2 font-bold" style={{ width: '110px' }}>Amount</th>
                   </tr>
@@ -463,6 +461,9 @@ const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
                       <td className="px-3 py-2 text-main">{item.item_name}</td>
                       <td className="px-3 py-2 text-right font-semibold text-main">{item.qty}</td>
                       <td className="px-3 py-2 text-center text-muted">{item.uom}</td>
+                      <td className="px-3 py-2 text-center text-main font-semibold">
+                        {item.requiredBy ? formatDate(item.requiredBy) : "-"}
+                      </td>
                       <td className="px-3 py-2 text-right font-mono text-main">{formatCurrency(item.rate)}</td>
                       <td className="px-3 py-2 text-right font-bold text-primary">{formatCurrency(item.amount)}</td>
                     </tr>
