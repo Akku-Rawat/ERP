@@ -264,7 +264,7 @@ const HrDashboard: React.FC = () => {
 
           <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-gray-900">Employee Status (Donut)</h3>
+              <h3 className="text-sm font-bold text-gray-900">Employee Status </h3>
             </div>
 
             <div className="h-64 rounded-lg border border-gray-200 bg-white" style={chartPlaneStyle}>
