@@ -202,16 +202,18 @@ const NewPayrollEntry: React.FC<{
 };
 
 const StatusChip: React.FC<{ status?: string }> = ({ status }) => {
-  const s = String(status ?? "").toLowerCase();
+  const raw = String(status ?? "").trim();
+  const normalized = raw.toLowerCase() === "submitted" ? "Paid" : raw;
+  const s = String(normalized ?? "").toLowerCase();
   const cls =
-    s === "submitted" || s === "paid"
+    s === "paid"
       ? "bg-success/10 text-success border-success/20"
       : s === "draft"
         ? "bg-warning/10 text-warning border-warning/20"
         : "bg-app text-muted border-theme";
   return (
     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${cls}`}>
-      {status || "—"}
+      {normalized || "—"}
     </span>
   );
 };
