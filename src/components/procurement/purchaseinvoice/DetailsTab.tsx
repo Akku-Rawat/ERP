@@ -75,16 +75,16 @@ export const DetailsTab = ({
   return (
     <div className="flex flex-col gap-4 max-h-screen overflow-auto p-4 bg-app text-main">
       <div className="bg-app">
-        <div className="grid grid-cols-[280px_150px_180px_120px_120px_140px_140px] gap-x-2 justify-start items-end">
+        <div className="grid grid-cols-[250px_135px_135px_90px_120px_100px_100px_140px_140px] gap-x-2 items-end">
           {/* Supplier */}
-          <div className="w-[280px]">
+          <div className="w-[250px]">
             <SupplierSelect
               selectedId={form.supplierId}
               onChange={onSupplierChange}
             />
           </div>
 
-          <div className="w-[150px]">
+          <div className="w-[135px]">
             <ModalSelect
               label="PO Number"
               name="poNumber"
@@ -94,19 +94,19 @@ export const DetailsTab = ({
                 label: po.poId,
                 value: po.poId
               }))}
-            onChange={(e) => {
-  const selected = poList.find(
-    p => p.poId === e.target.value
-  );
+              onChange={(e) => {
+                const selected = poList.find(
+                  p => p.poId === e.target.value
+                );
 
-  if (selected) {
-    onPOSelect(selected);
-  }
-}}
+                if (selected) {
+                  onPOSelect(selected);
+                }
+              }}
             />
           </div>
 
-          <div className="w-[180px]">
+          <div className="w-[135px]">
             <ModalInput
               label="Supplier Invoice No"
               name="supplierInvoiceNumber"
@@ -117,7 +117,7 @@ export const DetailsTab = ({
 
 
           {/* Date */}
-          <div className="w-[100px]">
+          <div className="w-[90px]">
             <ModalInput
               label="Date"
               type="date"
@@ -149,71 +149,66 @@ export const DetailsTab = ({
               ]}
             />
           </div>
-          <div className="w-[130px]">
-            <ModalSelect
+          <div className="w-[100px]">
+            <ModalInput
               label="Cost Center"
               name="costCenter"
               value={form.costCenter}
-              onChange={onFormChange}
-              options={[
-                { value: "UD-001 - Udvil - RI", label: "UD-001 - Udvil - RI" },
-
-              ]}
+              disabled
             />
           </div>
 
-          <div className="w-[140px]">
+          <div className="w-[100px]">
             <ModalInput
               label="Project"
               name="project"
               value={form.project}
-              onChange={onFormChange}
+              disabled
             />
           </div>
 
 
-          <div className="grid grid-cols-[170px_170px] gap-x-3 mt-2">
-            <div className="w-[140px]">
-              <ModalSelect
-                label="Transaction Progress"
-                name="transactionProgress"
-                value={form.transactionProgress}
-                onChange={onFormChange}
-                options={[
-                  { value: "APPROVED", label: "Approved" },
-                  { value: "REFUNDED", label: "Refunded" },
-                  { value: "TRANSFERRED", label: "Transferred" },
-                  { value: "REJECTED", label: "Rejected" },
-                ]}
-              />
-            </div>
+          {/* Transaction Progress */}
+          <div className="w-[120px]">
+            <ModalSelect
+              label="Transaction Progress"
+              name="transactionProgress"
+              value={form.transactionProgress}
+              onChange={onFormChange}
+              options={[
+                { value: "APPROVED", label: "Approved" },
+                { value: "REFUNDED", label: "Refunded" },
+                { value: "TRANSFERRED", label: "Transferred" },
+                { value: "REJECTED", label: "Rejected" },
+              ]}
+            />
+          </div>
+        </div>
 
-            <div className="w-[140px]">
-              <ModalSelect
-                label="Payment Type"
-                name="paymentType"
-                value={form.paymentType}
-                onChange={onFormChange}
-                options={[
-                  { value: "CASH", label: "CASH" },
-                  { value: "CREDIT", label: "CREDIT" },
-                  { value: "Bank transfer", label: "Bank transfer" },
-                  { value: "CASH/CREDIT", label: "CASH/CREDIT" },
-                  { value: "BANK CHECK", label: "BANK CHECK" },
-                  {
-                    value: "MOBILE MONEY",
-                    label: "Any Transaction Using Mobile Money System",
-                  },
-                  { value: "DEBIT & CREDIT CARD", label: "PAYMENT USING CARD" },
-                  { value: "OTHER", label: "Other Payment Methods" },
-                ]}
-              />
-            </div>
+        <div className="mt-2 grid grid-cols-[250px_135px_135px_90px_90px_100px_100px_140px] gap-x-2">
 
+          <div className="col-start-1 w-[140px]">
+            <ModalSelect
+              label="Payment Type"
+              name="paymentType"
+              value={form.paymentType}
+              onChange={onFormChange}
+              options={[
+                { value: "CASH", label: "CASH" },
+                { value: "CREDIT", label: "CREDIT" },
+                { value: "Bank transfer", label: "Bank transfer" },
+                { value: "CASH/CREDIT", label: "CASH/CREDIT" },
+                { value: "BANK CHECK", label: "BANK CHECK" },
+                { value: "MOBILE MONEY", label: "Mobile Money" },
+                { value: "DEBIT & CREDIT CARD", label: "Card" },
+                { value: "OTHER", label: "Other" },
+              ]}
+            />
           </div>
 
         </div>
       </div>
+
 
       {/* Main Body - Table LEFT + Sidebar RIGHT */}
       <div className="grid grid-cols-[4fr_1fr] gap-4">
