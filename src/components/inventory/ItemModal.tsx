@@ -8,9 +8,9 @@ import { YesNoCheckbox } from "../ui/modal/modalComponent";
 
 /** Tiny label text with optional required asterisk */
 const FieldLabel: React.FC<{ label: string; required?: boolean }> = ({ label, required }) => (
-  <span className="text-[11px] font-medium uppercase tracking-wide text-muted">
+  <span className={`text-[11px] font-medium uppercase tracking-wide ${required ? "text-muted" : "text-muted"}`}>
     {label}
-    {required && <span className="text-danger ml-0.5">*</span>}
+    {required && <span className="ml-0.5 text-danger">*</span>}
   </span>
 );
 
@@ -61,13 +61,16 @@ const DynamicFieldWrapper: React.FC<{
   letter-spacing: 0.05em !important;
 }
 
-/* Default label */
 .dynamic-field-wrap label > span:first-child {
   color: var(--text-muted);
 }
 
-/* Required star always red */
 .dynamic-field-wrap label > span:first-child span {
+  color: var(--color-danger) !important;
+}
+
+.dynamic-field-wrap span:has(> span) > span,
+.dynamic-field-wrap label span span {
   color: var(--color-danger) !important;
 }
       .dynamic-field-wrap input,
@@ -228,7 +231,9 @@ const CheckboxField: React.FC<{
         )}
       </div>
     </div>
-    <span className="text-sm font-medium text-main">{label}</span>
+    <span className="text-[11px] font-medium text-main whitespace-nowrap">
+      {label}
+    </span>
   </label>
 );
 
@@ -316,8 +321,8 @@ const ItemModal: React.FC<{
       onClose={handleClose}
       title={isEditMode ? "Edit Item" : "Add Item"}
       subtitle="Create and manage item details"
-      maxWidth="6xl"
-      height="65vh"
+      customWidth="68vw"
+      height="60vh"
     >
       <form onSubmit={handleSubmit} noValidate className="h-full flex flex-col">
 
@@ -342,7 +347,6 @@ const ItemModal: React.FC<{
             {/* ══════════════ ITEM DETAILS TAB ══════════════ */}
             {activeTab === "details" && (
               <>
-                <SectionHeading title="Item Information" />
 
                 {/* 4-col grid for item fields */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-3 gap-y-4 items-end">
@@ -359,7 +363,7 @@ const ItemModal: React.FC<{
                           onChange={handleForm}
                           required
                           placeholder="e.g. 84713010"
-                          className="w-full"
+                          className="w-[140px]"
                         />
                       );
                     }
@@ -369,36 +373,38 @@ const ItemModal: React.FC<{
                       return (
                         <div
                           key="uom-svc-ins-sku"
-                          className="col-span-3 flex items-end gap-4"
+                          className="col-span-3 grid grid-cols-[90px_130px_130px_160px_auto_auto_auto] gap-4 items-end"
                         >
 
                           {/* Packing */}
-                          <div className="flex flex-col gap-0.5">
-                            <FieldLabel label="Packing Unit" />
-                            <div className="flex items-center gap-1 h-8">
-                              <input
-                                type="number"
-                                name="pakingunit"
-                                value={form.pakingunit || ""}
-                                onChange={handleForm}
-                                placeholder="1"
-                                min={1}
-                                className="w-12 h-8 rounded-md border border-theme bg-card text-main text-center text-sm px-1
-        focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-                              />
-                              <span className="text-muted text-xs font-bold">×</span>
-                              <input
-                                type="number"
-                                name="packingsize"
-                                value={form.packingsize || ""}
-                                onChange={handleForm}
-                                placeholder="1"
-                                min={1}
-                                className="w-12 h-8 rounded-md border border-theme bg-card text-main text-center text-sm px-1
-        focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-                              />
+                          <DynamicFieldWrapper className="max-w-[90px]">
+                            <div className="flex flex-col gap-0.5">
+                              <FieldLabel label="Packing Unit" />
+                              <div className="flex items-center gap-1 h-8">
+                                <input
+                                  type="number"
+                                  name="pakingunit"
+                                  value={form.pakingunit || ""}
+                                  onChange={handleForm}
+                                  placeholder="1"
+                                  min={1}
+                                  className="w-10 h-8 rounded-md border border-theme bg-card text-main text-center text-sm px-1
+                                focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                                />
+                                <span className="text-muted text-xs font-bold">×</span>
+                                <input
+                                  type="number"
+                                  name="packingsize"
+                                  value={form.packingsize || ""}
+                                  onChange={handleForm}
+                                  placeholder="1"
+                                  min={1}
+                                  className="w-10 h-8 rounded-md border border-theme bg-card text-main text-center text-sm px-1
+                                  focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                                />
+                              </div>
                             </div>
-                          </div>
+                          </DynamicFieldWrapper>
 
                           {/* UOM */}
                           <DynamicFieldWrapper className="max-w-[130px]">
@@ -411,7 +417,7 @@ const ItemModal: React.FC<{
                           </DynamicFieldWrapper>
 
                           {/* SKU */}
-                          <DynamicFieldWrapper className="max-w-[150px]">
+                          <DynamicFieldWrapper className="max-w-[130px]">
                             <DynamicField
                               config={fieldConfigs.find(f => f.fieldName === "sku")!}
                               value={form.sku}
@@ -421,31 +427,43 @@ const ItemModal: React.FC<{
                           </DynamicFieldWrapper>
 
 
-                          {/* Service Charge */}
-                          <YesNoCheckbox
-                            label="Svc Charge"
-                            name="svcCharge"
-                            value={form.svcCharge || "N"}
-                            onChange={handleToggleChange}
-                          />
+                          {/* Country of Origin */}
+                          <DynamicFieldWrapper className="max-w-[150px]">
+                            <DynamicField
+                              config={fieldConfigs.find(f => f.fieldName === "originNationCode")!}
+                              value={form.originNationCode}
+                              onChange={handleDynamicFieldChange}
+                            />
+                          </DynamicFieldWrapper>
 
-                          {/* Insurance */}
-                          <YesNoCheckbox
-                            label="Insurance"
-                            name="ins"
-                            value={form.ins || "N"}
-                            onChange={handleToggleChange}
-                          />
+                          <div className="w-full min-w-[70px]">
+                            <YesNoCheckbox
+                              label="Svc Charge"
+                              name="svcCharge"
+                              value={form.svcCharge || "N"}
+                              onChange={handleToggleChange}
+                            />
+                          </div>
 
-                          {/* Taxable */}
-                          <YesNoCheckbox
-                            label="Taxable"
-                            name="taxPreference"
-                            value={form.taxPreference === "Taxable" ? "Y" : "N"}
-                            onChange={(name, val) =>
-                              handleDynamicFieldChange(name, val === "Y" ? "Taxable" : "Non-Taxable")
-                            }
-                          />
+                          <div className="w-full min-w-[70px]">
+                            <YesNoCheckbox
+                              label="Insurance"
+                              name="ins"
+                              value={form.ins || "N"}
+                              onChange={handleToggleChange}
+                            />
+                          </div>
+
+                          <div className="w-full min-w-[80px]">
+                            <YesNoCheckbox
+                              label="Taxable"
+                              name="taxPreference"
+                              value={form.taxPreference === "Taxable" ? "Y" : "N"}
+                              onChange={(name, val) =>
+                                handleDynamicFieldChange(name, val === "Y" ? "Taxable" : "Non-Taxable")
+                              }
+                            />
+                          </div>
 
                         </div>
                       );
@@ -459,7 +477,7 @@ const ItemModal: React.FC<{
                     if (fieldConfig.fieldName === "sellingPrice") return null;
                     if (fieldConfig.fieldName === "buyingPrice") return null;
                     if (fieldConfig.fieldName === "dimensionWidth") return null;
-                    if (fieldConfig.fieldName === "countryOfOrigin") return null; 
+                    if (fieldConfig.fieldName === "originNationCode") return null;
 
                     /* Item Group */
                     if (fieldConfig.fieldName === "itemGroup") {
@@ -698,7 +716,7 @@ const ItemModal: React.FC<{
             {/* ══════════════ INVENTORY DETAILS TAB ══════════════ */}
             {activeTab === "inventoryDetails" && (
               <>
-                <SectionHeading title="Inventory Details" />
+
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-3 gap-y-4 items-end">
                   <Input
@@ -711,7 +729,7 @@ const ItemModal: React.FC<{
                   />
 
                   {/* Dimensions */}
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-0.5 min-w-[150px]">
                     <FieldLabel label="Dimensions (L × W × H)" />
                     <div className="flex items-center gap-1 h-8">
                       {["dimensionLength", "dimensionWidth", "dimensionHeight"].map((dim, i) => (
@@ -742,16 +760,18 @@ const ItemModal: React.FC<{
                   </div>
 
                   {/* Weight */}
-                  <div className="flex flex-col gap-0.5">
-                    <FieldLabel label="Weight" />
-                    <div className="flex items-center gap-1 h-8">
+                  <div className="flex flex-col gap-0.5 min-w-[170px]">
+                      <span className="ml-9">
+    <FieldLabel label="Weight" />
+  </span>
+                    <div className="flex items-center gap-1 h-8 w-full">
                       <input
                         type="number"
                         name="weight"
                         value={form.weight || ""}
                         onChange={handleForm}
                         placeholder="0"
-                        className="flex-1 h-8 rounded-md border border-theme bg-card text-main text-sm px-2.5
+                        className="w-16 ml-9 h-8 rounded-md border border-theme bg-card text-main text-sm px-2.5
                           focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                       />
                       <select
@@ -781,53 +801,53 @@ const ItemModal: React.FC<{
                   </CompactSelect>
                 </div>
 
-                {/* Batch & Expiry */}
-                {showBatchExpiry && (
-                  <>
-                    <SectionHeading title="Batch & Expiry" />
-                    <div className="flex flex-wrap gap-5">
-                      <CheckboxField
-                        id="has_batch_no"
-                        label="Has Batch Number"
-                        checked={form.has_batch_no || false}
-                        onChange={(checked) => setForm((prev) => ({ ...prev, has_batch_no: checked }))}
-                      />
-                      <CheckboxField
-                        id="has_expiry_date"
-                        label="Has Expiry Date"
-                        checked={form.has_expiry_date || false}
-                        onChange={(checked) => setForm((prev) => ({ ...prev, has_expiry_date: checked }))}
-                      />
-                    </div>
-                  </>
-                )}
+
 
                 {/* Track Inventory */}
                 <SectionHeading title="Inventory Tracking" />
-                <div className="space-y-3">
+                <div className="flex items-end gap-5 flex-wrap mt-[-6px]">
+                  <CheckboxField
+                    id="has_batch_no"
+                    label="Has Batch Number"
+                    checked={form.has_batch_no || false}
+                    onChange={(checked) =>
+                      setForm((prev) => ({ ...prev, has_batch_no: checked }))
+                    }
+                  />
+
+                  <CheckboxField
+                    id="has_expiry_date"
+                    label="Has Expiry Date"
+                    checked={form.has_expiry_date || false}
+                    onChange={(checked) =>
+                      setForm((prev) => ({ ...prev, has_expiry_date: checked }))
+                    }
+                  />
+
                   <CheckboxField
                     id="trackInventory"
                     label="Track Inventory"
                     checked={form.trackInventory || false}
-                    onChange={(checked) => setForm((prev) => ({ ...prev, trackInventory: checked }))}
+                    onChange={(checked) =>
+                      setForm((prev) => ({ ...prev, trackInventory: checked }))
+                    }
                   />
 
-                  {form.trackInventory && (
-                    <div className="ml-6 max-w-xs">
-                      <CompactSelect
-                        label="Tracking Method"
-                        name="trackingMethod"
-                        value={form.trackingMethod || ""}
-                        onChange={handleForm}
-                      >
-                        <option value="">Select method…</option>
-                        <option value="none">Normal (No tracking)</option>
-                        <option value="batch">Batch</option>
-                        <option value="serial">Serial Number (SR No)</option>
-                        <option value="imei">IMEI</option>
-                      </CompactSelect>
-                    </div>
-                  )}
+                  <div className="w-[180px]">
+                    <CompactSelect
+                      label="Tracking Method"
+                      name="trackingMethod"
+                      value={form.trackingMethod || ""}
+                      onChange={handleForm}
+                      disabled={!form.trackInventory}
+                    >
+                      <option value="">Select method…</option>
+                      <option value="none">Normal</option>
+                      <option value="batch">Batch</option>
+                      <option value="serial">Serial</option>
+                      <option value="imei">IMEI</option>
+                    </CompactSelect>
+                  </div>
                 </div>
 
                 {/* Stock Levels */}

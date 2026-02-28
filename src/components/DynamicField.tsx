@@ -196,6 +196,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
             fetchData={fetchFn}
             onChange={({ id }) => onChange(apiConfig.fieldName, id)}
             required={apiConfig.required}
+            displayField={apiConfig.displayField} 
           />
           {/* Hidden input for HTML5 validation */}
           {apiConfig.required && (
