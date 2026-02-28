@@ -436,18 +436,28 @@ export default function AdvanceLoanTab() {
                             {detailLoading ? (
                                 <div className="flex justify-center p-10"><RefreshCw className="w-6 h-6 animate-spin text-muted" /></div>
                             ) : selectedDetail ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <Field label="Employee ID" value={selectedDetail.employee} />
-                                    <Field label="Employee Name" value={selectedDetail.employee_name} />
-                                    <Field label="Company" value={selectedDetail.company} />
-                                    <Field label="Department" value={selectedDetail.department} />
-                                    <Field label="Posting Date" value={selectedDetail.posting_date} />
-                                    <Field label="Purpose" value={selectedDetail.purpose} />
-                                    <Field label="Advance Amount" value={Number(selectedDetail.advance_amount || 0).toLocaleString("en-ZM", { minimumFractionDigits: 2 })} />
-                                    <Field label="Paid Amount" value={Number(selectedDetail.paid_amount || 0).toLocaleString("en-ZM", { minimumFractionDigits: 2 })} />
-                                    <Field label="Pending Amount" value={Number(selectedDetail.pending_amount || 0).toLocaleString("en-ZM", { minimumFractionDigits: 2 })} />
-                                    <Field label="Claimed Amount" value={Number(selectedDetail.claimed_amount || 0).toLocaleString("en-ZM", { minimumFractionDigits: 2 })} />
-                                    <Field label="Return Amount" value={Number(selectedDetail.return_amount || 0).toLocaleString("en-ZM", { minimumFractionDigits: 2 })} />
+                                <div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        <Field label="Employee ID" value={selectedDetail.employee} />
+                                        <Field label="Employee Name" value={selectedDetail.employee_name} />
+                                        <Field label="Company" value={selectedDetail.company} />
+                                        <Field label="Department" value={selectedDetail.department} />
+                                        <Field label="Posting Date" value={selectedDetail.posting_date} />
+                                        <Field label="Advance Amount" value={Number(selectedDetail.advance_amount || 0).toLocaleString("en-ZM", { minimumFractionDigits: 2 })} />
+                                        <Field label="Paid Amount" value={Number(selectedDetail.paid_amount || 0).toLocaleString("en-ZM", { minimumFractionDigits: 2 })} />
+                                        <Field label="Pending Amount" value={Number(selectedDetail.pending_amount || 0).toLocaleString("en-ZM", { minimumFractionDigits: 2 })} />
+                                        <Field label="Claimed Amount" value={Number(selectedDetail.claimed_amount || 0).toLocaleString("en-ZM", { minimumFractionDigits: 2 })} />
+                                        <Field label="Return Amount" value={Number(selectedDetail.return_amount || 0).toLocaleString("en-ZM", { minimumFractionDigits: 2 })} />
+                                    </div>
+
+                                    <div className="mt-6">
+                                        <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1.5">Purpose</p>
+                                        <div className="bg-muted/5 p-4 rounded-lg border border-border min-h-24">
+                                            <p className="text-sm font-medium text-main leading-relaxed whitespace-pre-wrap break-words">
+                                                {String(selectedDetail.purpose ?? "").trim() || "—"}
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="text-sm text-muted">No details found.</div>
