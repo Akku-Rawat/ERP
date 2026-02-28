@@ -15,8 +15,6 @@ import PurchaseInvoiceModal from "../../components/procurement/PurchaseInvoiceMo
 import PurchaseOrderModal from "../../components/procurement/PurchaseOrderModal";
 import SupplierPurchaseOrders from "./SupplierPurchaseOrders";
 
-
-
 /*  PROPS  */
 
 interface Props {
@@ -43,29 +41,28 @@ const SupplierDetailView: React.FC<Props> = ({
   const [showPOModal, setShowPOModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
-
-
   const supplierDetail = suppliers.find((s) =>
     supplier.supplierId
       ? s.supplierId === supplier.supplierId
       : s.supplierCode === supplier.supplierCode,
   );
   const supplierName = supplierDetail?.supplierName;
-
+  const formattedDate = supplier?.dateOfAddition
+    ? new Date(supplier.dateOfAddition).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : null;
 
   const supplierCode = supplierDetail?.supplierCode;
-
 
   const filteredSuppliers = suppliers.filter(
     (s) =>
       (s.supplierName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.supplierCode || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (s.tpin || "").toLowerCase().includes(searchTerm.toLowerCase())
+      (s.tpin || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
-
-
-
-
 
   const renderActionButton = () => {
     switch (activeTab) {
@@ -106,22 +103,42 @@ const SupplierDetailView: React.FC<Props> = ({
   };
 
   const formatAddress = () => {
-    const parts = [
-      supplierDetail?.billingAddressLine1,
-      supplierDetail?.billingAddressLine2,
-      supplierDetail?.billingCity,
-      supplierDetail?.district,
-      supplierDetail?.province,
-      supplierDetail?.billingPostalCode,
-      supplierDetail?.billingCountry,
-    ].filter(Boolean);
-    return parts.length ? parts.join(", ") : "—";
-  };
+    if (!supplier) return "—";
 
+    const {
+      billingAddressLine1,
+      billingAddressLine2,
+      billingCity,
+      district,
+      province,
+      billingPostalCode,
+      billingCountry,
+    } = supplier;
+
+    return (
+      <div className="flex flex-col text-right leading-tight">
+        {billingAddressLine1 && <span>{billingAddressLine1}</span>}
+
+        {(billingAddressLine2 || billingCity) && (
+          <span>
+            {[billingAddressLine2, billingCity].filter(Boolean).join(", ")}
+          </span>
+        )}
+
+        {(district || province) && (
+          <span>{[district, province].filter(Boolean).join(", ")}</span>
+        )}
+
+        {billingCountry && <span>{billingCountry}</span>}
+
+        {billingPostalCode && <span>{billingPostalCode}</span>}
+      </div>
+    );
+  };
   return (
     <div className="flex flex-col bg-app text-main overflow-hidden ">
       {/*  HEADER  */}
-       <header className="bg-card px-5 py-3 flex items-center justify-between border-b border-[var(--border)] shrink-0">
+      <header className="bg-card px-5 py-3 flex items-center justify-between border-b border-[var(--border)] shrink-0">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
@@ -147,14 +164,19 @@ const SupplierDetailView: React.FC<Props> = ({
             </p>
           </div>
         </div>
+        
+        {formattedDate && (
+          <div className="text-[10px] font-semibold text-muted uppercase tracking-wider">
+            Added on {formattedDate}
+          </div>
+        )}
 
         {renderActionButton()}
       </header>
 
       <div className="flex-1 flex overflow-hidden min-h-0">
-
         {/*  SIDEBAR  */}
-        <aside className="w-60 bg-card border-r border-[var(--border)] h-130 rounded-2xl">
+        <aside className="w-60 bg-card border-r border-[var(--border)] flex flex-col rounded-br-2xl rounded-bl-2xl overflow-hidden ">
           <div className="p-3 border-b border-[var(--border)] bg-row-hover/10">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" />
@@ -168,21 +190,23 @@ const SupplierDetailView: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className=" overflow-y-auto custom-scrollbar mt-3 px-2 h-110">
+          <div className=" overflow-y-auto custom-scrollbar mt-3 px-2 ">
             {filteredSuppliers.map((s) => (
               <button
                 key={s.supplierId || s.supplierCode}
                 onClick={() => onSupplierSelect(s)}
-                className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center gap-3 border ${s.supplierCode === supplierDetail?.supplierCode
-                  ? "bg-primary text-white border-primary shadow-sm"
-                  : "bg-transparent border-transparent hover:bg-row-hover"
-                  }`}
+                className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center gap-3 border ${
+                  s.supplierCode === supplierDetail?.supplierCode
+                    ? "bg-primary text-white border-primary shadow-sm"
+                    : "bg-transparent border-transparent hover:bg-row-hover"
+                }`}
               >
                 <div
-                  className={`w-7 h-7 shrink-0 rounded-lg flex items-center justify-center font-bold text-[10px] ${s.supplierCode === supplierDetail?.supplierCode
-                    ? "bg-white/20"
-                    : "bg-muted text-white"
-                    }`}
+                  className={`w-7 h-7 shrink-0 rounded-lg flex items-center justify-center font-bold text-[10px] ${
+                    s.supplierCode === supplierDetail?.supplierCode
+                      ? "bg-white/20"
+                      : "bg-muted text-white"
+                  }`}
                 >
                   {(s.supplierName || "?").charAt(0).toUpperCase()}
                 </div>
@@ -212,7 +236,6 @@ const SupplierDetailView: React.FC<Props> = ({
 
         {/*  MAIN  */}
         <main className="flex-1 flex flex-col min-w-0 bg-app/20">
-
           {/* Tabs */}
           <div className="bg-card border-b border-[var(--border)] px-4 shrink-0 z-10">
             <div className="flex">
@@ -225,10 +248,11 @@ const SupplierDetailView: React.FC<Props> = ({
                 <button
                   key={t.id}
                   onClick={() => setActiveTab(t.id as any)}
-                  className={`px-4 py-3.5 font-bold text-[10px] uppercase tracking-widest border-b-2 transition-all ${activeTab === t.id
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted hover:text-main"
-                    }`}
+                  className={`px-4 py-3.5 font-bold text-[10px] uppercase tracking-widest border-b-2 transition-all ${
+                    activeTab === t.id
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted hover:text-main"
+                  }`}
                 >
                   {t.label}
                 </button>
@@ -240,52 +264,124 @@ const SupplierDetailView: React.FC<Props> = ({
           <div className="flex-1 overflow-y-auto pt-4 px-2 box-border">
             {activeTab === "overview" && (
               <div className="max-w-6xl mx-auto space-y-4 animate-in fade-in duration-500 p-5">
-
                 {/* Info Strips */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <InfoStrip label="Currency" value={supplierDetail?.currency} icon={<Building2 />} />
-                  <InfoStrip label="TPIN" value={supplierDetail?.tpin} icon={<FileText />} />
-                  <InfoStrip label="Opening Balance" value={supplierDetail?.openingBalance} icon={<Receipt />} />
+                <div className="bg-card rounded-2xl border border-[var(--border)] p-5 shadow-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-app/30 rounded-xl p-3">
+                      <p className="text-[8px] font-black text-muted uppercase tracking-wider">
+                        Tax Category
+                      </p>
+                      <p className="text-xs font-bold text-main">
+                        {supplier?.taxCategory || "Not provided"}
+                      </p>
+                    </div>
+                    <div className="bg-app/30 rounded-xl p-3">
+                      <p className="text-[8px] font-black text-muted uppercase tracking-wider">
+                        TPIN
+                      </p>
+                      <p className="text-xs font-bold text-main">
+                        {supplier?.tpin || "Not provided"}
+                      </p>
+                    </div>
+
+                    <div className="bg-app/30 rounded-xl p-3">
+                      <p className="text-[8px] font-black text-muted uppercase tracking-wider">
+                        Opening Balance
+                      </p>
+                      <p className="text-xs font-bold text-main">
+                        {supplier?.openingBalance || "Not provided"}
+                      </p>
+                    </div>
+                    <div className="bg-app/30 rounded-xl p-3">
+                      <p className="text-[8px] font-black text-muted uppercase tracking-wider">
+                        Currency
+                      </p>
+                      <p className="text-xs font-bold text-main">
+                        {supplier?.currency || "Not provided"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Contact + Address */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div className="bg-card rounded-2xl border border-[var(--border)] p-5 shadow-sm">
                     <h4 className="text-[10px] font-black text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
-                      <Mail size={12} className="text-primary" /> Contact Channels
+                      <Mail size={12} className="text-primary" /> Contact
+                      Channels
                     </h4>
                     <div className="space-y-3">
-                      <DataRow label="Email Address" value={supplierDetail?.emailId} />
-                      <DataRow label="Phone Number" value={supplierDetail?.phoneNo} />
+                      <DataRow
+                        label="Contact Person"
+                        value={supplierDetail?.contactPerson}
+                      />
+
+                      <DataRow
+                        label="Phone Number"
+                        value={supplierDetail?.phoneNo}
+                      />
+                      <DataRow
+                        label="Alternate Number"
+                        value={supplierDetail?.alternateNo}
+                      />
+
+                      <DataRow
+                        label="Email Address"
+                        value={supplierDetail?.emailId}
+                      />
+
+                      <DataRow
+                        label="Billing Address"
+                        value={formatAddress()}
+                      />
                     </div>
                   </div>
 
                   <div className="bg-card rounded-2xl border border-[var(--border)] p-5 shadow-sm">
                     <h4 className="text-[10px] font-black text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
-                      <MapPin size={12} className="text-primary" /> Physical Location
+                      Bank Details
                     </h4>
-                    <DataRow label="Billing Address" value={formatAddress()} />
-                  </div>
-                </div>
 
-                <div className="p-4 border-2 border-dashed border-[var(--border)] rounded-2xl flex items-center justify-center opacity-40">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted">
-                    Additional ledger data will load here
-                  </p>
+                    <div className="space-y-3">
+                      <DataRow
+                        label="Account Holder"
+                        value={supplier?.accountHolder}
+                      />
+
+                      <DataRow
+                        label="Bank Name"
+                        value={supplier?.bankAccount}
+                      />
+
+                      <DataRow
+                        label="Account Number"
+                        value={supplier?.accountNumber}
+                      />
+
+                      <DataRow label="SWIFT Code" value={supplier?.swiftCode} />
+
+                      <DataRow
+                        label="Sort/IFSC Code"
+                        value={supplier?.sortCode}
+                      />
+
+                      <DataRow
+                        label="Branch Address"
+                        value={supplier?.branchAddress}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
-           
             {activeTab === "purchase-orders" && supplierName && (
               <SupplierPurchaseOrders supplierName={supplierName} />
             )}
-            
 
             {activeTab === "statement" && supplierDetail && (
               <SupplierStatement supplier={supplierDetail} />
             )}
-
           </div>
         </main>
       </div>
@@ -314,9 +410,7 @@ const InfoStrip = ({ icon, label, value }: any) => (
       <p className="text-[8px] font-black text-muted uppercase tracking-wider">
         {label}
       </p>
-      <p className="text-xs font-bold text-main">
-        {value || "—"}
-      </p>
+      <p className="text-xs font-bold text-main">{value || "—"}</p>
     </div>
   </div>
 );
@@ -326,7 +420,7 @@ const DataRow = ({ label, value }: any) => (
     <span className="text-[9px] font-bold text-muted uppercase tracking-widest">
       {label}
     </span>
-    <span className="text-xs font-semibold text-main truncate max-w-[220px]">
+    <span className="text-xs font-semibold text-main text-right max-w-[220px] break-words">
       {value || "Not provided"}
     </span>
   </div>
