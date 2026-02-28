@@ -15,6 +15,7 @@ interface PurchaseInvoiceModalProps {
   onClose: () => void;
   onSubmit?: (data: any) => void;
   pId?: string | number;
+  poLoading?: boolean;
 }
 
 const tabs: { key: POTab; icon: typeof Building2; label: string }[] = [
@@ -46,6 +47,7 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
     handleSubmit,
     reset,
      poList,
+     poLoading,
   handlePOSelect,
    customShippingRule,
   setCustomShippingRule,
@@ -117,7 +119,9 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
               getCurrencySymbol={getCurrencySymbol}
               onItemSelect={handleItemSelect}
               poList={poList}
-onPOSelect={handlePOSelect}
+              poLoading={poLoading}
+              onPOSelect={handlePOSelect}
+
             />
           )}
 

@@ -46,6 +46,7 @@ export const usePurchaseInvoiceForm = ({
   const [poList, setPoList] = useState<any[]>([]);
   const [customShippingRule, setCustomShippingRule] = useState("");
   const [customIncoterm, setCustomIncoterm] = useState("");
+  const [poLoading, setPoLoading] = useState(false);
   useEffect(() => {
     if (!isOpen) {
       setForm(emptyPOForm);
@@ -156,53 +157,59 @@ export const usePurchaseInvoiceForm = ({
     }));
   };
 
-  const handlePOSelect = async (po: any) => {
-    if (!po) return;
+const handlePOSelect = async (po: any) => {
+  if (!po) return;
 
-    try {
-      const res = await getPurchaseOrderById(po.poId);
-      const data = res?.data;
-      if (!data) return;
+  try {
+    const res = await getPurchaseOrderById(po.poId);
+    const data = res?.data;
+    if (!data) return;
 
-      setForm(prev => ({
-        ...prev,
+    setForm(prev => ({
+      ...prev,
 
-        poNumber: data.pId,
-        currency: data.currency,
-        project: data.project,
-        costCenter: data.costCenter,
-        incoterm: data.incoterm,
-        shippingRule: data.shippingRule,
+      poNumber: data.poId,
+      supplier: data.supplierName,
+      currency: data.currency,
+      taxCategory: data.taxCategory || "",
+      project: data.project,
+      costCenter: data.costCenter,
+      incoterm: data.incoterm,
+      placeOfSupply: data.placeOfSupply || "",
 
-        addresses: {
-          ...prev.addresses,
-          supplierAddress: data.addresses?.supplierAddress || prev.addresses.supplierAddress,
-          dispatchAddress: data.addresses?.dispatchAddress || prev.addresses.dispatchAddress,
-          shippingAddress: data.addresses?.shippingAddress || prev.addresses.shippingAddress,
-        },
+      addresses: {
+        ...prev.addresses,
+        supplierAddress: data.addresses?.supplierAddress || prev.addresses.supplierAddress,
+        dispatchAddress: data.addresses?.dispatchAddress || prev.addresses.dispatchAddress,
+        shippingAddress: data.addresses?.shippingAddress || prev.addresses.shippingAddress,
+      },
 
-        items: (data.items || []).map((item: any) => ({
-          itemCode: item.item_code,
-          itemName: item.item_name,
-          quantity: item.qty,
-          rate: item.rate,
-          uom: item.uom,
-          vatCd: item.VatCd || "",
-          vatRate: Number(item.vatRate ?? 0),
-          description: "",
-          packing: "",
-          batchNo: "",
-          mfgDate: "",
-          expDate: "",
-          discount: 0,
-        }))
-      }));
+      items: (data.items || []).map((item: any) => ({
+        itemCode: item.item_code,
+        itemName: item.item_name,
+        quantity: item.qty,
+        rate: item.rate,
+        uom: item.uom,
+        vatCd: "",
+        vatRate: Number(data.tax?.taxRate?.replace("%", "") || 0),
+        description: "",
+        packing: "",
+        batchNo: "",
+        mfgDate: "",
+        expDate: "",
+        discount: 0,
+      })),
 
-    } catch (e) {
-      showApiError({ message: "Failed to load PO details" });
-    }
-  };
+      totalQuantity: data.summary?.totalQuantity || 0,
+      grandTotal: data.summary?.grandTotal || 0,
+      roundingAdjustment: data.summary?.roundingAdjustment || 0,
+      roundedTotal: data.summary?.roundedTotal || 0,
+    }));
 
+  } catch (e) {
+    showApiError({ message: "Failed to load PO details" });
+  }
+};
   const handleFormChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -254,13 +261,26 @@ export const usePurchaseInvoiceForm = ({
           ),
         },
       }));
+setPoLoading(true);
+setPoList([]);
+setForm(prev => ({ ...prev, poNumber: "" }));
 
-      // 2. Fetch PO list for that supplier
-      const poRes = await getPurchaseOrders(1, 100, {
-        supplier: supplier.supplierName
-      });
+try {
+  const poRes = await getPurchaseOrders(1, 100, {
+    supplier: supplier.supplierName
+  });
+if (poRes?.status_code === 200) {
+  setPoList(poRes.data || []);
+} else {
+  setPoList([]);
+}
 
-      setPoList(poRes?.data?.data || []);
+} catch (err) {
+  setPoList([]);
+} finally {
+  setPoLoading(false);
+}
+
 
     } catch (e) {
       console.error("Supplier detail fetch failed", e);
@@ -511,6 +531,8 @@ export const usePurchaseInvoiceForm = ({
     setCustomShippingRule,
     customIncoterm,
     setCustomIncoterm,
+    poLoading,
+    setPoLoading,
   };
 };
 
