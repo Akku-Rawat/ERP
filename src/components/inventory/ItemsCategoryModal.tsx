@@ -3,28 +3,37 @@ import {
   updateItemGroupById,
   createItemGroup,
 } from "../../api/itemCategoryApi";
-import { getUOMs } from "../../api/itemZraApi";
-import { showApiError } from "../../utils/alert";
 import { getRolaUOMs } from "../../api/itemZraApi";
+import { showApiError } from "../../utils/alert";
 import ItemGenericSelect from "../selects/ItemGenericSelect";
 import Modal from "../ui/modal/modal";
 import { Button } from "../ui/modal/formComponent";
 import { ModalInput, ModalSelect } from "../ui/modal/modalComponent";
 
-const emptyForm: Record<string, any> = {
+/* ───────────────────────────────
+   Default Form State
+─────────────────────────────── */
+
+const emptyForm = {
   id: "",
   groupName: "",
   description: "",
   salesAccount: "",
-  customSellingPrice: "",
+  sellingPrice: "",
   unitOfMeasurement: "",
   itemType: "",
 };
+
 const itemTypeOptions = [
   { value: "1", label: "Raw Material" },
   { value: "2", label: "Finished Product" },
   { value: "3", label: "Service" },
 ];
+
+/* ───────────────────────────────
+   Component
+─────────────────────────────── */
+
 const ItemsCategoryModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -32,20 +41,48 @@ const ItemsCategoryModal: React.FC<{
   initialData?: Record<string, any> | null;
   isEditMode?: boolean;
 }> = ({ isOpen, onClose, onSubmit, initialData, isEditMode = false }) => {
-  const [form, setForm] = useState<Record<string, any>>(emptyForm);
+  const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"details" | "pricing">("details");
 
-  // Tab state
-  const [activeTab, setActiveTab] = useState<"type" | "tax">("type");
+  /* ───────────────────────────────
+     Load Data (Edit Safe)
+  ──────────────────────────────── */
 
   useEffect(() => {
-    if (initialData) {
-      setForm(initialData);
-    } else {
-      setForm(emptyForm);
+    if (isOpen) {
+      if (initialData) {
+        setForm({
+          ...emptyForm,
+          ...initialData,
+        });
+      } else {
+        setForm(emptyForm);
+      }
+      setActiveTab("details");
     }
-    setActiveTab("type");
-  }, [initialData, isOpen]);
+  }, [isOpen, initialData]);
+
+  /* ───────────────────────────────
+     Change Handler
+  ──────────────────────────────── */
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  /* ───────────────────────────────
+     Submit
+  ──────────────────────────────── */
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -53,9 +90,8 @@ const ItemsCategoryModal: React.FC<{
     try {
       const payload: any = { ...form };
 
-if (!isEditMode) {
-  delete payload.id; 
-}
+      if (!isEditMode) delete payload.id;
+
       let response;
 
       if (isEditMode && initialData?.id) {
@@ -72,24 +108,21 @@ if (!isEditMode) {
       onSubmit?.(payload);
       handleClose();
     } catch (err: any) {
-      console.error("Category save failed:", err);
       showApiError(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => {
-    const { name, type, value } = e.target;
-    if (type === "checkbox") {
-      const checked = (e.target as HTMLInputElement).checked;
-      setForm((p) => ({ ...p, [name]: checked }));
+  /* ───────────────────────────────
+     Reset
+  ──────────────────────────────── */
+
+  const reset = () => {
+    if (initialData) {
+      setForm({ ...emptyForm, ...initialData });
     } else {
-      setForm((p) => ({ ...p, [name]: value }));
+      setForm(emptyForm);
     }
   };
 
@@ -98,196 +131,143 @@ if (!isEditMode) {
     onClose();
   };
 
-  const reset = () => {
-    setForm(initialData ?? emptyForm);
-  };
-
   if (!isOpen) return null;
+
+  /* ───────────────────────────────
+     UI
+  ──────────────────────────────── */
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
       title={isEditMode ? "Edit Item Category" : "Add Item Category"}
-      subtitle="Manage item category details"
-      maxWidth="4xl"
-      height="50vh"
-      footer={
-        <>
-          <Button variant="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-
-          <div className="flex gap-2">
-            <Button variant="ghost" onClick={reset}>
-              Reset
-            </Button>
-            <Button
-              variant="primary"
-              loading={loading}
-              type="submit"
-              form="item-category-form"
-            >
-              {isEditMode ? "Update" : "Save"} Category
-            </Button>
-          </div>
-        </>
-      }
+      subtitle="Manage category configuration"
+      maxWidth="5xl"
+      height="75vh"
     >
-      <form
-        id="item-category-form"
-        onSubmit={handleSubmit}
-        className="h-full flex flex-col"
-      >
-        {/* Tabs */}
-        <div className="bg-app border-b border-theme px-8 shrink-0">
-          <div className="flex gap-8">
-            {(["type", "tax"] as const).map((tab) => (
+      <form onSubmit={handleSubmit} className="h-full flex flex-col">
+
+        {/* ───── Tabs ───── */}
+        <div className="border-b border-theme px-6 bg-app shrink-0">
+          <div className="flex gap-6">
+            {[
+              { key: "details", label: "Category Details" },
+              { key: "pricing", label: "Pricing & Accounts" },
+            ].map((tab) => (
               <button
-                key={tab}
+                key={tab.key}
                 type="button"
-                onClick={() => setActiveTab(tab)}
-                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
-                  activeTab === tab
-                    ? "text-primary border-b-[3px] border-primary"
-                    : "text-muted border-b-[3px] border-transparent hover:text-main"
+                onClick={() =>
+                  setActiveTab(tab.key as "details" | "pricing")
+                }
+                className={`py-3 text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === tab.key
+                    ? "text-primary border-b-2 border-primary"
+                    : "text-muted border-b-2 border-transparent hover:text-main"
                 }`}
               >
-                {tab === "type" && "Category Details"}
-                {tab === "tax" && "Payment & Pricing"}
+                {tab.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Tab Content */}
-        <section className="flex-1 overflow-y-auto p-6 space-y-8">
-          {/* Items Category Details Tab */}
-          {activeTab === "type" && (
+        {/* ───── Content ───── */}
+        <section className="flex-1 overflow-y-auto p-6 bg-app">
+
+          {/* DETAILS TAB */}
+          {activeTab === "details" && (
             <>
-              <div className="space-y-4 mt-4">
-                <h3 className="text-sm font-semibold text-gray-700 underline">
-                  Category Type
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                  <ModalSelect
-                    label="Item Type"
-                    name="itemType"
-                    value={form.itemType || ""}
-                    onChange={handleChange}
-                    required
-                  >
-                    {itemTypeOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </ModalSelect>
-                  <ModalInput
-                    label="Category Name"
-                    name="groupName"
-                    value={form.groupName}
-                    onChange={handleChange}
-                    // required
-                  />
-                  <ModalInput
-                    label="Category Description"
-                    name="description"
-                    value={form.description}
-                    onChange={handleChange}
-                  />
-                  {/* <Input
-                        label="Unit of Measurement"
-                        name="unitOfMeasurement"
-                        value={form.unitOfMeasurement}
-                        onChange={handleChange}
-                      /> */}
-                  {/* <ItemGenericSelect
-                        label="UOM"
-                        value={form.unitOfMeasurement}
-                        fetchData={getUOMs}
-                        // displayField="code"
-                        displayFormatter={(item) => `${item.code} - ${item.name}`}
-                        onChange={({ id }) => {
-                          setForm(p => ({ ...p, unitOfMeasurement: id }));
-                        }}
-                      /> */}
-                  <ItemGenericSelect
-                    label="Unit of Measure"
-                    value={form.unitOfMeasurement}
-                    fetchData={getRolaUOMs}
-                    variant="modal"
-                    onChange={(item) =>
-                      setForm((p) => ({
-                        ...p,
-                        unitOfMeasurement: item.id,
-                      }))
-                    }
-                  />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
+
+                <ModalSelect
+                  label="Item Type"
+                  name="itemType"
+                  value={form.itemType}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Type</option>
+                  {itemTypeOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </ModalSelect>
+
+                <ModalInput
+                  label="Category Name"
+                  name="groupName"
+                  value={form.groupName}
+                  onChange={handleChange}
+                  required
+                />
+
+                <ModalInput
+                  label="Description"
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                />
+
+                <ItemGenericSelect
+                  label="Unit of Measure"
+                  value={form.unitOfMeasurement}
+                  fetchData={getRolaUOMs}
+                  variant="modal"
+                  onChange={(item) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      unitOfMeasurement: item?.id || "",
+                    }))
+                  }
+                />
               </div>
             </>
           )}
 
-          {/* Payment Details Tab */}
-          {activeTab === "tax" && (
-            <div className="space-y-8 mt-4">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700 underline mb-4">
-                  Payment Details
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                  <ModalInput
-                    label="Selling Price"
-                    name="sellingPrice"
-                    value={form.sellingPrice || ""}
-                    onChange={handleChange}
-                  />
-                  <ModalInput
-                    label="Sales Account"
-                    name="salesAccount"
-                    value={form.salesAccount || ""}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
+          {/* PRICING TAB */}
+          {activeTab === "pricing" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
+
+              <ModalInput
+                label="Selling Price"
+                name="sellingPrice"
+                type="number"
+                value={form.sellingPrice}
+                onChange={handleChange}
+              />
+
+              <ModalInput
+                label="Sales Account"
+                name="salesAccount"
+                value={form.salesAccount}
+                onChange={handleChange}
+              />
+
             </div>
           )}
         </section>
+
+        {/* ───── Footer ───── */}
+        <div className="flex justify-end gap-3 border-t border-theme px-6 py-4 bg-app shrink-0">
+          <Button variant="secondary" type="button" onClick={handleClose}>
+            Cancel
+          </Button>
+
+          <Button variant="ghost" type="button" onClick={reset}>
+            Reset
+          </Button>
+
+          <Button variant="primary" type="submit" loading={loading}>
+            {isEditMode ? "Update Category" : "Save Category"}
+          </Button>
+        </div>
+
       </form>
     </Modal>
   );
 };
-
-// Input Component (unchanged)
-// interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-//   label: string;
-//   icon?: React.ReactNode;
-// }
-
-// const Input = React.forwardRef<HTMLInputElement, InputProps>(
-//   ({ label, icon, className = "", ...props }, ref) => (
-//     <label className="flex flex-col gap-1 text-sm w-full">
-//       <span className="font-medium text-gray-600">
-//         {label}
-//         {props.required && <span className="text-red-500 ml-1">*</span>}
-//       </span>
-//       <div className="relative">
-//         {icon && (
-//           <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-//             {icon}
-//           </div>
-//         )}
-//         <input
-//           ref={ref}
-//           className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${icon ? "pl-10" : ""
-//             } ${props.disabled ? "bg-gray-50" : ""} ${className}`}
-//           {...props}
-//         />
-//       </div>
-//     </label>
-//   ),
-// );
-// Input.displayName = "Input";
 
 export default ItemsCategoryModal;

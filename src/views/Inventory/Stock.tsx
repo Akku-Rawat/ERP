@@ -33,7 +33,7 @@ import type { Column } from "../../components/ui/Table/type";
 import type { ItemSummary, Item } from "../../types/item";
 
 const Items: React.FC = () => {
-  const [items, setItems] = useState<ItemSummary[]>([]);
+const [items, setItems] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -59,43 +59,21 @@ const Items: React.FC = () => {
       // Map API data to ItemSummary[]
       const list = Array.isArray(apiData) ? apiData : apiData?.data || [];
 
-      const mapped = list.map((entry: any) => ({
-        id: entry.id || entry.name || "",
-        itemName: entry.item_name || "",
-        itemGroup: entry.item_group || "",
-        itemClassCode: entry.item_class_code || "",
-        unitOfMeasureCd: entry.unit_of_measure_cd || "",
-        sellingPrice: entry.selling_price || 0,
-        preferredVendor: entry.preferred_vendor || "",
-        minStockLevel: entry.min_stock_level || "",
-        maxStockLevel: entry.max_stock_level || "",
-        taxCategory: entry.tax_category || "",
-        date: entry.date || entry.posting_date || "",
-        orgSarNo:
-          entry.orgSarNo ||
-          entry.org_sar_no ||
-          entry.org_sarNo ||
-          entry.orgsarno ||
-          "",
-        registrationType:
-          entry.registrationType ||
-          entry.registration_type ||
-          entry.registrationtype ||
-          "",
-        stockEntryType:
-          entry.stockEntryType ||
-          entry.stock_entry_type ||
-          entry.stockentrytype ||
-          "",
-        totalTaxableAmount:
-          entry.totalTaxableAmount ||
-          entry.total_taxable_amount ||
-          entry.totaltaxableamount ||
-          0,
-        warehouse: entry.warehouse || "",
-      }));
+      
+const mapped = list.flatMap((entry: any) =>
+  (entry.items || []).map((item: any) => ({
+    id: entry.name || "",
+    date: entry.posting_date || "",
+    itemCode: item.item_code || "",
+    qty: item.qty || 0,
+    totalAmount: Number(item.custom_total_amount || 0),
+  }))
+);
 
-      setItems(mapped);
+setItems(mapped as any);
+
+
+ 
 
       setTotalItems(apiData?.totalItems ?? 0);
       setTotalPages(apiData?.totalPages ?? 1);
@@ -120,17 +98,30 @@ const Items: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleEdit = async (stockId: string, e?: React.MouseEvent<Element>) => {
-    e?.stopPropagation();
-    try {
-      const res = await getStockById(stockId);
-      setViewStockData(res?.data || res);
+const handleEdit = async (stockId: string, e?: React.MouseEvent<Element>) => {
+  e?.stopPropagation();
 
-      setShowViewModal(true);
-    } catch {
-      showApiError("Unable to fetch stock entry details");
+  try {
+    const res = await getStockById(stockId);
+    console.log("FULL RESPONSE:", res);
+
+    const stockData =
+      Array.isArray(res?.data?.data)
+        ? res.data.data[0]
+        : null;
+
+    if (!stockData) {
+      showApiError("Invalid stock data");
+      return;
     }
-  };
+
+    setViewStockData(stockData);
+    setShowViewModal(true);
+  } catch (err) {
+    console.error(err);
+    showApiError("Unable to fetch stock entry details");
+  }
+};
 
   const handleDeleteClick = (item: ItemSummary, e?: React.MouseEvent<Element>) => {
     e?.stopPropagation();
@@ -145,10 +136,24 @@ const Items: React.FC = () => {
       setDeleting(true);
       showLoading("Deleting Stock Entry...");
 
-      await deleteStockEntry({ id: itemToDelete.id });
+const res = await deleteStockEntry({
+  stock_entry_id: itemToDelete.id,
+});
 
-      closeSwal();
-      showSuccess("Stock entry deleted successfully");
+if (res?.status_code !== 200 || res?.status !== "success") {
+  closeSwal();
+  showApiError(res?.message || "Delete failed");
+  return;
+}
+
+closeSwal();
+showSuccess("Stock entry deleted successfully");
+
+setItems((prev) =>
+  prev.filter((i) => i.id !== itemToDelete.id)
+);
+
+setDeleteModalOpen(false);
 
       setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
       setDeleteModalOpen(false);
@@ -182,58 +187,64 @@ const Items: React.FC = () => {
   /*      COLUMNS
    */
 
-  const columns: Column<ItemSummary>[] = [
-    {
-      key: "id",
-      header: "Stock ID",
-      align: "left",
-      render: (i) => (
-        <span className="whitespace-nowrap tabular-nums font-semibold text-main">
-          {i.id}
-        </span>
-      ),
-    },
-    {
-      key: "date",
-      header: "Date",
-      align: "left",
-      render: (i) => (
-        <span className="whitespace-nowrap text-xs text-muted">
-          {i.date ? new Date(i.date).toLocaleDateString() : "—"}
-        </span>
-      ),
-    },
-    { key: "orgSarNo", header: "orgSarNo", align: "left" },
-    { key: "registrationType", header: "Registration Type", align: "left" },
-    { key: "stockEntryType", header: "Stock Entry Type", align: "left" },
-    {
-      key: "totalTaxableAmount",
-      header: "Total Taxable Amount",
-      align: "right",
-      render: (i) => (
-        <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
-          INR {Number(i.totalTaxableAmount || 0).toLocaleString()}
-        </code>
-      ),
-    },
+const columns: Column<any>[] = [
+  {
+    key: "id",
+    header: "Stock ID",
+    align: "left",
+  },
+  {
+    key: "date",
+    header: "Posting Date",
+    align: "left",
+    render: (i) =>
+      i.date ? new Date(i.date).toLocaleDateString() : "—",
+  },
+  {
+    key: "itemCode",
+    header: "Item Code",
+    align: "left",
+  },
+  {
+    key: "qty",
+    header: "Qty",
+    align: "right",
+  },
+{
+  key: "totalAmount",
+  header: "Total Amount",
+  align: "right",
+  render: (i) => (
+    <code className="text-xs px-2 py-1 rounded bg-row-hover text-main">
+      INR {i.totalAmount.toLocaleString()}
+    </code>
+  ),
+},
+  {
+  key: "actions",
+  header: "Actions",
+  align: "center",
+  render: (i) => (
+    <ActionGroup>
+      {/* View Button Direct */}
+      <ActionButton
+        type="view"
+        onClick={(e) => handleEdit(i.id, e)}
+        iconOnly
+      />
 
-    { key: "warehouse", header: "Warehouse", align: "left" },
-    {
-      key: "actions",
-      header: "Actions",
-      align: "center",
-      render: (i) => (
-        <ActionGroup>
-          <ActionButton type="view" onClick={(e) => handleEdit(i.id, e)} iconOnly />
-          <ActionMenu
-            onEdit={(e) => handleEdit(i.id, e)}
-            onDelete={(e) => handleDeleteClick(i, e)}
-          />
-        </ActionGroup>
-      ),
-    },
-  ];
-
+      {/* Dropdown Menu */}
+      <ActionMenu
+        onEdit={() => {
+          setEditItem(i);
+          setShowModal(true);
+        }}
+        onDelete={(e) => handleDeleteClick(i, e)}
+      />
+    </ActionGroup>
+  ),
+}
+];
   /*      RENDER
    */
 
@@ -241,7 +252,7 @@ const Items: React.FC = () => {
     <div className="p-8">
       <Table
         loading={loading || initialLoad}
-        serverSide
+      
         columns={columns}
         data={items}
         enableColumnSelector

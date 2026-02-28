@@ -4,10 +4,11 @@ import { showApiError, showLoading, closeSwal } from "../utils/alert";
 import { updateItemByItemCode, createItem } from "../api/itemApi";
 import { getItemGroupById } from "../api/itemCategoryApi";
 import { useCompanySelection } from "../hooks/useCompanySelection";
+import { getAllItemGroups } from "../api/itemCategoryApi";
 import { getItemFieldConfigs } from "../config/companyConfigResolver";
 import { getTaxConfigs, isTaxAutoPopulated } from "../taxconfig/taxConfigResolver";
 import { API } from "../config/api";
-
+import { getSuppliers } from "../api/procurement/supplierApi";
 // ─────────────────────────────────────────────────────────────────────────────
 // Empty form
 //
@@ -134,7 +135,7 @@ const buildPayload = (form: Record<string, any>) => ({
     batchInfo: {
       has_batch_no: form.has_batch_no,
       create_new_batch: false,
-      batchNo: form.has_batch_no ? form.batchNo : "",
+
       has_expiry_date: form.has_expiry_date,
       expiryDate: form.has_expiry_date ? form.expiryDate : "",
       manufacturingDate: form.has_expiry_date ? form.manufacturingDate : "",
@@ -185,32 +186,85 @@ export const useItemForm = ({
   const fieldConfigs   = getItemFieldConfigs(companyCode);
   const taxConfigs     = getTaxConfigs(companyCode);
   const autoPopulateTax = isTaxAutoPopulated(companyCode);
-
+   const [itemGroups, setItemGroups] = useState<any[]>([]);
+const [loadingItemGroups, setLoadingItemGroups] = useState(false);
   // Derived UI flags
   const isServiceItem   = Number(form.itemTypeCode) === 3;
   const showBatchExpiry = Number(form.itemTypeCode) === 1 || Number(form.itemTypeCode) === 2;
 
+const [suppliers, setSuppliers] = useState<
+  Array<{ label: string; value: string }>
+>([]);
+const [loadingSuppliers, setLoadingSuppliers] = useState(false);
+
+const fetchItemGroups = useCallback(async (itemType?: string) => {
+  try {
+    setLoadingItemGroups(true);
+
+    const res = await getAllItemGroups(1, 1000, {
+      itemType: itemType,   // 🔥 send filter to backend
+    });
+
+    if (res?.status_code !== 200) {
+      showApiError(res?.message || "Failed to load item groups");
+      return;
+    }
+
+    setItemGroups(res?.data?.data || []);
+
+  } catch (err) {
+    showApiError("Error fetching item groups");
+  } finally {
+    setLoadingItemGroups(false);
+  }
+}, []);
+
+const fetchSuppliers = useCallback(async () => {
+  try {
+    setLoadingSuppliers(true);
+
+    const res = await getSuppliers(1, 1000);
+
+    if (!res || res.status_code !== 200) {
+      showApiError(res?.message || "Failed to load suppliers");
+      return;
+    }
+
+const list = res?.data?.suppliers || [];
+
+const mapped = list.map((supplier: any) => ({
+  label: supplier.supplierName,
+  value: supplier.supplierId,
+}));
+
+    setSuppliers(mapped);
+  } catch (err) {
+    showApiError("Error fetching suppliers");
+  } finally {
+    setLoadingSuppliers(false);
+  }
+}, []);
   // ── Data fetchers ──────────────────────────────────────────────────────────
 
-  const fetchItemClassList = useCallback(async () => {
-    try {
-      setLoadingItemClasses(true);
-      const response = await fetch(API.lookup.getItemClasses);
-      const data: any[] = await response.json();
-      setItemClassOptions(
-        data.map((item) => ({
-          cd:  item.itemClsCd  ?? item.cd  ?? "",
-          cdNm: item.itemClsNm ?? item.cdNm ?? "",
-          lvl: item.itemClsLvl ?? item.lvl ?? "1",
-        }))
-      );
-    } catch (err) {
-      console.error("[useItemForm] Failed to fetch item classes:", err);
-      setItemClassOptions([]);
-    } finally {
-      setLoadingItemClasses(false);
-    }
-  }, []);
+  // const fetchItemClassList = useCallback(async () => {
+  //   try {
+  //     setLoadingItemClasses(true);
+  //     const response = await fetch(API.lookup.getItemClasses);
+  //     const data: any[] = await response.json();
+  //     setItemClassOptions(
+  //       data.map((item) => ({
+  //         cd:  item.itemClsCd  ?? item.cd  ?? "",
+  //         cdNm: item.itemClsNm ?? item.cdNm ?? "",
+  //         lvl: item.itemClsLvl ?? item.lvl ?? "1",
+  //       }))
+  //     );
+  //   } catch (err) {
+  //     console.error("[useItemForm] Failed to fetch item classes:", err);
+  //     setItemClassOptions([]);
+  //   } finally {
+  //     setLoadingItemClasses(false);
+  //   }
+  // }, []);
 
   // ── Form initialisation ────────────────────────────────────────────────────
   //
@@ -261,7 +315,7 @@ export const useItemForm = ({
         has_batch_no:      initialData.batchInfo?.has_batch_no      ?? initialData.has_batch_no      ?? false,
         create_new_batch:  initialData.batchInfo?.create_new_batch  ?? initialData.create_new_batch  ?? false,
         has_expiry_date:   initialData.batchInfo?.has_expiry_date   ?? initialData.has_expiry_date   ?? false,
-        batchNo:           initialData.batchInfo?.batchNo           ?? initialData.batchNo           ?? "",
+       
         expiryDate:        initialData.batchInfo?.expiryDate        ?? initialData.expiryDate        ?? "",
         manufacturingDate: initialData.batchInfo?.manufacturingDate ?? initialData.manufacturingDate ?? "",
         shelfLifeInDays:   initialData.batchInfo?.shelfLifeInDays   ?? initialData.shelfLifeInDays   ?? "",
@@ -279,8 +333,9 @@ export const useItemForm = ({
       setSelectedLevel3("");
       setSelectedLevel4("");
     }
-
-    void fetchItemClassList();
+ void fetchSuppliers();
+  //   void fetchItemClassList();
+  //  void fetchItemClassList();
   }, [isOpen, isEditMode, initialData]);
 
   // Pre-populate HSN level selectors when editing an existing item.
@@ -419,26 +474,36 @@ export const useItemForm = ({
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleDynamicFieldChange = (name: string, value: any) => {
-    // Changing itemTypeCode invalidates the previously selected itemGroup.
-    if (name === "itemTypeCode") {
-      setForm((prev) => ({ ...prev, [name]: value, itemGroup: "" }));
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+const handleDynamicFieldChange = (name: string, value: any) => {
+  if (name === "itemTypeCode") {
+    // Reset itemGroup whenever type changes, then re-fetch filtered groups.
+    setForm((prev) => ({ ...prev, [name]: value, itemGroup: "" }));
 
-  const handleCategoryChange = async (data: { name: string; id: string }) => {
-    setForm((prev) => ({ ...prev, itemGroup: data.name }));
-    try {
-      const response = await getItemGroupById(data.id);
-      if (response?.status_code === 200) {
-        setForm((prev) => ({ ...prev, item_group: response.data.name }));
-      }
-    } catch {
-      showApiError("Error loading item category details");
+    if (value) {
+      void fetchItemGroups(String(value)); // e.g. "1", "2", "3"
+    } else {
+      setItemGroups([]); // clear list when type is deselected / reset
     }
-  };
+  } else {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+};
+const handleCategoryChange = async (data: { name: string; id: string }) => {
+  try {
+    const response = await getItemGroupById(data.id);
+
+    const group = response?.data;   
+
+    if (response?.status_code === 200 && group) {
+      setForm((prev) => ({
+        ...prev,
+        itemGroup: group.groupName || "",
+      }));
+    }
+  } catch (err) {
+    showApiError("Error loading item category details");
+  }
+};
 
   // ── Form lifecycle ─────────────────────────────────────────────────────────
 
@@ -534,5 +599,9 @@ export const useItemForm = ({
     reset,
     handleClose,
     handleSubmit,
+    itemGroups,
+    loadingItemGroups,
+    suppliers,
+loadingSuppliers,
   };
 };
