@@ -175,10 +175,10 @@ const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
   return (
     <div className={`${rootClassName} ${className}`}>
-      <span className={labelClassName}>
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </span>
+      <span className="flex items-center gap-0.5 font-medium text-muted text-sm">
+  <span>{label}</span>
+  {required && <span className="text-danger">*</span>}
+</span>
 
 
       <div ref={ref} className="relative w-full">

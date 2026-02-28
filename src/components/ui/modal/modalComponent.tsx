@@ -210,3 +210,83 @@ export const FilterSelect = React.forwardRef<
 });
 
 FilterSelect.displayName = "FilterSelect";
+
+/** Y/N Checkbox that still sends Y/N to backend */
+
+interface YesNoCheckboxProps {
+  name: string;
+  label: string;
+  value?: string; // expects "Y" | "N"
+  required?: boolean;
+  disabled?: boolean;
+  onChange: (name: string, value: string) => void;
+}
+
+export const YesNoCheckbox: React.FC<YesNoCheckboxProps> = ({
+  name,
+  label,
+  value,
+  required,
+  disabled,
+  onChange,
+}) => {
+  // Production safety: always normalize value
+  const normalizedValue = value === "Y" ? "Y" : "N";
+  const checked = normalizedValue === "Y";
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.checked ? "Y" : "N";
+    onChange(name, newValue);
+  };
+
+  return (
+   <label className="flex flex-col text-sm min-w-0 w-fit">
+
+      {/* LABEL */}
+      <span className="text-[11px] font-medium uppercase tracking-wide text-muted mb-1">
+        {label}
+        {required && <span className="text-danger">*</span>}
+      </span>
+
+      {/* CHECKBOX */}
+    <div className="flex items-center gap-2 cursor-pointer select-none">
+  
+  <div
+    onClick={() => !disabled && onChange(name, checked ? "N" : "Y")}
+    className={[
+      "w-7 h-7 rounded-md border flex items-center justify-center transition-all",
+      checked
+        ? "bg-primary border-primary"
+        : "bg-card border-theme hover:border-primary/60",
+      disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+    ].join(" ")}
+  >
+    {checked && (
+      <svg
+        className="w-4 h-4 text-white"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={3}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+    )}
+  </div>
+
+ <span className="text-[11px] text-main">
+    {checked ? "Yes" : "No"}
+  </span>
+
+</div>
+
+      {/* Hidden field ensures form always submits Y/N */}
+      <input
+        type="hidden"
+        name={name}
+        value={normalizedValue}
+      />
+
+    </label>
+  );
+};

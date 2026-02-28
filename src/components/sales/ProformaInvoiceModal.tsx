@@ -39,56 +39,50 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
     ui,
     actions,
   } = useInvoiceForm(isOpen, onClose, undefined, "proforma");
-  const [allowSubmit, setAllowSubmit] = useState(false);
 
-useEffect(() => {
-  if (isOpen) {
-    setAllowSubmit(false);
-  }
-}, [isOpen]);
+
   const tabs: Array<"details" | "address" | "terms"> = [
-  "details",
-  "address",
-  "terms",
-];
-const handleNext = () => {
-  const currentIndex = tabs.indexOf(ui.activeTab as any);
-  if (currentIndex < tabs.length - 1) {
-    ui.setActiveTab(tabs[currentIndex + 1]);
-    setAllowSubmit(false);
-  }
-};
+    "details",
+    "address",
+    "terms",
+  ];
+  const handleNext = () => {
+    const currentIndex = tabs.indexOf(ui.activeTab as any);
+    if (currentIndex < tabs.length - 1) {
+      ui.setActiveTab(tabs[currentIndex + 1]);
+    }
+  };
 
- const handleFormSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  if (ui.activeTab !== "terms") {
-    handleNext();
-    return;
-  }
-
-  if (!allowSubmit) return;
-
-  try {
-    const payload = await actions.handleSubmit(e);
-    if (!payload) return;
-
-    const res = await createProformaInvoice(payload);
-
-    if (!res || ![200, 201].includes(res.status_code)) {
-      showApiError(res);
+    if (ui.activeTab !== "terms") {
+      handleNext();
       return;
     }
 
-    showSuccess(res.message || "Proforma invoice created successfully");
 
-    actions.handleReset();
-    onSubmit?.();
-    onClose();
-  } catch (error: any) {
-    showApiError(error);
-  }
-};
+
+    try {
+      const payload = await actions.handleSubmit(e);
+      if (!payload) return;
+
+      const res = await createProformaInvoice(payload);
+
+      if (!res || ![200, 201].includes(res.status_code)) {
+        showApiError(res);
+        return;
+      }
+
+      showSuccess(res.message || "Proforma invoice created successfully");
+
+      actions.handleReset();
+      onSubmit?.();
+      onClose();
+    } catch (error: any) {
+      showApiError(error);
+    }
+  };
 
   const handleClose = () => {
     actions.handleReset();
@@ -96,7 +90,7 @@ const handleNext = () => {
   };
 
   const [custLoading, setCustLoading] = useState(true);
-  const symbol = currencySymbols[formData.currencyCode] ?? "₹";
+  const symbol = currencySymbols[formData.currencyCode] || "";
   useEffect(() => {
     if (!isOpen) return;
 
@@ -143,22 +137,17 @@ const handleNext = () => {
               Reset
             </Button>
             <Button
-  variant="primary"
-  type={ui.activeTab !== "terms" ? "button" : "submit"}
-  form={ui.activeTab !== "terms" ? undefined : "proforma-form"}
-  onClick={
-    ui.activeTab !== "terms"
-      ? handleNext
-      : () => setAllowSubmit(true)
-  }
->
-  {ui.activeTab === "terms" ? "Submit" : "Next"}
-</Button>
+              variant="primary"
+              type={ui.activeTab === "terms" ? "submit" : "button"}
+              onClick={ui.activeTab !== "terms" ? handleNext : undefined}
+            >
+              {ui.activeTab === "terms" ? "Submit" : "Next"}
+            </Button>
           </div>
         </>
       }
-      maxWidth="6xl"
-      height="79vh"
+      customWidth="81vw"
+      height="82vh"
     >
       <form id="proforma-form" onSubmit={handleFormSubmit}>
         {/* Tabs */}
@@ -170,8 +159,8 @@ const handleNext = () => {
                 type="button"
                 onClick={() => ui.setActiveTab(tab)}
                 className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab
-                    ? "text-primary border-b-[3px] border-primary"
-                    : "text-muted border-b-[3px] border-transparent hover:text-main"
+                  ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
                   }`}
               >
                 {tab === "details" && "Details"}
@@ -189,22 +178,34 @@ const handleNext = () => {
             <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
               <div className="">
                 <div
-                  className="grid grid-cols-6 gap-3 items-end"
+                  className={`
+                    grid
+${ui.isExport
+                      ? "grid-cols-[minmax(120px,0.6fr)_100px_100px_90px_110px_120px_100px]"
+                      : "grid-cols-[minmax(120px,0.7fr)_105px_105px_100px_115px_115px]"
+                    }
+                  gap-x-2 items-end`}
                 >
-                  <CustomerSelect
-                    value={customerNameDisplay}
-                    onChange={actions.handleCustomerSelect}
-                    className="w-full"
-                  />
 
-                  <ModalInput
-                    label="Date of Invoice"
-                    name="dateOfInvoice"
-                    type="date"
-                    value={formData.dateOfInvoice}
-                    onChange={actions.handleInputChange}
-                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                  />
+                  <div>
+                    <CustomerSelect
+                      value={customerNameDisplay}
+                      onChange={actions.handleCustomerSelect}
+                      className="w-full min-w-0"
+                    />
+                  </div>
+
+
+                  <div>
+                    <ModalInput
+                      label="Date of Invoice"
+                      name="dateOfInvoice"
+                      type="date"
+                      value={formData.dateOfInvoice}
+                      onChange={actions.handleInputChange}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    />
+                  </div>
 
                   <div>
                     <ModalInput
@@ -303,6 +304,7 @@ const handleNext = () => {
                   )}
 
                   {ui.isLocal && (
+
                     <ModalInput
                       label="LPO Number"
                       name="lpoNumber"
@@ -335,9 +337,9 @@ const handleNext = () => {
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[100px] whitespace-nowrap">Packing</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">Quantity</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">Unit Price</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">Discount (%)</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">Tax</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">Tax Code</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">Dis(%)</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">Tax(%)</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]  whitespace-nowrap">Tax Code</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">Amount</th>
                           <th></th>
                         </tr>
@@ -368,16 +370,18 @@ const handleNext = () => {
                                                     });
                                                   }}
                                                 /> */}
-                                <ItemSelect
-                                  taxCategory={ui.taxCategory}
-                                  value={it.itemCode}
-                                  excludeItemCodes={formData.items
-                                    .map((x, j) => (j === i ? "" : x?.itemCode))
-                                    .filter(Boolean) as string[]}
-                                  onChange={(item) => {
-                                    actions.handleItemSelect(i, item.id);
-                                  }}
-                                />
+                                <div className="w-[180px]">
+                                  <ItemSelect
+                                    taxCategory={ui.taxCategory}
+                                    value={it.itemCode}
+                                    excludeItemCodes={formData.items
+                                      .map((x, j) => (j === i ? "" : x?.itemCode))
+                                      .filter(Boolean) as string[]}
+                                    onChange={(item) => {
+                                      actions.handleItemSelect(i, item.id);
+                                    }}
+                                  />
+                                </div>
                               </td>
                               <td className="px-0.5 py-1">
                                 <input
@@ -404,7 +408,7 @@ const handleNext = () => {
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
-                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[70px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="quantity"
                                   value={it.quantity}
                                   onChange={(e) =>
@@ -415,7 +419,7 @@ const handleNext = () => {
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
-                                  className="w-[90px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[86px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="price"
                                   value={it.price}
                                   onChange={(e) =>
@@ -426,7 +430,7 @@ const handleNext = () => {
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
-                                  className="w-[80px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[65px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="discount"
                                   value={it.discount}
                                   onChange={(e) =>
@@ -436,8 +440,8 @@ const handleNext = () => {
                               </td>
                               <td className="px-0.5 py-1">
                                 <input
-                                  type="number" 
-                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  type="number"
+                                  className="w-[55px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="vatRate"
                                   value={it.vatRate}
                                   onChange={(e) =>
@@ -447,8 +451,8 @@ const handleNext = () => {
                               </td>
                               <td className="px-0.5 py-1">
                                 <input
-                                  type="string"
-                                  className="w-[80px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  type="text"
+                                  className="w-[40px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="vatCode"
                                   value={it.vatCode}
                                   onChange={(e) =>
@@ -457,7 +461,7 @@ const handleNext = () => {
                                 />
                               </td>
                               <td className="px-0.5 py-1">
-                                  <span className="text-[10px] font-medium text-main">
+                                <span className="text-[10px] font-medium text-main">
                                   {symbol} {amount.toFixed(2)}
                                 </span>
                               </td>

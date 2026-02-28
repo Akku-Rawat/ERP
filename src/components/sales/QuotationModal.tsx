@@ -40,7 +40,6 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     ui,
     actions,
   } = useQuotationForm(isOpen, onClose, onSubmit);
-  const [allowSubmit, setAllowSubmit] = React.useState(false);
 
   const tabs: Array<"details" | "address" | "terms"> = [
     "details",
@@ -51,21 +50,18 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
     const currentIndex = tabs.indexOf(ui.activeTab as any);
     if (currentIndex < tabs.length - 1) {
       ui.setActiveTab(tabs[currentIndex + 1]);
-      setAllowSubmit(false);
     }
   };
 
-  const symbol = currencySymbols[formData.currencyCode] ?? "₹";
+  const symbol = currencySymbols[formData.currencyCode] || "";
   const showExchangeRate =
     formData.currencyCode?.toUpperCase() !== "INR";
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (ui.activeTab !== "terms") {
       handleNext();
-      return;
-    }
-    if (!allowSubmit) {
       return;
     }
 
@@ -89,11 +85,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
           variant="primary"
           type={ui.activeTab !== "terms" ? "button" : "submit"}
           form={ui.activeTab !== "terms" ? undefined : "quotationForm"}
-          onClick={
-            ui.activeTab !== "terms"
-              ? handleNext
-              : () => setAllowSubmit(true)
-          }
+          onClick={ui.activeTab !== "terms" ? handleNext : undefined}
         >
           {ui.activeTab === "terms" ? "Submit" : "Next"}
         </Button>
@@ -109,8 +101,8 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
       subtitle="Create and manage quotation details"
       icon={FileText}
       footer={footerContent}
-      maxWidth="6xl"
-      height="79vh"
+      customWidth="82vw"
+      height="82vh"
     >
       <form id="quotationForm" onSubmit={handleFormSubmit} className="h-full flex flex-col">
         {/* Tabs */}
@@ -143,7 +135,15 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
             <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
               <div className="">
                 <div
-                  className="grid grid-cols-6 gap-3 items-end"
+                  className={`
+                      grid
+                   ${ui.isExport
+                      ? "grid-cols-[minmax(150px,1fr)_100px_100px_100px_100px_90px_110px_110px]"
+                      : "grid-cols-[minmax(180px,1fr)_110px_110px_110px_110px_110px_110px]"
+                    }
+                    gap-x-2
+                      items-end
+                       `}
                 >
                   {/* Customer */}
 
@@ -214,7 +214,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                     ></ModalSelect>
                   </div>
 
-                  <div>
+                  <div className="max-w-[140px]">
                     <ModalSelect
                       label="Payment Method"
                       name="paymentMethod"
@@ -260,7 +260,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                 </div>
               </div>
 
-              {/* ================= MAIN BODY (TABLE LEFT + RIGHT SIDEBAR) ================= */}
+              {/*  MAIN BODY (TABLE LEFT + RIGHT SIDEBAR)  */}
               <div className="grid grid-cols-[4fr_1fr] gap-4">
                 {/* LEFT: QUOTED ITEMS TABLE  */}
                 <div className="bg-card rounded-lg p-2 shadow-sm flex-1">
@@ -292,10 +292,10 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                             Unit Price
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px] whitespace-nowrap">
-                            Discount (%)
+                            Dis(%)
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">
-                            Tax
+                            Tax (%)
                           </th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]  whitespace-nowrap">
                             Tax Code
@@ -303,9 +303,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
                             Amount
                           </th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[35px] whitespace-nowrap">
-                            -
-                          </th>
+                           <th></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -324,6 +322,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                             >
                               <td className="px-3 py-2 text-[10px]">{i + 1}</td>
                               <td className="px-0.5 py-1">
+                                 <div className="w-[180px]">
                                 <ItemSelect
                                   taxCategory={ui.taxCategory}
                                   value={it.itemCode}
@@ -334,6 +333,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                     actions.handleItemSelect(i, item.id);
                                   }}
                                 />
+                                </div>
                               </td>
                               <td className="px-0.5 py-1">
 
@@ -370,7 +370,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                     actions.handleItemChange(i, e)
                                   }
                                   min="1"
-                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[70px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -396,7 +396,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   }
                                   min="0"
                                   placeholder="0"
-                                  className="w-[80px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[65px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
                               <td className="px-0.5 py-1">
@@ -420,7 +420,7 @@ const QuotationModal: React.FC<QuotationModalProps> = ({
                                   onChange={(e) =>
                                     actions.handleItemChange(i, e)
                                   }
-                                  className="w-[80px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[50px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               </td>
                               <td className="px-0.5 py-1">
