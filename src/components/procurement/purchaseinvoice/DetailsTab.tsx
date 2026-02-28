@@ -94,10 +94,15 @@ export const DetailsTab = ({
                 label: po.poId,
                 value: po.poId
               }))}
-              onChange={(e) => {
-                const selected = poList.find(p => p.pId === e.target.value);
-                onPOSelect(selected);
-              }}
+            onChange={(e) => {
+  const selected = poList.find(
+    p => p.poId === e.target.value
+  );
+
+  if (selected) {
+    onPOSelect(selected);
+  }
+}}
             />
           </div>
 
