@@ -1,12 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DollarSign, FileText, TrendingUp, Users } from "lucide-react";
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
   Legend,
   Line,
+  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -16,12 +19,13 @@ import {
 } from "recharts";
 
 import type { SalarySlipListItem } from "../../../api/salarySlipApi";
+import { getEmployeeAdvancesPaged, type EmployeeAdvanceRecord } from "../../../api/advanceLoanApi";
 
 const fmtZMW = (n: number) => Number(n || 0).toLocaleString("en-ZM");
 
 const COLORS = ["#2563eb", "#16a34a", "#f59e0b", "#ef4444", "#06b6d4", "#8b5cf6"];
 
-const KPI_CARD_BASE = "bg-card rounded-xl p-6 flex flex-col items-start shadow-sm";
+const KPI_CARD_BASE = "bg-card rounded-xl p-6 w-full min-w-0 flex flex-col items-stretch shadow-sm";
 const CHART_CARD_BASE = KPI_CARD_BASE;
 
 type PeriodPreset = "all" | "this_month" | "last_3" | "last_6" | "last_12" | "custom_month";
@@ -116,36 +120,6 @@ export default function PayrollReportsDashboard({ slips, loading, error }: Payro
     [],
   );
 
-  const kpiCards = useMemo(
-    () => [
-      {
-        label: "Salary Slips",
-        value: loading ? "—" : String(kpis.slipCount.toLocaleString("en-ZM")),
-        icon: FileText,
-        color: "text-blue-600 bg-blue-50",
-      },
-      {
-        label: "Total Earnings",
-        value: loading ? "—" : currencyZMW.format(kpis.totalGross),
-        icon: TrendingUp,
-        color: "text-emerald-600 bg-emerald-50",
-      },
-      {
-        label: "Total Deductions",
-        value: loading ? "—" : currencyZMW.format(kpis.totalDed),
-        icon: Users,
-        color: "text-amber-600 bg-amber-50",
-      },
-      {
-        label: "Total Net Pay",
-        value: loading ? "—" : currencyZMW.format(kpis.totalNet),
-        icon: DollarSign,
-        color: "text-purple-600 bg-purple-50",
-      },
-    ],
-    [currencyZMW, kpis.slipCount, kpis.totalDed, kpis.totalGross, kpis.totalNet, loading],
-  );
-
   const statusData = useMemo(() => {
     const map = filteredSlips.reduce((acc: Record<string, number>, r) => {
       const raw = String(r.status ?? "").trim();
@@ -172,24 +146,115 @@ export default function PayrollReportsDashboard({ slips, loading, error }: Payro
       .slice(0, 8);
   }, [filteredSlips]);
 
+  const [advancesLoading, setAdvancesLoading] = useState(false);
+  const [advancesError, setAdvancesError] = useState<string | null>(null);
+  const [advances, setAdvances] = useState<EmployeeAdvanceRecord[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const run = async () => {
+      setAdvancesLoading(true);
+      setAdvancesError(null);
+      try {
+        const res = await getEmployeeAdvancesPaged({ page: 1, page_size: 1000 });
+        if (!mounted) return;
+        setAdvances(Array.isArray(res?.records) ? res.records : []);
+      } catch (e: any) {
+        if (!mounted) return;
+        setAdvances([]);
+        setAdvancesError(e?.message || "Failed to load advances");
+      } finally {
+        if (!mounted) return;
+        setAdvancesLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const advancesKpis = useMemo(() => {
+    const totalAdvance = advances.reduce((s, r) => s + Number(r.advance_amount ?? 0), 0);
+    return {
+      count: advances.length,
+      totalAdvance,
+    };
+  }, [advances]);
+
   const monthlyTrend = useMemo(() => {
-    const map = filteredSlips.reduce(
-      (acc: Record<string, { month: string; gross: number; deductions: number; net: number; slips: number }>, r) => {
-        const key = getMonthKey(r.end_date) || getMonthKey(r.start_date) || "Unknown";
-        if (!acc[key]) acc[key] = { month: key, gross: 0, deductions: 0, net: 0, slips: 0 };
-        acc[key].gross += Number(r.total_earnings ?? 0);
-        acc[key].deductions += Number(r.total_deduction ?? 0);
-        acc[key].net += Number(r.net_pay ?? 0);
-        acc[key].slips += 1;
-        return acc;
-      },
-      {},
-    );
+    const map: Record<
+      string,
+      { month: string; gross: number; deductions: number; net: number; advances: number; slips: number }
+    > = {};
+
+    filteredSlips.forEach((r) => {
+      const key = getMonthKey(r.end_date) || getMonthKey(r.start_date) || "Unknown";
+      if (!map[key]) map[key] = { month: key, gross: 0, deductions: 0, net: 0, advances: 0, slips: 0 };
+      map[key].gross += Number(r.total_earnings ?? 0);
+      map[key].deductions += Number(r.total_deduction ?? 0);
+      map[key].net += Number(r.net_pay ?? 0);
+      map[key].slips += 1;
+    });
+
+    advances.forEach((r) => {
+      const key = getMonthKey(String(r.posting_date ?? "").trim()) || "Unknown";
+      if (!map[key]) map[key] = { month: key, gross: 0, deductions: 0, net: 0, advances: 0, slips: 0 };
+      map[key].advances += Number(r.advance_amount ?? 0);
+    });
 
     return Object.values(map)
+      .filter((r) => r.month !== "Unknown")
       .sort((a, b) => String(a.month).localeCompare(String(b.month)))
       .slice(-12);
-  }, [filteredSlips]);
+  }, [filteredSlips, advances]);
+
+  const kpiCards = useMemo(
+    () => [
+      {
+        label: "Salary Slips",
+        value: loading ? "—" : String(kpis.slipCount.toLocaleString("en-ZM")),
+        icon: FileText,
+        color: "text-blue-600 bg-blue-50",
+      },
+      {
+        label: "Total Earnings",
+        value: loading ? "—" : currencyZMW.format(kpis.totalGross),
+        icon: TrendingUp,
+        color: "text-emerald-600 bg-emerald-50",
+      },
+      {
+        label: "Total Deductions",
+        value: loading ? "—" : currencyZMW.format(kpis.totalDed),
+        icon: Users,
+        color: "text-amber-600 bg-amber-50",
+      },
+      {
+        label: "Total Net Pay",
+        value: loading ? "—" : currencyZMW.format(kpis.totalNet),
+        icon: DollarSign,
+        color: "text-purple-600 bg-purple-50",
+      },
+      {
+        label: "Total Advances",
+        value: advancesLoading ? "—" : currencyZMW.format(advancesKpis.totalAdvance),
+        icon: TrendingUp,
+        color: "text-emerald-600 bg-emerald-50",
+      },
+    ],
+    [
+      advancesKpis.totalAdvance,
+      advancesLoading,
+      currencyZMW,
+      kpis.slipCount,
+      kpis.totalDed,
+      kpis.totalGross,
+      kpis.totalNet,
+      loading,
+    ],
+  );
 
   return (
     <div className="space-y-4">
@@ -233,7 +298,7 @@ export default function PayrollReportsDashboard({ slips, loading, error }: Payro
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {kpiCards.map((c) => {
           const Icon = c.icon;
           return (
@@ -259,7 +324,7 @@ export default function PayrollReportsDashboard({ slips, loading, error }: Payro
           <div>
             <div className="text-sm font-semibold text-gray-600">Status Distribution</div>
           </div>
-          <div className="h-[280px] mt-4">
+          <div className="h-[280px] mt-4 w-full min-w-0">
             {loading ? (
               <div className="h-full rounded-lg bg-muted/5 animate-pulse" />
             ) : statusData.length === 0 ? (
@@ -291,7 +356,7 @@ export default function PayrollReportsDashboard({ slips, loading, error }: Payro
           <div>
             <div className="text-sm font-semibold text-gray-600">Top Employees by Net Pay</div>
           </div>
-          <div className="h-[280px] mt-4">
+          <div className="h-[280px] mt-4 w-full min-w-0">
             {loading ? (
               <div className="h-full rounded-lg bg-muted/5 animate-pulse" />
             ) : topEmployees.length === 0 ? (
@@ -321,61 +386,101 @@ export default function PayrollReportsDashboard({ slips, loading, error }: Payro
         </div>
       </div>
 
-      <div className={CHART_CARD_BASE}>
+      <div className={`${CHART_CARD_BASE} lg:col-span-2`}>
         <div>
-          <div className="text-sm font-semibold text-gray-600">Monthly Trend</div>
+          <div className="text-sm font-semibold text-gray-600">Unified Monthly Trend (Net Pay, Deductions, Advances)</div>
         </div>
-        <div className="h-[280px] mt-4">
-          {loading ? (
+        <div className="h-[320px] mt-4 w-full min-w-0">
+          {loading || advancesLoading ? (
             <div className="h-full rounded-lg bg-muted/5 animate-pulse" />
           ) : monthlyTrend.length === 0 ? (
             <div className="text-sm text-muted mt-6">No data available</div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyTrend} margin={{ top: 8, right: 12, left: 0, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
-                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} />
-                <Tooltip
-                  contentStyle={{ borderRadius: 12, borderColor: "#e5e7eb" }}
-                  formatter={(v: any, name: any) => {
-                    const label = name === "gross" ? "Earnings" : name === "deductions" ? "Deductions" : "Net Pay";
-                    return [`ZMW ${fmtZMW(Number(v || 0))}`, label];
+              <AreaChart data={monthlyTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorNet" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorDed" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorAdv" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 11, fill: "#6b7280" }}
+                  axisLine={{ stroke: "#e5e7eb" }}
+                  tickLine={false}
+                  tickMargin={10}
+                  minTickGap={20}
+                />
+                <YAxis
+                  yAxisId="left"
+                  tick={{ fontSize: 11, fill: "#6b7280" }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickMargin={10}
+                  tickFormatter={(value) => {
+                    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+                    if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
+                    return value;
                   }}
                 />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: '12px',
+                    border: '1px solid #e5e7eb',
+                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  }}
+                  itemStyle={{ fontSize: 13, fontWeight: 500 }}
+                  labelStyle={{ fontSize: 12, color: '#6b7280', marginBottom: 4 }}
+                  formatter={(v: any, name: string) => {
+                    return [`ZMW ${fmtZMW(Number(v || 0))}`, name];
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 12, paddingTop: '15px' }} iconType="circle" />
+                <Area
                   type="monotone"
-                  dataKey="gross"
-                  name="Earnings"
-                  stroke="#2563eb"
-                  strokeWidth={2.5}
-                  dot={false}
-                  activeDot={{ r: 4 }}
+                  dataKey="net"
+                  name="Net Pay"
+                  stroke="#10b981"
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#colorNet)"
+                  activeDot={{ r: 6, strokeWidth: 0, fill: "#10b981" }}
                   yAxisId="left"
                 />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="deductions"
                   name="Deductions"
                   stroke="#ef4444"
-                  strokeWidth={2.5}
-                  dot={false}
-                  activeDot={{ r: 4 }}
-                  yAxisId="right"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="net"
-                  name="Net Pay"
-                  stroke="#16a34a"
-                  strokeWidth={2.5}
-                  dot={false}
-                  activeDot={{ r: 4 }}
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorDed)"
+                  activeDot={{ r: 5, strokeWidth: 0, fill: "#ef4444" }}
                   yAxisId="left"
                 />
-              </BarChart>
+                <Area
+                  type="monotone"
+                  dataKey="advances"
+                  name="Advances"
+                  stroke="#f59e0b"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorAdv)"
+                  activeDot={{ r: 5, strokeWidth: 0, fill: "#f59e0b" }}
+                  yAxisId="left"
+                />
+              </AreaChart>
             </ResponsiveContainer>
           )}
         </div>

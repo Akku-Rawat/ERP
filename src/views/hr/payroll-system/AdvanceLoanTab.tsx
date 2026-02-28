@@ -17,6 +17,7 @@ import {
     type EmployeeAdvancesPage,
 } from "../../../api/advanceLoanApi";
 import { getAllEmployees } from "../../../api/employeeapi";
+import { closeSwal, showApiError, showLoading, showSuccess } from "../../../utils/alert";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED BUTTON
@@ -30,7 +31,18 @@ const Btn: React.FC<{
     size?: "sm" | "md";
     className?: string;
     type?: "button" | "submit";
-}> = ({ onClick, disabled, children, icon, variant = "primary", size = "md", className = "", type = "button" }) => {
+    form?: string;
+}> = ({
+    onClick,
+    disabled,
+    children,
+    icon,
+    variant = "primary",
+    size = "md",
+    className = "",
+    type = "button",
+    form,
+}) => {
     const v: Record<string, string> = {
         primary: "bg-primary text-white hover:bg-primary/90",
         outline: "bg-card text-main border border-border hover:bg-muted/5",
@@ -41,6 +53,7 @@ const Btn: React.FC<{
     return (
         <button
             type={type}
+            form={form}
             onClick={onClick}
             disabled={disabled}
             className={`inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-colors
@@ -149,6 +162,7 @@ export default function AdvanceLoanTab() {
             setPage(Number(data?.pagination?.page ?? p) || p);
         } catch (err) {
             console.error("Failed to fetch all advances", err);
+            showApiError(err);
         } finally {
             setListLoading(false);
         }
@@ -161,6 +175,7 @@ export default function AdvanceLoanTab() {
             setSearchRecords(data?.records || []);
         } catch (err) {
             setSearchRecords([]);
+            showApiError(err);
         } finally {
             setListLoading(false);
         }
@@ -180,6 +195,7 @@ export default function AdvanceLoanTab() {
             setEmployees(rows);
         } catch (e) {
             setEmployees([]);
+            showApiError(e);
         } finally {
             setEmployeeListLoading(false);
         }
@@ -225,6 +241,7 @@ export default function AdvanceLoanTab() {
             } catch (e: any) {
                 setSelectedDetail(null);
                 setError(e?.message || "Failed to load advance details.");
+                showApiError(e);
             } finally {
                 setDetailLoading(false);
             }
@@ -238,6 +255,7 @@ export default function AdvanceLoanTab() {
         setLoading(true);
         setError(null);
         try {
+            showLoading("Creating advance request...");
             const res = await createEmployeeAdvance(createData);
             if (res) {
                 setIsCreating(false);
@@ -251,9 +269,17 @@ export default function AdvanceLoanTab() {
                 });
                 setEmployeeQuery("");
                 setDepartmentLocked(false);
+                closeSwal();
+                showSuccess("Advance request created successfully");
+                return;
             }
+
+            closeSwal();
+            showApiError("Failed to create advance.");
         } catch (err: any) {
             setError(err.message || "Failed to create advance.");
+            closeSwal();
+            showApiError(err);
         } finally {
             setLoading(false);
         }
@@ -419,18 +445,28 @@ export default function AdvanceLoanTab() {
 
             {/* View Modal */}
             {selectedName && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-card w-full max-w-2xl rounded-xl shadow-xl flex flex-col overflow-hidden max-h-[90vh]">
-                        <div className="bg-muted/5 px-6 py-4 flex items-center justify-between border-b border-border">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+                    <div className="bg-card border border-theme w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
+                        <div className="bg-app px-6 py-4 flex items-center justify-between border-b border-theme">
                             <div>
                                 <h3 className="text-lg font-bold text-main">{selectedName}</h3>
                                 <p className="text-xs text-muted flex items-center gap-1 mt-1">
                                     <Calendar className="w-3 h-3" /> Advance Request
                                 </p>
                             </div>
-                            <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded text-xs font-bold">
-                                {selectedDetail?.status || "—"}
-                            </span>
+                            <div className="flex items-center gap-2">
+                                <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded text-xs font-bold">
+                                    {selectedDetail?.status || "—"}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedName(null)}
+                                    className="p-2 rounded-lg hover:bg-card text-muted hover:text-main transition"
+                                    title="Close"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
                         <div className="p-6 overflow-y-auto">
                             {detailLoading ? (
@@ -452,7 +488,7 @@ export default function AdvanceLoanTab() {
 
                                     <div className="mt-6">
                                         <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1.5">Purpose</p>
-                                        <div className="bg-muted/5 p-4 rounded-lg border border-border min-h-24">
+                                        <div className="bg-muted/5 p-4 rounded-lg border border-theme min-h-24">
                                             <p className="text-sm font-medium text-main leading-relaxed whitespace-pre-wrap break-words">
                                                 {String(selectedDetail.purpose ?? "").trim() || "—"}
                                             </p>
@@ -463,30 +499,35 @@ export default function AdvanceLoanTab() {
                                 <div className="text-sm text-muted">No details found.</div>
                             )}
                         </div>
-                        <div className="px-6 py-4 bg-muted/5 border-t border-border flex items-center justify-end">
-                            <Btn type="button" onClick={() => setSelectedName(null)} variant="outline">Close Details</Btn>
+                        <div className="px-6 py-4 bg-app border-t border-theme flex items-center justify-end">
+                            <Btn type="button" onClick={() => setSelectedName(null)} variant="outline">Close</Btn>
                         </div>
                     </div>
                 </div>
             )}
 
             {isCreating && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-card w-full max-w-2xl rounded-xl shadow-xl flex flex-col overflow-hidden">
-                        <div className="bg-muted/5 px-6 py-4 flex items-center justify-between border-b border-border/40">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+                    <div className="bg-card border border-theme w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                        <div className="bg-app px-6 py-4 flex items-center justify-between border-b border-theme">
                             <div>
                                 <h3 className="text-base font-bold text-main">New Advance Request</h3>
                                 <p className="text-xs text-muted">Submit a new salary advance request</p>
                             </div>
                             <button
                                 onClick={() => setIsCreating(false)}
-                                className="p-1 rounded hover:bg-muted/10 transition-colors"
+                                className="p-2 rounded-lg hover:bg-card text-muted hover:text-main transition"
+                                title="Close"
                             >
-                                <X className="w-4 h-4 text-muted hover:text-main" />
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleCreate} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <form
+                            id="advance-create-form"
+                            onSubmit={handleCreate}
+                            className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4"
+                        >
                             <div className="md:col-span-2">
                                 <label className="block text-xs font-bold text-main mb-1.5 uppercase tracking-wider">Employee</label>
                                 <div className="relative">
@@ -602,15 +643,15 @@ export default function AdvanceLoanTab() {
                                     />
                                     Repay unclaimed amount from salary
                                 </label>
-
-                                <div className="flex items-center gap-2">
-                                    <Btn type="button" variant="ghost" onClick={() => setIsCreating(false)}>Cancel</Btn>
-                                    <Btn type="submit" disabled={loading}>
-                                        {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Submit Request"}
-                                    </Btn>
-                                </div>
                             </div>
                         </form>
+
+                        <div className="px-6 py-4 bg-app border-t border-theme flex items-center justify-end gap-2">
+                            <Btn type="button" variant="outline" onClick={() => setIsCreating(false)}>Cancel</Btn>
+                            <Btn form="advance-create-form" type="submit" disabled={loading} className="min-w-[140px]" >
+                                {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Submit Request"}
+                            </Btn>
+                        </div>
                     </div>
                 </div>
             )}

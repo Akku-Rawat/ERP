@@ -28,6 +28,19 @@ export type SalarySlipListResponse = {
   };
 };
 
+type ApiEnvelope<T> = {
+  status_code?: number;
+  status?: string;
+  message?: string;
+  data?: T;
+};
+
+type PaginatedRecords<T> = {
+  records?: T[];
+  salary_slips?: T[];
+  pagination?: SalarySlipListResponse["pagination"];
+};
+
 export type SalarySlipDetail = SalarySlipListItem & {
   employee_name?: string;
   company?: string;
@@ -55,7 +68,41 @@ export async function getSalarySlips(params?: {
     },
   });
 
-  return resp.data?.data ?? resp.data;
+  const raw = (resp.data?.data ?? resp.data) as
+    | SalarySlipListResponse
+    | ApiEnvelope<PaginatedRecords<SalarySlipListItem>>
+    | PaginatedRecords<SalarySlipListItem>
+    | any;
+
+  // Case 1: already normalized
+  if (raw && Array.isArray(raw.salary_slips)) {
+    return {
+      salary_slips: raw.salary_slips,
+      pagination: raw.pagination,
+    };
+  }
+
+  // Case 2: envelope -> data -> records
+  const env = raw as ApiEnvelope<PaginatedRecords<SalarySlipListItem>>;
+  const rowsFromEnv = env?.data?.salary_slips ?? env?.data?.records;
+  if (Array.isArray(rowsFromEnv)) {
+    return {
+      salary_slips: rowsFromEnv,
+      pagination: env?.data?.pagination,
+    };
+  }
+
+  // Case 3: data directly contains records
+  const pr = raw as PaginatedRecords<SalarySlipListItem>;
+  const rows = pr?.salary_slips ?? pr?.records;
+  if (Array.isArray(rows)) {
+    return {
+      salary_slips: rows,
+      pagination: pr?.pagination,
+    };
+  }
+
+  return { salary_slips: [], pagination: raw?.pagination };
 }
 
 export async function getSalarySlipById(salarySlipId: string): Promise<SalarySlipDetail | null> {

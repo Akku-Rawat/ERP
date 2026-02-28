@@ -15,7 +15,7 @@ import { EmployeesTab } from "./EntryFormTabs";
 import SalaryStructureTab from "../tabs/SalaryStructureTab";
 import SalaryStructureAssignmentsDashboardTab from "./SalaryStructureAssignmentsDashboardTab";
 import PayrollReportsDashboard from "./PayrollReportsDashboard";
-import AdvanceLoanTab from "../tabs/AdvanceLoanTab";
+import AdvanceLoanTab from "./AdvanceLoanTab";
 
 // ── Views ─────────────────────────────────────────────────────────────────────
 import EmployeeDetailsPage from "./EmployeeDetailsPage";
@@ -114,8 +114,9 @@ const TopBar: React.FC<{
   const navItems: { id: View; label: string; icon: React.ReactNode }[] = [
     { id: "salaryStructure", label: "Salary Structure", icon: <Users className="w-3.5 h-3.5" /> },
     { id: "assignments", label: "Employee Assignment", icon: <Users className="w-3.5 h-3.5" /> },
-    { id: "reports", label: "Reports", icon: <FileText className="w-3.5 h-3.5" /> },
     { id: "advanceLoan", label: "Advance  & Loans  ", icon: <CreditCard className="w-3.5 h-3.5" /> },
+    { id: "reports", label: "Reports", icon: <FileText className="w-3.5 h-3.5" /> }
+
   ];
 
   return (
