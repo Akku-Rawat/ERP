@@ -52,7 +52,7 @@ import type { Invoice } from "../types/invoice";
 
 export const DEFAULT_INVOICE_FORM: Invoice = {
   customerId: "",
-  currencyCode: "INR",
+  currencyCode: "",
   exchangeRt: "1",
   dateOfInvoice: "",
   dueDate: "",
@@ -123,7 +123,7 @@ export const currencyOptions = [
   { value: "GBP", label: "GBP (£)" },
   { value: "CNY", label: "CNY (¥)" },
   { value: "EUR", label: "EUR (€)" },
-  { value: "INR",label:"INR ()"},
+ { value: "INR", label: "INR (₹)" },
 ] as const;
 
 export const currencySymbols: Record<string, string> = {

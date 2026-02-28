@@ -167,8 +167,8 @@ export const emptyPOForm: PurchaseInvoiceFormData = {
   paymentType: "",
   transactionProgress: "",
 
-  costCenter: "",
-  project: "",
+  costCenter: "UD-001 - Udvil - RI",
+  project: "Project-0001",
 
   addresses: {
     supplierAddress: {

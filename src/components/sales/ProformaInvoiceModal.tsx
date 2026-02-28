@@ -39,13 +39,8 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
     ui,
     actions,
   } = useInvoiceForm(isOpen, onClose, undefined, "proforma");
-  const [allowSubmit, setAllowSubmit] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      setAllowSubmit(false);
-    }
-  }, [isOpen]);
+
   const tabs: Array<"details" | "address" | "terms"> = [
     "details",
     "address",
@@ -55,7 +50,6 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
     const currentIndex = tabs.indexOf(ui.activeTab as any);
     if (currentIndex < tabs.length - 1) {
       ui.setActiveTab(tabs[currentIndex + 1]);
-      setAllowSubmit(false);
     }
   };
 
@@ -67,7 +61,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
       return;
     }
 
-    if (!allowSubmit) return;
+
 
     try {
       const payload = await actions.handleSubmit(e);
@@ -96,7 +90,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
   };
 
   const [custLoading, setCustLoading] = useState(true);
-  const symbol = currencySymbols[formData.currencyCode] ?? "₹";
+  const symbol = currencySymbols[formData.currencyCode] || "";
   useEffect(() => {
     if (!isOpen) return;
 
@@ -144,21 +138,16 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
             </Button>
             <Button
               variant="primary"
-              type={ui.activeTab !== "terms" ? "button" : "submit"}
-              form={ui.activeTab !== "terms" ? undefined : "proforma-form"}
-              onClick={
-                ui.activeTab !== "terms"
-                  ? handleNext
-                  : () => setAllowSubmit(true)
-              }
+              type={ui.activeTab === "terms" ? "submit" : "button"}
+              onClick={ui.activeTab !== "terms" ? handleNext : undefined}
             >
               {ui.activeTab === "terms" ? "Submit" : "Next"}
             </Button>
           </div>
         </>
       }
-      maxWidth="6xl"
-      height="79vh"
+      customWidth="81vw"
+      height="82vh"
     >
       <form id="proforma-form" onSubmit={handleFormSubmit}>
         {/* Tabs */}
@@ -190,10 +179,10 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
               <div className="">
                 <div
                   className={`
-                     grid
-                    ${ui.isExport
-                      ? "grid-cols-[minmax(220px,1.2fr)_100px_100px_90px_110px_120px_100px]"
-                      : "grid-cols-[minmax(220px,1.3fr)_105px_105px_100px_115px_115px]"
+                    grid
+${ui.isExport
+                      ? "grid-cols-[minmax(120px,0.6fr)_100px_100px_90px_110px_120px_100px]"
+                      : "grid-cols-[minmax(120px,0.7fr)_105px_105px_100px_115px_115px]"
                     }
                   gap-x-2 items-end`}
                 >
@@ -348,9 +337,9 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[100px] whitespace-nowrap">Packing</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">Quantity</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">Unit Price</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">Discount (%)</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">Tax</th>
-                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">Tax Code</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">Dis(%)</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px] whitespace-nowrap">Tax(%)</th>
+                          <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]  whitespace-nowrap">Tax Code</th>
                           <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">Amount</th>
                           <th></th>
                         </tr>
@@ -381,16 +370,18 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                                                     });
                                                   }}
                                                 /> */}
-                                <ItemSelect
-                                  taxCategory={ui.taxCategory}
-                                  value={it.itemCode}
-                                  excludeItemCodes={formData.items
-                                    .map((x, j) => (j === i ? "" : x?.itemCode))
-                                    .filter(Boolean) as string[]}
-                                  onChange={(item) => {
-                                    actions.handleItemSelect(i, item.id);
-                                  }}
-                                />
+                                <div className="w-[180px]">
+                                  <ItemSelect
+                                    taxCategory={ui.taxCategory}
+                                    value={it.itemCode}
+                                    excludeItemCodes={formData.items
+                                      .map((x, j) => (j === i ? "" : x?.itemCode))
+                                      .filter(Boolean) as string[]}
+                                    onChange={(item) => {
+                                      actions.handleItemSelect(i, item.id);
+                                    }}
+                                  />
+                                </div>
                               </td>
                               <td className="px-0.5 py-1">
                                 <input
@@ -417,7 +408,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
-                                  className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[70px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="quantity"
                                   value={it.quantity}
                                   onChange={(e) =>
@@ -428,7 +419,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
-                                  className="w-[90px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[86px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="price"
                                   value={it.price}
                                   onChange={(e) =>
@@ -439,7 +430,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
-                                  className="w-[80px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[65px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="discount"
                                   value={it.discount}
                                   onChange={(e) =>
@@ -450,7 +441,7 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                               <td className="px-0.5 py-1">
                                 <input
                                   type="number"
-                                  className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  className="w-[55px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="vatRate"
                                   value={it.vatRate}
                                   onChange={(e) =>
@@ -460,8 +451,8 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
                               </td>
                               <td className="px-0.5 py-1">
                                 <input
-                                  type="string"
-                                  className="w-[80px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                                  type="text"
+                                  className="w-[40px]  py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="vatCode"
                                   value={it.vatCode}
                                   onChange={(e) =>

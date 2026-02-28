@@ -63,7 +63,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     }
   };
 
-  const symbol = currencySymbols[formData.currencyCode] ?? "₹";
+  const symbol = currencySymbols[formData.currencyCode] || "";
   const showExchangeRate =
     String(formData.currencyCode ?? "").trim().toUpperCase() !== "INR";
   const showExportField = ui.isExport || ui.hasC1;
@@ -363,10 +363,10 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                             Unit Price
                           </th>
                           <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[60px] whitespace-nowrap">
-                            Dis (%)
+                            Dis(%)
                           </th>
                           <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[70px] whitespace-nowrap">
-                            Tax
+                            Tax(%)
                           </th>
                           <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[60px]  whitespace-nowrap">
                             Tax Code
