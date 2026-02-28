@@ -440,9 +440,8 @@ export default function SalaryStructureTab() {
                   ].map((h) => (
                     <th
                       key={h}
-                      className={`px-4 py-3 text-[10px] font-extrabold text-gray-500 uppercase tracking-wider whitespace-nowrap ${
-                        h === "" ? "text-right" : "text-left"
-                      }`}
+                      className={`px-4 py-3 text-[10px] font-extrabold text-gray-500 uppercase tracking-wider whitespace-nowrap ${h === "" ? "text-right" : "text-left"
+                        }`}
                     >
                       {h}
                     </th>
@@ -480,9 +479,8 @@ export default function SalaryStructureTab() {
                       <tr
                         key={key}
                         onMouseEnter={() => fetchStructurePreview(key)}
-                        className={`border-b border-gray-200 last:border-0 ${
-                          idx % 2 === 1 ? "bg-gray-50/40" : "bg-white"
-                        }`}
+                        className={`border-b border-gray-200 last:border-0 ${idx % 2 === 1 ? "bg-gray-50/40" : "bg-white"
+                          }`}
                       >
                         <td className="px-4 py-3">
                           <div className="text-xs font-extrabold text-gray-900 break-words">
@@ -496,11 +494,10 @@ export default function SalaryStructureTab() {
 
                         <td className="px-4 py-3">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 text-[11px] font-bold rounded-full border ${
-                              structure.is_active
-                                ? "bg-green-50 text-green-700 border-green-200"
-                                : "bg-gray-50 text-gray-600 border-gray-200"
-                            }`}
+                            className={`inline-flex items-center px-2 py-0.5 text-[11px] font-bold rounded-full border ${structure.is_active
+                              ? "bg-green-50 text-green-700 border-green-200"
+                              : "bg-gray-50 text-gray-600 border-gray-200"
+                              }`}
                           >
                             {structure.is_active ? "Active" : "Inactive"}
                           </span>
@@ -844,14 +841,14 @@ function SalaryComponentsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-        <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-card rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-xl">
+        <div className="px-6 py-4 flex items-center justify-between bg-card text-main">
           <div className="min-w-0">
-            <div className="text-lg font-semibold">Salary Components</div>
-            <div className="text-xs text-white/80 mt-0.5">Manage earnings and deductions</div>
+            <h3 className="text-base font-bold text-main">Salary Components</h3>
+            <div className="text-xs text-muted mt-0.5">Manage earnings and deductions</div>
           </div>
-          <button onClick={onClose} className="text-white/80 hover:text-white">
+          <button onClick={onClose} className="p-1 rounded hover:bg-muted/5 transition-colors text-muted hover:text-main">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -864,11 +861,11 @@ function SalaryComponentsModal({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search components"
-                className="w-full md:w-96 px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                className="w-full md:w-96 px-3 py-2 text-sm border border-border rounded-md bg-card focus:ring-1 focus:ring-primary outline-none"
               />
               <button
                 onClick={startCreate}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 flex items-center gap-2"
+                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 flex items-center gap-2 text-sm font-medium transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 New Component
@@ -882,100 +879,100 @@ function SalaryComponentsModal({
             </div>
           )}
 
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead className="bg-gray-50 text-gray-700">
-                    <tr>
-                      <th className="text-left font-semibold px-4 py-3">Component</th>
-                      <th className="text-left font-semibold px-4 py-3">Abbr</th>
-                      <th className="text-left font-semibold px-4 py-3">Type</th>
-                      <th className="text-left font-semibold px-4 py-3">Tax</th>
-                      <th className="text-left font-semibold px-4 py-3">Enabled</th>
-                      <th className="text-right font-semibold px-4 py-3">Actions</th>
+          <div className="bg-card rounded-lg overflow-hidden flex-1 flex flex-col shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/5">
+                  <tr>
+                    <th className="text-left font-semibold text-muted text-xs px-4 py-3 whitespace-nowrap">Component</th>
+                    <th className="text-left font-semibold text-muted text-xs px-4 py-3 whitespace-nowrap">Abbr</th>
+                    <th className="text-left font-semibold text-muted text-xs px-4 py-3 whitespace-nowrap">Type</th>
+                    <th className="text-left font-semibold text-muted text-xs px-4 py-3 whitespace-nowrap">Tax</th>
+                    <th className="text-left font-semibold text-muted text-xs px-4 py-3 whitespace-nowrap">Enabled</th>
+                    <th className="text-right font-semibold text-muted text-xs px-4 py-3 whitespace-nowrap">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paged.map((c) => (
+                    <tr key={c.id} className="hover:bg-muted/5 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="font-semibold text-main">{c.component || c.id}</div>
+                        {c.description && (
+                          <div className="text-xs text-gray-500 line-clamp-1">{c.description}</div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-main">{c.abbr}</td>
+                      <td className="px-4 py-3 text-main">{String(c.type || "")}</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs font-medium ${c.tax_applicable ? "text-primary" : "text-muted"}`}>
+                          {c.tax_applicable ? "Taxable" : "No"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs font-medium ${c.enabled ? "text-green-600" : "text-muted"}`}>
+                          {c.enabled ? "Yes" : "No"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => startEdit(c)}
+                            className="p-2 text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg"
+                            title="Edit"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => remove(c.id)}
+                            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="text-gray-800">
-                    {paged.map((c) => (
-                      <tr key={c.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3">
-                          <div className="font-semibold text-gray-900">{c.component || c.id}</div>
-                          {c.description && (
-                            <div className="text-xs text-gray-500 line-clamp-1">{c.description}</div>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-gray-700">{c.abbr}</td>
-                        <td className="px-4 py-3 text-gray-700">{String(c.type || "")}</td>
-                        <td className="px-4 py-3">
-                          <span className={`text-xs font-medium ${c.tax_applicable ? "text-primary" : "text-gray-500"}`}>
-                            {c.tax_applicable ? "Taxable" : "No"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`text-xs font-medium ${c.enabled ? "text-green-700" : "text-gray-500"}`}>
-                            {c.enabled ? "Yes" : "No"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex justify-end gap-2">
-                            <button
-                              onClick={() => startEdit(c)}
-                              className="p-2 text-gray-600 hover:text-primary hover:bg-primary/10 rounded-lg"
-                              title="Edit"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => remove(c.id)}
-                              className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                  ))}
 
-                    {!loading && paged.length === 0 && (
-                      <tr>
-                        <td className="px-4 py-10 text-center text-gray-600" colSpan={6}>
-                          No salary components found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                  {!loading && paged.length === 0 && (
+                    <tr>
+                      <td className="px-4 py-10 text-center text-gray-600" colSpan={6}>
+                        No salary components found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-              <div className="p-4 border-t flex items-center justify-end gap-2">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1}
-                  className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Prev
-                </button>
-                <button
-                  onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-                  disabled={page >= pageCount}
-                  className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
+            <div className="p-4 border-t flex items-center justify-end gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                disabled={page >= pageCount}
+                className="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
 
         {editing && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-              <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-card rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-xl flex flex-col">
+              <div className="px-6 py-4 flex items-center justify-between text-main">
                 <div className="min-w-0">
-                  <div className="text-lg font-semibold">{editing?.id ? "Edit" : "Create"} Component</div>
-                  <div className="text-xs text-white/80 mt-0.5">Fill in the component details</div>
+                  <h3 className="text-base font-bold">{editing?.id ? "Edit" : "Create"} Component</h3>
+                  <div className="text-xs text-muted mt-0.5">Fill in the component details</div>
                 </div>
-                <button onClick={() => setEditing(null)} className="text-white/80 hover:text-white">
+                <button onClick={() => setEditing(null)} className="p-1 rounded hover:bg-muted/5 transition-colors text-muted hover:text-main">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -983,47 +980,47 @@ function SalaryComponentsModal({
               <div className="flex-1 overflow-y-auto p-6">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Name *</label>
+                    <label className="block text-xs font-medium text-muted mb-1">Name *</label>
                     <input
                       value={editing.name}
                       onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 text-sm border border-border rounded-md bg-card focus:ring-1 focus:ring-primary outline-none"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Type *</label>
+                      <label className="block text-xs font-medium text-muted mb-1">Type *</label>
                       <select
                         value={editing.type}
                         onChange={(e) => setEditing({ ...editing, type: e.target.value as any })}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                        className="w-full px-3 py-2 text-sm border border-border rounded-md bg-card focus:ring-1 focus:ring-primary outline-none"
                       >
                         <option value="Earning">Earning</option>
                         <option value="Deduction">Deduction</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Abbr *</label>
+                      <label className="block text-xs font-medium text-muted mb-1">Abbr *</label>
                       <input
                         value={editing.abbr}
                         onChange={(e) => setEditing({ ...editing, abbr: e.target.value })}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                        className="w-full px-3 py-2 text-sm border border-border rounded-md bg-card focus:ring-1 focus:ring-primary outline-none"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                    <label className="block text-xs font-medium text-muted mb-1">Description</label>
                     <input
                       value={editing.description}
                       onChange={(e) => setEditing({ ...editing, description: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 text-sm border border-border rounded-md bg-card focus:ring-1 focus:ring-primary outline-none"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <label className="flex items-center gap-2 text-sm text-main">
                       <input
                         type="checkbox"
                         checked={editing.enabled}
@@ -1032,7 +1029,7 @@ function SalaryComponentsModal({
                       Enabled
                     </label>
 
-                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <label className="flex items-center gap-2 text-sm text-main">
                       <input
                         type="checkbox"
                         checked={editing.tax_applicable}
@@ -1041,55 +1038,20 @@ function SalaryComponentsModal({
                       Tax applicable
                     </label>
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label className="flex items-center gap-2 text-sm text-gray-700">
-                      <input
-                        type="checkbox"
-                        checked={editing.amount_based_on_formula}
-                        onChange={(e) =>
-                          setEditing({
-                            ...editing,
-                            amount_based_on_formula: e.target.checked,
-                          })
-                        }
-                      />
-                      Amount based on formula
-                    </label>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Condition</label>
-                      <input
-                        value={editing.condition}
-                        onChange={(e) => setEditing({ ...editing, condition: e.target.value })}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Formula</label>
-                      <input
-                        value={editing.formula}
-                        onChange={(e) => setEditing({ ...editing, formula: e.target.value })}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
-                      />
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              <div className="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
+              <div className="px-6 py-4 bg-muted/5 flex justify-end gap-3">
                 <button
                   onClick={() => setEditing(null)}
-                  className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-sm font-medium hover:bg-black/5 transition-colors rounded-md"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={save}
                   disabled={loading}
-                  className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:opacity-90 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary/90 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <Save className="w-4 h-4" />
                   Save
@@ -1099,10 +1061,10 @@ function SalaryComponentsModal({
           </div>
         )}
 
-        <div className="px-6 py-4 border-t flex justify-end gap-3 bg-gray-50">
+        <div className="px-6 py-4 bg-muted/5 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-medium hover:bg-black/5 transition-colors rounded-md"
           >
             Close
           </button>
@@ -1237,16 +1199,16 @@ function StructureModal({
   }, [formData, onChange]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-        <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-card rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-xl">
+        <div className="px-6 py-4 flex items-center justify-between">
           <div className="min-w-0">
-            <div className="text-lg font-semibold">
+            <h3 className="text-base font-bold text-main">
               {readOnly ? "View" : formData.id ? "Edit" : "Create"} Salary Structure
-            </div>
-            <div className="text-xs text-white/80 mt-0.5">Define components and calculations</div>
+            </h3>
+            <div className="text-xs text-muted mt-0.5">Define components and calculations</div>
           </div>
-          <button onClick={onClose} className="text-white/80 hover:text-white">
+          <button onClick={onClose} className="p-1 rounded hover:bg-muted/10 transition-colors text-muted hover:text-main">
             <X className="w-5 h-5" />
           </button>
         </div>

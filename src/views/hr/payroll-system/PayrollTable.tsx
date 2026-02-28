@@ -61,7 +61,7 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
 
   return (
     <table className="w-full">
-      <thead className="sticky top-0 z-10 bg-muted/5 border-b border-border">
+      <thead className="sticky top-0 z-10 bg-muted/5">
         <tr>
           <Th>Employee</Th>
           <Th>Department</Th>
@@ -85,7 +85,7 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
               {/* Main row */}
               <tr
                 onClick={() => onToggleRow(record.id)}
-                className={`border-b border-border cursor-pointer transition-colors ${expanded ? "bg-muted/5" : "hover:bg-muted/5"
+                className={`cursor-pointer transition-colors ${expanded ? "bg-muted/5" : "hover:bg-muted/5"
                   }`}
               >
                 {/* Employee */}
@@ -94,7 +94,7 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                     <span className={`transition-transform duration-150 shrink-0 ${expanded ? "rotate-180" : ""}`}>
                       <ChevronDown className="w-4 h-4 text-muted" />
                     </span>
-                    <div className="w-8 h-8 rounded shrink-0 bg-muted/10 text-primary font-bold flex items-center justify-center border border-border">
+                    <div className="w-8 h-8 rounded shrink-0 bg-muted/10 text-primary font-bold flex items-center justify-center">
                       {initials}
                     </div>
                     <div>

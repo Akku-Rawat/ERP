@@ -21,7 +21,7 @@ const fmtZMW = (n: number) => Number(n || 0).toLocaleString("en-ZM");
 
 const COLORS = ["#2563eb", "#16a34a", "#f59e0b", "#ef4444", "#06b6d4", "#8b5cf6"];
 
-const KPI_CARD_BASE = "bg-white border border-gray-200 rounded-2xl p-6 shadow-sm";
+const KPI_CARD_BASE = "bg-card rounded-xl p-6 flex flex-col items-start shadow-sm";
 const CHART_CARD_BASE = KPI_CARD_BASE;
 
 type PeriodPreset = "all" | "this_month" | "last_3" | "last_6" | "last_12" | "custom_month";
@@ -122,25 +122,25 @@ export default function PayrollReportsDashboard({ slips, loading, error }: Payro
         label: "Salary Slips",
         value: loading ? "—" : String(kpis.slipCount.toLocaleString("en-ZM")),
         icon: FileText,
-        gradient: "from-blue-500 to-blue-600",
+        color: "text-blue-600 bg-blue-50",
       },
       {
         label: "Total Earnings",
         value: loading ? "—" : currencyZMW.format(kpis.totalGross),
         icon: TrendingUp,
-        gradient: "from-emerald-500 to-emerald-600",
+        color: "text-emerald-600 bg-emerald-50",
       },
       {
         label: "Total Deductions",
         value: loading ? "—" : currencyZMW.format(kpis.totalDed),
         icon: Users,
-        gradient: "from-amber-500 to-amber-600",
+        color: "text-amber-600 bg-amber-50",
       },
       {
         label: "Total Net Pay",
         value: loading ? "—" : currencyZMW.format(kpis.totalNet),
         icon: DollarSign,
-        gradient: "from-purple-500 to-purple-600",
+        color: "text-purple-600 bg-purple-50",
       },
     ],
     [currencyZMW, kpis.slipCount, kpis.totalDed, kpis.totalGross, kpis.totalNet, loading],
@@ -228,7 +228,7 @@ export default function PayrollReportsDashboard({ slips, loading, error }: Payro
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm font-semibold">
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm font-semibold">
           {error}
         </div>
       )}
@@ -238,15 +238,15 @@ export default function PayrollReportsDashboard({ slips, loading, error }: Payro
           const Icon = c.icon;
           return (
             <div key={c.label} className={KPI_CARD_BASE}>
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between w-full">
                 <div>
-                  <div className="text-xs font-semibold text-gray-600">{c.label}</div>
-                  <div className="text-xl font-extrabold text-gray-900 mt-1 tabular-nums">{c.value}</div>
+                  <div className="text-xs font-semibold text-muted tracking-wide uppercase">{c.label}</div>
+                  <div className="text-xl font-bold text-main mt-1.5 tabular-nums">{c.value}</div>
                 </div>
                 <div
-                  className={`h-12 w-12 rounded-xl bg-gradient-to-br ${c.gradient} flex items-center justify-center text-white shadow-sm`}
+                  className={`h-10 w-10 rounded-md flex items-center justify-center ${c.color}`}
                 >
-                  <Icon className="w-6 h-6" />
+                  <Icon className="w-5 h-5" />
                 </div>
               </div>
             </div>
@@ -261,7 +261,7 @@ export default function PayrollReportsDashboard({ slips, loading, error }: Payro
           </div>
           <div className="h-[280px] mt-4">
             {loading ? (
-              <div className="h-full rounded-xl bg-app animate-pulse" />
+              <div className="h-full rounded-lg bg-muted/5 animate-pulse" />
             ) : statusData.length === 0 ? (
               <div className="text-sm text-muted mt-6">No data available</div>
             ) : (
@@ -293,7 +293,7 @@ export default function PayrollReportsDashboard({ slips, loading, error }: Payro
           </div>
           <div className="h-[280px] mt-4">
             {loading ? (
-              <div className="h-full rounded-xl bg-app animate-pulse" />
+              <div className="h-full rounded-lg bg-muted/5 animate-pulse" />
             ) : topEmployees.length === 0 ? (
               <div className="text-sm text-muted mt-6">No data available</div>
             ) : (
@@ -327,7 +327,7 @@ export default function PayrollReportsDashboard({ slips, loading, error }: Payro
         </div>
         <div className="h-[280px] mt-4">
           {loading ? (
-            <div className="h-full rounded-xl bg-app animate-pulse" />
+            <div className="h-full rounded-lg bg-muted/5 animate-pulse" />
           ) : monthlyTrend.length === 0 ? (
             <div className="text-sm text-muted mt-6">No data available</div>
           ) : (

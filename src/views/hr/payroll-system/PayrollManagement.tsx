@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   Plus, ChevronLeft,
   FileText, Users, CheckCircle,
-  Layers, X, Download,
+  Layers, X, Download, CreditCard
 } from "lucide-react";
 
 import type { PayrollEntry, Employee } from "../../../types/payrolltypes";
@@ -15,6 +15,7 @@ import { EmployeesTab } from "./EntryFormTabs";
 import SalaryStructureTab from "../tabs/SalaryStructureTab";
 import SalaryStructureAssignmentsDashboardTab from "./SalaryStructureAssignmentsDashboardTab";
 import PayrollReportsDashboard from "./PayrollReportsDashboard";
+import AdvanceLoanTab from "../tabs/AdvanceLoanTab";
 
 // ── Views ─────────────────────────────────────────────────────────────────────
 import EmployeeDetailsPage from "./EmployeeDetailsPage";
@@ -73,7 +74,7 @@ const Btn: React.FC<{
 // ─────────────────────────────────────────────────────────────────────────────
 // TOP NAVIGATION BAR (shared across views)
 // ─────────────────────────────────────────────────────────────────────────────
-type View = "dashboard" | "newEntry" | "salaryStructure" | "assignments" | "reports";
+type View = "dashboard" | "newEntry" | "salaryStructure" | "assignments" | "reports" | "advanceLoan";
 
 const toCsv = (rows: Array<Record<string, any>>): string => {
   const colSet = new Set<string>();
@@ -114,6 +115,7 @@ const TopBar: React.FC<{
     { id: "salaryStructure", label: "Salary Structure", icon: <Users className="w-3.5 h-3.5" /> },
     { id: "assignments", label: "Employee Assignment", icon: <Users className="w-3.5 h-3.5" /> },
     { id: "reports", label: "Reports", icon: <FileText className="w-3.5 h-3.5" /> },
+    { id: "advanceLoan", label: "Advance  & Loans  ", icon: <CreditCard className="w-3.5 h-3.5" /> },
   ];
 
   return (
@@ -126,7 +128,7 @@ const TopBar: React.FC<{
           className={`flex items-center gap-2 rounded px-1.5 py-1 transition-colors ${view === "dashboard" ? "text-primary" : "text-main hover:text-primary"
             }`}
         >
-          <div className="w-8 h-8 rounded bg-muted/10 text-primary flex items-center justify-center border border-border">
+          <div className="w-8 h-8 rounded bg-muted/10 text-primary flex items-center justify-center">
             <Layers className="w-4 h-4" />
           </div>
           <span className="text-base font-bold">Payroll</span>
@@ -288,8 +290,8 @@ const SalarySlipDetailsModal: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-card rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-xl flex flex-col border border-border">
-        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+      <div className="bg-card rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-xl flex flex-col">
+        <div className="px-6 py-4 flex items-center justify-between">
           <div className="min-w-0">
             <h3 className="text-sm font-bold text-main flex items-center gap-2">
               <FileText className="w-4 h-4 text-muted" />
@@ -313,17 +315,17 @@ const SalarySlipDetailsModal: React.FC<{
           {!loading && data && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-muted/5 border border-border rounded-lg p-5">
+                <div className="bg-muted/5 rounded-lg p-5">
                   <div className="text-xs text-muted font-medium uppercase tracking-wider mb-1">Employee</div>
                   <div className="text-sm font-semibold text-main break-words">{data.employee_name || data.employee}</div>
                   <div className="text-xs text-muted mt-0.5">{data.employee}</div>
                 </div>
-                <div className="bg-muted/5 border border-border rounded-lg p-5">
+                <div className="bg-muted/5 rounded-lg p-5">
                   <div className="text-xs text-muted font-medium uppercase tracking-wider mb-1">Period</div>
                   <div className="text-sm font-semibold text-main">{data.start_date} → {data.end_date}</div>
                   <div className="text-xs text-muted mt-0.5">{data.salary_structure}</div>
                 </div>
-                <div className="bg-muted/5 border border-border rounded-lg p-5">
+                <div className="bg-muted/5 rounded-lg p-5">
                   <div className="text-xs text-muted font-medium uppercase tracking-wider mb-1">Net Pay</div>
                   <div className="text-xl font-bold text-main tabular-nums">ZMW {Number(data.net_pay ?? 0).toLocaleString("en-ZM")}</div>
                   <div className="mt-2"><StatusChip status={data.status} /></div>
@@ -331,14 +333,14 @@ const SalarySlipDetailsModal: React.FC<{
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="border border-border rounded-lg overflow-hidden bg-card">
-                  <div className="px-5 py-4 bg-muted/5 border-b border-border flex items-center justify-between">
+                <div className="rounded-lg overflow-hidden bg-card shadow-sm">
+                  <div className="px-5 py-4 bg-muted/5 flex items-center justify-between">
                     <div className="text-sm font-bold text-main">Earnings</div>
                     <div className="text-sm font-bold text-main">ZMW {Number(data.total_earnings ?? 0).toLocaleString("en-ZM")}</div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-card border-b border-border">
+                      <thead className="bg-card">
                         <tr>
                           <th className="px-5 py-3 text-xs font-semibold text-muted text-left">Component</th>
                           <th className="px-5 py-3 text-xs font-semibold text-muted text-right">Amount</th>
@@ -347,8 +349,8 @@ const SalarySlipDetailsModal: React.FC<{
                       <tbody>
                         {earnings.length === 0 ? (
                           <tr><td colSpan={2} className="px-5 py-8 text-center text-sm text-muted">No earnings</td></tr>
-                        ) : earnings.map((r: any, idx: number) => (
-                          <tr key={`${r?.component}-${idx}`} className="border-b border-border last:border-0 hover:bg-muted/5 transition-colors">
+                        ) : earnings.map((r: any) => (
+                          <tr key={`${r?.component}`} className="last:border-0 hover:bg-muted/5 transition-colors">
                             <td className="px-5 py-3 text-sm font-medium text-main">{String(r?.component ?? "")}</td>
                             <td className="px-5 py-3 text-right text-sm font-medium text-main tabular-nums">{Number(r?.amount ?? 0).toLocaleString("en-ZM")}</td>
                           </tr>
@@ -358,14 +360,14 @@ const SalarySlipDetailsModal: React.FC<{
                   </div>
                 </div>
 
-                <div className="border border-border rounded-lg overflow-hidden bg-card">
-                  <div className="px-5 py-4 bg-muted/5 border-b border-border flex items-center justify-between">
+                <div className="rounded-lg overflow-hidden bg-card shadow-sm">
+                  <div className="px-5 py-4 bg-muted/5 flex items-center justify-between">
                     <div className="text-sm font-bold text-main">Deductions</div>
                     <div className="text-sm font-bold text-main">ZMW {Number(data.total_deduction ?? 0).toLocaleString("en-ZM")}</div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-card border-b border-border">
+                      <thead className="bg-card">
                         <tr>
                           <th className="px-5 py-3 text-xs font-semibold text-muted text-left">Component</th>
                           <th className="px-5 py-3 text-xs font-semibold text-muted text-right">Amount</th>
@@ -375,7 +377,7 @@ const SalarySlipDetailsModal: React.FC<{
                         {deductions.length === 0 ? (
                           <tr><td colSpan={2} className="px-5 py-8 text-center text-sm text-muted">No deductions</td></tr>
                         ) : deductions.map((r: any, idx: number) => (
-                          <tr key={`${r?.component}-${idx}`} className="border-b border-border last:border-0 hover:bg-muted/5 transition-colors">
+                          <tr key={`${r?.component}-${idx}`} className="last:border-0 hover:bg-muted/5 transition-colors">
                             <td className="px-5 py-3 text-sm font-medium text-main">{String(r?.component ?? "")}</td>
                             <td className="px-5 py-3 text-right text-sm font-medium text-main tabular-nums">{Number(r?.amount ?? 0).toLocaleString("en-ZM")}</td>
                           </tr>
@@ -677,6 +679,17 @@ export default function PayrollManagement() {
     );
   }
 
+  if (view === "advanceLoan") {
+    return (
+      <div className="h-screen flex flex-col bg-app overflow-hidden">
+        <TopBar {...topBarProps} />
+        <div className="flex-1 min-h-0 overflow-y-auto w-full">
+          <AdvanceLoanTab />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen flex flex-col bg-app overflow-hidden">
       <Toast toast={toast} />
@@ -722,7 +735,7 @@ export default function PayrollManagement() {
           )}
 
           <div className="flex-1 min-h-0 overflow-y-auto p-4">
-            <div className="mt-4 border border-theme rounded-xl overflow-hidden bg-card">
+            <div className="mt-4 rounded-xl overflow-hidden bg-card shadow-sm">
               <div className="px-4 py-3 bg-app border-b border-theme flex items-center justify-between">
                 <div>
                   <div className="text-xs font-extrabold text-main uppercase tracking-wide">Salary Slips</div>
@@ -777,7 +790,7 @@ export default function PayrollManagement() {
 
               <div className="overflow-auto">
                 <table className="w-full">
-                  <thead className="bg-muted/5 border-b border-border">
+                  <thead className="bg-muted/5">
                     <tr>
                       {[
                         "Slip ID",
@@ -824,10 +837,10 @@ export default function PayrollManagement() {
                         </td>
                       </tr>
                     ) : (
-                      filteredSalarySlips.map((s, idx) => (
+                      filteredSalarySlips.map((s) => (
                         <tr
                           key={s.name}
-                          className={`border-b border-border last:border-0 hover:bg-muted/5 transition-colors`}
+                          className={`hover:bg-muted/5 transition-colors`}
                         >
                           <td className="px-4 py-3 text-sm font-medium text-main break-words">{s.name}</td>
                           <td className="px-4 py-3 text-sm text-muted whitespace-nowrap">{s.employee}</td>
@@ -844,7 +857,7 @@ export default function PayrollManagement() {
                                 setSlipDetailsId(s.name);
                                 setSlipDetailsOpen(true);
                               }}
-                              className="px-3 py-1.5 rounded-md text-xs font-medium border border-border bg-card text-main hover:bg-muted/5 transition-colors"
+                              className="px-3 py-1.5 rounded-md text-xs font-medium bg-card text-main hover:bg-black/5 transition-colors"
                             >
                               View
                             </button>

@@ -12,10 +12,10 @@ interface PayrollReportsProps {
   records: PayrollRecord[];
 }
 
-const StatCard: React.FC<{ label: string; value: string; color: string }> = ({ label, value, color }) => (
-  <div className={`${color} rounded-xl p-4`}>
-    <p className="text-xs font-bold text-white/80 mb-1">{label}</p>
-    <p className="text-2xl font-extrabold text-white">{value}</p>
+const StatCard: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <div className={`rounded-xl p-5 flex flex-col items-start bg-card shadow-sm`}>
+    <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">{label}</p>
+    <p className="text-2xl font-bold text-main">{value}</p>
   </div>
 );
 
@@ -86,23 +86,23 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
       {tab === "summary" && (
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-4">
-            <StatCard label="Total Employees" value={String(summary.employees)} color="bg-info" />
-            <StatCard label="Gross Payout" value={`ZMW ${fmtZMW(summary.gross)}`} color="bg-success" />
-            <StatCard label="Total Deductions" value={`ZMW ${fmtZMW(summary.deductions)}`} color="bg-danger" />
-            <StatCard label="Net Payout" value={`ZMW ${fmtZMW(summary.net)}`} color="bg-primary" />
+            <StatCard label="Total Employees" value={String(summary.employees)} />
+            <StatCard label="Gross Payout" value={`ZMW ${fmtZMW(summary.gross)}`} />
+            <StatCard label="Total Deductions" value={`ZMW ${fmtZMW(summary.deductions)}`} />
+            <StatCard label="Net Payout" value={`ZMW ${fmtZMW(summary.net)}`} />
           </div>
 
-          <div className="bg-card border border-theme rounded-xl p-5">
-            <h4 className="text-xs font-extrabold text-muted uppercase tracking-wider mb-4">Statutory Deductions Breakdown</h4>
+          <div className="bg-card rounded-xl p-5 shadow-sm mt-4">
+            <h4 className="text-sm font-semibold text-main mb-4">Statutory Deductions Breakdown</h4>
             <div className="grid grid-cols-3 gap-4">
               {[
-                { label: "PAYE", val: summary.tax, color: "border-danger" },
-                { label: "Provident Fund", val: summary.pf, color: "border-info" },
-                { label: "ESI", val: summary.esi, color: "border-warning" },
-              ].map(({ label, val, color }) => (
-                <div key={label} className={`rounded-xl border-l-4 ${color} bg-app px-4 py-3`}>
-                  <p className="text-xs text-muted mb-1">{label}</p>
-                  <p className="text-lg font-extrabold text-main tabular-nums">ZMW {fmtZMW(val)}</p>
+                { label: "PAYE", val: summary.tax },
+                { label: "Provident Fund", val: summary.pf },
+                { label: "ESI", val: summary.esi },
+              ].map(({ label, val }) => (
+                <div key={label} className={`rounded-lg bg-muted/5 px-5 py-4`}>
+                  <p className="text-xs text-muted mb-1.5">{label}</p>
+                  <p className="text-lg font-bold text-main tabular-nums">ZMW {fmtZMW(val)}</p>
                 </div>
               ))}
             </div>
@@ -121,8 +121,8 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
       {tab === "department" && (
         <div className="space-y-4">
           {/* Bar chart */}
-          <div className="bg-card border border-theme rounded-xl p-5">
-            <h4 className="text-xs font-extrabold text-muted uppercase tracking-wider mb-5">Department-wise Gross Pay</h4>
+          <div className="bg-card rounded-xl p-5 shadow-sm">
+            <h4 className="text-sm font-semibold text-main mb-5">Department-wise Gross Pay</h4>
             <div className="flex items-end gap-6 h-40 mb-4">
               {deptData.map(d => {
                 const h = Math.round((d.gross / maxGross) * 120);
@@ -148,22 +148,22 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
           </div>
 
           {/* Table */}
-          <div className="bg-card border border-theme rounded-xl overflow-hidden">
+          <div className="bg-card rounded-xl overflow-hidden shadow-sm mt-4">
             <table className="w-full">
-              <thead className="bg-app border-b border-theme">
+              <thead className="bg-muted/5">
                 <tr>
                   {["Department", "Employees", "Gross Pay", "Net Pay", "Avg Net Pay"].map(h => (
-                    <th key={h} className="px-5 py-3 text-left text-[10px] font-extrabold text-muted uppercase tracking-wider">{h}</th>
+                    <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-muted whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {deptData.map((d, i) => (
-                  <tr key={d.dept} className={`border-b border-theme last:border-0 ${i % 2 === 1 ? "bg-app" : "bg-card"}`}>
-                    <td className="px-5 py-3 text-sm font-bold text-main">{d.dept}</td>
+                {deptData.map((d) => (
+                  <tr key={d.dept} className={`hover:bg-muted/5 transition-colors`}>
+                    <td className="px-5 py-3 text-sm font-semibold text-main">{d.dept}</td>
                     <td className="px-5 py-3 text-sm text-muted">{d.count}</td>
-                    <td className="px-5 py-3 text-sm font-bold text-main tabular-nums">ZMW {fmtZMW(d.gross)}</td>
-                    <td className="px-5 py-3 text-sm font-bold text-success tabular-nums">ZMW {fmtZMW(d.net)}</td>
+                    <td className="px-5 py-3 text-sm font-medium text-main tabular-nums">ZMW {fmtZMW(d.gross)}</td>
+                    <td className="px-5 py-3 text-sm font-medium text-main tabular-nums">ZMW {fmtZMW(d.net)}</td>
                     <td className="px-5 py-3 text-sm text-muted tabular-nums">ZMW {fmtZMW(Math.round(d.net / d.count))}</td>
                   </tr>
                 ))}
@@ -203,14 +203,14 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
                 // ["Total ESI Collected", `ZMW ${fmtZMW(summary.esi)}`],
               ],
             },
-          ].map(({ title, color, items }) => (
-            <div key={title} className={`rounded-xl border ${color} p-5`}>
-              <h4 className="text-xs font-extrabold text-main mb-3">{title}</h4>
-              <div className="space-y-2">
+          ].map(({ title, items }) => (
+            <div key={title} className={`rounded-xl bg-card shadow-sm p-6`}>
+              <h4 className="text-sm font-bold text-main mb-4">{title}</h4>
+              <div className="space-y-3">
                 {items.map(([l, v]) => (
-                  <div key={l} className="flex justify-between items-center">
-                    <span className="text-xs text-muted">{l}</span>
-                    <span className="text-xs font-bold text-main tabular-nums">{v}</span>
+                  <div key={l} className="flex justify-between items-center bg-muted/5 p-3 rounded-lg">
+                    <span className="text-sm text-muted">{l}</span>
+                    <span className="text-sm font-semibold text-main tabular-nums">{v}</span>
                   </div>
                 ))}
               </div>
@@ -233,7 +233,7 @@ export const PayrollReports: React.FC<PayrollReportsProps> = ({ records }) => {
               { title: "Bank Account Configured", val: `${records.filter(r => r.bankAccount).length}/${records.length}`, ok: records.filter(r => r.bankAccount).length === records.length },
               { title: "Tax Regime Declared", val: `${records.filter(r => r.taxRegime).length}/${records.length}`, ok: true },
             ].map(({ title, val, ok }) => (
-              <div key={title} className={`rounded-xl border p-4 flex items-center gap-3 ${ok ? "border-success/30 bg-success/5" : "border-danger/30 bg-danger/5"}`}>
+              <div key={title} className={`rounded-xl p-4 flex items-center gap-3 ${ok ? "bg-success/5" : "bg-danger/5"}`}>
                 <div className={`p-2 rounded-full ${ok ? "bg-success/15" : "bg-danger/15"}`}>
                   {ok ? <Check className="w-4 h-4 text-success" /> : <X className="w-4 h-4 text-danger" />}
                 </div>
@@ -290,24 +290,24 @@ export const ApprovalWorkflowManager: React.FC<ApprovalWorkflowManagerProps> = (
         </div>
       ) : (
         pending.map(r => (
-          <div key={r.id} className="border border-theme rounded-xl p-5 bg-card space-y-4">
+          <div key={r.id} className="rounded-xl p-5 bg-card shadow-sm space-y-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-extrabold text-main">{r.employeeName}</p>
-                <p className="text-xs text-muted mt-0.5">{r.employeeId} · {r.department} · {r.designation}</p>
+                <p className="text-sm font-bold text-main">{r.employeeName}</p>
+                <p className="text-xs text-muted mt-0.5">{r.employeeId} • {r.department} • {r.designation}</p>
               </div>
-              <span className="text-[10px] font-bold bg-warning/10 text-warning px-3 py-1 rounded-full">Pending Approval</span>
+              <span className="text-xs font-medium border border-yellow-200 bg-yellow-50 text-yellow-700 px-2.5 py-1 rounded">Pending</span>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               {[
                 { label: "Gross Pay", val: r.grossPay, color: "text-main" },
-                { label: "Deductions", val: r.totalDeductions, color: "text-danger" },
-                { label: "Net Pay", val: r.netPay, color: "text-success" },
+                { label: "Deductions", val: r.totalDeductions, color: "text-red-700" },
+                { label: "Net Pay", val: r.netPay, color: "text-green-700" },
               ].map(({ label, val, color }) => (
-                <div key={label} className="bg-app rounded-lg p-3">
-                  <p className="text-[10px] text-muted mb-1">{label}</p>
-                  <p className={`text-sm font-extrabold ${color} tabular-nums`}>ZMW {fmtZMW(val)}</p>
+                <div key={label} className="bg-muted/5 rounded-lg p-4">
+                  <p className="text-xs text-muted mb-1 font-medium">{label}</p>
+                  <p className={`text-sm font-semibold ${color} tabular-nums`}>ZMW {fmtZMW(val)}</p>
                 </div>
               ))}
             </div>
