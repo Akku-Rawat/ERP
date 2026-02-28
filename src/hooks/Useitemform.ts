@@ -520,57 +520,49 @@ const handleCategoryChange = async (data: { name: string; id: string }) => {
     onClose();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // Step 1 — validate item details → advance to tax tab.
-    if (activeTab === "details") {
-      if (validateItemDetails()) {
-        toast.success("Item details validated. Please complete Tax Details.");
-        setActiveTab("taxDetails");
-      }
+  // 🔹 NEXT BUTTON FLOW ONLY (NO VALIDATION)
+
+  if (activeTab === "details") {
+    setActiveTab("taxDetails");
+    return;
+  }
+
+  if (activeTab === "taxDetails" && !isServiceItem) {
+    setActiveTab("inventoryDetails");
+    return;
+  }
+
+  // 🔹 FINAL SUBMIT (ONLY ON LAST TAB)
+
+  try {
+    setLoading(true);
+    showLoading(isEditMode ? "Updating item…" : "Creating item…");
+
+    const payload  = buildPayload(form);
+    const response = isEditMode && initialData?.id
+      ? await updateItemByItemCode(initialData.id, payload)
+      : await createItem(payload);
+
+    closeSwal();
+
+    if (!response || ![200, 201].includes(response.status_code)) {
+      showApiError(response);
       return;
     }
 
-    // Step 2 — validate tax details.
-    // Physical items advance to inventory tab; service items submit immediately.
-    if (activeTab === "taxDetails") {
-      if (!validateTaxDetails()) return;
-      if (!isServiceItem) {
-        toast.success("Tax details validated. Please complete Inventory Details.");
-        setActiveTab("inventoryDetails");
-        return;
-      }
-      // Service item — fall through to submit.
-    }
-
-    // Step 3 — final submission.
-    try {
-      setLoading(true);
-      showLoading(isEditMode ? "Updating item…" : "Creating item…");
-
-      const payload  = buildPayload(form);
-      const response = isEditMode && initialData?.id
-        ? await updateItemByItemCode(initialData.id, payload)
-        : await createItem(payload);
-
-      closeSwal();
-
-      if (!response || ![200, 201].includes(response.status_code)) {
-        showApiError(response);
-        return;
-      }
-
-      onSubmit?.(response);
-      handleClose();
-    } catch (err: any) {
-      closeSwal();
-      console.error("[useItemForm] Save failed:", err);
-      showApiError(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    onSubmit?.(response);
+    handleClose();
+  } catch (err: any) {
+    closeSwal();
+    console.error("[useItemForm] Save failed:", err);
+    showApiError(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ── Public API ─────────────────────────────────────────────────────────────
 

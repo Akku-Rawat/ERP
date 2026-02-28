@@ -52,6 +52,7 @@ export interface ApiSelectConfig extends BaseFieldConfig {
   apiFunctionName: string;
   /** Which custom component DynamicField should render for this field. */
   customComponent: "ItemTreeSelect" | "ItemGenericSelect" | "ItemCategorySelect";
+    displayField?: "code" | "name";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
