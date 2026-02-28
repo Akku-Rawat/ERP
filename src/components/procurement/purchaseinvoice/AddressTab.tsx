@@ -11,6 +11,12 @@ interface AddressTabProps {
   onFormChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
+
+  customShippingRule: string;
+  setCustomShippingRule: React.Dispatch<React.SetStateAction<string>>;
+
+  customIncoterm: string;
+  setCustomIncoterm: React.Dispatch<React.SetStateAction<string>>;
 }
 interface Country {
   name: string;
@@ -51,31 +57,31 @@ const AddressBlock: React.FC<{
 }) => {
 
 
- 
-const [countriesCache, setCountriesCache] = useState<Country[]>([]);
-useEffect(() => {
-  const loadCountries = async () => {
-    try {
-      const result = await getRolaCountryList();
 
-      const formatted = (result || []).map((c: Country) => ({
-        ...c,
-        code: c.code?.toUpperCase() || "",
-      }));
+    const [countriesCache, setCountriesCache] = useState<Country[]>([]);
+    useEffect(() => {
+      const loadCountries = async () => {
+        try {
+          const result = await getRolaCountryList();
 
-      setCountriesCache(formatted);
-    } catch (error) {
-      console.error("Failed to load countries:", error);
-      setCountriesCache([]);
-    }
-  };
+          const formatted = (result || []).map((c: Country) => ({
+            ...c,
+            code: c.code?.toUpperCase() || "",
+          }));
 
-  loadCountries();
-}, []);
+          setCountriesCache(formatted);
+        } catch (error) {
+          console.error("Failed to load countries:", error);
+          setCountriesCache([]);
+        }
+      };
 
-const selectedCountry = countriesCache.find(
-  (c) => c.country_name === data?.country
-);
+      loadCountries();
+    }, []);
+
+    const selectedCountry = countriesCache.find(
+      (c) => c.country_name === data?.country
+    );
 
     return (
       <div className="bg-card border border-theme rounded-xl shadow-sm overflow-hidden">
@@ -183,7 +189,7 @@ const selectedCountry = countriesCache.find(
               }}
             />
 
-             <ModalInput
+            <ModalInput
               label="Postal Code"
               name={`addresses.${keyName}.postalCode`}
               value={data?.postalCode || ""}
@@ -220,6 +226,10 @@ const selectedCountry = countriesCache.find(
 export const AddressTab: React.FC<AddressTabProps> = ({
   form,
   onFormChange,
+  customShippingRule,
+  setCustomShippingRule,
+  customIncoterm,
+  setCustomIncoterm,
 }) => {
 
   /* Accordion open state */
@@ -232,6 +242,7 @@ export const AddressTab: React.FC<AddressTabProps> = ({
 
   const [copyBillingToShipping, setCopyBillingToShipping] = useState(false);
   const [copySupplierToDispatch, setCopySupplierToDispatch] = useState(false);
+
 
   const toggle = useCallback((key: AddressKey) => {
     setOpen((p) => ({ ...p, [key]: !p[key] }));
@@ -300,32 +311,71 @@ export const AddressTab: React.FC<AddressTabProps> = ({
       {/* Top fields */}
       <div className="grid grid-cols-4 gap-4 p-4">
 
-        <ModalSelect
-          label="Shipping Rule"
-          name="shippingRule"
-          value={form.shippingRule || ""}
-          onChange={onFormChange}
-          options={[
-            { value: "STANDARD", label: "Standard Shipping" },
-            { value: "EXPRESS", label: "Express Shipping" },
-            { value: "OVERNIGHT", label: "Overnight Shipping" },
-            { value: "SAME_DAY", label: "Same Day Delivery" },
-            { value: "ECONOMY", label: "Economy Shipping" },
-            { value: "FREIGHT", label: "Freight" },
-            { value: "SEA", label: "Sea Freight" },
-            { value: "AIR", label: "Air Freight" },
-            { value: "ROAD", label: "Road Transport" },
-            { value: "PICKUP", label: "Self Pickup" },
-          ]}
-        />
+        {form.shippingRule === "OTHER" ? (
+          <ModalInput
+            label="Shipping Rule"
+            value={customShippingRule}
+            onChange={(e) => {
+              setCustomShippingRule(e.target.value);
+            }}
+          />
+        ) : (
+          <ModalSelect
+            label="Shipping Rule"
+            name="shippingRule"
+            value={form.shippingRule || ""}
+            onChange={(e) => {
+              onFormChange(e);
+              if (e.target.value !== "OTHER") {
+                setCustomShippingRule("");
+              }
+            }}
+            options={[
+              { value: "STANDARD", label: "Standard Shipping" },
+              { value: "EXPRESS", label: "Express Shipping" },
+              { value: "OVERNIGHT", label: "Overnight Shipping" },
+              { value: "SAME_DAY", label: "Same Day Delivery" },
+              { value: "ECONOMY", label: "Economy Shipping" },
+              { value: "FREIGHT", label: "Freight" },
+              { value: "SEA", label: "Sea Freight" },
+              { value: "AIR", label: "Air Freight" },
+              { value: "ROAD", label: "Road Transport" },
+              { value: "PICKUP", label: "Self Pickup" },
+              { value: "OTHER", label: "Others" },
+            ]}
+          />
+        )}
 
-        <ModalInput
-          label="Incoterm"
-          name="incoterm"
-          value={form.incoterm || ""}
-          onChange={onFormChange}
-        />
 
+        {form.incoterm === "OTHER" ? (
+          <ModalInput
+            label="Incoterm"
+            value={customIncoterm}
+            onChange={(e) => {
+              setCustomIncoterm(e.target.value);
+            }}
+          />
+        ) : (
+          <ModalSelect
+            label="Incoterm"
+            name="incoterm"
+            value={form.incoterm || ""}
+            onChange={(e) => {
+              onFormChange(e);
+              if (e.target.value !== "OTHER") {
+                setCustomIncoterm("");
+              }
+            }}
+            options={[
+              { value: "EXW", label: "EXW – Ex Works" },
+              { value: "FCA", label: "FCA – Free Carrier" },
+              { value: "FOB", label: "FOB – Free On Board" },
+              { value: "CFR", label: "CFR – Cost and Freight" },
+              { value: "CIF", label: "CIF – Cost, Insurance & Freight" },
+              { value: "OTHER", label: "Others" },
+            ]}
+          />
+        )}
         <ModalInput
           label="Supplier Contact"
           name="supplierContact"

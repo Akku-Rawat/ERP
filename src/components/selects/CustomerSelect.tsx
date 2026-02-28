@@ -82,12 +82,17 @@ export default function CustomerSelect({
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      <span className="block text-[10px] font-medium text-main ">{label}</span>
+      <span className="block text-[10px] font-medium text-main mb-1">
+        {label}
+      </span>
 
       <div ref={containerRef} className="relative w-full">
         <input
-          className="w-full py-2 px-3 border border-theme rounded text-[13px] text-main bg-card"
-          placeholder={loading ? "Loading..." : "Search customer..."}
+          className={[
+            "py-1 px-2 border rounded text-[11px] text-main bg-card transition-all w-full",
+            "border-[var(--border)] hover:border-primary/40",
+          ].join(" ")}
+          placeholder={loading ? "Loading..." : "Select"}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -95,14 +100,13 @@ export default function CustomerSelect({
           }}
           onFocus={() => setOpen(true)}
         />
-
         {open && !loading && (
-          <div className="absolute left-0 top-full mt-1 w-full bg-card border border-theme shadow-lg rounded z-30">
+<div className="absolute left-0 top-full mt-1 w-full bg-card border border-[var(--border)] shadow rounded z-30">
             <ul className="max-h-56 overflow-y-auto text-[13px]">
               {filteredCustomers.map((customer) => (
                 <li
                   key={customer.id}
-                  className="px-4 py-2 cursor-pointer hover:bg-row-hover text-main"
+                  className="px-2 py-1 cursor-pointer hover:bg-primary/5 text-main text-[11px]"
                   onClick={() => {
                     setSearch(customer.name);
                     setOpen(false);
@@ -121,7 +125,7 @@ export default function CustomerSelect({
               ))}
 
               {filteredCustomers.length === 0 && (
-                <li className="px-4 py-2 text-muted">No match found</li>
+                <li className="px-2 py-1 text-muted text-[11px]">No match found</li>
               )}
             </ul>
           </div>

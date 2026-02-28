@@ -92,7 +92,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
               error={errors.contactPerson}
             />
       <div className="flex gap-2 items-end">
-  <div className="w-[70px]">
+  <div className="w-[50px]">
     <ModalInput
       label=" "
       name="phoneCode"
@@ -117,7 +117,7 @@ export const SupplierInfoTab: React.FC<SupplierInfoTabProps> = ({
 
 
             <div className="flex gap-2 items-end">
-  <div className="w-[70px]">
+  <div className="w-[50px]">
     <ModalInput
       label=" "
       name="alternateCode"

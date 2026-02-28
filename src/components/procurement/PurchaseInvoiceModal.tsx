@@ -46,7 +46,11 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
     handleSubmit,
     reset,
      poList,
-  handlePOSelect
+  handlePOSelect,
+   customShippingRule,
+  setCustomShippingRule,
+  customIncoterm,
+  setCustomIncoterm
   } = usePurchaseInvoiceForm({ isOpen, onSuccess: onSubmit, onClose, pId });
 
   const footer = (
@@ -72,8 +76,8 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
       title={pId ? "Edit Purchase Invoice" : "New Purchase Invoice"}
       subtitle="Create and manage purchase invoice"
       icon={Building2}
-      maxWidth="6xl"
-      height="87vh"
+      customWidth="88vw"
+      height="93vh"
       footer={footer}
     >
       <form
@@ -156,7 +160,14 @@ onPOSelect={handlePOSelect}
           )} */}
 
           {activeTab === "address" && (
-            <AddressTab form={form} onFormChange={handleFormChange} />
+            <AddressTab
+  form={form}
+  onFormChange={handleFormChange}
+  customShippingRule={customShippingRule}
+  setCustomShippingRule={setCustomShippingRule}
+  customIncoterm={customIncoterm}
+  setCustomIncoterm={setCustomIncoterm}
+/>
           )}
 
           {activeTab === "terms" && (

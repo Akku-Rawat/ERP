@@ -42,6 +42,8 @@ export const usePurchaseOrderForm = ({
   const [form, setForm] = useState<PurchaseOrderFormData>(emptyPOForm);
   const [activeTab, setActiveTab] = useState<POTab>("details");
   const [saving, setSaving] = useState(false);
+  const [customShippingRule, setCustomShippingRule] = useState("");
+  const [customIncoterm, setCustomIncoterm] = useState("");
 
   useEffect(() => {
     if (!isOpen) {
@@ -99,11 +101,11 @@ export const usePurchaseOrderForm = ({
   }, [isOpen, poId]);
 
   // Set default date on create mode
-useEffect(() => {
-  if (!isOpen || poId) return;
-  const today = new Date().toISOString().split("T")[0];
-  setForm((prev) => ({ ...prev, date: today }));
-}, [isOpen, poId]);
+  useEffect(() => {
+    if (!isOpen || poId) return;
+    const today = new Date().toISOString().split("T")[0];
+    setForm((prev) => ({ ...prev, date: today }));
+  }, [isOpen, poId]);
 
   // Calculate totals (Items + Taxes + Rounding)
   useEffect(() => {
@@ -236,18 +238,17 @@ useEffect(() => {
   };
 
   const addItem = () => {
-  setForm((p) => ({
-    ...p,
-    items: [
-      ...p.items,
-      {
-        ...emptyItem,
-        requiredBy: p.date, 
-      },
-    ],
-  }));
-  toast.success("New item row added");
-};
+    setForm((p) => ({
+      ...p,
+      items: [
+        ...p.items,
+        {
+          ...emptyItem,
+          requiredBy: p.date,
+        },
+      ],
+    }));
+  };
 
   const removeItem = (idx: number) => {
     if (form.items.length === 1) {
@@ -335,34 +336,34 @@ useEffect(() => {
     }
   };
 
-const handleItemSelect = async (itemId: string, idx: number) => {
-  try {
-    const res = await getItemByItemCode(itemId);
-    if (!res || res.status_code !== 200) return;
+  const handleItemSelect = async (itemId: string, idx: number) => {
+    try {
+      const res = await getItemByItemCode(itemId);
+      if (!res || res.status_code !== 200) return;
 
-    const data = res.data;
+      const data = res.data;
 
-    setForm((prev) => {
-      const items = [...prev.items];
+      setForm((prev) => {
+        const items = [...prev.items];
 
-      items[idx] = {
-        ...items[idx],
-        itemCode: data.id,
-        itemName: data.itemName,   
-        rate: Number(data.buyingPrice ?? 0),
-        uom: data.unitOfMeasureCd || "Unit",
-        vatRate: Number(data.taxInfo?.taxPerct ?? 0),
-        vatCd: data.taxInfo?.taxCode ?? "",
-        requiredBy: items[idx].requiredBy || prev.date, 
-      };
+        items[idx] = {
+          ...items[idx],
+          itemCode: data.id,
+          itemName: data.itemName,
+          rate: Number(data.buyingPrice ?? 0),
+          uom: data.unitOfMeasureCd || "Unit",
+          vatRate: Number(data.taxInfo?.taxPerct ?? 0),
+          vatCd: data.taxInfo?.taxCode ?? "",
+          requiredBy: items[idx].requiredBy || prev.date,
+        };
 
-      return { ...prev, items };
-    });
-  } catch (err) {
-    console.error("Failed to fetch item details", err);
-    toast.error("Failed to load item details");
-  }
-};
+        return { ...prev, items };
+      });
+    } catch (err) {
+      console.error("Failed to fetch item details", err);
+      toast.error("Failed to load item details");
+    }
+  };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -386,7 +387,20 @@ const handleItemSelect = async (itemId: string, idx: number) => {
     try {
       setSaving(true);
 
-      const payload = mapUIToCreatePO(form);
+      const finalForm = {
+        ...form,
+        shippingRule:
+          form.shippingRule === "OTHER"
+            ? customShippingRule
+            : form.shippingRule,
+
+        incoterm:
+          form.incoterm === "OTHER"
+            ? customIncoterm
+            : form.incoterm,
+      };
+
+      const payload = mapUIToCreatePO(finalForm);
 
       let res;
 
@@ -398,7 +412,7 @@ const handleItemSelect = async (itemId: string, idx: number) => {
         return;
       }
 
-      
+
       res = await createPurchaseOrder(payload);
 
       if (!res || ![200, 201].includes(res.status_code)) {
@@ -445,6 +459,10 @@ const handleItemSelect = async (itemId: string, idx: number) => {
     handleSubmit,
     reset,
     setForm,
+    customShippingRule,
+setCustomShippingRule,
+customIncoterm,
+setCustomIncoterm,
   };
 };
 

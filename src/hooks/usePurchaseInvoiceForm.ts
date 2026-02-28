@@ -15,7 +15,7 @@ import {
 } from "../types/Supply/purchaseInvoice";
 import { createPurchaseInvoice } from "../api/procurement/PurchaseInvoiceApi";
 import { mapUIToCreatePI } from "../types/Supply/purchaseInvoiceMapper";
-import { validatePO } from "./poValidator";
+import { validatePI } from "./piValidator";
 import { getPurchaseInvoiceById } from "../api/procurement/PurchaseInvoiceApi";
 import { mapApiToUI } from "../types/Supply/purchaseInvoiceMapper";
 // import { updatePurchaseInvoice } from "../api/procurement/PurchaseInvoiceApi";
@@ -24,7 +24,7 @@ import { getCompanyById } from "../api/companySetupApi";
 import { mapSupplierToAddress } from "../types/Supply/purchaseInvoiceMapper";
 import type { AddressBlock } from "../types/Supply/purchaseInvoice";
 import { getItemByItemCode } from "../api/itemApi";
-import { getPurchaseOrderById,getPurchaseOrders } from "../api/procurement/PurchaseOrderApi";
+import { getPurchaseOrderById, getPurchaseOrders } from "../api/procurement/PurchaseOrderApi";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 
 interface UsePurchaseInvoiceFormProps {
@@ -43,7 +43,9 @@ export const usePurchaseInvoiceForm = ({
   const [form, setForm] = useState<PurchaseInvoiceFormData>(emptyPOForm);
   const [activeTab, setActiveTab] = useState<POTab>("details");
   const [saving, setSaving] = useState(false);
-   const [poList, setPoList] = useState<any[]>([]);
+  const [poList, setPoList] = useState<any[]>([]);
+  const [customShippingRule, setCustomShippingRule] = useState("");
+  const [customIncoterm, setCustomIncoterm] = useState("");
   useEffect(() => {
     if (!isOpen) {
       setForm(emptyPOForm);
@@ -75,8 +77,8 @@ export const usePurchaseInvoiceForm = ({
     loadCompanyBuyingTerms();
   }, [isOpen]);
 
- 
-  
+
+
 
   useEffect(() => {
     if (!isOpen || !pId) return;
@@ -94,26 +96,29 @@ export const usePurchaseInvoiceForm = ({
   useEffect(() => {
     if (!isOpen || pId) return;
     const today = new Date().toISOString().split("T")[0];
-    setForm((prev) => ({ ...prev, date: today, requiredBy: today }));
+    setForm((prev) => ({ ...prev, date: today }));
   }, [isOpen, pId]);
 
   // Calculate totals (Items + Taxes + Rounding)
   useEffect(() => {
-    const subTotal = form.items.reduce(
-      (sum, item) => sum + item.quantity * item.rate,
-      0,
-    );
+    let sub = 0;
+    let tax = 0;
 
-    const itemTaxTotal = form.items.reduce((sum, item) => {
-      const base = item.quantity * item.rate;
-      return sum + (base * (item.vatRate || 0)) / 100;
-    }, 0);
+    form.items.forEach((item) => {
+      const discountAmount =
+        item.quantity * item.rate * (Number(item.discount || 0) / 100);
 
-    const taxRowTotal = form.taxRows.reduce((sum, t) => {
-      return sum + (t.amount * t.taxRate) / 100;
-    }, 0);
+      const totalInclusive = item.quantity * item.rate - discountAmount;
 
-    const grandTotal = subTotal + itemTaxTotal + taxRowTotal;
+      const exclusive = totalInclusive / (1 + Number(item.vatRate || 0) / 100);
+
+      const taxAmt = totalInclusive - exclusive;
+
+      sub += exclusive;
+      tax += taxAmt;
+    });
+
+    const grandTotal = sub + tax;
 
     const totalQuantity = form.items.reduce(
       (sum, item) => sum + (Number(item.quantity) || 0),
@@ -152,46 +157,51 @@ export const usePurchaseInvoiceForm = ({
   };
 
   const handlePOSelect = async (po: any) => {
-  if (!po) return;
+    if (!po) return;
 
-  try {
-    const res = await getPurchaseOrderById(po.poId);
-    const data = res?.data;
-    if (!data) return;
+    try {
+      const res = await getPurchaseOrderById(po.poId);
+      const data = res?.data;
+      if (!data) return;
 
-    setForm(prev => ({
-  ...prev,
+      setForm(prev => ({
+        ...prev,
 
-  poNumber: data.pId,
-  currency: data.currency,
-  project: data.project,
-  costCenter: data.costCenter,
-  incoterm: data.incoterm,
-  shippingRule: data.shippingRule,
+        poNumber: data.pId,
+        currency: data.currency,
+        project: data.project,
+        costCenter: data.costCenter,
+        incoterm: data.incoterm,
+        shippingRule: data.shippingRule,
 
-  addresses: {
-    ...prev.addresses,
-    supplierAddress: data.addresses?.supplierAddress || prev.addresses.supplierAddress,
-    dispatchAddress: data.addresses?.dispatchAddress || prev.addresses.dispatchAddress,
-    shippingAddress: data.addresses?.shippingAddress || prev.addresses.shippingAddress,
-  },
+        addresses: {
+          ...prev.addresses,
+          supplierAddress: data.addresses?.supplierAddress || prev.addresses.supplierAddress,
+          dispatchAddress: data.addresses?.dispatchAddress || prev.addresses.dispatchAddress,
+          shippingAddress: data.addresses?.shippingAddress || prev.addresses.shippingAddress,
+        },
 
-  items: (data.items || []).map((item:any) => ({
-    itemCode: item.item_code,
-    itemName: item.item_name,
-    quantity: item.qty,
-    rate: item.rate,
-    uom: item.uom,
-    vatCd: item.VatCd || "",
-    vatRate: 0,
-    requiredBy: prev.requiredBy
-  }))
-}));
+        items: (data.items || []).map((item: any) => ({
+          itemCode: item.item_code,
+          itemName: item.item_name,
+          quantity: item.qty,
+          rate: item.rate,
+          uom: item.uom,
+          vatCd: item.VatCd || "",
+          vatRate: Number(item.vatRate ?? 0),
+          description: "",
+          packing: "",
+          batchNo: "",
+          mfgDate: "",
+          expDate: "",
+          discount: 0,
+        }))
+      }));
 
-  } catch (e) {
-    showApiError({ message: "Failed to load PO details" });
-  }
-};
+    } catch (e) {
+      showApiError({ message: "Failed to load PO details" });
+    }
+  };
 
   const handleFormChange = (
     e: React.ChangeEvent<
@@ -215,54 +225,54 @@ export const usePurchaseInvoiceForm = ({
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
- const handleSupplierChange = async (sup: any) => {
-  if (!sup) return;
+  const handleSupplierChange = async (sup: any) => {
+    if (!sup) return;
 
-  try {
-    const res = await getSupplierById(sup.id);
-    const supplier = res?.data;
-    if (!supplier) return;
+    try {
+      const res = await getSupplierById(sup.id);
+      const supplier = res?.data;
+      if (!supplier) return;
 
-    // 1. Set supplier details
-    setForm((p) => ({
-      ...p,
-      supplier: supplier.supplierName,
-      supplierId: supplier.supplierId,
-      supplierCode: supplier.supplierCode,
-      supplierEmail: supplier.emailId,
-      supplierPhone: supplier.phoneNo,
-      taxCategory: supplier.taxCategory || "",
-      currency: supplier.currency || p.currency,
-      supplierContact: supplier.contactPerson || "",
-      destnCountryCd: "",
-      placeOfSupply: "",
-      addresses: {
-        ...p.addresses,
-        supplierAddress: mapSupplierToAddress(
-          supplier,
-          p.addresses.supplierAddress
-        ),
-      },
-    }));
+      // 1. Set supplier details
+      setForm((p) => ({
+        ...p,
+        supplier: supplier.supplierName,
+        supplierId: supplier.supplierId,
+        supplierCode: supplier.supplierCode,
+        supplierEmail: supplier.emailId,
+        supplierPhone: supplier.phoneNo,
+        taxCategory: supplier.taxCategory || "",
+        currency: supplier.currency || p.currency,
+        supplierContact: supplier.contactPerson || "",
+        destnCountryCd: "",
+        placeOfSupply: "",
+        addresses: {
+          ...p.addresses,
+          supplierAddress: mapSupplierToAddress(
+            supplier,
+            p.addresses.supplierAddress
+          ),
+        },
+      }));
 
-    // 2. Fetch PO list for that supplier
-    const poRes = await getPurchaseOrders(1, 100, {
-  supplier: supplier.supplierName
-});
+      // 2. Fetch PO list for that supplier
+      const poRes = await getPurchaseOrders(1, 100, {
+        supplier: supplier.supplierName
+      });
 
-    setPoList(poRes?.data?.data || []);
+      setPoList(poRes?.data?.data || []);
 
-  } catch (e) {
-    console.error("Supplier detail fetch failed", e);
-  }
-};
+    } catch (e) {
+      console.error("Supplier detail fetch failed", e);
+    }
+  };
 
   const handleItemChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     idx: number,
   ) => {
     const { name, value } = e.target;
-    const isNum = ["quantity", "rate"].includes(name);
+    const isNum = ["quantity", "rate", "discount", "vatRate"].includes(name);
     const items = [...form.items];
     items[idx] = { ...items[idx], [name]: isNum ? Number(value) : value };
     setForm((p) => ({ ...p, items }));
@@ -270,7 +280,6 @@ export const usePurchaseInvoiceForm = ({
 
   const addItem = () => {
     setForm((p) => ({ ...p, items: [...p.items, { ...emptyItem }] }));
-    toast.success("New item row added");
   };
 
   const removeItem = (idx: number) => {
@@ -362,36 +371,43 @@ export const usePurchaseInvoiceForm = ({
     }
   };
 
-const handleItemSelect = async (itemId: string, idx: number) => {
-  try {
-    const res = await getItemByItemCode(itemId);
-    if (!res || res.status_code !== 200) return;
+  const handleItemSelect = async (itemId: string, idx: number) => {
+    try {
+      const res = await getItemByItemCode(itemId);
+      if (!res || res.status_code !== 200) return;
 
-    const data = res.data;
+      const data = res.data;
 
-    setForm((prev) => {
-      const items = [...prev.items];
+      setForm((prev) => {
+        const items = [...prev.items];
 
-      items[idx] = {
-        ...items[idx],
+        items[idx] = {
+          ...items[idx],
 
-        itemCode: data.id,
-        itemName: data.itemName,
-        uom: data.unitOfMeasureCd || "Unit",   
-        rate: Number(data.buyingPrice ?? 0),
-        vatCd: data.taxInfo?.taxCode ?? "",
-        vatRate: Number(data.taxInfo?.taxPerct ?? 0),
-      };
+          itemCode: data.id,
+          itemName: data.itemName,
+          uom: data.unitOfMeasureCd || "Unit",
+          rate: Number(data.buyingPrice ?? 0),
+          vatCd: data.taxInfo?.taxCode ?? "",
+          vatRate: Number(data.taxInfo?.taxPerct ?? 0),
 
-      return { ...prev, items };
-    });
-  } catch (err) {
-    console.error("Failed to fetch item details", err);
-    showApiError({
-      message: "Failed to load item details",
-    });
-  }
-};
+          description: items[idx].description || "",
+          packing: items[idx].packing || "",
+          batchNo: items[idx].batchNo || "",
+          mfgDate: items[idx].mfgDate || "",
+          expDate: items[idx].expDate || "",
+          discount: items[idx].discount || 0,
+        };
+
+        return { ...prev, items };
+      });
+    } catch (err) {
+      console.error("Failed to fetch item details", err);
+      showApiError({
+        message: "Failed to load item details",
+      });
+    }
+  };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -403,7 +419,7 @@ const handleItemSelect = async (itemId: string, idx: number) => {
       return;
     }
 
-    const errors = validatePO(form);
+    const errors = validatePI(form);
 
     if (errors.length) {
       const uniqueErrors = [...new Set(errors)];
@@ -418,7 +434,20 @@ const handleItemSelect = async (itemId: string, idx: number) => {
     try {
       setSaving(true);
 
-      const payload = mapUIToCreatePI(form);
+      const finalForm = {
+        ...form,
+        shippingRule:
+          form.shippingRule === "OTHER"
+            ? customShippingRule
+            : form.shippingRule,
+
+        incoterm:
+          form.incoterm === "OTHER"
+            ? customIncoterm
+            : form.incoterm,
+      };
+
+      const payload = mapUIToCreatePI(finalForm);
 
       let res;
 
@@ -476,8 +505,12 @@ const handleItemSelect = async (itemId: string, idx: number) => {
     handleSubmit,
     reset,
     setForm,
-    poList,          
-  handlePOSelect
+    poList,
+    handlePOSelect,
+    customShippingRule,
+    setCustomShippingRule,
+    customIncoterm,
+    setCustomIncoterm,
   };
 };
 

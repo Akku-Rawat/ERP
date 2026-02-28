@@ -11,6 +11,8 @@ export interface ItemRow {
 
   vatCd: string;   
   vatRate: number; 
+  packing?: string;
+
 }
 
 
@@ -109,6 +111,7 @@ export const emptyItem: ItemRow = {
   rate: 0,
   vatCd: "",
   vatRate: 0,
+  packing: "",
 };
 
 

@@ -29,6 +29,7 @@ const emptyForm: CustomerDetail & { sameAsBilling: boolean } = {
   tpin: "",
   currency: "",
   onboardingBalance: 0,
+  mobileCode: "",
   mobile: "",
   contactPerson: "",
   displayName: "",
@@ -124,10 +125,44 @@ const CustomerModal: React.FC<{
 
   useEffect(() => {
     if (initialData) {
+
+      const splitMobile = (mobile?: string) => {
+        if (!mobile) return { code: "", number: "" };
+
+        // With +code
+        const plusMatch = mobile.match(/^(\+\d{1,4})(\d+)$/);
+        if (plusMatch) {
+          return {
+            code: plusMatch[1],
+            number: plusMatch[2],
+          };
+        }
+
+        // Without +
+        const plainMatch = mobile.match(/^(\d{1,4})(\d{6,})$/);
+        if (plainMatch) {
+          return {
+            code: `+${plainMatch[1]}`,
+            number: plainMatch[2],
+          };
+        }
+
+        // Fallback → treat everything as number
+        return {
+          code: "",
+          number: mobile,
+        };
+      };
+
+      const mobile = splitMobile(initialData.mobile);
+
       setForm({
         ...initialData,
+        mobileCode: mobile.code,
+        mobile: mobile.number,
         sameAsBilling: false,
       });
+
     } else {
       setForm(emptyForm);
     }
@@ -135,7 +170,7 @@ const CustomerModal: React.FC<{
     setActiveTab("details");
     setLoading(false);
     setAllowSubmit(false);
-    setErrors({}); // Clear errors when modal opens/closes
+    setErrors({});
   }, [initialData, isOpen]);
 
   useEffect(() => {
@@ -195,7 +230,11 @@ const CustomerModal: React.FC<{
       newErrors.contactPerson = "Contact person is required";
     }
 
-   
+
+    if (!form.mobileCode || !form.mobile) {
+      newErrors.mobile = "Mobile number is required";
+    }
+
     // Validate Tax Category
     if (!form.customerTaxCategory || form.customerTaxCategory === "") {
       newErrors.customerTaxCategory = "Tax category is required";
@@ -216,7 +255,7 @@ const CustomerModal: React.FC<{
       }
     }
 
-  
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -333,8 +372,19 @@ const CustomerModal: React.FC<{
 
     setLoading(true);
 
-    const payload: CustomerDetail = { ...form };
-    delete (payload as any).sameAsBilling;
+
+
+    const formattedForm = {
+      ...form,
+      mobile: `${form.mobileCode || ""}${form.mobile || ""}`,
+    };
+
+    const { sameAsBilling, mobileCode, ...cleanForm } = formattedForm;
+
+    const payload: CustomerDetail = {
+      ...cleanForm,
+    };
+
 
     try {
       //  Loading
@@ -441,11 +491,10 @@ const CustomerModal: React.FC<{
                 type="button"
                 onClick={() => setActiveTab(tab)}
                 className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2
-          ${
-            activeTab === tab
-              ? "text-primary border-b-[3px] border-primary"
-              : "text-muted border-b-[3px] border-transparent hover:text-main"
-          }`}
+          ${activeTab === tab
+                    ? "text-primary border-b-[3px] border-primary"
+                    : "text-muted border-b-[3px] border-transparent hover:text-main"
+                  }`}
               >
                 {/* ICONS KEPT FROM LOGIC 1 */}
                 {tab === "details" && <User className="w-4 h-4" />}
@@ -578,16 +627,29 @@ const CustomerModal: React.FC<{
                   placeholder="email@example.com"
                   error={errors.email}
                 />
+                <div className="flex gap-2 items-end">
+                  <div className="w-[50px]">
+                    <ModalInput
+                      label=" "
+                      name="mobileCode"
+                      value={form.mobileCode}
+                      onChange={handleChange}
+                      placeholder="+"
+                    />
+                  </div>
 
-                <ModalInput
-                  label="Mobile"
-                  name="mobile"
-                  type="tel"
-                  value={form.mobile}
-                  onChange={handleChange}
-                  required
-                  placeholder="+1234567890"
-                />
+                  <div className="flex-1">
+                    <ModalInput
+                      label="Mobile"
+                      name="mobile"
+                      type="tel"
+                      value={form.mobile}
+                      onChange={handleChange}
+                      required
+                      placeholder="Enter mobile number"
+                    />
+                  </div>
+                </div>
               </div>
             </Card>
           )}

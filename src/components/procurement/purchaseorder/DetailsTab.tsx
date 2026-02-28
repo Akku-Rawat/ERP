@@ -37,7 +37,7 @@ export const DetailsTab = ({
   const symbol = getCurrencySymbol();
 
   // Pagination Logic
-  const ITEMS_PER_PAGE = 5;
+  const ITEMS_PER_PAGE = 7;
   const [page, setPage] = useState(0);
 
   // Helper function to get VAT description
@@ -69,17 +69,18 @@ export const DetailsTab = ({
   return (
     <div className="flex flex-col gap-4 max-h-screen overflow-auto p-4 bg-app text-main">
       <div className="bg-app">
-        <div className="grid grid-cols-6 gap-3 items-end">
+        <div className="grid grid-cols-[minmax(300px,380px)_repeat(4,135px)] gap-x-2 items-end">
           {/* Supplier */}
-          <div className="col-span-1">
+          <div className="max-w-[380px]">
             <SupplierSelect
+              className="w-full"
               selectedId={form.supplierId}
               onChange={onSupplierChange}
             />
           </div>
 
           {/* Date */}
-          <div>
+          <div className="w-[120px]">
             <ModalInput
               label="Date"
               type="date"
@@ -93,7 +94,7 @@ export const DetailsTab = ({
 
 
           {/* Status */}
-          <div>
+          <div className="w-[120px]">
             <ModalSelect
               label="Status"
               name="status"
@@ -111,7 +112,7 @@ export const DetailsTab = ({
               ]}
             />
           </div>
-          <div>
+          <div className="w-[130px]">
             <ModalInput
               label="Cost Center"
               name="costCenter"
@@ -120,7 +121,7 @@ export const DetailsTab = ({
             />
           </div>
 
-          <div>
+          <div className="w-[120px]">
             <ModalInput
               label="Project"
               name="project"
@@ -141,37 +142,40 @@ export const DetailsTab = ({
           </div>
 
           <div>
-            <table className="w-full border-collapse text-[10px]">
+            <table className="w-full border-collapse text-[10px] table-fixed">
               <thead>
                 <tr className="border-b border-theme">
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[25px]">
+                  <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[25px]">
                     #
                   </th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[130px]">
-                    Item Code
+                  <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[150px]">
+                    Item Name
                   </th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[140px]">
+                   <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[60px]">
+                    Packing
+                  </th>
+                  <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[90px]">
                     Required By
                   </th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[50px]">
+                  <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[70px]">
                     Qty
                   </th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
+                  <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[70px]">
                     UOM
                   </th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
+                  <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[70px]">
                     Rate
                   </th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[70px]">
+                  <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[70px]">
                     Tax(%){" "}
                   </th>
-                  <th className="px-2 py-3 text-left text-muted font-medium text-[11px] w-[60px]">
+                  <th className="px-2 py-1 text-left text-muted font-medium text-[11px] w-[60px]">
                     Tax Code
                   </th>
-                  <th className="px-2 py-3 text-right text-muted font-medium text-[11px] w-[70px]">
+                  <th className="px-2 py-1 text-right text-muted font-medium text-[11px] w-[70px]">
                     Amount
                   </th>
-                  <th className="px-2 py-3 text-center text-muted font-medium text-[11px] w-[35px]">
+                  <th className="px-2 py-1 text-center text-muted font-medium text-[11px] w-[35px]">
                     -
                   </th>
                 </tr>
@@ -199,10 +203,20 @@ export const DetailsTab = ({
                         />
                       </td>
 
+                         <td className="px-0.5 py-1">
+                        <input
+                          type="text"
+                          className="w-full py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          name="packing"
+                          value={it.packing || ""}
+                          onChange={(e) => onItemChange(e, i)}
+                        />
+                      </td>
+
                       <td className="px-0.5 py-1">
                         <input
                           type="date"
-                          className="py-1 px-2 border border-theme rounded  bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-full py-1 px-2 border border-theme rounded  bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                           name="requiredBy"
                           value={it.requiredBy}
                           onChange={(e) => onItemChange(e, i)}
@@ -212,26 +226,27 @@ export const DetailsTab = ({
                       <td className="px-0.5 py-1">
                         <input
                           type="number"
-                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-full py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                           name="quantity"
                           value={it.quantity}
                           onChange={(e) => onItemChange(e, i)}
                         />
                       </td>
 
-                      <td className="px-1 py-1">
+                      <td className="px-0.5 py-1">
                         <input
-                          className="w-[50px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-full py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                           name="uom"
                           value={it.uom}
                           onChange={(e) => onItemChange(e, i)}
+                          disabled
                         />
                       </td>
 
                       <td className="px-0.5 py-1">
                         <input
                           type="number"
-                          className="w-[65px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-full py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                           name="rate"
                           value={it.rate}
                           onChange={(e) => onItemChange(e, i)}
@@ -240,7 +255,7 @@ export const DetailsTab = ({
                       <td className="px-0.5 py-1">
                         <input
                           type="number"
-                          className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-full py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                           name="vatRate"
                           value={it.vatRate}
                           onChange={(e) => onItemChange(e, i)}
@@ -250,7 +265,7 @@ export const DetailsTab = ({
                       <td className="px-0.5 py-1">
                         <div className="relative">
                           <input
-                            className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="w-full py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                             name="vatCd"
                             value={it.vatCd || ""}
                             onChange={(e) => onItemChange(e, i)}
