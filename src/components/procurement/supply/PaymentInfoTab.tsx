@@ -51,6 +51,16 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             error={errors.currency}
           />
 
+           <ModalInput
+            label="Opening Balance"
+            name="openingBalance"
+            type="number"
+            value={form.openingBalance}
+            onChange={onChange}
+            required
+            error={errors.openingBalance}
+          />
+
           <ModalInput
             label="Payment Terms "
             name="paymentTerms"
@@ -71,15 +81,6 @@ export const PaymentInfoTab: React.FC<PaymentInfoTabProps> = ({
             error={errors.dateOfAddition}
           />
 
-          <ModalInput
-            label="Opening Balance"
-            name="openingBalance"
-            type="number"
-            value={form.openingBalance}
-            onChange={onChange}
-            required
-            error={errors.openingBalance}
-          />
         </div>
       </div>
 
