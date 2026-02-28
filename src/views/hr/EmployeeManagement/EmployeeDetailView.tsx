@@ -164,6 +164,17 @@ const EmployeeDetailView: React.FC<Props> = ({
     leaveInfo,
   } = employee;
 
+  const profilePhotoUrl = useMemo(() => {
+    const docs = Array.isArray(documents) ? documents : [];
+    const profileDoc = docs.find((d: any) => {
+      const desc = String(d?.description ?? d?.name ?? "").trim().toLowerCase();
+      return desc === "profile photo";
+    });
+
+    const file = profileDoc?.file ? String(profileDoc.file) : "";
+    return getFileUrl(file) || null;
+  }, [documents]);
+
   const employeeCode = String(
     employee?.employeeId ??
     employmentInfo?.employeeId ??
@@ -294,9 +305,15 @@ const EmployeeDetailView: React.FC<Props> = ({
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-muted/10 border border-border rounded-full flex items-center justify-center text-primary text-xl font-bold">
-              {personalInfo?.FirstName?.[0]}
-              {personalInfo?.LastName?.[0]}
+            <div className="w-14 h-14 bg-muted/10 border border-border rounded-full flex items-center justify-center overflow-hidden">
+              {profilePhotoUrl ? (
+                <img src={profilePhotoUrl} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <div className="text-primary text-xl font-bold">
+                  {personalInfo?.FirstName?.[0]}
+                  {personalInfo?.LastName?.[0]}
+                </div>
+              )}
             </div>
             <div>
               <h1 className="text-xl font-bold text-main">

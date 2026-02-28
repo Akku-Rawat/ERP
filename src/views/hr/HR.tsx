@@ -12,7 +12,7 @@ import HrDashboard from "./HrDashboard";
 import EmployeeManagement from "./EmployeeManagement/EmployeeManagement";
 import PerformanceDevelopment from "./performance&growth/performancedevolpment";
 import ComplianceManagement from "./compiliance/ComplianceManagement";
-import TimeAttendance from "./time_leave/Attendance";
+import TimeAttendance from "./time_leave/TimeAttendanceSimple";
 import Leave from "./time_leave/Leave";
 import PayrollManagement from "./payroll-system/PayrollManagement";
 import HRSettingsPage from "./hrsetup";

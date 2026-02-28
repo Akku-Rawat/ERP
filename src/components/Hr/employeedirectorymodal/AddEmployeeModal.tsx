@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { X, Upload, User, CheckCircle2 } from "lucide-react";
 import IdentityVerificationModal from "./IdentityVerificationModal";
 import PersonalInfoTab from "./PersonalInfoTab";
@@ -13,7 +13,7 @@ import { EMPLOYEE_ROLE_CONFIG } from "../../../api/config/employeeRoleConfig";
 import { filterEmployeesByRole } from "../../../api/config/employeeRoleFilter";
 import { getAllEmployees } from "../../../api/employeeapi";
  
-import { createEmployee, getEmployeeById, updateEmployeeById } from "../../../api/employeeapi";
+import { createEmployee, getEmployeeById, updateEmployeeById, updateEmployeeDocuments } from "../../../api/employeeapi";
 import { createSalaryStructureAssignment } from "../../../api/salaryStructureAssignmentApi";
 import { getSalaryStructureById } from "../../../api/salaryStructureApi";
 
@@ -175,8 +175,41 @@ const [step, setStep] = useState<"verification" | "form">(
 
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
 
+  const profileInputRef = useRef<HTMLInputElement | null>(null);
+  const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [profilePreviewUrl, setProfilePreviewUrl] = useState<string>("");
+
   const [loading] = useState(false);
  
+
+  const resolveEmployeeInternalId = async (candidate: any): Promise<string> => {
+    const raw = String(candidate ?? "").trim();
+    if (!raw) return "";
+    try {
+      const emp = await getEmployeeById(raw);
+      const id = String(emp?.id ?? emp?.name ?? "").trim();
+      return id;
+    } catch {
+      return "";
+    }
+  };
+
+  const uploadProfilePhoto = async (employeeInternalId: string) => {
+    if (!profileFile) return;
+    const empId = String(employeeInternalId ?? "").trim();
+    if (!empId) return;
+
+    const formData = new FormData();
+    formData.append("employeeId", empId);
+    formData.append("name[0]", "Profile Photo");
+    formData.append("description[0]", "Profile Photo");
+    formData.append("file[0]", profileFile);
+    formData.append("isUpdate", "1");
+    formData.append("isDelete", "0");
+
+    await updateEmployeeDocuments(formData);
+  };
+
 
   // Auto-set salary structure when job title changes
 
@@ -192,8 +225,16 @@ const [step, setStep] = useState<"verification" | "form">(
       setStep("verification");
       setIsPreFilled(false);
       setCurrentTabIndex(0);
+      setProfileFile(null);
+      setProfilePreviewUrl("");
     }
   }, [isOpen, editData]);
+
+  useEffect(() => {
+    return () => {
+      if (profilePreviewUrl) URL.revokeObjectURL(profilePreviewUrl);
+    };
+  }, [profilePreviewUrl]);
 
   useEffect(() => {
     if (!editData) return;
@@ -629,6 +670,9 @@ const [step, setStep] = useState<"verification" | "form">(
         formData.employeeId ?? editData?.employeeId ?? editData?.employmentInfo?.employeeId ?? editData?.id,
       );
       await createOrUpdateAssignment(empCode);
+
+      const internalId = await resolveEmployeeInternalId(editData?.id ?? empCode);
+      await uploadProfilePhoto(internalId);
       closeSwal();
       showSuccess("Employee updated successfully");
     } else {
@@ -645,6 +689,9 @@ const [step, setStep] = useState<"verification" | "form">(
       ).trim();
       const empCode = await resolveEmployeeCode(candidate);
       await createOrUpdateAssignment(empCode);
+
+      const internalId = await resolveEmployeeInternalId(candidate || empCode);
+      await uploadProfilePhoto(internalId);
       closeSwal();
       showSuccess("Employee created successfully");
     }
@@ -712,12 +759,34 @@ if (step === "verification" && features.requireIdentityVerification) {
           <div className="flex gap-4">
             <div className="flex-shrink-0">
               <div className="relative">
-                <div className="w-16 h-16 bg-approunded-lg flex items-center justify-center border-2 border-theme">
-                  <User className="w-8 h-8 text-muted" />
+                <div className="w-16 h-16 rounded-lg overflow-hidden flex items-center justify-center border-2 border-theme bg-app">
+                  {profilePreviewUrl ? (
+                    <img src={profilePreviewUrl} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-8 h-8 text-muted" />
+                  )}
                 </div>
-                <button className="absolute -bottom-1 -right-1 w-5 h-5 bg-card rounded-full border-2 border-theme flex items-center justify-center hover:bg-app transition shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => profileInputRef.current?.click()}
+                  className="absolute -bottom-1 -right-1 w-5 h-5 bg-card rounded-full border-2 border-theme flex items-center justify-center hover:bg-app transition shadow-sm"
+                  title="Upload profile photo"
+                >
                   <Upload className="w-2.5 h-2.5 text-main" />
                 </button>
+                <input
+                  ref={profileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0] || null;
+                    if (profilePreviewUrl) URL.revokeObjectURL(profilePreviewUrl);
+                    setProfileFile(f);
+                    setProfilePreviewUrl(f ? URL.createObjectURL(f) : "");
+                    e.target.value = "";
+                  }}
+                />
               </div>
             </div>
 
