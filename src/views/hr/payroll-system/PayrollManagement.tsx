@@ -52,18 +52,18 @@ const Btn: React.FC<{
   className?: string;
 }> = ({ onClick, disabled, children, icon, variant = "primary", size = "md", className = "" }) => {
   const v: Record<string, string> = {
-    primary: "bg-primary text-white hover:opacity-90 shadow-sm",
-    outline: "bg-card text-main border border-theme hover:bg-app",
-    success: "bg-success text-white hover:opacity-90 shadow-sm",
-    ghost: "text-muted hover:text-main hover:bg-app",
+    primary: "bg-primary text-white hover:bg-primary/90",
+    outline: "bg-card text-main border border-border hover:bg-muted/5",
+    success: "bg-green-600 text-white hover:bg-green-700",
+    ghost: "text-muted hover:text-main hover:bg-muted/5",
   };
   const s = size === "sm" ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm";
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center gap-1.5 rounded-lg font-semibold transition-all duration-150
-        disabled:opacity-40 disabled:cursor-not-allowed ${v[variant]} ${s} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-md font-medium transition-colors
+        disabled:opacity-50 disabled:cursor-not-allowed ${v[variant]} ${s} ${className}`}
     >
       {icon}{children}
     </button>
@@ -117,32 +117,31 @@ const TopBar: React.FC<{
   ];
 
   return (
-    <header className="h-12 shrink-0 bg-card border-b border-theme px-5 flex items-center justify-between z-30 shadow-sm">
-      <div className="flex items-center gap-4">
+    <header className="h-14 shrink-0 bg-card border-b border-border px-6 flex items-center justify-between z-30 sticky top-0">
+      <div className="flex items-center gap-6">
         {/* Brand */}
         <button
           type="button"
           onClick={() => setView("dashboard")}
-          className={`flex items-center gap-2 rounded-md px-1.5 py-1 transition ${
-            view === "dashboard" ? "text-primary" : "text-main hover:text-primary"
-          }`}
+          className={`flex items-center gap-2 rounded px-1.5 py-1 transition-colors ${view === "dashboard" ? "text-primary" : "text-main hover:text-primary"
+            }`}
         >
-          <div className="w-6 h-6 rounded-md bg-primary text-white flex items-center justify-center">
-            <Layers className="w-3.5 h-3.5" />
+          <div className="w-8 h-8 rounded bg-muted/10 text-primary flex items-center justify-center border border-border">
+            <Layers className="w-4 h-4" />
           </div>
-          <span className="text-sm font-extrabold">Payroll</span>
+          <span className="text-base font-bold">Payroll</span>
         </button>
-        <span className="text-muted opacity-30 select-none">|</span>
+        <span className="text-border select-none">|</span>
 
         {/* Nav */}
-        <nav className="flex items-center gap-0.5">
+        <nav className="flex items-center gap-1">
           {navItems.map(item => (
             <button
               key={item.id}
               onClick={() => setView(item.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${view === item.id
-                ? "bg-app text-primary border border-theme"
-                : "text-muted hover:text-main hover:bg-app"
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${view === item.id
+                ? "bg-muted/10 text-primary"
+                : "text-muted hover:text-main hover:bg-muted/5"
                 }`}
             >
               {item.icon}{item.label}
@@ -237,12 +236,12 @@ const StatusChip: React.FC<{ status?: string }> = ({ status }) => {
   const s = String(normalized ?? "").toLowerCase();
   const cls =
     s === "paid"
-      ? "bg-success/10 text-success border-success/20"
+      ? "bg-green-50 text-green-700 border-green-200"
       : s === "draft"
-        ? "bg-warning/10 text-warning border-warning/20"
-        : "bg-app text-muted border-theme";
+        ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+        : "bg-gray-50 text-gray-700 border-gray-200";
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${cls}`}>
+    <span className={`inline-flex items-center px-2.5 py-1 rounded text-xs font-medium border ${cls}`}>
       {normalized || "—"}
     </span>
   );
@@ -288,15 +287,18 @@ const SalarySlipDetailsModal: React.FC<{
   const deductions = Array.isArray(data?.deductions) ? data?.deductions : [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-        <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-card rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-xl flex flex-col border border-border">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <div className="min-w-0">
-            <div className="text-lg font-semibold">Salary Slip</div>
-            <div className="text-xs text-white/80 mt-0.5 break-words">{slipId}</div>
+            <h3 className="text-sm font-bold text-main flex items-center gap-2">
+              <FileText className="w-4 h-4 text-muted" />
+              Salary Slip
+            </h3>
+            <div className="text-xs text-muted mt-1 break-words">{slipId}</div>
           </div>
-          <button onClick={onClose} className="text-white/80 hover:text-white">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="p-1 rounded hover:bg-muted/10 transition-colors">
+            <X className="w-5 h-5 text-muted hover:text-main" />
           </button>
         </div>
 
@@ -310,45 +312,45 @@ const SalarySlipDetailsModal: React.FC<{
 
           {!loading && data && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-app border border-theme rounded-xl p-4">
-                  <div className="text-[11px] font-extrabold text-muted uppercase tracking-wider">Employee</div>
-                  <div className="text-sm font-bold text-main mt-1">{data.employee_name || data.employee}</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-muted/5 border border-border rounded-lg p-5">
+                  <div className="text-xs text-muted font-medium uppercase tracking-wider mb-1">Employee</div>
+                  <div className="text-sm font-semibold text-main break-words">{data.employee_name || data.employee}</div>
                   <div className="text-xs text-muted mt-0.5">{data.employee}</div>
                 </div>
-                <div className="bg-app border border-theme rounded-xl p-4">
-                  <div className="text-[11px] font-extrabold text-muted uppercase tracking-wider">Period</div>
-                  <div className="text-sm font-bold text-main mt-1">{data.start_date} → {data.end_date}</div>
+                <div className="bg-muted/5 border border-border rounded-lg p-5">
+                  <div className="text-xs text-muted font-medium uppercase tracking-wider mb-1">Period</div>
+                  <div className="text-sm font-semibold text-main">{data.start_date} → {data.end_date}</div>
                   <div className="text-xs text-muted mt-0.5">{data.salary_structure}</div>
                 </div>
-                <div className="bg-app border border-theme rounded-xl p-4">
-                  <div className="text-[11px] font-extrabold text-muted uppercase tracking-wider">Net Pay</div>
-                  <div className="text-xl font-extrabold text-main mt-1 tabular-nums">ZMW {Number(data.net_pay ?? 0).toLocaleString("en-ZM")}</div>
+                <div className="bg-muted/5 border border-border rounded-lg p-5">
+                  <div className="text-xs text-muted font-medium uppercase tracking-wider mb-1">Net Pay</div>
+                  <div className="text-xl font-bold text-main tabular-nums">ZMW {Number(data.net_pay ?? 0).toLocaleString("en-ZM")}</div>
                   <div className="mt-2"><StatusChip status={data.status} /></div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border border-theme rounded-xl overflow-hidden">
-                  <div className="px-4 py-3 bg-app border-b border-theme flex items-center justify-between">
-                    <div className="text-xs font-extrabold text-main uppercase tracking-wide">Earnings</div>
-                    <div className="text-xs font-extrabold text-main">ZMW {Number(data.total_earnings ?? 0).toLocaleString("en-ZM")}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="border border-border rounded-lg overflow-hidden bg-card">
+                  <div className="px-5 py-4 bg-muted/5 border-b border-border flex items-center justify-between">
+                    <div className="text-sm font-bold text-main">Earnings</div>
+                    <div className="text-sm font-bold text-main">ZMW {Number(data.total_earnings ?? 0).toLocaleString("en-ZM")}</div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-card border-b border-theme">
+                      <thead className="bg-card border-b border-border">
                         <tr>
-                          <th className="px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider text-left">Component</th>
-                          <th className="px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider text-right">Amount</th>
+                          <th className="px-5 py-3 text-xs font-semibold text-muted text-left">Component</th>
+                          <th className="px-5 py-3 text-xs font-semibold text-muted text-right">Amount</th>
                         </tr>
                       </thead>
                       <tbody>
                         {earnings.length === 0 ? (
-                          <tr><td colSpan={2} className="px-4 py-8 text-center text-sm text-muted">No earnings</td></tr>
+                          <tr><td colSpan={2} className="px-5 py-8 text-center text-sm text-muted">No earnings</td></tr>
                         ) : earnings.map((r: any, idx: number) => (
-                          <tr key={`${r?.component}-${idx}`} className="border-b border-theme last:border-0">
-                            <td className="px-4 py-3 text-xs font-semibold text-main">{String(r?.component ?? "")}</td>
-                            <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(r?.amount ?? 0).toLocaleString("en-ZM")}</td>
+                          <tr key={`${r?.component}-${idx}`} className="border-b border-border last:border-0 hover:bg-muted/5 transition-colors">
+                            <td className="px-5 py-3 text-sm font-medium text-main">{String(r?.component ?? "")}</td>
+                            <td className="px-5 py-3 text-right text-sm font-medium text-main tabular-nums">{Number(r?.amount ?? 0).toLocaleString("en-ZM")}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -356,26 +358,26 @@ const SalarySlipDetailsModal: React.FC<{
                   </div>
                 </div>
 
-                <div className="border border-theme rounded-xl overflow-hidden">
-                  <div className="px-4 py-3 bg-app border-b border-theme flex items-center justify-between">
-                    <div className="text-xs font-extrabold text-main uppercase tracking-wide">Deductions</div>
-                    <div className="text-xs font-extrabold text-main">ZMW {Number(data.total_deduction ?? 0).toLocaleString("en-ZM")}</div>
+                <div className="border border-border rounded-lg overflow-hidden bg-card">
+                  <div className="px-5 py-4 bg-muted/5 border-b border-border flex items-center justify-between">
+                    <div className="text-sm font-bold text-main">Deductions</div>
+                    <div className="text-sm font-bold text-main">ZMW {Number(data.total_deduction ?? 0).toLocaleString("en-ZM")}</div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-card border-b border-theme">
+                      <thead className="bg-card border-b border-border">
                         <tr>
-                          <th className="px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider text-left">Component</th>
-                          <th className="px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider text-right">Amount</th>
+                          <th className="px-5 py-3 text-xs font-semibold text-muted text-left">Component</th>
+                          <th className="px-5 py-3 text-xs font-semibold text-muted text-right">Amount</th>
                         </tr>
                       </thead>
                       <tbody>
                         {deductions.length === 0 ? (
-                          <tr><td colSpan={2} className="px-4 py-8 text-center text-sm text-muted">No deductions</td></tr>
+                          <tr><td colSpan={2} className="px-5 py-8 text-center text-sm text-muted">No deductions</td></tr>
                         ) : deductions.map((r: any, idx: number) => (
-                          <tr key={`${r?.component}-${idx}`} className="border-b border-theme last:border-0">
-                            <td className="px-4 py-3 text-xs font-semibold text-main">{String(r?.component ?? "")}</td>
-                            <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(r?.amount ?? 0).toLocaleString("en-ZM")}</td>
+                          <tr key={`${r?.component}-${idx}`} className="border-b border-border last:border-0 hover:bg-muted/5 transition-colors">
+                            <td className="px-5 py-3 text-sm font-medium text-main">{String(r?.component ?? "")}</td>
+                            <td className="px-5 py-3 text-right text-sm font-medium text-main tabular-nums">{Number(r?.amount ?? 0).toLocaleString("en-ZM")}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -387,8 +389,13 @@ const SalarySlipDetailsModal: React.FC<{
           )}
         </div>
 
-        <div className="px-6 py-4 border-t border-theme bg-app flex justify-end">
-          <Btn variant="outline" onClick={onClose}>Close</Btn>
+        <div className="px-6 py-4 border-t border-border bg-muted/5 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium border border-border rounded-md hover:bg-background transition-colors"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
@@ -500,13 +507,13 @@ export default function PayrollManagement() {
         const resp = await getSalarySlips(
           monthMode
             ? {
-                page: 1,
-                page_size: 2000,
-              }
+              page: 1,
+              page_size: 2000,
+            }
             : {
-                page: slipsPage,
-                page_size: slipsPageSize,
-              },
+              page: slipsPage,
+              page_size: slipsPageSize,
+            },
         );
         if (!mounted) return;
         const list = Array.isArray(resp?.salary_slips) ? resp.salary_slips : [];
@@ -562,11 +569,11 @@ export default function PayrollManagement() {
         setEmployeesSummary(
           summary
             ? {
-                totalEmployees: Number(summary?.totalEmployees ?? 0),
-                active: Number(summary?.active ?? 0),
-                onLeave: Number(summary?.onLeave ?? 0),
-                inactive: Number(summary?.inactive ?? 0),
-              }
+              totalEmployees: Number(summary?.totalEmployees ?? 0),
+              active: Number(summary?.active ?? 0),
+              onLeave: Number(summary?.onLeave ?? 0),
+              inactive: Number(summary?.inactive ?? 0),
+            }
             : null,
         );
       } catch (err: any) {
@@ -770,7 +777,7 @@ export default function PayrollManagement() {
 
               <div className="overflow-auto">
                 <table className="w-full">
-                  <thead className="bg-app border-b border-theme">
+                  <thead className="bg-muted/5 border-b border-border">
                     <tr>
                       {[
                         "Slip ID",
@@ -786,9 +793,8 @@ export default function PayrollManagement() {
                       ].map((h, i) => (
                         <th
                           key={String(i)}
-                          className={`px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider whitespace-nowrap ${
-                            i >= 6 && i <= 8 ? "text-right" : "text-left"
-                          }`}
+                          className={`px-4 py-3 text-xs font-semibold text-muted whitespace-nowrap ${i >= 6 && i <= 8 ? "text-right" : "text-left"
+                            }`}
                         >
                           {h}
                         </th>
@@ -821,24 +827,24 @@ export default function PayrollManagement() {
                       filteredSalarySlips.map((s, idx) => (
                         <tr
                           key={s.name}
-                          className={`border-b border-theme last:border-0 ${idx % 2 === 1 ? "bg-app" : "bg-card"}`}
+                          className={`border-b border-border last:border-0 hover:bg-muted/5 transition-colors`}
                         >
-                          <td className="px-4 py-3 text-xs font-semibold text-main break-words">{s.name}</td>
-                          <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{s.employee}</td>
-                          <td className="px-4 py-3 text-xs text-muted break-words">{s.salary_structure}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-main break-words">{s.name}</td>
+                          <td className="px-4 py-3 text-sm text-muted whitespace-nowrap">{s.employee}</td>
+                          <td className="px-4 py-3 text-sm text-muted break-words">{s.salary_structure}</td>
                           <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{s.start_date}</td>
                           <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{s.end_date}</td>
                           <td className="px-4 py-3"><StatusChip status={s.status} /></td>
-                          <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(s.total_earnings ?? 0).toLocaleString("en-ZM")}</td>
-                          <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(s.total_deduction ?? 0).toLocaleString("en-ZM")}</td>
-                          <td className="px-4 py-3 text-right text-xs font-extrabold text-main tabular-nums">{Number(s.net_pay ?? 0).toLocaleString("en-ZM")}</td>
+                          <td className="px-4 py-3 text-right text-sm font-semibold text-main tabular-nums">{Number(s.total_earnings ?? 0).toLocaleString("en-ZM")}</td>
+                          <td className="px-4 py-3 text-right text-sm font-semibold text-main tabular-nums">{Number(s.total_deduction ?? 0).toLocaleString("en-ZM")}</td>
+                          <td className="px-4 py-3 text-right text-sm font-bold text-main tabular-nums">{Number(s.net_pay ?? 0).toLocaleString("en-ZM")}</td>
                           <td className="px-4 py-3 text-right">
                             <button
                               onClick={() => {
                                 setSlipDetailsId(s.name);
                                 setSlipDetailsOpen(true);
                               }}
-                              className="px-3 py-1.5 rounded-lg text-xs font-extrabold border border-theme bg-card text-main hover:bg-app"
+                              className="px-3 py-1.5 rounded-md text-xs font-medium border border-border bg-card text-main hover:bg-muted/5 transition-colors"
                             >
                               View
                             </button>

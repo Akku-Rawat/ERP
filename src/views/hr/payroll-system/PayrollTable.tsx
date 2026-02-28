@@ -21,19 +21,19 @@ interface PayrollTableProps {
 
 const StatusPill: React.FC<{ status: string }> = ({ status }) => {
   const map: Record<string, string> = {
-    Paid: "bg-success/10 text-success",
-    Pending: "bg-warning/10 text-warning",
-    Processing: "bg-primary/10 text-primary",
-    Approved: "bg-success/10 text-success",
-    Rejected: "bg-danger/10 text-danger",
-    Draft: "bg-app text-muted",
-    Failed: "bg-danger/10 text-danger",
+    Paid: "bg-green-50 text-green-700 border-green-200",
+    Pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    Processing: "bg-blue-50 text-blue-700 border-blue-200",
+    Approved: "bg-green-50 text-green-700 border-green-200",
+    Rejected: "bg-red-50 text-red-700 border-red-200",
+    Draft: "bg-gray-50 text-gray-700 border-gray-200",
+    Failed: "bg-red-50 text-red-700 border-red-200",
   };
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${map[status] ?? "bg-app text-muted"}`}>
-      {status === "Paid" && <CheckCircle className="w-3 h-3" />}
-      {status === "Pending" && <Clock className="w-3 h-3" />}
-      {status === "Processing" && <RefreshCw className="w-3 h-3 animate-spin" />}
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border ${map[status] ?? "bg-gray-50 text-gray-700 border-gray-200"}`}>
+      {status === "Paid" && <CheckCircle className="w-3.5 h-3.5" />}
+      {status === "Pending" && <Clock className="w-3.5 h-3.5" />}
+      {status === "Processing" && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
       {status}
     </span>
   );
@@ -42,7 +42,7 @@ const StatusPill: React.FC<{ status: string }> = ({ status }) => {
 const Th: React.FC<{ children: React.ReactNode; align?: "left" | "right" | "center" }> = ({
   children, align = "left",
 }) => (
-  <th className={`px-4 py-3 text-[10px] font-extrabold text-muted uppercase tracking-wider whitespace-nowrap text-${align}`}>
+  <th className={`px-4 py-3 text-xs font-semibold text-muted text-${align} whitespace-nowrap`}>
     {children}
   </th>
 );
@@ -61,7 +61,7 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
 
   return (
     <table className="w-full">
-      <thead className="sticky top-0 z-10 bg-card border-b-2 border-theme">
+      <thead className="sticky top-0 z-10 bg-muted/5 border-b border-border">
         <tr>
           <Th>Employee</Th>
           <Th>Department</Th>
@@ -85,38 +85,38 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
               {/* Main row */}
               <tr
                 onClick={() => onToggleRow(record.id)}
-                className={`border-b border-theme cursor-pointer transition-colors ${expanded ? "bg-primary/[0.03]" : "hover:bg-app"
+                className={`border-b border-border cursor-pointer transition-colors ${expanded ? "bg-muted/5" : "hover:bg-muted/5"
                   }`}
               >
                 {/* Employee */}
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <span className={`transition-transform duration-150 shrink-0 ${expanded ? "rotate-180" : ""}`}>
-                      <ChevronDown className="w-3.5 h-3.5 text-muted" />
+                      <ChevronDown className="w-4 h-4 text-muted" />
                     </span>
-                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary text-[11px] font-extrabold flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded shrink-0 bg-muted/10 text-primary font-bold flex items-center justify-center border border-border">
                       {initials}
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-main leading-tight">{record.employeeName}</p>
-                      <p className="text-[10px] text-muted">{record.employeeId} · {record.grade}</p>
+                      <p className="text-sm font-semibold text-main leading-tight">{record.employeeName}</p>
+                      <p className="text-xs text-muted mt-0.5">{record.employeeId} • {record.grade}</p>
                     </div>
                   </div>
                 </td>
 
                 {/* Department */}
                 <td className="px-4 py-3">
-                  <span className="text-xs bg-app px-2 py-0.5 rounded-md font-medium text-main">{record.department}</span>
+                  <span className="text-xs font-medium text-main">{record.department}</span>
                 </td>
 
                 {/* Attendance with mini progress bar */}
                 <td className="px-4 py-3 text-center">
-                  <p className="text-xs font-extrabold text-main tabular-nums">
-                    {record.paidDays}<span className="text-muted font-normal">/{record.workingDays}</span>
+                  <p className="text-sm font-semibold text-main">
+                    {record.paidDays}<span className="text-xs text-muted font-normal ml-0.5">/{record.workingDays}</span>
                   </p>
-                  <div className="h-1.5 bg-theme rounded-full mt-1 w-16 mx-auto overflow-hidden">
+                  <div className="h-1.5 bg-muted/10 rounded-full mt-1.5 w-16 mx-auto overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-primary transition-all"
+                      className="h-full rounded-full bg-primary transition-all duration-500"
                       style={{ width: `${attendancePct}%` }}
                     />
                   </div>
@@ -124,17 +124,17 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
 
                 {/* Gross */}
                 <td className="px-4 py-3 text-right">
-                  <span className="text-xs font-bold text-main tabular-nums font-mono">ZMW {fmtZMW(record.grossPay)}</span>
+                  <span className="text-sm font-medium text-main tabular-nums">ZMW {fmtZMW(record.grossPay)}</span>
                 </td>
 
                 {/* Deductions */}
                 <td className="px-4 py-3 text-right">
-                  <span className="text-xs font-bold text-danger tabular-nums font-mono">−ZMW {fmtZMW(totalDed)}</span>
+                  <span className="text-sm font-medium text-main tabular-nums ml-1">ZMW {fmtZMW(totalDed)}</span>
                 </td>
 
                 {/* Net Pay */}
                 <td className="px-4 py-3 text-right">
-                  <span className="text-xs font-extrabold text-success tabular-nums font-mono">ZMW {fmtZMW(record.netPay)}</span>
+                  <span className="text-sm font-bold text-main tabular-nums">ZMW {fmtZMW(record.netPay)}</span>
                 </td>
 
                 {/* Status */}
@@ -148,17 +148,17 @@ export const PayrollTable: React.FC<PayrollTableProps> = ({
                     <button
                       onClick={() => onViewPayslip(record)}
                       title="View Payslip"
-                      className="p-1.5 rounded-lg text-muted hover:text-primary hover:bg-primary/8 transition border border-transparent hover:border-primary/20"
+                      className="p-1.5 rounded-md text-muted hover:text-main hover:bg-muted/10 transition-colors"
                     >
-                      <FileText className="w-3.5 h-3.5" />
+                      <FileText className="w-4 h-4" />
                     </button>
                     {record.status !== "Paid" && (
                       <button
                         onClick={() => onEditRecord(record)}
                         title="Edit"
-                        className="p-1.5 rounded-lg text-muted hover:text-main hover:bg-app transition border border-transparent hover:border-theme"
+                        className="p-1.5 rounded-md text-muted hover:text-main hover:bg-muted/10 transition-colors"
                       >
-                        <Edit2 className="w-3.5 h-3.5" />
+                        <Edit2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
