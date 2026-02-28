@@ -47,52 +47,106 @@ const CustomerDetailView: React.FC<Props> = ({
   const filteredCustomers = (customers || []).filter(
     (c) => c.name?.toLowerCase().includes(q) || c.id?.toLowerCase().includes(q),
   );
+  // shipping address formatting
+  const line1 = [customer.shippingAddressLine1, customer.shippingAddressLine2]
+    .filter(Boolean)
+    .join(", ");
 
-const renderActionButton = () => {
-  switch (activeTab) {
-    case "overview":
-      return (
-        <button
-          onClick={() => setCustomerModalOpen(true)}
-          className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
-        >
-          <Plus size={14} /> New Customer
-        </button>
-      );
+  const line2 = [customer.shippingCity, customer.shippingPostalCode]
+    .filter(Boolean)
+    .join(", ");
 
-    case "quotations":
-      return (
-        <button
-          onClick={() => setShowQuotationModal(true)}
-          className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
-        >
-          <Plus size={14} /> New Quotation
-        </button>
-      );
+  const line3 = [customer.shippingState, customer.shippingCountry]
+    .filter(Boolean)
+    .join(", ");
 
-    case "invoices":
-      return (
-        <button
-          onClick={() => setShowInvoiceModal(true)}
-          className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
-        >
-          <Plus size={14} /> New Invoice
-        </button>
-      );
+  const shippingAddress = [line1, line2, line3].filter(Boolean).join("\n");
+  // billing  address frormatting
+  const bLine1 = [customer.billingAddressLine1, customer.billingAddressLine2]
+    .filter(Boolean)
+    .join(", ");
 
-    default:
-      return null;
-  }
-};
+  const bLine2 = [customer.billingCity, customer.billingPostalCode]
+    .filter(Boolean)
+    .join(", ");
 
+  const bLine3 = [customer.billingState, customer.billingCountry]
+    .filter(Boolean)
+    .join(", ");
+
+  const billingAddress = [bLine1, bLine2, bLine3].filter(Boolean).join("\n");
+  const sellingTerms = customer?.terms?.selling;
+
+const formattedTerms = `
+PAYMENT TERMS:
+${sellingTerms?.payment?.phases
+  ?.map(
+    (p: any) =>
+      `• ${p.percentage} - ${p.condition}`
+  )
+  .join("\n") || ""}
+
+Due Dates: ${sellingTerms?.payment?.dueDates || ""}
+Late Charges: ${sellingTerms?.payment?.lateCharges || ""}
+Notes: ${sellingTerms?.payment?.notes || ""}
+
+DELIVERY:
+${sellingTerms?.delivery || ""}
+
+CANCELLATION:
+${sellingTerms?.cancellation || ""}
+
+WARRANTY:
+${sellingTerms?.warranty || ""}
+
+LIABILITY:
+${sellingTerms?.liability || ""}
+`.trim();
+
+  const renderActionButton = () => {
+    switch (activeTab) {
+      case "overview":
+        return (
+          <button
+            onClick={() => setCustomerModalOpen(true)}
+            className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
+          >
+            <Plus size={14} /> New Customer
+          </button>
+        );
+
+      case "quotations":
+        return (
+          <button
+            onClick={() => setShowQuotationModal(true)}
+            className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
+          >
+            <Plus size={14} /> New Quotation
+          </button>
+        );
+
+      case "invoices":
+        return (
+          <button
+            onClick={() => setShowInvoiceModal(true)}
+            className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md"
+          >
+            <Plus size={14} /> New Invoice
+          </button>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="flex flex-col  bg-app text-main overflow-hidden">
-      <header className="bg-card px-5 py-3 flex items-center justify-between border-b border-[var(--border)] shrink-0">
+      <header className="bg-card px-5 py-3 flex items-center justify-between border-b border-theme shrink-0">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
-            className="p-2 hover:bg-row-hover rounded-xl transition-all border border-[var(--border)]"
+            className="p-2 hover:bg-row-hover rounded-xl transition-all border border-theme"
           >
             <X size={18} className="text-muted" />
           </button>
@@ -101,24 +155,23 @@ const renderActionButton = () => {
               <h2 className="text-base font-black tracking-tight leading-none">
                 {customer.name}
               </h2>
-              <span className="text-[9px] font-bold text-muted bg-row-hover px-1.5 py-0.5 rounded border border-[var(--border)] uppercase">
+              <span className="text-[9px] font-bold text-muted bg-row-hover px-1.5 py-0.5 rounded border border-theme uppercase">
                 {customer.id}
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
             </div>
             <p className="text-[10px] text-muted font-bold uppercase tracking-wider mt-1">
               Customer Insight Center
             </p>
           </div>
         </div>
-      {renderActionButton()}
-
+        {renderActionButton()}
       </header>
 
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* 2. TIGHT SIDEBAR */}
-        <aside className="w-64 bg-card border-r border-[var(--border)] h-129 rounded-2xl">
-          <div className="p-3 border-b border-[var(--border)] bg-row-hover/10">
+        <aside className="w-64 bg-card border-r border-theme h-129 ">
+          <div className="p-3 border-b border-theme bg-row-hover/10">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" />
               <input
@@ -126,7 +179,7 @@ const renderActionButton = () => {
                 placeholder="Quick find..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-[11px] bg-app border border-[var(--border)] rounded-lg focus:ring-1 focus:ring-primary outline-none transition-all"
+                className="w-full pl-8 pr-3 py-1.5 text-[11px] bg-app border border-theme rounded-lg focus:ring-1 focus:ring-primary outline-none transition-all"
               />
             </div>
           </div>
@@ -165,7 +218,7 @@ const renderActionButton = () => {
         {/* 3. CONTENT AREA */}
         <main className="flex-1 flex flex-col min-w-0 bg-app/20">
           {/* COMPACT TABS */}
-          <div className="bg-card border-b border-[var(--border)] px-4 shrink-0 z-10 flex items-center justify-between">
+          <div className="bg-card border-b border-theme px-4 shrink-0 z-10 flex items-center justify-between">
             <div className="flex">
               {[
                 { id: "overview", label: "Overview", icon: <Globe /> },
@@ -184,7 +237,7 @@ const renderActionButton = () => {
             </div>
             <button
               onClick={(e) => onEdit(customer.id, e)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-card border border-[var(--border)] text-muted hover:text-main rounded-lg transition-all font-bold text-[10px] uppercase tracking-widest"
+              className="flex items-center gap-2 px-3 py-1.5 bg-card border border-theme text-muted hover:text-main rounded-lg transition-all font-bold text-[10px] uppercase tracking-widest"
             >
               <Edit size={12} /> Edit Profile
             </button>
@@ -213,45 +266,90 @@ const renderActionButton = () => {
                 </div>
 
                 {/* CONSOLIDATED DATA SECTION */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
                   {/* Contact Details */}
-                  <div className="bg-card rounded-2xl border border-[var(--border)] p-5 shadow-sm">
+                  <div className="bg-card rounded-2xl border border-theme p-5 shadow-sm">
                     <h4 className="text-[10px] font-black text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
                       <Mail size={12} className="text-primary" /> Contact
                       Channels
                     </h4>
-                    <div className="space-y-3">
+                    <div className="space-y-0">
+                      <DataRow
+                        label="Contact Person"
+                        value={customer.contactPerson}
+                      />
+                      `
+                      <DataRow label="Mobile Number" value={customer.mobile} />`
                       <DataRow label="Email Address" value={customer.email} />
-                      <DataRow label="Mobile Number" value={customer.mobile} />
                     </div>
-                  </div>
-
-                  {/* Address Details */}
-                  <div className="bg-card rounded-2xl border border-[var(--border)] p-5 shadow-sm">
-                    <h4 className="text-[10px] font-black text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <h4 className=" mt-6 text-[10px] font-black text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
                       <MapPin size={12} className="text-primary" /> Physical
                       Locations
                     </h4>
-                    <div className="space-y-3">
-                      <DataRow
-                        label="Billing Address"
-                        value={customer.billingAddressLine1}
-                      />
+                    <div className="space-y-0">
+                      <DataRow label="Billing Address" value={billingAddress} />
                       <DataRow
                         label="Shipping Address"
-                        value={customer.shippingAddressLine1}
+                        value={shippingAddress}
                       />
                     </div>
                   </div>
-                </div>
+                  <div className="bg-card rounded-2xl border border-theme shadow-sm flex flex-col h-[400px]">
+                    <h4 className="text-[10px] font-black text-muted uppercase tracking-widest p-5 border-b border-theme">
+  Terms & Conditions
+</h4>
 
-                {/* BOTTOM SECTION FOR MISC INFO (Optional) */}
-                <div className="p-4 border-2 border-dashed border-[var(--border)] rounded-2xl flex items-center justify-center opacity-40">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted text-center">
-                    Additional Ledger data will load here
-                  </p>
+<div className="p-5 overflow-y-auto flex-1 custom-scrollbar">
+ <div className="text-xs text-muted space-y-4">
+
+  {/* PAYMENT TERMS */}
+  <div>
+    <h5 className="text-main font-semibold mb-2">Payment Terms</h5>
+
+    <ul className="list-disc pl-4 space-y-1">
+      {sellingTerms?.payment?.phases?.map((p: any) => (
+        <li key={p.id}>
+          <span className="font-medium text-main">{p.percentage}</span> - {p.condition}
+        </li>
+      ))}
+    </ul>
+
+    <div className="mt-2 space-y-1">
+      <p><span className="text-main font-medium">Due Dates:</span> {sellingTerms?.payment?.dueDates}</p>
+      <p><span className="text-main font-medium">Late Charges:</span> {sellingTerms?.payment?.lateCharges}</p>
+      <p><span className="text-main font-medium">Notes:</span> {sellingTerms?.payment?.notes}</p>
+    </div>
+  </div>
+
+  {/* DELIVERY */}
+  <div>
+    <h5 className="text-main font-semibold mb-1">Delivery</h5>
+    <p>{sellingTerms?.delivery}</p>
+  </div>
+
+  {/* CANCELLATION */}
+  <div>
+    <h5 className="text-main font-semibold mb-1">Cancellation</h5>
+    <p>{sellingTerms?.cancellation}</p>
+  </div>
+
+  {/* WARRANTY */}
+  <div>
+    <h5 className="text-main font-semibold mb-1">Warranty</h5>
+    <p>{sellingTerms?.warranty}</p>
+  </div>
+
+  {/* LIABILITY */}
+  <div>
+    <h5 className="text-main font-semibold mb-1">Liability</h5>
+    <p>{sellingTerms?.liability}</p>
+  </div>
+
+</div>
+</div>
+                  </div>
                 </div>
-              </div>
+              </div> 
             )}
 
             {activeTab === "statement" && (
@@ -300,8 +398,8 @@ const renderActionButton = () => {
 // --- Enterprise UI Sub-components ---
 
 const InfoStrip = ({ icon, label, value }: any) => (
-  <div className="bg-card rounded-xl border border-[var(--border)] p-3 flex items-center gap-3 shadow-sm hover:shadow-md transition-all group">
-    <div className="p-2 rounded-lg bg-row-hover text-primary border border-[var(--border)] group-hover:bg-primary group-hover:text-white transition-all">
+  <div className="bg-card rounded-xl border border-theme p-3 flex items-center gap-3 shadow-sm hover:shadow-md transition-all group">
+    <div className="p-2 rounded-lg bg-row-hover text-primary border border-theme group-hover:bg-primary group-hover:text-white transition-all">
       {React.cloneElement(icon, { size: 16 })}
     </div>
     <div className="leading-tight">
@@ -314,11 +412,11 @@ const InfoStrip = ({ icon, label, value }: any) => (
 );
 
 const DataRow = ({ label, value }: any) => (
-  <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 py-1 px-3 bg-app/30 rounded-xl border border-transparent hover:border-[var(--border)] hover:bg-app/50 transition-all">
+  <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 py-1 px-3 bg-app/30 rounded-xl border border-transparent hover:border-theme hover:bg-app/50 transition-all">
     <span className="text-[9px] font-bold text-muted uppercase tracking-widest">
       {label}
     </span>
-    <span className="text-xs font-semibold text-main truncate max-w-[200px]">
+    <span className="text-xs font-semibold text-main whitespace-pre-line text-right max-w-[250px]">
       {value || "Not provided"}
     </span>
   </div>
