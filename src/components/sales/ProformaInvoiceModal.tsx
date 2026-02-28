@@ -41,54 +41,54 @@ const ProformaInvoiceModal: React.FC<ProformaInvoiceModalProps> = ({
   } = useInvoiceForm(isOpen, onClose, undefined, "proforma");
   const [allowSubmit, setAllowSubmit] = useState(false);
 
-useEffect(() => {
-  if (isOpen) {
-    setAllowSubmit(false);
-  }
-}, [isOpen]);
+  useEffect(() => {
+    if (isOpen) {
+      setAllowSubmit(false);
+    }
+  }, [isOpen]);
   const tabs: Array<"details" | "address" | "terms"> = [
-  "details",
-  "address",
-  "terms",
-];
-const handleNext = () => {
-  const currentIndex = tabs.indexOf(ui.activeTab as any);
-  if (currentIndex < tabs.length - 1) {
-    ui.setActiveTab(tabs[currentIndex + 1]);
-    setAllowSubmit(false);
-  }
-};
+    "details",
+    "address",
+    "terms",
+  ];
+  const handleNext = () => {
+    const currentIndex = tabs.indexOf(ui.activeTab as any);
+    if (currentIndex < tabs.length - 1) {
+      ui.setActiveTab(tabs[currentIndex + 1]);
+      setAllowSubmit(false);
+    }
+  };
 
- const handleFormSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  if (ui.activeTab !== "terms") {
-    handleNext();
-    return;
-  }
-
-  if (!allowSubmit) return;
-
-  try {
-    const payload = await actions.handleSubmit(e);
-    if (!payload) return;
-
-    const res = await createProformaInvoice(payload);
-
-    if (!res || ![200, 201].includes(res.status_code)) {
-      showApiError(res);
+    if (ui.activeTab !== "terms") {
+      handleNext();
       return;
     }
 
-    showSuccess(res.message || "Proforma invoice created successfully");
+    if (!allowSubmit) return;
 
-    actions.handleReset();
-    onSubmit?.();
-    onClose();
-  } catch (error: any) {
-    showApiError(error);
-  }
-};
+    try {
+      const payload = await actions.handleSubmit(e);
+      if (!payload) return;
+
+      const res = await createProformaInvoice(payload);
+
+      if (!res || ![200, 201].includes(res.status_code)) {
+        showApiError(res);
+        return;
+      }
+
+      showSuccess(res.message || "Proforma invoice created successfully");
+
+      actions.handleReset();
+      onSubmit?.();
+      onClose();
+    } catch (error: any) {
+      showApiError(error);
+    }
+  };
 
   const handleClose = () => {
     actions.handleReset();
@@ -143,17 +143,17 @@ const handleNext = () => {
               Reset
             </Button>
             <Button
-  variant="primary"
-  type={ui.activeTab !== "terms" ? "button" : "submit"}
-  form={ui.activeTab !== "terms" ? undefined : "proforma-form"}
-  onClick={
-    ui.activeTab !== "terms"
-      ? handleNext
-      : () => setAllowSubmit(true)
-  }
->
-  {ui.activeTab === "terms" ? "Submit" : "Next"}
-</Button>
+              variant="primary"
+              type={ui.activeTab !== "terms" ? "button" : "submit"}
+              form={ui.activeTab !== "terms" ? undefined : "proforma-form"}
+              onClick={
+                ui.activeTab !== "terms"
+                  ? handleNext
+                  : () => setAllowSubmit(true)
+              }
+            >
+              {ui.activeTab === "terms" ? "Submit" : "Next"}
+            </Button>
           </div>
         </>
       }
@@ -170,8 +170,8 @@ const handleNext = () => {
                 type="button"
                 onClick={() => ui.setActiveTab(tab)}
                 className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all ${ui.activeTab === tab
-                    ? "text-primary border-b-[3px] border-primary"
-                    : "text-muted border-b-[3px] border-transparent hover:text-main"
+                  ? "text-primary border-b-[3px] border-primary"
+                  : "text-muted border-b-[3px] border-transparent hover:text-main"
                   }`}
               >
                 {tab === "details" && "Details"}
@@ -189,22 +189,34 @@ const handleNext = () => {
             <div className="flex flex-col gap-6 max-w-[1600px] mx-auto">
               <div className="">
                 <div
-                  className="grid grid-cols-6 gap-3 items-end"
+                  className={`
+                     grid
+                    ${ui.isExport
+                      ? "grid-cols-[minmax(220px,1.2fr)_100px_100px_90px_110px_120px_100px]"
+                      : "grid-cols-[minmax(220px,1.3fr)_105px_105px_100px_115px_115px]"
+                    }
+                  gap-x-2 items-end`}
                 >
-                  <CustomerSelect
-                    value={customerNameDisplay}
-                    onChange={actions.handleCustomerSelect}
-                    className="w-full"
-                  />
 
-                  <ModalInput
-                    label="Date of Invoice"
-                    name="dateOfInvoice"
-                    type="date"
-                    value={formData.dateOfInvoice}
-                    onChange={actions.handleInputChange}
-                    className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
-                  />
+                  <div>
+                    <CustomerSelect
+                      value={customerNameDisplay}
+                      onChange={actions.handleCustomerSelect}
+                      className="w-full min-w-0"
+                    />
+                  </div>
+
+
+                  <div>
+                    <ModalInput
+                      label="Date of Invoice"
+                      name="dateOfInvoice"
+                      type="date"
+                      value={formData.dateOfInvoice}
+                      onChange={actions.handleInputChange}
+                      className="w-full py-1 px-2 border border-theme rounded text-[11px] text-main bg-card"
+                    />
+                  </div>
 
                   <div>
                     <ModalInput
@@ -303,6 +315,7 @@ const handleNext = () => {
                   )}
 
                   {ui.isLocal && (
+
                     <ModalInput
                       label="LPO Number"
                       name="lpoNumber"
@@ -436,7 +449,7 @@ const handleNext = () => {
                               </td>
                               <td className="px-0.5 py-1">
                                 <input
-                                  type="number" 
+                                  type="number"
                                   className="w-[60px] py-1 px-2 border border-theme rounded text-[11px] bg-card text-main focus:outline-none focus:ring-1 focus:ring-primary"
                                   name="vatRate"
                                   value={it.vatRate}
@@ -457,7 +470,7 @@ const handleNext = () => {
                                 />
                               </td>
                               <td className="px-0.5 py-1">
-                                  <span className="text-[10px] font-medium text-main">
+                                <span className="text-[10px] font-medium text-main">
                                   {symbol} {amount.toFixed(2)}
                                 </span>
                               </td>
