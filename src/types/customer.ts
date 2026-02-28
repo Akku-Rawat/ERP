@@ -7,8 +7,9 @@ export interface CustomerSummary {
   customerTaxCategory: string;
   contactPerson: string;
   displayName: string;
+  mobileCode?: string;
   mobile: string;
-  type: ""|"Company" | "Individual";
+  type: "" | "Company" | "Individual";
   email: string;
   accountNumber: string;
   currency: string;

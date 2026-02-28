@@ -79,9 +79,9 @@ export default function ItemCategorySelect({
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      <span className="font-medium text-muted text-sm">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+      <span className="flex items-center gap-0.5 font-medium text-muted text-sm">
+        <span>{label}</span>
+        {required && <span className="text-danger">*</span>}
       </span>
 
 
@@ -102,13 +102,13 @@ export default function ItemCategorySelect({
 
         {/* Dropdown */}
         {open && !loading && (
-      <div className="absolute left-0 top-full mt-1 w-full bg-card border border-theme shadow-lg rounded z-30">
-             <ul className="max-h-56 overflow-y-auto text-sm">
+          <div className="absolute left-0 top-full mt-1 w-full bg-card border border-theme shadow-lg rounded z-30">
+            <ul className="max-h-56 overflow-y-auto text-sm">
               {filtered.length > 0 ? (
                 filtered.map((category) => (
-                   <li
-                     key={category.id}
-                      className="px-4 py-2 cursor-pointer hover:bg-row-hover text-main"
+                  <li
+                    key={category.id}
+                    className="px-4 py-2 cursor-pointer hover:bg-row-hover text-main"
                     onClick={() => {
                       setSearch(category.name);
                       setOpen(false);

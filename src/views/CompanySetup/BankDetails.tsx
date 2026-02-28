@@ -14,6 +14,7 @@ import AddBankAccountModal from "../../components/CompanySetup/AddBankAccountMod
 import { updateCompanyById } from "../../api/companySetupApi";
 import { showApiError, showSuccess, showLoading, closeSwal, } from "../../utils/alert";
 import Swal from "sweetalert2";
+import { deleteCompanyBankAccount } from "../../api/companySetupApi";
 
 
 
@@ -213,12 +214,13 @@ const BankDetails: React.FC<Props> = ({ bankAccounts, setBankAccounts }) => {
 const handleDelete = async () => {
   if (selectedAccount === null) return;
 
-  const accountName = bankAccounts[selectedAccount].bankName;
+  const selected = bankAccounts[selectedAccount];
+  if (!selected?.id) return;
 
   const result = await Swal.fire({
     icon: "warning",
     title: "Delete Bank Account?",
-    text: `Are you sure you want to delete ${accountName}?`,
+    text: `Are you sure you want to delete ${selected.bankName}?`,
     showCancelButton: true,
     confirmButtonColor: "#ef4444",
     cancelButtonColor: "#6b7280",
@@ -230,31 +232,14 @@ const handleDelete = async () => {
   try {
     showLoading("Deleting Bank Account...");
 
-    const updatedAccounts = bankAccounts.filter(
-      (_, index) => index !== selectedAccount,
-    );
-
-    const payload = {
-      id: VITE_COMPANY_ID,
-      bankAccounts: updatedAccounts.map((acc) => ({
-        id: acc.id,
-        accountNo: acc.accountNo,
-        accountHolderName: acc.accountHolderName,
-        bankName: acc.bankName,
-        swiftCode: acc.swiftCode,
-        sortCode: acc.sortCode,
-        branchAddress: acc.branchAddress,
-        currency: acc.currency,
-        dateAdded: acc.dateAdded,
-        openingBalance: acc.openingBalance,
-        default: acc.isdefault ? "1" : 0,
-      })),
-    };
-
-    await updateCompanyById(payload);
+    await deleteCompanyBankAccount(VITE_COMPANY_ID, selected.id);
 
     closeSwal();
     showSuccess("Bank account deleted successfully.");
+
+    const updatedAccounts = bankAccounts.filter(
+      (acc) => acc.id !== selected.id
+    );
 
     setBankAccounts(updatedAccounts);
     setSelectedAccount(null);
@@ -265,7 +250,6 @@ const handleDelete = async () => {
     showApiError(error);
   }
 };
-
 
   const handleSetDefault = async () => {
     if (selectedAccount === null) return;

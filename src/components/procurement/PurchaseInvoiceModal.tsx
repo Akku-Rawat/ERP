@@ -15,6 +15,7 @@ interface PurchaseInvoiceModalProps {
   onClose: () => void;
   onSubmit?: (data: any) => void;
   pId?: string | number;
+  poLoading?: boolean;
 }
 
 const tabs: { key: POTab; icon: typeof Building2; label: string }[] = [
@@ -46,7 +47,12 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
     handleSubmit,
     reset,
      poList,
-  handlePOSelect
+     poLoading,
+  handlePOSelect,
+   customShippingRule,
+  setCustomShippingRule,
+  customIncoterm,
+  setCustomIncoterm
   } = usePurchaseInvoiceForm({ isOpen, onSuccess: onSubmit, onClose, pId });
 
   const footer = (
@@ -72,8 +78,8 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
       title={pId ? "Edit Purchase Invoice" : "New Purchase Invoice"}
       subtitle="Create and manage purchase invoice"
       icon={Building2}
-      maxWidth="6xl"
-      height="87vh"
+      customWidth="88vw"
+      height="93vh"
       footer={footer}
     >
       <form
@@ -113,7 +119,9 @@ const PurchaseInvoiceModal: React.FC<PurchaseInvoiceModalProps> = ({
               getCurrencySymbol={getCurrencySymbol}
               onItemSelect={handleItemSelect}
               poList={poList}
-onPOSelect={handlePOSelect}
+              poLoading={poLoading}
+              onPOSelect={handlePOSelect}
+
             />
           )}
 
@@ -156,7 +164,14 @@ onPOSelect={handlePOSelect}
           )} */}
 
           {activeTab === "address" && (
-            <AddressTab form={form} onFormChange={handleFormChange} />
+            <AddressTab
+  form={form}
+  onFormChange={handleFormChange}
+  customShippingRule={customShippingRule}
+  setCustomShippingRule={setCustomShippingRule}
+  customIncoterm={customIncoterm}
+  setCustomIncoterm={setCustomIncoterm}
+/>
           )}
 
           {activeTab === "terms" && (

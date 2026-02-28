@@ -3,14 +3,17 @@ import { TermSection } from "../termsAndCondition";
 export interface ItemRow {
   itemCode: string;
   itemName?: string;
-  requiredBy: string;
-
   quantity: number;
   uom: string;
   rate: number;
-
-  vatCd: string;   
-  vatRate: number; 
+  vatCd: string;
+  vatRate: number;
+  description?: string;
+  packing?: string;
+  batchNo?: string;
+  mfgDate?: string;
+  expDate?: string;
+  discount?: number;
 }
 
 
@@ -54,19 +57,18 @@ export interface PurchaseInvoiceFormData {
   supplierId: string;
   supplierEmail?: string;
   supplierPhone?: string;
- 
+
   supplierCode: string;
   taxCategory: string;
   supplierContact: string;
   paymentType: string;
   transactionProgress: string;
   supplierInvoiceNumber: string;
-  
-destnCountryCd: string; // New field for Export country
+
+  destnCountryCd: string; // New field for Export country
   shippingRule: string;
   incoterm: string;
   taxesChargesTemplate: string;
-  requiredBy: string;
   currency: string;
   status: string;
   costCenter: string;
@@ -97,22 +99,27 @@ destnCountryCd: string; // New field for Export country
   sendPrint: boolean;
 
   terms?: {
-  buying: TermSection;
-};
-  itemTerms: ItemTerms[];  
-  acceptedTerms: Record<string, boolean>; 
+    buying: TermSection;
+  };
+  itemTerms: ItemTerms[];
+  acceptedTerms: Record<string, boolean>;
   paymentRows: PaymentRow[];
 }
 
 export const emptyItem: ItemRow = {
   itemCode: "",
   itemName: "",
-  requiredBy: "",
   quantity: 0,
   uom: "Unit",
   rate: 0,
   vatCd: "",
   vatRate: 0,
+  description: "",
+  packing: "",
+  batchNo: "",
+  mfgDate: "",
+  expDate: "",
+  discount: 0,
 };
 
 
@@ -148,7 +155,6 @@ export const emptyPOForm: PurchaseInvoiceFormData = {
   poNumber: "",
   date: "",
   supplier: "",
-  requiredBy: "",
   supplierContact: "",
   taxCategory: "",
   currency: "INR",
@@ -161,8 +167,8 @@ export const emptyPOForm: PurchaseInvoiceFormData = {
   paymentType: "",
   transactionProgress: "",
 
-  costCenter: "",
-  project: "",
+  costCenter: "UD-001 - Udvil - RI",
+  project: "Project-0001",
 
   addresses: {
     supplierAddress: {
@@ -207,8 +213,8 @@ export const emptyPOForm: PurchaseInvoiceFormData = {
   messageHtml: "",
   sendAttachedFiles: false,
   sendPrint: false,
-terms: undefined,
-  itemTerms: [],  
+  terms: undefined,
+  itemTerms: [],
   acceptedTerms: {},
 };
 

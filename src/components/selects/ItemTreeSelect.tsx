@@ -275,9 +275,9 @@ export default function ItemTreeSelect({
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
       {/* Label */}
-      <label className="text-sm font-semibold text-gray-600">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+      <label className="flex items-center gap-0.5 font-medium text-muted text-sm">
+        <span>{label}</span>
+        {required && <span className="text-danger">*</span>}
       </label>
 
       <div ref={containerRef} className="relative">
@@ -290,10 +290,9 @@ export default function ItemTreeSelect({
             className={`
               w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border
               text-left text-sm transition-all
-              ${
-                loading
-                  ? "bg-gray-50 border-gray-200 cursor-not-allowed"
-                  : "bg-white border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              ${loading
+                ? "bg-gray-50 border-gray-200 cursor-not-allowed"
+                : "bg-white border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               }
             `}
           >
@@ -554,10 +553,9 @@ export default function ItemTreeSelect({
                               onClick={() => handleSelect(node)}
                               className={`
                                 text-left px-4 py-3 rounded-lg border-2 transition-all
-                                ${
-                                  isSelected
-                                    ? "bg-indigo-50 border-indigo-500 ring-2 ring-indigo-200"
-                                    : `${levelColor.bg} ${levelColor.border} ${levelColor.hover}`
+                                ${isSelected
+                                  ? "bg-indigo-50 border-indigo-500 ring-2 ring-indigo-200"
+                                  : `${levelColor.bg} ${levelColor.border} ${levelColor.hover}`
                                 }
                               `}
                             >

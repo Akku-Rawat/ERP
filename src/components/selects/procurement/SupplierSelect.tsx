@@ -87,12 +87,18 @@ export default function SupplierSelect({
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      <span className="block text-[10px] font-medium text-main">{label}</span>
+      <span className="block text-[10px] font-medium text-main mb-1">
+        {label}
+      </span>
 
-      <div ref={containerRef} className="relative">
+      <div ref={containerRef} className="relative w-full">
         <input
-          className="w-full py-2 px-3 border border-theme rounded text-[13px] text-main bg-card"
-          placeholder={loading ? "Loading..." : "Search supplier..."}
+          className={[
+            "py-1 px-2 border rounded text-[11px] text-main bg-card transition-all w-full",
+
+            "border-[var(--border)] hover:border-primary/40",
+          ].join(" ")}
+          placeholder={loading ? "Loading..." : "Select"}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -102,12 +108,12 @@ export default function SupplierSelect({
         />
 
         {open && !loading && (
-          <div className="absolute z-50 bg-card border border-theme mt-1 w-full rounded shadow">
+          <div className="absolute z-50 bg-card border border-[var(--border)] mt-1 w-full rounded shadow">
             <ul className="max-h-60 overflow-y-auto text-[13px]">
               {filtered.map((s) => (
                 <li
                   key={s.id}
-                  className="px-3 py-2 hover:bg-row-hover cursor-pointer"
+                  className="px-2 py-1 hover:bg-primary/5 cursor-pointer text-[11px]"
                   onClick={() => {
                     setSearch(s.name);
                     setOpen(false);

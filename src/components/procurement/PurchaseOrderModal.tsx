@@ -22,7 +22,7 @@ const tabs: { key: POTab; icon: typeof Building2; label: string }[] = [
   // { key: "email", icon: Mail, label: "Email" },
   // { key: "tax", icon: Calculator, label: "Tax" },
   { key: "address", icon: MapPin, label: "Address" },
-    { key: "terms", icon: FileText, label: "Terms" },
+  { key: "terms", icon: FileText, label: "Terms" },
 ];
 
 const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
@@ -50,6 +50,10 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
     getCurrencySymbol,
     handleSubmit,
     reset,
+    customShippingRule,
+    setCustomShippingRule,
+    customIncoterm,
+    setCustomIncoterm,
   } = usePurchaseOrderForm({ isOpen, onSuccess: onSubmit, onClose, poId });
 
   const footer = (
@@ -76,7 +80,7 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
       subtitle="Create and manage purchase order"
       icon={Building2}
       maxWidth="6xl"
-      height="81vh"
+      height="88vh"
       footer={footer}
     >
       <form
@@ -91,11 +95,10 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
                 key={key}
                 type="button"
                 onClick={() => setActiveTab(key)}
-                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${
-                  activeTab === key
+                className={`py-2.5 bg-transparent border-none text-xs font-medium cursor-pointer transition-all flex items-center gap-2 ${activeTab === key
                     ? "text-primary border-b-[3px] border-primary"
                     : "text-muted border-b-[3px] border-transparent hover:text-main"
-                }`}
+                  }`}
               >
                 {label}
               </button>
@@ -157,7 +160,14 @@ const PurchaseOrderModal: React.FC<PurchaseOrderModalProps> = ({
           )}
 
           {activeTab === "address" && (
-            <AddressTab form={form} onFormChange={handleFormChange} />
+            <AddressTab
+              form={form}
+              onFormChange={handleFormChange}
+              customShippingRule={customShippingRule}
+              setCustomShippingRule={setCustomShippingRule}
+              customIncoterm={customIncoterm}
+              setCustomIncoterm={setCustomIncoterm}
+            />
           )}
 
           {activeTab === "terms" && (

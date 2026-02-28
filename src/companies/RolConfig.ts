@@ -65,17 +65,18 @@ export const COMP_00004_ITEM_FIELDS: FieldConfig[] = [
   {
     fieldName: "originNationCode",
     fieldType: "api-select",
-    label: "Country of Origin",
+    label: "Country",
     required: true,
     colSpan: 1,
     apiFunctionName: "getRolaCountries",
     customComponent: "ItemGenericSelect",
+    displayField: "name" 
   },
 
   {
     fieldName: "unitOfMeasureCd",
     fieldType: "api-select",
-    label: "Unit of Measurement",
+    label: "UOM",
     required: true,
     colSpan: 1,
     apiFunctionName: "getRolaUOMs",

@@ -23,6 +23,7 @@ export interface ModalProps {
   | "wide"
   | "full";
   height?: string;
+  customWidth?: string;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -35,6 +36,7 @@ const Modal: React.FC<ModalProps> = ({
   footer,
   maxWidth = "4xl",
   height = "520px",
+  customWidth
 }) => {
   if (!isOpen) return null;
 
@@ -59,8 +61,13 @@ const Modal: React.FC<ModalProps> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 30 }}
           transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          className={`w-full ${maxWidthClasses[maxWidth]} bg-card shadow-2xl flex flex-col border border-[var(--border)] rounded-2xl overflow-hidden`}
-          style={{ height }}
+          className={`w-full ${!customWidth ? maxWidthClasses[maxWidth] : ""
+            } bg-card shadow-2xl flex flex-col border border-[var(--border)] rounded-2xl overflow-hidden`}
+          style={{
+            height,
+            width: customWidth || undefined,
+            maxWidth: customWidth ? "none" : undefined
+          }}
         >
           {/* Header with Gradient */}
           <header className="relative overflow-hidden px-4 py-3 bg-primary flex-shrink-0">

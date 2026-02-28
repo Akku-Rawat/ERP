@@ -581,44 +581,11 @@ const PurchaseOrderView: React.FC<PurchaseOrderViewProps> = ({
                     </div>
                   </div>
                 )}
-                {po.metadata?.remarks && (
-                  <div className="border-theme rounded p-3 text-xs" style={{ borderWidth: '1px' }}>
-                    <h3 className="font-bold text-main mb-2">REMARKS</h3>
-                    <p className="text-muted leading-relaxed" style={{ fontSize: '10px' }}>{po.metadata.remarks}</p>
-                  </div>
-                )}
+                
               </div>
             )}
 
-            {/* Footer - Metadata */}
-            {po.metadata && (
-              <div className="border-theme rounded p-3 text-xs" style={{ borderWidth: '1px', borderStyle: 'dashed' }}>
-                <div className="grid grid-cols-3 gap-4">
-                  {po.metadata.createdBy && (
-                    <div>
-                      <p className="text-muted text-[10px] mb-0.5">Created By</p>
-                      <p className="text-main font-semibold">{po.metadata.createdBy}</p>
-                    </div>
-                  )}
-                  {po.metadata.createdAt && (
-                    <div>
-                      <p className="text-muted text-[10px] mb-0.5">Created At</p>
-                      <p className="text-main font-semibold">
-                        {new Date(po.metadata.createdAt).toLocaleString('en-GB')}
-                      </p>
-                    </div>
-                  )}
-                  {po.metadata.updatedAt && (
-                    <div>
-                      <p className="text-muted text-[10px] mb-0.5">Last Updated</p>
-                      <p className="text-main font-semibold">
-                        {new Date(po.metadata.updatedAt).toLocaleString('en-GB')}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+           
           </div>
 
           {/* Bottom Action Bar - Print hidden */}

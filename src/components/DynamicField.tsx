@@ -29,9 +29,11 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
   if (config.fieldType === "text-input") {
     return (
       <label className={`flex flex-col gap-1 text-sm ${colSpanClass}`}>
-        <span className="font-medium text-muted">
-          {config.label}
-          {config.required && <span className="text-red-500 ml-1">*</span>}
+        <span className="font-medium text-muted flex items-center gap-0.5">
+          <span>{config.label}</span>
+          {config.required && (
+            <span className="text-danger">*</span>
+          )}
         </span>
         <input
           type="text"
@@ -52,10 +54,12 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
   if (config.fieldType === "textarea") {
     return (
       <label className={`flex flex-col gap-1 text-sm ${colSpanClass}`}>
-        <span className="font-medium text-muted">
-          {config.label}
-          {config.required && <span className="text-red-500 ml-1">*</span>}
-        </span>
+        <span className="font-medium text-muted flex items-center gap-0.5">
+  <span>{config.label}</span>
+  {config.required && (
+    <span className="text-danger">*</span>
+  )}
+</span>
         <textarea
           name={config.fieldName}
           value={value || ""}
@@ -78,12 +82,12 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
 
     return (
       <label className={`flex flex-col gap-1 text-sm ${colSpanClass}`}>
-        <span className="font-medium text-muted">
-          {selectConfig.label}
-          {selectConfig.required && (
-            <span className="text-red-500 ml-1">*</span>
-          )}
-        </span>
+        <span className="font-medium text-muted flex items-center gap-0.5">
+  <span>{selectConfig.label}</span>
+  {selectConfig.required && (
+    <span className="text-danger">*</span>
+  )}
+</span>
         <select
           name={selectConfig.fieldName}
           value={value || ""}
@@ -192,6 +196,7 @@ export const DynamicField: React.FC<DynamicFieldProps> = ({
             fetchData={fetchFn}
             onChange={({ id }) => onChange(apiConfig.fieldName, id)}
             required={apiConfig.required}
+            displayField={apiConfig.displayField} 
           />
           {/* Hidden input for HTML5 validation */}
           {apiConfig.required && (

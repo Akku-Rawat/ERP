@@ -14,12 +14,15 @@ import { FilterSelect } from "../../components/ui/modal/modalComponent";
 import type { Column } from "../../components/ui/Table/type";
 import { showApiError,showSuccess ,showLoading,closeSwal } from "../../utils/alert";
 import { getPurchaseOrders ,updatePurchaseOrderStatus } from "../../api/procurement/PurchaseOrderApi";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { getPurchaseOrderById } from "../../api/procurement/PurchaseOrderApi";
 import type { PurchaseOrderFilters } from "../../api/procurement/PurchaseOrderApi";
 import DateRangeFilter from "../../components/ui/modal/DateRangeFilter";
-
+import { generatePurchaseOrderPDF } from "../../components/template/purchasetemplete";
+import { getCompanyById } from "../../api/companySetupApi";
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
+import PdfPreviewModal from ".././Sales/PdfPreviewModal";
 interface PurchaseOrder {
   id: string;
   supplier: string;
@@ -71,8 +74,9 @@ const [page, setPage] = useState(1);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] =  useState<any | null>(null);
   const [filters, setFilters] = useState<PurchaseOrderFilters>({});
-
-
+const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+const [pdfOpen, setPdfOpen] = useState(false);
+const [company, setCompany] = useState<any | null>(null);
 useEffect(() => {
   const timer = setTimeout(() => {
     setFilters((prev) => ({
@@ -85,6 +89,15 @@ useEffect(() => {
   return () => clearTimeout(timer);
 }, [searchTerm]);
 
+useEffect(() => {
+  getCompanyById(COMPANY_ID)
+    .then((res) => {
+      if (res?.status_code === 200) {
+        setCompany(res.data);
+      }
+    })
+    .catch(() => console.error("Failed to load company"));
+}, []);
   //  FETCH ORDERS 
 const fetchOrders = async () => {
   try {
@@ -132,28 +145,33 @@ useEffect(() => {
 
 const handleView = async (order: PurchaseOrder) => {
   try {
-    // SweetAlert Loader
-    showLoading("Loading Purchase Order...");
+    showLoading("Generating PDF...");
 
     const res = await getPurchaseOrderById(order.id);
 
-    if (res.status !== "success") {
-      throw new Error(res.message || "Failed to load");
+    if (!res || res.status !== "success") {
+      throw new Error(res?.message || "Failed to load invoice");
     }
 
-    // Data set
-    setSelectedOrder(res.data);
+    const purchaseInvoice = res.data;
 
-    // Close loader → open modal
+    const blobUrl = await generatePurchaseOrderPDF(
+      purchaseInvoice,
+      company,
+      "bloburl"
+    );
+
     closeSwal();
-    setViewModalOpen(true);
+
+    setSelectedOrder(purchaseInvoice);   // 🔥 IMPORTANT
+    setPdfUrl(blobUrl);
+    setPdfOpen(true);
 
   } catch (error) {
     closeSwal();
     showApiError(error);
   }
 };
-
 
 
   //  MODAL HANDLERS 
@@ -215,9 +233,9 @@ const fetchAllPOsForExport = async () => {
   }
 };
 
-const handleExportExcel = async () => {
+const handleExportPDF = async () => {
   try {
-    showLoading("Exporting Purchase Orders...");
+    showLoading("Generating PDF...");
 
     const dataToExport = await fetchAllPOsForExport();
 
@@ -227,38 +245,42 @@ const handleExportExcel = async () => {
       return;
     }
 
-    const formattedData = dataToExport.map((po) => ({
-      "PO ID": po.id,
-      Supplier: po.supplier,
-      Date: po.date,
-      "Delivery Date": po.deliveryDate,
-      Amount: po.amount,
-      Status: po.status,
-    }));
+    const doc = new jsPDF("p", "mm", "a4");
 
-    const worksheet = XLSX.utils.json_to_sheet(formattedData);
-    const workbook = XLSX.utils.book_new();
+    doc.setFontSize(14);
+    doc.text("Purchase Orders Report", 14, 15);
 
-    XLSX.utils.book_append_sheet(
-      workbook,
-      worksheet,
-      "Purchase Orders"
-    );
+    const tableData = dataToExport.map((po, index) => [
+      index + 1,
+      po.id,
+      po.supplier,
+      po.date,
+      po.deliveryDate,
+      `INR ${Number(po.amount || 0).toFixed(2)}`,
+      po.status,
+    ]);
 
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
+    autoTable(doc, {
+      startY: 22,
+      head: [[
+        "SN",
+        "PO ID",
+        "Supplier",
+        "Date",
+        "Delivery Date",
+        "Amount",
+        "Status",
+      ]],
+      body: tableData,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [41, 128, 185] },
     });
 
-    const fileData = new Blob([excelBuffer], {
-      type:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-
-    saveAs(fileData, "All_Purchase_Orders.xlsx");
+    doc.save("Purchase_Orders_Report.pdf");
 
     closeSwal();
-    showSuccess("Export completed successfully");
+    showSuccess("PDF exported successfully");
+
   } catch (error) {
     closeSwal();
     showApiError(error);
@@ -369,7 +391,7 @@ const handleStatusChange = async (
         loading={loading}
         searchValue={searchTerm}
          enableExport
-        onExport={handleExportExcel}
+        onExport={handleExportPDF}
         onSearch={setSearchTerm}
         enableAdd
         addLabel="Add Purchase Order"
@@ -418,6 +440,21 @@ const handleStatusChange = async (
          poId={selectedOrder?.poId}
           onSubmit={handlePOSaved} 
       />
+      <PdfPreviewModal
+  open={pdfOpen}
+  title="Purchase Invoice Preview"
+  pdfUrl={pdfUrl}
+  onClose={() => {
+    if (pdfUrl?.startsWith("blob:")) URL.revokeObjectURL(pdfUrl);
+    setPdfUrl(null);
+    setPdfOpen(false);
+  }}
+  onDownload={() => {
+    if (selectedOrder && company) {
+      generatePurchaseInvoicePDF(selectedOrder, company, "save");
+    }
+  }}
+/>
       {/* VIEW MODAL */}
     {viewModalOpen && selectedOrder && (
       <PurchaseOrderView
@@ -428,6 +465,7 @@ const handleStatusChange = async (
           setModalOpen(true);
         }}
       />
+      
     )}
   </div>  
   );
