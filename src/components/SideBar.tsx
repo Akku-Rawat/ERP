@@ -14,8 +14,6 @@ import {
   Menu,
   ChevronDown,
   ChevronUp,
-  Repeat,
-  Receipt,
   Users2,
   LogOut,
   Landmark,
@@ -29,7 +27,7 @@ import {
   Mail,
   User,
   CreditCard,
-  FileUp, GraduationCap
+  FileUp, Coins
 } from "lucide-react";
 import { getCompanyById } from "../api/companySetupApi";
 import { ERP_BASE } from "../config/api";
@@ -589,24 +587,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
             </NavLink>
           ))}
 
-          {!isEmployeeView && user?.subscribedProducts?.includes("lms") && (
-            <button
-              type="button"
-              onClick={() => {
-                const sid = user?.sid || localStorage.getItem("session_id");
-                window.location.href = `${LMS_FRONTEND}?sid=${encodeURIComponent(sid ?? "")}`;
-              }}
-              className="group relative flex h-10 w-full items-center rounded-lg transition-all duration-150 text-muted hover:bg-row-hover hover:text-main"
-            >
-              <span className={`flex h-10 shrink-0 items-center justify-center text-[17px] transition-all duration-300 ${open ? "w-10" : "w-full"}`}>
-                <GraduationCap {...iconProps} />
-              </span>
-              <span className={`truncate text-[14px] font-semibold tracking-tight transition-all duration-200 pr-3 ${open ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
-                LMS
-              </span>
-              {!open && <Tooltip label="LMS" />}
-            </button>
-          )}
+
 
           {canSeeHr &&
             (isEmployeeView ? (
@@ -720,6 +701,25 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
               </span>
               {!open && <Tooltip label="Expense Management" />}
             </NavLink>
+          )}
+
+          {!isEmployeeView && user?.subscribedProducts?.includes("lms") && (
+            <button
+              type="button"
+              onClick={() => {
+                const sid = user?.sid || localStorage.getItem("session_id");
+                window.location.href = `${LMS_FRONTEND}?sid=${encodeURIComponent(sid ?? "")}`;
+              }}
+              className="group relative flex h-10 w-full items-center rounded-lg transition-all duration-150 text-muted hover:bg-row-hover hover:text-main"
+            >
+              <span className={`flex h-10 shrink-0 items-center justify-center text-[17px] transition-all duration-300 ${open ? "w-10" : "w-full"}`}>
+                <Coins {...iconProps} />
+              </span>
+              <span className={`truncate text-[14px] font-semibold tracking-tight transition-all duration-200 pr-3 ${open ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
+                Lending
+              </span>
+              {!open && <Tooltip label="Lending" />}
+            </button>
           )}
 
 
