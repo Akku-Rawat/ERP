@@ -32,7 +32,7 @@ interface PaymentAPI {
   referenceNumber?: string;
   amount: number;
   status: string;
-  currency?: string;
+   paidCurrency?: string;
 }
 
 type PaymentRow = {
@@ -149,7 +149,7 @@ const PaymentEntry: React.FC<PaymentEntryProps> = ({ defaultPartyType }) => {
         mode: p.paymentMode || "—",
         amount: Number(p.amount) || 0,
         paymentDate: p.paymentDate || undefined,
-        currency: p.currency,
+          currency: p.paidCurrency,
       }));
 
       setData(mapped);
