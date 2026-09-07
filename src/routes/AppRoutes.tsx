@@ -47,7 +47,6 @@ const ExpenseManagement = lazy(() => import("../views/ExpenseManagement/expenseM
 const EmailTemplate = lazy(() => import("../views/Email/EmailTemplate"));
 const Performance = lazy(() => import("../views/hr/performace/PerformanceModule"));
 const Scheduler = lazy(() => import("../views/Scheduler/SchedulerTable"));
-const SelectApp = lazy(() => import("../views/SelectApp"));
 const Imports = lazy(() => import("../views/Import/importdata"));
 
 // ── Component Helpers ──
@@ -90,7 +89,7 @@ const RELOAD_FLAG = "chunk-reload-attempted";
 
 const GlobalErrorBoundary: React.FC = () => {
   const error = useRouteError() as Error;
-  
+
   const isChunkLoadError =
     error?.message?.includes("Failed to fetch dynamically imported module") ||
     error?.message?.includes("Importing a module script failed") ||
@@ -98,7 +97,7 @@ const GlobalErrorBoundary: React.FC = () => {
 
   if (isChunkLoadError) {
     const alreadyTried = sessionStorage.getItem(RELOAD_FLAG);
-    
+
     if (!alreadyTried) {
       sessionStorage.setItem(RELOAD_FLAG, "1");
       window.location.reload();
@@ -165,7 +164,6 @@ const router = createBrowserRouter(
 
         {/* ── Protected Routes ── */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/select-app" element={<SelectApp />} />
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<DashboardRedirect />} />
 
@@ -289,7 +287,7 @@ const router = createBrowserRouter(
               element={
                 <PermissionRoute
                   modules={["Expense Claim", "Expense Claim Type", "Employee Advance"]}
-                 subscriptionCheck={(a) => a.expenseManagement}
+                  subscriptionCheck={(a) => a.expenseManagement}
                 >
                   <ExpenseManagement />
                 </PermissionRoute>
@@ -306,7 +304,7 @@ const router = createBrowserRouter(
             <Route
               path="/performance"
               element={
-           <PermissionRoute modules={["Appraisal"]} subscriptionCheck={(a) => a.hasHrmsKey}>
+                <PermissionRoute modules={["Appraisal"]} subscriptionCheck={(a) => a.hasHrmsKey}>
                   <Performance />
                 </PermissionRoute>
               }

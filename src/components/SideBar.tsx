@@ -28,8 +28,8 @@ import {
   Star,
   Mail,
   User,
-  CreditCard, House,
-FileUp
+  CreditCard,
+  FileUp, GraduationCap
 } from "lucide-react";
 import { getCompanyById } from "../api/companySetupApi";
 import { ERP_BASE } from "../config/api";
@@ -40,28 +40,29 @@ import { MODAL_LAYER } from "../store/modalStore";
 import { usePermission } from "../hooks/permission/usePermission";
 import { useHRView } from "../hooks/permission/useHRView";
 import { useSubscriptionAccess, type SubscriptionAccess } from "../store/subscriptionStore";
+import { LMS_FRONTEND } from "../config/resolverUrls";
 
 const iconProps = { size: 18, strokeWidth: 1.75 };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
- interface MenuItem {
-   name: string;
-   to: string;
-   icon: React.ReactNode;
-   modules?: string[];
+interface MenuItem {
+  name: string;
+  to: string;
+  icon: React.ReactNode;
+  modules?: string[];
   subscriptionCheck?: (access: SubscriptionAccess) => boolean;
-   hideInEmployeeView?: boolean;
- }
+  hideInEmployeeView?: boolean;
+}
 
- interface SettingsItem {
-   to: string;
-   label: string;
-   icon: React.ReactNode;
-   modules?: string[];
+interface SettingsItem {
+  to: string;
+  label: string;
+  icon: React.ReactNode;
+  modules?: string[];
   subscriptionCheck?: (access: SubscriptionAccess) => boolean;
-   hideInEmployeeView?: boolean;
- }
+  hideInEmployeeView?: boolean;
+}
 
 // ─── Employee HR sub-tabs ─────────────────────────────────────────────────────
 // Must stay in sync with EMPLOYEE_TAB_IDS in HrPayrollModule.tsx
@@ -141,7 +142,7 @@ const menuItems: MenuItem[] = [
     to: "/sales",
     icon: <ShoppingCart {...iconProps} />,
     modules: ["Sales Invoice"],
-     subscriptionCheck: (a) => a.sales,
+    subscriptionCheck: (a) => a.sales,
     hideInEmployeeView: true,
   },
   {
@@ -171,7 +172,7 @@ const menuItems: MenuItem[] = [
     to: "/inventory",
     icon: <Boxes {...iconProps} />,
     modules: ["Item", "Item Group", "Warehouse", "Stock Entry"],
-     subscriptionCheck: (a) => a.inventory,
+    subscriptionCheck: (a) => a.inventory,
     hideInEmployeeView: true,
   },
   {
@@ -205,7 +206,7 @@ const settingsItems: SettingsItem[] = [
     label: "Company Setup",
     icon: <Building2 {...iconProps} />,
     modules: ["Company"],
-      subscriptionCheck: (a) => a.settingsAccess("company"),
+    subscriptionCheck: (a) => a.settingsAccess("company"),
     hideInEmployeeView: true,
   },
   {
@@ -279,15 +280,15 @@ const settingsItems: SettingsItem[] = [
     modules: ["scheduler"],
     subscriptionCheck: (a) => a.scheduler,
     hideInEmployeeView: true,
-},
-   {
+  },
+  {
     to: "/Import",
     label: "Import",
     icon: <FileUp {...iconProps} />,
     modules: ["Import"],
     subscriptionCheck: (a) => a.importAccess,
     hideInEmployeeView: true,
-},
+  },
 
   {
     to: "/settings",
@@ -344,8 +345,8 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
 
   const { canAccessAnyOf, isLoading: permissionsLoading } = usePermission();
 
-    // ── Subscription (outer, company-plan) gate ──────────────────────────────
- const subscriptionAccess = useSubscriptionAccess();
+  // ── Subscription (outer, company-plan) gate ──────────────────────────────
+  const subscriptionAccess = useSubscriptionAccess();
   const { isLoading: subscriptionLoading, ...access } = subscriptionAccess;
 
   // ── HR view mode ──────────────────────────────────────────────────────────
@@ -496,21 +497,6 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
 
           <div className={`flex items-center ${open ? "gap-1" : "flex-col gap-2"}`}>
 
-            {user?.subscribedProducts && user.subscribedProducts.length > 1 && (
-              <div className="relative group">
-                <button
-                  type="button"
-                  onClick={() => navigate("/select-app")}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-row-hover hover:text-primary transition"
-                  title="Switch Workspace"
-                >
-                  <House size={18} />
-                </button>
-
-                {!open && <Tooltip label="Switch Workspace" />}
-              </div>
-            )}
-
             <button
               type="button"
               onClick={() => setOpen(!open)}
@@ -603,10 +589,25 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
             </NavLink>
           ))}
 
-          {/* ── HR Section ───────────────────────────────────────────────
-              Employee view  → flat employee tabs list
-              Professional   → single "Human Resource" NavLink
-          ────────────────────────────────────────────────────────────── */}
+          {!isEmployeeView && user?.subscribedProducts?.includes("lms") && (
+            <button
+              type="button"
+              onClick={() => {
+                const sid = user?.sid || localStorage.getItem("session_id");
+                window.location.href = `${LMS_FRONTEND}?sid=${encodeURIComponent(sid ?? "")}`;
+              }}
+              className="group relative flex h-10 w-full items-center rounded-lg transition-all duration-150 text-muted hover:bg-row-hover hover:text-main"
+            >
+              <span className={`flex h-10 shrink-0 items-center justify-center text-[17px] transition-all duration-300 ${open ? "w-10" : "w-full"}`}>
+                <GraduationCap {...iconProps} />
+              </span>
+              <span className={`truncate text-[14px] font-semibold tracking-tight transition-all duration-200 pr-3 ${open ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
+                LMS
+              </span>
+              {!open && <Tooltip label="LMS" />}
+            </button>
+          )}
+
           {canSeeHr &&
             (isEmployeeView ? (
               <div className="pt-1">
@@ -700,7 +701,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
               </NavLink>
             ))}
 
-        {!isEmployeeView && access.expenseManagement && canAccessAnyOf(["Expense Claim", "Expense Claim Type", "Employee Advance"]) && (
+          {!isEmployeeView && access.expenseManagement && canAccessAnyOf(["Expense Claim", "Expense Claim Type", "Employee Advance"]) && (
             <NavLink
               to="/Expense-Management"
               className={({ isActive }) =>
