@@ -3,6 +3,7 @@ import { saveAs } from "file-saver";
 import { showApiError, showSuccess, showLoading, closeSwal } from "../../utils/alert";
 import { IMPORT_MODULES } from "../../views/Import/Importmodules.config";
 import type { ImportApi } from "../../api/imports/createImportApi";
+import { useSubscriptionAccess } from "../../store/subscriptionStore";
 
 
 const pendingKeyFor = (moduleKey: string, subTypeKey?: string) =>
@@ -25,14 +26,17 @@ export function useImportData() {
   const [pendingTemplateKey, setPendingTemplateKey] = useState<string | null>(null);
   const [pendingImportKey, setPendingImportKey] = useState<string | null>(null);
 
+   const { isLoading: subscriptionLoading, ...access } = useSubscriptionAccess();
+
   const filtered = useMemo(() => {
     return IMPORT_MODULES.filter((m) => {
       const matchesCategory =
         selectedCategories.length === 0 || selectedCategories.includes(m.category);
       const matchesQuery = m.title.toLowerCase().includes(query.trim().toLowerCase());
-      return matchesCategory && matchesQuery;
+      const matchesSubscription = !m.subscriptionCheck || m.subscriptionCheck(access);
+    return matchesCategory && matchesQuery && matchesSubscription;
     });
-  }, [query, selectedCategories]);
+ }, [query, selectedCategories, access]);
 
   const downloadTemplate = async (moduleKey: string, subTypeKey?: string) => {
     const api = resolveApi(moduleKey, subTypeKey);
