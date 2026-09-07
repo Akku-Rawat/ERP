@@ -39,29 +39,29 @@ import { useCompanyStore } from "../store/companyStore";
 import { MODAL_LAYER } from "../store/modalStore";
 import { usePermission } from "../hooks/permission/usePermission";
 import { useHRView } from "../hooks/permission/useHRView";
+import { useSubscriptionAccess, type SubscriptionAccess } from "../store/subscriptionStore";
 
 const iconProps = { size: 18, strokeWidth: 1.75 };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface MenuItem {
-  name: string;
-  to: string;
-  icon: React.ReactNode;
-  /** Empty array = always visible */
-  modules?: string[];
-  /** If true, hidden when user is in employee view */
-  hideInEmployeeView?: boolean;
-}
+ interface MenuItem {
+   name: string;
+   to: string;
+   icon: React.ReactNode;
+   modules?: string[];
+  subscriptionCheck?: (access: SubscriptionAccess) => boolean;
+   hideInEmployeeView?: boolean;
+ }
 
-interface SettingsItem {
-  to: string;
-  label: string;
-  icon: React.ReactNode;
-  modules?: string[];
-  /** If true, hidden when user is in employee view */
-  hideInEmployeeView?: boolean;
-}
+ interface SettingsItem {
+   to: string;
+   label: string;
+   icon: React.ReactNode;
+   modules?: string[];
+  subscriptionCheck?: (access: SubscriptionAccess) => boolean;
+   hideInEmployeeView?: boolean;
+ }
 
 // ─── Employee HR sub-tabs ─────────────────────────────────────────────────────
 // Must stay in sync with EMPLOYEE_TAB_IDS in HrPayrollModule.tsx
@@ -141,6 +141,7 @@ const menuItems: MenuItem[] = [
     to: "/sales",
     icon: <ShoppingCart {...iconProps} />,
     modules: ["Sales Invoice"],
+     subscriptionCheck: (a) => a.sales,
     hideInEmployeeView: true,
   },
   {
@@ -148,6 +149,7 @@ const menuItems: MenuItem[] = [
     to: "/crm",
     icon: <Users {...iconProps} />,
     modules: ["Customer", "Payment Entry", "Customer Group"],
+    subscriptionCheck: (a) => a.customer,
     hideInEmployeeView: true,
   },
   {
@@ -161,6 +163,7 @@ const menuItems: MenuItem[] = [
       "Purchase Order",
       "Purchase Invoice",
     ],
+    subscriptionCheck: (a) => a.procurement,
     hideInEmployeeView: true,
   },
   {
@@ -168,6 +171,7 @@ const menuItems: MenuItem[] = [
     to: "/inventory",
     icon: <Boxes {...iconProps} />,
     modules: ["Item", "Item Group", "Warehouse", "Stock Entry"],
+     subscriptionCheck: (a) => a.inventory,
     hideInEmployeeView: true,
   },
   {
@@ -175,6 +179,7 @@ const menuItems: MenuItem[] = [
     to: "/accounting",
     icon: <Wallet {...iconProps} />,
     modules: ["GL Entry", "Journal Entry"],
+    subscriptionCheck: (a) => a.accounting,
     hideInEmployeeView: true,
   },
   {
@@ -182,6 +187,7 @@ const menuItems: MenuItem[] = [
     to: "/fasset",
     icon: <Building2 {...iconProps} />,
     modules: ["Asset Category", "Asset", "Asset Movement"],
+    subscriptionCheck: (a) => a.assets,
     hideInEmployeeView: true,
   },
   // {
@@ -199,6 +205,7 @@ const settingsItems: SettingsItem[] = [
     label: "Company Setup",
     icon: <Building2 {...iconProps} />,
     modules: ["Company"],
+      subscriptionCheck: (a) => a.settingsAccess("company"),
     hideInEmployeeView: true,
   },
   {
@@ -206,6 +213,7 @@ const settingsItems: SettingsItem[] = [
     label: "User and Roles",
     icon: <Users2 {...iconProps} />,
     modules: ["User"],
+    subscriptionCheck: (a) => a.settingsAccess("userAndRoles"),
     hideInEmployeeView: true,
   },
   {
@@ -213,6 +221,7 @@ const settingsItems: SettingsItem[] = [
     label: "Bank Management",
     icon: <Landmark {...iconProps} />,
     modules: ["Bank", "Bank Account", "Mode of Payment", "Currency Exchange"],
+    subscriptionCheck: (a) => a.settingsAccess("bank"),
     hideInEmployeeView: true,
   },
   // {
@@ -252,6 +261,7 @@ const settingsItems: SettingsItem[] = [
       "Tax Category",
       "Sales Taxes and Charges Template",
     ],
+    subscriptionCheck: (a) => a.taxMaintenance,
     hideInEmployeeView: true,
   },
   {
@@ -259,6 +269,7 @@ const settingsItems: SettingsItem[] = [
     label: "Email Template",
     icon: <Mail {...iconProps} />,
     modules: ["Email Template"],
+    subscriptionCheck: (a) => a.settingsAccess("email"),
     hideInEmployeeView: true,
   },
   {
@@ -266,6 +277,7 @@ const settingsItems: SettingsItem[] = [
     label: "Scheduler",
     icon: <CalendarClock {...iconProps} />,
     modules: ["scheduler"],
+    subscriptionCheck: (a) => a.scheduler,
     hideInEmployeeView: true,
 },
    {
@@ -273,6 +285,7 @@ const settingsItems: SettingsItem[] = [
     label: "Import",
     icon: <FileUp {...iconProps} />,
     modules: ["Import"],
+    subscriptionCheck: (a) => a.importAccess,
     hideInEmployeeView: true,
 },
 
@@ -331,6 +344,10 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
 
   const { canAccessAnyOf, isLoading: permissionsLoading } = usePermission();
 
+    // ── Subscription (outer, company-plan) gate ──────────────────────────────
+ const subscriptionAccess = useSubscriptionAccess();
+  const { isLoading: subscriptionLoading, ...access } = subscriptionAccess;
+
   // ── HR view mode ──────────────────────────────────────────────────────────
   const { viewMode } = useHRView();
   const isEmployeeView = viewMode === "employee";
@@ -355,32 +372,36 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
     () =>
       menuItems.filter((item) => {
         if (isEmployeeView && item.hideInEmployeeView) return false;
+        if (item.subscriptionCheck && !item.subscriptionCheck(access as SubscriptionAccess)) return false;
         if (!item.modules || item.modules.length === 0) return true;
         return canAccessAnyOf(item.modules);
       }),
-    [canAccessAnyOf, permissionsLoading, isEmployeeView],
+    [canAccessAnyOf, permissionsLoading, isEmployeeView, subscriptionAccess],
   );
 
   const visibleSettingsItems = useMemo(
     () =>
       settingsItems.filter((item) => {
         if (isEmployeeView && item.hideInEmployeeView) return false;
+        if (item.subscriptionCheck && !item.subscriptionCheck(access as SubscriptionAccess)) return false;
         if (!item.modules || item.modules.length === 0) return true;
         return canAccessAnyOf(item.modules);
       }),
-    [canAccessAnyOf, permissionsLoading, isEmployeeView],
+    [canAccessAnyOf, permissionsLoading, isEmployeeView, subscriptionAccess],
   );
 
-  const canSeeHr = canAccessAnyOf([
-    "Employee",
-    "Payroll Entry",
-    "Leave Type",
-    "Leave Period",
-    "Leave Policy",
-    "Leave Policy Assignment",
-    "Holiday List",
-    "Shift Type",
-  ]);
+  const canSeeHr =
+    access.hasHrmsKey &&
+    canAccessAnyOf([
+      "Employee",
+      "Payroll Entry",
+      "Leave Type",
+      "Leave Period",
+      "Leave Policy",
+      "Leave Policy Assignment",
+      "Holiday List",
+      "Shift Type",
+    ]);
   const showSettingsSection = visibleSettingsItems.length > 0;
 
   // ── User display ──────────────────────────────────────────────────────────
@@ -679,7 +700,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
               </NavLink>
             ))}
 
-          {!isEmployeeView && canAccessAnyOf(["Expense Claim", "Expense Claim Type", "Employee Advance"]) && (
+        {!isEmployeeView && access.expenseManagement && canAccessAnyOf(["Expense Claim", "Expense Claim Type", "Employee Advance"]) && (
             <NavLink
               to="/Expense-Management"
               className={({ isActive }) =>
