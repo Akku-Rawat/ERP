@@ -54,7 +54,7 @@ const ALL_TABS = [
   },
   {
     id: "payments",
-    label: "Payment Entry",
+    label: "Customer Payment",
     icon: <Banknote  {...iconProps} />,
     module: "Payment Entry",
     action: "read" as const,

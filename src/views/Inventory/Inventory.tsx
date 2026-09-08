@@ -18,6 +18,7 @@ import {
 import { usePermission } from "../../hooks/permission/usePermission";
 import { useUrlTab } from "../../hooks/useUrlTab";
 import { useCompanyStore } from "../../store/companyStore";
+import { useSubscriptionStore } from "../../store/subscriptionStore";
 
 
 const Items = lazy(() => import("./Items"));
@@ -46,6 +47,7 @@ const ALL_INVENTORY_TAB = [
     label: "Dashboard",
     icon: <LayoutDashboard {...iconProps} />,
     module: null,
+    subscriptionKey: "item" as const,
   },
   {
     id: "items",
@@ -53,6 +55,7 @@ const ALL_INVENTORY_TAB = [
     icon: <Package {...iconProps} />,
     module: "Item",
     action: "read" as const,
+    subscriptionKey: "item" as const,
   },
   {
     id: "importedItems",
@@ -60,6 +63,7 @@ const ALL_INVENTORY_TAB = [
     icon: <Package {...iconProps} />,
     module: "Item",
     action: "read" as const,
+    subscriptionKey: "item" as const,
   },
   {
     id: "itemsCategory",
@@ -67,6 +71,7 @@ const ALL_INVENTORY_TAB = [
     icon: <Layers {...iconProps} />,
     module: "Item Group",
     action: "read" as const,
+    subscriptionKey: "item" as const,
   },
   {
     id: "warehouse",
@@ -74,6 +79,7 @@ const ALL_INVENTORY_TAB = [
     icon: <Warehouse {...iconProps} />,
     module: "Warehouse",
     action: "read" as const,
+    subscriptionKey: "warehouse" as const,
   },
   {
     id: "stock",
@@ -81,6 +87,7 @@ const ALL_INVENTORY_TAB = [
     icon: <Boxes {...iconProps} />,
     module: "Stock Entry",
     action: "read" as const,
+    subscriptionKey: "stockEntry" as const,
   },
   // {
   //   id: "import",
@@ -96,17 +103,32 @@ const Inventory: React.FC = () => {
   const { can } = usePermission();
   const isZraEnabled = useCompanyStore((s) => s.isZraEnabled);
 
+  const inv = useSubscriptionStore((s) => s.raw?.erp?.inventory);
+  const erpEnabled = useSubscriptionStore((s) => s.raw?.erp?.enabled === true);
+  const hasItemAccess = erpEnabled && inv?.item === true;
+  const hasWarehouseAccess = erpEnabled && inv?.warehouse === true;
+  const hasStockEntryAccess = erpEnabled && inv?.stockEntry === true;
+
   const inventoryTabs = useMemo(
     () =>
       ALL_INVENTORY_TAB.filter((t) => {
         const hasPermission = !t.module || can(t.module, t.action);
+        const hasSubscription =
+         t.subscriptionKey === "item"
+           ? hasItemAccess
+           : t.subscriptionKey === "warehouse"
+             ? hasWarehouseAccess
+             : t.subscriptionKey === "stockEntry"
+               ? hasStockEntryAccess
+                : true;
+
        
         if (t.id === "importedItems") {
-          return hasPermission && isZraEnabled;
+          return hasPermission && hasSubscription && isZraEnabled;
         }
-        return hasPermission;
+        return hasPermission && hasSubscription;
       }),
-    [can, isZraEnabled],
+    [can, isZraEnabled, hasItemAccess, hasWarehouseAccess, hasStockEntryAccess],
   );
 
   const fallbackTab = inventoryTabs[0]?.id ?? DEFAULT_TAB;

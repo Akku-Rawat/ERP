@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ImportApi } from "../../api/imports/createImportApi";
+import type { SubscriptionAccess } from "../../store/subscriptionStore";
+
 
 export interface ImportModuleSubType {
   key: string;
@@ -17,4 +19,5 @@ export interface ImportModuleConfig {
   lastImport?: string;
   api?: ImportApi;
   subTypes?: ImportModuleSubType[];
+  subscriptionCheck?: (access: SubscriptionAccess) => boolean;
 }
