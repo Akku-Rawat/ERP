@@ -81,11 +81,6 @@ export const useLogin = () => {
       return;
     }
 
-    // ── both subscribed go to launcher ───────
-    if (products.length === 2) {
-      navigate("/select-app");
-      return;
-    }
 
     const companyRes = await getCompanyById(COMPANY_ID);
     const company = companyRes?.data;

@@ -5,7 +5,7 @@ import {
   UserCog,
   Network,
   ShoppingCart,
-  Receipt,
+  FileText,
 } from "lucide-react";
 import type { ImportModuleConfig } from "../../types/importdata/importdata_type";
 
@@ -13,6 +13,7 @@ import { customerImportApi } from "../../api/imports/customer import/customerimp
 import { inventoryItemImportApi } from "../../api/imports/inventory import/inventoryimportapi";
 import { purchaseInvoiceImportApi } from "../../api/imports/purchase import/purchaseinvoice_importapi";
 import { supplierImportApi } from "../../api/imports/supplier import/supplierimportapi";
+import type { SubscriptionAccess } from "../../store/subscriptionStore";
 
 
 export const IMPORT_MODULES: ImportModuleConfig[] = [
@@ -24,6 +25,7 @@ export const IMPORT_MODULES: ImportModuleConfig[] = [
     icon: Users,
     status: "active",
     api: customerImportApi,
+    subscriptionCheck: (a: SubscriptionAccess) => a.customer,
   },
  {
   key: "suppliers",
@@ -33,6 +35,7 @@ export const IMPORT_MODULES: ImportModuleConfig[] = [
   icon: Truck,
   status: "active",         
   api: supplierImportApi,
+  subscriptionCheck: (a: SubscriptionAccess) => a.procurement,
 },
   {
     key: "inventory",
@@ -46,6 +49,7 @@ export const IMPORT_MODULES: ImportModuleConfig[] = [
       { key: "warehouse", label: "Warehouse" },
       { key: "stock", label: "Stock" },
     ],
+      subscriptionCheck: (a: SubscriptionAccess) => a.inventory,
   },
   {
     key: "sales",
@@ -61,13 +65,14 @@ export const IMPORT_MODULES: ImportModuleConfig[] = [
       { key: "invoice", label: "Invoice" },
       { key: "credit-note", label: "Credit Note" },
     ],
+     subscriptionCheck: (a: SubscriptionAccess) => a.sales,
   },
   {
     key: "procurement",
     title: "Procurement",
     description: "Purchase orders, RFQs, purchase invoices, and debit notes.",
     category: "General",
-    icon: Receipt,
+    icon: FileText,
     status: "active",
     subTypes: [
       { key: "purchase-order", label: "Purchase Order" },
@@ -75,13 +80,14 @@ export const IMPORT_MODULES: ImportModuleConfig[] = [
       { key: "purchase-invoice", label: "Purchase Invoice", api: purchaseInvoiceImportApi },
       { key: "debit-note", label: "Debit Note" },
     ],
+     subscriptionCheck: (a: SubscriptionAccess) => a.procurement,
   },
   {
     key: "transactions",
     title: "Transactions",
     description: "Ledger entries, payment records, and reconciliations.",
     category: "Finance",
-    icon: Receipt,
+    icon: FileText,
     status: "soon",
     lastImport: "1 day ago",
   },
