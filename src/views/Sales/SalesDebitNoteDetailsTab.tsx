@@ -40,9 +40,9 @@ const SalesDebitNoteColGroup: React.FC = () => (
     <col style={{ width: "30%" }} />   {/* Item */}
     <col style={{ width: "10%" }} />   {/* Qty */}
     <col style={{ width: "12%" }} />   {/* Orig. Rate */}
-    <col style={{ width: "14%" }} />   {/* Adj. Rate */}
+    <col style={{ width: "14%" }} />   {/* Rate Diff. */}
     <col style={{ width: "16%" }} />   {/* Warehouse */}
-    <col style={{ width: "18%" }} />   {/* Adj. Total & Diff */}
+    <col style={{ width: "18%" }} />   {/* Adj. Amount */}
     <col style={{ width: "36px" }} />  {/* Actions */}
   </colgroup>
 );
@@ -53,9 +53,9 @@ const SalesDebitNoteHeaders: React.FC = () => (
     <th className="px-2 py-2 text-left text-muted font-semibold text-xs">Item</th>
     <th className="px-2 py-2 text-center text-muted font-semibold text-xs">Qty</th>
     <th className="px-2 py-2 text-right text-muted font-semibold text-xs">Orig. Rate</th>
-    <th className="px-2 py-2 text-left text-muted font-semibold text-xs">Adj. Rate</th>
+    <th className="px-2 py-2 text-left text-muted font-semibold text-xs">Rate Diff.</th>
     <th className="px-2 py-2 text-left text-muted font-semibold text-xs hidden md:table-cell">Warehouse</th>
-    <th className="px-2 py-2 text-right text-muted font-semibold text-xs">Adjusted Total</th>
+    <th className="px-2 py-2 text-right text-muted font-semibold text-xs">Adj. Amount</th>
     <th className="px-2 py-2" />
   </tr>
 );
@@ -175,9 +175,7 @@ export const SalesDebitNoteDetailsTab: React.FC<SalesDebitNoteDetailsTabProps> =
     const isPulsing = invoiceLoading;
     const qty = Math.abs(it.qty || 0);
     const origRate = it.original_rate ?? it.rate;
-    const origTotal = qty * origRate;
-    const adjTotal = qty * it.rate;
-    const diff = adjTotal - origTotal;
+    const adjAmount = qty * it.rate;
 
     return (
       <tr
@@ -261,27 +259,15 @@ export const SalesDebitNoteDetailsTab: React.FC<SalesDebitNoteDetailsTabProps> =
           />
         </td>
 
-        {/* Adj. Total & Difference */}
+        {/* Adj. Amount */}
         <td className="px-2 py-2 overflow-hidden text-right">
           {isPlaceholder ? (
             <span className="text-xs text-muted font-mono">—</span>
           ) : (
             <div className="flex flex-col items-end gap-0.5">
               <span className="text-xs font-semibold text-main tabular-nums whitespace-nowrap">
-                {adjTotal.toFixed(2)}
+                {adjAmount.toFixed(2)}
               </span>
-              {diff !== 0 && (
-                <span
-                  className={`text-[10px] font-medium font-mono px-1.5 py-0.2 rounded whitespace-nowrap ${
-                    diff > 0
-                      ? "text-emerald-700 bg-emerald-50 border border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40"
-                      : "text-amber-700 bg-amber-50 border border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40"
-                  }`}
-                  title={`Original total: ${origTotal.toFixed(2)}`}
-                >
-                  {diff > 0 ? `+${diff.toFixed(2)}` : diff.toFixed(2)}
-                </span>
-              )}
             </div>
           )}
         </td>
@@ -481,26 +467,17 @@ export const SalesDebitNoteDetailsTab: React.FC<SalesDebitNoteDetailsTabProps> =
               <div className="border-t border-theme my-1" />
 
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-2.5 flex justify-between items-center">
-                <span className="text-xs font-bold text-primary">Adjusted Total</span>
+                <span className="text-xs font-bold text-primary">Adjustment Total</span>
                 <span className="text-sm font-bold text-primary tabular-nums">
                   {grandTotal.toFixed(2)}
                 </span>
               </div>
 
               {form.original_invoice_total != null && form.original_invoice_total > 0 && (
-                <div className="flex justify-between items-center text-xs pt-1">
-                  <span className="text-muted font-medium">Net Adjustment:</span>
-                  <span
-                    className={`font-semibold font-mono tabular-nums px-1.5 py-0.5 rounded text-xs ${
-                      grandTotal - form.original_invoice_total > 0
-                        ? "text-emerald-700 bg-emerald-50 border border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40"
-                        : grandTotal - form.original_invoice_total < 0
-                        ? "text-amber-700 bg-amber-50 border border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40"
-                        : "text-main"
-                    }`}
-                  >
-                    {grandTotal - form.original_invoice_total > 0 ? "+" : ""}
-                    {(grandTotal - form.original_invoice_total).toFixed(2)}
+                <div className="flex justify-between items-center text-xs pt-2">
+                  <span className="text-muted font-medium">New Total:</span>
+                  <span className="font-semibold font-mono tabular-nums text-main">
+                    {(form.original_invoice_total + grandTotal).toFixed(2)}
                   </span>
                 </div>
               )}
