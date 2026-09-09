@@ -230,7 +230,19 @@ const router = createBrowserRouter(
             <Route
               path="/hr/*"
               element={
-                <PermissionRoute modules={["Employee", "Payroll Entry"]} subscriptionCheck={(a) => a.hasHrmsKey}>
+                    <PermissionRoute
+                  modules={[
+                    "Employee",
+                    "Payroll Entry",
+                    "Leave Type",
+                    "Leave Period",
+                    "Leave Policy",
+                    "Leave Policy Assignment",
+                    "Holiday List",
+                    "Shift Type",
+                  ]}
+                  subscriptionCheck={(a) => a.hasHrmsKey}
+                >
                   <HrPayrollModule />
                 </PermissionRoute>
               }
