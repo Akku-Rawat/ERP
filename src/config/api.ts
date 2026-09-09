@@ -265,6 +265,8 @@ export const API = {
   itemClassification: {
     getAll: `${ERP_BASE}/api/method/custom_api.api.item.item_classification.api.get_classifications`,
     getByCode: `${ERP_BASE}/api/method/custom_api.api.item.item_classification.api.get_classification_by_code`,
+    getChildren: `${ERP_BASE}/api/method/custom_api.api.item.item_classification.api.get_classification_children`,
+    search: `${ERP_BASE}/api/method/custom_api.api.item.item_classification.api.search_classifications`,
   },
   /* =========================
    * TAX
