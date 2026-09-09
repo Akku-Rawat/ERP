@@ -47,14 +47,14 @@ const ALL_TABS = [
   },
   {
     id: "customer-managment",
-    label: "Customer Management",
+    label: "Customer",
     icon: <Users {...iconProps} />,
     module: "Customer",
     action: "read" as const,
   },
   {
     id: "payments",
-    label: "Payment Entry",
+    label: "Customer Payment",
     icon: <Banknote  {...iconProps} />,
     module: "Payment Entry",
     action: "read" as const,

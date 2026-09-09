@@ -1,41 +1,11 @@
-
-
 import { ENV } from "./env";
-
-const getApiBaseUrl = (): string => {
-  if (typeof window === "undefined") {
-    return ENV.apiBaseUrl;
-  }
-
-  const { protocol, hostname } = window.location;
-  // Dev / localhost fallback
-  if (
-    hostname === "localhost" ||
-    hostname.startsWith("127.") ||
-    hostname.endsWith(".local")
-  ) {
-    return ENV.apiBaseUrl;
-  }
-
-  const hostSegments = hostname.split(".");
-  if (hostSegments.length < 3) {
-    return ENV.apiBaseUrl;
-  }
-
-  const tenantSubdomain = hostSegments[0];
-  const baseDomain = hostSegments.slice(-2).join(".");
-  const isValidTenant = /^[a-z0-9-]+$/i.test(tenantSubdomain);
-  if (!isValidTenant) {
-    return ENV.apiBaseUrl;
-  }
-
-  return `${protocol}//api.erp.${tenantSubdomain}.${baseDomain}`;
-  // return window.location.origin;
-  // return "";
-};
-
-export const ERP_BASE = getApiBaseUrl();
+import { ERP_BASE, ERP_FRONTEND, LMS_FRONTEND } from './resolverUrls';
+// console.log("🚀 ~ LMS_FRONTEND:", LMS_FRONTEND)
+// console.log("🚀 ~ ERP_FRONTEND:", ERP_FRONTEND)
+// console.log("🚀 ~ ERP_BASE:", ERP_BASE)
+// export const ERP_BASE = getApiBaseUrl();
 // export const ERP_BASE = "";
+export { ERP_BASE, ERP_FRONTEND, LMS_FRONTEND };
 export const CODES_BASE = ENV.zraCodesBaseUrl;
 export const NAPSA_BASE = ENV.napsaBaseUrl;
 
@@ -474,13 +444,23 @@ getImportedPurchaseInvoices:`${ERP_BASE}/api/method/zra_smart_inv.......`,
   },
 
   CreditNote: {
-    Credit_note: `${ERP_BASE}/api/resource/Sales Invoice`,
+    getAll: `${ERP_BASE}/api/method/custom_api.api.selling.sales_invoice.sales_return.api.get_sales_returns`,
+    getById: `${ERP_BASE}/api/method/custom_api.api.selling.sales_invoice.sales_return.api.get_sales_return_by_id`,
+    create: `${ERP_BASE}/api/method/custom_api.api.selling.sales_invoice.sales_return.api.create_sales_return`,
+    update: `${ERP_BASE}/api/method/custom_api.api.selling.sales_invoice.sales_return.api.update_sales_return`,
+    updateStatus: `${ERP_BASE}/api/method/custom_api.api.selling.sales_invoice.sales_return.api.update_sales_return_status`,
+    delete: `${ERP_BASE}/api/method/custom_api.api.selling.sales_invoice.sales_return.api.delete_sales_return`,
   },
   DebitNote: {
     Debit_note: `${ERP_BASE}/api/resource/Purchase Invoice`,
   },
   SalesDebitNote: {
-    Sales_Debit_Note: `${ERP_BASE}/api/resource/Sales Invoice`,
+    getAll: `${ERP_BASE}/api/method/custom_api.api.selling.sales_invoice.sales_return.api.get_sales_returns`,
+    getById: `${ERP_BASE}/api/method/custom_api.api.selling.sales_invoice.sales_return.api.get_sales_return_by_id`,
+    create: `${ERP_BASE}/api/method/custom_api.api.selling.sales_invoice.sales_return.api.create_sales_return`,
+    update: `${ERP_BASE}/api/method/custom_api.api.selling.sales_invoice.sales_return.api.update_sales_return`,
+    updateStatus: `${ERP_BASE}/api/method/custom_api.api.selling.sales_invoice.sales_return.api.update_sales_return_status`,
+    delete: `${ERP_BASE}/api/method/custom_api.api.selling.sales_invoice.sales_return.api.delete_sales_return`,
   },
 
   Bank: {

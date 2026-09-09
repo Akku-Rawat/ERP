@@ -67,14 +67,14 @@ const ALL_PROCUREMENT_TABS = [
   },
   {
     id: "supplier",
-    label: "Supplier Management",
+    label: "Supplier",
     icon: <Users {...iconProps} />,
     module: "Supplier",
     action: "read" as const,
   },
   {
     id: "payments",
-    label: "Payment Entry",
+    label: "Supplier Payment",
     icon: <Banknote {...iconProps} />,
     module: "Payment Entry",
     action: "read" as const,

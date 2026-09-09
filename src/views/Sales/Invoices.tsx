@@ -330,6 +330,13 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
           mapSortField(sortBy),
           sortOrder,
           searchTerm,
+          undefined,
+          undefined,
+          filters.status && filters.status.length > 0
+            ? filters.status.join(",")
+            : undefined,
+          filters.from_date,
+          filters.to_date,
         );
 
         if (res?.status_code === 200) {
@@ -463,27 +470,27 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
       setDrawerPdfLoading(false);
     }
   };
-  
+
   const handleShipperLabels = async (
-  inv: InvoiceSummary,
-  e?: React.MouseEvent,
-) => {
-  e?.stopPropagation();
-  try {
-    showLoading("Generating shipper labels...");
-    const res = await getSalesInvoiceById(inv.invoiceNumber);
-    if (!res?.message || res.message.status_code !== 200) {
+    inv: InvoiceSummary,
+    e?: React.MouseEvent,
+  ) => {
+    e?.stopPropagation();
+    try {
+      showLoading("Generating shipper labels...");
+      const res = await getSalesInvoiceById(inv.invoiceNumber);
+      if (!res?.message || res.message.status_code !== 200) {
+        closeSwal();
+        showApiError(res?.message?.message || "Failed to load invoice");
+        return;
+      }
+      generateShipperLabelsPDF(res.message.data, company, "save");
       closeSwal();
-      showApiError(res?.message?.message || "Failed to load invoice");
-      return;
+    } catch (err) {
+      closeSwal();
+      showApiError(err);
     }
-    generateShipperLabelsPDF(res.message.data, company, "save");
-    closeSwal();
-  } catch (err) {
-    closeSwal();
-    showApiError(err);
-  }
-};
+  };
 
   // ── PDF preview modal (table row action — kept, do not remove)
   const handlePreviewPDF = async (
@@ -781,99 +788,99 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ onAddInvoice }) => {
                 ...(inv.invoiceStatus !== "Draft" &&
                   inv.invoiceStatus !== "Failed" &&
                   inv.invoiceStatus !== "Pending" &&
-                inv.invoiceStatus !== "Cancelled" &&
-                inv.outstanding_amount > 0 &&
-                can(PAYMENT_MODULE, "create")
+                  inv.invoiceStatus !== "Cancelled" &&
+                  inv.outstanding_amount > 0 &&
+                  can(PAYMENT_MODULE, "create")
                   ? [
-                      {
-                        label: "Receive Payment",
-                        icon: ACTION_ICONS.PAYMENT,
-                        onClick: () => handleReceivePayment(inv),
-                      },
-                    ]
-                  : []),
-
-                ...(inv.invoiceStatus !== "Draft" && 
-                     inv.invoiceStatus!== "Failed" &&
-                     inv.invoiceStatus !== "Pending" &&
-                     !isCancelled
-                  ? [
-                      {
-                        label: "Compose Email",
-                        icon: ACTION_ICONS.EMAIL,
-                        onClick: async () => {
-                          let contactEmail: string | null = null;
-                          let invoiceAttachments: {
-                            name: string;
-                            file_name: string;
-                          }[] = [];
-                          try {
-                            const res = await getSalesInvoiceById(
-                              inv.invoiceNumber,
-                            );
-                            if (res?.message?.status_code === 200) {
-                              contactEmail =
-                                res.message.data?.contact_email ?? null;
-                              invoiceAttachments =
-                                res.message.data?.attachments ?? [];
-                            }
-                          } catch {}
-                          openSendEmailModal({
-                            docType: "Sales Invoice",
-                            invoiceNumber: inv.invoiceNumber,
-                            customerName: inv.customerName,
-                            contactEmail,
-                            invoiceAttachments,
-                          });
-                        },
-                      },
-                    ]
-                  : []),
-
-                                ...(!isCancelled && inv.invoiceStatus !== "Pending"
-                  ? [
-                      {
-                        label: "View PDF",
-                        icon: ACTION_ICONS.PDF,
-                        onClick: () => handlePreviewPDF(inv),
-                      },
-                    ]
+                    {
+                      label: "Receive Payment",
+                      icon: ACTION_ICONS.PAYMENT,
+                      onClick: () => handleReceivePayment(inv),
+                    },
+                  ]
                   : []),
 
                 ...(inv.invoiceStatus !== "Draft" &&
                   inv.invoiceStatus !== "Failed" &&
-                  inv.invoiceStatus !== "Pending" 
+                  inv.invoiceStatus !== "Pending" &&
+                  !isCancelled
                   ? [
-                      {
-                        label: "Shipper Labels",
-                        icon: ACTION_ICONS.PDF,
-                        onClick: () => handleShipperLabels(inv),
+                    {
+                      label: "Compose Email",
+                      icon: ACTION_ICONS.EMAIL,
+                      onClick: async () => {
+                        let contactEmail: string | null = null;
+                        let invoiceAttachments: {
+                          name: string;
+                          file_name: string;
+                        }[] = [];
+                        try {
+                          const res = await getSalesInvoiceById(
+                            inv.invoiceNumber,
+                          );
+                          if (res?.message?.status_code === 200) {
+                            contactEmail =
+                              res.message.data?.contact_email ?? null;
+                            invoiceAttachments =
+                              res.message.data?.attachments ?? [];
+                          }
+                        } catch { }
+                        openSendEmailModal({
+                          docType: "Sales Invoice",
+                          invoiceNumber: inv.invoiceNumber,
+                          customerName: inv.customerName,
+                          contactEmail,
+                          invoiceAttachments,
+                        });
                       },
-                    ]
+                    },
+                  ]
+                  : []),
+
+                ...(!isCancelled && inv.invoiceStatus !== "Pending"
+                  ? [
+                    {
+                      label: "View PDF",
+                      icon: ACTION_ICONS.PDF,
+                      onClick: () => handlePreviewPDF(inv),
+                    },
+                  ]
+                  : []),
+
+                ...(inv.invoiceStatus !== "Draft" &&
+                  inv.invoiceStatus !== "Failed" &&
+                  inv.invoiceStatus !== "Pending"
+                  ? [
+                    {
+                      label: "Shipper Labels",
+                      icon: ACTION_ICONS.PDF,
+                      onClick: () => handleShipperLabels(inv),
+                    },
+                  ]
                   : []),
                 ...(inv.invoiceStatus !== "Draft" &&
                   inv.invoiceStatus !== "Failed" &&
                   inv.invoiceStatus !== "Pending" &&
-                inv.invoiceStatus !== "Cancelled"
+                  inv.invoiceStatus !== "Cancelled"
                   ? [
-                      {
-                        label: "Create Credit Note",
-                        icon: ACTION_ICONS.CREDIT_NOTE,
-                        onClick: () =>
-                          handleCreateCreditNote(inv.invoiceNumber),
-                      },
-                    ]
+                    {
+                      label: "Create Credit Note",
+                      icon: ACTION_ICONS.CREDIT_NOTE,
+                      onClick: () =>
+                        handleCreateCreditNote(inv.invoiceNumber),
+                    },
+                  ]
                   : []),
                 ...(can(SALES_MODULE, "write")
                   ? (STATUS_TRANSITIONS[inv.invoiceStatus] ?? []).map(
-                      (status) => ({
-                        label: status === "Approved" ? "Approve" : status,
-                        icon: getStatusActionIcon(status),
-                        danger: status === "Paid" || status === "Cancelled",
-                        onClick: () =>
-                          handleRowStatusChange(inv.invoiceNumber, status),
-                      }),
-                    )
+                    (status) => ({
+                      label: status === "Approved" ? "Approve" : status,
+                      icon: getStatusActionIcon(status),
+                      danger: status === "Paid" || status === "Cancelled",
+                      onClick: () =>
+                        handleRowStatusChange(inv.invoiceNumber, status),
+                    }),
+                  )
                   : []),
               ];
 

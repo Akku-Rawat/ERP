@@ -1,18 +1,32 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, GraduationCap, Loader2 } from "lucide-react";
+import { Building2, GraduationCap, Loader2, Users2 } from "lucide-react";
 import { getCompanyById } from "../api/companySetupApi";
 import { getCurrencyList } from "../api/lookupApi";
 import { useCompanyStore } from "../store/companyStore";
 import { useAuth } from "../context/AuthContext";
+import { useSubscriptionStore } from "../store/subscriptionStore";
 
-const LMS_URL = import.meta.env.VITE_LMS_URL as string;
+import { ERP_BASE, ERP_FRONTEND, LMS_FRONTEND } from '../config/resolverUrls';
+// const LMS_URL = import.meta.env.VITE_LMS_URL as string;
+
+console.log("🚀 ~ LMS_FRONTEND:", LMS_FRONTEND)
+console.log("🚀 ~ ERP_FRONTEND:", ERP_FRONTEND)
+console.log("🚀 ~ ERP_BASE:", ERP_BASE)
+
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID as string;
 
 const SelectApp = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [loadingTile, setLoadingTile] = useState<"erp" | "lms" | null>(null);
+    const erpEnabled = useSubscriptionStore((s) => s.raw?.erp?.enabled === true);
+   const hrmsEnabled = useSubscriptionStore((s) => s.raw?.hrms?.enabled === true);
+
+
+    const erpTileLabel = erpEnabled ? "ERP" : hrmsEnabled ? "HRMS" : "ERP";
+     const ErpTileIcon = erpEnabled ? Building2 : hrmsEnabled ? Users2 : Building2;
+
 
     const handleErpClick = async () => {
         setLoadingTile("erp");
@@ -43,7 +57,7 @@ const SelectApp = () => {
     const handleLmsClick = () => {
         setLoadingTile("lms");
         const sid = user?.sid || localStorage.getItem("session_id");   // ← fallback
-        window.location.href = `${LMS_URL}?sid=${encodeURIComponent(sid ?? "")}`;
+        window.location.href = `${LMS_FRONTEND}?sid=${encodeURIComponent(sid ?? "")}`;
     };
 
   return (
@@ -87,9 +101,9 @@ const SelectApp = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <Building2 size={32} color="#2563eb" />
+                                        <ErpTileIcon size={32} color="#2563eb" />
                                         <span className="text-[14px] font-bold" style={{ color: "#0f1f3d" }}>
-                                            ERP
+                                             {erpTileLabel}
                                         </span>
                                     </>
                                 )}

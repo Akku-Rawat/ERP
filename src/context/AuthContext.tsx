@@ -5,27 +5,27 @@ import type { AuthUser } from "../api/authService";
 import { useCompanyStore } from "../store/companyStore";
 import { useHRViewStore } from "../store/hrViewStore";
 
-const SID_KEY  = "session_id";
+const SID_KEY = "session_id";
 const USER_KEY = "auth_user";
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user: AuthUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<AuthUser>;   
+  login: (email: string, password: string) => Promise<AuthUser>;
   logout: () => Promise<void>;
-  refreshPermissions: () => Promise<void>;   // ← manual trigger for role updates
+  refreshPermissions: () => Promise<void>; // ← manual trigger for role updates
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser]       = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   // ── On mount — restore from localStorage ────────────────────────────────
   useEffect(() => {
-    const sid        = localStorage.getItem(SID_KEY);
+    const sid = localStorage.getItem(SID_KEY);
     const storedUser = localStorage.getItem(USER_KEY);
 
     if (sid && storedUser) {
@@ -42,48 +42,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   // ── Login — call loginApi then fetchLoginUser for permissions ────────────
-const login = useCallback(async (email: string, password: string) => {
-  const basicUser = await loginApi(email, password);
-  setUser(basicUser);
+  const login = useCallback(async (email: string, password: string) => {
+    const basicUser = await loginApi(email, password);
+    setUser(basicUser);
 
-  try {
-    const fullUser = await fetchLoginUser();
-    setUser({
-      ...fullUser,
-      sid: basicUser.sid,
-      subscribedProducts: basicUser.subscribedProducts,   
-    });
-    useCompanyStore.getState().setZraEnabled(fullUser.isZraEnabled ?? false);
-  } catch (err) {
-    console.error("[AuthContext] fetchLoginUser failed after login:", err);
-  }
+    try {
+      const fullUser = await fetchLoginUser();
+      setUser({
+        ...fullUser,
+        sid: basicUser.sid,
+        subscribedProducts: basicUser.subscribedProducts,
+        subscribedModules: basicUser.subscribedModules,
+      });
+      useCompanyStore.getState().setZraEnabled(fullUser.isZraEnabled ?? false);
+    } catch (err) {
+      console.error("[AuthContext] fetchLoginUser failed after login:", err);
+    }
 
-  return basicUser;
-}, []);
+    return basicUser;
+  }, []);
 
-const refreshPermissions = useCallback(async () => {
-  if (!localStorage.getItem(SID_KEY)) return;
+  const refreshPermissions = useCallback(async () => {
+    if (!localStorage.getItem(SID_KEY)) return;
 
-  try {
-    const freshUser = await fetchLoginUser();
-    setUser(freshUser);
-    useCompanyStore.getState().setZraEnabled(freshUser.isZraEnabled ?? false);
-  } catch (err) {
-    console.error("[AuthContext] refreshPermissions failed:", err);
-  }
-}, []);
+    try {
+      const freshUser = await fetchLoginUser();
+      setUser(freshUser);
+      useCompanyStore.getState().setZraEnabled(freshUser.isZraEnabled ?? false);
+    } catch (err) {
+      console.error("[AuthContext] refreshPermissions failed:", err);
+    }
+  }, []);
 
   // ── Logout ───────────────────────────────────────────────────────────────
-const logout = useCallback(async () => {
-  const username = user?.username;
-  if (username) {
-    useHRViewStore.getState().clearViewMode(username);
-  }
-  await logoutApi();
-  setUser(null);
-  useCompanyStore.getState().clearCompanyInfo();
-}, [user]);
-
+  const logout = useCallback(async () => {
+    const username = user?.username;
+    if (username) {
+      useHRViewStore.getState().clearViewMode(username);
+    }
+    await logoutApi();
+    setUser(null);
+    useCompanyStore.getState().clearCompanyInfo();
+  }, [user]);
 
   return (
     <AuthContext.Provider
