@@ -363,7 +363,7 @@ const ImportedPurchaseInvoice: React.FC = () => {
               type="text"
               value={remarks[g.items[0].id] ?? ""}
               placeholder="Remarks"
-              disabled
+              
               className="w-full rounded-md border border-theme bg-muted/50 px-2 py-1.5 text-xs text-muted cursor-not-allowed"
             />
             {remarkErrors[g.key] && (
