@@ -86,10 +86,10 @@ const STATUS_TRANSITIONS: Record<PIStatus, PIStatus[]> = {
 
 const invoiceStatusOptions = [
   { label: "Draft", value: "Draft" },
-  { label: "Approve", value: "Submitted" },
+  // { label: "Approve", value: "Submitted" },
   { label: "Unpaid", value: "Unpaid" },
   { label: "Paid", value: "Paid" },
-  { label: "Party Paid", value: "Party Paid" },
+  { label: "Partly Paid", value: "Partly Paid" },
   { label: "Cancelled", value: "Cancelled" },
   { label: "Overdue", value: "Overdue" },
 ];
