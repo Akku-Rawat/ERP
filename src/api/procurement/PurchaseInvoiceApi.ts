@@ -14,6 +14,7 @@ export interface PurchaseInvoiceFilters {
   from_date?: string;
   to_date?: string;
   supplier?: string;
+   sort_by?: string;
   sort_order?: "asc" | "desc";
 }
 
