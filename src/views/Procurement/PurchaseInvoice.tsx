@@ -166,10 +166,9 @@ const PurchaseinvoicesTable: React.FC<PurchaseinvoicesTableProps> = () => {
   const fetchInvoice = useCallback(async () => {
     try {
       setLoading(true);
-            const res = await getPurchaseInvoices(page, pageSize, {
+                const res = await getPurchaseInvoices(page, pageSize, {
         ...filters,
-        sort_by: mapSortField(sortBy),
-        sort_order: sortOrder,
+        order_by: `${mapSortField(sortBy)} ${sortOrder}`,
       });
       if (!res?.data || res.data.length === 0) {
         setOrders([]);
@@ -395,10 +394,9 @@ const handleViewAttachment = (file: any) => {
       let currentPage = 1;
       let totalPagesLocal = 1;
       do {
-                const res = await getPurchaseInvoices(currentPage, 100, {
+                      const res = await getPurchaseInvoices(currentPage, 100, {
           ...filters,
-          sort_by: mapSortField(sortBy),
-          sort_order: sortOrder,
+          order_by: `${mapSortField(sortBy)} ${sortOrder}`,
         });
         if (res?.status_code === 200) {
           allData = [
